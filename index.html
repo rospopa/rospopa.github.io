@@ -10,14 +10,56 @@
     <meta name="viewport" content="width=device-width">
     <meta name="description" content="pavlo@rospopa.com">
     <link rel="canonical" href="http://rospopa.github.io/">
-  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
+    <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
   
-   <!-- Custom CSS -->
-  <link rel="stylesheet" href="/css/format.css">
-  
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/format.css">
+
+    <style>
+      /* Flex container for categories */
+      .categories {
+          display: flex;
+          justify-content: space-around;
+          padding: 10px;
+          background-color: #f4f4f4;
+          list-style-type: none;
+          margin: 0;
+      }
+
+      .categories li {
+          margin: 0 10px;
+      }
+
+      .categories a {
+          text-decoration: none;
+          color: #333;
+          font-size: 16px;
+      }
+
+      /* Make it responsive */
+      @media (max-width: 600px) {
+          .categories {
+              flex-direction: column;
+              align-items: center;
+          }
+
+          .categories li {
+              margin-bottom: 10px;
+          }
+      }
+    </style>
 </head>
   
   <body>
+
+    <!-- Add category section at the top -->
+    <ul class="categories">
+      <li><a href="#economics">Economics</a></li>
+      <li><a href="#philosophy">Philosophy</a></li>
+      <li><a href="#science">Science</a></li>
+      <li><a href="#technology">Technology</a></li>
+      <li><a href="#art">Art</a></li>
+    </ul>
 
     <header class="site-header">
 
