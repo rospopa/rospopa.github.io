@@ -113,23 +113,83 @@ Financial institutions need liquidity to keep cash flowing throughout the econom
   The Federal Reserve Bank is continuing to inject short-term liquidity and "expects to buy Treausry bills through the middle of next year."
 </p>
   
-<table border="1">
-  <tr>
-    <th>Header 1</th>
-    <th>Header 2</th>
-    <th>Header 3</th>
-  </tr>
-  <tr>
-    <td>Data 1</td>
-    <td>Data 2</td>
-    <td>Data 3</td>
-  </tr>
-  <tr>
-    <td>Data 4</td>
-    <td>Data 5</td>
-    <td>Data 6</td>
-  </tr>
-</table>
+  <style>
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 600px; /* Ensures minimum width */
+    }
+
+    th, td {
+      padding: 10px;
+      text-align: left;
+      border: 1px solid #ddd;
+    }
+
+    thead {
+      background-color: #f4f4f4;
+    }
+
+    /* Responsive for small screens */
+    @media screen and (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      tr {
+        margin-bottom: 10px;
+      }
+
+      th {
+        background-color: #f4f4f4;
+        position: relative;
+        padding-left: 50%;
+      }
+
+      td {
+        position: relative;
+        padding-left: 50%;
+      }
+
+      td:before, th:before {
+        content: attr(data-label);
+        position: absolute;
+        left: 0;
+        padding-left: 10px;
+        white-space: nowrap;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="table-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th data-label="Header 1">Header 1</th>
+        <th data-label="Header 2">Header 2</th>
+        <th data-label="Header 3">Header 3</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td data-label="Header 1">Data 1</td>
+        <td data-label="Header 2">Data 2</td>
+        <td data-label="Header 3">Data 3</td>
+      </tr>
+      <tr>
+        <td data-label="Header 1">Data 4</td>
+        <td data-label="Header 2">Data 5</td>
+        <td data-label="Header 3">Data 6</td>
+      </tr>
+    </tbody>
+  </table>
                                                             
 <br>
 <br>
