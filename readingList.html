@@ -79,16 +79,15 @@ we will attempt uncover the future course of the United States economy given cur
 <br>
 <br>
 
-  <style>
+<style>
     .table-wrapper {
       width: 100%;
-      overflow-x: auto;
+      overflow-x: auto; /* Enable horizontal scrolling for small screens */
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 600px; /* Ensures minimum width */
     }
 
     th, td {
@@ -98,28 +97,23 @@ we will attempt uncover the future course of the United States economy given cur
     }
 
     thead {
-      background-color: #2a9eef;
+      background-color: #f4f4f4;
     }
 
-    /* Every other row will be grey */
-    tbody tr:nth-child(even) {
-      background-color: #f2f2f2; /* Light grey color */
-    }
-
-    /* Responsive for small screens */
+    /* Style for making table responsive */
     @media screen and (max-width: 600px) {
       table, thead, tbody, th, td, tr {
         display: block;
       }
 
       tr {
-        margin-bottom: 10px;
+        margin-bottom: 15px;
       }
 
       th {
         background-color: #f4f4f4;
-        position: relative;
         padding-left: 50%;
+        position: relative;
       }
 
       td {
@@ -127,7 +121,7 @@ we will attempt uncover the future course of the United States economy given cur
         padding-left: 50%;
       }
 
-      td:before, th:before {
+      td:before {
         content: attr(data-label);
         position: absolute;
         left: 0;
@@ -143,25 +137,40 @@ we will attempt uncover the future course of the United States economy given cur
   <table>
     <thead>
       <tr>
-        <th data-label="Header 1">Title</th>
-        <th data-label="Header 2">Author</th>
-        <th data-label="Header 3">Rating</th>
+        <th>Column 1</th>
+        <th>Column 2</th>
+        <th>Column 3</th>
       </tr>
     </thead>
-    <tbody>
-      <tr>
-        <td data-label="Header 1">Light of the Mind, Light of the World <br> Illuminating Science Through Faith</td>
-        <td data-label="Header 2">Spencer Klavan</td>
-        <td data-label="Header 3">- / -</td>
-      </tr>
-      <tr>
-        <td data-label="Header 1">Ego Is the Enemy</td>
-        <td data-label="Header 2">Ryan Holiday</td>
-        <td data-label="Header 3">- / -</td>
-      </tr>
+    <tbody id="table-body">
+      <!-- Table rows will be dynamically inserted here by JavaScript -->
     </tbody>
   </table>
 </div>
+
+<script>
+  // Example data for the table
+  const data = [
+    ['Data 1', 'Data 2', 'Data 3'],
+    ['Data 4', 'Data 5', 'Data 6'],
+    ['Data 7', 'Data 8', 'Data 9']
+  ];
+
+  // Get the table body element
+  const tableBody = document.getElementById('table-body');
+
+  // Insert rows dynamically
+  data.forEach(rowData => {
+    const row = document.createElement('tr');
+    rowData.forEach((cellData, index) => {
+      const cell = document.createElement('td');
+      cell.setAttribute('data-label', `Column ${index + 1}`);
+      cell.textContent = cellData;
+      row.appendChild(cell);
+    });
+    tableBody.appendChild(row);
+  });
+</script>
         
 <br>
 <br>
