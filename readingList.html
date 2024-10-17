@@ -82,7 +82,7 @@ we will attempt uncover the future course of the United States economy given cur
 <style>
     .table-wrapper {
       width: 100%;
-      overflow-x: auto; /* Enable horizontal scrolling for small screens */
+      overflow-x: auto;
     }
 
     table {
@@ -100,33 +100,39 @@ we will attempt uncover the future course of the United States economy given cur
       background-color: #f4f4f4;
     }
 
-    /* Style for making table responsive */
+    /* Make table responsive on small devices */
     @media screen and (max-width: 600px) {
-      table, thead, tbody, th, td, tr {
+      table {
         display: block;
+        width: 100%;
+      }
+
+      thead {
+        display: none; /* Hide headers */
       }
 
       tr {
+        display: block;
         margin-bottom: 15px;
       }
 
-      th {
-        background-color: #f4f4f4;
-        padding-left: 50%;
-        position: relative;
-      }
-
       td {
+        display: block;
+        text-align: right;
         position: relative;
         padding-left: 50%;
+        border: none;
+        border-bottom: 1px solid #ddd;
       }
 
       td:before {
         content: attr(data-label);
         position: absolute;
         left: 0;
+        width: 50%;
         padding-left: 10px;
-        white-space: nowrap;
+        text-align: left;
+        font-weight: bold;
       }
     }
   </style>
