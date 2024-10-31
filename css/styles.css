@@ -52,27 +52,27 @@ body{
 }
 
 .carousel .background.a {
-  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("../../assets/img/carrousel_006.webp?h=08c60b770646fde53747d6e04c6226fb");
+  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
 }
 
 .carousel .background.b {
-  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("../../assets/img/carrousel_007.webp?h=83e960700a2e255fee78fb5b39cfce6b");
+  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/2845a9e54d934a4488db735bea97adcc_3000x2000_resize.jpg");
 }
 
 .carousel .background.c {
-  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("../../assets/img/carrousel_012.webp?h=e0897427aeb74a5384b7b965c58bc812");
+  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
 }
 
 .carousel .background.d {
-  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("../../assets/img/carrousel_013.webp?h=39a05a6856f29b6377022d143be7aa48");
+  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/596115d2f7b640a3bd7a982e91a63fcd_3000x2000_resize.jpg");
 }
 
 .carousel .background.f {
-  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("../../assets/img/carrousel_015.webp?h=6f57d9d28c2574db94af898396fe677d");
+  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/7d8f510be94640ec8277474da348239f_3000x2000_resize.jpg");
 }
 
 .carousel .background.g {
-  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("../../assets/img/carrousel_016.webp?h=5ea1570a0b720515049ecc48ca0d9248");
+  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/bbfa65ca46704977a08713beffa91b26_3000x2000_resize.jpg");
 }
 
 .carousel-fade .carousel-inner .item {
