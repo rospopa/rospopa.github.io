@@ -437,7 +437,6 @@ hr {
 }
 
 .carousel-indicators .active {
-  width: 12px;
   height: 12px;
   margin: 0;
   background-color: #fff;
