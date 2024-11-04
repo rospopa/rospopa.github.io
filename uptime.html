@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto-Starting Stopwatch</title>
+    <title>Persistent Stopwatch</title>
     <style>
         body {
             display: flex;
@@ -22,38 +22,46 @@
 </head>
 <body>
 
-    <div id="stopwatch">0 Days 00:00:00:00</div>
+    <div id="stopwatch">00 Days 00 Hours 00 Minutes 00 Seconds</div>
 
     <script>
-        let seconds = 0;
-        let minutes = 0;
-        let hours = 0;
-        let days = 0;
+        function startStopwatch() {
+            let startTime;
 
-        function updateStopwatch() {
-            seconds++;
-            if (seconds === 60) {
-                seconds = 0;
-                minutes++;
-                if (minutes === 60) {
-                    minutes = 0;
-                    hours++;
-                    if (hours === 24) {
-                        hours = 0;
-                        days++;
-                    }
-                }
+            // Check if start time is already stored
+            if (localStorage.getItem("startTime")) {
+                startTime = parseInt(localStorage.getItem("startTime"));
+            } else {
+                // Set start time as now if it doesn’t exist in localStorage
+                startTime = Date.now();
+                localStorage.setItem("startTime", startTime);
             }
-            document.getElementById("stopwatch").textContent =
-                days + " Days " +
-                (hours < 10 ? "0" + hours : hours) + ":" +
-                (minutes < 10 ? "0" + minutes : minutes) + ":" +
-                (seconds < 10 ? "0" + seconds : seconds);
+
+            // Update the stopwatch display every second
+            setInterval(() => {
+                const currentTime = Date.now();
+                const elapsedTime = currentTime - startTime;
+
+                // Calculate days, hours, minutes, seconds
+                const totalSeconds = Math.floor(elapsedTime / 1000);
+                const days = Math.floor(totalSeconds / 86400);
+                const hours = Math.floor((totalSeconds % 86400) / 3600);
+                const minutes = Math.floor((totalSeconds % 3600) / 60);
+                const seconds = totalSeconds % 60;
+
+                // Display in the desired format
+                document.getElementById("stopwatch").textContent =
+                    (days < 10 ? "0" + days : days) + " Days " +
+                    (hours < 10 ? "0" + hours : hours) + " Hours " +
+                    (minutes < 10 ? "0" + minutes : minutes) + " Minutes " +
+                    (seconds < 10 ? "0" + seconds : seconds) + " Seconds";
+            }, 1000);
         }
 
-        // Start the stopwatch immediately
-        setInterval(updateStopwatch, 1000);
+        // Start the stopwatch when the page loads
+        startStopwatch();
     </script>
 
 </body>
 </html>
+
