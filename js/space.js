@@ -30,35 +30,58 @@ Star.prototype.move = function(x, y) {
   this.y = this.origY + y * (0.01 + this.layerIndex / 50);
 }
 
-function Cloud() {
+function Planet() {
   this.x = w / 2;
   this.y = h / 2;
   this.origX = this.x;
   this.origY = this.y;
-  this.cloudSize = 120;
+  this.radius = 100;
+  this.cradius = this.radius + 50;
+  this.mv = 20;
 }
 
-Cloud.prototype.draw = function() {
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)'; // Light white color for the cloud
-  
-  // Draw the cloud using overlapping circles
-  this.drawCloudPart(this.x - 70, this.y - 30, this.cloudSize);
-  this.drawCloudPart(this.x - 30, this.y - 40, this.cloudSize);
-  this.drawCloudPart(this.x + 20, this.y - 30, this.cloudSize);
-  this.drawCloudPart(this.x + 50, this.y, this.cloudSize);
-  this.drawCloudPart(this.x, this.y + 30, this.cloudSize);
-  this.drawCloudPart(this.x - 40, this.y + 20, this.cloudSize);
-
+Planet.prototype.drawBackCircle = function(radius, y) {
+  y = y || 0;
+  ctx.beginPath();
+  ctx.moveTo(this.x - radius,this.y - this.mv);
+  ctx.bezierCurveTo(
+    this.x - radius, this.y - y - 50 - this.mv,
+    this.x + radius, this.y - y - 50 + this.mv,
+    this.x + radius, this.y + this.mv
+  );
   ctx.stroke();
 }
 
-Cloud.prototype.drawCloudPart = function(x, y, size) {
+Planet.prototype.drawFrontCircle = function(radius, y) {
+  y = y || 0;
   ctx.beginPath();
-  ctx.arc(x, y, size, 0, PI2);
-  ctx.fill();
+  ctx.moveTo(this.x - radius,this.y - this.mv);
+  ctx.bezierCurveTo(
+    this.x - radius, this.y + y + 50 - this.mv,
+    this.x + radius, this.y + y + 50 + this.mv,
+    this.x + radius, this.y + this.mv
+  );
+  ctx.stroke();
 }
 
-Cloud.prototype.think = function(x, y) {
+Planet.prototype.draw = function() {
+  this.drawBackCircle(this.cradius);
+  this.drawBackCircle(this.cradius + 10, 4);
+  
+  ctx.beginPath();
+  ctx.arc(this.x, this.y, 100, 0, PI2);
+  ctx.fillStyle = 'black';
+  ctx.fill();
+  ctx.stroke();
+  
+  this.drawFrontCircle(this.cradius);
+  this.drawFrontCircle(this.cradius + 10, 12);
+}
+
+Planet.prototype.think = function(x, y) {
+  // this.mv = y / 50;
+  // this.mv = y / 50;
+  this.mv = y / 100 + x / 100;
   this.x = this.origX + x / 30;
   this.y = this.origY + y / 30;
 }
@@ -88,26 +111,41 @@ StarsLayer.prototype.each = function(cb) {
   }
 }
 
+// function createStarsLayer(index) {
+//   for (var i = 0; i < 100; i++) {
+//     layers.push(new Star(index));
+//   }
+// }
+
 var s1 = new StarsLayer(1);
 var s2 = new StarsLayer(2);
 var s3 = new StarsLayer(3);
-var cloud = new Cloud();
+var planet = new Planet();
+// createStarsLayer(1);
+// createStarsLayer(2);
+// createStarsLayer(3);
 
 (function loop() {
-  ctx.clearRect(0, 0, w, h);
+  ctx.clearRect(0,0,w,h);
   s1.draw();
   s2.draw();
-  cloud.draw();
+  // for (var i = 0; i < layers.length; i++) {
+  //   layers[i].draw();
+  // }
+  planet.draw();
   s3.draw();
   requestAnimationFrame(loop);
 })()
 
 canvas.addEventListener('mousemove', function(e) {
-  var x = e.layerX - w / 2;
-  var y = e.layerY - h / 2;
+  var x = e.layerX - w/2;
+  var y = e.layerY - h/2;
   s1.move(x, y);
   s2.move(x, y);
   s3.move(x, y);
-  cloud.think(x, y);
+  // for (var i = 0; i < layers.length; i++) {
+  //   layers[i].move(x, y);
+  // }
+  planet.think(x, y);
 });
 
