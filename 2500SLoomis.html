@@ -16,6 +16,25 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700,900&amp;display=swap">
     <link rel="stylesheet" href="css/styles.css?h=421f12796ff206eb6931c116123b2a81">
     <link rel="stylesheet" href="css/format.css">
+
+  <style>
+        /* Make the video take up the whole screen */
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Ensures the video covers the whole screen */
+        }
+    </style>
+  
 </head>
 
 <body>
@@ -60,13 +79,20 @@
     </div>
   </div>
 </div></div>
+           <video autoplay muted loop>
+        <source src="your-video.mp4" type="video/mp4">
+        <!-- You can add other formats for compatibility -->
+        <source src="https://assets.rospopa.com/vid/2500SLoomis.mov" type="video/webm">
+        <source src="https://assets.rospopa.com/vid/2500SLoomis.mov" type="video/ogv">
+        Your browser does not support the video tag.
+    </video>
         </section><!-- End: myCarousel -->
         <!-- Start: Carousel1 -->
         <section class="d-flex flex-row d-flex justify-content-center">
             <div class="container d-flex justify-content-center" style="margin-right: 0px;margin-left: 0px;padding-right: 0px;padding-left: 0px;padding-top: 0px;padding-bottom: 0px;max-width: 100%;width:100%;">
                 <div class="carousel slide" data-bs-ride="false" id="carousel-1" style="overflow: hidden;">
                     <div class="carousel-inner">
-                        <div class="carousel-item active mybackground1"><img class="img-fluid w-100 d-block" src="https://assets.rospopa.com/vid/2500SLoomis.webm" alt="Slide Image"></div>
+                        <div class="carousel-item active mybackground1"><img class="img-fluid w-100 d-block" src="https://images.crexi.com/lease-assets/793448/2845a9e54d934a4488db735bea97adcc_3000x2000_resize.jpg" alt="Slide Image"></div>
                         <div class="carousel-item"><img class="img-fluid w-100 d-block" src="https://images.crexi.com/lease-assets/793448/2845a9e54d934a4488db735bea97adcc_3000x2000_resize.jpg" alt="Slide Image"></div>
                         <div class="carousel-item"><img class="w-100 d-block" src="https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg" alt="Slide Image"></div>
                         <div class="carousel-item"><img class="w-100 d-block" src="https://images.crexi.com/lease-assets/793448/596115d2f7b640a3bd7a982e91a63fcd_3000x2000_resize.jpg" alt="Slide Image"></div>
