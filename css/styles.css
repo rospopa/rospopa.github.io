@@ -267,6 +267,7 @@ hr {
   width: 100%;
   height: auto;
   overflow: hidden;
+  text-align: center;
 }
 
 .carousel-inner > .item {
@@ -642,8 +643,7 @@ hr {
     position: absolute;
     cursor: pointer;
     display: inline-block;
-    margin-top: -75%;
-    margin-left: 50%;
+    margin-top: -110vh;
     z-index: 9999;
 }
  .sound-icon {
