@@ -42,7 +42,7 @@ body{
   background-position: center center;
   background-size: contain, cover;
   background-repeat: no-repeat;
-  height: 100vh;
+  height: 850px;
 }
 
 @media (max-width:991px) {
@@ -51,9 +51,11 @@ body{
   }
 }
 
-.carousel .background.a {
-  position:relative;overflow:hidden;
-}
+/* .carousel .background.a { */
+/* .position:relative;overflow:hidden; */
+/* .} */
+*/
+
 .carousel-video {
   position: absolute;
   top: 0;
@@ -64,6 +66,10 @@ body{
   /* margin-top: -25px; */
   /* margin-bottom: -25px; */
 }
+.carousel .background.a {
+  background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
+}
+
 .carousel .background.b {
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/2845a9e54d934a4488db735bea97adcc_3000x2000_resize.jpg");
 }
