@@ -267,7 +267,6 @@ hr {
   width: 100%;
   height: auto;
   overflow: hidden;
-  text-align: center;
 }
 
 .carousel-inner > .item {
@@ -638,17 +637,18 @@ hr {
 }
 
 .sound {
-	width: 50px;
+    width: 50px;
     height: 50px;
     position: absolute;
     cursor: pointer;
     display: inline-block;
     margin-top: -110vh;
+    margin-left: 50%;
     z-index: 9999;
 }
  .sound-icon {
 	 color: #fff;
-	 width: 85%;
+	 width: 100%;
 	 height: 100%;
 	 line-height: 100%;
 	 font-size: 50px;
@@ -657,9 +657,9 @@ hr {
 }
  .sound-wave {
 	 position: absolute;
-	 border: 5.625px solid transparent;
-	 border-right: 5.625px solid #fff;
-	 border-radius: 50%;
+	 border: 2.625px solid transparent;
+	 border-right: 3.625px solid #fff;
+	 border-radius: 75%;
 	 transition: all 200ms;
 	 margin: auto;
 	 top: 0;
@@ -678,10 +678,10 @@ hr {
 	 transition: all 0.2s cubic-bezier(0.26, 0.1, 0, 1.49);
 }
  .sound-mute .sound-wave {
-	 border-radius: 50%;
+	 border-radius: 60%;
 	 width: 0%;
 	 height: 0%;
-	 border-width: 0 15.625px 0 0;
+	 border-width: 0 5.625px 0 0;
 }
  .sound-mute .sound-wave_one {
 	 transform: translateX(-10px);
