@@ -635,21 +635,16 @@ hr {
   background-repeat: repeat-x;
   background-size: 30px 30px;
 }
+
 .speaker {
 	height: 30px;
 	width: 30px;
 	position: relative;
 	overflow: hidden;
 	display: inline-block;
-  margin-top: -50%;
-  margin-left: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: absolute;
-  text-align: center;
+	cursor: pointer;
 
-	span {
+	.speakermute {
 		display: block;
 		width: 8px;
 		height: 8px;
@@ -686,13 +681,13 @@ hr {
 
 	&:hover {
 
-		span:before {
+		.speakermute:before {
 			transform: scale(.8) translate(-3px, 0) rotate(42deg);		
     }
 	}
   
   &.mute {
-    span:before {
+   .speakermute:before {
 			transform: scale(.5) translate(-15px, 0) rotate(36deg);
       opacity: 0;
     }
