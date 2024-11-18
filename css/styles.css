@@ -51,21 +51,24 @@ body{
   }
 }
 
-/* .carousel .background.a { */
-/* .position:relative;overflow:hidden; */
-/* .} */
+/*
+.carousel .background.a {
+.position:relative;overflow:hidden;
+.}
+*/
 
-
-/*.carousel-video {
+/*
+.carousel-video {
   position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-   margin-top: -25px;
-   margin-bottom: -25px; */
-
+  margin-top: -25px;
+  margin-bottom: -25px; 
+}
+*/
 
 .carousel .background.a {
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
