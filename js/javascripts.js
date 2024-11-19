@@ -27,7 +27,7 @@ jQuery(document).ready(function ($) {
     // Показати елемент через 500 мс після завантаження сторінки
     setTimeout(function () {
         $('.type-text').css('opacity', '1');
-    }, 500); // Затримка у 500 мс (можна змінити за потреби)
+    }, 250); // Затримка у 500 мс (можна змінити за потреби)
 });
 };
 document.addEventListener('DOMContentLoaded', function() {
