@@ -675,3 +675,8 @@ hr {
 	 right: 0;
 */
 }
+
+.type-text {
+  opacity: 0;
+  transition: opacity 0.5s ease-in-out;
+}
