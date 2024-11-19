@@ -30,3 +30,19 @@ jQuery(document).ready(function ($) {
     }, 500); // Затримка у 500 мс (можна змінити за потреби)
 });
 };
+document.addEventListener('DOMContentLoaded', function() {
+  const soundIcon = document.querySelector('.sound-icon');
+  const videoElement = document.querySelector('.carousel-video');
+
+  soundIcon.addEventListener('click', function() {
+    if (videoElement.muted) {
+      videoElement.muted = false;
+      soundIcon.classList.remove('fa-volume-off');
+      soundIcon.classList.add('fa-volume-up');
+    } else {
+      videoElement.muted = true;
+      soundIcon.classList.remove('fa-volume-up');
+      soundIcon.classList.add('fa-volume-off');
+    }
+  });
+});
