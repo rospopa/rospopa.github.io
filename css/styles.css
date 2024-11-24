@@ -650,14 +650,20 @@ hr {
   margin-left: 50%;
   z-index: 9999;
 }
+
+.fa {
+  font-size: 24px;
+  color: #fff;
+}
+
  .sound-icon {
   color: #fff;
   font-size: 50px;
   position: absolute;
   display: inline-block;
   transition: all 200ms;
-  margin-left: 50%;
-  margin-top: 5%;
+  left: 50%;
+  top: 5%;
   cursor: pointer;
   z-index: 9999;
 /*
@@ -679,9 +685,4 @@ hr {
 .type-text {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
-}
-
-.fa {
-  font-size: 24px;
-  color: #fff;
 }
