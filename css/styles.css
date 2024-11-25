@@ -686,3 +686,7 @@ hr {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
 }
+
+div.px-3 .text-white {
+  font-weight: bold;
+}
