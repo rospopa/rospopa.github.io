@@ -1,5 +1,5 @@
-body{
-  padding:0px 0px;
+body {
+  padding: 0px 0px;
   margin: 0;
   font-family: Roboto, sans-serif;
   font-size: var(--bs-body-font-size);
@@ -12,19 +12,17 @@ body{
   -webkit-tap-highlight-color: transparent;
 }
 
-
-.results tr[visible='false'],
-.no-result{
-  display:none;
+.results tr[visible='false'], .no-result {
+  display: none;
 }
 
-.results tr[visible='true']{
-  display:table-row;
+.results tr[visible='true'] {
+  display: table-row;
 }
 
-.counter{
-  padding:9px; 
-  color:#ccc;
+.counter {
+  padding: 9px;
+  color: #ccc;
 }
 
 .mybackground1 {
@@ -51,14 +49,11 @@ body{
   }
 }
 
-/*
-.carousel .background.a {
+/* .carousel .background.a {
 .position:relative;overflow:hidden;
-.}
-*/
+.} */
 
-/*
-.carousel-video {
+/* .carousel-video {
   position: absolute;
   top: 0;
   left: 0;
@@ -67,8 +62,7 @@ body{
   object-fit: cover;
   margin-top: -25px;
   margin-bottom: -25px; 
-}
-*/
+} */
 
 .carousel .background.a {
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
@@ -192,8 +186,8 @@ hr {
 }
 
 .container-fluid {
-  /* padding-right: 15px; */
-  /* padding-left: 15px; */
+  /*padding-right: 15px;*/
+  /*padding-left: 15px;*/
   margin-right: auto;
   margin-left: auto;
 }
@@ -656,7 +650,7 @@ hr {
   color: #fff;
 }
 
- .sound-icon {
+.sound-icon {
   color: #fff;
   font-size: 50px;
   position: absolute;
@@ -666,25 +660,28 @@ hr {
   top: 5%;
   cursor: pointer;
   z-index: 9999;
-/*
-  width: 100%;
-  height: 100%;
-  line-height: 100%;
-  font-size: 50px;
-  display: block;
-  margin: auto; 
-  border: 2.625px solid transparent;
-  border-right: 3.625px solid #fff;
-  border-radius: 75%;
-  top: 0;
-  left: 0;
-  right: 0;
-*/
+  /*width: 100%;*/
+  /*height: 100%;*/
+  /*line-height: 100%;*/
+  /*font-size: 50px;*/
+  /*display: block;*/
+  /*margin: auto;*/
+  /*border: 2.625px solid transparent;*/
+  /*border-right: 3.625px solid #fff;*/
+  /*border-radius: 75%;*/
+  /*top: 0;*/
+  /*left: 0;*/
+  /*right: 0;*/
 }
 
 .type-text {
   opacity: 0;
   transition: opacity 0.5s ease-in-out;
+}
+
+.px-3 {
+  padding-right: 0px!important;
+  padding-left: 1rem!important;
 }
 
 div.px-3 .text-white {
