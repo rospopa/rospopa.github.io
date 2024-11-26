@@ -447,6 +447,10 @@ button {
   color: #BDB18A!important;
 }
 
+h3 {
+  /*text-transform: uppercase;*/
+}
+
 /* ! CSS Used from: Embedded */
 
 footer {
@@ -507,7 +511,7 @@ footer .site-footer__logo-bar {
 
 footer .site-footer__logo-container img {
   max-width: 268px;
-  max-height: 56px;
+  /*max-height: 56px;*/
   object-fit: contain;
   display: block;
   object-position: left top;
@@ -564,7 +568,7 @@ footer .site-footer__col {
   -webkit-flex-direction: column;
   -ms-flex-direction: column;
   flex-direction: column;
-  padding-right: 32px;
+  /*padding-right: 32px;*/
 }
 
 footer .site-footer__col-title {
@@ -731,8 +735,8 @@ footer .site-footer__bottom {
 
 @media (max-width: 768px) {
   footer .site-footer__bottom {
-    padding-top: 64px;
-    padding-bottom: 64px;
+    padding-top: 50px;
+    padding-bottom: 50px;
   }
 }
 
@@ -862,59 +866,5 @@ footer .footer-navigation__link {
 @media (hover: hover) and (pointer: fine) {
   footer .footer-navigation__link:hover {
     color: var(--themeBeige);
-  }
-}
-
-footer .lp-socials li {
-  margin-bottom: 14px;
-}
-
-footer .sync-icon {
-  display: none;
-  margin-right: 10px;
-  -webkit-box-pack: center;
-  -ms-flex-pack: center;
-  -webkit-justify-content: center;
-  justify-content: center;
-  -webkit-align-items: center;
-  -webkit-box-align: center;
-  -ms-flex-align: center;
-  align-items: center;
-}
-
-/* ! CSS Used from: Embedded */
-
-.social_icons-style-1 a {
-  border-color: rgba(189, 177, 138, 1)!important;
-  background-color: rgba(0, 0, 0, 0)!important;
-  color: rgba(189, 177, 138, 1)!important;
-}
-
-.social_icons-style-1 a:hover {
-  border-color: rgba(189, 177, 138, 1)!important;
-  background-color: rgba(189, 177, 138, 1)!important;
-  color: rgba(255, 255, 255, 1)!important;
-}
-
-.button-style-5 {
-  color: rgba(255, 255, 255, 1)!important;
-  background-color: rgba(189, 177, 138, 1)!important;
-  border-color: rgba(189, 177, 138, 1)!important;
-}
-
-.button-style-5:hover {
-  color: rgba(189, 177, 138, 1)!important;
-  background-color: rgba(255, 255, 255, 1)!important;
-  border-color: rgba(255, 255, 255, 1)!important;
-}
-
-/* ! CSS Used keyframes */
-
-@keyframes i-spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(1turn);
   }
 }
