@@ -687,3 +687,7 @@ hr {
 div.px-3 .text-white {
   font-weight: bold;
 }
+
+.mb-3 {
+  margin-bottom: auto!important;
+}
