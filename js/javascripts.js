@@ -24,9 +24,49 @@ jQuery(document).ready(function ($) {
     }
 });
 jQuery(document).ready(function ($) {
+    if (jQuery("*").hasClass('type-text-2')) {
+        var self_1 = jQuery(".type-text-2");
+        var txt2 = self_1.html();
+        var tot = txt2.length;
+        var ch = 0;
+        function typeIt() {
+            if (ch > tot)
+                return;
+            ch++;
+            if (txt2[ch] == "<")
+                ch = ch + 5;
+            if (txt2[ch] == "&")
+                ch = ch + 4;
+            self_1.html(txt2.substring(0, ch));
+            setTimeout(typeIt, 40);
+        }
+        typeIt();
+    }
+});
+jQuery(document).ready(function ($) {
+    if (jQuery("*").hasClass('type-text-3')) {
+        var self_1 = jQuery(".type-text-3");
+        var txt2 = self_1.html();
+        var tot = txt2.length;
+        var ch = 0;
+        function typeIt() {
+            if (ch > tot)
+                return;
+            ch++;
+            if (txt2[ch] == "<")
+                ch = ch + 5;
+            if (txt2[ch] == "&")
+                ch = ch + 4;
+            self_1.html(txt2.substring(0, ch));
+            setTimeout(typeIt, 40);
+        }
+        typeIt();
+    }
+});
+jQuery(document).ready(function ($) {
     // Показати елемент через 500 мс після завантаження сторінки
     setTimeout(function () {
-        $('.type-text').css('opacity', '1');
+        $('.type-text, .type-text-2, .type-text-3').css('opacity', '1');
     }, 250); // Затримка у 500 мс (можна змінити за потреби)
 });
 };
