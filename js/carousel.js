@@ -1,89 +1,92 @@
-function singleGalleryCarousel () {
-  if ($('.single-gallery-carousel-content-box').length && $('.single-gallery-carousel-thumbnail-box').length) {
-
-    var $sync1 = $(".single-gallery-carousel-content-box"), // variable declaration
-        $sync2 = $(".single-gallery-carousel-thumbnail-box"),
-        flag = false,
-        duration = 500;
-
-        $sync1.owlCarousel({ //function for preview carousel
-            items: 1,
-            margin: 0,
-            nav: false,
-            dots: false
-        })
-        .on('changed.owl.carousel', function (e) {
-            //var currentItem = e.item.index;
-            //alert(currentItem);
-            if (!flag) {
-                flag = true;
-                $sync2.trigger('to.owl.carousel', [e.item.index, duration, true]);
-                flag = false;
-            }
-        });
-
-        $('.single-gallery-carousel-content-box').magnificPopup({ //function for magnific popup
-            type: 'image',
-            delegate: '.owl-item:not(.cloned) a',
-            closeOnContentClick: false,
-            removalDelay: 500,
-            callbacks: {
-                beforeOpen: function() {
-                     this.st.image.markup = this.st.image.markup.replace('mfp-figure', 'mfp-figure mfp-with-anim');
-                     this.st.mainClass = this.st.el.attr('data-effect');
-                }
+$(function(){
+    if($('.gallery-wrapper').length){
+        var galleryThumbs = new Swiper('.gallery-wrapper .content .gallery.thumb .swiper-container', {
+            speed: 900,
+            effect: 'slide',
+            spaceBetween: 12,
+            grabCursor: false,
+            simulateTouch: true,
+            loop: false,
+            watchSlidesVisibility: true,
+            watchSlidesProgress: true,
+            navigation: {
+                nextEl: '.gallery-wrapper .content .gallery.thumb .swiper-next-button',
+                prevEl: '.gallery-wrapper .content .gallery.thumb .swiper-prev-button',
             },
-            tLoading: 'Loading image #%curr%...',
-            mainClass: 'mfp-zoom-in mfp-img-mobile',
-            gallery: {
-                enabled: true,
-                navigateByImgClick: true,
-                preload: [0,1]
-            },
-            zoom: {
-                enabled: true,
-                duration: 300
-            },
-            image: {
-                tError: '<a href="%url%">The image #%curr%</a> could not be loaded.',
-                titleSrc: function(item) {
-                    return item.el.attr('title') + '<small></small>';
-                }
-            }
-        });
-    
-        $sync2.owlCarousel({ //function for thumbnails carousel
-            margin: 1,
-            items: 7,
-            nav: true,
-            dots: false,
-            navText:false,
-            center: false,
-            responsive: {
-                0:{
-                    items:2,
-                    autoWidth: false
+            breakpoints: {
+                320: {
+                    slidesPerView: 2,
+                    spaceBetween: 10,
                 },
-                400:{
-                    items:3,
-                    autoWidth: false
+                414: {
+                    slidesPerView: 3,
+                    spaceBetween: 10
                 },
-                768:{
-                    items:4,
-                    autoWidth: false
+                768: {
+                    slidesPerView: 5,
+                    spaceBetween: 10
+                },
+                1024: {
+                    slidesPerView: 7,
+                    spaceBetween: 10
                 }
             },
-        })
-        .on('click', '.owl-item', function () {
-            $sync1.trigger('to.owl.carousel', [$(this).index(), duration, true]);
-        })
-        .on('changed.owl.carousel', function (e) {
-            if (!flag) {
-                flag = true;    
-                $sync1.trigger('to.owl.carousel', [e.item.index, duration, true]);
-                flag = false;
+			  on: {
+				  init: function() { 
+				  	let containerThumbWidth = $('.gallery-wrapper .content .gallery.thumb').outerWidth();
+	
+	let totalThumbWidth = 0;
+	
+	$('.gallery.thumb .swiper-container .swiper-wrapper .swiper-slide').each(function(){
+		let thumbWidth = $(this).outerWidth();
+		totalThumbWidth += thumbWidth
+	});
+	
+	
+	
+	if(totalThumbWidth < containerThumbWidth){
+		$('.gallery.thumb .swiper-next-button, .gallery.thumb .swiper-prev-button').addClass('hide');
+	}else{
+		$('.gallery.thumb .swiper-next-button, .gallery.thumb .swiper-prev-button').removeClass('hide');
+	}
+			   }
+			  }
+        });
+
+        var galleryFull = new Swiper('.gallery-wrapper .content .gallery.full .swiper-container', {
+            speed: 900,
+            effect: 'slide',
+            slidesPerView: 3,
+            spaceBetween: 0,
+            centeredSlides: true,
+            keyboard: {
+                enabled: true,
+            },
+            grabCursor: false,
+            simulateTouch: false,
+            loop: true,
+            navigation: {
+                nextEl: '.gallery-wrapper .content .gallery.full .swiper-next-button',
+                prevEl: '.gallery-wrapper .content .gallery.full .swiper-prev-button',
+            },
+            thumbs: {
+                swiper: galleryThumbs
+            },
+            on: {
+                slideChangeTransitionStart: function () {
+                    $('.gallery-wrapper .content .gallery.full .swiper-slide .overlay').removeClass('show');
+                },
+                slideChangeTransitionEnd: function () {
+                    $('.gallery-wrapper .content .gallery.full .swiper-slide-active .overlay').addClass('show');
+                }
             }
         });
-    };
-}
-singleGalleryCarousel (); //FUNCTION CALLED HERE
+    }
+});
+
+
+$(window).on("load", function() {
+    setTimeout(function(){
+        $('.loader').fadeOut();
+    }, 1000);
+});
