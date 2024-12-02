@@ -34,24 +34,20 @@ $(function(){
 			  on: {
 				  init: function() { 
 				  	let containerThumbWidth = $('.gallery-wrapper .content .gallery.thumb').outerWidth();
-	
-	let totalThumbWidth = 0;
-	
-	$('.gallery.thumb .swiper-container .swiper-wrapper .swiper-slide').each(function(){
-		let thumbWidth = $(this).outerWidth();
-		totalThumbWidth += thumbWidth
-	});
-	
-	
-	
-	if(totalThumbWidth < containerThumbWidth){
-		$('.gallery.thumb .swiper-next-button, .gallery.thumb .swiper-prev-button').addClass('hide');
-	}else{
-		$('.gallery.thumb .swiper-next-button, .gallery.thumb .swiper-prev-button').removeClass('hide');
-	}
-			   }
-			  }
-        });
+					let totalThumbWidth = 0;
+					$('.gallery.thumb .swiper-container .swiper-wrapper .swiper-slide').each(function(){
+						let thumbWidth = $(this).outerWidth();
+						totalThumbWidth += thumbWidth
+					});
+					
+					if(totalThumbWidth < containerThumbWidth){
+						$('.gallery.thumb .swiper-next-button, .gallery.thumb .swiper-prev-button').addClass('hide');
+					}else{
+						$('.gallery.thumb .swiper-next-button, .gallery.thumb .swiper-prev-button').removeClass('hide');
+					}
+				}
+			}
+		});
 
         var galleryFull = new Swiper('.gallery-wrapper .content .gallery.full .swiper-container', {
             speed: 900,
@@ -65,6 +61,9 @@ $(function(){
             grabCursor: false,
             simulateTouch: false,
             loop: true,
+            longSwipes: false, // Вимикає контроль за довгими свайпами
+            longSwipesMs: 100, // Максимальний час для довгого свайпу
+            longSwipesRatio: 0.5, // Мінімальна частка свайпу для переходу до наступного слайда
             navigation: {
                 nextEl: '.gallery-wrapper .content .gallery.full .swiper-next-button',
                 prevEl: '.gallery-wrapper .content .gallery.full .swiper-prev-button',
