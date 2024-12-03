@@ -258,6 +258,7 @@ hr {
 
 .carousel {
   position: relative;
+  pointer-events: none;
 }
 
 .carousel-inner {
