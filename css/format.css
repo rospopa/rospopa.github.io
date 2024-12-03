@@ -65,7 +65,7 @@ a:visited {
 
 .site-header {
   border-top: 5px solid #333;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 3px solid #e8e8e8;
   min-height: 56px;
   background-color: white;
 }
@@ -737,10 +737,10 @@ a:visited {
 
 @media screen and (max-width: 600px) {
   .site-nav {
-    position: fixed;
-    z-index: 10;
-    top: 14px;
-    right: 8px;
+    /*position: fixed;*/
+    /*z-index: 10;*/
+    /*top: 14px;*/
+    /*right: 8px;*/
     background-color: white;
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
@@ -778,7 +778,7 @@ a:visited {
 
 @media screen and (max-width: 600px) {
   .site-nav:hover .trigger {
-    display: block;
+    /*display: block;*/
   }
 }
 
