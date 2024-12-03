@@ -15,7 +15,7 @@ $(function(){
             },
             breakpoints: {
                 320: {
-                    slidesPerView: 2,
+                    slidesPerView: 3,
                     spaceBetween: 10,
                 },
                 414: {
@@ -50,10 +50,10 @@ $(function(){
 		});
 
         var galleryFull = new Swiper('.gallery-wrapper .content .gallery.full .swiper-container', {
-            speed: 900,
+            speed: 300,
             effect: 'slide',
             slidesPerView: 3,
-            spaceBetween: 0,
+            spaceBetween: 5,
             centeredSlides: true,
             keyboard: {
                 enabled: true,
@@ -61,8 +61,9 @@ $(function(){
             grabCursor: false,
             simulateTouch: false,
             loop: true,
-            longSwipes: false, // Вимикає контроль за довгими свайпами
-            longSwipesMs: 100, // Максимальний час для довгого свайпу
+            touchMoveStopPropagation: true,
+            longSwipes: false, // Включає контроль за довгими свайпами
+            longSwipesMs: 50, // Максимальний час для довгого свайпу
             longSwipesRatio: 0.5, // Мінімальна частка свайпу для переходу до наступного слайда
             navigation: {
                 nextEl: '.gallery-wrapper .content .gallery.full .swiper-next-button',
