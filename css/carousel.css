@@ -1,3 +1,9 @@
+.material-icons {
+  color: #fff;
+  opacity: 0.8;
+  font-size: 75px;
+}
+
 * {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -368,7 +374,7 @@
 
 @media only screen and (max-width: 1024px) {
   .gallery-wrapper .content .gallery.full .swiper-next-button em, .gallery-wrapper .content .gallery.full .swiper-prev-button em {
-    font-size: 45px;
+    font-size: 75px;
   }
 }
 
@@ -413,9 +419,4 @@
   .signature {
     display: none;
   }
-}
-
-.material-icons {
-  color: #ffffff;
-  opacity: 0.5;
 }
