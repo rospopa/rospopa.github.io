@@ -1,14 +1,17 @@
 $(function(){
     if($('.gallery-wrapper').length){
         var galleryThumbs = new Swiper('.gallery-wrapper .content .gallery.thumb .swiper-container', {
-            speed: 900,
+            speed: 300,
             effect: 'slide',
-            spaceBetween: 12,
+            spaceBetween: 5,
+            slidesToScroll: 1,
             grabCursor: false,
-            simulateTouch: true,
+            simulateTouch: false,
             loop: false,
+            swipeToSlide: true,
             watchSlidesVisibility: true,
             watchSlidesProgress: true,
+            touchRatio: 0.1,
             navigation: {
                 nextEl: '.gallery-wrapper .content .gallery.thumb .swiper-next-button',
                 prevEl: '.gallery-wrapper .content .gallery.thumb .swiper-prev-button',
@@ -16,19 +19,19 @@ $(function(){
             breakpoints: {
                 320: {
                     slidesPerView: 3,
-                    spaceBetween: 10,
+                    spaceBetween: 5,
                 },
                 414: {
                     slidesPerView: 3,
-                    spaceBetween: 10
+                    spaceBetween: 5
                 },
                 768: {
                     slidesPerView: 5,
-                    spaceBetween: 10
+                    spaceBetween: 5
                 },
                 1024: {
                     slidesPerView: 7,
-                    spaceBetween: 10
+                    spaceBetween: 5
                 }
             },
 			  on: {
@@ -53,18 +56,20 @@ $(function(){
             speed: 300,
             effect: 'slide',
             slidesPerView: 3,
+            slidesToScroll: 1,
             spaceBetween: 5,
             centeredSlides: true,
-            keyboard: {
-                enabled: true,
-            },
+            keyboard: {enabled: true,},
             grabCursor: false,
             simulateTouch: false,
             loop: true,
-            touchMoveStopPropagation: true,
-            longSwipes: false, // Включає контроль за довгими свайпами
-            longSwipesMs: 50, // Максимальний час для довгого свайпу
-            longSwipesRatio: 0.5, // Мінімальна частка свайпу для переходу до наступного слайда
+            swipe: true,
+            swipeToSlide: true,
+            touchRatio: 0.1,
+        //  touchMoveStopPropagation: false,
+	//  longSwipes: false, // Включає контроль за довгими свайпами
+        //  longSwipesMs: 50, // Максимальний час для довгого свайпу
+        //  longSwipesRatio: 0.5, // Мінімальна частка свайпу для переходу до наступного слайда
             navigation: {
                 nextEl: '.gallery-wrapper .content .gallery.full .swiper-next-button',
                 prevEl: '.gallery-wrapper .content .gallery.full .swiper-prev-button',
@@ -83,7 +88,6 @@ $(function(){
         });
     }
 });
-
 
 $(window).on("load", function() {
     setTimeout(function(){
