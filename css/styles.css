@@ -41,6 +41,7 @@ body {
   background-size: contain, cover;
   background-repeat: no-repeat;
   height: 850px;
+  width: 100%;
 }
 
 @media (max-width:991px) {
@@ -324,9 +325,9 @@ hr {
 
 .carousel-inner > .active {
   left: 0;
-  max-height: 850px;
+  /*max-height: 850px;*/
   /*min-height: 50%;*/
-  /*height: 100%;*/
+  /*width: 100%;*/
 }
 
 .carousel-inner > .next, .carousel-inner > .prev {
@@ -560,10 +561,6 @@ hr {
   position: fixed;
 }
 
-@-ms-viewport {
-  width: device-width;
-}
-
 /* CSS Hack to trigger GPU for smooth transition */
 
 @media all and (transform-3d),
@@ -617,29 +614,6 @@ hr {
   text-align: center;
 }
 
-.zigzag {
-  background: #fff;
-  position: relative;
-  height: 200px;
-  box-shadow: 0 15px 10px rgba(0, 0, 0, .75);
-  z-index: 1;
-}
-
-.zigzag::after {
-  content: "";
-  display: block;
-  height: 30px;
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  background: -webkit-linear-gradient(225deg, #fff 15px, transparent 0) 0 15px, -webkit-linear-gradient(315deg, #fff 15px, transparent 0) 0 15px;
-  background: linear-gradient(-135deg, #fff 15px, transparent 0) 0 15px, linear-gradient( 135deg, #fff 15px, transparent 0) 0 15px;
-  background-position: top left;
-  background-repeat: repeat-x;
-  background-size: 30px 30px;
-}
-
 .sound {
   color: #fff;
   font-size: 50px;
@@ -687,11 +661,12 @@ hr {
 
 .px-3 {
   padding-right: 0px!important;
-  padding-left: 1rem!important;
+  padding-left: 0.3rem!important;
 }
 
 div.px-3 .text-white {
   font-weight: bold;
+  margin-bottom: 1px;
 }
 
 .mb-3 {
@@ -713,73 +688,85 @@ div.px-3 .text-white {
   background-size: 100% 100%;
 }
 
-.mfp-title {
-  display: none;
+.col_parag_1 .parag_1 {
+  font-size: 18px;
+  font-weight: 300;
+  font-family: Roboto, sans-serif;
+  line-height: 1.3;
 }
 
-.gallery-slider_wrapper {
-  width: 100%;
-  max-width: 768px;
-  margin: auto;
+.col_parag_1 {
+  width: auto;
+  max-width: 650px;
+  margin: 0px auto;
+  padding-right: 10px;
+  padding-left: 10px;
 }
 
-.gallery-slider_wrapper .owl-theme .owl-nav {
-  margin: 0;
+.px-3 p {
+  margin-bottom: 0px;
 }
 
-.gallery-slider_wrapper .owl-theme .owl-nav [class*=owl-] {
-  width: 30px;
-  height: 120px;
-  background: #ffb808;
-  font-size: 20px;
-  color: #000;
-  margin: 0;
-  padding: 0;
-  border-radius: 0;
+.bs-icon-sm.bs-icon-rounded.bs-icon-semi-white.bs-icon {
+  /*min-width: 18%;*/
+  margin: auto 0px;
 }
 
-.gallery-slider_wrapper .owl-carousel .owl-nav .owl-prev:before, .gallery-slider_wrapper .owl-carousel .owl-nav .owl-next:before {
-  font-family: 'LineAwesome';
-  position: absolute;
-  line-height: 120px;
-  width: 30px;
-  text-align: center;
-  top: 0;
-  left: 0;
+.div_icon {
+  min-width: 65px;
 }
 
-.gallery-slider_wrapper .owl-carousel .owl-nav .owl-prev:before {
-  content: "\f111";
+.row {
 }
 
-.gallery-slider_wrapper .owl-carousel .owl-nav .owl-prev {
-  position: absolute;
-  top: 0;
-  left: -25px;
+@media (min-width: 360px) {
+  .row.gy-4.row-cols-1 {
+    padding: 0 35px;
+  }
 }
 
-.gallery-slider_wrapper .owl-carousel .owl-nav .owl-next:before {
-  content: "\f112";
+@media (max-width: 360px) {
+  .row.gy-4.row-cols-1 {
+    padding: 0 0;
+  }
 }
 
-.gallery-slider_wrapper .owl-carousel .owl-nav .owl-next {
-  position: absolute;
-  top: 0;
-  right: -24px;
+@media (min-width:768px) {
+  .row-cols-md-2 > * {
+    flex: 0 0 auto;
+    width: 50%;
+    /*padding: 0 0px;*/
+  }
 }
 
-.gallery-slider_wrapper .owl-theme .owl-nav [class*=owl-]:hover {
-  background: #202020;
-  color: #fff;
+@media screen and (min-width:1200px) {
+  .row-cols-xl-3 > * {
+    flex: 0 0 auto;
+    width: 33.33333333%;
+    padding: 5px 0px;
+  }
 }
 
-.gallery-slider_wrapper .single-gallery-carousel-thumbnail-box .item {
-  position: relative;
-  margin: 0 5px;
-  height: 120px;
+@media (min-width:1400px) {
+  .row-cols-xl-3 > * {
+    flex: 0 0 auto;
+    width: 25%;
+    padding: 5px 0px;
+  }
 }
 
-.gallery-slider_wrapper .single-gallery-carousel-thumbnail-box .item img {
-  height: 100%;
-  cursor: pointer;
+@media (min-width:1400px) {
+  .row.gy-4.row-cols-1 {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+}
+
+.min_height {
+  min-height: 77px;
+}
+
+.margin_tb_a {
+  margin-top: auto;
+  margin-bottom: auto;
 }
