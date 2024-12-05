@@ -1,3 +1,10 @@
+/*
+* Prefixed by https://autoprefixer.github.io
+* PostCSS: v8.4.14,
+* Autoprefixer: v10.4.7
+* Browsers: last 4 version
+*/
+
 body {
   padding: 0px 0px;
   margin: 0;
@@ -50,47 +57,46 @@ body {
   }
 }
 
-/* .carousel .background.a {
-.position:relative;overflow:hidden;
-.} */
-
-/* .carousel-video {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  margin-top: -25px;
-  margin-bottom: -25px; 
-} */
-
 .carousel .background.a {
+  background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
+  background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
 }
 
 .carousel .background.b {
+  background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/2845a9e54d934a4488db735bea97adcc_3000x2000_resize.jpg");
+  background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/2845a9e54d934a4488db735bea97adcc_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/2845a9e54d934a4488db735bea97adcc_3000x2000_resize.jpg");
 }
 
 .carousel .background.c {
+  background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
+  background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
 }
 
 .carousel .background.d {
+  background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/596115d2f7b640a3bd7a982e91a63fcd_3000x2000_resize.jpg");
+  background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/596115d2f7b640a3bd7a982e91a63fcd_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/596115d2f7b640a3bd7a982e91a63fcd_3000x2000_resize.jpg");
 }
 
 .carousel .background.f {
+  background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/7d8f510be94640ec8277474da348239f_3000x2000_resize.jpg");
+  background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/7d8f510be94640ec8277474da348239f_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/7d8f510be94640ec8277474da348239f_3000x2000_resize.jpg");
 }
 
 .carousel .background.g {
+  background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/bbfa65ca46704977a08713beffa91b26_3000x2000_resize.jpg");
+  background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/bbfa65ca46704977a08713beffa91b26_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/bbfa65ca46704977a08713beffa91b26_3000x2000_resize.jpg");
 }
 
 .carousel-fade .carousel-inner .item {
   opacity: 0;
+  -webkit-transition: opacity 0.5s;
+  -o-transition: opacity 0.5s;
   transition: opacity 0.5s;
 }
 
@@ -287,7 +293,10 @@ hr {
   .carousel-inner > .item {
     -webkit-transition: -webkit-transform 0.6s ease-in-out;
     -o-transition: -o-transform 0.6s ease-in-out;
+    transition: -webkit-transform 0.6s ease-in-out;
+    -o-transition: transform 0.6s ease-in-out;
     transition: transform 0.6s ease-in-out;
+    transition: transform 0.6s ease-in-out, -webkit-transform 0.6s ease-in-out;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     -webkit-perspective: 1000px;
@@ -372,9 +381,8 @@ hr {
 }
 
 .carousel-control.left {
-  background-image: -webkit-linear-gradient( left, rgba(0, 0, 0, 0.5) 0, rgba(0, 0, 0, 0.0001) 100% );
   background-image: -o-linear-gradient( left, rgba(0, 0, 0, 0.5) 0, rgba(0, 0, 0, 0.0001) 100% );
-  background-image: -webkit-gradient( linear, left top, right top, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.0001)) );
+  background-image: -webkit-gradient( linear, left top, right top, color-stop(0, rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.0001)) );
   background-image: linear-gradient( to right, rgba(0, 0, 0, 0.5) 0, rgba(0, 0, 0, 0.0001) 100% );
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#80000000', endColorstr='#00000000', GradientType=1);
   background-repeat: repeat-x;
@@ -383,9 +391,8 @@ hr {
 .carousel-control.right {
   right: 0;
   left: auto;
-  background-image: -webkit-linear-gradient( left, rgba(0, 0, 0, 0.0001) 0, rgba(0, 0, 0, 0.5) 100% );
   background-image: -o-linear-gradient( left, rgba(0, 0, 0, 0.0001) 0, rgba(0, 0, 0, 0.5) 100% );
-  background-image: -webkit-gradient( linear, left top, right top, from(rgba(0, 0, 0, 0.0001)), to(rgba(0, 0, 0, 0.5)) );
+  background-image: -webkit-gradient( linear, left top, right top, color-stop(0, rgba(0, 0, 0, 0.0001)), to(rgba(0, 0, 0, 0.5)) );
   background-image: linear-gradient( to right, rgba(0, 0, 0, 0.0001) 0, rgba(0, 0, 0, 0.5) 100% );
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#00000000', endColorstr='#80000000', GradientType=1);
   background-repeat: repeat-x;
@@ -635,27 +642,19 @@ hr {
   font-size: 50px;
   position: absolute;
   display: inline-block;
+  -webkit-transition: all 200ms;
+  -o-transition: all 200ms;
   transition: all 200ms;
   left: 50%;
   top: 5%;
   cursor: pointer;
   z-index: 9999;
-  /*width: 100%;*/
-  /*height: 100%;*/
-  /*line-height: 100%;*/
-  /*font-size: 50px;*/
-  /*display: block;*/
-  /*margin: auto;*/
-  /*border: 2.625px solid transparent;*/
-  /*border-right: 3.625px solid #fff;*/
-  /*border-radius: 75%;*/
-  /*top: 0;*/
-  /*left: 0;*/
-  /*right: 0;*/
 }
 
 .type-text {
   opacity: 0;
+  -webkit-transition: opacity 0.5s ease-in-out;
+  -o-transition: opacity 0.5s ease-in-out;
   transition: opacity 0.5s ease-in-out;
 }
 
@@ -675,6 +674,8 @@ div.px-3 .text-white {
 
 @media (prefers-reduced-motion:reduce) {
   .carousel-control-next, .carousel-control-prev {
+    -webkit-transition: opacity .15s ease;
+    -o-transition: opacity .15s ease;
     transition: opacity .15s ease;
   }
 }
@@ -733,7 +734,9 @@ div.px-3 .text-white {
 
 @media (min-width:768px) {
   .row-cols-md-2 > * {
-    flex: 0 0 auto;
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
     width: 50%;
     /*padding: 0 0px;*/
   }
@@ -741,7 +744,9 @@ div.px-3 .text-white {
 
 @media screen and (min-width:1200px) {
   .row-cols-xl-3 > * {
-    flex: 0 0 auto;
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
     width: 33.33333333%;
     padding: 5px 0px;
   }
@@ -756,7 +761,9 @@ div.px-3 .text-white {
 
 @media (min-width:1400px) {
   .row-cols-xl-3 > * {
-    flex: 0 0 auto;
+    -webkit-box-flex: 0;
+        -ms-flex: 0 0 auto;
+            flex: 0 0 auto;
     width: 25%;
     padding: 5px 0px;
   }
