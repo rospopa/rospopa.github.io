@@ -52,7 +52,7 @@ a:visited {
 .wrap {
   max-width: 800px;
   padding-left: 15px;
-  padding-right: 0px;
+  padding-right: 15px;
   margin: 0 auto;
   zoom: 1;
 }
@@ -745,7 +745,7 @@ a:visited {
     -webkit-border-radius: 5px;
     -moz-border-radius: 5px;
     border-radius: 5px;
-    border: 1px solid #e8e8e8;
+    /*border: 1px solid #e8e8e8;*/
   }
 }
 
@@ -768,17 +768,30 @@ a:visited {
   }
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 435px) {
   .site-nav .trigger {
     clear: both;
-    margin-bottom: 5px;
+    /*margin-bottom: 5px;*/
     display: none;
+  }
+}
+
+.trigger2 {
+  display: none;
+}
+
+@media (max-width: 435px) {
+  .site-nav .trigger2 {
+    clear: both;
+    display: block;
+    font-size: 26px;
+    /*font-weight: bold;*/
   }
 }
 
 @media screen and (max-width: 600px) {
   .site-nav:hover .trigger {
-    /*display: block;*/
+    display: block;
   }
 }
 
