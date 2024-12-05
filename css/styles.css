@@ -747,6 +747,13 @@ div.px-3 .text-white {
   }
 }
 
+@media screen and (min-width:1200px) {
+  .row.gy-4.row-cols-1 {
+    padding-left: 65px;
+    padding-right: 5px;
+  }
+}
+
 @media (min-width:1400px) {
   .row-cols-xl-3 > * {
     flex: 0 0 auto;
