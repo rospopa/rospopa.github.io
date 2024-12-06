@@ -146,9 +146,9 @@ a:visited {
 }
 
 .site-footer li, .site-footer p {
-  font-size: 15px;
+  font-size: 16px;
   letter-spacing: -.3px;
-  color: #313131;
+  color: #000000;
 }
 
 .github-icon-svg, .twitter-icon-svg {
