@@ -52,36 +52,48 @@ body {
   background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
   background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
+  max-width: 100%;
+  height: auto;
 }
 
 .carousel .background.b {
   background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/2845a9e54d934a4488db735bea97adcc_3000x2000_resize.jpg");
   background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/2845a9e54d934a4488db735bea97adcc_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/2845a9e54d934a4488db735bea97adcc_3000x2000_resize.jpg");
+  max-width: 100%;
+  height: auto;
 }
 
 .carousel .background.c {
   background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
   background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/f20376c550fa43b69dc43a6cebbad15a_3000x2000_resize.jpg");
+  max-width: 100%;
+  height: auto;
 }
 
 .carousel .background.d {
   background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/596115d2f7b640a3bd7a982e91a63fcd_3000x2000_resize.jpg");
   background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/596115d2f7b640a3bd7a982e91a63fcd_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/596115d2f7b640a3bd7a982e91a63fcd_3000x2000_resize.jpg");
+  max-width: 100%;
+  height: auto;
 }
 
 .carousel .background.f {
   background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/7d8f510be94640ec8277474da348239f_3000x2000_resize.jpg");
   background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/7d8f510be94640ec8277474da348239f_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/7d8f510be94640ec8277474da348239f_3000x2000_resize.jpg");
+  max-width: 100%;
+  height: auto;
 }
 
 .carousel .background.g {
   background-image: -webkit-gradient( linear, left top, left bottom, from(rgba(0, 0, 0, 0.5)), to(rgba(0, 0, 0, 0.5))), url("https://images.crexi.com/lease-assets/793448/bbfa65ca46704977a08713beffa91b26_3000x2000_resize.jpg");
   background-image: -o-linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/bbfa65ca46704977a08713beffa91b26_3000x2000_resize.jpg");
   background-image: linear-gradient( rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url("https://images.crexi.com/lease-assets/793448/bbfa65ca46704977a08713beffa91b26_3000x2000_resize.jpg");
+  max-width: 100%;
+  height: auto;
 }
 
 .carousel-fade .carousel-inner .item {
@@ -274,9 +286,9 @@ hr {
 .carousel-inner > .item {
   position: relative;
   display: none;
-  -webkit-transition: 0.6s ease-in-out left;
-  -o-transition: 0.6s ease-in-out left;
-  transition: 0.6s ease-in-out left;
+  -webkit-transition: 0.6s ease-in-out;
+  -o-transition: 0.6s ease-in-out;
+  transition: 0.6s ease-in-out;
 }
 
 .carousel-inner > .item > a > img, .carousel-inner > .item > img {
@@ -779,10 +791,6 @@ div.px-3 .text-white {
 .margin_tb_a {
   margin-top: auto;
   margin-bottom: auto;
-}
-
-.carousel-inner::after {
-  clear: none;
 }
 
 iframe {
