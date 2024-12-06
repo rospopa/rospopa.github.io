@@ -768,30 +768,23 @@ a:visited {
   }
 }
 
-@media screen and (max-width: 435px) {
+@media (max-width: 435px) {
   .site-nav .trigger {
     clear: both;
-    /*margin-bottom: 5px;*/
     display: none;
   }
 }
 
-.trigger2 {
+.site-nav .trigger2 {
   display: none;
 }
 
-@media (max-width: 435px) {
+@media (310px <= width <= 435px) {
   .site-nav .trigger2 {
     clear: both;
     display: block;
     font-size: 26px;
     /*font-weight: bold;*/
-  }
-}
-
-@media screen and (max-width: 600px) {
-  .site-nav:hover .trigger {
-    display: block;
   }
 }
 
