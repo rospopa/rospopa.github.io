@@ -6,8 +6,9 @@ $(function(){
             spaceBetween: 5,
             slidesToScroll: 1,
             grabCursor: false,
-            simulateTouch: false,
+            simulateTouch: true,
             loop: false,
+            swipe: true,
             swipeToSlide: true,
             watchSlidesVisibility: true,
             watchSlidesProgress: true,
@@ -67,7 +68,7 @@ $(function(){
             swipeToSlide: true,
             touchRatio: 0.1,
         //  touchMoveStopPropagation: false,
-	//  longSwipes: false, // Включає контроль за довгими свайпами
+		// 	longSwipes: false, // Включає контроль за довгими свайпами
         //  longSwipesMs: 50, // Максимальний час для довгого свайпу
         //  longSwipesRatio: 0.5, // Мінімальна частка свайпу для переходу до наступного слайда
             navigation: {
