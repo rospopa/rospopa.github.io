@@ -26,16 +26,6 @@ footer {
   display: block;
 }
 
-a {
-  background-color: transparent;
-  -webkit-text-decoration-skip: objects;
-  text-decoration: unset;
-}
-
-a:active, a:hover {
-  outline-width: 0;
-}
-
 img {
   border-style: none;
   max-width: 100%;
