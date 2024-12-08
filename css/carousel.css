@@ -1,9 +1,3 @@
-.material-icons {
-  color: #fff;
-  opacity: 0.8;
-  /*font-size: 45px;*/
-}
-
 * {
   box-sizing: border-box;
   -webkit-box-sizing: border-box;
@@ -419,4 +413,10 @@
   .signature {
     display: none;
   }
+}
+
+.material-icons {
+  color: #fff;
+  opacity: 0.8;
+  font-size: 45px;
 }
