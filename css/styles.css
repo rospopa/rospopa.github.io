@@ -513,8 +513,10 @@ hr {
 
 .center-block {
   display: block;
-  margin-right: auto;
-  margin-left: auto;
+  left: 0;
+  right: 0;
+  /*margin-right: auto;*/
+  /*margin-left: auto;*/
 }
 
 .pull-right {
@@ -585,12 +587,13 @@ hr {
 /* CSS Hack to trigger GPU for smooth transition */
 
 .covertext {
+  display: inline-flex;
   position: absolute;
   top: 30%;
   margin: 0 auto;
-  width: 100%;
-  /*left: 0px;*/
-  /*right: 0px;*/
+  max-width: 700px;
+  left: 0px;
+  right: 0px;
 }
 
 .title {
@@ -636,18 +639,6 @@ hr {
   top: 5%;
   cursor: pointer;
   z-index: 9999;
-  /*width: 100%;*/
-  /*height: 100%;*/
-  /*line-height: 100%;*/
-  /*font-size: 50px;*/
-  /*display: block;*/
-  /*margin: auto;*/
-  /*border: 2.625px solid transparent;*/
-  /*border-right: 3.625px solid #fff;*/
-  /*border-radius: 75%;*/
-  /*top: 0;*/
-  /*left: 0;*/
-  /*right: 0;*/
 }
 
 .type-text {
@@ -655,6 +646,8 @@ hr {
   transition: opacity 0.5s ease-in-out;
   -webkit-transition: opacity 0.5s ease-in-out;
   -o-transition: opacity 0.5s ease-in-out;
+  /*left: 0;*/
+  /*right: 0;*/
 }
 
 .px-3 {
