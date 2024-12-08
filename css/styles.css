@@ -35,6 +35,7 @@ body {
   background-size: contain, cover;
   background-repeat: no-repeat;
   height: 850px;
+  width: 100%;
 }
 
 /* .carousel-video {
@@ -86,9 +87,9 @@ body {
 
 .carousel-fade .carousel-inner .item {
   opacity: 0;
-  -webkit-transition: opacity 0.5s;
-  -o-transition: opacity 0.5s;
-  transition: opacity 0.5s;
+  -webkit-transition: opacity 0.1s;
+  -o-transition: opacity 0.1s;
+  transition: opacity 0.1s;
 }
 
 .carousel-fade .carousel-inner .active {
@@ -274,9 +275,9 @@ hr {
 .carousel-inner > .item {
   position: relative;
   display: none;
-  -webkit-transition: opacity 0.6s ease-in-out;
-  -o-transition: opacity 0.6s ease-in-out;
-  transition: opacity 0.6s ease-in-out;
+  -webkit-transition: opacity 0.1s ease-in-out;
+  -o-transition: opacity 0.1s ease-in-out;
+  transition: opacity 0.1s ease-in-out;
 }
 
 .carousel-inner > .item > a > img, .carousel-inner > .item > img {
@@ -285,16 +286,13 @@ hr {
 
 @media all and (transform-3d), (-webkit-transform-3d) {
   .carousel-inner > .item {
-    -webkit-transition: -webkit-transform 0.6s ease-in-out;
-    -o-transition: -o-transform 0.6s ease-in-out;
-    transition: -webkit-transform 0.6s ease-in-out;
-    -o-transition: transform 0.6s ease-in-out;
-    transition: transform 0.6s ease-in-out;
-    transition: transform 0.6s ease-in-out, -webkit-transform 0.6s ease-in-out;
+    -webkit-transition: -webkit-transform 0.1s ease-in-out;
+    -o-transition: -o-transform 0.1s ease-in-out;
+    transition: -webkit-transform 0.1s ease-in-out;
+    -o-transition: transform 0.1s ease-in-out;
+    transition: transform 0.1s ease-in-out, -webkit-transform 0.1s ease-in-out;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
-    -webkit-perspective: 1000px;
-    perspective: 1000px;
   }
 }
 
@@ -589,8 +587,10 @@ hr {
 .covertext {
   position: absolute;
   top: 30%;
-  left: 0px;
-  right: 0px;
+  margin: 0 auto;
+  width: 100%;
+  /*left: 0px;*/
+  /*right: 0px;*/
 }
 
 .title {
@@ -652,9 +652,9 @@ hr {
 
 .type-text {
   opacity: 0;
+  transition: opacity 0.5s ease-in-out;
   -webkit-transition: opacity 0.5s ease-in-out;
   -o-transition: opacity 0.5s ease-in-out;
-  transition: opacity 0.5s ease-in-out;
 }
 
 .px-3 {
