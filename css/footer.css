@@ -1,19 +1,5 @@
 /* ! CSS Used from: Embedded */
 
-h3, h5, button {
-  font-family: Montserrat,sans-serif;
-}
-
-h3 {
-  font-size: 40px;
-}
-
-h5 {
-  font-size: 22px;
-}
-
-/* ! CSS Used from: https://styles.luxurypresence.com/masterpiece/index.css */
-
 * {
   box-sizing: border-box;
 }
@@ -30,16 +16,6 @@ h3, h5 {
 
 img {
   margin-bottom: 0;
-}
-
-ul {
-  list-style-image: none;
-  list-style-position: outside;
-  margin-left: 1.666rem;
-}
-
-li {
-  margin-bottom: .833rem;
 }
 
 ul li {
@@ -465,11 +441,11 @@ footer .site-footer__logo-bar {
 }
 
 footer .site-footer__logo-container img {
-  max-width: 268px;
-  /*max-height: 56px;*/
+  width: auto;
+  max-height: 150px;
   object-fit: contain;
   display: block;
-  object-position: left top;
+  object-position: top;
 }
 
 footer .site-footer__logo-container + .site-footer__logo-container {
