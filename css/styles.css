@@ -778,3 +778,7 @@ iframe {
   font-size: 14pt;
   letter-spacing: 1px;
 }
+
+.bg-primary {
+  background-color: rgb(1 90 158) !important;
+}
