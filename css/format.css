@@ -47,8 +47,8 @@ a:visited {
 
 .wrap {
   max-width: 800px;
-  padding-left: 15px;
-  padding-right: 15px;
+  padding-left: 0px;
+  padding-right: 0px;
   margin: 0 auto;
   zoom: 1;
 }
