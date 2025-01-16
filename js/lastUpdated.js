@@ -2,14 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const owner = 'rospopa';  // Your GitHub username
   const repo = 'rospopa.github.io';   // Your GitHub repository name
   const filePaths = [
-    'readingList.html',
     'RSS.html',
-    'space.html',   // Add more file paths as needed
-    'js/lastUpdated.js'  // Track the specific file you want to update
+    'readingList.html'
   ];
 
-  const updateList = document.getElementById('update-list');  // This is the <ul> element
-
+  // Loop through each file path to fetch commit data and update the corresponding dates
   filePaths.forEach(filePath => {
     fetch(`https://api.github.com/repos/${owner}/${repo}/commits?path=${filePath}`)
       .then(response => response.json())
@@ -24,25 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
             const formattedDate = date.toLocaleDateString('en-US', options);
             
-            // Update the list with the file and its last update date
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `<strong>${filePath}</strong>: Updated ${formattedDate}`;
-            updateList.appendChild(listItem);
-
-            // If the file is 'readingList.html', update its date in the span with id='readingList-date'
-            if (filePath === 'readingList.html') {
-              const dateElement = document.getElementById('readingList-date');
-              if (dateElement) {
-                dateElement.textContent = `Updated ${formattedDate}`;  // Set the updated date text
-              }
-            }
-
-            // If the file is 'RSS.html', update its date in the span with id='RSS-date'
+            // Update the date in the corresponding <span> based on the file
             if (filePath === 'RSS.html') {
-              const dateElement = document.getElementById('RSS-date');
-              if (dateElement) {
-                dateElement.textContent = `Updated ${formattedDate}`;  // Set the updated date text
-              }
+              document.getElementById('RSS-date').textContent = `Updated ${formattedDate}`;
+            } else if (filePath === 'readingList.html') {
+              document.getElementById('readingList-date').textContent = `Updated ${formattedDate}`;
             }
           } else {
             console.error(`Invalid date for commit on ${filePath}`);
@@ -54,4 +37,5 @@ document.addEventListener('DOMContentLoaded', () => {
       .catch(error => console.error('Error fetching commit data for ' + filePath, error));
   });
 });
+
 
