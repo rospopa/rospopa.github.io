@@ -29,9 +29,17 @@ document.addEventListener('DOMContentLoaded', () => {
             listItem.innerHTML = `<strong>${filePath}</strong>: Updated ${formattedDate}`;
             updateList.appendChild(listItem);
 
-            // If the file is 'js/lastUpdated.js', also update the specific span with id='file2-date'
-            if (filePath === 'js/lastUpdated.js') {
-              const dateElement = document.getElementById('file2-date');
+            // If the file is 'readingList.html', update its date in the span with id='readingList-date'
+            if (filePath === 'readingList.html') {
+              const dateElement = document.getElementById('readingList-date');
+              if (dateElement) {
+                dateElement.textContent = `Updated ${formattedDate}`;  // Set the updated date text
+              }
+            }
+
+            // If the file is 'RSS.html', update its date in the span with id='RSS-date'
+            if (filePath === 'RSS.html') {
+              const dateElement = document.getElementById('RSS-date');
               if (dateElement) {
                 dateElement.textContent = `Updated ${formattedDate}`;  // Set the updated date text
               }
