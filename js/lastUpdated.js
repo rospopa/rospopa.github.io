@@ -26,7 +26,8 @@ document.addEventListener('DOMContentLoaded', () => {
               document.getElementById('RSS-date').textContent = `Updated ${formattedDate}`;
             } else if (filePath === 'readingList.html') {
               document.getElementById('readingList-date').textContent = `Updated ${formattedDate}`;
-            }
+            } else if (filePath === 'economicCalendar.html') {
+              document.getElementById('economicCalendar-date').textContent = `Updated ${formattedDate}`;
           } else {
             console.error(`Invalid date for commit on ${filePath}`);
           }
