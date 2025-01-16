@@ -836,3 +836,7 @@ a:visited {
     margin: 0 0 15px;
   }
 }
+
+.tradingview-widget-copyright {
+  display:none;
+}
