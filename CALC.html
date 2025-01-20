@@ -144,7 +144,12 @@
                 : loanAmount / totalPayments;
             const totalLoanCost = paymentPerPeriod * totalPayments;
             const interestCost = totalLoanCost - loanAmount;
-            const downPaymentCost = downPayment + (totalPrice * 0.05) + 300;
+            const downPaymentCost = downPayment + (totalPrice * closingCost) + inspection;
+	const closingCost = parseFloat(document.getElementById().value || 0;
+			const inspection = parseFloat(document.getElementById().value || 0;
+		
+		
+	
 
             document.getElementById('B5').value = downPayment.toFixed(2);
             document.getElementById('B7').value = loanAmount.toFixed(2);
