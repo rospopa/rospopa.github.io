@@ -12,21 +12,35 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="/css/format.css">
     <style>
-        .calculator {
+        .page-content{
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        #calculator {
             font-family: Helvetica, sans-serif;
             max-width: 650px;
-            margin: 50px auto;
+            background-color: #f7f7f7;
             padding: 20px;
-            border: 1px solid #ccc;
-            border-radius: 10px;
-            background-color: #f9f9f9;
+            margin-bottom: 50px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Subtle shadow */
         }
+
+        label {
+            font-weight: 500;
+        }
+
         input[readonly] {
             background-color: #e9e9e9;
             cursor: not-allowed;
         }
     </style>
 </head>
+
 <body>
 <header class="site-header">
     <div class="wrap">
@@ -45,86 +59,75 @@
 <main>
     <div class="page-content">
         <div class="wrap">
-        <div class="home">
-    <div class="calculator container">
-        <h1 class="text-center">Rental Property Calculator</h1>
-        
-        <div class="mb-3">
-            <label for="totalPrice" class="form-label">Total Price ($)</label>
-            <input type="number" id="B1" class="form-control editable" value="569999">
-        </div>
 
+    <div id="calculator">
+        <h1 class="text-center">Rental Property Calculator</h2>
         <div class="mb-3">
-            <label for="downPaymentPercentage" class="form-label">Down Payment (%)</label>
-            <input type="number" id="B2" class="form-control editable" value="5.00">
-        </div>
-
-        <div class="mb-3">
-            <label for="downPaymentAmount" class="form-label">Down Payment ($)</label>
-            <input type="number" id="B3" class="form-control" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label for="closingDate" class="form-label">Closing Date</label>
-            <input type="date" id="B4" class="form-control editable" value="2025-01-16">
-        </div>
-
-        <div class="mb-3">
-            <label for="loanAmount" class="form-label">Loan Amount ($)</label>
-            <input type="number" id="B5" class="form-control" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label for="annualInterestRate" class="form-label">Annual Interest Rate</label>
-            <input type="number" id="B6" class="form-control editable" value="7.04">
-        </div>
-
-        <div class="mb-3">
-            <label for="lifeLoan" class="form-label">Life Loan (in years)</label>
-            <input type="number" id="B7" class="form-control editable" value="30">
-        </div>
-
-        <div class="mb-3">
-            <label for="paymentsPerYear" class="form-label">Number of Payments per Year</label>
-            <input type="number" id="B8" class="form-control editable" value="12">
-        </div>
-
-        <div class="mb-3">
-            <label for="totalPayments" class="form-label">Total Number of Payments</label>
-            <input type="number" id="B9" class="form-control" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label for="paymentPerPeriod" class="form-label">Payment per Period</label>
-            <input type="number" id="B10" class="form-control" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label for="sumOfPayments" class="form-label">Sum of Payments (Total Cost of Loan)</label>
-            <input type="number" id="B11" class="form-control" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label for="interestCost" class="form-label">Interest Cost</label>
-            <input type="number" id="B12" class="form-control" readonly>
-        </div>
-
-        <div class="mb-3">
-            <label for="closingCost" class="form-label">Closing Cost (%)</label>
-            <input type="number" id="B13" class="form-control editable" value="5.00">
-        </div>
-
-        <div class="mb-3">
-            <label for="inspection" class="form-label">Inspection ($)</label>
-            <input type="number" id="B14" class="form-control editable" value="300">
-        </div>
-
-        <div class="mb-3">
-            <label for="finalDownPayment" class="form-label">Down Payment ($)</label>
-            <input type="number" id="B15" class="form-control" readonly>
-        </div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="B1" class="form-label">Total Price ($)</label>
+                    <input type="number" class="form-control" id="B1" value="569999">
+                </div>
+                <div class="col-md-6">
+                    <label for="B2" class="form-label">Down Payment (%)</label>
+                    <input type="number" class="form-control" id="B2" value="5.00" step="0.01">
+                </div>
+                <div class="col-md-6">
+                    <label for="B3" class="form-label">Down Payment ($)</label>
+                    <input type="number" class="form-control" id="B3" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="B4" class="form-label">Closing Date</label>
+                    <input type="date" class="form-control" id="B4" value="2025-01-16">
+                </div>
+                <div class="col-md-6">
+                    <label for="B5" class="form-label">Loan Amount ($)</label>
+                    <input type="number" class="form-control" id="B5" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="B6" class="form-label">Annual Interest Rate (%)</label>
+                    <input type="number" class="form-control" id="B6" value="7.04" step="0.01">
+                </div>
+                <div class="col-md-6">
+                    <label for="B7" class="form-label">Loan Term (years)</label>
+                    <input type="number" class="form-control" id="B7" value="30">
+                </div>
+                <div class="col-md-6">
+                    <label for="B8" class="form-label">Payments per Year</label>
+                    <input type="number" class="form-control" id="B8" value="12">
+                </div>
+                <div class="col-md-6">
+                    <label for="B9" class="form-label">Total Payments</label>
+                    <input type="number" class="form-control" id="B9" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="B10" class="form-label">Payment per Period ($)</label>
+                    <input type="number" class="form-control" id="B10" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="B11" class="form-label">Total Loan Cost ($)</label>
+                    <input type="number" class="form-control" id="B11" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="B12" class="form-label">Interest Cost ($)</label>
+                    <input type="number" class="form-control" id="B12" readonly>
+                </div>
+                <div class="col-md-6">
+                    <label for="B13" class="form-label">Closing Cost (%)</label>
+                    <input type="number" class="form-control" id="B13" value="5.00" step="0.01">
+                </div>
+                <div class="col-md-6">
+                    <label for="B14" class="form-label">Inspection ($)</label>
+                    <input type="number" class="form-control" id="B14" value="300">
+                </div>
+                <div class="col-md-6">
+                    <label for="B15" class="form-label">Final Down Payment ($)</label>
+                    <input type="number" class="form-control" id="B15" readonly>
+                </div>
+            </div>
     </div>
-
+  </div>
+<div class="home">
     <style>
         p {
             margin-bottom: 0;
@@ -133,8 +136,7 @@
                 <p>Go to <a href="https://www.linkedin.com/in/prospopa/">LinkedIn</a>.</p>
                 <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
                 <p>Return to <a href="#top">Top of This Page</a>.</p>
-            </div>
-        </div>
+</div>
 </div>
 </main>
 
@@ -154,41 +156,54 @@
         </div>
     </section>
 </footer>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         function calculate() {
-            const B1 = parseFloat(document.getElementById('B1').value) || 0;
-            const B2 = parseFloat(document.getElementById('B2').value) || 0;
-            const B6 = parseFloat(document.getElementById('B6').value) || 0;
-            const B7 = parseFloat(document.getElementById('B7').value) || 0;
-            const B8 = parseFloat(document.getElementById('B8').value) || 0;
-            const B13 = parseFloat(document.getElementById('B13').value) || 0;
-            const B14 = parseFloat(document.getElementById('B14').value) || 0;
+            const B1 = parseFloat(document.getElementById('B1').value);
+            const B2 = parseFloat(document.getElementById('B2').value) / 100;
+            const B6 = parseFloat(document.getElementById('B6').value) / 100;
+            const B7 = parseFloat(document.getElementById('B7').value);
+            const B8 = parseFloat(document.getElementById('B8').value);
+            const B13 = parseFloat(document.getElementById('B13').value) / 100;
+            const B14 = parseFloat(document.getElementById('B14').value);
 
-            const B3 = B1 * (B2 / 100);
+            const B3 = B1 * B2;
             const B5 = B1 - B3;
             const B9 = B7 * B8;
-            const B10 = (B6 / 100 / B8 * B5) / (1 - Math.pow(1 + (B6 / 100 / B8), -B9));
+            const B15 = -(((B1 * B2) + (B1 * B13))) - B14;
+
+
+            const PMT = (rate, nper, pv, fv = 0, type = 0) => {
+                if (rate === 0) return -(pv + fv) / nper;
+                const pvif = Math.pow(1 + rate, nper);
+                let pmt = rate / (pvif - 1) * -(pv * pvif + fv);
+
+                if (type === 1) {
+                    pmt /= (1 + rate);
+                }
+                return pmt;
+            };
+            const B10 = PMT(B6 / B8, B9, -B5);
             const B11 = B10 * B9;
             const B12 = B11 - B5;
-            const B15 = (((B1 * B2 / 100) + (B1 * B13 / 100)) * -1) - B14;
 
             document.getElementById('B3').value = B3.toFixed(2);
             document.getElementById('B5').value = B5.toFixed(2);
-            document.getElementById('B9').value = B9.toFixed(0);
+            document.getElementById('B9').value = B9;
             document.getElementById('B10').value = B10.toFixed(2);
             document.getElementById('B11').value = B11.toFixed(2);
             document.getElementById('B12').value = B12.toFixed(2);
             document.getElementById('B15').value = B15.toFixed(2);
+
         }
 
-        document.querySelectorAll('.editable').forEach(input => {
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
             input.addEventListener('input', calculate);
         });
 
-        // Initial calculation
-        calculate();
+        calculate(); // Initial calculation
     </script>
 </body>
+
 </html>
