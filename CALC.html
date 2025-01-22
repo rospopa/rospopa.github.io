@@ -22,7 +22,7 @@
 
         #calculator {
             font-family: Helvetica, sans-serif;
-            max-width: 650px;
+            max-width: 800px;
             background-color: #f7f7f7;
             padding: 20px;
 			margin: auto;
@@ -39,6 +39,66 @@
             background-color: #e9e9e9;
             cursor: not-allowed;
         }
+		
+		.section-heading {
+            background-color: lightgray;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+			text-align: center;
+        }
+
+        .subsection {
+            background-color: lightcoral;
+            
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .subsection-heading {
+            font-weight: bold;
+			padding-top: 10px;
+            margin-bottom: 10px;
+			text-align: center;
+        }
+		
+		.table {
+            margin-bottom: 0;
+		}
+		
+        .table-responsive{
+            overflow-x: auto;
+        }
+		
+		.table>thead>tr>th {
+			background-color: #ffc8c8;
+		}
+		
+		.table>tbody>tr>td {
+			vertical-align: middle;
+			background-color: #ffc8c8;
+		}
+		
+		.tabcalctitle {
+		}
+		
+		#calculator > div.subsection > div > table > thead > tr {
+			text-align: center;
+		}
+		
+		.table>:not(caption)>*>* {
+			padding: .2rem .2rem;
+		}
+		
+		.form-control {
+			padding: .375rem .35rem;
+			line-height: 1;
+		}
+		
+		.form-label {
+			margin-bottom: .2rem;
+		}
     </style>
 </head>
 
@@ -62,7 +122,7 @@
         <div class="wrap">
 
     <div id="calculator">
-        <h1 class="text-center" style="margin-top:0.5rem; margin-bottom:1.5rem;">Rental Property Calculator</h2>
+        <h1 class="text-center">Rental Property Calculator</h2>
         <div class="mb-3">
             <div class="row g-3">
                 <div class="col-md-6">
@@ -139,6 +199,104 @@
                 </div>
             </div>
         </div>
+		
+        <div class="subsection">
+            <h4 class="subsection-heading">Expenses Portion</h4>
+            <div class="table-responsive">
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Expense</th>
+                        <th>Min ($)</th>
+                        <th>Max ($)</th>
+                        <th>Avg ($)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="tabcalctitle">Refuse</td>
+                        <td><input type="number" class="form-control" id="B20"></td>
+                        <td><input type="number" class="form-control" id="C20"></td>
+                        <td><input type="number" class="form-control" id="D20" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">Water and Sewer</td>
+                        <td><input type="number" class="form-control" id="B21"></td>
+                        <td><input type="number" class="form-control" id="C21"></td>
+                        <td><input type="number" class="form-control" id="D21" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">Property Taxes</td>
+                        <td><input type="number" class="form-control" id="B22" value="189"></td>
+                        <td><input type="number" class="form-control" id="C22" readonly></td>
+                        <td><input type="number" class="form-control" id="D22" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">Electric</td>
+                        <td><input type="number" class="form-control" id="B23"></td>
+                        <td><input type="number" class="form-control" id="C23"></td>
+                        <td><input type="number" class="form-control" id="D23" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">Gas</td>
+                        <td><input type="number" class="form-control" id="B24"></td>
+                        <td><input type="number" class="form-control" id="C24"></td>
+                        <td><input type="number" class="form-control" id="D24" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">Internet</td>
+                        <td><input type="number" class="form-control" id="B25"></td>
+                        <td><input type="number" class="form-control" id="C25"></td>
+                        <td><input type="number" class="form-control" id="D25" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">Lawn Care</td>
+                        <td><input type="number" class="form-control" id="B26"></td>
+                        <td><input type="number" class="form-control" id="C26"></td>
+                        <td><input type="number" class="form-control" id="D26" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">Maintenance</td>
+                        <td><input type="number" class="form-control" id="B27"></td>
+                        <td><input type="number" class="form-control" id="C27"></td>
+                        <td><input type="number" class="form-control" id="D27" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">Vacancy Rate (%)</td>
+                        <td><input type="number" class="form-control" id="B28" value="5.00" step="0.01"></td>
+                        <td><input type="number" class="form-control" id="C28" value="12.00" step="0.01"></td>
+                        <td><input type="number" class="form-control" id="D28" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">Mortgage Insurance</td>
+                        <td><input type="number" class="form-control" id="B29" value="338"></td>
+                        <td><input type="number" class="form-control" id="C29" value="338"></td>
+                        <td><input type="number" class="form-control" id="D29" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">Property Insurance</td>
+                        <td><input type="number" class="form-control" id="B30" value="209"></td>
+                        <td><input type="number" class="form-control" id="C30" value="209"></td>
+                        <td><input type="number" class="form-control" id="D30" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">HOA</td>
+                        <td><input type="number" class="form-control" id="B31"></td>
+                        <td><input type="number" class="form-control" id="C31"></td>
+                        <td><input type="number" class="form-control" id="D31" readonly></td>
+                    </tr>
+                    <tr>
+                        <td class="tabcalctitle">Prop. Management</td>
+                        <td><input type="number" class="form-control" id="B32"></td>
+                        <td><input type="number" class="form-control" id="C32"></td>
+                        <td><input type="number" class="form-control" id="D32" readonly></td>
+                    </tr>
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </div>
+	
     </div>
 
 </div>
@@ -225,6 +383,36 @@
         });
 
         calculate(); // Initial calculation
+		
+		function calculateExpenses(){
+            const B6 = parseFloat(document.getElementById('B6').value) / 100;
+            const B22 = parseFloat(document.getElementById('B22').value);
+            const C22 = -(((B6*0.1)*2.9)*0.065)/12;
+            document.getElementById('C22').value = C22.toFixed(2);
+            calculateAvg("20");
+            calculateAvg("21");
+            calculateAvg("23");
+            calculateAvg("24");
+            calculateAvg("25");
+            calculateAvg("26");
+            calculateAvg("27");
+            calculateAvg("28");
+            calculateAvg("29");
+            calculateAvg("30");
+            calculateAvg("31");
+            calculateAvg("32");
+        }
+        function calculateAvg(rowNum) {
+            const minVal = parseFloat(document.getElementById('B' + rowNum).value) || 0;
+            const maxVal = parseFloat(document.getElementById('C' + rowNum).value) || 0;
+            const avgVal = (minVal + maxVal) / 2;
+            document.getElementById('D' + rowNum).value = avgVal.toFixed(2);
+        }
+        const expenseInputs = document.querySelectorAll('#calculator .subsection input');
+        expenseInputs.forEach(input => {
+            input.addEventListener('input', calculateExpenses);
+        });
+        calculateExpenses();
     </script>
 </body>
 
