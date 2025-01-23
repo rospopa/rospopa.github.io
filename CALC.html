@@ -101,11 +101,12 @@
 		}
 		
 		.table>:not(caption)>*>* {
-			padding: .2rem .2rem;
+			padding: .15rem .2rem;
 		}
 		
 		.form-control {
-			padding: .375rem .35rem;
+			padding: .3rem .35rem;
+			padding-bottom: .15rem;
 			line-height: 1;
 		}
 		
@@ -581,9 +582,10 @@
 		    const vacancyRateC = parseFloat(document.getElementById('C28').value) / 100 || 0;
 		    const vacancyRateD = parseFloat(document.getElementById('D28').value) / 100 || 0;
 
-		    const B44 = BExpenses - (B45 * vacancyRateB);
-		    const C44 = CExpenses - (C45 * vacancyRateC);
-		    const D44 = DExpenses - (D45 * vacancyRateD);
+		    // Corrected Expense Calculation: Apply vacancy to respective revenues
+		    const B44 = BExpenses + (B45 * vacancyRateB * -1);
+		    const C44 = CExpenses + (C45 * vacancyRateC * -1);
+		    const D44 = DExpenses + (D45 * vacancyRateD * -1);
 
 		    document.getElementById('B44').value = B44.toFixed(2);
 		    document.getElementById('C44').value = C44.toFixed(2);
