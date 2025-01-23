@@ -338,81 +338,66 @@
 </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        function calculate() {
-            const B1 = parseFloat(document.getElementById('B1').value);
-            const B2 = parseFloat(document.getElementById('B2').value) / 100;
-            const B6 = parseFloat(document.getElementById('B6').value) / 100;
-            const B7 = parseFloat(document.getElementById('B7').value);
-            const B8 = parseFloat(document.getElementById('B8').value);
-            const B13 = parseFloat(document.getElementById('B13').value) / 100;
-            const B14 = parseFloat(document.getElementById('B14').value);
+        function calculateAll() {
+			// Loan Profile Calculations
+			const B1 = parseFloat(document.getElementById('B1').value) || 0;
+			const B2 = parseFloat(document.getElementById('B2').value) / 100 || 0;
+			const B6 = parseFloat(document.getElementById('B6').value) / 100 || 0;
+			const B7 = parseFloat(document.getElementById('B7').value) || 0;
+			const B8 = parseFloat(document.getElementById('B8').value) || 0;
+			const B13 = parseFloat(document.getElementById('B13').value) / 100 || 0;
+			const B14 = parseFloat(document.getElementById('B14').value) || 0;
 
-            const B3 = B1 * B2;
-            const B5 = B1 - B3;
-            const B9 = B7 * B8;
-            const B15 = -(((B1 * B2) + (B1 * B13))) - B14;
+			const B3 = B1 * B2;
+			const B5 = B1 - B3;
+			const B9 = B7 * B8;
+			const B15 = -(((B1 * B2) + (B1 * B13))) - B14;
 
+			const PMT = (rate, nper, pv, fv = 0, type = 0) => {
+			    if (rate === 0) return -(pv + fv) / nper;
+			    const pvif = Math.pow(1 + rate, nper);
+			    let pmt = rate / (pvif - 1) * -(pv * pvif + fv);
+			    if (type === 1) {
+			        pmt /= (1 + rate);
+			    }
+			    return pmt;
+			};
 
-            const PMT = (rate, nper, pv, fv = 0, type = 0) => {
-                if (rate === 0) return -(pv + fv) / nper;
-                const pvif = Math.pow(1 + rate, nper);
-                let pmt = rate / (pvif - 1) * -(pv * pvif + fv);
+			const B10 = PMT(B6 / B8, B9, -B5);
+			const B11 = B10 * B9;
+			const B12 = B11 - B5;
 
-                if (type === 1) {
-                    pmt /= (1 + rate);
-                }
-                return pmt;
-            };
-            const B10 = PMT(B6 / B8, B9, -B5);
-            const B11 = B10 * B9;
-            const B12 = B11 - B5;
+			document.getElementById('B3').value = B3.toFixed(2);
+			document.getElementById('B5').value = B5.toFixed(2);
+			document.getElementById('B9').value = B9;
+			document.getElementById('B10').value = B10.toFixed(2);
+			document.getElementById('B11').value = B11.toFixed(2);
+			document.getElementById('B12').value = B12.toFixed(2);
+			document.getElementById('B15').value = B15.toFixed(2);
 
-            document.getElementById('B3').value = B3.toFixed(2);
-            document.getElementById('B5').value = B5.toFixed(2);
-            document.getElementById('B9').value = B9;
-            document.getElementById('B10').value = B10.toFixed(2);
-            document.getElementById('B11').value = B11.toFixed(2);
-            document.getElementById('B12').value = B12.toFixed(2);
-            document.getElementById('B15').value = B15.toFixed(2);
+			// Expenses Portion Calculations
+			const B22 = parseFloat(document.getElementById('B22').value) || 0;
+			const C22 = -(((B6 * 0.1) * 2.9) * 0.065) / 12;
+			document.getElementById('C22').value = C22.toFixed(2);
 
-        }
-
-        const inputs = document.querySelectorAll('input');
-        inputs.forEach(input => {
-            input.addEventListener('input', calculate);
-        });
-
-        calculate(); // Initial calculation
-		
-		function calculateExpenses(){
-            const B6 = parseFloat(document.getElementById('B6').value) / 100;
-            const B22 = parseFloat(document.getElementById('B22').value);
-            const C22 = -(((B6*0.1)*2.9)*0.065)/12;
-            document.getElementById('C22').value = C22.toFixed(2);
-            calculateAvg("20");
-            calculateAvg("21");
-            calculateAvg("23");
-            calculateAvg("24");
-            calculateAvg("25");
-            calculateAvg("26");
-            calculateAvg("27");
-            calculateAvg("28");
-            calculateAvg("29");
-            calculateAvg("30");
-            calculateAvg("31");
-            calculateAvg("32");
-        }
+			for (let i = 20; i <= 32; i++) {
+			        calculateAvg(i);
+			}
+		}
+			
         function calculateAvg(rowNum) {
-            const minVal = parseFloat(document.getElementById('B' + rowNum).value) || 0;
-            const maxVal = parseFloat(document.getElementById('C' + rowNum).value) || 0;
-            const avgVal = (minVal + maxVal) / 2;
-            document.getElementById('D' + rowNum).value = avgVal.toFixed(2);
+		const minVal = parseFloat(document.getElementById('B' + rowNum).value) || 0;
+		const maxVal = parseFloat(document.getElementById('C' + rowNum).value) || 0;
+		const avgVal = (minVal + maxVal) / 2;
+		document.getElementById('D' + rowNum).value = avgVal.toFixed(2);
         }
-        const expenseInputs = document.querySelectorAll('#calculator .subsection input');
-        expenseInputs.forEach(input => {
-            input.addEventListener('input', calculateExpenses);
-        });
-        calculateExpenses();
+
+const allInputs = document.querySelectorAll('#calculator input'); // Select all inputs within the calculator
+allInputs.forEach(input => {
+    input.addEventListener('input', calculateAll);
+});
+
+calculateAll(); // Initial calculation
     </script>
 </body>
 
