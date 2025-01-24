@@ -497,16 +497,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
 function calculateAll() {
-    const editableFields = document.querySelectorAll('.editable');
-
-    editableFields.forEach(input => {
-        formatInput(input); // Форматування вводу
-        if (input.value !== "" && !isNaN(input.value)) { // Check for empty input and NaN
-            input.value = parseFloat(input.value).toFixed(2);
-        }
-    });
-
-    // Loan Profile Calculations
+    // Loan Profile Calculations (unchanged)
     const B1 = parseFloat(document.getElementById('B1').value) || 0;
     const B2 = parseFloat(document.getElementById('B2').value) / 100 || 0;
     const B6 = parseFloat(document.getElementById('B6').value) / 100 || 0;
@@ -544,18 +535,19 @@ function calculateAll() {
 
     // Expenses Portion Calculations
     const B22 = parseFloat(document.getElementById('B22').value) || 0;
-    const C22 = (((B6 * 0.1) * 2.9) * 0.065) / 12;
+    const C22 = (((B6 * 0.1) * 2.9) * 0.065) / 12; //Corrected formula for C22
     document.getElementById('C22').value = C22.toFixed(2);
 
-    // Calculate Averages
+    // Calculate Averages (Combined Loop)
     for (let i = 20; i <= 42; i++) {
         calculateAvg(i);
     }
 
-    // Total Cash Flow Calculations (rest of calculations remain the same)
+    // Total Cash Flow Calculations
     const B15Value = parseFloat(document.getElementById('B15').value) || 0;
     document.getElementById('B43').value = document.getElementById('C43').value = document.getElementById('D43').value = B15Value.toFixed(2);
 
+    // Calculate Total Revenue (B45, C45, D45)
     let B45 = 0, C45 = 0, D45 = 0;
     for (let i = 33; i <= 42; i++) {
         B45 += parseFloat(document.getElementById('B' + i).value) || 0;
@@ -566,6 +558,7 @@ function calculateAll() {
     document.getElementById('C45').value = C45.toFixed(2);
     document.getElementById('D45').value = D45.toFixed(2);
 
+    // Calculate Total Expenses (B44, C44, D44) - Improved Calculation
     let BExpenses = 0, CExpenses = 0, DExpenses = 0;
     for (let i = 20; i <= 27; i++) {
         BExpenses += parseFloat(document.getElementById('B' + i).value) || 0;
@@ -590,30 +583,13 @@ function calculateAll() {
     document.getElementById('C44').value = C44.toFixed(2);
     document.getElementById('D44').value = D44.toFixed(2);
 
+    // Calculate Est Total Income (B46, C46, D46)
     const B46 = (parseFloat(document.getElementById('B43').value) || 0) + (parseFloat(document.getElementById('B44').value) || 0) + (parseFloat(document.getElementById('B45').value) || 0);
     const C46 = (parseFloat(document.getElementById('C43').value) || 0) + (parseFloat(document.getElementById('C44').value) || 0) + (parseFloat(document.getElementById('C45').value) || 0);
     const D46 = (parseFloat(document.getElementById('D43').value) || 0) + (parseFloat(document.getElementById('D44').value) || 0) + (parseFloat(document.getElementById('D45').value) || 0);
     document.getElementById('B46').value = B46.toFixed(2);
     document.getElementById('C46').value = C46.toFixed(2);
     document.getElementById('D46').value = D46.toFixed(2);
-    document.getElementById('B3').value = formatCurrency(B3);
-    document.getElementById('B5').value = formatCurrency(B5);
-    document.getElementById('B10').value = formatCurrency(B10);
-    document.getElementById('B11').value = formatCurrency(B11);
-    document.getElementById('B12').value = formatCurrency(B12);
-    document.getElementById('B15').value = formatCurrency(B15);
-    document.getElementById('C22').value = formatCurrency(C22);
-
-    document.getElementById('B43').value = document.getElementById('C43').value = document.getElementById('D43').value = formatCurrency(B15);
-    document.getElementById('B45').value = formatCurrency(B45);
-    document.getElementById('C45').value = formatCurrency(C45);
-    document.getElementById('D45').value = formatCurrency(D45);
-    document.getElementById('B44').value = formatCurrency(B44);
-    document.getElementById('C44').value = formatCurrency(C44);
-    document.getElementById('D44').value = formatCurrency(D44);
-    document.getElementById('B46').value = formatCurrency(B46);
-    document.getElementById('C46').value = formatCurrency(C46);
-    document.getElementById('D46').value = formatCurrency(D46);
 }
 
 function calculateAvg(rowNum) {
@@ -623,29 +599,12 @@ function calculateAvg(rowNum) {
     document.getElementById('D' + rowNum).value = avgVal.toFixed(2);
 }
 
-function formatInput(input) {
-        if (input.value !== "" && !isNaN(input.value)) {
-            input.value = parseFloat(input.value).toFixed(2);
-            input.step = '0.01'; // Завжди встановлюємо крок
-        }
-    }
-
 const allInputs = document.querySelectorAll('#calculator input');
 allInputs.forEach(input => {
     input.addEventListener('input', calculateAll);
 });
 
 calculateAll(); // Initial calculation
-
-const inputFields = document.querySelectorAll('.form-control');
-for (const inputField of inputFields) {
-  inputField.addEventListener('blur', (event) => {
-    const currentValue = event.target.value;
-    const roundedValue = parseFloat(currentValue).toFixed(2);
-    event.target.value = roundedValue;
-    event.target.step = '0.01';
-  });
-}
     </script>
 </body>
 
