@@ -147,6 +147,14 @@
         .text-red{
             color: red;
         }
+		
+        .input-group-text {
+            line-height: 1;
+            font-weight: bold;
+			padding: .3rem .3rem;
+			padding-top: .4rem;
+        }
+		
     </style>
 </head>
 
@@ -174,28 +182,43 @@
         <div class="mb-3">
             <div class="row g-3">
                 <div class="col-md-6">
-                    <label for="B1" class="form-label">Purchase Price ($)</label>
-                    <input type="number" class="form-control" id="B1" value="569999">
+                    <label for="B1" class="form-label">Purchase Price</label>
+					<div class="input-group">
+					    <span class="input-group-text">$</span>
+					    <input type="number" class="form-control" id="B1" value="569999">
+					</div>
                 </div>
                 <div class="col-md-6">
-                    <label for="B2" class="form-label">Down Payment (%)</label>
-                    <input type="number" class="form-control" id="B2" value="5.00" step="0.01">
+                    <label for="B2" class="form-label">Down Payment</label>
+					<div class="input-group">
+					    <input type="number" class="form-control" id="B2" value="5.00" step="0.01">
+						<span class="input-group-text">%</span>
+					</div>
                 </div>
                 <div class="col-md-6">
-                    <label for="B3" class="form-label">Down Payment ($)</label>
-                    <input type="number" class="form-control" id="B3" readonly>
+                    <label for="B3" class="form-label">Down Payment</label>
+					<div class="input-group">
+					    <span class="input-group-text">$</span>
+					    <input type="number" class="form-control" id="B3" readonly>
+					</div>
                 </div>
                 <div class="col-md-6">
                     <label for="B4" class="form-label">Closing Date</label>
                     <input type="date" class="form-control" id="B4" value="2025-01-16">
                 </div>
                 <div class="col-md-6">
-                    <label for="B5" class="form-label">Loan Amount ($)</label>
-                    <input type="number" class="form-control" id="B5" readonly>
+                    <label for="B5" class="form-label">Loan Amount</label>
+					<div class="input-group">
+					    <span class="input-group-text">$</span>
+					    <input type="number" class="form-control" id="B5" readonly>
+					</div>
                 </div>
                 <div class="col-md-6">
-                    <label for="B6" class="form-label">Annual Interest Rate (%)</label>
-                    <input type="number" class="form-control" id="B6" value="7.04" step="0.01">
+                    <label for="B6" class="form-label">Annual Interest Rate</label>
+					<div class="input-group">
+						<input type="number" class="form-control" id="B6" value="7.04" step="0.01">
+						<span class="input-group-text">%</span>
+					</div>
                 </div>
                 <div class="col-md-6">
                     <label for="B7" class="form-label">Loan Term (years)</label>
@@ -210,28 +233,47 @@
                     <input type="number" class="form-control" id="B9" readonly>
                 </div>
                 <div class="col-md-6">
-                    <label for="B10" class="form-label">Payment per Period ($)</label>
-                    <input type="number" class="form-control" id="B10" readonly>
+                    <label for="B10" class="form-label">Payment per Period</label>
+					<div class="input-group">
+					    <span class="input-group-text">$</span>
+					    <input type="number" class="form-control" id="B10" readonly>
+					</div>
                 </div>
                 <div class="col-md-6">
-                    <label for="B11" class="form-label">Total Loan Cost ($)</label>
-                    <input type="number" class="form-control" id="B11" readonly>
+                    <label for="B11" class="form-label">Total Loan Cost</label>
+					<div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="B11" readonly>
+					</div>
                 </div>
                 <div class="col-md-6">
-                    <label for="B12" class="form-label">Interest Cost ($)</label>
-                    <input type="number" class="form-control" id="B12" readonly>
+                    <label for="B12" class="form-label">Interest Cost</label>
+					<div class="input-group">
+                        <span class="input-group-text">$</span>
+                        <input type="number" class="form-control" id="B12" readonly>
+					</div>
                 </div>
                 <div class="col-md-6">
-                    <label for="B13" class="form-label">Closing Cost (%)</label>
-                    <input type="number" class="form-control" id="B13" value="5.00" step="0.01">
+                    <label for="B13" class="form-label">Closing Cost</label>
+					<div class="input-group">
+                        <input type="number" class="form-control" id="B13" value="5.00" step="0.01">
+						<span class="input-group-text">%</span>
+					</div>
                 </div>
                 <div class="col-md-6">
-                    <label for="B14" class="form-label">Inspection ($)</label>
-                    <input type="number" class="form-control" id="B14" value="300">
+                    <label for="B14" class="form-label">Inspection</label>
+					<div class="input-group">
+					    <span class="input-group-text">$</span>
+					    <input type="number" class="form-control" id="B14" value="300">
+					</div>
                 </div>
+				
                 <div class="col-md-6">
-                    <label for="B15" class="form-label">Down Payment ($) + Closing Cost (% of Purchase Price) + Inspection ($)</label>
-                    <input type="number" class="form-control" id="B15" readonly>
+                    <label for="B15" class="form-label">Down Payment + Closing Cost (% of Purchase Price) + Inspection</label>
+					<div class="input-group">
+					    <span class="input-group-text">$</span>
+					    <input type="number" class="form-control" id="B15" readonly>
+					</div>
                 </div>
 
             </div>
