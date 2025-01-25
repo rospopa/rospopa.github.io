@@ -1099,8 +1099,7 @@ function calculateAll() {
 
     // Expenses Portion Calculations
     const B22 = parseFloat(document.getElementById('B22').value.replace(/,/g, '')) || 0;
-    const C22 = (((B6 * 0.1) * 2.9) * 0.065) / 12; // Corrected formula for C22
-    document.getElementById('C22').value = formatCalculatedValue(C22);
+    const C22 = parseFloat(document.getElementById('C22').value.replace(/,/g, '')) || 0;
 
     // Calculate Averages
     for (let i = 20; i <= 42; i++) {
