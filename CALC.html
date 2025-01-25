@@ -203,7 +203,7 @@
                     <label for="B1" class="form-label">Purchase Price <span class="calctooltip2">[<a class="calctooltip" type="button" data-toggle="tooltip" data-placement="top" title="Descriptions"> ? </a>]</span></label>
 					<div class="input-group">
 					    <span class="input-group-text">$</span>
-					    <input type="number" class="form-control" placeholder="0.00" step="0.01" id="B1" >
+					    <input type="text" data-type="currency" class="form-control" placeholder="0.00" step="0.01" id="B1" >
 					</div>
                 </div>
                 <div class="col-md-6">
@@ -217,7 +217,7 @@
                     <label for="B3" class="form-label">Down Payment <span class="calctooltip2">[<a class="calctooltip" type="button" data-toggle="tooltip" data-placement="top" title="Descriptions 2"> ? </a>]</span></label>
 					<div class="input-group">
 					    <span class="input-group-text">$</span>
-					    <input type="number" class="form-control" id="B3" readonly>
+					    <input type="text" data-type="currency" class="form-control" id="B3" readonly>
 					</div>
                 </div>
                 <div class="col-md-6">
@@ -228,7 +228,7 @@
                     <label for="B5" class="form-label">Loan Amount <span class="calctooltip2">[<a class="calctooltip" type="button" data-toggle="tooltip" data-placement="top" title="Descriptions 4"> ? </a>]</span></label>
 					<div class="input-group">
 					    <span class="input-group-text">$</span>
-					    <input type="number" class="form-control" id="B5" readonly>
+					    <input type="text" data-type="currency" class="form-control" id="B5" readonly>
 					</div>
                 </div>
                 <div class="col-md-6">
@@ -254,27 +254,27 @@
                 </div>
                 <div class="col-md-6">
                     <label for="B9" class="form-label">Total Payments <span class="calctooltip2">[<a class="calctooltip" type="button" data-toggle="tooltip" data-placement="top" title="Descriptions"> ? </a>]</span></label>
-                    <input type="number" class="form-control" id="B9" readonly>
+                    <input type="text" data-type="currency" class="form-control" id="B9" readonly>
                 </div>
                 <div class="col-md-6">
                     <label for="B10" class="form-label">Payment per Period <span class="calctooltip2">[<a class="calctooltip" type="button" data-toggle="tooltip" data-placement="top" title="Descriptions"> ? </a>]</span></label>
 					<div class="input-group">
 					    <span class="input-group-text">$</span>
-					    <input type="number" class="form-control" id="B10" readonly>
+					    <input type="text" data-type="currency" class="form-control" id="B10" readonly>
 					</div>
                 </div>
                 <div class="col-md-6">
                     <label for="B11" class="form-label">Total Loan Cost <span class="calctooltip2">[<a class="calctooltip" type="button" data-toggle="tooltip" data-placement="top" title="Descriptions"> ? </a>]</span></label>
 					<div class="input-group">
                         <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" id="B11" readonly>
+                        <input type="text" data-type="currency" class="form-control" id="B11" readonly>
 					</div>
                 </div>
                 <div class="col-md-6">
                     <label for="B12" class="form-label">Interest Cost <span class="calctooltip2">[<a class="calctooltip" type="button" data-toggle="tooltip" data-placement="top" title="Descriptions"> ? </a>]</span></label>
 					<div class="input-group">
                         <span class="input-group-text">$</span>
-                        <input type="number" class="form-control" id="B12" readonly>
+                        <input type="text" data-type="currency" class="form-control" id="B12" readonly>
 					</div>
                 </div>
                 <div class="col-md-6">
@@ -288,7 +288,7 @@
                     <label for="B14" class="form-label">Inspection <span class="calctooltip2">[<a class="calctooltip" type="button" data-toggle="tooltip" data-placement="top" title="Descriptions"> ? </a>]</span></label>
 					<div class="input-group">
 					    <span class="input-group-text">$</span>
-					    <input type="number" class="form-control" id="B14" placeholder="0.00" step="0.01">
+					    <input type="text" data-type="currency" class="form-control" id="B14" placeholder="0.00" step="0.01">
 					</div>
                 </div>
 				
@@ -296,7 +296,7 @@
                     <label for="B15" class="form-label">Down Payment + Closing Cost (% of Purchase Price) + Inspection <span class="calctooltip2">[<a class="calctooltip" type="button" data-toggle="tooltip" data-placement="top" title="Descriptions"> ? </a>]</span></label>
 					<div class="input-group">
 					    <span class="input-group-text">$</span>
-					    <input type="number" class="form-control" id="B15" step="0.01" readonly>
+					    <input type="text" data-type="currency" class="form-control" id="B15" step="0.01" readonly>
 					</div>
                 </div>
 
@@ -965,18 +965,104 @@
 </div>
     </section>
 </footer>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
-    <script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script>
+// jQuery Dependency for Currency Formatting
+$(document).ready(function () {
+    $("input[data-type='currency']").on({
+        keyup: function () {
+            formatCurrency($(this));
+        },
+        blur: function () {
+            formatCurrency($(this), "blur");
+        }
+    });
+});
+
+function formatNumber(n) {
+    // Format number: 1000000 to 1,234,567
+    return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function formatCurrency(input, blur) {
+    // Validates decimal side and keeps cursor in the right position.
+
+    // Get input value
+    var input_val = input.val();
+
+    // Don't validate empty input
+    if (input_val === "") {
+        return;
+    }
+
+    // Original length
+    var original_len = input_val.length;
+
+    // Initial caret position
+    var caret_pos = input.prop("selectionStart");
+
+    // Check for decimal
+    if (input_val.indexOf(".") >= 0) {
+        // Get position of first decimal
+        var decimal_pos = input_val.indexOf(".");
+
+        // Split number by decimal point
+        var left_side = input_val.substring(0, decimal_pos);
+        var right_side = input_val.substring(decimal_pos);
+
+        // Add commas to left side of number
+        left_side = formatNumber(left_side);
+
+        // Validate right side
+        right_side = formatNumber(right_side);
+
+        // On blur, make sure there are 2 digits after decimal
+        if (blur === "blur") {
+            right_side += "00";
+        }
+
+        // Limit decimal to only 2 digits
+        right_side = right_side.substring(0, 2);
+
+        // Join the number by "."
+        input_val = left_side + "." + right_side;
+    } else {
+        // No decimal entered
+        // Add commas to number
+        input_val = formatNumber(input_val);
+
+        // Final formatting
+        if (blur === "blur") {
+            input_val += ".00";
+        }
+    }
+
+    // Send updated string to input
+    input.val(input_val);
+
+    // Put caret back in the right position
+    var updated_len = input_val.length;
+    caret_pos = updated_len - original_len + caret_pos;
+    input[0].setSelectionRange(caret_pos, caret_pos);
+}
+
+// Function to format calculated values as currency
+function formatCalculatedValue(value) {
+    if (isNaN(value)) return "0.00"; // Handle invalid numbers
+    return value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// Main Calculation Logic
 function calculateAll() {
-    // Loan Profile Calculations (unchanged)
-    const B1 = parseFloat(document.getElementById('B1').value) || 0;
-    const B2 = parseFloat(document.getElementById('B2').value) / 100 || 0;
-    const B6 = parseFloat(document.getElementById('B6').value) / 100 || 0;
-    const B7 = parseFloat(document.getElementById('B7').value) || 0;
-    const B8 = parseFloat(document.getElementById('B8').value) || 0;
-    const B13 = parseFloat(document.getElementById('B13').value) / 100 || 0;
-    const B14 = parseFloat(document.getElementById('B14').value) || 0;
+    // Loan Profile Calculations
+    const B1 = parseFloat(document.getElementById('B1').value.replace(/,/g, '')) || 0;
+    const B2 = parseFloat(document.getElementById('B2').value.replace(/,/g, '')) / 100 || 0;
+    const B6 = parseFloat(document.getElementById('B6').value.replace(/,/g, '')) / 100 || 0;
+    const B7 = parseFloat(document.getElementById('B7').value.replace(/,/g, '')) || 0;
+    const B8 = parseFloat(document.getElementById('B8').value.replace(/,/g, '')) || 0;
+    const B13 = parseFloat(document.getElementById('B13').value.replace(/,/g, '')) / 100 || 0;
+    const B14 = parseFloat(document.getElementById('B14').value.replace(/,/g, '')) || 0;
 
     const B3 = B1 * B2;
     const B5 = B1 - B3;
@@ -997,93 +1083,88 @@ function calculateAll() {
     const B11 = B10 * B9;
     const B12 = B11 - B5;
 
-    document.getElementById('B3').value = B3.toFixed(2);
-    document.getElementById('B5').value = B5.toFixed(2);
-    document.getElementById('B9').value = B9;
-    document.getElementById('B10').value = B10.toFixed(2);
-    document.getElementById('B11').value = B11.toFixed(2);
-    document.getElementById('B12').value = B12.toFixed(2);
-    document.getElementById('B15').value = B15.toFixed(2);
+    // Format calculated values
+    document.getElementById('B3').value = formatCalculatedValue(B3);
+    document.getElementById('B5').value = formatCalculatedValue(B5);
+    document.getElementById('B9').value = B9; // No formatting for non-currency values
+    document.getElementById('B10').value = formatCalculatedValue(B10);
+    document.getElementById('B11').value = formatCalculatedValue(B11);
+    document.getElementById('B12').value = formatCalculatedValue(B12);
+    document.getElementById('B15').value = formatCalculatedValue(B15);
 
     // Expenses Portion Calculations
-    const B22 = parseFloat(document.getElementById('B22').value) || 0;
-    const C22 = (((B6 * 0.1) * 2.9) * 0.065) / 12; //Corrected formula for C22
-    document.getElementById('C22').value = C22.toFixed(2);
+    const B22 = parseFloat(document.getElementById('B22').value.replace(/,/g, '')) || 0;
+    const C22 = (((B6 * 0.1) * 2.9) * 0.065) / 12; // Corrected formula for C22
+    document.getElementById('C22').value = formatCalculatedValue(C22);
 
-    // Calculate Averages (Combined Loop)
+    // Calculate Averages
     for (let i = 20; i <= 42; i++) {
         calculateAvg(i);
     }
 
     // Total Cash Flow Calculations
-    const B15Value = parseFloat(document.getElementById('B15').value) || 0;
-    document.getElementById('B43').value = document.getElementById('C43').value = document.getElementById('D43').value = B15Value.toFixed(2);
+    const B15Value = parseFloat(document.getElementById('B15').value.replace(/,/g, '')) || 0;
+    document.getElementById('B43').value = document.getElementById('C43').value = document.getElementById('D43').value = formatCalculatedValue(B15Value);
 
-    // Calculate Total Revenue (B45, C45, D45)
+    // Calculate Total Revenue
     let B45 = 0, C45 = 0, D45 = 0;
     for (let i = 33; i <= 42; i++) {
-        B45 += parseFloat(document.getElementById('B' + i).value) || 0;
-        C45 += parseFloat(document.getElementById('C' + i).value) || 0;
-        D45 += parseFloat(document.getElementById('D' + i).value) || 0;
+        B45 += parseFloat(document.getElementById('B' + i).value.replace(/,/g, '')) || 0;
+        C45 += parseFloat(document.getElementById('C' + i).value.replace(/,/g, '')) || 0;
+        D45 += parseFloat(document.getElementById('D' + i).value.replace(/,/g, '')) || 0;
     }
-    document.getElementById('B45').value = B45.toFixed(2);
-    document.getElementById('C45').value = C45.toFixed(2);
-    document.getElementById('D45').value = D45.toFixed(2);
+    document.getElementById('B45').value = formatCalculatedValue(B45);
+    document.getElementById('C45').value = formatCalculatedValue(C45);
+    document.getElementById('D45').value = formatCalculatedValue(D45);
 
-    // Calculate Total Expenses (B44, C44, D44) - Improved Calculation
+    // Calculate Total Expenses
     let BExpenses = 0, CExpenses = 0, DExpenses = 0;
     for (let i = 20; i <= 27; i++) {
-        BExpenses += parseFloat(document.getElementById('B' + i).value) || 0;
-        CExpenses += parseFloat(document.getElementById('C' + i).value) || 0;
-        DExpenses += parseFloat(document.getElementById('D' + i).value) || 0;
+        BExpenses += parseFloat(document.getElementById('B' + i).value.replace(/,/g, '')) || 0;
+        CExpenses += parseFloat(document.getElementById('C' + i).value.replace(/,/g, '')) || 0;
+        DExpenses += parseFloat(document.getElementById('D' + i).value.replace(/,/g, '')) || 0;
     }
     for (let i = 29; i <= 32; i++) {
-        BExpenses += parseFloat(document.getElementById('B' + i).value) || 0;
-        CExpenses += parseFloat(document.getElementById('C' + i).value) || 0;
-        DExpenses += parseFloat(document.getElementById('D' + i).value) || 0;
+        BExpenses += parseFloat(document.getElementById('B' + i).value.replace(/,/g, '')) || 0;
+        CExpenses += parseFloat(document.getElementById('C' + i).value.replace(/,/g, '')) || 0;
+        DExpenses += parseFloat(document.getElementById('D' + i).value.replace(/,/g, '')) || 0;
     }
 
-    const vacancyRateB = parseFloat(document.getElementById('B28').value) / 100 || 0;
-    const vacancyRateC = parseFloat(document.getElementById('C28').value) / 100 || 0;
-    const vacancyRateD = parseFloat(document.getElementById('D28').value) / 100 || 0;
+    const vacancyRateB = parseFloat(document.getElementById('B28').value.replace(/,/g, '')) / 100 || 0;
+    const vacancyRateC = parseFloat(document.getElementById('C28').value.replace(/,/g, '')) / 100 || 0;
+    const vacancyRateD = parseFloat(document.getElementById('D28').value.replace(/,/g, '')) / 100 || 0;
 
     const B44 = BExpenses - (B45 * vacancyRateB);
     const C44 = CExpenses - (C45 * vacancyRateC);
     const D44 = DExpenses - (D45 * vacancyRateD);
 
-    document.getElementById('B44').value = B44.toFixed(2);
-    document.getElementById('C44').value = C44.toFixed(2);
-    document.getElementById('D44').value = D44.toFixed(2);
+    document.getElementById('B44').value = formatCalculatedValue(B44);
+    document.getElementById('C44').value = formatCalculatedValue(C44);
+    document.getElementById('D44').value = formatCalculatedValue(D44);
 
-    // Calculate Est Total Income (B46, C46, D46)
-    const B46 = (parseFloat(document.getElementById('B43').value) || 0) + (parseFloat(document.getElementById('B44').value) || 0) + (parseFloat(document.getElementById('B45').value) || 0);
-    const C46 = (parseFloat(document.getElementById('C43').value) || 0) + (parseFloat(document.getElementById('C44').value) || 0) + (parseFloat(document.getElementById('C45').value) || 0);
-    const D46 = (parseFloat(document.getElementById('D43').value) || 0) + (parseFloat(document.getElementById('D44').value) || 0) + (parseFloat(document.getElementById('D45').value) || 0);
-    document.getElementById('B46').value = B46.toFixed(2);
-    document.getElementById('C46').value = C46.toFixed(2);
-    document.getElementById('D46').value = D46.toFixed(2);
+    // Calculate Est Total Income
+    const B46 = (parseFloat(document.getElementById('B43').value.replace(/,/g, '')) || 0) + (parseFloat(document.getElementById('B44').value.replace(/,/g, '')) || 0) + (parseFloat(document.getElementById('B45').value.replace(/,/g, '')) || 0);
+    const C46 = (parseFloat(document.getElementById('C43').value.replace(/,/g, '')) || 0) + (parseFloat(document.getElementById('C44').value.replace(/,/g, '')) || 0) + (parseFloat(document.getElementById('C45').value.replace(/,/g, '')) || 0);
+    const D46 = (parseFloat(document.getElementById('D43').value.replace(/,/g, '')) || 0) + (parseFloat(document.getElementById('D44').value.replace(/,/g, '')) || 0) + (parseFloat(document.getElementById('D45').value.replace(/,/g, '')) || 0);
+    document.getElementById('B46').value = formatCalculatedValue(B46);
+    document.getElementById('C46').value = formatCalculatedValue(C46);
+    document.getElementById('D46').value = formatCalculatedValue(D46);
 }
 
 function calculateAvg(rowNum) {
-    const minVal = parseFloat(document.getElementById('B' + rowNum).value) || 0;
-    const maxVal = parseFloat(document.getElementById('C' + rowNum).value) || 0;
+    const minVal = parseFloat(document.getElementById('B' + rowNum).value.replace(/,/g, '')) || 0;
+    const maxVal = parseFloat(document.getElementById('C' + rowNum).value.replace(/,/g, '')) || 0;
     const avgVal = (minVal + maxVal) / 2;
-    document.getElementById('D' + rowNum).value = avgVal.toFixed(2);
+    document.getElementById('D' + rowNum).value = formatCalculatedValue(avgVal);
 }
 
+// Event Listeners
 const allInputs = document.querySelectorAll('#calculator input');
 allInputs.forEach(input => {
     input.addEventListener('input', calculateAll);
 });
 
 calculateAll(); // Initial calculation
-
-    </script>
-	
-	<script>
-$(function () {
-  $('[data-toggle="tooltip"]').tooltip()
-})
-	</script>
+</script>
 </body>
 </html>
