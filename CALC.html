@@ -173,7 +173,6 @@
 		  }
 		}
 
-	    
 		.tooltip {
 		    --bs-tooltip-opacity: 1;
 		}
@@ -201,7 +200,7 @@
         <div class="wrap">
 
     <div id="calculator">
-        <h1 class="text-center">Rental Property Calculator</h2>
+        <h1 class="text-center">Rental Property Calculator</h1>
         <div class="mb-3">
             <div class="row g-3">
                 <div class="col-md-6">
@@ -806,19 +805,19 @@
                         <td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="B42" placeholder="0.00" step="0.01">
+						    <input type="text" data-type="currency" class="form-control" id="B42" placeholder="0.00" step="0.01">
 							</div>
 						</td>
                         <td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="C42" placeholder="0.00" step="0.01">
+						    <input type="text" data-type="currency" class="form-control" id="C42" placeholder="0.00" step="0.01">
 							</div>
 						</td>
 						<td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="D42" readonly>
+						    <input type="text" class="form-control" id="D42" readonly>
 							</div>
 						</td>
                         </tr>
@@ -845,19 +844,19 @@
                         <td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="B43" step="0.01" readonly>
+						    <input type="text" data-type="currency" class="form-control" id="B43" step="0.01" readonly>
 							</div>
 						</td>
                         <td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="C43" step="0.01" readonly>
+						    <input type="text" data-type="currency" class="form-control" id="C43" step="0.01" readonly>
 							</div>
 						</td>
 						<td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="D43" step="0.01" readonly>
+						    <input type="text" data-type="currency" class="form-control" id="D43" step="0.01" readonly>
 							</div>
 						</td>
                     </tr>
@@ -866,19 +865,19 @@
                         <td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="B44" step="0.01" readonly>
+						    <input type="text" class="form-control" id="B44" step="0.01" readonly>
 							</div>
 						</td>
                         <td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="C44" step="0.01" readonly>
+						    <input type="text" class="form-control" id="C44" step="0.01" readonly>
 							</div>
 						</td>
 						<td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="D44" step="0.01" readonly>
+						    <input type="text" class="form-control" id="D44" step="0.01" readonly>
 							</div>
 						</td>
                     </tr>
@@ -887,19 +886,19 @@
                         <td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="B45" step="0.01" readonly>
+						    <input type="text" class="form-control" id="B45" step="0.01" readonly>
 							</div>
 						</td>
                         <td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="C45" step="0.01" readonly>
+						    <input type="text" class="form-control" id="C45" step="0.01" readonly>
 							</div>
 						</td>
 						<td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="D45" step="0.01" readonly>
+						    <input type="text" class="form-control" id="D45" step="0.01" readonly>
 							</div>
 						</td>
                     </tr>
@@ -908,19 +907,19 @@
                         <td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="B46" step="0.01" readonly>
+						    <input type="text" class="form-control" id="B46" step="0.01" readonly>
 							</div>
 						</td>
                         <td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="C46" step="0.01" readonly>
+						    <input type="text" class="form-control" id="C46" step="0.01" readonly>
 							</div>
 						</td>
 						<td>
 						<div class="input-group">
 					        <span class="input-group-text">$</span>
-						    <input type="number" class="form-control" id="D46" step="0.01" readonly>
+						    <input type="text" class="form-control" id="D46" step="0.01" readonly>
 							</div>
 						</td>
                     </tr>
@@ -970,93 +969,60 @@
 </div>
     </section>
 </footer>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
-// jQuery Dependency for Currency Formatting
-$(document).ready(function () {
-    $("input[data-type='currency']").on({
-        keyup: function () {
-            formatCurrency($(this));
-        },
-        blur: function () {
-            formatCurrency($(this), "blur");
-        }
-    });
-});
+
+// Debounce Function
+function debounce(func, wait) {
+    let timeout;
+    return function (...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), wait);
+    };
+}
 
 function formatNumber(n) {
-    // Format number: 1000000 to 1,234,567
     return n.replace(/\D/g, "").replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 function formatCurrency(input, blur) {
-    // Validates decimal side and keeps cursor in the right position.
+    let value = input.value;
 
-    // Get input value
-    var input_val = input.val();
+    if (!value) return;
 
-    // Don't validate empty input
-    if (input_val === "") {
-        return;
-    }
+    value = value.replace(/[^\d.]/g, ""); // Remove non-numeric characters except .
 
-    // Original length
-    var original_len = input_val.length;
-
-    // Initial caret position
-    var caret_pos = input.prop("selectionStart");
-
-    // Check for decimal
-    if (input_val.indexOf(".") >= 0) {
-        // Get position of first decimal
-        var decimal_pos = input_val.indexOf(".");
-
-        // Split number by decimal point
-        var left_side = input_val.substring(0, decimal_pos);
-        var right_side = input_val.substring(decimal_pos);
-
-        // Add commas to left side of number
-        left_side = formatNumber(left_side);
-
-        // Validate right side
-        right_side = formatNumber(right_side);
-
-        // On blur, make sure there are 2 digits after decimal
-        if (blur === "blur") {
-            right_side += "00";
-        }
-
-        // Limit decimal to only 2 digits
-        right_side = right_side.substring(0, 2);
-
-        // Join the number by "."
-        input_val = left_side + "." + right_side;
+    if (value.indexOf(".") >= 0) {
+        let [left, right] = value.split(".");
+        left = formatNumber(left);
+        right = right.slice(0, 2); // Limit to 2 decimal places
+        value = left + "." + right;
     } else {
-        // No decimal entered
-        // Add commas to number
-        input_val = formatNumber(input_val);
-
-        // Final formatting
-        if (blur === "blur") {
-            input_val += ".00";
+        value = formatNumber(value);
+        if (blur) {
+            value += ".00";
         }
     }
 
-    // Send updated string to input
-    input.val(input_val);
-
-    // Put caret back in the right position
-    var updated_len = input_val.length;
-    caret_pos = updated_len - original_len + caret_pos;
-    input[0].setSelectionRange(caret_pos, caret_pos);
+    input.value = value;
 }
 
-// Function to format calculated values as currency
 function formatCalculatedValue(value) {
-    if (isNaN(value)) return "0.00"; // Handle invalid numbers
-    return value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    if (isNaN(value)) return "0.00";
+    return Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
+
+
+document.addEventListener('DOMContentLoaded', () => {
+    const currencyInputs = document.querySelectorAll('[data-type="currency"]');
+
+    currencyInputs.forEach(input => {
+        input.addEventListener('input', () => formatCurrency(input));
+        input.addEventListener('blur', () => formatCurrency(input, true));
+    });
+});
 
 // Main Calculation Logic
 function calculateAll() {
@@ -1162,19 +1128,21 @@ function calculateAvg(rowNum) {
     document.getElementById('D' + rowNum).value = formatCalculatedValue(avgVal);
 }
 
-// Event Listeners
+// Add Event Listeners with Debounced Calculation
+const debouncedCalculateAll = debounce(calculateAll, 300);
 const allInputs = document.querySelectorAll('#calculator input');
 allInputs.forEach(input => {
-    input.addEventListener('input', calculateAll);
+    input.addEventListener('input', debouncedCalculateAll);
 });
 
-calculateAll(); // Initial calculation
+debouncedCalculateAll(); // Initial calculation
+
 </script>
-	
-<script>
+
+	<script>
 $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })
-</script>
+	</script>
 </body>
 </html>
