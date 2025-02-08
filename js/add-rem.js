@@ -21,7 +21,32 @@ document.addEventListener("DOMContentLoaded", function () {
         lastRow.style.display = "none";
         
         // Очистка input у прихованому рядку
-        lastRow.querySelectorAll("input").forEach(input => input.value = "");
+        const inputs = lastRow.querySelectorAll("input");
+        inputs.forEach(input => {
+          const oldValue = input.value;
+          input.value = "";
+          
+          // Only trigger update if the value actually changed
+          if (oldValue !== "") {
+            // Trigger input event to update calculations
+            input.dispatchEvent(new Event('input', {
+              bubbles: true,
+              cancelable: true
+            }));
+          }
+        });
+
+        // If any values were cleared, ensure calculations are updated
+        if (inputs.length > 0) {
+          // Use the debounced calculation function
+          const calculator = document.querySelector('[data-type="currency"]');
+          if (calculator) {
+            calculator.dispatchEvent(new Event('input', {
+              bubbles: true,
+              cancelable: true
+            }));
+          }
+        }
       }
     });
   }
