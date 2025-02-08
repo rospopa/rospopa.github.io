@@ -1,3 +1,11 @@
+.park-row, .unit-row {
+  display: none;
+}
+
+.btn-group.d-inline-flex {
+  margin: 0;
+}
+
 .triangle-add, .triangle-rem {
   cursor: pointer;
 }
@@ -26,6 +34,7 @@
   border-top: 20px solid #37de37;
   border-bottom: 0 solid transparent;
   margin-right: 0px;
+  padding-bottom: 0;
 }
 
 tr td button.btn {
@@ -166,13 +175,14 @@ input[readonly] {
 }
 
 .form-control {
-  padding: .3rem .35rem;
-  padding-bottom: .1rem;
+  padding: 0.2rem .35rem;
+  padding-bottom: .0rem;
   line-height: 1;
+  height: 29px;
 }
 
 .form-label {
-  margin-bottom: .2rem;
+  margin-bottom: 0;
 }
 
 .income-subsection {
@@ -208,8 +218,8 @@ input[readonly] {
   vertical-align: middle;
   line-height: normal;
   font-weight: bold;
-  padding: .3rem .3rem;
-  padding-top: .4rem;
+  padding: .4rem .3rem;
+  padding-bottom: .2rem;
 }
 
 .calctooltip {
@@ -290,14 +300,18 @@ html, body {
   display: inline-flex;
   list-style: none;
   margin-right: 3px;
+  border-radius: 50%;
+  /*top: -0.5rem;*/
+  /*padding-top: .5rem;*/
+  height: auto;
 }
 
-.wrapper .icon {
+.icon {
   position: relative;
   color: #ffffff;
   background: #1DA1F2;
   border-radius: 50%;
-  margin: auto;
+  /*margin: .1rem;*/
   font-size: 14px;
   display: flex;
   justify-content: center;
@@ -378,4 +392,64 @@ sup {
 
 input[readonly] {
   cursor: cell;
+}
+
+#autocomplete {
+  width: 100%;
+  padding-left: 5px;
+  border: 1px solid #ccc;
+}
+
+.suggestions {
+  /*border: 1px solid #ccc;*/
+  border-top: none;
+  width: auto;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+.suggestion {
+  padding: 10px;
+  cursor: pointer;
+  background-color: white;
+}
+
+.suggestion:hover {
+  background-color: #f0f0f0;
+}
+
+.input-group .searchbox {
+  width: 100%;
+}
+
+.form-loantype {
+  padding: .3rem .3rem;
+  padding-top: .4rem;
+}
+
+.form-control:focus {
+  color: var(--bs-body-color);
+  background-color: var(--bs-body-bg);
+  border-color: #1DA1F2;
+  outline: 0;
+  box-shadow: 0 0 0 0.1rem rgba(29,161,242,0.5);
+}
+
+.calcheaderbtn {
+  width: auto;
+  display: flex;
+  justify-content: end;
+}
+
+@media (min-width: 732px) {
+  .calcheaderbtn {
+    justify-content: end;
+  }
+}
+
+.group-pdf-mail {
+  height: 30px;
+  margin-right: -10px;
+  margin-top: -10px;
+  margin-bottom: 10px;
 }
