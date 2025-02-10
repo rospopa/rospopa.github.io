@@ -6,6 +6,12 @@
     <meta name="description" content="pavlo@rospopa.com">
     <link rel="canonical" href="http://rospopa.github.io/calc.html">
     <title>Rental Property Calculator</title>
+    <link rel="apple-touch-icon" type="image/svg+xml" sizes="180x180" href="assets/img/calculator-180x180.svg">
+    <link rel="icon" type="image/svg+xml" sizes="16x16" href="/css/favicons/calculator-16x16.svg">
+    <link rel="icon" type="image/svg+xml" sizes="32x32" href="/css/favicons/calculator-32x32.svg">
+    <link rel="icon" type="image/svg+xml" sizes="180x180" href="/css/favicons/calculator-180x180.svg">
+    <link rel="icon" type="image/svg+xml" sizes="192x192" href="/css/favicons/calculator-192x192.svg">
+    <link rel="icon" type="image/svg+xml" sizes="512x512" href="/css/favicons/calculator-512x512.svg">
     <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
 
     <!-- Custom CSS -->
@@ -36,36 +42,38 @@
         <div id="topdf" class="wrap">
             <div id="calculator">
                 <div class="calcheaderbtn">
-                    <div class="btn-group group-pdf-mail" role="group" style="height: 30px;margin-top: -10px;margin-bottom: 10px;"><button class="btn btn-primary btn-sm" id="savepdf" type="button">PDF</button><button class="btn btn-success btn-sm text-nowrap" id="sendtoemail" type="button">e-mail</button></div>
+                    <div class="btn-group group-pdf-mail" role="group"><button class="btn btn-primary btn-sm" id="savepdf" type="button" data-bs-toggle="pdfButton">PDF</button><button class="btn btn-success btn-sm text-nowrap" id="sendtoemail" type="button">e-mail</button></div>
                 </div><!-- Start: Investment -->
                 <div class="mb-3">
                     <h1 class="text-center">Investment Property Calculator</h1>
-                    <div class="row g-3">
+                    <div class="row">
                         <div class="col-md-12"><label class="form-label" for="autocomplete"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Address"><i class="icon-question icon"></i></sup>Address</label>
-                            <div class="input-group searchbox"><input type="text" id="autocomplete" class="form-control" placeholder="Enter an address"></div>
+                            <div class="input-group searchbox"><span class="input-group-text currency-span">Address</span><input type="text" id="autocomplete" class="form-control" placeholder="Enter an address"></div>
                             <div id="suggestions" class="suggestions"></div>
                         </div>
                         <div class="col-md-6"><label class="form-label" for="B1"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Purchase Price"><i class="icon-question icon"></i></sup>Purchase Price</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="B1" data-name="Purchase-Price" data-type="currency" maxlength="12" name="Purchase-Price" placeholder="0.00" step="0.01" value="330,000.00"></div>
+                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="B1" data-name="Purchase-Price" data-type="currency" maxlength="12" name="Purchase-Price" placeholder="0.00" step="0.01" value=""></div>
                         </div>
                         <div class="col-md-6"><label class="form-label" for="B2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Down Payment %"><i class="icon-question icon"></i></sup>Down Payment</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B2" data-name="Down-Payment-rate" max="100" name="Down Payment" placeholder="0.00" step="0.01" value="5.00"><span class="input-group-text">%</span></div>
+                            <div class="input-group"><input class="form-control" type="number" id="B2" data-name="Down-Payment-rate" max="100" name="Down Payment" placeholder="0.00" step="0.01" value=""><span class="input-group-text">%</span></div>
                         </div>
                         <div class="col-md-6"><label class="form-label" for="B3"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Down Payment $"><i class="icon-question icon"></i></sup>Down Payment</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B3" data-name="Down-Payment" name="Down Payment" maxlength="12" readonly="" data-type="currency"></div>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B3" data-name="Down-Payment" name="Down Payment" maxlength="12" readonly="" data-type="currency" placeholder="0.00"></div>
                         </div>
-                        <div class="col-md-6"><label class="form-label" for="B4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Closing Date"><i class="icon-question icon"></i></sup>Closing Date</label><input id="B4" class="form-control" type="date" data-name="Closing-Date" name="Closing Date" style="max-height: 31.1875px;height: 100%;"></div>
+                        <div class="col-md-6"><label class="form-label" for="B4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Closing Date"><i class="icon-question icon"></i></sup>Closing Date</label>
+                            <div class="input-group"><input class="form-control" id="B4" type="date" data-name="Closing-Date" name="Closing Date"></div>
+                        </div>
                         <div class="col-md-6"><label class="form-label" for="B5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Loan Amount"><i class="icon-question icon"></i></sup>Loan Amount</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B5" data-type="currency" readonly="" name="Loan Amount" data-name="Loan-Amount"></div>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B5" data-type="currency" readonly="" name="Loan Amount" data-name="Loan-Amount" placeholder="0.00"></div>
                         </div>
                         <div class="col-md-6"><label class="form-label" for="B6"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Annual Interest Rate"><i class="icon-question icon"></i></sup>Annual Interest Rate</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B6" placeholder="0.00" step="0.01" value="7.04" max="100" name="Annual Interest Rate" data-name="Annual-Interest-rate"><span class="input-group-text">%</span></div>
+                            <div class="input-group"><input class="form-control" type="number" id="B6" placeholder="0.00" step="0.01" value="" max="100" name="Annual Interest Rate" data-name="Annual-Interest-rate"><span class="input-group-text">%</span></div>
                         </div>
                         <div class="col-md-6"><label class="form-label" for="B7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Loan Term Period"><i class="icon-question icon"></i></sup>Loan Term Period</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B7" value="30" max="99" data-name="Loan-Term-Period" step="1" name="Loan Term Period"><span class="input-group-text">term period</span></div>
+                            <div class="input-group"><input class="form-control" type="number" id="B7" value="" max="99" data-name="Loan-Term-Period" step="1" name="Loan Term Period" placeholder="0"><span class="input-group-text">term period</span></div>
                         </div>
                         <div class="col-md-6"><label class="form-label" for="B8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Payments per Period"><i class="icon-question icon"></i></sup>Payments per Period</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B8" value="12" step="1" max="99" name="Payments per Period" data-name="Payments-per-Period"><span class="input-group-text">payments</span></div>
+                            <div class="input-group"><input class="form-control" type="number" id="B8" value="" step="1" max="99" name="Payments per Period" data-name="Payments-per-Period" placeholder="0"><span class="input-group-text">payments</span></div>
                         </div>
                         <div class="col-md-6"><label class="form-label" for="B9"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Total Payments"><i class="icon-question icon"></i></sup>Total Payments</label>
                             <div class="input-group"><input class="form-control" type="number" id="B9" name="Total Payments" data-name="Total-Payments" placeholder="0" readonly=""><span class="input-group-text">#</span></div>
@@ -80,10 +88,10 @@
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B12" data-type="currency" readonly="" name="Interest-Cost" data-name="Interest Cost" placeholder="0.00"></div>
                         </div>
                         <div class="col-md-6"><label class="form-label" for="B13"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Closing Cost"><i class="icon-question icon"></i></sup>Closing Cost</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B13" placeholder="" step="0.01" value="5.00" max="100" name="Closing-Cost"><span class="input-group-text">%</span></div>
+                            <div class="input-group"><input class="form-control" type="number" id="B13" placeholder="0.00" step="0.01" value="" max="100" name="Closing-Cost"><span class="input-group-text">%</span></div>
                         </div>
                         <div class="col-md-6"><label class="form-label" for="B14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Inspection"><i class="icon-question icon"></i></sup>Inspection</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B14" data-type="currency" placeholder="0.00" step="0.01" value="300.00" name="Inspection" maxlength="12"></div>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B14" data-type="currency" placeholder="0.00" step="0.01" value="" name="Inspection" maxlength="12"></div>
                         </div>
                         <div class="col-md-6">
                             <div></div><label class="form-label" for="B15"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Down Payment + Closing Cost (% of Purchase Price) + Inspection"><i class="icon-question icon"></i></sup>Down Payment + Closing Cost (% of Purchase Price) + Inspection</label>
@@ -125,7 +133,7 @@
                     </div>
                 </div><!-- End: Investment -->
                 <!-- Start: Gross Expenses -->
-                <div class="subsection">
+                <div class="subsection" style="background: rgb(240, 128, 128);">
                     <h4 class="subsection-heading">Gross Expenses</h4>
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered">
@@ -140,160 +148,186 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper" title="Refuse"><i class="icon-question icon"></i></sup>Refuse</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B20" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Refuse"><i class="icon-question icon"></i></sup>Refuse</h6>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C20" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B20" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D20" data-type="currency" readonly="" placeholder="0.00"></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Water and Sewer"><i class="icon-question icon"></i></sup>Water and Sewer</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B21" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C20" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C21" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D21" data-type="currency" readonly="" placeholder="0.00"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D20" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Property Taxes"><i class="icon-question icon"></i></sup>Property Taxes</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B22" data-type="currency" placeholder="0.00" step="0.01" value="238.00"></div>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Water and Sewer"><i class="icon-question icon"></i></sup>Water and Sewer</h6>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C22" data-type="currency" placeholder="0.00" step="0.01" value="518.38"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B21" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D22" data-type="currency" readonly="" placeholder="0.00"></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Electric"><i class="icon-question icon"></i></sup>Electric</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B23" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C21" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C23" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D23" data-type="currency" readonly="" placeholder="0.00"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D21" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Gas"><i class="icon-question icon"></i></sup>Gas</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B24" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Property Taxes"><i class="icon-question icon"></i></sup>Property Taxes</h6>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C24" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B22" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C22" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D22" data-type="currency" readonly="" placeholder="-0.00"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Electric"><i class="icon-question icon"></i></sup>Electric</h6>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B23" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C23" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D23" data-type="currency" readonly="" placeholder="-0.00"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Gas"><i class="icon-question icon"></i></sup>Gas</h6>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B24" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C24" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                         <div></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D24" data-type="currency" readonly="" placeholder="0.00"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D24" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Internet"><i class="icon-question icon"></i></sup>Internet</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B25" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Internet"><i class="icon-question icon"></i></sup>Internet</h6>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C25" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B25" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D25" data-type="currency" readonly="" placeholder="0.00"></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Lawn Care"><i class="icon-question icon"></i></sup>Lawn Care</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B26" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C25" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C26" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D26" data-type="currency" readonly="" placeholder="0.00"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D25" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Maintenance"><i class="icon-question icon"></i></sup>Maintenance</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B27" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Lawn Care"><i class="icon-question icon"></i></sup>Lawn Care</h6>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C27" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B26" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D27" data-type="currency" readonly="" placeholder="0.00"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C26" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D26" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Vacancy Rate"><i class="icon-question icon"></i></sup>Vacancy Rate</td>
-                                    <td>
-                                        <div class="input-group"><input class="form-control" type="number" id="B28" placeholder="0.00" step="0.01" value="5"><span class="input-group-text">%</span></div>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Maintenance"><i class="icon-question icon"></i></sup>Maintenance</h6>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="number" id="C28" placeholder="0.00" step="0.01" value="12"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B27" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C27" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D27" data-type="currency" readonly="" placeholder="-0.00"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Vacancy Rate"><i class="icon-question icon"></i></sup>Vacancy Rate</h6>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="B28" placeholder="0.00" step="0.01" value=""><span class="input-group-text">%</span></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="C28" placeholder="0.00" step="0.01" value=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><input class="form-control" type="number" id="D28" readonly="" placeholder="0.00"><span class="input-group-text">%</span></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Mortgage Insurance (if applicable)"><i class="icon-question icon"></i></sup>Mortgage Insurance</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="B29" data-type="currency" placeholder="0.00" step="0.01" value="196.00"></div>
+                                    <td class="flex-nowrap tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Mortgage Insurance (if applicable)"><i class="icon-question icon"></i></sup>Mortgage Insurance</h6>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="C29" data-type="currency" placeholder="0.00" step="0.01" value="196.00"></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control" type="text" id="B29" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="D29" data-type="currency" readonly="" placeholder="0.00"></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Property Insurance"><i class="icon-question icon"></i></sup>Property Insurance</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B30" data-type="currency" placeholder="0.00" step="0.01" value="121.00"></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="C29" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C30" data-type="currency" placeholder="0.00" step="0.01" value="121.00"></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D30" data-type="currency" readonly="" placeholder="0.00"></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="D29" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="HOA (if applicable)"><i class="icon-question icon"></i></sup>HOA</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B31" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Property Insurance"><i class="icon-question icon"></i></sup>Property Insurance</h6>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C31" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B30" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D31" data-type="currency" readonly="" placeholder="0.00"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C30" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D30" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Property Management (if applicable)"><i class="icon-question icon"></i></sup>Prop. Management</td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B32" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="HOA (if applicable)"><i class="icon-question icon"></i></sup>HOA</h6>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C32" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B31" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D32" data-type="currency" readonly="" placeholder="0.00"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C31" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D31" data-type="currency" readonly="" placeholder="-0.00"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tabcalctitle">
+                                        <h6 class="tab-cell-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Property Management (if applicable)"><i class="icon-question icon"></i></sup>Property Management</h6>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B32" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C32" data-type="currency" placeholder="-0.00" step="0.01" value=""></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D32" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -332,10 +366,10 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B33" data-type="currency" placeholder="0.00" step="0.01" value="725.00"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B33" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C33" data-type="currency" placeholder="0.00" step="0.01" value="825.00"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C33" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D33" data-type="currency" placeholder="0.00" readonly=""></div>
@@ -751,7 +785,9 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><span class="wrapper"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Mortgage / Month"><i class="icon-question"></i></sup></span>Total Mortgage /Month</td>
+                                    <td>
+                                        <h6 class="tab-cell-heading"><span class="wrapper"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Mortgage / Month"><i class="icon-question"></i></sup></span>Total Mortgage /Month</h6>
+                                    </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B63" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
@@ -763,7 +799,9 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><span class="wrapper" style="margin-right: 3px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Expense / Month"><i class="icon-question"></i></sup></span>Total Expense /Month</td>
+                                    <td>
+                                        <h6 class="tab-cell-heading"><span class="wrapper" style="margin-right: 3px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Expense / Month"><i class="icon-question"></i></sup></span>Total Expense /Month</h6>
+                                    </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B64" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
@@ -775,7 +813,9 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><span class="wrapper" style="margin-right: 3px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Revenue / Month"><i class="icon-question"></i></sup></span>Total Revenue /Month</td>
+                                    <td>
+                                        <h6 class="tab-cell-heading"><span class="wrapper" style="margin-right: 3px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Revenue / Month"><i class="icon-question"></i></sup></span>Total Revenue /Month</h6>
+                                    </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B65" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
@@ -787,7 +827,9 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><span class="wrapper" style="margin-right: 3px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Est Total Income / Month"><i class="icon-question"></i></sup></span>Est Total Income /Month</td>
+                                    <td>
+                                        <h6 class="tab-cell-heading"><span class="wrapper" style="margin-right: 3px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Est Total Income / Month"><i class="icon-question"></i></sup></span>Est Total Income /Month</h6>
+                                    </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B66" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
@@ -838,13 +880,12 @@ padding-top:20px;
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/js/bs-init.js"></script>
-<script src="/js/calc.js"></script>
-<script src="/js/add-rem.js"></script>
-<script src="/js/auto_address_full.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" type="module"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js" type="module"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" type="module"></script>
 <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1HsnCUe7p2CE8kgBjbnG-A8v8aLUFM1E&amp;libraries=places&amp;callback=initAutocomplete&amp;loading=async" type="module"></script>
+<script src="/js/auto_address_full.js"></script>
+<script src="/js/add-rem.js"></script>
+<script src="/js/calc.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="/js/pdf.js"></script>
 
 </body>
