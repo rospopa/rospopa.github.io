@@ -1,4 +1,4 @@
-// Debounce Function
+// Utility functions remain the same
 function debounce(func, wait) {
     let timeout;
     return function (...args) {
@@ -94,9 +94,9 @@ function calculateRow64() {
     }
 
     // Calculate final values with vacancy rate
-    const b64 = (b64Sum + (row65Values.b65 * b28)) * -1;
-    const c64 = (c64Sum + (row65Values.c65 * c28)) * -1;
-    const d64 = (d64Sum + (row65Values.b65 * b28)) * -1; // Uses B65 and B28 as per original formula
+    const b64 = b64Sum + (row65Values.b65 * b28 * -1);
+    const c64 = c64Sum + (row65Values.c65 * c28 * -1);
+    const d64 = d64Sum + (row65Values.b65 * b28 * -1); // Uses B65 and B28 as per original formula
 
     document.getElementById('B64').value = formatCalculatedValue(b64);
     document.getElementById('C64').value = formatCalculatedValue(c64);
@@ -182,6 +182,32 @@ function calculateAll() {
 
 // Set up event listeners
 document.addEventListener('DOMContentLoaded', () => {
+    // Expense fields that should have minus sign behavior
+    const expenseFields = [
+        'B20', 'C20', 'D20', 'B21', 'C21', 'D21', 'B22', 'C22', 'D22',
+        'B23', 'C23', 'D23', 'B24', 'C24', 'D24', 'B25', 'C25', 'D25',
+        'B26', 'C26', 'D26', 'B27', 'C27', 'D27', 'B29', 'C29', 'D29',
+        'B30', 'C30', 'D30', 'B31', 'C31', 'D31', 'B32', 'C32', 'D32'
+    ];
+    
+    // Add focus and blur events for expense fields
+    expenseFields.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('focus', function() {
+                if (!this.value || this.value === '-') {
+                    this.value = '-';
+                }
+            });
+            
+            input.addEventListener('blur', function() {
+                if (this.value === '-') {
+                    this.value = '';
+                }
+            });
+        }
+    });
+
     const currencyInputs = document.querySelectorAll('[data-type="currency"]');
     currencyInputs.forEach(input => {
         input.addEventListener('input', () => formatCurrency(input));
