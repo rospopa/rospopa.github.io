@@ -88,9 +88,10 @@ div.btn-group {
 
 #calculator {
   font-family: Helvetica, sans-serif;
+  line-height: 1;
   max-width: 800px;
   background-color: #f7f7f7;
-  padding: 20px;
+  padding: 10px;
   margin: auto;
   border-radius: 10px;
   border: 1px solid #ccc;
@@ -171,18 +172,12 @@ input[readonly] {
 }
 
 .table > :not(caption) > * > * {
-  padding: .15rem .2rem;
-}
-
-.form-control {
-  padding: 0.2rem .35rem;
-  padding-bottom: .0rem;
-  line-height: 1;
-  height: 29px;
+  padding: .2rem .05rem;
 }
 
 .form-label {
-  margin-bottom: 0;
+  margin-bottom: 3px;
+  margin-top: 6px;
 }
 
 .income-subsection {
@@ -213,15 +208,6 @@ input[readonly] {
   color: red;
 }
 
-.input-group-text {
-  /*font-size: 18px;*/
-  vertical-align: middle;
-  line-height: normal;
-  font-weight: bold;
-  padding: .4rem .3rem;
-  padding-bottom: .2rem;
-}
-
 .calctooltip {
   font-size: 12px;
   font-weight: bold;
@@ -234,8 +220,8 @@ input[readonly] {
 
 @media (max-width: 650px) {
   .subsection, .income-subsection, .total-cashflow-subsection {
-    margin-left: -20px;
-    margin-right: -20px;
+    margin-left: -10px;
+    margin-right: -10px;
   }
 }
 
@@ -303,7 +289,8 @@ html, body {
   border-radius: 50%;
   /*top: -0.5rem;*/
   /*padding-top: .5rem;*/
-  height: auto;
+  /*height: auto;*/
+  flex-wrap: nowrap;
 }
 
 .icon {
@@ -312,14 +299,14 @@ html, body {
   background: #1DA1F2;
   border-radius: 50%;
   /*margin: .1rem;*/
-  font-size: 14px;
+  font-size: 13px;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.4);
   cursor: help;
-  /*transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);*/
+  transition: all 0.3s ease-out;
 }
 
 .wrapper .icon:hover, wapper .icon:hover .icon::before {
@@ -395,7 +382,7 @@ input[readonly] {
 }
 
 #autocomplete {
-  width: 100%;
+  width: auto;
   padding-left: 5px;
   border: 1px solid #ccc;
 }
@@ -449,7 +436,68 @@ input[readonly] {
 
 .group-pdf-mail {
   height: 30px;
-  margin-right: -10px;
-  margin-top: -10px;
-  margin-bottom: 10px;
+  margin-right: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+div.input-group span.input-group-text {
+  padding: 0rem 0rem;
+  padding-top: 5px;
+  padding-bottom: 2px;
+  padding-left: .2rem;
+  padding-right: .2rem;
+  vertical-align: middle;
+  line-height: normal;
+  font-weight: bold;
+}
+
+div.form-group select.form-select {
+  padding: 0rem 0rem;
+  padding-top: 5px;
+  padding-bottom: 2px;
+  padding-left: .3rem;
+  padding-right: .3rem;
+  vertical-align: middle;
+  line-height: normal;
+  /*font-weight: bold;*/
+}
+
+div.input-group input.form-control {
+  padding: .0rem .0rem;
+  padding-top: .2rem;
+  padding-left: 0.3rem;
+  padding-right: 0rem;
+  line-height: normal;
+  /*height: 29px;*/
+  /*font-size: 0.96rem;*/
+}
+
+#B4 {
+  height: 25px;
+}
+
+.col-md-6, .col-md-12 {
+  padding-top: .5rem;
+  padding-bottom: .5rem;
+}
+
+mb-3 {
+  width: 100%;
+}
+
+.row {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.tab-cell-heading {
+  margin-bottom: 0px;
+  line-height: 1;
+}
+
+@media (max-width: 680px) {
+  div.input-group input.form-control, h6.tab-cell-heading, h6.padr, h6.padr2, thead tr th {
+    font-size: 0.96rem;
+  }
 }
