@@ -1,4 +1,4 @@
-// Utility functions remain the same
+// Utility functions Debounce
 function debounce(func, wait) {
     let timeout;
     return function (...args) {
@@ -15,7 +15,12 @@ function formatNumber(n) {
 function formatCurrency(input, blur) {
     let value = input.value;
     if (!value) return;
+    
+    // Preserve minus sign if present
+    const isNegative = value.startsWith('-');
+    // Remove all non-digit characters except decimal point
     value = value.replace(/[^\d.]/g, "");
+    
     if (value.indexOf(".") >= 0) {
         let [left, right] = value.split(".");
         left = formatNumber(left);
@@ -27,12 +32,16 @@ function formatCurrency(input, blur) {
             value += ".00";
         }
     }
-    input.value = value;
+    
+    // Add back the minus sign if it was present
+    input.value = isNegative ? '-' + value : value;
 }
 
 function formatCalculatedValue(value) {
     if (isNaN(value)) return "0.00";
-    return Number(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    // Format the absolute value and add minus sign if negative
+    const absValue = Math.abs(value).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    return value < 0 ? "-" + absValue : absValue;
 }
 
 // PMT function
@@ -50,8 +59,10 @@ function PMT(rate, nper, pv, fv = 0, type = 0) {
 function sumInputs(prefix, numbers) {
     let sum = 0;
     for (let i of numbers) {
-        const value = parseFloat(document.getElementById(prefix + i).value.replace(/,/g, '')) || 0;
-        sum += value;
+        const value = parseFloat(document.getElementById(prefix + i).value.replace(/,/g, ''));
+        if (!isNaN(value)) {
+            sum += value;
+        }
     }
     return sum;
 }
@@ -189,22 +200,77 @@ document.addEventListener('DOMContentLoaded', () => {
         'B26', 'C26', 'D26', 'B27', 'C27', 'D27', 'B29', 'C29', 'D29',
         'B30', 'C30', 'D30', 'B31', 'C31', 'D31', 'B32', 'C32', 'D32'
     ];
+
+    // Gross Expenses fields (B and C columns only)
+    const grossExpenseFields = [
+        'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
+        'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32'
+    ];
     
     // Add focus and blur events for expense fields
     expenseFields.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
+            // Remove the currency data-type if it exists
+            input.removeAttribute('data-type');
             input.addEventListener('focus', function() {
-                if (!this.value || this.value === '-') {
+                let value = this.value.replace(/,/g, '');
+                if (!value || value === '0.00') {
                     this.value = '-';
+                } else {
+                    // Remove formatting but keep the minus sign if present
+                    value = value.replace(/[^\d.-]/g, '');
+                    // Ensure there's a minus sign
+                    if (!value.startsWith('-')) {
+                        value = '-' + value;
+                    }
+                    this.value = value;
                 }
             });
-            
+
+            input.addEventListener('input', function(e) {
+                let value = this.value;
+                // Remove any existing minus signs
+                value = value.replace(/-/g, '');
+                // Always add a minus sign at the start
+                value = '-' + value;
+                
+                // If this is a gross expense field, apply formatting while typing
+                if (grossExpenseFields.includes(this.id)) {
+                    // Remove non-digits except decimal point
+                    value = value.replace(/[^\d.-]/g, '');
+                    
+                    // Format with commas if there are digits
+                    if (value !== '-') {
+                        const parts = value.substring(1).split('.');
+                        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+                        value = '-' + parts.join('.');
+                    }
+                }
+                
+                this.value = value;
+            });
+
             input.addEventListener('blur', function() {
-                if (this.value === '-') {
+                let value = this.value.replace(/,/g, '');
+                // Only remove minus sign if it's the only character
+                if (value === '-') {
                     this.value = '';
+                } else if (value) {
+                    // Format the value while ensuring it stays negative
+                    value = value.replace(/[^\d.-]/g, '');
+                    // Make sure the value is negative
+                    value = -Math.abs(parseFloat(value) || 0);
+                    this.value = formatCalculatedValue(value);
                 }
+                calculateAll();
             });
+
+            // Initial formatting to ensure negative values
+            const currentValue = input.value.replace(/,/g, '');
+            if (currentValue && currentValue !== '0.00') {
+                input.value = formatCalculatedValue(-Math.abs(parseFloat(currentValue)));
+            }
         }
     });
 
