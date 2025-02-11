@@ -86,19 +86,19 @@ function generatePDF() {
         {
             title: 'Gross Expenses',
             inputs: [
-                { id: ['B20', 'C20', 'D20'], label: 'Refuse' },
-                { id: ['B21', 'C21', 'D21'], label: 'Water and Sewer' },
-                { id: ['B26', 'C26', 'D26'], label: 'Property Taxes' },
-                { id: ['B22', 'C22', 'D22'], label: 'Electric' },
-                { id: ['B24', 'C24', 'D24'], label: 'Gas' },
-                { id: ['B23', 'C23', 'D23'], label: 'Internet' },
-                { id: ['B29', 'C29', 'D29'], label: 'Lawn Care' },
-                { id: ['B27', 'C27', 'D27'], label: 'Maintenance' },
-                { id: ['B28', 'C28', 'D28'], label: 'Vacancy Rate' },
-                { id: ['B30', 'C30', 'D30'], label: 'Mortgage Insurance' },
-                { id: ['B25', 'C25', 'D25'], label: 'Property Insurance' },
-                { id: ['B31', 'C31', 'D31'], label: 'HOA' },
-                { id: ['B32', 'C32', 'D32'], label: 'Property Management' }
+                { id: ['B20', 'C20', 'D20'], label: 'Refuse', format: formatCurrency },
+                { id: ['B21', 'C21', 'D21'], label: 'Water and Sewer', format: formatCurrency },
+                { id: ['B26', 'C26', 'D26'], label: 'Property Taxes', format: formatCurrency },
+                { id: ['B22', 'C22', 'D22'], label: 'Electric', format: formatCurrency },
+                { id: ['B24', 'C24', 'D24'], label: 'Gas', format: formatCurrency },
+                { id: ['B23', 'C23', 'D23'], label: 'Internet', format: formatCurrency },
+                { id: ['B29', 'C29', 'D29'], label: 'Lawn Care', format: formatCurrency },
+                { id: ['B27', 'C27', 'D27'], label: 'Maintenance', format: formatCurrency },
+                { id: ['B28', 'C28', 'D28'], label: 'Vacancy Rate',  format: formatPercentage },
+                { id: ['B30', 'C30', 'D30'], label: 'Mortgage Insurance', format: formatCurrency },
+                { id: ['B25', 'C25', 'D25'], label: 'Property Insurance', format: formatCurrency },
+                { id: ['B31', 'C31', 'D31'], label: 'HOA', format: formatCurrency },
+                { id: ['B32', 'C32', 'D32'], label: 'Property Management', format: formatCurrency }
             ]
         },
         {
@@ -229,9 +229,9 @@ function generatePDF() {
                 if (values.some(v => v)) {
                     tableData.push([
                         { text: getLabelText(input.id[0]) || input.label, fillColor: '#ffc8c8' },
-                        { text: formatCurrency(values[0]), fillColor: '#ffc8c8' },
-                        { text: formatCurrency(values[1]), fillColor: '#ffc8c8' },
-                        { text: formatCurrency(values[2]), fillColor: '#ffc8c8' }
+                        { text: input.format(getInputValue(input.id[0])), fillColor: '#ffc8c8' },
+                        { text: input.format(getInputValue(input.id[1])), fillColor: '#ffc8c8' },
+                        { text: input.format(getInputValue(input.id[2])), fillColor: '#ffc8c8' }
                     ]);
                 }
             });
