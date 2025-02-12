@@ -71,34 +71,36 @@ function generatePDF() {
                 { id: 'B3', label: 'Down Payment Amount', format: formatCurrency },
                 { id: 'B4', label: 'Closing Date', format: value => value },
                 { id: 'B5', label: 'Loan Amount', format: formatCurrency },
-                { id: 'B6', label: 'Interest Rate', format: formatPercentage },
-                { id: 'B7', label: 'Term', format: value => value + ' Years' },
-                { id: 'B8', label: 'Payment Frequency', format: value => value },
+                { id: 'B6', label: 'Annual Interest Rate', format: formatPercentage },
+                { id: 'B7', label: 'Loan Term Period', format: value => value + ' Years' },
+                { id: 'B8', label: 'Payments per Period', format: value => value },
                 { id: 'B9', label: 'Total Payments', format: value => value },
                 { id: 'B10', label: 'Payment per Period', format: formatCurrency },
-                { id: 'B11', label: 'Total Interest', format: formatCurrency },
-                { id: 'B12', label: 'Total Cost', format: formatCurrency },
+                { id: 'B11', label: 'Total Loan Cost', format: formatCurrency },
+                { id: 'B12', label: 'Interest Cost', format: formatCurrency },
                 { id: 'B13', label: 'Closing Costs', format: formatPercentage },
                 { id: 'B14', label: 'Inspection', format: formatCurrency },
-                { id: 'B15', label: 'Total Cash Required', format: formatCurrency }
+                { id: 'B15', label: 'Down Payment + Closing Cost (% of Purchase Price) + Inspection', format: formatCurrency },
+				{ id: 'Loan-Type', label: 'Loan Type', format: value => value }
             ]
         },
         {
             title: 'Gross Expenses',
             inputs: [
-                { id: ['B20', 'C20', 'D20'], label: 'Refuse', format: formatCurrency },
-                { id: ['B21', 'C21', 'D21'], label: 'Water and Sewer', format: formatCurrency },
-                { id: ['B26', 'C26', 'D26'], label: 'Property Taxes', format: formatCurrency },
-                { id: ['B22', 'C22', 'D22'], label: 'Electric', format: formatCurrency },
-                { id: ['B24', 'C24', 'D24'], label: 'Gas', format: formatCurrency },
-                { id: ['B23', 'C23', 'D23'], label: 'Internet', format: formatCurrency },
-                { id: ['B29', 'C29', 'D29'], label: 'Lawn Care', format: formatCurrency },
-                { id: ['B27', 'C27', 'D27'], label: 'Maintenance', format: formatCurrency },
-                { id: ['B28', 'C28', 'D28'], label: 'Vacancy Rate',  format: formatPercentage },
-                { id: ['B30', 'C30', 'D30'], label: 'Mortgage Insurance', format: formatCurrency },
-                { id: ['B25', 'C25', 'D25'], label: 'Property Insurance', format: formatCurrency },
-                { id: ['B31', 'C31', 'D31'], label: 'HOA', format: formatCurrency },
-                { id: ['B32', 'C32', 'D32'], label: 'Property Management', format: formatCurrency }
+                { id: ['B19', 'C19', 'D19'], label: 'Refuse' },
+                { id: ['B20', 'C20', 'D20'], label: 'Water' },
+                { id: ['B21', 'C21', 'D21'], label: 'Sewer' },
+                { id: ['B22', 'C22', 'D22'], label: 'Property Taxes' },
+                { id: ['B23', 'C23', 'D23'], label: 'Electric' },
+                { id: ['B24', 'C24', 'D24'], label: 'Gas' },
+                { id: ['B25', 'C25', 'D25'], label: 'Internet' },
+                { id: ['B26', 'C26', 'D26'], label: 'Lawn Care' },
+                { id: ['B27', 'C27', 'D27'], label: 'Maintenance' },
+                { id: ['B28', 'C28', 'D28'], label: 'Vacancy Rate', format: formatPercentage },
+                { id: ['B29', 'C29', 'D29'], label: 'Mortgage Insurance' },
+                { id: ['B30', 'C30', 'D30'], label: 'Property Insurance' },
+                { id: ['B31', 'C31', 'D31'], label: 'HOA' },
+                { id: ['B32', 'C32', 'D32'], label: 'Property Management' }
             ]
         },
         {
@@ -108,7 +110,7 @@ function generatePDF() {
                 const parking = [];
                 
                 // Check units
-                for (let i = 1; i <= 12; i++) {
+                for (let i = 1; i <= 15; i++) {
                     const baseIndex = 32 + i;
                     const value = getInputValue(`B${baseIndex}`);
                     if (value && parseFloat(value) !== 0) {
@@ -121,7 +123,7 @@ function generatePDF() {
                 }
                 
                 // Check parking
-                for (let i = 1; i <= 12; i++) {
+                for (let i = 1; i <= 15; i++) {
                     const baseIndex = 47 + i;
                     const value = getInputValue(`B${baseIndex}`);
                     if (value && parseFloat(value) !== 0) {
@@ -229,9 +231,9 @@ function generatePDF() {
                 if (values.some(v => v)) {
                     tableData.push([
                         { text: getLabelText(input.id[0]) || input.label, fillColor: '#ffc8c8' },
-                        { text: input.format(getInputValue(input.id[0])), fillColor: '#ffc8c8' },
-                        { text: input.format(getInputValue(input.id[1])), fillColor: '#ffc8c8' },
-                        { text: input.format(getInputValue(input.id[2])), fillColor: '#ffc8c8' }
+                        { text: input.label === 'Vacancy Rate' ? formatPercentage(values[0]) : formatCurrency(values[0]), fillColor: '#ffc8c8' },
+                        { text: input.label === 'Vacancy Rate' ? formatPercentage(values[1]) : formatCurrency(values[1]), fillColor: '#ffc8c8' },
+                        { text: input.label === 'Vacancy Rate' ? formatPercentage(values[2]) : formatCurrency(values[2]), fillColor: '#ffc8c8' }
                     ]);
                 }
             });
