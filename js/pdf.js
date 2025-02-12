@@ -371,5 +371,17 @@ function generatePDF() {
     };
 
     // Generate and download the PDF
-    pdfMake.createPdf(docDefinition).download('property-calculator.pdf');
+    const address = getInputValue('autocomplete');
+    const purchasePrice = getInputValue('B1');
+    
+    let fileName = 'property-calculator.pdf';
+    if (address && address.trim() !== '') {
+        // Clean the address to make it file-name safe
+        fileName = address.replace(/[^a-z0-9]/gi, '_').toLowerCase() + '.pdf';
+    } else if (purchasePrice && purchasePrice.trim() !== '') {
+        // Use purchase price if address is not available
+        fileName = 'property_' + purchasePrice.replace(/[^0-9.]/g, '') + '.pdf';
+    }
+
+    pdfMake.createPdf(docDefinition).download(fileName);
 }
