@@ -90,8 +90,8 @@ function calculateRow64() {
     // Sum the ranges for expenses (B20:B27 and B29:B32)
     let b64Sum = 0, c64Sum = 0, d64Sum = 0;
     
-    // Sum range 20-27
-    for(let i = 20; i <= 27; i++) {
+    // Sum range 19-27
+    for(let i = 19; i <= 27; i++) {
         b64Sum += parseFloat(document.getElementById('B' + i).value.replace(/,/g, '')) || 0;
         c64Sum += parseFloat(document.getElementById('C' + i).value.replace(/,/g, '')) || 0;
         d64Sum += parseFloat(document.getElementById('D' + i).value.replace(/,/g, '')) || 0;
@@ -171,8 +171,8 @@ function calculateAll() {
         document.getElementById('B12').value = formatCalculatedValue(B12);
         document.getElementById('B15').value = formatCalculatedValue(B15);
 
-        // Calculate averages for all rows from 20 to 62
-        for (let i = 20; i <= 62; i++) {
+        // Calculate averages for all rows from 19 to 62
+        for (let i = 19; i <= 62; i++) {
             const B = parseFloat(document.getElementById('B' + i).value.replace(/,/g, '')) || 0;
             const C = parseFloat(document.getElementById('C' + i).value.replace(/,/g, '')) || 0;
             const avg = (B + C) / 2;
@@ -195,7 +195,7 @@ function calculateAll() {
 document.addEventListener('DOMContentLoaded', () => {
     // Expense fields that should have minus sign behavior
     const expenseFields = [
-        'B20', 'C20', 'D20', 'B21', 'C21', 'D21', 'B22', 'C22', 'D22',
+        'B19', 'C19', 'D19', 'B20', 'C20', 'D20', 'B21', 'C21', 'D21', 'B22', 'C22', 'D22',
         'B23', 'C23', 'D23', 'B24', 'C24', 'D24', 'B25', 'C25', 'D25',
         'B26', 'C26', 'D26', 'B27', 'C27', 'D27', 'B29', 'C29', 'D29',
         'B30', 'C30', 'D30', 'B31', 'C31', 'D31', 'B32', 'C32', 'D32'
@@ -203,8 +203,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Gross Expenses fields (B and C columns only)
     const grossExpenseFields = [
-        'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
-        'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32'
+        'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
+        'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32'
     ];
     
     // Add focus and blur events for expense fields
