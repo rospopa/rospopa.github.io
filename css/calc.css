@@ -143,6 +143,7 @@ input[readonly] {
 
 .table > thead > tr > th {
   background-color: #ffc8c8;
+  vertical-align: middle;
 }
 
 #calculator > div.total-cashflow-subsection > div > table > thead > tr {
@@ -192,10 +193,11 @@ input[readonly] {
 
 #calculator > div.income-subsection > div > table > tbody > tr > td {
   background-color: #c1fdc1;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 #calculator > div.income-subsection > div > table > thead > tr > th {
-  vertical-align: middle;
   background-color: #c1fdc1;
 }
 
@@ -425,12 +427,12 @@ input[readonly] {
 .calcheaderbtn {
   width: auto;
   display: flex;
-  justify-content: end;
+  justify-content: space-between;
 }
 
 @media (min-width: 732px) {
   .calcheaderbtn {
-    justify-content: end;
+    justify-content: space-between;
   }
 }
 
@@ -500,4 +502,24 @@ mb-3 {
   div.input-group input.form-control, h6.tab-cell-heading, h6.padr, h6.padr2, thead tr th {
     font-size: 0.96rem;
   }
+}
+
+.btn-cln-inpt {
+  border-radius: 48px;
+  background: rgb(252,68,28);
+  /*font-family: 'Noto Sans Inscriptional Pahlavi', sans-serif;*/
+  line-height: 1;
+  padding: 2px 10px;
+  font-size: 15px;
+}
+
+.btn-cln-inpt:hover {
+  border-color: #fff;
+  box-shadow: 0px 0px 4px 1px rgb(0,13,25,0.3);
+}
+
+.col-form-label {
+  padding: .2rem .05rem;
+  /*padding-top: 0;*/
+  /*padding-bottom: 0;*/
 }
