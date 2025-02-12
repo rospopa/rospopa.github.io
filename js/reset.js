@@ -20,12 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
             select.dispatchEvent(event);
         });
 
-        // Clear localStorage cache
-        localStorage.clear();
-
-        // Clear sessionStorage cache
-        sessionStorage.clear();
-
         // Reset any custom input formatting (like currency formatting)
         const currencyInputs = document.querySelectorAll('[data-type="currency"]');
         currencyInputs.forEach(input => {
@@ -54,10 +48,16 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
 
+        // Clear localStorage cache
+        localStorage.clear();
+
+        // Clear sessionStorage cache
+        sessionStorage.clear();
+
         // Show a success message to the user
-        alert('All fields have been reset successfully!');
+        //alert('All fields have been reset successfully!');
 
         // Optionally reload the page to ensure a completely fresh state
-        // window.location.reload();
+        window.location.reload();
     });
 });
