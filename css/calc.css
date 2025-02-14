@@ -530,8 +530,8 @@ mb-3 {
   padding-bottom: 0;
 }
 
-#Term {
-  /*font-weight: bold;*/
+span#Term {
+  font-weight: bold;
 }
 
 .row.cell-tab-lable {
