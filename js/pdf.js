@@ -104,7 +104,7 @@ function generatePDF() {
                 { id: 'B3', label: 'Down Payment Amount', format: formatCurrency },
                 { id: 'B4', label: 'Closing Date', format: value => value },
                 { id: 'B5', label: 'Loan Amount', format: formatCurrency },
-                { id: 'B6', label: 'Annual Interest Rate', format: formatPercentage },
+                { id: 'B6', label: 'Interest Rate', format: formatPercentage },
                 { id: 'B7', label: 'Loan Term Period', format: value => value + ' ' + termsPeriod + '(s)' },
                 { id: 'B8', label: (termsPeriod) => `Payments per ${termsPeriod}`, format: value => value + ' ' + 'payment(s) per ' + termsPeriod },
                 { id: 'B9', label: 'Total Payments', format: value => value },
@@ -114,7 +114,7 @@ function generatePDF() {
                 { id: 'B13', label: 'Closing Costs', format: formatPercentage },
                 { id: 'B14', label: 'Inspection', format: formatCurrency },
                 { id: 'B15', label: 'Down Payment + Closing Cost (% of Purchase Price) + Inspection', format: formatCurrency },
-				{ id: 'Loan-Type', label: 'Loan Type', format: value => value }
+		{ id: 'Loan-Type', label: 'Loan Type', format: value => value }
             ]
         },
         {
