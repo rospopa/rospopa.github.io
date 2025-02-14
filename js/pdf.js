@@ -106,7 +106,7 @@ function generatePDF() {
                 { id: 'B5', label: 'Loan Amount', format: formatCurrency },
                 { id: 'B6', label: 'Annual Interest Rate', format: formatPercentage },
                 { id: 'B7', label: 'Loan Term Period', format: value => value + ' ' + termsPeriod + '(s)' },
-                { id: 'B8', label: (termsPeriod) => `Payments per ${termsPeriod}`, format: value => value },
+                { id: 'B8', label: (termsPeriod) => `Payments per ${termsPeriod}`, format: value => value + ' ' + 'payment(s) per ' + termsPeriod },
                 { id: 'B9', label: 'Total Payments', format: value => value },
                 { id: 'B10', label: 'Amount per Payment', format: formatCurrency },
                 { id: 'B11', label: 'Total Loan Cost', format: formatCurrency },
