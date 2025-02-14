@@ -24,9 +24,29 @@ function generatePDF() {
             console.log('Element not found:', id);
             return '';
         }
-        // For currency inputs, remove any existing formatting
+        
+        // For currency inputs, remove any existing formatting but keep negative signs
         if (element.getAttribute('data-type') === 'currency') {
-            return element.value.replace(/[^0-9.-]+/g, '') || '0';
+            const rawValue = element.value;
+            console.log('Raw value for ' + id + ':', rawValue);
+            
+            // First, check if the value is already a clean number
+            if (!isNaN(rawValue) && rawValue !== '') {
+                console.log('Clean number value:', rawValue);
+                return rawValue;
+            }
+            
+            // Remove currency symbol and commas, but keep negative sign and decimal point
+            let cleanValue = rawValue.replace(/[^-0-9.]/g, '');
+            
+            // Handle empty or invalid values
+            if (!cleanValue || isNaN(cleanValue)) {
+                console.log('Invalid/empty value, returning 0');
+                return '0';
+            }
+            
+            console.log('Cleaned value:', cleanValue);
+            return cleanValue;
         }
         return element.value || '';
     };
@@ -46,12 +66,24 @@ function generatePDF() {
     };
 
     const formatCurrency = (value) => {
-        const num = parseFloat(value);
+        // Handle empty or invalid values
+        if (!value || value === '') return '$0.00';
+        
+        // Clean the input value - remove everything except numbers, decimal point and minus sign
+        const cleanValue = value.toString().replace(/[^-0-9.]/g, '');
+        
+        // Convert to number
+        const num = parseFloat(cleanValue);
         if (isNaN(num)) return '$0.00';
-        return '$' + num.toLocaleString('en-US', {
+        
+        // Format with proper commas and decimals
+        const formatted = Math.abs(num).toLocaleString('en-US', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
         });
+        
+        // Add negative sign if needed
+        return (num < 0 ? '-$' : '$') + formatted;
     };
 
     const formatPercentage = (value) => {
@@ -74,7 +106,7 @@ function generatePDF() {
                 { id: 'B5', label: 'Loan Amount', format: formatCurrency },
                 { id: 'B6', label: 'Annual Interest Rate', format: formatPercentage },
                 { id: 'B7', label: 'Loan Term Period', format: value => value + ' ' + termsPeriod + '(s)' },
-                { id: 'B8', label: (termsPeriod) => `Payments per ${termsPeriod}`, format: value => value + ' ' + 'payment(s) per ' + termsPeriod },
+                { id: 'B8', label: (termsPeriod) => `Payments per ${termsPeriod}`, format: value => value },
                 { id: 'B9', label: 'Total Payments', format: value => value },
                 { id: 'B10', label: 'Amount per Payment', format: formatCurrency },
                 { id: 'B11', label: 'Total Loan Cost', format: formatCurrency },
@@ -88,20 +120,20 @@ function generatePDF() {
         {
             title: 'Gross Expenses',
             inputs: [
-                { id: ['B19', 'C19', 'D19'], label: 'Refuse' },
-                { id: ['B20', 'C20', 'D20'], label: 'Water' },
-                { id: ['B21', 'C21', 'D21'], label: 'Sewer' },
-                { id: ['B22', 'C22', 'D22'], label: 'Property Taxes' },
-                { id: ['B23', 'C23', 'D23'], label: 'Electric' },
-                { id: ['B24', 'C24', 'D24'], label: 'Gas' },
-                { id: ['B25', 'C25', 'D25'], label: 'Internet' },
-                { id: ['B26', 'C26', 'D26'], label: 'Lawn Care' },
-                { id: ['B27', 'C27', 'D27'], label: 'Maintenance' },
+                { id: ['B19', 'C19', 'D19'], label: 'Refuse', format: formatCurrency },
+                { id: ['B20', 'C20', 'D20'], label: 'Water', format: formatCurrency },
+                { id: ['B21', 'C21', 'D21'], label: 'Sewer', format: formatCurrency },
+                { id: ['B22', 'C22', 'D22'], label: 'Property Taxes', format: formatCurrency },
+                { id: ['B23', 'C23', 'D23'], label: 'Electric', format: formatCurrency },
+                { id: ['B24', 'C24', 'D24'], label: 'Gas', format: formatCurrency },
+                { id: ['B25', 'C25', 'D25'], label: 'Internet', format: formatCurrency },
+                { id: ['B26', 'C26', 'D26'], label: 'Lawn Care', format: formatCurrency },
+                { id: ['B27', 'C27', 'D27'], label: 'Maintenance', format: formatCurrency },
                 { id: ['B28', 'C28', 'D28'], label: 'Vacancy Rate', format: formatPercentage },
-                { id: ['B29', 'C29', 'D29'], label: 'Mortgage Insurance' },
-                { id: ['B30', 'C30', 'D30'], label: 'Property Insurance' },
-                { id: ['B31', 'C31', 'D31'], label: 'HOA' },
-                { id: ['B32', 'C32', 'D32'], label: 'Property Management' }
+                { id: ['B29', 'C29', 'D29'], label: 'Mortgage Insurance', format: formatCurrency },
+                { id: ['B30', 'C30', 'D30'], label: 'Property Insurance', format: formatCurrency },
+                { id: ['B31', 'C31', 'D31'], label: 'HOA', format: formatCurrency },
+                { id: ['B32', 'C32', 'D32'], label: 'Property Management', format: formatCurrency }
             ]
         },
         {
@@ -173,16 +205,16 @@ function generatePDF() {
                     ],
                     ...units.map(input => [
                         { text: input.label, fillColor: '#c1fdc1' },
-                        { text: input.format(getInputValue(input.id[0])), fillColor: '#c1fdc1' },
-                        { text: input.format(getInputValue(input.id[1])), fillColor: '#c1fdc1' },
-                        { text: input.format(getInputValue(input.id[2])), fillColor: '#c1fdc1' }
+                        { text: input.format(getInputValue(input.id[0])), fillColor: '#c1fdc1', alignment: 'right' },
+                        { text: input.format(getInputValue(input.id[1])), fillColor: '#c1fdc1', alignment: 'right' },
+                        { text: input.format(getInputValue(input.id[2])), fillColor: '#c1fdc1', alignment: 'right' }
                     ])
                 ];
 
                 content.push({
                     table: {
                         headerRows: 2,
-                        widths: ['*', 'auto', 'auto', 'auto'],
+                        widths: ['*', 100, 100, 100],
                         body: tableData,
                         layout: getTableLayout()
                     }
@@ -201,16 +233,16 @@ function generatePDF() {
                     ],
                     ...parking.map(input => [
                         { text: input.label, fillColor: '#c1fdc1' },
-                        { text: input.format(getInputValue(input.id[0])), fillColor: '#c1fdc1' },
-                        { text: input.format(getInputValue(input.id[1])), fillColor: '#c1fdc1' },
-                        { text: input.format(getInputValue(input.id[2])), fillColor: '#c1fdc1' }
+                        { text: input.format(getInputValue(input.id[0])), fillColor: '#c1fdc1', alignment: 'right' },
+                        { text: input.format(getInputValue(input.id[1])), fillColor: '#c1fdc1', alignment: 'right' },
+                        { text: input.format(getInputValue(input.id[2])), fillColor: '#c1fdc1', alignment: 'right' }
                     ])
                 ];
 
                 content.push({
                     table: {
                         headerRows: 2,
-                        widths: ['*', 'auto', 'auto', 'auto'],
+                        widths: ['*', 100, 100, 100],
                         body: tableData,
                         layout: getTableLayout()
                     }
@@ -228,13 +260,23 @@ function generatePDF() {
             ];
             
             section.inputs.forEach(input => {
-                const values = input.id.map(id => getInputValue(id));
+                const values = input.id.map(id => {
+                    const rawValue = getInputValue(id);
+                    // For currency fields, ensure we're getting the numeric value
+                    const element = document.getElementById(id);
+                    if (element && element.getAttribute('data-type') === 'currency') {
+                        // Remove any existing formatting but keep negative signs and decimals
+                        return rawValue.replace(/[^-0-9.]/g, '');
+                    }
+                    return rawValue;
+                });
+
                 if (values.some(v => v)) {
                     tableData.push([
                         { text: getLabelText(input.id[0]) || input.label, fillColor: '#ffc8c8' },
-                        { text: input.label === 'Vacancy Rate' ? formatPercentage(values[0]) : formatCurrency(values[0]), fillColor: '#ffc8c8' },
-                        { text: input.label === 'Vacancy Rate' ? formatPercentage(values[1]) : formatCurrency(values[1]), fillColor: '#ffc8c8' },
-                        { text: input.label === 'Vacancy Rate' ? formatPercentage(values[2]) : formatCurrency(values[2]), fillColor: '#ffc8c8' }
+                        { text: input.format(values[0]), fillColor: '#ffc8c8', alignment: 'right' },
+                        { text: input.format(values[1]), fillColor: '#ffc8c8', alignment: 'right' },
+                        { text: input.format(values[2]), fillColor: '#ffc8c8', alignment: 'right' }
                     ]);
                 }
             });
@@ -242,9 +284,9 @@ function generatePDF() {
             content.push({
                 table: {
                     headerRows: 2,
-                    widths: ['*', 'auto', 'auto', 'auto'],
+                    widths: ['*', 100, 100, 100],
                     body: tableData,
-                    layout: getTableLayout()
+                    layout: getTableLayout(true)
                 }
             });
         } else if (section.title === 'Total Cash Flow') {
@@ -266,13 +308,23 @@ function generatePDF() {
             ];
 
             inputs.forEach(input => {
-                const values = input.id.map(id => getInputValue(id));
+                const values = input.id.map(id => {
+                    const rawValue = getInputValue(id);
+                    // For currency fields, ensure we're getting the numeric value
+                    const element = document.getElementById(id);
+                    if (element && element.getAttribute('data-type') === 'currency') {
+                        // Remove any existing formatting but keep negative signs and decimals
+                        return rawValue.replace(/[^-0-9.]/g, '');
+                    }
+                    return rawValue;
+                });
+
                 if (values.some(v => v)) {
                     tableData.push([
                         { text: getLabelText(input.id[0]) || input.label, fillColor: '#dfdfdf' },
-                        { text: formatCurrency(values[0]), fillColor: '#dfdfdf' },
-                        { text: formatCurrency(values[1]), fillColor: '#dfdfdf' },
-                        { text: formatCurrency(values[2]), fillColor: '#dfdfdf' }
+                        { text: formatCurrency(values[0]), fillColor: '#dfdfdf', alignment: 'right' },
+                        { text: formatCurrency(values[1]), fillColor: '#dfdfdf', alignment: 'right' },
+                        { text: formatCurrency(values[2]), fillColor: '#dfdfdf', alignment: 'right' }
                     ]);
                 }
             });
@@ -280,7 +332,7 @@ function generatePDF() {
             content.push({
                 table: {
                     headerRows: 2,
-                    widths: ['*', 'auto', 'auto', 'auto'],
+                    widths: ['*', 100, 100, 100],
                     body: tableData,
                     layout: getTableLayout()
                 }
