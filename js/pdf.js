@@ -60,6 +60,7 @@ function generatePDF() {
         return isNaN(num) ? '0%' : num.toFixed(2) + '%';
     };
 
+    const termsPeriod = document.getElementById('TermsPeriod').value || 'Year';
     // Define sections for the PDF
     const sections = [
         {
@@ -72,10 +73,10 @@ function generatePDF() {
                 { id: 'B4', label: 'Closing Date', format: value => value },
                 { id: 'B5', label: 'Loan Amount', format: formatCurrency },
                 { id: 'B6', label: 'Annual Interest Rate', format: formatPercentage },
-                { id: 'B7', label: 'Loan Term Period', format: value => value + ' Years' },
-                { id: 'B8', label: 'Payments per Period', format: value => value },
+                { id: 'B7', label: 'Loan Term Period', format: value => value + ' ' + termsPeriod + '(s)' },
+                { id: 'B8', label: (termsPeriod) => `Payments per ${termsPeriod}`, format: value => value + ' ' + 'payment(s) per ' + termsPeriod },
                 { id: 'B9', label: 'Total Payments', format: value => value },
-                { id: 'B10', label: 'Payment per Period', format: formatCurrency },
+                { id: 'B10', label: 'Amount per Payment', format: formatCurrency },
                 { id: 'B11', label: 'Total Loan Cost', format: formatCurrency },
                 { id: 'B12', label: 'Interest Cost', format: formatCurrency },
                 { id: 'B13', label: 'Closing Costs', format: formatPercentage },
@@ -297,9 +298,9 @@ function generatePDF() {
             section.inputs.forEach(input => {
                 const value = getInputValue(input.id);
                 if (value) {
-                    const label = getLabelText(input.id) || input.label;
+                    const labelText = typeof input.label === 'function' ? input.label(termsPeriod) : (getLabelText(input.id) || input.label);
                     const formattedValue = input.format ? input.format(value) : formatCurrency(value);
-                    tableData.push([label, formattedValue]);
+                    tableData.push([labelText, formattedValue]);
                 }
             });
 
