@@ -1,5 +1,10 @@
+.tab-cell-row {
+  margin-left: .5rem;
+}
+
 .park-row, .unit-row {
   display: none;
+  /*height: 30px;*/
 }
 
 .btn-group.d-inline-flex {
@@ -173,7 +178,7 @@ input[readonly] {
 }
 
 .table > :not(caption) > * > * {
-  padding: .2rem .05rem;
+  padding: 1px 1px;
 }
 
 .form-label {
@@ -193,8 +198,8 @@ input[readonly] {
 
 #calculator > div.income-subsection > div > table > tbody > tr > td {
   background-color: #c1fdc1;
-  padding-top: 0;
-  padding-bottom: 0;
+  /*padding-top: 0;*/
+  /*padding-bottom: 0;*/
 }
 
 #calculator > div.income-subsection > div > table > thead > tr > th {
@@ -454,7 +459,7 @@ div.input-group span.input-group-text {
   font-weight: bold;
 }
 
-div.form-group select.form-select {
+div.form-group select.form-select, select.form-select {
   padding: 0rem 0rem;
   padding-top: 5px;
   padding-bottom: 2px;
@@ -463,6 +468,12 @@ div.form-group select.form-select {
   vertical-align: middle;
   line-height: normal;
   /*font-weight: bold;*/
+}
+
+#TermsPeriod {
+  width: auto;
+  min-width: 100px;
+  font-weight: bold;
 }
 
 div.input-group input.form-control {
@@ -486,11 +497,6 @@ div.input-group input.form-control {
 
 mb-3 {
   width: 100%;
-}
-
-.row {
-  margin-left: 0;
-  margin-right: 0;
 }
 
 .tab-cell-heading {
@@ -519,7 +525,32 @@ mb-3 {
 }
 
 .col-form-label {
-  padding: .2rem .05rem;
-  /*padding-top: 0;*/
-  /*padding-bottom: 0;*/
+  /*padding: .2rem .05rem;*/
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+#Term {
+  /*font-weight: bold;*/
+}
+
+.row.cell-tab-lable {
+  --bs-gutter-x: 0;
+  --bs-gutter-y: 0;
+  display: flex;
+  flex-wrap: wrap;
+  /*margin-top: -.2rem;*/
+  /*margin-bottom: -.2rem;*/
+  /*margin-right: calc(-.5 * var(--bs-gutter-x));*/
+  /*margin-left: calc(-.5 * var(--bs-gutter-x));*/
+  margin: 0;
+  padding: 0;
+}
+
+div.row div.col.rci {
+  width: auto;
+  margin: auto;
+  margin-top: .2rem;
+  margin-bottom: 0;
+  max-width: 16px;
 }
