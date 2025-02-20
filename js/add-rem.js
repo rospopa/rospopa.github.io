@@ -56,4 +56,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Налаштування для Parking
   setupRowControls("addRowP", "removeRowP", "park-row");
+
+  // Налаштування для Custom
+  setupRowControls("addRowC", "removeRowC", "cust-row");
 });
