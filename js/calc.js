@@ -37,6 +37,22 @@ function formatCurrency(input, blur) {
     input.value = isNegative ? '-' + value : value;
 }
 
+function formatPercentage(input, blur) {
+    let value = input.value;
+    
+    // If empty, do nothing
+    if (!value) return;
+    
+    // For number input, we get a numeric value directly
+    const number = parseFloat(value);
+    
+    // If it's a valid number, format it
+    if (!isNaN(number)) {
+        // Only format with decimals on blur
+        input.value = blur ? number.toFixed(2) : number;
+    }
+}
+
 function formatCalculatedValue(value) {
     if (isNaN(value)) return "0.00";
     // Format the absolute value and add minus sign if negative
@@ -102,6 +118,13 @@ function calculateRow64() {
         b64Sum += parseFloat(document.getElementById('B' + i).value.replace(/,/g, '')) || 0;
         c64Sum += parseFloat(document.getElementById('C' + i).value.replace(/,/g, '')) || 0;
         d64Sum += parseFloat(document.getElementById('D' + i).value.replace(/,/g, '')) || 0;
+    }
+
+    // Sum range Custom Expense 1-9
+    for(let i = 1; i <= 9; i++) {
+        b64Sum += parseFloat(document.getElementById('CFB' + i).value.replace(/,/g, '')) || 0;
+        c64Sum += parseFloat(document.getElementById('CFC' + i).value.replace(/,/g, '')) || 0;
+        d64Sum += parseFloat(document.getElementById('CFD' + i).value.replace(/,/g, '')) || 0;
     }
 
     // Calculate final values with vacancy rate
@@ -171,12 +194,35 @@ function calculateAll() {
         document.getElementById('B12').value = formatCalculatedValue(B12);
         document.getElementById('B15').value = formatCalculatedValue(B15);
 
+        // Calculate row 65 first (sum of rows 33-62)
+        const row65Values = calculateRow65();
+        
+        // Calculate VRB28, VRC28, VRD28 using the updated row65Values
+        const B28 = parseFloat(document.getElementById('B28').value.replace(/,/g, '')) / 100 || 0;
+        const C28 = parseFloat(document.getElementById('C28').value.replace(/,/g, '')) / 100 || 0;
+
+        const VRB28 = B28 * row65Values.b65;
+        const VRC28 = C28 * row65Values.c65;
+        const VRD28 = (VRB28 + VRC28) / 2; // Average of VRB28 and VRC28
+
+        document.getElementById('VRB28').value = formatCalculatedValue(VRB28);
+        document.getElementById('VRC28').value = formatCalculatedValue(VRC28);
+        document.getElementById('VRD28').value = formatCalculatedValue(VRD28);
+
         // Calculate averages for all rows from 19 to 62
         for (let i = 19; i <= 62; i++) {
             const B = parseFloat(document.getElementById('B' + i).value.replace(/,/g, '')) || 0;
             const C = parseFloat(document.getElementById('C' + i).value.replace(/,/g, '')) || 0;
             const avg = (B + C) / 2;
             document.getElementById('D' + i).value = formatCalculatedValue(avg);
+        }
+        
+        // Calculate averages for all Custom Expanse rows from 1 to 9
+        for (let i = 1; i <= 9; i++) {
+            const CFB = parseFloat(document.getElementById('CFB' + i).value.replace(/,/g, '')) || 0;
+            const CFC = parseFloat(document.getElementById('CFC' + i).value.replace(/,/g, '')) || 0;
+            const avg = (CFB + CFC) / 2;
+            document.getElementById('CFD' + i).value = formatCalculatedValue(avg);
         }
 
         // B63, C63, D63 = B10
@@ -198,13 +244,18 @@ document.addEventListener('DOMContentLoaded', () => {
         'B19', 'C19', 'D19', 'B20', 'C20', 'D20', 'B21', 'C21', 'D21', 'B22', 'C22', 'D22',
         'B23', 'C23', 'D23', 'B24', 'C24', 'D24', 'B25', 'C25', 'D25',
         'B26', 'C26', 'D26', 'B27', 'C27', 'D27', 'B29', 'C29', 'D29',
-        'B30', 'C30', 'D30', 'B31', 'C31', 'D31', 'B32', 'C32', 'D32'
+        'B30', 'C30', 'D30', 'B31', 'C31', 'D31', 'B32', 'C32', 'D32',
+        'CFB1', 'CFC1', 'CFD1', 'CFB2', 'CFC2', 'CFD2', 'CFB3', 'CFC3', 'CFD3', 
+        'CFB4', 'CFC4', 'CFD4', 'CFB5', 'CFC5', 'CFD5', 'CFB6', 'CFC6', 'CFD6', 
+        'CFB7', 'CFC7', 'CFD7', 'CFB8', 'CFC8', 'CFD8', 'CFB9', 'CFC9', 'CFD9'
     ];
 
     // Gross Expenses fields (B and C columns only)
     const grossExpenseFields = [
         'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
-        'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32'
+        'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
+        'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
+        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9'
     ];
     
     // Add focus and blur events for expense fields
@@ -274,10 +325,49 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    const currencyInputs = document.querySelectorAll('[data-type="currency"]');
+    // Set up event listeners for currency inputs
+    const currencyInputs = document.querySelectorAll('input[type="text"]');
     currencyInputs.forEach(input => {
-        input.addEventListener('input', () => formatCurrency(input));
-        input.addEventListener('blur', () => formatCurrency(input, true));
+        // Skip percentage fields and custom field name inputs
+        if (!['B2', 'B6', 'B13', 'B28', 'C28'].includes(input.id) && 
+            !input.id.startsWith('CFN')) {  // Exclude CFN1-CFN9 inputs
+            input.addEventListener('input', () => formatCurrency(input, false));
+            input.addEventListener('blur', () => formatCurrency(input, true));
+        }
+    });
+
+    // Set up event listeners for percentage inputs
+    const percentageInputs = ['B2', 'B6', 'B13', 'B28', 'C28'];
+    percentageInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            // Set attributes for number input
+            input.setAttribute('type', 'number');
+            input.setAttribute('step', '0.01');
+            input.setAttribute('min', '0');
+            input.setAttribute('max', '100');
+            
+            input.addEventListener('input', function() {
+                calculateAll();
+            });
+            
+            input.addEventListener('blur', function() {
+                if (this.value) {
+                    this.value = parseFloat(this.value).toFixed(2);
+                }
+                calculateAll();
+            });
+        }
+    });
+
+    // Remove any formatting from custom field name inputs
+    const customFieldNames = ['CFN1', 'CFN2', 'CFN3', 'CFN4', 'CFN5', 'CFN6', 'CFN7', 'CFN8', 'CFN9'];
+    customFieldNames.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.setAttribute('type', 'text');
+            input.setAttribute('data-type', 'text');
+        }
     });
 
     const debouncedCalculateAll = debounce(calculateAll, 300);
