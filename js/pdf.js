@@ -114,7 +114,7 @@ function generatePDF() {
                 { id: 'B13', label: 'Closing Costs', format: formatPercentage },
                 { id: 'B14', label: 'Inspection', format: formatCurrency },
                 { id: 'B15', label: 'Down Payment + Closing Cost (% of Purchase Price) + Inspection', format: formatCurrency },
-		{ id: 'Loan-Type', label: 'Loan Type', format: value => value }
+				{ id: 'Loan-Type', label: 'Loan Type', format: value => value }
             ]
         },
         {
@@ -130,11 +130,28 @@ function generatePDF() {
                 { id: ['B26', 'C26', 'D26'], label: 'Lawn Care', format: formatCurrency },
                 { id: ['B27', 'C27', 'D27'], label: 'Maintenance', format: formatCurrency },
                 { id: ['B28', 'C28', 'D28'], label: 'Vacancy Rate', format: formatPercentage },
+                { id: ['VRB28', 'VRC28', 'VRD28'], label: 'Vacancy Risk', format: formatCurrency },
                 { id: ['B29', 'C29', 'D29'], label: 'Mortgage Insurance', format: formatCurrency },
                 { id: ['B30', 'C30', 'D30'], label: 'Property Insurance', format: formatCurrency },
                 { id: ['B31', 'C31', 'D31'], label: 'HOA', format: formatCurrency },
                 { id: ['B32', 'C32', 'D32'], label: 'Property Management', format: formatCurrency }
             ]
+        },
+        {
+            title: 'Custom Expenses',
+            rows: Array.from({ length: 9 }, (_, i) => i + 1).map(i => {
+                const fieldName = document.getElementById(`CFN${i}`).value.trim();
+                const hasValue = fieldName && (
+                    document.getElementById(`CFB${i}`).value ||
+                    document.getElementById(`CFC${i}`).value ||
+                    document.getElementById(`CFD${i}`).value
+                );
+                return hasValue ? {
+                    id: [`CFB${i}`, `CFC${i}`, `CFD${i}`],
+                    label: fieldName,
+                    format: formatCurrency
+                } : null;
+            }).filter(Boolean)
         },
         {
             title: 'Gross Revenue',
@@ -198,7 +215,7 @@ function generatePDF() {
                 const tableData = [
                     [{ text: section.title, style: 'sectionHeader', colSpan: 4, alignment: 'left', margin: [0, 10, 0, 1] }, {}, {}, {}],
                     [
-                        { text: 'Item', alignment: 'center', fillColor: '#90ee90' },
+                        { text: section.title, alignment: 'center', fillColor: '#90ee90', bold: true },
                         { text: 'Min', alignment: 'center', fillColor: '#90ee90' },
                         { text: 'Max', alignment: 'center', fillColor: '#90ee90' },
                         { text: 'Avg', alignment: 'center', fillColor: '#90ee90' }
@@ -224,9 +241,9 @@ function generatePDF() {
             // Only add parking subsection if there are parking spaces with values
             if (parking.length > 0) {
                 const tableData = [
-                    [{ text: 'Parking', colSpan: 4, alignment: 'left', margin: [0, 10, 0, 1] }, {}, {}, {}],
+                    [{ text: section.title, style: 'sectionHeader', colSpan: 4, alignment: 'left', margin: [0, 10, 0, 1] }, {}, {}, {}],
                     [
-                        { text: 'Item', alignment: 'center', fillColor: '#90ee90' },
+                        { text: section.title, alignment: 'center', fillColor: '#90ee90', bold: true },
                         { text: 'Min', alignment: 'center', fillColor: '#90ee90' },
                         { text: 'Max', alignment: 'center', fillColor: '#90ee90' },
                         { text: 'Avg', alignment: 'center', fillColor: '#90ee90' }
@@ -252,7 +269,7 @@ function generatePDF() {
             const tableData = [
                 [{ text: section.title, style: 'sectionHeader', colSpan: 4, alignment: 'left', margin: [0, 10, 0, 1] }, {}, {}, {}],
                 [
-                    { text: 'Item', alignment: 'center', fillColor: '#f08080' },
+                    { text: section.title, alignment: 'center', fillColor: '#f08080', bold: true },
                     { text: 'Min', alignment: 'center', fillColor: '#f08080' },
                     { text: 'Max', alignment: 'center', fillColor: '#f08080' },
                     { text: 'Avg', alignment: 'center', fillColor: '#f08080' }
@@ -289,11 +306,62 @@ function generatePDF() {
                     layout: getTableLayout(true)
                 }
             });
+        } else if (section.title === 'Custom Expenses') {
+            // First check if there are any custom expenses with values
+            const hasCustomExpenses = Array.from({ length: 9 }, (_, i) => i + 1).some(i => {
+                const fieldName = document.getElementById(`CFN${i}`).value.trim();
+                return fieldName && (
+                    document.getElementById(`CFB${i}`).value ||
+                    document.getElementById(`CFC${i}`).value ||
+                    document.getElementById(`CFD${i}`).value
+                );
+            });
+
+            if (hasCustomExpenses) {
+                const tableData = [
+                    [{ text: section.title, style: 'sectionHeader', colSpan: 4, alignment: 'left', margin: [0, 10, 0, 1] }, {}, {}, {}],
+                    [
+                        { text: section.title, alignment: 'center', fillColor: '#f08080', bold: true },
+                        { text: 'Min', alignment: 'center', fillColor: '#f08080' },
+                        { text: 'Max', alignment: 'center', fillColor: '#f08080' },
+                        { text: 'Avg', alignment: 'center', fillColor: '#f08080' }
+                    ]
+                ];
+
+                section.rows.forEach(input => {
+                    const values = input.id.map(id => {
+                        const rawValue = getInputValue(id);
+                        const element = document.getElementById(id);
+                        if (element && element.getAttribute('data-type') === 'currency') {
+                            return rawValue.replace(/[^-0-9.]/g, '');
+                        }
+                        return rawValue;
+                    });
+
+                    if (values.some(v => v)) {
+                        tableData.push([
+                            { text: getLabelText(input.id[0]) || input.label, fillColor: '#ffc8c8' },
+                            { text: input.format(values[0]), fillColor: '#ffc8c8', alignment: 'right' },
+                            { text: input.format(values[1]), fillColor: '#ffc8c8', alignment: 'right' },
+                            { text: input.format(values[2]), fillColor: '#ffc8c8', alignment: 'right' }
+                        ]);
+                    }
+                });
+
+                content.push({
+                    table: {
+                        headerRows: 2,
+                        widths: ['*', 100, 100, 100],
+                        body: tableData,
+                        layout: getTableLayout(true)
+                    }
+                });
+            }
         } else if (section.title === 'Total Cash Flow') {
             const tableData = [
                 [{ text: section.title, style: 'sectionHeader', colSpan: 4, alignment: 'left', margin: [0, 10, 0, 1] }, {}, {}, {}],
                 [
-                    { text: 'Item', alignment: 'center', fillColor: '#d3d3d3' },
+                    { text: section.title, alignment: 'center', fillColor: '#d3d3d3', bold: true },
                     { text: 'Min', alignment: 'center', fillColor: '#d3d3d3' },
                     { text: 'Max', alignment: 'center', fillColor: '#d3d3d3' },
                     { text: 'Avg', alignment: 'center', fillColor: '#d3d3d3' }
@@ -342,7 +410,7 @@ function generatePDF() {
             const tableData = [
                 [{ text: section.title, style: 'sectionHeader', colSpan: 2, alignment: 'left', margin: [0, 10, 0, 1] }, {}],
                 [
-                    { text: 'Item', alignment: 'center' },
+                    { text: section.title, alignment: 'center', bold: true },
                     { text: 'Value', alignment: 'center' }
                 ]
             ];
