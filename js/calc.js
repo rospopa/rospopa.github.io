@@ -329,7 +329,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const currencyInputs = document.querySelectorAll('input[type="text"]');
     currencyInputs.forEach(input => {
         // Skip percentage fields and custom field name inputs
-        if (!['B2', 'B6', 'B13', 'B28', 'C28'].includes(input.id) && 
+        if (!['B2', 'B6', 'B13', 'B28', 'C28', 'autocomplete'].includes(input.id) && 
             !input.id.startsWith('CFN')) {  // Exclude CFN1-CFN9 inputs
             input.addEventListener('input', () => formatCurrency(input, false));
             input.addEventListener('blur', () => formatCurrency(input, true));
@@ -361,7 +361,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Remove any formatting from custom field name inputs
-    const customFieldNames = ['CFN1', 'CFN2', 'CFN3', 'CFN4', 'CFN5', 'CFN6', 'CFN7', 'CFN8', 'CFN9'];
+    const customFieldNames = ['CFN1', 'CFN2', 'CFN3', 'CFN4', 'CFN5', 'CFN6', 'CFN7', 'CFN8', 'CFN9', 'autocomplete'];
     customFieldNames.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
