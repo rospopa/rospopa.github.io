@@ -201,8 +201,8 @@ function calculateAll() {
         const B28 = parseFloat(document.getElementById('B28').value.replace(/,/g, '')) / 100 || 0;
         const C28 = parseFloat(document.getElementById('C28').value.replace(/,/g, '')) / 100 || 0;
 
-        const VRB28 = B28 * row65Values.b65;
-        const VRC28 = C28 * row65Values.c65;
+        const VRB28 = B28 * row65Values.b65 * -1;
+        const VRC28 = C28 * row65Values.c65 * -1;
         const VRD28 = (VRB28 + VRC28) / 2; // Average of VRB28 and VRC28
 
         document.getElementById('VRB28').value = formatCalculatedValue(VRB28);
