@@ -40,7 +40,7 @@ function showPDFPreview() {
             background: white;
             padding: 15px;
             border-radius: 8px;
-            max-width: 100%;
+            max-width: 90%;
             max-height: 80vh;
             overflow-y: auto;
         `;
@@ -51,7 +51,7 @@ function showPDFPreview() {
 
         const fieldsContainer = document.createElement('div');
         fieldsContainer.id = 'pdfFieldsContainer';
-        fieldsContainer.style.marginLeft = '0px';
+        fieldsContainer.style.marginLeft = '20px';
 
         // Add buttons
         const buttonContainer = document.createElement('div');
@@ -154,54 +154,39 @@ function populatePDFFields(container) {
         },
         {
             title: 'Custom Expenses',
-            rows: Array.from({ length: 9 }, (_, i) => i + 1).map(i => {
-                const fieldName = document.getElementById(`CFN${i}`).value.trim();
+            inputs: Array.from({ length: 9 }, (_, i) => i + 1).map(i => {
+                const fieldName = document.getElementById(`CFN${i}`)?.value.trim();
                 const hasValue = fieldName && (
-                    document.getElementById(`CFB${i}`).value ||
-                    document.getElementById(`CFC${i}`).value ||
-                    document.getElementById(`CFD${i}`).value
+                    document.getElementById(`CFB${i}`)?.value ||
+                    document.getElementById(`CFC${i}`)?.value ||
+                    document.getElementById(`CFD${i}`)?.value
                 );
                 return hasValue ? {
                     id: [`CFB${i}`, `CFC${i}`, `CFD${i}`],
-                    label: fieldName,
-                    format: formatCurrency
+                    label: fieldName
                 } : null;
             }).filter(Boolean)
         },
         {
             title: 'Gross Revenue',
-            getInputs: () => {
-                const units = [];
-                const parking = [];
-                
-                // Check units
-                for (let i = 1; i <= 15; i++) {
-                    const baseIndex = 32 + i;
-                    const value = getInputValue(`B${baseIndex}`);
-                    if (value && parseFloat(value) !== 0) {
-                        units.push({
-                            id: [`B${baseIndex}`, `C${baseIndex}`, `D${baseIndex}`],
-                            label: `Unit ${i}`,
-                            format: formatCurrency
-                        });
-                    }
-                }
-                
-                // Check parking
-                for (let i = 1; i <= 15; i++) {
-                    const baseIndex = 47 + i;
-                    const value = getInputValue(`B${baseIndex}`);
-                    if (value && parseFloat(value) !== 0) {
-                        parking.push({
-                            id: [`B${baseIndex}`, `C${baseIndex}`, `D${baseIndex}`],
-                            label: `Parking ${i}`,
-                            format: formatCurrency
-                        });
-                    }
-                }
-                
-                return { units, parking };
-            }
+            inputs: [
+                ...Array.from({ length: 15 }, (_, i) => {
+                    const baseIndex = 33 + i;
+                    const value = document.getElementById(`B${baseIndex}`)?.value;
+                    return value && parseFloat(value.replace(/[^-0-9.]/g, '')) !== 0 ? {
+                        id: [`B${baseIndex}`, `C${baseIndex}`, `D${baseIndex}`],
+                        label: `Unit ${i + 1}`
+                    } : null;
+                }).filter(Boolean),
+                ...Array.from({ length: 15 }, (_, i) => {
+                    const baseIndex = 48 + i;
+                    const value = document.getElementById(`B${baseIndex}`)?.value;
+                    return value && parseFloat(value.replace(/[^-0-9.]/g, '')) !== 0 ? {
+                        id: [`B${baseIndex}`, `C${baseIndex}`, `D${baseIndex}`],
+                        label: `Parking ${i + 1}`
+                    } : null;
+                }).filter(Boolean)
+            ]
         },
         {
             title: 'Total Cash Flow',
@@ -222,7 +207,7 @@ function populatePDFFields(container) {
         const sectionHeaderDiv = document.createElement('div');
         sectionHeaderDiv.style.display = 'flex';
         sectionHeaderDiv.style.alignItems = 'center';
-        sectionHeaderDiv.style.marginBottom = '0px';
+        sectionHeaderDiv.style.marginBottom = '5px';
 
         // Create section checkbox
         const sectionCheckbox = document.createElement('input');
@@ -241,7 +226,7 @@ function populatePDFFields(container) {
         sectionDiv.appendChild(sectionHeaderDiv);
 
         const fieldsContainer = document.createElement('div');
-        fieldsContainer.style.marginLeft = '0px';
+        fieldsContainer.style.marginLeft = '20px';
 
         if (section.inputs) {
             // Create table for fields
@@ -496,12 +481,12 @@ function generatePDF(selectedFields) {
         },
         {
             title: 'Custom Expenses',
-            rows: Array.from({ length: 9 }, (_, i) => i + 1).map(i => {
-                const fieldName = document.getElementById(`CFN${i}`).value.trim();
+            inputs: Array.from({ length: 9 }, (_, i) => i + 1).map(i => {
+                const fieldName = document.getElementById(`CFN${i}`)?.value.trim();
                 const hasValue = fieldName && (
-                    document.getElementById(`CFB${i}`).value ||
-                    document.getElementById(`CFC${i}`).value ||
-                    document.getElementById(`CFD${i}`).value
+                    document.getElementById(`CFB${i}`)?.value ||
+                    document.getElementById(`CFC${i}`)?.value ||
+                    document.getElementById(`CFD${i}`)?.value
                 );
                 return hasValue ? {
                     id: [`CFB${i}`, `CFC${i}`, `CFD${i}`],
@@ -512,38 +497,26 @@ function generatePDF(selectedFields) {
         },
         {
             title: 'Gross Revenue',
-            getInputs: () => {
-                const units = [];
-                const parking = [];
-                
-                // Check units
-                for (let i = 1; i <= 15; i++) {
-                    const baseIndex = 32 + i;
-                    const value = getInputValue(`B${baseIndex}`);
-                    if (value && parseFloat(value) !== 0) {
-                        units.push({
-                            id: [`B${baseIndex}`, `C${baseIndex}`, `D${baseIndex}`],
-                            label: `Unit ${i}`,
-                            format: formatCurrency
-                        });
-                    }
-                }
-                
-                // Check parking
-                for (let i = 1; i <= 15; i++) {
-                    const baseIndex = 47 + i;
-                    const value = getInputValue(`B${baseIndex}`);
-                    if (value && parseFloat(value) !== 0) {
-                        parking.push({
-                            id: [`B${baseIndex}`, `C${baseIndex}`, `D${baseIndex}`],
-                            label: `Parking ${i}`,
-                            format: formatCurrency
-                        });
-                    }
-                }
-                
-                return { units, parking };
-            }
+            inputs: [
+                ...Array.from({ length: 15 }, (_, i) => {
+                    const baseIndex = 33 + i;
+                    const value = document.getElementById(`B${baseIndex}`)?.value;
+                    return value && parseFloat(value.replace(/[^-0-9.]/g, '')) !== 0 ? {
+                        id: [`B${baseIndex}`, `C${baseIndex}`, `D${baseIndex}`],
+                        label: `Unit ${i + 1}`,
+                        format: formatCurrency
+                    } : null;
+                }).filter(Boolean),
+                ...Array.from({ length: 15 }, (_, i) => {
+                    const baseIndex = 48 + i;
+                    const value = document.getElementById(`B${baseIndex}`)?.value;
+                    return value && parseFloat(value.replace(/[^-0-9.]/g, '')) !== 0 ? {
+                        id: [`B${baseIndex}`, `C${baseIndex}`, `D${baseIndex}`],
+                        label: `Parking ${i + 1}`,
+                        format: formatCurrency
+                    } : null;
+                }).filter(Boolean)
+            ]
         },
         {
             title: 'Total Cash Flow',
@@ -565,60 +538,68 @@ function generatePDF(selectedFields) {
     sections.forEach((section, index) => {
         // Special handling for Gross Revenue section
         if (section.title === 'Gross Revenue') {
-            const { units, parking } = section.getInputs();
+            // Split inputs into units and parking
+            const units = section.inputs.filter(input => input.label.startsWith('Unit'));
+            const parking = section.inputs.filter(input => input.label.startsWith('Parking'));
             
             // Only add units subsection if there are units with values
             if (units.length > 0) {
                 const tableData = [
-                    [{ text: section.title, style: 'sectionHeader', colSpan: 4, alignment: 'left', margin: [0, 10, 0, 1] }, {}, {}, {}],
+                    [{ text: 'Units', style: 'sectionHeader', colSpan: 4, alignment: 'left', margin: [0, 10, 0, 1] }, {}, {}, {}],
                     [
-                        { text: section.title, alignment: 'center', fillColor: '#90ee90', bold: true },
+                        { text: 'Unit', alignment: 'center', fillColor: '#90ee90', bold: true },
                         { text: 'Min', alignment: 'center', fillColor: '#90ee90' },
                         { text: 'Max', alignment: 'center', fillColor: '#90ee90' },
                         { text: 'Avg', alignment: 'center', fillColor: '#90ee90' }
                     ],
                     ...units.map(input => [
                         { text: input.label, fillColor: '#c1fdc1' },
-                        { text: input.format(getInputValue(input.id[0])), fillColor: '#c1fdc1', alignment: 'right' },
-                        { text: input.format(getInputValue(input.id[1])), fillColor: '#c1fdc1', alignment: 'right' },
-                        { text: input.format(getInputValue(input.id[2])), fillColor: '#c1fdc1', alignment: 'right' }
+                        { text: formatCurrency(getInputValue(input.id[0])), fillColor: '#c1fdc1', alignment: 'right' },
+                        { text: formatCurrency(getInputValue(input.id[1])), fillColor: '#c1fdc1', alignment: 'right' },
+                        { text: formatCurrency(getInputValue(input.id[2])), fillColor: '#c1fdc1', alignment: 'right' }
                     ])
                 ];
 
                 content.push({
                     table: {
-                        headerRows: 2,
-                        widths: ['*', 100, 100, 100],
-                        body: tableData,
-                        layout: getTableLayout()
+                        widths: ['*', '*', '*', '*'],
+                        body: tableData
+                    },
+                    layout: {
+                        fillColor: function (rowIndex, node, columnIndex) {
+                            return rowIndex === 0 ? '#ffffff' : null;
+                        }
                     }
                 });
             }
-            
-            // Only add parking subsection if there are parking spaces with values
+
+            // Only add parking subsection if there are parking spots with values
             if (parking.length > 0) {
                 const tableData = [
-                    [{ text: section.title, style: 'sectionHeader', colSpan: 4, alignment: 'left', margin: [0, 10, 0, 1] }, {}, {}, {}],
+                    [{ text: 'Parking', style: 'sectionHeader', colSpan: 4, alignment: 'left', margin: [0, 10, 0, 1] }, {}, {}, {}],
                     [
-                        { text: section.title, alignment: 'center', fillColor: '#90ee90', bold: true },
+                        { text: 'Parking', alignment: 'center', fillColor: '#90ee90', bold: true },
                         { text: 'Min', alignment: 'center', fillColor: '#90ee90' },
                         { text: 'Max', alignment: 'center', fillColor: '#90ee90' },
                         { text: 'Avg', alignment: 'center', fillColor: '#90ee90' }
                     ],
                     ...parking.map(input => [
                         { text: input.label, fillColor: '#c1fdc1' },
-                        { text: input.format(getInputValue(input.id[0])), fillColor: '#c1fdc1', alignment: 'right' },
-                        { text: input.format(getInputValue(input.id[1])), fillColor: '#c1fdc1', alignment: 'right' },
-                        { text: input.format(getInputValue(input.id[2])), fillColor: '#c1fdc1', alignment: 'right' }
+                        { text: formatCurrency(getInputValue(input.id[0])), fillColor: '#c1fdc1', alignment: 'right' },
+                        { text: formatCurrency(getInputValue(input.id[1])), fillColor: '#c1fdc1', alignment: 'right' },
+                        { text: formatCurrency(getInputValue(input.id[2])), fillColor: '#c1fdc1', alignment: 'right' }
                     ])
                 ];
 
                 content.push({
                     table: {
-                        headerRows: 2,
-                        widths: ['*', 100, 100, 100],
-                        body: tableData,
-                        layout: getTableLayout()
+                        widths: ['*', '*', '*', '*'],
+                        body: tableData
+                    },
+                    layout: {
+                        fillColor: function (rowIndex, node, columnIndex) {
+                            return rowIndex === 0 ? '#ffffff' : null;
+                        }
                     }
                 });
             }
@@ -685,7 +666,7 @@ function generatePDF(selectedFields) {
                     ]
                 ];
 
-                section.rows.forEach(input => {
+                section.inputs.forEach(input => {
                     const values = input.id.map(id => {
                         const rawValue = getInputValue(id);
                         const element = document.getElementById(id);
