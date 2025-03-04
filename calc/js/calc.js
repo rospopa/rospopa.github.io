@@ -404,6 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const annualTaxInput = document.getElementById('A7');
     const taxProrationCheckbox = document.getElementById('A8');
     const taxProrationRateInput = document.getElementById('A9');
+    const dateInput = document.getElementById('B4');
 
     if (yearDaysRemainInput) {
         yearDaysRemainInput.addEventListener('input', debounce(() => {
@@ -414,14 +415,72 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (annualTaxInput) {
+        // Function to reset tooltip and styles
+        const resetTooltipAndStyles = () => {
+            const tooltip = document.getElementById('date-tooltip');
+            if (tooltip) {
+                tooltip.style.display = 'none';
+            }
+            dateInput.style.backgroundColor = '';
+            dateInput.style.borderColor = '';
+        };
+
         annualTaxInput.addEventListener('input', debounce((e) => {
+            const yearDaysRemainInput = document.getElementById('A4');
+            
+            // Check if A4 is empty and A7 has a value
+            if (!yearDaysRemainInput.value && annualTaxInput.value) {
+                dateInput.style.backgroundColor = '#fff3cd';
+                dateInput.style.borderColor = '#ffeeba';
+                
+                // Create tooltip element if it doesn't exist
+                let tooltip = document.getElementById('date-tooltip');
+                if (!tooltip) {
+                    tooltip = document.createElement('div');
+                    tooltip.id = 'date-tooltip';
+                    document.body.appendChild(tooltip);
+                    
+                    // Add tooltip styles if they don't exist
+                    if (!document.getElementById('tooltip-styles')) {
+                        const style = document.createElement('style');
+                        style.id = 'tooltip-styles';
+                        style.textContent = `
+                            #date-tooltip {
+                                position: fixed;
+                                background: #333;
+                                color: white;
+                                padding: 5px 10px;
+                                border-radius: 4px;
+                                font-size: 14px;
+                                pointer-events: none;
+                                z-index: 1000;
+                                display: none;
+                            }
+                        `;
+                        document.head.appendChild(style);
+                    }
+                }
+                
+                // Position and show tooltip
+                const rect = dateInput.getBoundingClientRect();
+                tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
+                tooltip.style.top = (rect.top - 30) + 'px';
+                tooltip.textContent = 'Please select a date first';
+                tooltip.style.display = 'block';
+                
+                // Reset A7 value
+                annualTaxInput.value = '';
+                return;
+            } else {
+                resetTooltipAndStyles();
+            }
+            
             formatCurrency(annualTaxInput, false);
             calculateTaxProration();
         }, 300));
-        annualTaxInput.addEventListener('blur', (e) => {
-            formatCurrency(annualTaxInput, true);
-            calculateTaxProration();
-        });
+
+        // Add blur event handler
+        annualTaxInput.addEventListener('blur', resetTooltipAndStyles);
     }
 
     if (taxProrationRateInput) {
