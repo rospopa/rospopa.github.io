@@ -378,7 +378,7 @@ a.wrapper {
 }
 
 sup {
-  top: -.5em;
+  /*top: -.5em;*/
   cursor: help;
 }
 
