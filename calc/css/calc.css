@@ -315,7 +315,7 @@ html, body {
   background: #1DA1F2;
   border-radius: 50%;
   /*margin: .1rem;*/
-  font-size: 13px;
+  font-weight: 300;
   /*display: flex;*/
   /*justify-content: center;*/
   /*align-items: center;*/
@@ -385,12 +385,12 @@ sup {
 .tooltip:before {
   position: absolute;
   content: "";
-  height: 7px;
+  height: 8px;
   width: 8px;
   bottom: -3px;
   left: 50%;
-  transform: translate(-50%) rotate(45deg);
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  transform: translate(-50%);
+  transition: all 0.2s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 input[readonly] {
@@ -608,3 +608,27 @@ sup.wrapper.mtooltip {
 #pdfFieldsContainer div div {
   /*margin-bottom: 2px;*/
 }
+
+tbody > tr > td.tabcalctitle > div.input-group > input.form-control {
+  min-height: 25px;
+}
+
+.ATTENTION-SECTION {
+  background-color: #fff3cd;
+  border-color: #ffeeba;
+  border-style: solid;
+}
+
+h4.font-monospace {
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
+footer > div.wrap > div.home > p {
+  margin-bottom: 0;
+}
+
+footer > div.wrap > div.home {
+  padding-top: 20px;
+}
+
