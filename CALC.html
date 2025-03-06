@@ -42,6 +42,7 @@
     <div class="page-content">
         <div id="topdf" class="wrap">
             <div id="calculator">
+                <!-- Start: Modal-Reset-Cinfirmation -->
                 <div class="calcheaderbtn">
                     <div class="modal fade" role="dialog" tabindex="-1" id="confirmModal" aria-labelledby="confirmModalLabel">
                         <div class="modal-dialog modal-sm" role="document">
@@ -55,7 +56,8 @@
                         </div>
                     </div><button class="btn btn-secondary btn-cln-inpt" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal" style="font-weight: bold;">RESET ALL</button>
                     <div class="btn-group group-pdf-mail" role="group"><button class="btn btn-primary btn-sm" id="savepdf" type="button">PDF</button><button class="btn btn-success btn-sm text-nowrap" id="sendtoemail" type="button">e-mail</button></div>
-                </div><!-- Start: Investment -->
+                </div><!-- End: Modal-Reset-Cinfirmation -->
+                <!-- Start: Investment -->
                 <div class="mb-3">
                     <h1 class="text-center">Investment Property Calculator</h1>
                     <div class="row">
@@ -65,7 +67,7 @@
                             <div id="suggestions" class="suggestions"></div>
                         </div><!-- End: Address -->
                         <!-- Start: Purchase_price -->
-                        <div class="col-md-6" style="padding-right: 10px;padding-left: 10px;"><label class="form-label" for="B1"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Purchase Price"><i class="icon-question icon"></i></sup>Purchase Price</label>
+                        <div class="col-md-6" style="padding-right: 10px;padding-left: 10px;"><label class="form-label" for="B1"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Purchase Price $"><i class="icon-question icon"></i></sup>Purchase Price</label>
                             <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="B1" data-name="Purchase-Price" data-type="currency" maxlength="12" name="Purchase-Price" placeholder="0.00" step="0.01"></div>
                         </div><!-- End: Purchase_price -->
                         <!-- Start: Down_Payment_% -->
@@ -85,28 +87,28 @@
                             <div class="input-group"><input class="form-control" type="text" id="A4" name="Year-days-remain" data-name="Year-days-remain" readonly=""><span class="input-group-text">days</span></div>
                         </div><!-- End: Remain-to-Year-end-Days -->
                         <!-- Start: Annual_Tax_Amount -->
-                        <div class="col-md-6"><label class="form-label" for="A7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Annual Tax Amount"><i class="icon-question icon"></i></sup>Annual Tax Amount</label>
+                        <div class="col-md-6"><label class="form-label" for="A7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Annual Tax Amount $"><i class="icon-question icon"></i></sup>Annual Tax Amount</label>
                             <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A7" data-name="Annual-Tax-Amount" data-type="currency" maxlength="12" name="Annual-Tax-Amount" placeholder="0.00" step="0.01"></div>
                         </div><!-- End: Annual_Tax_Amount -->
                         <!-- Start: Daily / Percentage - switch -->
-                        <div class="col-md-6"><label class="form-label" for="A9" style="margin-bottom: 1px;margin-top: 0px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Daily or Percentage - Based Proration"><i class="icon-question icon"></i></sup>Percentage-Based Proration</label>
+                        <div class="col-md-6"><label class="form-label" for="A9" style="margin-bottom: 1px;margin-top: 0px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Daily or Percentage - Based Proration %"><i class="icon-question icon"></i></sup>Percentage-Based Proration</label>
                             <div class="d-inline-flex form-check form-switch" id="Daily_Percentage_switch" style="padding-left: 45px;margin-bottom: 0px;"><input type="checkbox" id="A8" class="form-check-input" value="PercentageSwitch" name="Daily-Percentage-Based-Proration"></div>
                             <div class="input-group" id="percentageBasedProration"><input class="form-control" type="number" id="A9" placeholder="0" step="0.01" name="Tax-Proration-Rate" data-name="Tax-Proration-Rate" min="0.00" disabled=""><span class="input-group-text">%</span></div>
                         </div><!-- End: Daily / Percentage - switch -->
                         <!-- Start: Loan_Amount -->
-                        <div class="col-md-6"><label class="form-label" for="B5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Loan Amount"><i class="icon-question icon"></i></sup>Loan Amount</label>
+                        <div class="col-md-6"><label class="form-label" for="B5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Loan Amount $"><i class="icon-question icon"></i></sup>Loan Amount</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B5" data-type="currency" readonly="" name="Loan Amount" data-name="Loan-Amount" placeholder="0.00"></div>
                         </div><!-- End: Loan_Amount -->
                         <!-- Start: Tax-Proration-Amount -->
-                        <div class="col-md-6"><label class="form-label" for="A10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Tax Proration Amount"><i class="icon-question icon"></i></sup>Tax Proration Amount<span class="dailyBasedSpan">&nbsp;(Daily-Based)</span></label>
+                        <div class="col-md-6"><label class="form-label" for="A10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Tax Proration Amount (Daily or Percentage) Based $"><i class="icon-question icon"></i></sup>Tax Proration Amount<span class="dailyBasedSpan">&nbsp;(Daily-Based)</span></label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A10" data-type="currency" readonly="" name="Tax-Proration-Amount" data-name="Tax-Proration-Amount" placeholder="0.00"></div>
                         </div><!-- End: Tax-Proration-Amount -->
                         <!-- Start: Annual_Interest_Rate -->
-                        <div class="col-md-6"><label class="form-label" for="B6"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Annual Interest Rate"><i class="icon-question icon"></i></sup>Annual Interest Rate</label>
+                        <div class="col-md-6"><label class="form-label" for="B6"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Annual Interest Rate %"><i class="icon-question icon"></i></sup>Annual Interest Rate</label>
                             <div class="input-group"><input class="form-control" type="number" id="B6" placeholder="0" step="0.01" max="100" name="Annual Interest Rate" data-name="Annual-Interest-rate" min="0.00"><span class="input-group-text">%</span></div>
                         </div><!-- End: Annual_Interest_Rate -->
                         <!-- Start: Loan_Term_Period -->
-                        <div class="col-md-6"><label class="form-label" for="B7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Loan Term Period"><i class="icon-question icon"></i></sup>Loan Term Period</label>
+                        <div class="col-md-6"><label class="form-label" for="B7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Loan Term Period (year's/ month's/ week's/ day's)"><i class="icon-question icon"></i></sup>Loan Term Period</label>
                             <div class="input-group"><input class="form-control" type="number" id="B7" max="99" data-name="Loan-Term-Period" step="1" name="Loan Term Period" placeholder="0" min="0"><select class="form-select flex-grow-0 form-control" id="TermsPeriod" name="Terms Period" data-name="Terms-Period">
                                     <option value="Year" selected="">Year(s)</option>
                                     <option value="Month">Month(s)</option>
@@ -123,28 +125,28 @@
                             <div class="input-group"><input class="form-control" type="number" id="B9" name="Total Payments" data-name="Total-Payments" placeholder="0" readonly=""><span class="input-group-text">#</span></div>
                         </div><!-- End: Total_Payments -->
                         <!-- Start: Amount_per_Payment -->
-                        <div class="col-md-6"><label class="form-label" for="B10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Amount per Payment"><i class="icon-question icon"></i></sup>Amount per Payment</label>
+                        <div class="col-md-6"><label class="form-label" for="B10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Amount per Payment $"><i class="icon-question icon"></i></sup>Amount per Payment</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B10" data-type="currency" readonly="" name="Payment per Period" data-name="Payment-per-Period" placeholder="0.00"></div>
                         </div><!-- End: Amount_per_Payment -->
                         <!-- Start: Total_Loan_Cost -->
-                        <div class="col-md-6"><label class="form-label" for="B11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Sum of Payments (Total Cost of Loan)"><i class="icon-question icon"></i></sup>Total Loan Cost</label>
+                        <div class="col-md-6"><label class="form-label" for="B11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Sum of Payments (Total Cost of Loan) $"><i class="icon-question icon"></i></sup>Total Loan Cost</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B11" data-type="currency" readonly="" data-name="Total-Loan-Cost" name="Total Loan Cost" placeholder="0.00"></div>
                         </div><!-- End: Total_Loan_Cost -->
                         <!-- Start: Interest_Cost -->
-                        <div class="col-md-6"><label class="form-label" for="B12"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Interest Cost"><i class="icon-question icon"></i></sup>Interest Cost</label>
+                        <div class="col-md-6"><label class="form-label" for="B12"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Interest Cost $"><i class="icon-question icon"></i></sup>Interest Cost</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B12" data-type="currency" readonly="" name="Interest-Cost" data-name="Interest Cost" placeholder="0.00"></div>
                         </div><!-- End: Interest_Cost -->
                         <!-- Start: Closing_Cost -->
-                        <div class="col-md-6"><label class="form-label" for="B13"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Closing Cost"><i class="icon-question icon"></i></sup>Closing Cost</label>
+                        <div class="col-md-6"><label class="form-label" for="B13"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Closing Cost %"><i class="icon-question icon"></i></sup>Closing Cost</label>
                             <div class="input-group"><input class="form-control" type="number" id="B13" placeholder="0" step="0.01" max="100" name="Closing-Cost" min="0"><span class="input-group-text">%</span></div>
                         </div><!-- End: Closing_Cost -->
                         <!-- Start: Inspection -->
-                        <div class="col-md-6 d-flex flex-column justify-content-end"><label class="form-label" for="B14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Inspection"><i class="icon-question icon"></i></sup>Inspection</label>
+                        <div class="col-md-6 d-flex flex-column justify-content-end"><label class="form-label" for="B14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Inspection $"><i class="icon-question icon"></i></sup>Inspection</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B14" data-type="currency" placeholder="0.00" step="0.01" name="Inspection" maxlength="12"></div>
                         </div><!-- End: Inspection -->
                         <!-- Start: Down_Payment_ -->
                         <div class="col-md-6">
-                            <div></div><label class="form-label" for="B15"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Down Payment + Closing Cost (% of Purchase Price) + Inspection"><i class="icon-question icon"></i></sup>Down Payment + Closing Cost (% of Purchase Price) + Inspection - Tax Proration</label>
+                            <div></div><label class="form-label" for="B15"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Down Payment + Closing Cost (% of Purchase Price) + Inspection - Tax Proration $"><i class="icon-question icon"></i></sup>Down Payment + Closing Cost (% of Purchase Price) + Inspection - Tax Proration</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B15" data-type="currency" readonly="" step="0.01" name="Down Payment" data-name="Down-Payment-total" placeholder="0.00"></div>
                         </div><!-- End: Down_Payment_ -->
                         <!-- Start: Loan_Type -->
@@ -381,7 +383,7 @@
                                 </tr><!-- Start: Custom Field -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><span class="input-group-text chck-box"></span><input class="form-control" type="text" id="CFN1" data-type="text" placeholder="Custom Expense"></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN1" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB1" data-type="currency" placeholder="-0.00" step="0.01"></div>
@@ -396,7 +398,7 @@
                                 <!-- Start: Custom Field -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><span class="input-group-text chck-box"></span><input class="form-control" type="text" id="CFN2" data-type="text" placeholder="Custom Expense"></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN2" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB2" data-type="currency" placeholder="-0.00" step="0.01"></div>
@@ -411,7 +413,7 @@
                                 <!-- Start: Custom Field -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><span class="input-group-text chck-box"></span><input class="form-control" type="text" id="CFN3" data-type="text" placeholder="Custom Expense"></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN3" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB3" data-type="currency" placeholder="-0.00" step="0.01"></div>
@@ -426,7 +428,7 @@
                                 <!-- Start: Custom Field -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><span class="input-group-text chck-box"></span><input class="form-control" type="text" id="CFN4" data-type="text" placeholder="Custom Expense"></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN4" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB4" data-type="currency" placeholder="-0.00" step="0.01"></div>
@@ -441,7 +443,7 @@
                                 <!-- Start: Custom Field -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><span class="input-group-text chck-box"></span><input class="form-control" type="text" id="CFN5" data-type="text" placeholder="Custom Expense"></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN5" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB5" data-type="currency" placeholder="-0.00" step="0.01"></div>
@@ -456,7 +458,7 @@
                                 <!-- Start: Custom Field -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><span class="input-group-text chck-box"></span><input class="form-control" type="text" id="CFN6" data-type="text" placeholder="Custom Expense"></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN6" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB6" data-type="currency" placeholder="-0.00" step="0.01"></div>
@@ -471,7 +473,7 @@
                                 <!-- Start: Custom Field -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><span class="input-group-text chck-box"></span><input class="form-control" type="text" id="CFN7" data-type="text" placeholder="Custom Expense"></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN7" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB7" data-type="currency" placeholder="-0.00" step="0.01"></div>
@@ -486,7 +488,7 @@
                                 <!-- Start: Custom Field -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><span class="input-group-text chck-box"></span><input class="form-control" type="text" id="CFN8" data-type="text" placeholder="Custom Expense"></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN8" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB8" data-type="currency" placeholder="-0.00" step="0.01"></div>
@@ -501,7 +503,7 @@
                                 <!-- Start: Custom Field -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><span class="input-group-text chck-box"></span><input class="form-control" type="text" id="CFN9" data-type="text" placeholder="Custom Expense"></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN9" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB9" data-type="currency" placeholder="-0.00" step="0.01"></div>
@@ -1034,6 +1036,9 @@
                     </div>
                 </div><!-- End: Total Cash Flow -->
             </div>
+            <section class="ATTENTION-SECTION">
+                <h5 class="font-monospace lh-1 text-center">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br>(It's not a substitute for your calculations.)</h5>
+            </section>
         </div>
     </div>
 </main>
