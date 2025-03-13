@@ -267,7 +267,7 @@ function calculateA8() {
     const a5 = parseFloat(document.getElementById('A5').value.replace(/,/g, '')) || 0;
     const a4 = parseFloat(document.getElementById('A4').value) || 0;
     const a4_2 = parseFloat(document.getElementById('A4_2').value) || 0;
-    const a7 = parseFloat(document.getElementById('A7').value) / 100 || 0;
+    const a7 = document.getElementById('A7').value === '' ? 0 : (parseFloat(document.getElementById('A7').value) / 100 || 0);
     const a11 = parseFloat(document.getElementById('A11').value.replace(/,/g, '')) || 0;
 
     if (radioArrears.checked) {
