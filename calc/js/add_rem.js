@@ -59,4 +59,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Налаштування для Custom
   setupRowControls("addRowC", "removeRowC", "cust-row");
+    
+  // Налаштування для Custom Revenue
+  setupRowControls("addRowCR", "removeRowCR", "cust_rev-row");
 });
