@@ -42,115 +42,131 @@
     <div class="page-content">
         <div id="topdf" class="wrap">
             <div id="calculator">
-                <!-- Start: Modal-Reset-Cinfirmation -->
+                <h1 class="text-center">Investment Property Calculator</h1><!-- Start: Modal-Reset-Cinfirmation -->
                 <div class="calcheaderbtn">
                     <div class="modal fade" role="dialog" tabindex="-1" id="confirmModal" aria-labelledby="confirmModalLabel">
                         <div class="modal-dialog modal-sm" role="document">
                             <div class="modal-content">
-                                <div class="modal-header" style="border-style: none;padding-bottom: 0px;padding-top: 10px;"><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal" style="margin-bottom: 0px;padding-bottom: 0px;padding-right: 0px;padding-left: 0px;"></button></div>
-                                <div class="modal-body" style="border-style: none;padding-bottom: 0px;padding-top: 0px;padding-right: 0px;padding-left: 0px;">
-                                    <h4 class="text-center" style="width: auto;margin-right: auto;margin-left: auto;">Confirm Reset ?</h4>
+                                <div class="modal-header" style="padding-bottom: 10px;"><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal" style="padding-right: 0px;padding-left: 0px;padding-bottom: 0px;"></button></div>
+                                <div class="modal-body">
+                                    <h2 class="text-center" style="margin-bottom: 0px;margin-top: 5px;">Confirm Reset?</h2>
                                 </div>
-                                <div class="modal-footer justify-content-evenly" style="border-style: none;padding-top: 5px;"><button class="btn btn-success" type="button" data-bs-dismiss="modal" style="padding-bottom: 1px;">NO</button><button class="btn btn-warning" id="resetAll" type="button" onclick="resetFormAndClearCache()" data-bs-dismiss="modal" style="padding-bottom: 1px;">YES</button></div>
+                                <div class="modal-footer justify-content-evenly"><button class="btn btn-success" id="btnno" type="button" data-bs-dismiss="modal" style="padding-bottom: 1px;"><span>NO</span></button><button class="btn btn-secondary" id="resetAll" type="button" onclick="resetFormAndClearCache()" data-bs-dismiss="modal"><span>YES</span></button></div>
                             </div>
                         </div>
-                    </div><button class="btn btn-secondary btn-cln-inpt" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal" style="font-weight: bold;">RESET ALL</button>
-                    <div class="btn-group group-pdf-mail" role="group"><button class="btn btn-primary btn-sm" id="savepdf" type="button">PDF</button><button class="btn btn-success btn-sm text-nowrap" id="sendtoemail" type="button">e-mail</button></div>
+                    </div><button class="btn btn-secondary btn-sm" id="bt-reset-modal" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button><button class="btn btn-primary btn-sm" id="savepdf" type="button"><span>PDF</span></button><button class="btn btn-success btn-sm" id="sendtoemail" type="button"><span>E-MAIL</span></button>
                 </div><!-- End: Modal-Reset-Cinfirmation -->
                 <!-- Start: Investment -->
                 <div class="mb-3">
-                    <h1 class="text-center">Investment Property Calculator</h1>
                     <div class="row">
                         <!-- Start: Address -->
-                        <div class="col-md-12" style="box-shadow: 0px 0px 0px 0px rgb(0,13,25);"><label class="form-label" for="autocomplete"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Address"><i class="icon-question icon"></i></sup>Address</label>
+                        <div class="col-md-12" style="box-shadow: 0px 0px 0px 0px rgb(0,13,25);"><label class="form-label" for="autocomplete"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Address"><i class="icon-question"></i></sup>Address*</label>
                             <div class="input-group searchbox"><span class="input-group-text currency-span">Address</span><input type="text" id="autocomplete" class="form-control" placeholder="Enter an address" data-type="text"></div>
                             <div id="suggestions" class="suggestions"></div>
                         </div><!-- End: Address -->
-                        <!-- Start: Purchase_price -->
-                        <div class="col-md-6" style="padding-right: 10px;padding-left: 10px;"><label class="form-label" for="B1"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Purchase Price $"><i class="icon-question icon"></i></sup>Purchase Price</label>
+                        <!-- Start: Purchase_Price_$ -->
+                        <div class="col-md-6" style="padding-right: 10px;padding-left: 10px;"><label class="form-label" for="B1"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Purchase Price $"><i class="icon-question"></i></sup>Purchase Price</label>
                             <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="B1" data-name="Purchase-Price" data-type="currency" maxlength="12" name="Purchase-Price" placeholder="0.00" step="0.01"></div>
-                        </div><!-- End: Purchase_price -->
+                        </div><!-- End: Purchase_Price_$ -->
+                        <!-- Start: Closing_Date_select -->
+                        <div class="col-md-3"><label class="form-label" for="B4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Date"><i class="icon-question"></i></sup>Closing Date*</label>
+                            <div class="input-group"><input class="form-control" id="B4" type="date" data-name="Closing-Date" name="Closing Date"></div>
+                        </div><!-- End: Closing_Date_select -->
+                        <!-- Start: Past_Tax_Schedule_Date_select -->
+                        <div class="col-md-3"><label class="form-label" for="A10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Past Tax Schedule Date"><i class="icon-question"></i></sup>Past Tax Date</label>
+                            <div class="input-group"><input class="form-control" id="A10" type="date" data-name="Past-Tax-Date" name="Past-Tax-Date"></div>
+                        </div><!-- End: Past_Tax_Schedule_Date_select -->
+                        <!-- Start: Annual_Tax_Amount_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount $"><i class="icon-question"></i></sup>Annual Tax Amount</label>
+                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5" data-name="Annual-Tax-Amount" data-type="currency" maxlength="12" name="Annual-Tax-Amount" placeholder="0.00" step="0.01"></div>
+                        </div><!-- End: Annual_Tax_Amount_$ -->
+                        <!-- Start: Annual_Tax_Amount_Daily_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A5_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount Daily $"><i class="icon-question"></i></sup>Annual Tax Daily</label>
+                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5_2" data-name="Annual-Tax-Amount-Daily" data-type="currency" maxlength="12" name="Annual-Tax-Amount-Daily" placeholder="0.00" step="0.01" readonly=""></div>
+                        </div><!-- End: Annual_Tax_Amount_Daily_$ -->
+                        <!-- Start: Days_Remain_in_Year -->
+                        <div class="col-md-2"><label class="form-label" for="A4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Days Remain in Year"><i class="icon-question"></i></sup>Remain</label>
+                            <div class="input-group"><input class="form-control" type="text" id="A4" name="Year-days-remain" data-name="Year-days-remain" readonly=""><span class="input-group-text">days</span></div>
+                        </div><!-- End: Days_Remain_in_Year -->
+                        <!-- Start: Days_Passed_in_Year -->
+                        <div class="col-md-2"><label class="form-label" for="A4_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Days Passed in Year"><i class="icon-question"></i></sup>Passed</label>
+                            <div class="input-group"><input class="form-control" type="text" id="A4_2" name="Year-days-passed" data-name="Year-days-passed" readonly=""><span class="input-group-text">days</span></div>
+                        </div><!-- End: Days_Passed_in_Year -->
+                        <!-- Start: Tax_Days_Due -->
+                        <div class="col-md-2"><label class="form-label" for="A10_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Days Due"><i class="icon-question"></i></sup>Tax Due</label>
+                            <div class="input-group"><input class="form-control" type="text" id="A10_2" name="Tax-Days-Due" data-name="Tax-Days-Due" readonly=""><span class="input-group-text">days</span></div>
+                        </div><!-- End: Tax_Days_Due -->
                         <!-- Start: Down_Payment_% -->
-                        <div class="col-md-6"><label class="form-label" for="B2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Down Payment %"><i class="icon-question icon"></i></sup>Down Payment</label>
+                        <div class="col-md-3"><label class="form-label" for="B2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment %"><i class="icon-question"></i></sup>Down Payment</label>
                             <div class="input-group"><input class="form-control" type="number" id="B2" data-name="Down-Payment-rate" max="100" name="Down-Payment-rate" placeholder="0" step="0.01" min="0.00"><span class="input-group-text">%</span></div>
                         </div><!-- End: Down_Payment_% -->
                         <!-- Start: Down_Payment_$ -->
-                        <div class="col-md-6"><label class="form-label" for="B3"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Down Payment $"><i class="icon-question icon"></i></sup>Down Payment</label>
+                        <div class="col-md-3"><label class="form-label" for="B3"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment $"><i class="icon-question"></i></sup>Down Payment</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B3" data-name="Down-Payment" name="Down Payment" maxlength="12" readonly="" data-type="currency" placeholder="0.00"></div>
                         </div><!-- End: Down_Payment_$ -->
-                        <!-- Start: Closing_Date -->
-                        <div class="col-md-3"><label class="form-label" for="B4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Closing Date"><i class="icon-question icon"></i></sup>Closing Date*</label>
-                            <div class="input-group"><input class="form-control" id="B4" type="date" data-name="Closing-Date" name="Closing Date"></div>
-                        </div><!-- End: Closing_Date -->
-                        <!-- Start: Remain-to-Year-end-Days -->
-                        <div class="col-md-3"><label class="form-label" for="A4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Days Remain in Year for Closing Date"><i class="icon-question icon"></i></sup>Remain to Year End<span id="days-to-year-end-1"></span></label>
-                            <div class="input-group"><input class="form-control" type="text" id="A4" name="Year-days-remain" data-name="Year-days-remain" readonly=""><span class="input-group-text">days</span></div>
-                        </div><!-- End: Remain-to-Year-end-Days -->
-                        <!-- Start: Annual_Tax_Amount -->
-                        <div class="col-md-6"><label class="form-label" for="A7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Annual Tax Amount $"><i class="icon-question icon"></i></sup>Annual Tax Amount</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A7" data-name="Annual-Tax-Amount" data-type="currency" maxlength="12" name="Annual-Tax-Amount" placeholder="0.00" step="0.01"></div>
-                        </div><!-- End: Annual_Tax_Amount -->
-                        <!-- Start: Daily / Percentage - switch -->
-                        <div class="col-md-6"><label class="form-label" for="A9" style="margin-bottom: 1px;margin-top: 0px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Daily or Percentage - Based Proration %"><i class="icon-question icon"></i></sup>Percentage-Based Proration</label>
-                            <div class="d-inline-flex form-check form-switch" id="Daily_Percentage_switch" style="padding-left: 45px;margin-bottom: 0px;"><input type="checkbox" id="A8" class="form-check-input" value="PercentageSwitch" name="Daily-Percentage-Based-Proration"></div>
-                            <div class="input-group" id="percentageBasedProration"><input class="form-control" type="number" id="A9" placeholder="0" step="0.01" name="Tax-Proration-Rate" data-name="Tax-Proration-Rate" min="0.00" disabled=""><span class="input-group-text">%</span></div>
-                        </div><!-- End: Daily / Percentage - switch -->
-                        <!-- Start: Loan_Amount -->
-                        <div class="col-md-6"><label class="form-label" for="B5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Loan Amount $"><i class="icon-question icon"></i></sup>Loan Amount</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B5" data-type="currency" readonly="" name="Loan Amount" data-name="Loan-Amount" placeholder="0.00"></div>
-                        </div><!-- End: Loan_Amount -->
-                        <!-- Start: Tax-Proration-Amount -->
-                        <div class="col-md-6"><label class="form-label" for="A10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Tax Proration Amount (Daily or Percentage) Based $"><i class="icon-question icon"></i></sup>Tax Proration Amount<span class="dailyBasedSpan">&nbsp;(Daily-Based)</span></label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A10" data-type="currency" readonly="" name="Tax-Proration-Amount" data-name="Tax-Proration-Amount" placeholder="0.00"></div>
-                        </div><!-- End: Tax-Proration-Amount -->
-                        <!-- Start: Annual_Interest_Rate -->
-                        <div class="col-md-6"><label class="form-label" for="B6"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Annual Interest Rate %"><i class="icon-question icon"></i></sup>Annual Interest Rate</label>
+                        <!-- Start: Tax_Proration_% -->
+                        <div class="col-md-3"><label class="form-label" for="A7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration %"><i class="icon-question"></i></sup>Tax Proration</label>
+                            <div class="input-group" id="percentageBasedProration"><input class="form-control" type="number" id="A7" placeholder="0" step="0.01" name="Tax-Proration-Rate" data-name="Tax-Proration-Rate" min="0.00"><span class="input-group-text">%</span></div>
+                        </div><!-- End: Tax_Proration_% -->
+                        <!-- Start: Tax_Proration_Amount_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration Amount $"><i class="icon-question"></i></sup>Tax Proration Amount</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A8" data-type="currency" readonly="" name="Tax-Proration-Amount" data-name="Tax-Proration-Amount" placeholder="0.00"></div>
+                        </div><!-- End: Tax_Proration_Amount_$ -->
+                        <!-- Start: Annual_Interest_Rate_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B6"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Interest Rate %"><i class="icon-question"></i></sup>Annual Interest Rate</label>
                             <div class="input-group"><input class="form-control" type="number" id="B6" placeholder="0" step="0.01" max="100" name="Annual Interest Rate" data-name="Annual-Interest-rate" min="0.00"><span class="input-group-text">%</span></div>
-                        </div><!-- End: Annual_Interest_Rate -->
-                        <!-- Start: Loan_Term_Period -->
-                        <div class="col-md-6"><label class="form-label" for="B7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Loan Term Period (year's/ month's/ week's/ day's)"><i class="icon-question icon"></i></sup>Loan Term Period</label>
+                        </div><!-- End: Annual_Interest_Rate_$ -->
+                        <!-- Start: Loan_Term_Period_ -->
+                        <div class="col-md-3"><label class="form-label" for="B7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Term Period (year's/ month's/ week's/ day's)"><i class="icon-question"></i></sup>Loan Term Period</label>
                             <div class="input-group"><input class="form-control" type="number" id="B7" max="99" data-name="Loan-Term-Period" step="1" name="Loan Term Period" placeholder="0" min="0"><select class="form-select flex-grow-0 form-control" id="TermsPeriod" name="Terms Period" data-name="Terms-Period">
                                     <option value="Year" selected="">Year(s)</option>
                                     <option value="Month">Month(s)</option>
                                     <option value="Week">Week(s)</option>
                                     <option value="Day">Day(s)</option>
                                 </select></div>
-                        </div><!-- End: Loan_Term_Period -->
+                        </div><!-- End: Loan_Term_Period_ -->
+                        <!-- Start: Inspection_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Inspection $"><i class="icon-question"></i></sup>Inspection</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B14" data-type="currency" placeholder="0.00" step="0.01" name="Inspection" maxlength="12"></div>
+                        </div><!-- End: Inspection_$ -->
+                        <!-- Start: Past_Tax_Payment_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Encumbrances $"><i class="icon-question"></i></sup>Encumbrances</label>
+                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A11" data-name="Past-Tax-Payment" data-type="currency" maxlength="12" name="Past-Tax-Payment" placeholder="0.00" step="0.01"></div>
+                        </div><!-- End: Past_Tax_Payment_$ -->
                         <!-- Start: Payments_per_ -->
-                        <div class="col-md-6"><label class="form-label" for="B8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Payments per Period"><i class="icon-question icon"></i></sup>Payments per&nbsp;</label><span id="Term"></span>
-                            <div class="input-group"><input class="form-control" type="number" id="B8" step="1" max="99" name="Payments per Period" data-name="Payments-per-Period" placeholder="0" min="0"><span class="input-group-text" id="per">payments</span></div>
+                        <div class="col-md-3"><label class="form-label" for="B8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Payments per Period"><i class="icon-question"></i></sup>Payments per&nbsp;</label><span id="Term"></span>
+                            <div class="input-group"><input class="form-control" type="number" id="B8" step="1" max="99" name="Payments per Period" data-name="Payments-per-Period" placeholder="0" min="0"><span class="input-group-text" id="per">#</span></div>
                         </div><!-- End: Payments_per_ -->
-                        <!-- Start: Total_Payments -->
-                        <div class="col-md-6"><label class="form-label" for="B9"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Total Payments"><i class="icon-question icon"></i></sup>Total Payments</label>
+                        <!-- Start: Closing_Cost_% -->
+                        <div class="col-md-3"><label class="form-label" for="B13"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Cost %"><i class="icon-question"></i></sup>Closing Cost</label>
+                            <div class="input-group"><input class="form-control" type="number" id="B13" placeholder="0" step="0.01" max="100" name="Closing-Cost" min="0"><span class="input-group-text">%</span></div>
+                        </div><!-- End: Closing_Cost_% -->
+                        <!-- Start: Total_Payments_# -->
+                        <div class="col-md-3"><label class="form-label" for="B9"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Payments"><i class="icon-question"></i></sup>Total Payments</label>
                             <div class="input-group"><input class="form-control" type="number" id="B9" name="Total Payments" data-name="Total-Payments" placeholder="0" readonly=""><span class="input-group-text">#</span></div>
-                        </div><!-- End: Total_Payments -->
-                        <!-- Start: Amount_per_Payment -->
-                        <div class="col-md-6"><label class="form-label" for="B10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Amount per Payment $"><i class="icon-question icon"></i></sup>Amount per Payment</label>
+                        </div><!-- End: Total_Payments_# -->
+                        <!-- Start: Amount_per_Payment_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Amount per Payment $"><i class="icon-question"></i></sup>Amount per Payment</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B10" data-type="currency" readonly="" name="Payment per Period" data-name="Payment-per-Period" placeholder="0.00"></div>
-                        </div><!-- End: Amount_per_Payment -->
+                        </div><!-- End: Amount_per_Payment_$ -->
+                        <!-- Start: Loan_Amount_$ -->
+                        <div class="col-md-6"><label class="form-label" for="B5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Amount $"><i class="icon-question"></i></sup>Loan Amount</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B5" data-type="currency" readonly="" name="Loan Amount" data-name="Loan-Amount" placeholder="0.00"></div>
+                        </div><!-- End: Loan_Amount_$ -->
                         <!-- Start: Total_Loan_Cost -->
-                        <div class="col-md-6"><label class="form-label" for="B11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Sum of Payments (Total Cost of Loan) $"><i class="icon-question icon"></i></sup>Total Loan Cost</label>
+                        <div class="col-md-6"><label class="form-label" for="B11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Sum of Payments (Total Cost of Loan) $"><i class="icon-question"></i></sup>Total Loan Cost</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B11" data-type="currency" readonly="" data-name="Total-Loan-Cost" name="Total Loan Cost" placeholder="0.00"></div>
                         </div><!-- End: Total_Loan_Cost -->
                         <!-- Start: Interest_Cost -->
-                        <div class="col-md-6"><label class="form-label" for="B12"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Interest Cost $"><i class="icon-question icon"></i></sup>Interest Cost</label>
+                        <div class="col-md-6"><label class="form-label" for="B12"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Interest Cost $"><i class="icon-question"></i></sup>Interest Cost</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B12" data-type="currency" readonly="" name="Interest-Cost" data-name="Interest Cost" placeholder="0.00"></div>
                         </div><!-- End: Interest_Cost -->
-                        <!-- Start: Closing_Cost -->
-                        <div class="col-md-6"><label class="form-label" for="B13"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Closing Cost %"><i class="icon-question icon"></i></sup>Closing Cost</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B13" placeholder="0" step="0.01" max="100" name="Closing-Cost" min="0"><span class="input-group-text">%</span></div>
-                        </div><!-- End: Closing_Cost -->
-                        <!-- Start: Inspection -->
-                        <div class="col-md-6 d-flex flex-column justify-content-end"><label class="form-label" for="B14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Inspection $"><i class="icon-question icon"></i></sup>Inspection</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B14" data-type="currency" placeholder="0.00" step="0.01" name="Inspection" maxlength="12"></div>
-                        </div><!-- End: Inspection -->
                         <!-- Start: Down_Payment_ -->
-                        <div class="col-md-6">
-                            <div></div><label class="form-label" for="B15"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Down Payment + Closing Cost (% of Purchase Price) + Inspection - Tax Proration $"><i class="icon-question icon"></i></sup>Down Payment + Closing Cost (% of Purchase Price) + Inspection - Tax Proration</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B15" data-type="currency" readonly="" step="0.01" name="Down Payment" data-name="Down-Payment-total" placeholder="0.00"></div>
+                        <div class="col-md-6"><label class="form-label" for="B15"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment + Closing Cost (% of Purchase Price) + Inspection - Tax Proration $"><i class="icon-question"></i></sup>Cash to Close</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B15" data-type="currency" readonly="" step="0.01" name="Cash-to-Close" data-name="Cash-to-Close" placeholder="0.00"></div>
                         </div><!-- End: Down_Payment_ -->
                         <!-- Start: Loan_Type -->
-                        <div class="col-md-6 d-flex flex-column justify-content-end"><label class="form-label" for="Loan-Type"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Loan Type"><i class="icon-question icon"></i></sup>Loan Type</label>
+                        <div class="col-md-6 d-flex flex-column justify-content-end"><label class="form-label" for="Loan-Type"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Type"><i class="icon-question"></i></sup>Loan Type</label>
                             <form class="form-inline">
                                 <div class="form-group"><select class="form-select form-control form-loantype" id="Loan-Type" name="Loan Type" data-name="Loan-Type">
                                         <option value="None (All Cash)">None (All Cash)</option>
@@ -183,6 +199,20 @@
                                     </select></div>
                             </form>
                         </div><!-- End: Loan_Type -->
+                        <!-- Start: Closing_Date_select -->
+                        <div class="col-md-3"><label class="form-label" for="A14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Future Tax Date"><i class="icon-question"></i></sup>Future Tax Date</label>
+                            <div class="input-group"><input class="form-control" id="A14" type="date" data-name="Future-Tax-Date" name="Future-Tax-Date"></div>
+                        </div><!-- End: Closing_Date_select -->
+                        <!-- Start: Arrears_Advance -->
+                        <div class="col-md-3">
+                            <!-- Start: Arrears_Advance -->
+                            <div>
+                                <fieldset>
+                                    <div class="custom-control custom-radio"><input type="radio" id="Arrears" class="custom-control-input" name="customRadio" checked=""><label class="form-label custom-control-label" for="Arrears">Arrears</label></div>
+                                    <div class="custom-control custom-radio"><input type="radio" id="Advance" class="custom-control-input" name="customRadio"><label class="form-label custom-control-label" for="Advance">Advance</label></div>
+                                </fieldset>
+                            </div><!-- End: Arrears_Advance -->
+                        </div><!-- End: Arrears_Advance -->
                     </div>
                 </div><!-- End: Investment -->
                 <!-- Start: Gross Expenses -->
@@ -201,7 +231,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><sup class="wrapper mtooltip"><i class="icon-question icon" data-bs-toggle="tooltip" data-bss-tooltip="" title="Refuse"></i></sup><label class="form-label" for="D19">Refuse</label></td>
+                                    <td><sup class="mtool"><i class="icon-question" data-bs-toggle="tooltip" data-bss-tooltip="" title="Refuse"></i></sup><label class="form-label" for="D19">Refuse</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B19" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -213,7 +243,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Water"><i class="icon-question icon"></i></sup><label class="form-label" for="D20">Water</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Water"><i class="icon-question"></i></sup><label class="form-label" for="D20">Water</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B20" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -225,7 +255,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Sewer"><i class="icon-question icon"></i></sup><label class="form-label" for="D21">Sewer</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Sewer"><i class="icon-question"></i></sup><label class="form-label" for="D21">Sewer</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B21" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -237,7 +267,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Property Taxes"><i class="icon-question icon"></i></sup><label class="form-label" for="D22">Property Taxes</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Property Taxes"><i class="icon-question"></i></sup><label class="form-label" for="D22">Property Taxes</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B22" data-type="currency" placeholder="-0.00" step="0.01" readonly=""></div>
                                     </td>
@@ -249,7 +279,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Electric"><i class="icon-question icon"></i></sup><label class="form-label" for="D23">Electric</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Electric"><i class="icon-question"></i></sup><label class="form-label" for="D23">Electric</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B23" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -261,7 +291,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Gas"><i class="icon-question icon"></i></sup><label class="form-label" for="D24">Gas</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Gas"><i class="icon-question"></i></sup><label class="form-label" for="D24">Gas</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B24" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -274,7 +304,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Internet"><i class="icon-question icon"></i></sup><label class="form-label" for="D25">Internet</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Internet"><i class="icon-question"></i></sup><label class="form-label" for="D25">Internet</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B25" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -286,7 +316,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Lawn Care"><i class="icon-question icon"></i></sup><label class="form-label" for="D26">Lawn Care</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Lawn Care"><i class="icon-question"></i></sup><label class="form-label" for="D26">Lawn Care</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B26" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -298,7 +328,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Maintenance"><i class="icon-question icon"></i></sup><label class="form-label" for="D27">Maintenance</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Maintenance"><i class="icon-question"></i></sup><label class="form-label" for="D27">Maintenance</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B27" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -310,7 +340,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Vacancy Rate"><i class="icon-question icon"></i></sup><label class="form-label" for="D28">Vacancy Rate</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Vacancy Rate"><i class="icon-question"></i></sup><label class="form-label" for="D28">Vacancy Rate</label></td>
                                     <td>
                                         <div class="input-group"><input class="form-control" type="number" id="B28" placeholder="0" step="0.01" max="100" min="0"><span class="input-group-text">%</span></div>
                                     </td>
@@ -322,7 +352,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle vrbcd"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Vacancy Risk"><i class="icon-question icon"></i></sup><label class="form-label" for="VRD28">Vacancy Risk</label></td>
+                                    <td class="tabcalctitle vrbcd"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Vacancy Risk"><i class="icon-question"></i></sup><label class="form-label" for="VRD28">Vacancy Risk</label></td>
                                     <td class="tabcalctitle vrbcd">
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="VRB28" data-type="currency" readonly=""></div>
                                     </td>
@@ -334,7 +364,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="flex-nowrap tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Mortgage Insurance (if applicable)"><i class="icon-question icon"></i></sup><label class="form-label" for="D29">Mortgage Insurance</label></td>
+                                    <td class="flex-nowrap tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Mortgage Insurance (if applicable)"><i class="icon-question"></i></sup><label class="form-label" for="D29">Mortgage Insurance</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control" type="text" id="B29" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -346,7 +376,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Property Insurance"><i class="icon-question icon"></i></sup><label class="form-label" for="D30">Property Insurance</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Property Insurance"><i class="icon-question"></i></sup><label class="form-label" for="D30">Property Insurance</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B30" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -358,7 +388,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="HOA (if applicable)"><i class="icon-question icon"></i></sup><label class="form-label" for="D31">HOA</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="HOA (if applicable)"><i class="icon-question"></i></sup><label class="form-label" for="D31">HOA</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B31" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -370,7 +400,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Property Management (if applicable)"><i class="icon-question icon"></i></sup><label class="form-label" for="D32">Property Management</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Property Management (if applicable)"><i class="icon-question"></i></sup><label class="form-label" for="D32">Property Management</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B32" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
@@ -519,8 +549,8 @@
                                 <tr>
                                     <td>
                                         <div class="row d-flex flex-row align-items-center cell-tab-lable">
-                                            <div class="col rci" style="padding-top: 1px;"><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="'Custom Expense' Own Name Input Field"><i class="icon-question icon"></i></sup></span></div>
-                                            <div class="col text-nowrap col-titl"><label class="col-form-label form-label">Custom Expense</label></div>
+                                            <div class="col rci" style="padding-top: 1px;"><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="'Custom Expense' Own Name Input Field"><i class="icon-question"></i></sup></span></div>
+                                            <div class="col text-nowrap col-titl"><span class="form-label">Custom Expense</span></div>
                                             <div class="col d-flex justify-content-center align-items-center">
                                                 <div class="btn-group d-inline-flex" role="group">
                                                     <div id="addRowC" class="triangle triangle-add"></div>
@@ -556,7 +586,7 @@
                                 <tr>
                                     <td>
                                         <div class="row d-flex align-items-center cell-tab-lable">
-                                            <div class="col rci"><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Unit"><i class="icon-question icon"></i></sup></span></div>
+                                            <div class="col rci"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Unit"><i class="icon-question"></i></sup></div>
                                             <div class="col text-nowrap col-titl"><label class="col-form-label form-label" for="D33">Unit 1</label></div>
                                             <div class="col d-flex justify-content-center align-items-center" style="width: auto;padding: 0px;">
                                                 <div class="btn-group d-inline-flex" role="group">
@@ -762,7 +792,7 @@
                                 <tr>
                                     <td>
                                         <div class="row d-flex align-items-center cell-tab-lable">
-                                            <div class="col rci"><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="Parking"><i class="icon-question icon"></i></sup></span></div>
+                                            <div class="col rci"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Parking"><i class="icon-question"></i></sup></div>
                                             <div class="col text-nowrap col-titl"><label class="col-form-label form-label" for="D48">Parking 1</label></div>
                                             <div class="col d-flex justify-content-center align-items-center" style="padding: 0;width: auto;">
                                                 <div class="btn-group d-inline-flex" role="group">
@@ -964,6 +994,24 @@
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D62" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
                                 </tr><!-- End: Parking_15 -->
+                                <!-- Start: Custom Field Buttons -->
+                                <tr>
+                                    <td>
+                                        <div class="row d-flex flex-row align-items-center cell-tab-lable">
+                                            <div class="col rci" style="padding-top: 1px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="'Custom Revenue' Own Name Input Field"><i class="icon-question"></i></sup></div>
+                                            <div class="col text-nowrap col-titl"><span class="form-label">Custom</span></div>
+                                            <div class="col d-flex justify-content-center align-items-center">
+                                                <div class="btn-group d-inline-flex" role="group">
+                                                    <div id="addRowCR" class="triangle triangle-add"></div>
+                                                    <div id="removeRowCR" class="triangle triangle-rem"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td></td>
+                                    <td></td>
+                                    <td></td>
+                                </tr><!-- End: Custom Field Buttons -->
                             </tbody>
                         </table>
                     </div>
@@ -984,7 +1032,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><span class="wrapper"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Mortgage / Month"><i class="icon-question"></i></sup></span><label class="form-label" for="D63">Total Mortgage /Month</label></td>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Mortgage / Month"><i class="icon-question"></i></sup><label class="form-label" for="D63">Total Mortgage /Month</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B63" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
@@ -996,7 +1044,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><span class="wrapper" style="margin-right: 3px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Expense / Month"><i class="icon-question"></i></sup></span><label class="form-label" for="D64">Total Expense /Month</label></td>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Expense / Month"><i class="icon-question"></i></sup><label class="form-label" for="D64">Total Expense /Month</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B64" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
@@ -1008,7 +1056,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><span class="wrapper" style="margin-right: 3px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Revenue / Month"><i class="icon-question"></i></sup></span><label class="form-label" for="D65">Total Revenue /Month</label></td>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Total Revenue / Month"><i class="icon-question"></i></sup><label class="form-label" for="D65">Total Revenue /Month</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B65" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
@@ -1020,7 +1068,7 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><span class="wrapper" style="margin-right: 3px;"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Est Total Income / Month"><i class="icon-question"></i></sup></span><label class="form-label" for="D66">Est Total Income /Month</label></td>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="icon mtooltip" title="Est Total Income / Month"><i class="icon-question"></i></sup><label class="form-label" for="D66">Est Total Income /Month</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B66" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
@@ -1078,10 +1126,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
 <script src="/calc/js/pdf.js"></script>
-<script src="/calc/js/date-days.js"></script>
 <script src="/calc/js/reset-btn.js"></script>
 <script src="/calc/js/reset.js"></script>
-<script src="/calc/js/switch.js"></script>
 <script src="/calc/js/term-period.js"></script>
 </body>
 </html>
