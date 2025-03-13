@@ -170,8 +170,8 @@ function calculateAll() {
         const B8 = parseFloat(document.getElementById('B8').value.replace(/,/g, '')) || 0;
         const B13 = parseFloat(document.getElementById('B13').value.replace(/,/g, '')) / 100 || 0;
         const B14 = parseFloat(document.getElementById('B14').value.replace(/,/g, '')) || 0;
-        const A10 = parseFloat(document.getElementById('A10').value.replace(/,/g, '')) || 0;
-        const A7 = parseFloat(document.getElementById('A7').value.replace(/,/g, '')) || 0;
+        const A8 = parseFloat(document.getElementById('A8').value.replace(/,/g, '')) || 0;
+        const A5 = parseFloat(document.getElementById('A5').value.replace(/,/g, '')) || 0;
 
         // B3 = B1 * B2
         const B3 = B1 * B2;
@@ -185,10 +185,10 @@ function calculateAll() {
         const B11 = B10 * B9;
         // B12 = B11 + B5
         const B12 = B11 + B5;
-        // B15 = (((B1*B2)+(B1*B13))*-1)-B14+A10
-        const B15 = (((B1 * B2) + (B1 * B13)) * -1) - B14 + A10;
-        // B22 = A7 / 12 (Monthly Tax)
-        const B22 = -(A7 / 12);
+        // B15 = (((B1*B2)+(B1*B13))*-1)-B14+A8
+        const B15 = (((B1 * B2) + (B1 * B13)) * -1) - B14 + A8;
+        // B22 = A5 / 12 (Monthly Tax)
+        const B22 = -(A5 / 12);
 
         // Update calculated values
         document.getElementById('B3').value = formatCalculatedValue(B3);
@@ -244,123 +244,153 @@ function calculateAll() {
 }
 
 // Tax Proration Calculation
-function calculateTaxProration() {
-    const yearDaysRemain = parseFloat(document.getElementById('A4').value.replace(/,/g, '')) || 0;
-    const annualTaxAmount = parseFloat(document.getElementById('A7').value.replace(/,/g, '')) || 0;
-    const isPercentageBased = document.getElementById('A8').checked;
-    const taxProrationRate = parseFloat(document.getElementById('A9').value) / 100 || 0;
-    let prorationAmount;
+function calculateA5_2() {
+    const a5 = parseFloat(document.getElementById('A5').value.replace(/,/g, '')) || 0;
+    const a4 = parseFloat(document.getElementById('A4').value) || 0;
+    const a4_2 = parseFloat(document.getElementById('A4_2').value) || 0;
+    
+    const result = a5 / (a4 + a4_2);
+    document.getElementById('A5_2').value = formatCalculatedValue(result);
+    return result;
+}
 
-    if (isPercentageBased) {
-        prorationAmount = annualTaxAmount * taxProrationRate;
-    } else {
-        prorationAmount = (annualTaxAmount / 365) * yearDaysRemain;
+function calculateA8() {
+    const dateInputB4 = document.getElementById('B4');
+    const selectedDateB4 = new Date(dateInputB4.value);
+    const radioArrears = document.getElementById('Arrears');
+    const radioAdvance = document.getElementById('Advance');
+    const dateInputA10 = document.getElementById('A10');
+    const dateInputA14 = document.getElementById('A14');
+    let selectedDateCompare;
+    let result = 0;
+
+    const a5 = parseFloat(document.getElementById('A5').value.replace(/,/g, '')) || 0;
+    const a4 = parseFloat(document.getElementById('A4').value) || 0;
+    const a4_2 = parseFloat(document.getElementById('A4_2').value) || 0;
+    const a7 = parseFloat(document.getElementById('A7').value) / 100 || 0;
+    const a11 = parseFloat(document.getElementById('A11').value.replace(/,/g, '')) || 0;
+
+    if (radioArrears.checked) {
+        selectedDateCompare = new Date(dateInputA10.value);
+        if (!isNaN(selectedDateB4) && !isNaN(selectedDateCompare)) {
+            const diffDays = (selectedDateCompare - selectedDateB4) / (1000 * 3600 * 24);
+            result = ((a5 / (a4 + a4_2)) * diffDays) * a7 + a11;
+            result = Math.abs(result);
+        }
+    } else if (radioAdvance.checked) {
+        selectedDateCompare = new Date(dateInputA14.value);
+        if (!isNaN(selectedDateB4) && !isNaN(selectedDateCompare)) {
+            const diffDays = (selectedDateCompare - selectedDateB4) / (1000 * 3600 * 24);
+            if (selectedDateCompare.getFullYear() === selectedDateB4.getFullYear()) {
+                result = (a5 / (a4 + a4_2)) * diffDays + a11;
+            } else {
+                result = (a5 / (a4 + a4_2)) * diffDays * a7 + a11;
+            }
+            result = -Math.abs(result);
+        }
     }
 
-    document.getElementById('A10').value = formatCalculatedValue(prorationAmount);
+    document.getElementById('A8').value = formatCalculatedValue(result);
+    calculateAll(); // Trigger full recalculation
+}
+
+// Add new function for date calculations
+function calculateDates(selectedDate) {
+    if (isNaN(selectedDate)) {
+        document.getElementById('A4').value = "";
+        document.getElementById('A4_2').value = "";
+        return;
+    }
+
+    const currentYear = selectedDate.getFullYear();
+    
+    // Calculate days to end of year
+    const lastDayOfYear = new Date(currentYear, 11, 31);
+    const differenceToEndOfYearTime = lastDayOfYear.getTime() - selectedDate.getTime();
+    const differenceToEndOfYearDays = Math.ceil(differenceToEndOfYearTime / (1000 * 3600 * 24));
+    document.getElementById('A4').value = differenceToEndOfYearDays;
+
+    // Calculate days from start of year
+    const startOfYear = new Date(currentYear, 0, 1);
+    const differenceFromStartOfYearTime = selectedDate.getTime() - startOfYear.getTime();
+    const differenceFromStartOfYearDays = Math.ceil(differenceFromStartOfYearTime / (1000 * 3600 * 24));
+    document.getElementById('A4_2').value = differenceFromStartOfYearDays;
+}
+
+function calculateDateDifference() {
+    const dateInputB4 = document.getElementById('B4');
+    const selectedDateB4 = new Date(dateInputB4.value);
+    const radioArrears = document.getElementById('Arrears');
+    const radioAdvance = document.getElementById('Advance');
+    const dateInputA10 = document.getElementById('A10');
+    const dateInputA14 = document.getElementById('A14');
+    const resultInputA10_2 = document.getElementById('A10_2');
+
+    let selectedDateCompare;
+
+    if (radioArrears.checked) {
+        selectedDateCompare = new Date(dateInputA10.value);
+    } else if (radioAdvance.checked) {
+        selectedDateCompare = new Date(dateInputA14.value);
+    } else {
+        resultInputA10_2.value = "";
+        return;
+    }
+
+    if (isNaN(selectedDateB4) || isNaN(selectedDateCompare)) {
+        resultInputA10_2.value = "";
+        return;
+    }
+
+    const differenceInTime = selectedDateCompare.getTime() - selectedDateB4.getTime();
+    const differenceInDays = Math.abs(Math.ceil(differenceInTime / (1000 * 3600 * 24)));
+    resultInputA10_2.value = differenceInDays;
 }
 
 // Set up event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    // Expense fields that should have minus sign behavior
-    const expenseFields = [
-        'B19', 'C19', 'D19', 'B20', 'C20', 'D20', 'B21', 'C21', 'D21', 'B22', 'C22', 'D22',
-        'B23', 'C23', 'D23', 'B24', 'C24', 'D24', 'B25', 'C25', 'D25',
-        'B26', 'C26', 'D26', 'B27', 'C27', 'D27', 'B29', 'C29', 'D29',
-        'B30', 'C30', 'D30', 'B31', 'C31', 'D31', 'B32', 'C32', 'D32',
-        'CFB1', 'CFC1', 'CFD1', 'CFB2', 'CFC2', 'CFD2', 'CFB3', 'CFC3', 'CFD3', 
-        'CFB4', 'CFC4', 'CFD4', 'CFB5', 'CFC5', 'CFD5', 'CFB6', 'CFC6', 'CFD6', 
-        'CFB7', 'CFC7', 'CFD7', 'CFB8', 'CFC8', 'CFD8', 'CFB9', 'CFC9', 'CFD9'
-    ];
-
-    // Gross Expenses fields (B and C columns only)
-    const grossExpenseFields = [
+    // Configure input fields
+    const currencyInputs = [
+        'B1', 'B3', 'B5', 'B10', 'B11', 'B12', 'B14', 'B15', 'A5', 'A5_2', 'A8',
         'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
-        'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
         'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
+        'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
         'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9'
     ];
+
+    // Configure percentage inputs
+    const percentageInputs = [
+        'B2', 'B6', 'B13', 'B28', 'C28', 'D28', 'A7',
+    ];
     
-    // Add focus and blur events for expense fields
-    expenseFields.forEach(id => {
+    // Set up calculation triggers
+    const calculationTriggers = [
+        'B1', 'B2', 'B6', 'B7', 'B8', 'B13', 'B14', 'A4', 'A4_2', 'A5', 'A5_2', 'A7', 'A8',
+        'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
+        'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
+        'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
+        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9'
+    ];
+
+    // Configure input elements
+    currencyInputs.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
-            // Remove the currency data-type if it exists
-            input.removeAttribute('data-type');
-            input.addEventListener('focus', function() {
-                let value = this.value.replace(/,/g, '');
-                if (!value || value === '0.00') {
-                    this.value = '-';
-                } else {
-                    // Remove formatting but keep the minus sign if present
-                    value = value.replace(/[^\d.-]/g, '');
-                    // Ensure there's a minus sign
-                    if (!value.startsWith('-')) {
-                        value = '-' + value;
-                    }
-                    this.value = value;
-                }
-            });
-
-            input.addEventListener('input', function(e) {
-                let value = this.value;
-                // Remove any existing minus signs
-                value = value.replace(/-/g, '');
-                // Always add a minus sign at the start
-                value = '-' + value;
-                
-                // If this is a gross expense field, apply formatting while typing
-                if (grossExpenseFields.includes(this.id)) {
-                    // Remove non-digits except decimal point
-                    value = value.replace(/[^\d.-]/g, '');
-                    
-                    // Format with commas if there are digits
-                    if (value !== '-') {
-                        const parts = value.substring(1).split('.');
-                        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-                        value = '-' + parts.join('.');
-                    }
-                }
-                
-                this.value = value;
-            });
-
-            input.addEventListener('blur', function() {
-                let value = this.value.replace(/,/g, '');
-                // Only remove minus sign if it's the only character
-                if (value === '-') {
-                    this.value = '';
-                } else if (value) {
-                    // Format the value while ensuring it stays negative
-                    value = value.replace(/[^\d.-]/g, '');
-                    // Make sure the value is negative
-                    value = -Math.abs(parseFloat(value) || 0);
-                    this.value = formatCalculatedValue(value);
-                }
-                calculateAll();
-            });
-
-            // Initial formatting to ensure negative values
-            const currentValue = input.value.replace(/,/g, '');
-            if (currentValue && currentValue !== '0.00') {
-                input.value = formatCalculatedValue(-Math.abs(parseFloat(currentValue)));
+            input.setAttribute('type', 'text');
+            input.setAttribute('data-type', 'currency');
+            if (id === 'A8') {
+                input.readOnly = true;
             }
+            input.addEventListener('input', function(e) {
+                formatCurrency(e.target);
+            });
+            input.addEventListener('blur', function(e) {
+                formatCurrency(e.target, true);
+            });
         }
     });
 
-    // Set up event listeners for currency inputs
-    const currencyInputs = document.querySelectorAll('input[type="text"]');
-    currencyInputs.forEach(input => {
-        // Skip percentage fields and custom field name inputs
-        if (!['B2', 'B6', 'B13', 'B28', 'C28', 'autocomplete'].includes(input.id) && 
-            !input.id.startsWith('CFN')) {  // Exclude CFN1-CFN9 inputs
-            input.addEventListener('input', () => formatCurrency(input, false));
-            input.addEventListener('blur', () => formatCurrency(input, true));
-        }
-    });
-
-    // Set up event listeners for percentage inputs
-    const percentageInputs = ['B2', 'B6', 'B13', 'B28', 'C28'];
+    // Set up percentage inputs
     percentageInputs.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
@@ -401,9 +431,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Tax Proration Fields Setup
     const yearDaysRemainInput = document.getElementById('A4');
-    const annualTaxInput = document.getElementById('A7');
-    const taxProrationCheckbox = document.getElementById('A8');
-    const taxProrationRateInput = document.getElementById('A9');
+    const annualTaxInput = document.getElementById('A5');
+    const taxProrationRateInput = document.getElementById('A7');
     const dateInput = document.getElementById('B4');
 
     if (yearDaysRemainInput) {
@@ -428,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
         annualTaxInput.addEventListener('input', debounce((e) => {
             const yearDaysRemainInput = document.getElementById('A4');
             
-            // Check if A4 is empty and A7 has a value
+            // Check if A4 is empty and A5 has a value
             if (!yearDaysRemainInput.value && annualTaxInput.value) {
                 dateInput.style.backgroundColor = '#fff3cd';
                 dateInput.style.borderColor = '#ffeeba';
@@ -468,7 +497,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tooltip.textContent = 'Please select a date first';
                 tooltip.style.display = 'block';
                 
-                // Reset A7 value
+                // Reset A5 value
                 annualTaxInput.value = '';
                 return;
             } else {
@@ -476,7 +505,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             formatCurrency(annualTaxInput, false);
-            calculateTaxProration();
         }, 300));
 
         // Add blur event handler
@@ -486,16 +514,68 @@ document.addEventListener('DOMContentLoaded', () => {
     if (taxProrationRateInput) {
         taxProrationRateInput.addEventListener('input', debounce((e) => {
             formatPercentage(taxProrationRateInput, false);
-            calculateTaxProration();
         }, 300));
         taxProrationRateInput.addEventListener('blur', (e) => {
             formatPercentage(taxProrationRateInput, true);
-            calculateTaxProration();
         });
     }
 
-    if (taxProrationCheckbox) {
-        taxProrationCheckbox.addEventListener('change', calculateTaxProration);
+    ['A4', 'A4_2', 'A5'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', debounce(() => {
+                calculateA5_2();
+                calculateA8();
+                calculateAll();
+            }, 500));
+        }
+    });
+
+    ['A7'].forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', debounce(() => {
+                calculateA8();
+                calculateAll();
+            }, 500));
+        }
+    });
+
+    // Add new event listeners for date and tax calculations
+    const dateInputB4 = document.getElementById('B4');
+    if (dateInputB4) {
+        dateInputB4.addEventListener('change', function() {
+            calculateDates(new Date(this.value));
+            calculateA8();
+        });
+    }
+
+    const dateInputs = ['A10', 'A14'];
+    dateInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('change', function() {
+                calculateDateDifference();
+                calculateA8();
+            });
+        }
+    });
+
+    const radioButtons = ['Arrears', 'Advance'];
+    radioButtons.forEach(id => {
+        const radio = document.getElementById(id);
+        if (radio) {
+            radio.addEventListener('change', function() {
+                calculateDateDifference();
+                calculateA8();
+            });
+        }
+    });
+
+    // Add event listener for A11 (if it exists)
+    const inputA11 = document.getElementById('A11');
+    if (inputA11) {
+        inputA11.addEventListener('input', calculateA8);
     }
 
     calculateAll(); // Initial calculation
