@@ -755,3 +755,49 @@ button.btn.btn-primary, button.btn.btn-secondary {
   font-weight: bold;
 }
 
+.files input {
+  outline: 2px dashed #1DA1F2;
+  outline-offset: -5px;
+  -webkit-transition: outline-offset .15s ease-in-out, background-color .15s linear;
+  transition: outline-offset .15s ease-in-out, background-color .15s linear;
+  padding: 15px 0px 35px 10%;
+  top: 50%;
+  text-align: center !important;
+  margin: 0;
+  width: 100% !important;
+  cursor: pointer;
+}
+
+.files input:focus {
+  outline: 2px dashed #6bc7ff;
+  outline-offset: -5px;
+  -webkit-transition: outline-offset .15s ease-in-out, background-color .15s linear;
+  transition: outline-offset .15s ease-in-out, background-color .15s linear;
+  border: 1px solid #92b0b3;
+}
+
+.files {
+  position: relative;
+}
+
+#user_file {
+  background-color: #eeeeee;
+}
+
+.files:before {
+  position: absolute;
+  bottom: 0px;
+  left: 0;
+  pointer-events: none;
+  width: 100%;
+  right: 0;
+  height: 30px;
+  content: " or Drag & Drop. ";
+  display: block;
+  margin: 0 auto;
+  color: #1DA1F2;
+  font-weight: 600;
+  /*text-transform: capitalize;*/
+  text-align: center;
+}
+
