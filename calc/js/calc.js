@@ -14,7 +14,13 @@ function formatNumber(n) {
 
 function formatCurrency(input, blur) {
     let value = input.value;
-    if (!value) return;
+    if (!value) {
+        // Remove minus sign if field is empty on blur
+        if (blur && input.dataset.isExpense === 'true') {
+            input.value = '';
+        }
+        return;
+    }
     
     // Preserve minus sign if present
     const isNegative = value.startsWith('-');
@@ -28,13 +34,18 @@ function formatCurrency(input, blur) {
         value = left + "." + right;
     } else {
         value = formatNumber(value);
-        if (blur) {
+        // Only add .00 on blur if it's not an expense field or if it has a value
+        if (blur && (!input.dataset.isExpense || value !== '')) {
             value += ".00";
         }
     }
     
-    // Add back the minus sign if it was present
-    input.value = isNegative ? '-' + value : value;
+    // Add minus sign based on whether it's an expense field
+    if (input.dataset.isExpense === 'true' && value !== '') {
+        input.value = '-' + value;
+    } else {
+        input.value = isNegative ? '-' + value : value;
+    }
 }
 
 function formatPercentage(input, blur) {
@@ -355,7 +366,12 @@ document.addEventListener('DOMContentLoaded', () => {
         'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
         'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
         'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
-        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9'
+        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9',
+        // Revenue fields without minus sign
+        'B33', 'B34', 'B35', 'B36', 'B37', 'B38', 'B39', 'B40', 'B41', 'B42', 'B43', 'B44', 'B45', 'B46', 'B47',
+        'C33', 'C34', 'C35', 'C36', 'C37', 'C38', 'C39', 'C40', 'C41', 'C42', 'C43', 'C44', 'C45', 'C46', 'C47',
+        'B48', 'B49', 'B50', 'B51', 'B52', 'B53', 'B54', 'B55', 'B56', 'B57', 'B58', 'B59', 'B60', 'B61', 'B62',
+        'C48', 'C49', 'C50', 'C51', 'C52', 'C53', 'C54', 'C55', 'C56', 'C57', 'C58', 'C59', 'C60', 'C61', 'C62'
     ];
 
     // Configure percentage inputs
@@ -577,6 +593,36 @@ document.addEventListener('DOMContentLoaded', () => {
     if (inputA11) {
         inputA11.addEventListener('input', calculateA8);
     }
+
+    // Configure expense input fields
+    const expenseFields = [
+        'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
+        'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
+        'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
+        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9'
+    ];
+
+    expenseFields.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            // Mark as expense field
+            input.dataset.isExpense = 'true';
+            
+            // Add focus event to ensure minus sign when field is selected
+            input.addEventListener('focus', function() {
+                if (!this.value) {
+                    this.value = '-';
+                }
+            });
+            
+            // Add blur event to remove minus sign if no value
+            input.addEventListener('blur', function() {
+                if (this.value === '-') {
+                    this.value = '';
+                }
+            });
+        }
+    });
 
     calculateAll(); // Initial calculation
 });
