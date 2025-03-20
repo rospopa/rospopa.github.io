@@ -65,37 +65,21 @@
                             <div id="suggestions" class="suggestions"></div>
                         </div><!-- End: Address -->
                         <!-- Start: Purchase_Price_$ -->
-                        <div class="col-md-6"><label class="form-label" for="B1"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Purchase Price $"><i class="icon-question"></i></sup>Purchase Price</label>
+                        <div class="col-md-3"><label class="form-label" for="B1"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Purchase Price $"><i class="icon-question"></i></sup>Purchase Price</label>
                             <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="B1" data-name="Purchase-Price" data-type="currency" maxlength="12" name="Purchase-Price" placeholder="0.00" step="0.01"></div>
                         </div><!-- End: Purchase_Price_$ -->
                         <!-- Start: Closing_Date_select -->
                         <div class="col-md-3"><label class="form-label" for="B4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Date"><i class="icon-question"></i></sup>Closing Date*</label>
                             <div class="input-group"><input class="form-control" id="B4" type="date" data-name="Closing-Date" name="Closing Date"></div>
                         </div><!-- End: Closing_Date_select -->
-                        <!-- Start: Past_Tax_Schedule_Date_select -->
-                        <div class="col-md-3"><label class="form-label" for="A10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Past Tax Schedule Date"><i class="icon-question"></i></sup>Past Tax Date</label>
-                            <div class="input-group"><input class="form-control" id="A10" type="date" data-name="Past-Tax-Date" name="Past-Tax-Date"></div>
-                        </div><!-- End: Past_Tax_Schedule_Date_select -->
-                        <!-- Start: Annual_Tax_Amount_$ -->
-                        <div class="col-md-3"><label class="form-label" for="A5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount $"><i class="icon-question"></i></sup>Annual Tax Amount</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5" data-name="Annual-Tax-Amount" data-type="currency" maxlength="12" name="Annual-Tax-Amount" placeholder="0.00" step="0.01"></div>
-                        </div><!-- End: Annual_Tax_Amount_$ -->
-                        <!-- Start: Annual_Tax_Amount_Daily_$ -->
-                        <div class="col-md-3"><label class="form-label" for="A5_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount Daily $"><i class="icon-question"></i></sup>Annual Tax Daily</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5_2" data-name="Annual-Tax-Amount-Daily" data-type="currency" maxlength="12" name="Annual-Tax-Amount-Daily" placeholder="0.00" step="0.01" readonly=""></div>
-                        </div><!-- End: Annual_Tax_Amount_Daily_$ -->
                         <!-- Start: Days_Remain_in_Year -->
-                        <div class="col-md-2"><label class="form-label" for="A4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Days Remain in Year"><i class="icon-question"></i></sup>Remain</label>
+                        <div class="col-md-3"><label class="form-label" for="A4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Days Remain in Year"><i class="icon-question"></i></sup>Remain</label>
                             <div class="input-group"><input class="form-control" type="text" id="A4" name="Year-days-remain" data-name="Year-days-remain" readonly=""><span class="input-group-text">days</span></div>
                         </div><!-- End: Days_Remain_in_Year -->
                         <!-- Start: Days_Passed_in_Year -->
-                        <div class="col-md-2"><label class="form-label" for="A4_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Days Passed in Year"><i class="icon-question"></i></sup>Passed</label>
+                        <div class="col-md-3"><label class="form-label" for="A4_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Days Passed in Year"><i class="icon-question"></i></sup>Passed</label>
                             <div class="input-group"><input class="form-control" type="text" id="A4_2" name="Year-days-passed" data-name="Year-days-passed" readonly=""><span class="input-group-text">days</span></div>
                         </div><!-- End: Days_Passed_in_Year -->
-                        <!-- Start: Tax_Days_Due -->
-                        <div class="col-md-2"><label class="form-label" for="A10_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Days Due"><i class="icon-question"></i></sup>Tax Due</label>
-                            <div class="input-group"><input class="form-control" type="text" id="A10_2" name="Tax-Days-Due" data-name="Tax-Days-Due" readonly=""><span class="input-group-text">days</span></div>
-                        </div><!-- End: Tax_Days_Due -->
                         <!-- Start: Down_Payment_% -->
                         <div class="col-md-3"><label class="form-label" for="B2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment %"><i class="icon-question"></i></sup>Down Payment</label>
                             <div class="input-group"><input class="form-control" type="number" id="B2" data-name="Down-Payment-rate" max="100" name="Down-Payment-rate" placeholder="0" step="0.01" min="0.00"><span class="input-group-text">%</span></div>
@@ -104,67 +88,6 @@
                         <div class="col-md-3"><label class="form-label" for="B3"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment $"><i class="icon-question"></i></sup>Down Payment</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B3" data-name="Down-Payment" name="Down Payment" maxlength="12" readonly="" data-type="currency" placeholder="0.00"></div>
                         </div><!-- End: Down_Payment_$ -->
-                        <!-- Start: Tax_Proration_% -->
-                        <div class="col-md-3"><label class="form-label" for="A7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration %"><i class="icon-question"></i></sup>Tax Proration</label>
-                            <div class="input-group" id="percentageBasedProration"><input class="form-control" type="number" id="A7" placeholder="0" step="0.01" name="Tax-Proration-Rate" data-name="Tax-Proration-Rate" min="0.00"><span class="input-group-text">%</span></div>
-                        </div><!-- End: Tax_Proration_% -->
-                        <!-- Start: Tax_Proration_Amount_$ -->
-                        <div class="col-md-3"><label class="form-label" for="A8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration Amount $"><i class="icon-question"></i></sup>Tax Proration Amount</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A8" data-type="currency" readonly="" name="Tax-Proration-Amount" data-name="Tax-Proration-Amount" placeholder="0.00"></div>
-                        </div><!-- End: Tax_Proration_Amount_$ -->
-                        <!-- Start: Annual_Interest_Rate_$ -->
-                        <div class="col-md-3"><label class="form-label" for="B6"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Interest Rate %"><i class="icon-question"></i></sup>Annual Interest Rate</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B6" placeholder="0" step="0.01" max="100" name="Annual Interest Rate" data-name="Annual-Interest-rate" min="0.00"><span class="input-group-text">%</span></div>
-                        </div><!-- End: Annual_Interest_Rate_$ -->
-                        <!-- Start: Loan_Term_Period_ -->
-                        <div class="col-md-3"><label class="form-label" for="B7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Term Period (year's/ month's/ week's/ day's)"><i class="icon-question"></i></sup>Loan Term Period</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B7" max="99" data-name="Loan-Term-Period" step="1" name="Loan Term Period" placeholder="0" min="0"><select class="form-select flex-grow-0 form-control" id="TermsPeriod" name="Terms Period" data-name="Terms-Period">
-                                    <option value="Year" selected="">Year(s)</option>
-                                    <option value="Month">Month(s)</option>
-                                    <option value="Week">Week(s)</option>
-                                    <option value="Day">Day(s)</option>
-                                </select></div>
-                        </div><!-- End: Loan_Term_Period_ -->
-                        <!-- Start: Inspection_$ -->
-                        <div class="col-md-3"><label class="form-label" for="B14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Inspection $"><i class="icon-question"></i></sup>Inspection</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B14" data-type="currency" placeholder="0.00" step="0.01" name="Inspection" maxlength="12"></div>
-                        </div><!-- End: Inspection_$ -->
-                        <!-- Start: Past_Tax_Payment_$ -->
-                        <div class="col-md-3"><label class="form-label" for="A11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Encumbrances $"><i class="icon-question"></i></sup>Encumbrances</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A11" data-name="Past-Tax-Payment" data-type="currency" maxlength="12" name="Past-Tax-Payment" placeholder="0.00" step="0.01"></div>
-                        </div><!-- End: Past_Tax_Payment_$ -->
-                        <!-- Start: Payments_per_ -->
-                        <div class="col-md-3"><label class="form-label" for="B8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Payments per Period"><i class="icon-question"></i></sup>Payments per&nbsp;</label><span id="Term"></span>
-                            <div class="input-group"><input class="form-control" type="number" id="B8" step="1" max="99" name="Payments per Period" data-name="Payments-per-Period" placeholder="0" min="0"><span class="input-group-text" id="per">#</span></div>
-                        </div><!-- End: Payments_per_ -->
-                        <!-- Start: Closing_Cost_% -->
-                        <div class="col-md-3"><label class="form-label" for="B13"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Cost %"><i class="icon-question"></i></sup>Closing Cost</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B13" placeholder="0" step="0.01" max="100" name="Closing-Cost" min="0"><span class="input-group-text">%</span></div>
-                        </div><!-- End: Closing_Cost_% -->
-                        <!-- Start: Total_Payments_# -->
-                        <div class="col-md-3"><label class="form-label" for="B9"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Payments"><i class="icon-question"></i></sup>Total Payments</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B9" name="Total Payments" data-name="Total-Payments" placeholder="0" readonly=""><span class="input-group-text">#</span></div>
-                        </div><!-- End: Total_Payments_# -->
-                        <!-- Start: Amount_per_Payment_$ -->
-                        <div class="col-md-3"><label class="form-label" for="B10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Amount per Payment $"><i class="icon-question"></i></sup>Amount per Payment</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B10" data-type="currency" readonly="" name="Payment per Period" data-name="Payment-per-Period" placeholder="0.00"></div>
-                        </div><!-- End: Amount_per_Payment_$ -->
-                        <!-- Start: Loan_Amount_$ -->
-                        <div class="col-md-6"><label class="form-label" for="B5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Amount $"><i class="icon-question"></i></sup>Loan Amount</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B5" data-type="currency" readonly="" name="Loan Amount" data-name="Loan-Amount" placeholder="0.00"></div>
-                        </div><!-- End: Loan_Amount_$ -->
-                        <!-- Start: Total_Loan_Cost -->
-                        <div class="col-md-6"><label class="form-label" for="B11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Sum of Payments (Total Cost of Loan) $"><i class="icon-question"></i></sup>Total Loan Cost</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B11" data-type="currency" readonly="" data-name="Total-Loan-Cost" name="Total Loan Cost" placeholder="0.00"></div>
-                        </div><!-- End: Total_Loan_Cost -->
-                        <!-- Start: Interest_Cost -->
-                        <div class="col-md-6"><label class="form-label" for="B12"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Interest Cost $"><i class="icon-question"></i></sup>Interest Cost</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B12" data-type="currency" readonly="" name="Interest-Cost" data-name="Interest Cost" placeholder="0.00"></div>
-                        </div><!-- End: Interest_Cost -->
-                        <!-- Start: Down_Payment_ -->
-                        <div class="col-md-6"><label class="form-label" for="B15"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment + Closing Cost (% of Purchase Price) + Inspection - Tax Proration $"><i class="icon-question"></i></sup>Cash to Close</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B15" data-type="currency" readonly="" step="0.01" name="Cash-to-Close" data-name="Cash-to-Close" placeholder="0.00"></div>
-                        </div><!-- End: Down_Payment_ -->
                         <!-- Start: Loan_Type -->
                         <div class="col-md-6"><label class="form-label" for="Loan-Type"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Type"><i class="icon-question"></i></sup>Loan Type</label>
                             <form class="form-inline">
@@ -199,10 +122,43 @@
                                     </select></div>
                             </form>
                         </div><!-- End: Loan_Type -->
-                        <!-- Start: Closing_Date_select -->
-                        <div class="col-md-3"><label class="form-label" for="A14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Future Tax Date"><i class="icon-question"></i></sup>Future Tax Date</label>
-                            <div class="input-group"><input class="form-control" id="A14" type="date" data-name="Future-Tax-Date" name="Future-Tax-Date"></div>
-                        </div><!-- End: Closing_Date_select -->
+                        <!-- Start: Loan_Amount_$ -->
+                        <div class="col-md-6"><label class="form-label" for="B5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Amount $"><i class="icon-question"></i></sup>Loan Amount</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B5" data-type="currency" readonly="" name="Loan Amount" data-name="Loan-Amount" placeholder="0.00"></div>
+                        </div><!-- End: Loan_Amount_$ -->
+                        <!-- Start: Loan_Term_Period_ -->
+                        <div class="col-md-3"><label class="form-label" for="B7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Term Period (year's/ month's/ week's/ day's)"><i class="icon-question"></i></sup>Loan Term Period</label>
+                            <div class="input-group"><input class="form-control" type="number" id="B7" max="99" data-name="Loan-Term-Period" step="1" name="Loan Term Period" placeholder="0" min="0"><select class="form-select flex-grow-0 form-control" id="TermsPeriod" name="Terms Period" data-name="Terms-Period">
+                                    <option value="Year" selected="">Year(s)</option>
+                                    <option value="Month">Month(s)</option>
+                                    <option value="Week">Week(s)</option>
+                                    <option value="Day">Day(s)</option>
+                                </select></div>
+                        </div><!-- End: Loan_Term_Period_ -->
+                        <!-- Start: Payments_per_ -->
+                        <div class="col-md-3"><label class="form-label" for="B8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Payments per Period"><i class="icon-question"></i></sup>Payments per&nbsp;</label><span id="Term"></span>
+                            <div class="input-group"><input class="form-control" type="number" id="B8" step="1" max="99" name="Payments per Period" data-name="Payments-per-Period" placeholder="0" min="0"><span class="input-group-text" id="per">#</span></div>
+                        </div><!-- End: Payments_per_ -->
+                        <!-- Start: Annual_Interest_Rate_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B6"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Interest Rate %"><i class="icon-question"></i></sup>Annual Interest Rate</label>
+                            <div class="input-group"><input class="form-control" type="number" id="B6" placeholder="0" step="0.01" max="100" name="Annual Interest Rate" data-name="Annual-Interest-rate" min="0.00"><span class="input-group-text">%</span></div>
+                        </div><!-- End: Annual_Interest_Rate_$ -->
+                        <!-- Start: Total_Payments_# -->
+                        <div class="col-md-3"><label class="form-label" for="B9"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Payments"><i class="icon-question"></i></sup>Total Payments</label>
+                            <div class="input-group"><input class="form-control" type="number" id="B9" name="Total Payments" data-name="Total-Payments" placeholder="0" readonly=""><span class="input-group-text">#</span></div>
+                        </div><!-- End: Total_Payments_# -->
+                        <!-- Start: Amount_per_Payment_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Amount per Payment $"><i class="icon-question"></i></sup>Amount per Payment</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B10" data-type="currency" readonly="" name="Payment per Period" data-name="Payment-per-Period" placeholder="0.00"></div>
+                        </div><!-- End: Amount_per_Payment_$ -->
+                        <!-- Start: Interest_Cost -->
+                        <div class="col-md-3"><label class="form-label" for="B12"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Interest Cost $"><i class="icon-question"></i></sup>Interest Cost</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B12" data-type="currency" readonly="" name="Interest-Cost" data-name="Interest Cost" placeholder="0.00"></div>
+                        </div><!-- End: Interest_Cost -->
+                        <!-- Start: Total_Loan_Cost -->
+                        <div class="col-md-6"><label class="form-label" for="B11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Sum of Payments (Total Cost of Loan) $"><i class="icon-question"></i></sup>Total Loan Cost</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B11" data-type="currency" readonly="" data-name="Total-Loan-Cost" name="Total Loan Cost" placeholder="0.00"></div>
+                        </div><!-- End: Total_Loan_Cost -->
                         <!-- Start: Arrears_Advance -->
                         <div class="col-md-3">
                             <!-- Start: Arrears_Advance -->
@@ -213,6 +169,50 @@
                                 </fieldset>
                             </div><!-- End: Arrears_Advance -->
                         </div><!-- End: Arrears_Advance -->
+                        <!-- Start: Past_Tax_Schedule_Date_select -->
+                        <div class="col-md-3"><label class="form-label" for="A10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Past Tax Schedule Date"><i class="icon-question"></i></sup>Past Tax Date</label>
+                            <div class="input-group"><input class="form-control" id="A10" type="date" data-name="Past-Tax-Date" name="Past-Tax-Date"></div>
+                        </div><!-- End: Past_Tax_Schedule_Date_select -->
+                        <!-- Start: Future_Tax_Schedule_Date_select -->
+                        <div class="col-md-3"><label class="form-label" for="A14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Future Tax Date"><i class="icon-question"></i></sup>Future Tax Date</label>
+                            <div class="input-group"><input class="form-control" id="A14" type="date" data-name="Future-Tax-Date" name="Future-Tax-Date"></div>
+                        </div><!-- End: Future_Tax_Schedule_Date_select -->
+                        <!-- Start: Tax_Proration_% -->
+                        <div class="col-md-3"><label class="form-label" for="A7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration %"><i class="icon-question"></i></sup>Tax Proration</label>
+                            <div class="input-group" id="percentageBasedProration"><input class="form-control" type="number" id="A7" placeholder="0" step="0.01" name="Tax-Proration-Rate" data-name="Tax-Proration-Rate" min="0.00"><span class="input-group-text">%</span></div>
+                        </div><!-- End: Tax_Proration_% -->
+                        <!-- Start: Tax_Proration_Amount_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration Amount $"><i class="icon-question"></i></sup>Tax Proration Amount</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A8" data-type="currency" readonly="" name="Tax-Proration-Amount" data-name="Tax-Proration-Amount" placeholder="0.00"></div>
+                        </div><!-- End: Tax_Proration_Amount_$ -->
+                        <!-- Start: Annual_Tax_Amount_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount $"><i class="icon-question"></i></sup>Annual Tax Amount</label>
+                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5" data-name="Annual-Tax-Amount" data-type="currency" maxlength="12" name="Annual-Tax-Amount" placeholder="0.00" step="0.01"></div>
+                        </div><!-- End: Annual_Tax_Amount_$ -->
+                        <!-- Start: Annual_Tax_Amount_Daily_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A5_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount Daily $"><i class="icon-question"></i></sup>Annual Tax Daily</label>
+                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5_2" data-name="Annual-Tax-Amount-Daily" data-type="currency" maxlength="12" name="Annual-Tax-Amount-Daily" placeholder="0.00" step="0.01" readonly=""></div>
+                        </div><!-- End: Annual_Tax_Amount_Daily_$ -->
+                        <!-- Start: Tax_Days_Due -->
+                        <div class="col-md-3"><label class="form-label" for="A10_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Days Due"><i class="icon-question"></i></sup>Tax Due</label>
+                            <div class="input-group"><input class="form-control" type="text" id="A10_2" name="Tax-Days-Due" data-name="Tax-Days-Due" readonly=""><span class="input-group-text">days</span></div>
+                        </div><!-- End: Tax_Days_Due -->
+                        <!-- Start: Closing_Cost_% -->
+                        <div class="col-md-3"><label class="form-label" for="B13"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Cost %"><i class="icon-question"></i></sup>Closing Cost</label>
+                            <div class="input-group"><input class="form-control" type="number" id="B13" placeholder="0" step="0.01" max="100" name="Closing-Cost" min="0"><span class="input-group-text">%</span></div>
+                        </div><!-- End: Closing_Cost_% -->
+                        <!-- Start: Inspection_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Inspection $"><i class="icon-question"></i></sup>Inspection</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B14" data-type="currency" placeholder="0.00" step="0.01" name="Inspection" maxlength="12"></div>
+                        </div><!-- End: Inspection_$ -->
+                        <!-- Start: Encumbrances_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Encumbrances $"><i class="icon-question"></i></sup>Encumbrances</label>
+                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A11" data-name="Past-Tax-Payment" data-type="currency" maxlength="12" name="Past-Tax-Payment" placeholder="0.00" step="0.01"></div>
+                        </div><!-- End: Encumbrances_$ -->
+                        <!-- Start: Cash_To_Close -->
+                        <div class="col-md-3"><label class="form-label" for="B15"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment + Closing Cost (% of Purchase Price) + Inspection - Tax Proration $"><i class="icon-question"></i></sup>Cash to Close</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B15" data-type="currency" readonly="" step="0.01" name="Cash-to-Close" data-name="Cash-to-Close" placeholder="0.00"></div>
+                        </div><!-- End: Cash_To_Close -->
                         <!-- Start: User_File -->
                         <div class="col-md-6 col-file">
                             <!-- Start: File_Upload -->
@@ -1091,6 +1091,7 @@
         </div>
     </div>
 </main>
+
 <footer>
     <div class="wrap">
         <div class="home">
