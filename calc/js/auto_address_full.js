@@ -48,6 +48,9 @@ function initAutocomplete() {
             fullAddress += " " + zip;
         }
 
+        // Update the title with the entered address
+        const titleElement = document.getElementById("main-title-address");
+        titleElement.textContent = fullAddress || "Investment Property Calculator";
 
         input.value = fullAddress; // Set input field to the full address
 
