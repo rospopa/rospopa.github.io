@@ -185,6 +185,7 @@ input[readonly] {
 .table > thead > tr > th {
   background-color: #ffc8c8;
   vertical-align: middle;
+  text-align: center;
 }
 
 #calculator > div.total-cashflow-subsection > div > table > thead > tr {
@@ -196,6 +197,14 @@ input[readonly] {
 }
 
 #calculator > div.total-cashflow-subsection > div > table > tbody > tr > td {
+  background-color: #dfdfdf;
+}
+
+#calculator > div > div.property-total-subsection > div > table > tbody > tr > td {
+  background-color: #dfdfdf;
+}
+
+#calculator > div > div.property-total-subsection > div > table > thead > tr > th {
   background-color: #dfdfdf;
 }
 
@@ -223,6 +232,13 @@ input[readonly] {
 .income-subsection {
   background-color: lightgreen;
   border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.property-total-subsection {
+  background-color: lightgray;
+  border-radius: 5px;
+  margin-top: 20px;
   margin-bottom: 20px;
 }
 
@@ -436,6 +452,7 @@ input[readonly] {
   width: auto;
   display: flex;
   justify-content: space-between;
+  margin-bottom: 10px;
 }
 
 @media (min-width: 732px) {
@@ -800,4 +817,3 @@ button.btn.btn-primary, button.btn.btn-secondary {
   /*text-transform: capitalize;*/
   text-align: center;
 }
-
