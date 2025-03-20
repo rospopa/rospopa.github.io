@@ -141,7 +141,10 @@ function populatePDFFields(container) {
                 { id: 'A10', label: 'Past Tax Date' },
                 { id: 'A14', label: 'Future Tax Date' },
                 { id: 'A7', label: 'Tax Proration %' },
-                { id: 'A8', label: 'Tax Proration Amount' }
+                { id: 'A8', label: 'Tax Proration Amount' },
+				{ id: 'A5', label: 'Annual Tax Amount' },
+				{ id: 'A5_2', label: 'Annual Tax Daily' },
+				{ id: 'A10_2', label: 'Tax Due Days' }
             ]
         },
         {
@@ -497,7 +500,10 @@ function generatePDF(selectedFields) {
                     { id: 'A10', label: 'Past Tax Date', format: value => value },
                     { id: 'A14', label: 'Future Tax Date', format: value => value },
                     { id: 'A7', label: 'Tax Proration', format: formatPercentage },
-                    { id: 'A8', label: 'Tax Proration Amount', format: formatCurrency }
+                    { id: 'A8', label: 'Tax Proration Amount', format: formatCurrency },
+                    { id: 'A5', label: 'Annual Tax Amount', format: formatCurrency },
+                    { id: 'A5_2', label: 'Annual Tax Daily', format: formatCurrency },
+                    { id: 'A10_2', label: 'Tax Due Days', format: value => value + ' days' }
                 ]
             },
             {
