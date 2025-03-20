@@ -630,12 +630,12 @@ button span {
 .btn {
 }
 
-button#savepdf:hover span {
-  color: #0d6efd;
-}
-
 button#savepdf:hover {
   background-color: #ffffff;
+}
+
+button#savepdf:hover span {
+  color: #0d6efd;
 }
 
 button#bt-reset-modal:hover span {
