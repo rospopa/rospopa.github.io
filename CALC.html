@@ -42,7 +42,7 @@
     <div class="page-content">
         <div id="topdf" class="wrap">
             <div id="calculator">
-                <h2 class="text-center" id="main-title-address">Investment Property Calculator</h2><!-- Start: Modal-Reset-Cinfirmation -->
+                <h2 class="text-center" id="main-title-address"></h2><!-- Start: Modal-Reset-Cinfirmation -->
                 <div class="calcheaderbtn">
                     <div class="modal fade" role="dialog" tabindex="-1" id="confirmModal" aria-labelledby="confirmModalLabel">
                         <div class="modal-dialog modal-sm" role="document">
@@ -70,7 +70,7 @@
                             <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="B1" data-name="Purchase-Price" data-type="currency" maxlength="12" name="Purchase-Price" placeholder="0.00" step="0.01"></div>
                         </div><!-- End: Purchase_Price_$ -->
                         <!-- Start: Closing_Date_select -->
-                        <div class="col-md-3"><label class="form-label" for="B4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Date"><i class="icon-question"></i></sup>Closing Date*</label>
+                        <div class="col-md-3"><label class="form-label" for="B4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Date"><i class="icon-question"></i></sup>Closing Date</label>
                             <div class="input-group"><input class="form-control" id="B4" type="date" data-name="Closing-Date" name="Closing Date"></div>
                         </div><!-- End: Closing_Date_select -->
                         <!-- Start: Days_Remain_in_Year -->
@@ -163,50 +163,67 @@
                         <div class="col-md-3"><label class="form-label" for="B11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Sum of Payments (Total Cost of Loan) $"><i class="icon-question"></i></sup>Total Loan Cost</label>
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B11" data-type="currency" readonly="" data-name="Total-Loan-Cost" name="Total Loan Cost" placeholder="0.00"></div>
                         </div><!-- End: Total_Loan_Cost -->
+                        <!-- Start: PROPERTY_TOTAL -->
+                        <div class="col">
+                            <div class="property-total-subsection">
+                                <h4 class="subsection-heading"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Mortgage / Month"><i class="icon-question"></i></sup><span class="fs-5">Total Mortgage</span></h4>
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <caption></caption>
+                                        <thead>
+                                            <tr>
+                                                <th>Min</th>
+                                                <th>Max</th>
+                                                <th>Avg</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr>
+                                                <td>
+                                                    <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B63" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
+                                                </td>
+                                                <td>
+                                                    <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C63" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
+                                                </td>
+                                                <td>
+                                                    <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D63" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div><!-- End: PROPERTY_TOTAL -->
                     </div><!-- End: LOAN_PROFILE -->
-                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 10px;margin-bottom: 10px;">Taxes</h4><!-- Start: TAXES -->
+                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 5px;margin-bottom: 10px;">Taxes</h4><!-- Start: TAXES -->
                     <div class="row" style="border: 1px dashed #1DA1F2 ;">
-                        <!-- Start: Arrears_Advance -->
-                        <div class="col-md-3">
-                            <!-- Start: Arrears_Advance -->
-                            <div>
-                                <fieldset>
-                                    <div class="custom-control custom-radio"><input type="radio" id="Arrears" class="custom-control-input" name="customRadio" checked="" value="Arrears"><label class="form-label custom-control-label" for="Arrears">Arrears</label></div>
-                                    <div class="custom-control custom-radio"><input type="radio" id="Advance" class="custom-control-input" name="customRadio" value="Advanced"><label class="form-label custom-control-label" for="Advance">Advance</label></div>
-                                </fieldset>
-                            </div><!-- End: Arrears_Advance -->
-                        </div><!-- End: Arrears_Advance -->
-                        <!-- Start: Past_Tax_Schedule_Date_select -->
-                        <div class="col-md-3"><label class="form-label" for="A10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Past Tax Schedule Date"><i class="icon-question"></i></sup>Past Tax Date</label>
-                            <div class="input-group"><input class="form-control" id="A10" type="date" data-name="Past-Tax-Date" name="Past-Tax-Date"></div>
-                        </div><!-- End: Past_Tax_Schedule_Date_select -->
-                        <!-- Start: Future_Tax_Schedule_Date_select -->
-                        <div class="col-md-3"><label class="form-label" for="A14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Future Tax Date"><i class="icon-question"></i></sup>Future Tax Date</label>
-                            <div class="input-group"><input class="form-control" id="A14" type="date" data-name="Future-Tax-Date" name="Future-Tax-Date"></div>
-                        </div><!-- End: Future_Tax_Schedule_Date_select -->
-                        <!-- Start: Tax_Proration_% -->
-                        <div class="col-md-3"><label class="form-label" for="A7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration %"><i class="icon-question"></i></sup>Tax Proration</label>
-                            <div class="input-group" id="percentageBasedProration"><input class="form-control" type="number" id="A7" placeholder="0" step="0.01" name="Tax-Proration-Rate" data-name="Tax-Proration-Rate" min="0.00"><span class="input-group-text">%</span></div>
-                        </div><!-- End: Tax_Proration_% -->
-                        <!-- Start: Tax_Proration_Amount_$ -->
-                        <div class="col-md-3"><label class="form-label" for="A8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration Amount $"><i class="icon-question"></i></sup>Tax Proration Amount</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A8" data-type="currency" readonly="" name="Tax-Proration-Amount" data-name="Tax-Proration-Amount" placeholder="0.00"></div>
-                        </div><!-- End: Tax_Proration_Amount_$ -->
                         <!-- Start: Annual_Tax_Amount_$ -->
                         <div class="col-md-3"><label class="form-label" for="A5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount $"><i class="icon-question"></i></sup>Annual Tax Amount</label>
                             <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5" data-name="Annual-Tax-Amount" data-type="currency" maxlength="12" name="Annual-Tax-Amount" placeholder="0.00" step="0.01"></div>
                         </div><!-- End: Annual_Tax_Amount_$ -->
                         <!-- Start: Annual_Tax_Amount_Daily_$ -->
-                        <div class="col-md-3"><label class="form-label" for="A5_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount Daily $"><i class="icon-question"></i></sup>Annual Tax Daily</label>
+                        <div class="col-md-3"><label class="form-label" for="A5_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Daily Tax Amount $"><i class="icon-question"></i></sup>Daily Tax Amount</label>
                             <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5_2" data-name="Annual-Tax-Amount-Daily" data-type="currency" maxlength="12" name="Annual-Tax-Amount-Daily" placeholder="0.00" step="0.01" readonly=""></div>
                         </div><!-- End: Annual_Tax_Amount_Daily_$ -->
-                        <!-- Start: Tax_Days_Due -->
-                        <div class="col-md-3"><label class="form-label" for="A10_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Days Due"><i class="icon-question"></i></sup>Tax Due</label>
-                            <div class="input-group"><input class="form-control" type="text" id="A10_2" name="Tax-Days-Due" data-name="Tax-Days-Due" readonly=""><span class="input-group-text">days</span></div>
-                        </div><!-- End: Tax_Days_Due -->
+                        <!-- Start: Tax_Proration_Amount_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration Amount $"><i class="icon-question"></i></sup>Tax Proration Amount</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A8" data-type="currency" name="Tax-Proration-Amount" data-name="Tax-Proration-Amount" placeholder="0.00"></div>
+                        </div><!-- End: Tax_Proration_Amount_$ -->
+                        <!-- Start: Tax_Depreciation_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Depreciation $"><i class="icon-question"></i></sup>Tax Depreciation</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A7" data-type="currency" name="Tax-Proration-Amount" data-name="Tax-Proration-Amount" placeholder="0.00"></div>
+                        </div><!-- End: Tax_Depreciation_$ -->
                     </div><!-- End: TAXES -->
-                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 10px;margin-bottom: 10px;">Cash to close</h4><!-- Start: CASH_TO_CLOSE -->
+                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 10px;margin-bottom: 10px;">Cash to Close</h4><!-- Start: CASH_TO_CLOSE -->
                     <div class="row" style="border: 1px dashed #1DA1F2 ;">
+                        <!-- Start: Escrow_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Escrow $"><i class="icon-question"></i></sup>Escrow</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A10" data-type="currency" name="Escrow-Amount" data-name="Escrow-Amount" placeholder="0.00"></div>
+                        </div><!-- End: Escrow_$ -->
+                        <!-- Start: Escrow_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A12"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Allowances $"><i class="icon-question"></i></sup>Allowances</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A12" data-type="currency" name="Escrow-Amount" data-name="Escrow-Amount" placeholder="0.00"></div>
+                        </div><!-- End: Escrow_$ -->
                         <!-- Start: Closing_Cost_% -->
                         <div class="col-md-3"><label class="form-label" for="B13"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Cost %"><i class="icon-question"></i></sup>Closing Cost</label>
                             <div class="input-group"><input class="form-control" type="number" id="B13" placeholder="0" step="0.01" max="100" name="Closing-Cost" min="0"><span class="input-group-text">%</span></div>
@@ -224,41 +241,10 @@
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B15" data-type="currency" readonly="" step="0.01" name="Cash-to-Close" data-name="Cash-to-Close" placeholder="0.00"></div>
                         </div><!-- End: Cash_To_Close -->
                     </div><!-- End: CASH_TO_CLOSE -->
-                    <!-- Start: Property_Total -->
-                    <div class="property-total-subsection">
-                        <h4 class="subsection-heading"></h4>
-                        <div class="table-responsive">
-                            <table class="table table-hover">
-                                <caption></caption>
-                                <thead>
-                                    <tr>
-                                        <th>Cash Flow Item</th>
-                                        <th>Min</th>
-                                        <th>Max</th>
-                                        <th>Avg</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                        <td><label class="form-label" for="D63"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Mortgage / Month"><i class="icon-question"></i></sup>Total Mortgage /Month</label></td>
-                                        <td>
-                                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B63" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
-                                        </td>
-                                        <td>
-                                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C63" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
-                                        </td>
-                                        <td>
-                                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D63" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div><!-- End: Property_Total -->
                 </div><!-- End: Investment -->
                 <!-- Start: Gross Expenses -->
                 <div class="subsection" style="background: rgb(240, 128, 128);">
-                    <h4 class="subsection-heading">Gross Expenses</h4>
+                    <h4 class="subsection-heading">Expenses</h4>
                     <div class="table-responsive">
                         <table class="table table-hover table-bordered">
                             <caption></caption>
@@ -451,7 +437,7 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D32" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr><!-- Start: Custom Field -->
+                                </tr><!-- Start: Custom_Expenses_Row1 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
                                         <div class="input-group"><input class="form-control" type="text" id="CFN1" data-type="text" placeholder="Custom Expense"></div>
@@ -465,8 +451,8 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD1" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr><!-- End: Custom Field -->
-                                <!-- Start: Custom Field -->
+                                </tr><!-- End: Custom_Expenses_Row1 -->
+                                <!-- Start: Custom_Expenses_Row2 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
                                         <div class="input-group"><input class="form-control" type="text" id="CFN2" data-type="text" placeholder="Custom Expense"></div>
@@ -480,8 +466,8 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD2" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr><!-- End: Custom Field -->
-                                <!-- Start: Custom Field -->
+                                </tr><!-- End: Custom_Expenses_Row2 -->
+                                <!-- Start: Custom_Expenses_Row3 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
                                         <div class="input-group"><input class="form-control" type="text" id="CFN3" data-type="text" placeholder="Custom Expense"></div>
@@ -495,8 +481,8 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD3" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr><!-- End: Custom Field -->
-                                <!-- Start: Custom Field -->
+                                </tr><!-- End: Custom_Expenses_Row3 -->
+                                <!-- Start: Custom_Expenses_Row4 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
                                         <div class="input-group"><input class="form-control" type="text" id="CFN4" data-type="text" placeholder="Custom Expense"></div>
@@ -510,8 +496,8 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD4" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr><!-- End: Custom Field -->
-                                <!-- Start: Custom Field -->
+                                </tr><!-- End: Custom_Expenses_Row4 -->
+                                <!-- Start: Custom_Expenses_Row5 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
                                         <div class="input-group"><input class="form-control" type="text" id="CFN5" data-type="text" placeholder="Custom Expense"></div>
@@ -525,8 +511,8 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD5" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr><!-- End: Custom Field -->
-                                <!-- Start: Custom Field -->
+                                </tr><!-- End: Custom_Expenses_Row5 -->
+                                <!-- Start: Custom_Expenses_Row6 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
                                         <div class="input-group"><input class="form-control" type="text" id="CFN6" data-type="text" placeholder="Custom Expense"></div>
@@ -540,8 +526,8 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD6" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr><!-- End: Custom Field -->
-                                <!-- Start: Custom Field -->
+                                </tr><!-- End: Custom_Expenses_Row6 -->
+                                <!-- Start: Custom_Expenses_Row7 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
                                         <div class="input-group"><input class="form-control" type="text" id="CFN7" data-type="text" placeholder="Custom Expense"></div>
@@ -555,8 +541,8 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD7" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr><!-- End: Custom Field -->
-                                <!-- Start: Custom Field -->
+                                </tr><!-- End: Custom_Expenses_Row7 -->
+                                <!-- Start: Custom_Expenses_Row8 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
                                         <div class="input-group"><input class="form-control" type="text" id="CFN8" data-type="text" placeholder="Custom Expense"></div>
@@ -570,8 +556,8 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD8" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr><!-- End: Custom Field -->
-                                <!-- Start: Custom Field -->
+                                </tr><!-- End: Custom_Expenses_Row8 -->
+                                <!-- Start: Custom_Expenses_Row9 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
                                         <div class="input-group"><input class="form-control" type="text" id="CFN9" data-type="text" placeholder="Custom Expense"></div>
@@ -585,7 +571,7 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD9" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr><!-- End: Custom Field -->
+                                </tr><!-- End: Custom_Expenses_Row9 -->
                                 <!-- Start: Custom Field Buttons -->
                                 <tr>
                                     <td>
@@ -604,7 +590,7 @@
                                     <td></td>
                                 </tr><!-- End: Custom Field Buttons -->
                                 <tr>
-                                    <td><label class="form-label" for="D64"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Expense / Month"><i class="icon-question"></i></sup>Total Expense</label></td>
+                                    <td><label class="form-label fw-bold" for="D64"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Expense / Month"><i class="icon-question"></i></sup>Total Expense</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B64" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
@@ -621,7 +607,7 @@
                 </div><!-- End: Gross Expenses -->
                 <!-- Start: Gross Revenue -->
                 <div class="income-subsection">
-                    <h4 class="subsection-heading">Gross Revenue</h4>
+                    <h4 class="subsection-heading">Revenue</h4>
                     <div class="table-responsive">
                         <table class="table table-striped table-hover table-bordered">
                             <caption></caption>
@@ -1044,6 +1030,141 @@
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D62" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
                                 </tr><!-- End: Parking_15 -->
+                                <!-- Start: Custom_Revenue_Row1 -->
+                                <tr class="cust_reve-row">
+                                    <td class="tabcalctitle">
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN1" data-type="text" placeholder="Custom Revenue"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB1" data-type="currency" placeholder="0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC1" data-type="currency" placeholder="0.00"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD1" data-type="currency" readonly="" placeholder="0.00"></div>
+                                    </td>
+                                </tr><!-- End: Custom_Revenue_Row1 -->
+                                <!-- Start: Custom_Revenue_Row2 -->
+                                <tr class="cust_reve-row">
+                                    <td class="tabcalctitle">
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN2" data-type="text" placeholder="Custom Revenue"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB2" data-type="currency" placeholder="0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC2" data-type="currency" placeholder="0.00"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD2" data-type="currency" readonly="" placeholder="0.00"></div>
+                                    </td>
+                                </tr><!-- End: Custom_Revenue_Row2 -->
+                                <!-- Start: Custom_Revenue_Row3 -->
+                                <tr class="cust_reve-row">
+                                    <td class="tabcalctitle">
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN3" data-type="text" placeholder="Custom Revenue"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB3" data-type="currency" placeholder="0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC3" data-type="currency" placeholder="0.00"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD3" data-type="currency" readonly="" placeholder="0.00"></div>
+                                    </td>
+                                </tr><!-- End: Custom_Revenue_Row3 -->
+                                <!-- Start: Custom_Revenue_Row4 -->
+                                <tr class="cust_reve-row">
+                                    <td class="tabcalctitle">
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN4" data-type="text" placeholder="Custom Revenue"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB4" data-type="currency" placeholder="0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC4" data-type="currency" placeholder="0.00"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD4" data-type="currency" readonly="" placeholder="0.00"></div>
+                                    </td>
+                                </tr><!-- End: Custom_Revenue_Row4 -->
+                                <!-- Start: Custom_Revenue_Row5 -->
+                                <tr class="cust_reve-row">
+                                    <td class="tabcalctitle">
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN5" data-type="text" placeholder="Custom Revenue"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB5" data-type="currency" placeholder="0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC5" data-type="currency" placeholder="0.00"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD5" data-type="currency" readonly="" placeholder="0.00"></div>
+                                    </td>
+                                </tr><!-- End: Custom_Revenue_Row5 -->
+                                <!-- Start: Custom_Revenue_Row6 -->
+                                <tr class="cust_reve-row">
+                                    <td class="tabcalctitle">
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN6" data-type="text" placeholder="Custom Revenue"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB6" data-type="currency" placeholder="0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC6" data-type="currency" placeholder="0.00"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD6" data-type="currency" readonly="" placeholder="0.00"></div>
+                                    </td>
+                                </tr><!-- End: Custom_Revenue_Row6 -->
+                                <!-- Start: Custom_Revenue_Row7 -->
+                                <tr class="cust_reve-row">
+                                    <td class="tabcalctitle">
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN7" data-type="text" placeholder="Custom Revenue"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB7" data-type="currency" placeholder="0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC7" data-type="currency" placeholder="0.00"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD7" data-type="currency" readonly="" placeholder="0.00"></div>
+                                    </td>
+                                </tr><!-- End: Custom_Revenue_Row7 -->
+                                <!-- Start: Custom_Revenue_Row8 -->
+                                <tr class="cust_reve-row">
+                                    <td class="tabcalctitle">
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN8" data-type="text" placeholder="Custom Revenue"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB8" data-type="currency" placeholder="0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC8" data-type="currency" placeholder="0.00"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD8" data-type="currency" readonly="" placeholder="0.00"></div>
+                                    </td>
+                                </tr><!-- End: Custom_Revenue_Row8 -->
+                                <!-- Start: Custom_Revenue_Row9 -->
+                                <tr class="cust_reve-row">
+                                    <td class="tabcalctitle">
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN9" data-type="text" placeholder="Custom Revenue"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB9" data-type="currency" placeholder="0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC9" data-type="currency" placeholder="0.00"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD9" data-type="currency" readonly="" placeholder="0.00"></div>
+                                    </td>
+                                </tr><!-- End: Custom_Revenue_Row9 -->
                                 <!-- Start: Custom Field Buttons -->
                                 <tr>
                                     <td>
@@ -1062,7 +1183,7 @@
                                     <td></td>
                                 </tr><!-- End: Custom Field Buttons -->
                                 <tr>
-                                    <td><label class="form-label" for="D65"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Revenue / Month"><i class="icon-question"></i></sup>Total Revenue</label></td>
+                                    <td><label class="form-label fw-bold" for="D65"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Revenue / Month"><i class="icon-question"></i></sup>Total Revenue</label></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B65" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
@@ -1079,13 +1200,13 @@
                 </div><!-- End: Gross Revenue -->
                 <!-- Start: Total Cash Flow -->
                 <div class="total-cashflow-subsection">
-                    <h4 class="subsection-heading">Total Cash Flow</h4>
+                    <h4 class="subsection-heading"><span class="fs-5">Summary</span></h4>
                     <div class="table-responsive">
                         <table class="table table-hover">
                             <caption></caption>
                             <thead>
                                 <tr>
-                                    <th>Cash Flow Item</th>
+                                    <th>Formula</th>
                                     <th>Min</th>
                                     <th>Max</th>
                                     <th>Avg</th>
@@ -1093,7 +1214,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><label class="form-label" for="D66"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Est Total Income / Month"><i class="icon-question"></i></sup>Est Total Income /Month</label></td>
+                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Est Total Income / Month"><i class="icon-question"></i></sup>Total Income</span></td>
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B66" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
