@@ -183,6 +183,10 @@ function calculateAll() {
         const B14 = parseFloat(document.getElementById('B14').value.replace(/,/g, '')) || 0;
         const A8 = parseFloat(document.getElementById('A8').value.replace(/,/g, '')) || 0;
         const A5 = parseFloat(document.getElementById('A5').value.replace(/,/g, '')) || 0;
+        const A7 = parseFloat(document.getElementById('A7').value.replace(/,/g, '')) || 0;
+        const A10 = parseFloat(document.getElementById('A10').value.replace(/,/g, '')) || 0;
+        const A11 = parseFloat(document.getElementById('A11').value.replace(/,/g, '')) || 0;
+        const A12 = parseFloat(document.getElementById('A12').value.replace(/,/g, '')) || 0;
 
         // B3 = B1 * B2
         const B3 = B1 * B2;
@@ -197,7 +201,7 @@ function calculateAll() {
         // B12 = B11 + B5
         const B12 = B11 + B5;
         // B15 = (((B1*B2)+(B1*B13))*-1)-B14+A8
-        const B15 = (((B1 * B2) + (B1 * B13)) * -1) - B14 + A8;
+        const B15 = (((B1 * B2) + (B1 * B13)) * -1) - B14 + A7 + A8 + A10 + A11 + A12;
         // B22 = A5 / 12 (Monthly Tax)
         const B22 = -(A5 / 12);
 
@@ -254,57 +258,6 @@ function calculateAll() {
     }
 }
 
-// Tax Proration Calculation
-function calculateA5_2() {
-    const a5 = parseFloat(document.getElementById('A5').value.replace(/,/g, '')) || 0;
-    const a4 = parseFloat(document.getElementById('A4').value) || 0;
-    const a4_2 = parseFloat(document.getElementById('A4_2').value) || 0;
-    
-    const result = a5 / (a4 + a4_2);
-    document.getElementById('A5_2').value = formatCalculatedValue(result);
-    return result;
-}
-
-function calculateA8() {
-    const dateInputB4 = document.getElementById('B4');
-    const selectedDateB4 = new Date(dateInputB4.value);
-    const radioArrears = document.getElementById('Arrears');
-    const radioAdvance = document.getElementById('Advance');
-    const dateInputA10 = document.getElementById('A10');
-    const dateInputA14 = document.getElementById('A14');
-    let selectedDateCompare;
-    let result = 0;
-
-    const a5 = parseFloat(document.getElementById('A5').value.replace(/,/g, '')) || 0;
-    const a4 = parseFloat(document.getElementById('A4').value) || 0;
-    const a4_2 = parseFloat(document.getElementById('A4_2').value) || 0;
-    const a7 = document.getElementById('A7').value === '' ? 0 : (parseFloat(document.getElementById('A7').value) / 100 || 0);
-    const a11 = parseFloat(document.getElementById('A11').value.replace(/,/g, '')) || 0;
-
-    if (radioArrears.checked) {
-        selectedDateCompare = new Date(dateInputA10.value);
-        if (!isNaN(selectedDateB4) && !isNaN(selectedDateCompare)) {
-            const diffDays = (selectedDateCompare - selectedDateB4) / (1000 * 3600 * 24);
-            result = ((a5 / (a4 + a4_2)) * diffDays) * a7 + a11;
-            result = Math.abs(result);
-        }
-    } else if (radioAdvance.checked) {
-        selectedDateCompare = new Date(dateInputA14.value);
-        if (!isNaN(selectedDateB4) && !isNaN(selectedDateCompare)) {
-            const diffDays = (selectedDateCompare - selectedDateB4) / (1000 * 3600 * 24);
-            if (selectedDateCompare.getFullYear() === selectedDateB4.getFullYear()) {
-                result = (a5 / (a4 + a4_2)) * diffDays + a11;
-            } else {
-                result = (a5 / (a4 + a4_2)) * diffDays * a7 + a11;
-            }
-            result = -Math.abs(result);
-        }
-    }
-
-    document.getElementById('A8').value = formatCalculatedValue(result);
-    calculateAll(); // Trigger full recalculation
-}
-
 // Add new function for date calculations
 function calculateDates(selectedDate) {
     if (isNaN(selectedDate)) {
@@ -328,41 +281,11 @@ function calculateDates(selectedDate) {
     document.getElementById('A4_2').value = differenceFromStartOfYearDays;
 }
 
-function calculateDateDifference() {
-    const dateInputB4 = document.getElementById('B4');
-    const selectedDateB4 = new Date(dateInputB4.value);
-    const radioArrears = document.getElementById('Arrears');
-    const radioAdvance = document.getElementById('Advance');
-    const dateInputA10 = document.getElementById('A10');
-    const dateInputA14 = document.getElementById('A14');
-    const resultInputA10_2 = document.getElementById('A10_2');
-
-    let selectedDateCompare;
-
-    if (radioArrears.checked) {
-        selectedDateCompare = new Date(dateInputA10.value);
-    } else if (radioAdvance.checked) {
-        selectedDateCompare = new Date(dateInputA14.value);
-    } else {
-        resultInputA10_2.value = "";
-        return;
-    }
-
-    if (isNaN(selectedDateB4) || isNaN(selectedDateCompare)) {
-        resultInputA10_2.value = "";
-        return;
-    }
-
-    const differenceInTime = selectedDateCompare.getTime() - selectedDateB4.getTime();
-    const differenceInDays = Math.abs(Math.ceil(differenceInTime / (1000 * 3600 * 24)));
-    resultInputA10_2.value = differenceInDays;
-}
-
 // Set up event listeners
 document.addEventListener('DOMContentLoaded', () => {
     // Configure input fields
     const currencyInputs = [
-        'B1', 'B3', 'B5', 'B10', 'B11', 'B12', 'B14', 'B15', 'A5', 'A5_2', 'A8', 'A11',
+        'B1', 'B3', 'B5', 'B10', 'B11', 'B12', 'B14', 'B15', 'A5', 'A5_2', 'A7', 'A8', 'A10', 'A11', 'A12', 
         'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
         'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
         'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
@@ -371,21 +294,25 @@ document.addEventListener('DOMContentLoaded', () => {
         'B33', 'B34', 'B35', 'B36', 'B37', 'B38', 'B39', 'B40', 'B41', 'B42', 'B43', 'B44', 'B45', 'B46', 'B47',
         'C33', 'C34', 'C35', 'C36', 'C37', 'C38', 'C39', 'C40', 'C41', 'C42', 'C43', 'C44', 'C45', 'C46', 'C47',
         'B48', 'B49', 'B50', 'B51', 'B52', 'B53', 'B54', 'B55', 'B56', 'B57', 'B58', 'B59', 'B60', 'B61', 'B62',
-        'C48', 'C49', 'C50', 'C51', 'C52', 'C53', 'C54', 'C55', 'C56', 'C57', 'C58', 'C59', 'C60', 'C61', 'C62'
+        'C48', 'C49', 'C50', 'C51', 'C52', 'C53', 'C54', 'C55', 'C56', 'C57', 'C58', 'C59', 'C60', 'C61', 'C62',
+        'CFRB1', 'CFRB2', 'CFRB3', 'CFRB4', 'CFRB5', 'CFRB6', 'CFRB7', 'CFRB8', 'CFRB9',
+        'CFRC1', 'CFRC2', 'CFRC3', 'CFRC4', 'CFRC5', 'CFRC6', 'CFRC7', 'CFRC8', 'CFRC9'
     ];
 
     // Configure percentage inputs
     const percentageInputs = [
-        'B2', 'B6', 'B13', 'B28', 'C28', 'D28', 'A7',
+        'B2', 'B6', 'B13', 'B28', 'C28', 'D28',
     ];
     
     // Set up calculation triggers
     const calculationTriggers = [
-        'B1', 'B2', 'B6', 'B7', 'B8', 'B13', 'B14', 'A4', 'A4_2', 'A5', 'A5_2', 'A7', 'A8',
+        'B1', 'B2', 'B6', 'B7', 'B8', 'B13', 'B14', 'A4', 'A4_2', 'A5', 'A5_2', 'A7', 'A8', 'A10', 'A11', 'A12',
         'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
         'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
         'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
-        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9'
+        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9',
+        'CFRB1', 'CFRB2', 'CFRB3', 'CFRB4', 'CFRB5', 'CFRB6', 'CFRB7', 'CFRB8', 'CFRB9',
+        'CFRC1', 'CFRC2', 'CFRC3', 'CFRC4', 'CFRC5', 'CFRC6', 'CFRC7', 'CFRC8', 'CFRC9'
     ];
 
     // Configure input elements
@@ -394,9 +321,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (input) {
             input.setAttribute('type', 'text');
             input.setAttribute('data-type', 'currency');
-            if (id === 'A8') {
-                input.readOnly = true;
-            }
             input.addEventListener('input', function(e) {
                 formatCurrency(e.target);
             });
@@ -430,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Remove any formatting from custom field name inputs
-    const customFieldNames = ['CFN1', 'CFN2', 'CFN3', 'CFN4', 'CFN5', 'CFN6', 'CFN7', 'CFN8', 'CFN9', 'autocomplete'];
+    const customFieldNames = ['CFN1', 'CFN2', 'CFN3', 'CFN4', 'CFN5', 'CFN6', 'CFN7', 'CFN8', 'CFN9', 'CFRN1', 'CFRN2', 'CFRN3', 'CFRN4', 'CFRN5', 'CFRN6', 'CFRN7', 'CFRN8', 'CFRN9', 'autocomplete'];
     customFieldNames.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
@@ -443,185 +367,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const allInputs = document.querySelectorAll('#calculator input');
     allInputs.forEach(input => {
         input.addEventListener('input', debouncedCalculateAll);
-    });
-
-    // Tax Proration Fields Setup
-    const yearDaysRemainInput = document.getElementById('A4');
-    const annualTaxInput = document.getElementById('A5');
-    const taxProrationRateInput = document.getElementById('A7');
-    const dateInput = document.getElementById('B4');
-
-    if (yearDaysRemainInput) {
-        yearDaysRemainInput.addEventListener('input', debounce(() => {
-            const value = yearDaysRemainInput.value.replace(/,/g, '');
-            yearDaysRemainInput.value = formatNumber(value);
-            calculateTaxProration();
-        }, 300));
-    }
-
-    if (annualTaxInput) {
-        // Function to reset tooltip and styles
-        const resetTooltipAndStyles = () => {
-            const tooltip = document.getElementById('date-tooltip');
-            if (tooltip) {
-                tooltip.style.display = 'none';
-            }
-            dateInput.style.backgroundColor = '';
-            dateInput.style.borderColor = '';
-        };
-
-        annualTaxInput.addEventListener('input', debounce((e) => {
-            const yearDaysRemainInput = document.getElementById('A4');
-            
-            // Check if A4 is empty and A5 has a value
-            if (!yearDaysRemainInput.value && annualTaxInput.value) {
-                dateInput.style.backgroundColor = '#fff3cd';
-                dateInput.style.borderColor = '#ffeeba';
-                
-                // Create tooltip element if it doesn't exist
-                let tooltip = document.getElementById('date-tooltip');
-                if (!tooltip) {
-                    tooltip = document.createElement('div');
-                    tooltip.id = 'date-tooltip';
-                    document.body.appendChild(tooltip);
-                    
-                    // Add tooltip styles if they don't exist
-                    if (!document.getElementById('tooltip-styles')) {
-                        const style = document.createElement('style');
-                        style.id = 'tooltip-styles';
-                        style.textContent = `
-                            #date-tooltip {
-                                position: fixed;
-                                background: #333;
-                                color: white;
-                                padding: 5px 10px;
-                                border-radius: 4px;
-                                font-size: 14px;
-                                pointer-events: none;
-                                z-index: 1000;
-                                display: none;
-                            }
-                        `;
-                        document.head.appendChild(style);
-                    }
-                }
-                
-                // Position and show tooltip
-                const rect = dateInput.getBoundingClientRect();
-                tooltip.style.left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2) + 'px';
-                tooltip.style.top = (rect.top - 30) + 'px';
-                tooltip.textContent = 'Please select a date first';
-                tooltip.style.display = 'block';
-                
-                // Reset A5 value
-                annualTaxInput.value = '';
-                return;
-            } else {
-                resetTooltipAndStyles();
-            }
-            
-            formatCurrency(annualTaxInput, false);
-        }, 300));
-
-        // Add blur event handler
-        annualTaxInput.addEventListener('blur', resetTooltipAndStyles);
-    }
-
-    if (taxProrationRateInput) {
-        taxProrationRateInput.addEventListener('input', debounce((e) => {
-            formatPercentage(taxProrationRateInput, false);
-        }, 300));
-        taxProrationRateInput.addEventListener('blur', (e) => {
-            formatPercentage(taxProrationRateInput, true);
-        });
-    }
-
-    ['A4', 'A4_2', 'A5'].forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener('input', debounce(() => {
-                calculateA5_2();
-                calculateA8();
-                calculateAll();
-            }, 500));
-        }
-    });
-
-    ['A7'].forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener('input', debounce(() => {
-                calculateA8();
-                calculateAll();
-            }, 500));
-        }
-    });
-
-    // Add new event listeners for date and tax calculations
-    const dateInputB4 = document.getElementById('B4');
-    if (dateInputB4) {
-        dateInputB4.addEventListener('change', function() {
-            calculateDates(new Date(this.value));
-            calculateA8();
-        });
-    }
-
-    const dateInputs = ['A10', 'A14'];
-    dateInputs.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            input.addEventListener('change', function() {
-                calculateDateDifference();
-                calculateA8();
-            });
-        }
-    });
-
-    const radioButtons = ['Arrears', 'Advance'];
-    radioButtons.forEach(id => {
-        const radio = document.getElementById(id);
-        if (radio) {
-            radio.addEventListener('change', function() {
-                calculateDateDifference();
-                calculateA8();
-            });
-        }
-    });
-
-    // Add event listener for A11 (if it exists)
-    const inputA11 = document.getElementById('A11');
-    if (inputA11) {
-        inputA11.addEventListener('input', calculateA8);
-    }
-
-    // Configure expense input fields
-    const expenseFields = [
-        'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
-        'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
-        'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
-        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9'
-    ];
-
-    expenseFields.forEach(id => {
-        const input = document.getElementById(id);
-        if (input) {
-            // Mark as expense field
-            input.dataset.isExpense = 'true';
-            
-            // Add focus event to ensure minus sign when field is selected
-            input.addEventListener('focus', function() {
-                if (!this.value) {
-                    this.value = '-';
-                }
-            });
-            
-            // Add blur event to remove minus sign if no value
-            input.addEventListener('blur', function() {
-                if (this.value === '-') {
-                    this.value = '';
-                }
-            });
-        }
     });
 
     calculateAll(); // Initial calculation
