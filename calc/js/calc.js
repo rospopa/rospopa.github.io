@@ -261,13 +261,15 @@ function calculateAll() {
 }
 
 // Add new function for date calculations
-function calculateDates(selectedDate) {
-    if (isNaN(selectedDate)) {
+function calculateDates() {
+    const dateInput = document.getElementById('B4').value;
+    if (!dateInput) {
         document.getElementById('A4').value = "";
         document.getElementById('A4_2').value = "";
         return;
     }
 
+    const selectedDate = new Date(dateInput);
     const currentYear = selectedDate.getFullYear();
     
     // Calculate days to end of year
@@ -401,4 +403,12 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     calculateAll(); // Initial calculation
+
+    // Add date input listener
+    const dateInput = document.getElementById('B4');
+    if (dateInput) {
+        dateInput.setAttribute('type', 'date');
+        dateInput.addEventListener('input', calculateDates);
+        dateInput.addEventListener('change', calculateDates);
+    }
 });
