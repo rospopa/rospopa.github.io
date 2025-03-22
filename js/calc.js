@@ -14,7 +14,13 @@ function formatNumber(n) {
 
 function formatCurrency(input, blur) {
     let value = input.value;
-    if (!value) return;
+    if (!value) {
+        // Remove minus sign if field is empty on blur
+        if (blur && input.dataset.isExpense === 'true') {
+            input.value = '';
+        }
+        return;
+    }
     
     // Preserve minus sign if present
     const isNegative = value.startsWith('-');
@@ -28,13 +34,18 @@ function formatCurrency(input, blur) {
         value = left + "." + right;
     } else {
         value = formatNumber(value);
-        if (blur) {
+        // Only add .00 on blur if it's not an expense field or if it has a value
+        if (blur && (!input.dataset.isExpense || value !== '')) {
             value += ".00";
         }
     }
     
-    // Add back the minus sign if it was present
-    input.value = isNegative ? '-' + value : value;
+    // Add minus sign based on whether it's an expense field
+    if (input.dataset.isExpense === 'true' && value !== '') {
+        input.value = '-' + value;
+    } else {
+        input.value = isNegative ? '-' + value : value;
+    }
 }
 
 function formatPercentage(input, blur) {
@@ -86,9 +97,10 @@ function sumInputs(prefix, numbers) {
 // Calculate row 65 (sum of rows 33-62)
 function calculateRow65() {
     const range = Array.from({length: 30}, (_, i) => i + 33);
-    const b65 = sumInputs('B', range);
-    const c65 = sumInputs('C', range);
-    const d65 = sumInputs('D', range);
+    const range2 = Array.from({length: 9}, (_, i) => i + 1);
+    const b65 = sumInputs('B', range) + sumInputs('CFRB', range2);
+    const c65 = sumInputs('C', range) + sumInputs('CFRC', range2);
+    const d65 = sumInputs('D', range) + sumInputs('CFRD', range2);
 
     document.getElementById('B65').value = formatCalculatedValue(b65);
     document.getElementById('C65').value = formatCalculatedValue(c65);
@@ -102,7 +114,8 @@ function calculateRow64() {
     const row65Values = calculateRow65();
     const b28 = parseFloat(document.getElementById('B28').value.replace(/,/g, '')) / 100 || 0;
     const c28 = parseFloat(document.getElementById('C28').value.replace(/,/g, '')) / 100 || 0;
-
+    const d28 = parseFloat(document.getElementById('D28').value.replace(/,/g, '')) / 100 || 0;
+    
     // Sum the ranges for expenses (B20:B27 and B29:B32)
     let b64Sum = 0, c64Sum = 0, d64Sum = 0;
     
@@ -130,7 +143,7 @@ function calculateRow64() {
     // Calculate final values with vacancy rate
     const b64 = b64Sum + (row65Values.b65 * b28 * -1);
     const c64 = c64Sum + (row65Values.c65 * c28 * -1);
-    const d64 = d64Sum + (row65Values.b65 * b28 * -1); // Uses B65 and B28 as per original formula
+    const d64 = d64Sum + (row65Values.d65 * d28 * -1); // Uses B65 and B28 as per original formula
 
     document.getElementById('B64').value = formatCalculatedValue(b64);
     document.getElementById('C64').value = formatCalculatedValue(c64);
@@ -144,15 +157,13 @@ function calculateRow66() {
     const row64Values = calculateRow64();
     const row65Values = calculateRow65();
     
-    // Get B63/C63/D63 values (which are all equal to B10)
-    const b63 = parseFloat(document.getElementById('B63').value.replace(/,/g, '')) || 0;
-    const c63 = parseFloat(document.getElementById('C63').value.replace(/,/g, '')) || 0;
-    const d63 = parseFloat(document.getElementById('D63').value.replace(/,/g, '')) || 0;
+    // Get monthly payment value directly from B10
+    const monthlyPayment = parseFloat(document.getElementById('B10').value.replace(/,/g, '')) || 0;
 
-    // Simple sum of rows 63, 64, and 65
-    const b66 = b63 + row64Values.b64 + row65Values.b65;
-    const c66 = c63 + row64Values.c64 + row65Values.c65;
-    const d66 = d63 + row64Values.d64 + row65Values.d65;
+    // Simple sum using B10 value instead of B63/C63/D63
+    const b66 = monthlyPayment + row64Values.b64 + row65Values.b65;
+    const c66 = monthlyPayment + row64Values.c64 + row65Values.c65;
+    const d66 = monthlyPayment + row64Values.d64 + row65Values.d65;
 
     document.getElementById('B66').value = formatCalculatedValue(b66);
     document.getElementById('C66').value = formatCalculatedValue(c66);
@@ -169,6 +180,12 @@ function calculateAll() {
         const B8 = parseFloat(document.getElementById('B8').value.replace(/,/g, '')) || 0;
         const B13 = parseFloat(document.getElementById('B13').value.replace(/,/g, '')) / 100 || 0;
         const B14 = parseFloat(document.getElementById('B14').value.replace(/,/g, '')) || 0;
+        const A8 = parseFloat(document.getElementById('A8').value.replace(/,/g, '')) || 0;
+        const A5 = parseFloat(document.getElementById('A5').value.replace(/,/g, '')) || 0;
+        const A7 = parseFloat(document.getElementById('A7').value.replace(/,/g, '')) || 0;
+        const A10 = parseFloat(document.getElementById('A10').value.replace(/,/g, '')) || 0;
+        const A11 = parseFloat(document.getElementById('A11').value.replace(/,/g, '')) || 0;
+        const A12 = parseFloat(document.getElementById('A12').value.replace(/,/g, '')) || 0;
 
         // B3 = B1 * B2
         const B3 = B1 * B2;
@@ -182,8 +199,10 @@ function calculateAll() {
         const B11 = B10 * B9;
         // B12 = B11 + B5
         const B12 = B11 + B5;
-        // B15 = (((B1 * B2) + (B1 * B13)) * -1) - B14
-        const B15 = -(((B1 * B2) + (B1 * B13))) - B14;
+        // B15 = (((B1*B2)+(B1*B13))*-1)-B14+A8
+        const B15 = (((B1 * B2) + (B1 * B13)) * -1) - B14 + A7 + A8 + A10 + A11 + A12;
+        // B22 = A5 / 12 (Monthly Tax)
+        const B22 = -(A5 / 12);
 
         // Update calculated values
         document.getElementById('B3').value = formatCalculatedValue(B3);
@@ -193,6 +212,7 @@ function calculateAll() {
         document.getElementById('B11').value = formatCalculatedValue(B11);
         document.getElementById('B12').value = formatCalculatedValue(B12);
         document.getElementById('B15').value = formatCalculatedValue(B15);
+        document.getElementById('B22').value = formatCalculatedValue(B22);
 
         // Calculate row 65 first (sum of rows 33-62)
         const row65Values = calculateRow65();
@@ -225,11 +245,14 @@ function calculateAll() {
             document.getElementById('CFD' + i).value = formatCalculatedValue(avg);
         }
 
-        // B63, C63, D63 = B10
-        document.getElementById('B63').value = formatCalculatedValue(B10);
-        document.getElementById('C63').value = formatCalculatedValue(B10);
-        document.getElementById('D63').value = formatCalculatedValue(B10);
-
+        // Calculate averages for all Custom Revenue rows from 1 to 9
+        for (let i = 1; i <= 9; i++) {
+            const CFRB = parseFloat(document.getElementById('CFRB' + i).value.replace(/,/g, '')) || 0;
+            const CFRC = parseFloat(document.getElementById('CFRC' + i).value.replace(/,/g, '')) || 0;
+            const avg = (CFRB + CFRC) / 2;
+            document.getElementById('CFRD' + i).value = formatCalculatedValue(avg);
+        }
+		
         calculateRow66(); // This will trigger calculation of rows 64 and 65 as well
 
     } catch (error) {
@@ -237,107 +260,81 @@ function calculateAll() {
     }
 }
 
+// Add new function for date calculations
+function calculateDates() {
+    const dateInput = document.getElementById('B4').value;
+    if (!dateInput) {
+        document.getElementById('A4').value = "";
+        document.getElementById('A4_2').value = "";
+        return;
+    }
+
+    const selectedDate = new Date(dateInput);
+    const currentYear = selectedDate.getFullYear();
+    
+    // Calculate days to end of year
+    const lastDayOfYear = new Date(currentYear, 11, 31);
+    const differenceToEndOfYearTime = lastDayOfYear.getTime() - selectedDate.getTime();
+    const differenceToEndOfYearDays = Math.ceil(differenceToEndOfYearTime / (1000 * 3600 * 24));
+    document.getElementById('A4').value = differenceToEndOfYearDays;
+
+    // Calculate days from start of year
+    const startOfYear = new Date(currentYear, 0, 1);
+    const differenceFromStartOfYearTime = selectedDate.getTime() - startOfYear.getTime();
+    const differenceFromStartOfYearDays = Math.ceil(differenceFromStartOfYearTime / (1000 * 3600 * 24));
+    document.getElementById('A4_2').value = differenceFromStartOfYearDays;
+}
+
 // Set up event listeners
 document.addEventListener('DOMContentLoaded', () => {
-    // Expense fields that should have minus sign behavior
-    const expenseFields = [
-        'B19', 'C19', 'D19', 'B20', 'C20', 'D20', 'B21', 'C21', 'D21', 'B22', 'C22', 'D22',
-        'B23', 'C23', 'D23', 'B24', 'C24', 'D24', 'B25', 'C25', 'D25',
-        'B26', 'C26', 'D26', 'B27', 'C27', 'D27', 'B29', 'C29', 'D29',
-        'B30', 'C30', 'D30', 'B31', 'C31', 'D31', 'B32', 'C32', 'D32',
-        'CFB1', 'CFC1', 'CFD1', 'CFB2', 'CFC2', 'CFD2', 'CFB3', 'CFC3', 'CFD3', 
-        'CFB4', 'CFC4', 'CFD4', 'CFB5', 'CFC5', 'CFD5', 'CFB6', 'CFC6', 'CFD6', 
-        'CFB7', 'CFC7', 'CFD7', 'CFB8', 'CFC8', 'CFD8', 'CFB9', 'CFC9', 'CFD9'
+    // Configure input fields
+    const currencyInputs = [
+        'B1', 'B3', 'B5', 'B10', 'B11', 'B12', 'B14', 'B15', 'A5', 'A5_2', 'A7', 'A8', 'A10', 'A11', 'A12', 
+        'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
+        'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
+        'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
+        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9',
+        // Revenue fields without minus sign
+        'B33', 'B34', 'B35', 'B36', 'B37', 'B38', 'B39', 'B40', 'B41', 'B42', 'B43', 'B44', 'B45', 'B46', 'B47',
+        'C33', 'C34', 'C35', 'C36', 'C37', 'C38', 'C39', 'C40', 'C41', 'C42', 'C43', 'C44', 'C45', 'C46', 'C47',
+        'B48', 'B49', 'B50', 'B51', 'B52', 'B53', 'B54', 'B55', 'B56', 'B57', 'B58', 'B59', 'B60', 'B61', 'B62',
+        'C48', 'C49', 'C50', 'C51', 'C52', 'C53', 'C54', 'C55', 'C56', 'C57', 'C58', 'C59', 'C60', 'C61', 'C62',
+        'CFRB1', 'CFRB2', 'CFRB3', 'CFRB4', 'CFRB5', 'CFRB6', 'CFRB7', 'CFRB8', 'CFRB9',
+        'CFRC1', 'CFRC2', 'CFRC3', 'CFRC4', 'CFRC5', 'CFRC6', 'CFRC7', 'CFRC8', 'CFRC9'
     ];
 
-    // Gross Expenses fields (B and C columns only)
-    const grossExpenseFields = [
-        'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
-        'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
-        'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
-        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9'
+    // Configure percentage inputs
+    const percentageInputs = [
+        'B2', 'B6', 'B13', 'B28', 'C28', 'D28',
     ];
     
-    // Add focus and blur events for expense fields
-    expenseFields.forEach(id => {
+    // Set up calculation triggers
+    const calculationTriggers = [
+        'B1', 'B2', 'B6', 'B7', 'B8', 'B13', 'B14', 'A4', 'A4_2', 'A5', 'A5_2', 'A7', 'A8', 'A10', 'A11', 'A12',
+        'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
+        'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
+        'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
+        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9',
+        'CFRB1', 'CFRB2', 'CFRB3', 'CFRB4', 'CFRB5', 'CFRB6', 'CFRB7', 'CFRB8', 'CFRB9',
+        'CFRC1', 'CFRC2', 'CFRC3', 'CFRC4', 'CFRC5', 'CFRC6', 'CFRC7', 'CFRC8', 'CFRC9'
+    ];
+
+    // Configure input elements
+    currencyInputs.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
-            // Remove the currency data-type if it exists
-            input.removeAttribute('data-type');
-            input.addEventListener('focus', function() {
-                let value = this.value.replace(/,/g, '');
-                if (!value || value === '0.00') {
-                    this.value = '-';
-                } else {
-                    // Remove formatting but keep the minus sign if present
-                    value = value.replace(/[^\d.-]/g, '');
-                    // Ensure there's a minus sign
-                    if (!value.startsWith('-')) {
-                        value = '-' + value;
-                    }
-                    this.value = value;
-                }
-            });
-
+            input.setAttribute('type', 'text');
+            input.setAttribute('data-type', 'currency');
             input.addEventListener('input', function(e) {
-                let value = this.value;
-                // Remove any existing minus signs
-                value = value.replace(/-/g, '');
-                // Always add a minus sign at the start
-                value = '-' + value;
-                
-                // If this is a gross expense field, apply formatting while typing
-                if (grossExpenseFields.includes(this.id)) {
-                    // Remove non-digits except decimal point
-                    value = value.replace(/[^\d.-]/g, '');
-                    
-                    // Format with commas if there are digits
-                    if (value !== '-') {
-                        const parts = value.substring(1).split('.');
-                        parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-                        value = '-' + parts.join('.');
-                    }
-                }
-                
-                this.value = value;
+                formatCurrency(e.target);
             });
-
-            input.addEventListener('blur', function() {
-                let value = this.value.replace(/,/g, '');
-                // Only remove minus sign if it's the only character
-                if (value === '-') {
-                    this.value = '';
-                } else if (value) {
-                    // Format the value while ensuring it stays negative
-                    value = value.replace(/[^\d.-]/g, '');
-                    // Make sure the value is negative
-                    value = -Math.abs(parseFloat(value) || 0);
-                    this.value = formatCalculatedValue(value);
-                }
-                calculateAll();
+            input.addEventListener('blur', function(e) {
+                formatCurrency(e.target, true);
             });
-
-            // Initial formatting to ensure negative values
-            const currentValue = input.value.replace(/,/g, '');
-            if (currentValue && currentValue !== '0.00') {
-                input.value = formatCalculatedValue(-Math.abs(parseFloat(currentValue)));
-            }
         }
     });
 
-    // Set up event listeners for currency inputs
-    const currencyInputs = document.querySelectorAll('input[type="text"]');
-    currencyInputs.forEach(input => {
-        // Skip percentage fields and custom field name inputs
-        if (!['B2', 'B6', 'B13', 'B28', 'C28', 'autocomplete'].includes(input.id) && 
-            !input.id.startsWith('CFN')) {  // Exclude CFN1-CFN9 inputs
-            input.addEventListener('input', () => formatCurrency(input, false));
-            input.addEventListener('blur', () => formatCurrency(input, true));
-        }
-    });
-
-    // Set up event listeners for percentage inputs
-    const percentageInputs = ['B2', 'B6', 'B13', 'B28', 'C28'];
+    // Set up percentage inputs
     percentageInputs.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
@@ -346,7 +343,6 @@ document.addEventListener('DOMContentLoaded', () => {
             input.setAttribute('step', '0.01');
             input.setAttribute('min', '0');
             input.setAttribute('max', '100');
-            
             input.addEventListener('input', function() {
                 calculateAll();
             });
@@ -361,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Remove any formatting from custom field name inputs
-    const customFieldNames = ['CFN1', 'CFN2', 'CFN3', 'CFN4', 'CFN5', 'CFN6', 'CFN7', 'CFN8', 'CFN9', 'autocomplete'];
+    const customFieldNames = ['CFN1', 'CFN2', 'CFN3', 'CFN4', 'CFN5', 'CFN6', 'CFN7', 'CFN8', 'CFN9', 'CFRN1', 'CFRN2', 'CFRN3', 'CFRN4', 'CFRN5', 'CFRN6', 'CFRN7', 'CFRN8', 'CFRN9', 'autocomplete'];
     customFieldNames.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
@@ -376,5 +372,43 @@ document.addEventListener('DOMContentLoaded', () => {
         input.addEventListener('input', debouncedCalculateAll);
     });
 
+        // Configure expense input fields
+    const expenseFields = [
+        'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32',
+        'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
+        'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
+        'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9'
+    ];
+
+    expenseFields.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            // Mark as expense field
+            input.dataset.isExpense = 'true';
+            
+            // Add focus event to ensure minus sign when field is selected
+            input.addEventListener('focus', function() {
+                if (!this.value) {
+                    this.value = '-';
+                }
+            });
+            
+            // Add blur event to remove minus sign if no value
+            input.addEventListener('blur', function() {
+                if (this.value === '-') {
+                    this.value = '';
+                }
+            });
+        }
+    });
+    
     calculateAll(); // Initial calculation
+
+    // Add date input listener
+    const dateInput = document.getElementById('B4');
+    if (dateInput) {
+        dateInput.setAttribute('type', 'date');
+        dateInput.addEventListener('input', calculateDates);
+        dateInput.addEventListener('change', calculateDates);
+    }
 });
