@@ -42,50 +42,60 @@
     <div class="page-content">
         <div id="topdf" class="wrap">
             <div id="calculator">
-                <h2 id="main-title-address" class="text-center"></h2>
+                <h2 class="text-center" id="main-title-address"></h2><!-- Start: Modal-Reset-Cinfirmation -->
                 <div class="calcheaderbtn">
-                    <div id="confirmModal" class="modal fade" role="dialog" tabindex="-1" aria-labelledby="confirmModalLabel">
+                    <div class="modal fade" role="dialog" tabindex="-1" id="confirmModal" aria-labelledby="confirmModalLabel">
                         <div class="modal-dialog modal-sm" role="document">
                             <div class="modal-content">
                                 <div class="modal-header" style="padding-bottom: 10px;"><button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal" style="padding-right: 0px;padding-left: 0px;padding-bottom: 0px;"></button></div>
                                 <div class="modal-body">
                                     <h2 class="text-center" style="margin-bottom: 0px;margin-top: 5px;">Confirm Reset?</h2>
                                 </div>
-                                <div class="modal-footer justify-content-evenly"><button id="btnno" class="btn btn-success" type="button" data-bs-dismiss="modal" style="padding-bottom: 1px;"><span>NO</span></button><button id="resetAll" class="btn btn-secondary" type="button" data-bs-dismiss="modal" onclick="resetFormAndClearCache()"><span>YES</span></button></div>
+                                <div class="modal-footer justify-content-evenly"><button class="btn btn-success" id="btnno" type="button" data-bs-dismiss="modal" style="padding-bottom: 1px;"><span>NO</span></button><button class="btn btn-secondary" id="resetAll" type="button" onclick="resetFormAndClearCache()" data-bs-dismiss="modal"><span>YES</span></button></div>
                             </div>
                         </div>
-                    </div><button id="bt-reset-modal" class="btn btn-secondary btn-sm" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button><button id="savepdf" class="btn btn-primary btn-sm" type="button"><span>PDF</span></button><button id="sendtoemail" class="btn btn-success btn-sm" type="button"><span>E-MAIL</span></button>
-                </div>
+                    </div><button class="btn btn-secondary btn-sm" id="bt-reset-modal" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button><button class="btn btn-primary btn-sm" id="savepdf" type="button"><span>PDF</span></button><button class="btn btn-success btn-sm" id="sendtoemail" type="button"><span>E-MAIL</span></button>
+                </div><!-- End: Modal-Reset-Cinfirmation -->
+                <!-- Start: Investment -->
                 <div class="mb-3">
+                    <!-- Start: PROPERTY -->
                     <div class="row" style="border: 1px dashed #1DA1F2;">
-                        <div class="col-md-12" style="box-shadow: 0px 0px 0px 0px rgb(0,13,25);"><label class="form-label" for="autocomplete"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Address"><i class="icon-question"></i></sup>Address*</label>
-                            <div class="input-group searchbox"><span class="input-group-text currency-span">Address</span><input id="autocomplete" class="form-control" type="text" placeholder="Enter an address" data-type="text" /></div>
+                        <!-- Start: Address -->
+                        <div class="col-md-12" style="box-shadow: 0px 0px 0px 0px rgb(0,13,25);"><label class="form-label" for="autocomplete"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Address"><i class="icon-question"></i></sup>Address*</label>
+                            <div class="input-group searchbox"><span class="input-group-text currency-span">Address</span><input type="text" id="autocomplete" class="form-control" placeholder="Enter an address" data-type="text"></div>
                             <div id="suggestions" class="suggestions"></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B1"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Purchase Price $"><i class="icon-question"></i></sup>Purchase Price</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input id="B1" class="form-control" type="text" data-name="Purchase-Price" data-type="currency" maxlength="12" name="Purchase-Price" placeholder="0.00" step="0.01" /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B4"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Closing Date"><i class="icon-question"></i></sup>Closing Date</label>
-                            <div class="input-group"><input id="B4" class="form-control" type="date" data-name="Closing-Date" name="Closing Date" /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="A4"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Days Remain in Year"><i class="icon-question"></i></sup>Remain</label>
-                            <div class="input-group"><input id="A4" class="form-control" type="text" name="Year-days-remain" data-name="Year-days-remain" readonly /><span class="input-group-text">days</span></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="A4_2"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Days Passed in Year"><i class="icon-question"></i></sup>Passed</label>
-                            <div class="input-group"><input id="A4_2" class="form-control" type="text" name="Year-days-passed" data-name="Year-days-passed" readonly /><span class="input-group-text">days</span></div>
-                        </div>
-                    </div>
-                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 10px;margin-bottom: 10px;">Loan Profile</h4>
-                    <div class="row" style="border: 1px dashed #1DA1F2;">
-                        <div class="col-md-3"><label class="form-label" for="B2"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Down Payment %"><i class="icon-question"></i></sup>Down Payment</label>
-                            <div class="input-group"><input id="B2" class="form-control" type="number" data-name="Down-Payment-rate" max="100" name="Down-Payment-rate" placeholder="0" step="0.01" min="0.00" /><span class="input-group-text">%</span></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B3"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Down Payment $"><i class="icon-question"></i></sup>Down Payment</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input id="B3" class="form-control" type="text" data-name="Down-Payment" name="Down Payment" maxlength="12" readonly data-type="currency" placeholder="0.00" /></div>
-                        </div>
-                        <div class="col-md-6"><label class="form-label" for="Loan-Type"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Loan Type"><i class="icon-question"></i></sup>Loan Type</label>
+                        </div><!-- End: Address -->
+                        <!-- Start: Purchase_Price_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B1"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Purchase Price $"><i class="icon-question"></i></sup>Purchase Price</label>
+                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="B1" data-name="Purchase-Price" data-type="currency" maxlength="12" name="Purchase-Price" placeholder="0.00" step="0.01"></div>
+                        </div><!-- End: Purchase_Price_$ -->
+                        <!-- Start: Closing_Date_select -->
+                        <div class="col-md-3"><label class="form-label" for="B4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Date"><i class="icon-question"></i></sup>Closing Date</label>
+                            <div class="input-group"><input class="form-control" id="B4" type="date" data-name="Closing-Date" name="Closing Date"></div>
+                        </div><!-- End: Closing_Date_select -->
+                        <!-- Start: Days_Remain_in_Year -->
+                        <div class="col-md-3"><label class="form-label" for="A4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Days Remain in Year"><i class="icon-question"></i></sup>Remain</label>
+                            <div class="input-group"><input class="form-control" type="text" id="A4" name="Year-days-remain" data-name="Year-days-remain" readonly=""><span class="input-group-text">days</span></div>
+                        </div><!-- End: Days_Remain_in_Year -->
+                        <!-- Start: Days_Passed_in_Year -->
+                        <div class="col-md-3"><label class="form-label" for="A4_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Days Passed in Year"><i class="icon-question"></i></sup>Passed</label>
+                            <div class="input-group"><input class="form-control" type="text" id="A4_2" name="Year-days-passed" data-name="Year-days-passed" readonly=""><span class="input-group-text">days</span></div>
+                        </div><!-- End: Days_Passed_in_Year -->
+                    </div><!-- End: PROPERTY -->
+                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 10px;margin-bottom: 10px;">Loan Profile</h4><!-- Start: LOAN_PROFILE -->
+                    <div class="row" style="border: 1px dashed #1DA1F2 ;">
+                        <!-- Start: Down_Payment_% -->
+                        <div class="col-md-3"><label class="form-label" for="B2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment %"><i class="icon-question"></i></sup>Down Payment</label>
+                            <div class="input-group"><input class="form-control" type="number" id="B2" data-name="Down-Payment-rate" max="100" name="Down-Payment-rate" placeholder="0" step="0.01" min="0.00"><span class="input-group-text">%</span></div>
+                        </div><!-- End: Down_Payment_% -->
+                        <!-- Start: Down_Payment_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B3"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment $"><i class="icon-question"></i></sup>Down Payment</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B3" data-name="Down-Payment" name="Down Payment" maxlength="12" readonly="" data-type="currency" placeholder="0.00"></div>
+                        </div><!-- End: Down_Payment_$ -->
+                        <!-- Start: Loan_Type -->
+                        <div class="col-md-6"><label class="form-label" for="Loan-Type"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Type"><i class="icon-question"></i></sup>Loan Type</label>
                             <form class="form-inline">
-                                <div class="form-group"><select id="Loan-Type" class="form-select form-control form-loantype" name="Loan Type" data-name="Loan-Type">
+                                <div class="form-group"><select class="form-select form-control form-loantype" id="Loan-Type" name="Loan Type" data-name="Loan-Type">
                                         <option value="None (All Cash)">None (All Cash)</option>
                                         <option value="Conventional Loan">Conventional Loan</option>
                                         <option value="FHA Loan">FHA Loan</option>
@@ -115,74 +125,93 @@
                                         <option value="Seller Financing (Owner Carry Loan)">Seller Financing (Owner Carry Loan)</option>
                                     </select></div>
                             </form>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B5"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Loan Amount $"><i class="icon-question"></i></sup>Loan Amount</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input id="B5" class="form-control" type="text" data-type="currency" readonly name="Loan Amount" data-name="Loan-Amount" placeholder="0.00" /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B7"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Loan Term Period (year&#39;s/ month&#39;s/ week&#39;s/ day&#39;s)"><i class="icon-question"></i></sup>Loan Term Period</label>
-                            <div class="input-group"><input id="B7" class="form-control" type="number" max="99" data-name="Loan-Term-Period" step="1" name="Loan Term Period" placeholder="0" min="0" /><select id="TermsPeriod" class="form-select flex-grow-0 form-control" name="Terms Period" data-name="Terms-Period">
-                                    <option value="Year" selected>Year(s)</option>
+                        </div><!-- End: Loan_Type -->
+                        <!-- Start: Loan_Amount_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Amount $"><i class="icon-question"></i></sup>Loan Amount</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B5" data-type="currency" readonly="" name="Loan Amount" data-name="Loan-Amount" placeholder="0.00"></div>
+                        </div><!-- End: Loan_Amount_$ -->
+                        <!-- Start: Loan_Term_Period_ -->
+                        <div class="col-md-3"><label class="form-label" for="B7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Term Period (year's/ month's/ week's/ day's)"><i class="icon-question"></i></sup>Loan Term Period</label>
+                            <div class="input-group"><input class="form-control" type="number" id="B7" max="99" data-name="Loan-Term-Period" step="1" name="Loan Term Period" placeholder="0" min="0"><select class="form-select flex-grow-0 form-control" id="TermsPeriod" name="Terms Period" data-name="Terms-Period">
+                                    <option value="Year" selected="">Year(s)</option>
                                     <option value="Month">Month(s)</option>
                                     <option value="Week">Week(s)</option>
                                     <option value="Day">Day(s)</option>
                                 </select></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B8"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Payments per Period"><i class="icon-question"></i></sup>Payments per </label><span id="Term"></span>
-                            <div class="input-group"><input id="B8" class="form-control" type="number" step="1" max="99" name="Payments per Period" data-name="Payments-per-Period" placeholder="0" min="0" /><span id="per" class="input-group-text">#</span></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B6"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Annual Interest Rate %"><i class="icon-question"></i></sup>Annual Interest Rate</label>
-                            <div class="input-group"><input id="B6" class="form-control" type="number" placeholder="0" step="0.01" max="100" name="Annual Interest Rate" data-name="Annual-Interest-rate" min="0.00" /><span class="input-group-text">%</span></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B9"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Total Payments"><i class="icon-question"></i></sup>Total Payments</label>
-                            <div class="input-group"><input id="B9" class="form-control" type="number" name="Total Payments" data-name="Total-Payments" placeholder="0" readonly /><span class="input-group-text">#</span></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B10"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Amount per Payment $"><i class="icon-question"></i></sup>Amount per Payment</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input id="B10" class="form-control" type="text" data-type="currency" readonly name="Payment per Period" data-name="Payment-per-Period" placeholder="0.00" /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B12"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Interest Cost $"><i class="icon-question"></i></sup>Interest Cost</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input id="B12" class="form-control" type="text" data-type="currency" readonly name="Interest-Cost" data-name="Interest Cost" placeholder="0.00" /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B11"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Sum of Payments (Total Cost of Loan) $"><i class="icon-question"></i></sup>Total Loan Cost</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input id="B11" class="form-control" type="text" data-type="currency" readonly data-name="Total-Loan-Cost" name="Total Loan Cost" placeholder="0.00" /></div>
-                        </div>
-                    </div>
-                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 5px;margin-bottom: 10px;">Taxes</h4>
-                    <div class="row" style="border: 1px dashed #1DA1F2;">
-                        <div class="col-md-3"><label class="form-label" for="A5"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Annual Tax Amount $"><i class="icon-question"></i></sup>Annual Tax Amount</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input id="A5" class="form-control" type="text" data-name="Annual-Tax-Amount" data-type="currency" maxlength="12" name="Annual-Tax-Amount" placeholder="0.00" step="0.01" /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="A5_2"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Daily Tax Amount $"><i class="icon-question"></i></sup>Daily Tax Amount</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input id="A5_2" class="form-control" type="text" data-name="Annual-Tax-Amount-Daily" data-type="currency" maxlength="12" name="Annual-Tax-Amount-Daily" placeholder="0.00" step="0.01" readonly /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="A8"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Tax Proration Amount $"><i class="icon-question"></i></sup>Tax Proration Amount</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input id="A8" class="form-control" type="text" data-type="currency" name="Tax-Proration-Amount" data-name="Tax-Proration-Amount" placeholder="0.00" /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="A7"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Tax Depreciation $"><i class="icon-question"></i></sup>Tax Depreciation</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input id="A7" class="form-control" type="text" data-type="currency" name="Tax-Depreciation" data-name="Tax-Depreciation" placeholder="0.00" /></div>
-                        </div>
-                    </div>
-                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 10px;margin-bottom: 10px;">Cash to Close</h4>
-                    <div class="row" style="border: 1px dashed #1DA1F2;">
-                        <div class="col-md-3"><label class="form-label" for="A10"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Escrow $"><i class="icon-question"></i></sup>Escrow</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input id="A10" class="form-control" type="text" data-type="currency" name="Escrow-Amount" data-name="Escrow-Amount" placeholder="0.00" /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="A12"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Allowances $"><i class="icon-question"></i></sup>Allowances</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input id="A12" class="form-control" type="text" data-type="currency" name="Allowances" data-name="Allowances" placeholder="0.00" /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B13"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Closing Cost %"><i class="icon-question"></i></sup>Closing Cost</label>
-                            <div class="input-group"><input id="B13" class="form-control" type="number" placeholder="0" step="0.01" max="100" name="Closing-Cost" min="0" /><span class="input-group-text">%</span></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B14"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Inspection $"><i class="icon-question"></i></sup>Inspection</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input id="B14" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" name="Inspection" maxlength="12" /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="A11"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Encumbrances $"><i class="icon-question"></i></sup>Encumbrances</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input id="A11" class="form-control" type="text" data-name="Encumbrances" data-type="currency" maxlength="12" name="Encumbrances" placeholder="0.00" step="0.01" /></div>
-                        </div>
-                        <div class="col-md-3"><label class="form-label" for="B15"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Down Payment + Closing Cost (% of Purchase Price) + Inspection - Tax Proration $"><i class="icon-question"></i></sup>Cash to Close</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input id="B15" class="form-control" type="text" data-type="currency" readonly step="0.01" name="Cash-to-Close" data-name="Cash-to-Close" placeholder="0.00" /></div>
-                        </div>
-                    </div>
-                </div>
+                        </div><!-- End: Loan_Term_Period_ -->
+                        <!-- Start: Payments_per_ -->
+                        <div class="col-md-3"><label class="form-label" for="B8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Payments per Period"><i class="icon-question"></i></sup>Payments per&nbsp;</label><span id="Term"></span>
+                            <div class="input-group"><input class="form-control" type="number" id="B8" step="1" max="99" name="Payments per Period" data-name="Payments-per-Period" placeholder="0" min="0"><span class="input-group-text" id="per">#</span></div>
+                        </div><!-- End: Payments_per_ -->
+                        <!-- Start: Annual_Interest_Rate_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B6"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Interest Rate %"><i class="icon-question"></i></sup>Annual Interest Rate</label>
+                            <div class="input-group"><input class="form-control" type="number" id="B6" placeholder="0" step="0.01" max="100" name="Annual Interest Rate" data-name="Annual-Interest-rate" min="0.00"><span class="input-group-text">%</span></div>
+                        </div><!-- End: Annual_Interest_Rate_$ -->
+                        <!-- Start: Total_Payments_# -->
+                        <div class="col-md-3"><label class="form-label" for="B9"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Payments"><i class="icon-question"></i></sup>Total Payments</label>
+                            <div class="input-group"><input class="form-control" type="number" id="B9" name="Total Payments" data-name="Total-Payments" placeholder="0" readonly=""><span class="input-group-text">#</span></div>
+                        </div><!-- End: Total_Payments_# -->
+                        <!-- Start: Amount_per_Payment_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Amount per Payment $"><i class="icon-question"></i></sup>Amount per Payment</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B10" data-type="currency" readonly="" name="Payment per Period" data-name="Payment-per-Period" placeholder="0.00"></div>
+                        </div><!-- End: Amount_per_Payment_$ -->
+                        <!-- Start: Interest_Cost -->
+                        <div class="col-md-3"><label class="form-label" for="B12"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Interest Cost $"><i class="icon-question"></i></sup>Interest Cost</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B12" data-type="currency" readonly="" name="Interest-Cost" data-name="Interest Cost" placeholder="0.00"></div>
+                        </div><!-- End: Interest_Cost -->
+                        <!-- Start: Total_Loan_Cost -->
+                        <div class="col-md-3"><label class="form-label" for="B11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Sum of Payments (Total Cost of Loan) $"><i class="icon-question"></i></sup>Total Loan Cost</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B11" data-type="currency" readonly="" data-name="Total-Loan-Cost" name="Total Loan Cost" placeholder="0.00"></div>
+                        </div><!-- End: Total_Loan_Cost -->
+                    </div><!-- End: LOAN_PROFILE -->
+                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 5px;margin-bottom: 10px;">Taxes</h4><!-- Start: TAXES -->
+                    <div class="row" style="border: 1px dashed #1DA1F2 ;">
+                        <!-- Start: Annual_Tax_Amount_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount $"><i class="icon-question"></i></sup>Annual Tax Amount</label>
+                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5" data-name="Annual-Tax-Amount" data-type="currency" maxlength="12" name="Annual-Tax-Amount" placeholder="0.00" step="0.01"></div>
+                        </div><!-- End: Annual_Tax_Amount_$ -->
+                        <!-- Start: Annual_Tax_Amount_Daily_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A5_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Daily Tax Amount $"><i class="icon-question"></i></sup>Daily Tax Amount</label>
+                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5_2" data-name="Annual-Tax-Amount-Daily" data-type="currency" maxlength="12" name="Annual-Tax-Amount-Daily" placeholder="0.00" step="0.01" readonly=""></div>
+                        </div><!-- End: Annual_Tax_Amount_Daily_$ -->
+                        <!-- Start: Tax_Proration_Amount_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration Amount $"><i class="icon-question"></i></sup>Tax Proration Amount</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A8" data-type="currency" name="Tax-Proration-Amount" data-name="Tax-Proration-Amount" placeholder="0.00"></div>
+                        </div><!-- End: Tax_Proration_Amount_$ -->
+                        <!-- Start: Tax_Depreciation_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A7"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Depreciation $"><i class="icon-question"></i></sup>Tax Depreciation</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A7" data-type="currency" name="Tax-Depreciation" data-name="Tax-Depreciation" placeholder="0.00"></div>
+                        </div><!-- End: Tax_Depreciation_$ -->
+                    </div><!-- End: TAXES -->
+                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 10px;margin-bottom: 10px;">Cash to Close</h4><!-- Start: CASH_TO_CLOSE -->
+                    <div class="row" style="border: 1px dashed #1DA1F2 ;">
+                        <!-- Start: Escrow_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Escrow $"><i class="icon-question"></i></sup>Escrow</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A10" data-type="currency" name="Escrow-Amount" data-name="Escrow-Amount" placeholder="0.00"></div>
+                        </div><!-- End: Escrow_$ -->
+                        <!-- Start: Escrow_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A12"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Allowances $"><i class="icon-question"></i></sup>Allowances</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A12" data-type="currency" name="Allowances" data-name="Allowances" placeholder="0.00"></div>
+                        </div><!-- End: Escrow_$ -->
+                        <!-- Start: Closing_Cost_% -->
+                        <div class="col-md-3"><label class="form-label" for="B13"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Cost %"><i class="icon-question"></i></sup>Closing Cost</label>
+                            <div class="input-group"><input class="form-control" type="number" id="B13" placeholder="0" step="0.01" max="100" name="Closing-Cost" min="0"><span class="input-group-text">%</span></div>
+                        </div><!-- End: Closing_Cost_% -->
+                        <!-- Start: Inspection_$ -->
+                        <div class="col-md-3"><label class="form-label" for="B14"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Inspection $"><i class="icon-question"></i></sup>Inspection</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B14" data-type="currency" placeholder="0.00" step="0.01" name="Inspection" maxlength="12"></div>
+                        </div><!-- End: Inspection_$ -->
+                        <!-- Start: Encumbrances_$ -->
+                        <div class="col-md-3"><label class="form-label" for="A11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Encumbrances $"><i class="icon-question"></i></sup>Encumbrances</label>
+                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A11" data-name="Encumbrances" data-type="currency" maxlength="12" name="Encumbrances" placeholder="0.00" step="0.01"></div>
+                        </div><!-- End: Encumbrances_$ -->
+                        <!-- Start: Cash_To_Close -->
+                        <div class="col-md-3"><label class="form-label" for="B15"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment + Closing Cost (% of Purchase Price) + Inspection - Tax Proration $"><i class="icon-question"></i></sup>Cash to Close</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B15" data-type="currency" readonly="" step="0.01" name="Cash-to-Close" data-name="Cash-to-Close" placeholder="0.00"></div>
+                        </div><!-- End: Cash_To_Close -->
+                    </div><!-- End: CASH_TO_CLOSE -->
+                </div><!-- End: Investment -->
+                <!-- Start: Gross Expenses -->
                 <div class="subsection" style="background: rgb(240, 128, 128);">
                     <h4 class="subsection-heading">Expenses</h4>
                     <div class="table-responsive">
@@ -198,316 +227,325 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><sup class="mtool"><i class="icon-question" data-bs-toggle="tooltip" data-bss-tooltip title="Refuse"></i></sup><label class="form-label" for="D19">Refuse</label></td>
+                                    <td><sup class="mtool"><i class="icon-question" data-bs-toggle="tooltip" data-bss-tooltip="" title="Refuse"></i></sup><label class="form-label" for="D19">Refuse</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B19" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B19" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C19" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C19" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D19" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tabcalctitle"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Water"><i class="icon-question"></i></sup><label class="form-label" for="D20">Water</label></td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B20" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C20" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D20" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D19" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Sewer"><i class="icon-question"></i></sup><label class="form-label" for="D21">Sewer</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Water"><i class="icon-question"></i></sup><label class="form-label" for="D20">Water</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B21" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B20" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C21" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C20" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D21" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tabcalctitle"><label class="form-label" for="D22"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Property Taxes"><i class="icon-question"></i></sup>Property Taxes</label></td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B22" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" readonly /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C22" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D22" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D20" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Electric"><i class="icon-question"></i></sup><label class="form-label" for="D23">Electric</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Sewer"><i class="icon-question"></i></sup><label class="form-label" for="D21">Sewer</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B23" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B21" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C23" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C21" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D23" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D21" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Gas"><i class="icon-question"></i></sup><label class="form-label" for="D24">Gas</label></td>
+                                    <td class="tabcalctitle"><label class="form-label" for="D22"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Property Taxes"><i class="icon-question"></i></sup>Property Taxes</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B24" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B22" data-type="currency" placeholder="-0.00" step="0.01" readonly=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C24" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C22" data-type="currency" placeholder="-0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D22" data-type="currency" readonly="" placeholder="-0.00"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Electric"><i class="icon-question"></i></sup><label class="form-label" for="D23">Electric</label></td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B23" data-type="currency" placeholder="-0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C23" data-type="currency" placeholder="-0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D23" data-type="currency" readonly="" placeholder="-0.00"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Gas"><i class="icon-question"></i></sup><label class="form-label" for="D24">Gas</label></td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B24" data-type="currency" placeholder="-0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C24" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                         <div></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D24" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D24" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Internet"><i class="icon-question"></i></sup><label class="form-label" for="D25">Internet</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Internet"><i class="icon-question"></i></sup><label class="form-label" for="D25">Internet</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B25" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B25" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C25" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C25" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D25" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tabcalctitle"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Lawn Care"><i class="icon-question"></i></sup><label class="form-label" for="D26">Lawn Care</label></td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B26" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C26" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D26" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D25" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="text-break tabcalctitle"><label class="form-label" for="D27"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Maintenance"><i class="icon-question"></i></sup>Maintenance</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Lawn Care"><i class="icon-question"></i></sup><label class="form-label" for="D26">Lawn Care</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B27" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B26" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C27" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C26" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D27" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td class="tabcalctitle"><label class="form-label" for="D28"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Vacancy Rate"><i class="icon-question"></i></sup>Vacancy Rate</label></td>
-                                    <td>
-                                        <div class="input-group"><input id="B28" class="form-control" type="number" placeholder="0" step="0.01" max="100" min="0" /><span class="input-group-text">%</span></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><input id="C28" class="form-control" type="number" placeholder="0" step="0.01" max="100" min="0" /><span class="input-group-text">%</span></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><input id="D28" class="form-control" type="number" readonly placeholder="0,00" /><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D26" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle vrbcd"><label class="form-label" for="VRD28"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Vacancy Risk"><i class="icon-question"></i></sup>Vacancy Risk</label></td>
+                                    <td class="text-break tabcalctitle"><label class="form-label" for="D27"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Maintenance"><i class="icon-question"></i></sup>Maintenance</label></td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B27" data-type="currency" placeholder="-0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C27" data-type="currency" placeholder="-0.00" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D27" data-type="currency" readonly="" placeholder="-0.00"></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tabcalctitle"><label class="form-label" for="D28"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Vacancy Rate"><i class="icon-question"></i></sup>Vacancy Rate</label></td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="B28" placeholder="0" step="0.01" max="100" min="0"><span class="input-group-text">%</span></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="C28" placeholder="0" step="0.01" max="100" min="0"><span class="input-group-text">%</span></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="D28" readonly="" placeholder="0,00"><span class="input-group-text">%</span></div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="tabcalctitle vrbcd"><label class="form-label" for="VRD28"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Vacancy Risk"><i class="icon-question"></i></sup>Vacancy Risk</label></td>
                                     <td class="tabcalctitle vrbcd">
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="VRB28" class="form-control" type="text" data-type="currency" readonly /></div>
-                                    </td>
-                                    <td class="tabcalctitle vrbcd">
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="VRC28" class="form-control" type="text" data-type="currency" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="VRB28" data-type="currency" readonly=""></div>
                                     </td>
                                     <td class="tabcalctitle vrbcd">
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="VRD28" class="form-control" type="text" data-type="currency" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="VRC28" data-type="currency" readonly=""></div>
+                                    </td>
+                                    <td class="tabcalctitle vrbcd">
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="VRD28" data-type="currency" readonly=""></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="flex-nowrap tabcalctitle"><label class="form-label" for="D29"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Mortgage Insurance (if applicable)"><i class="icon-question"></i></sup>Mortgage Insurance</label></td>
+                                    <td class="flex-nowrap tabcalctitle"><label class="form-label" for="D29"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Mortgage Insurance (if applicable)"><i class="icon-question"></i></sup>Mortgage Insurance</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="B29" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control" type="text" id="B29" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="C29" class="form-control form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="C29" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="D29" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control" type="text" id="D29" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><label class="form-label" for="D30"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Property Insurance"><i class="icon-question"></i></sup>Property Insurance</label></td>
+                                    <td class="tabcalctitle"><label class="form-label" for="D30"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Property Insurance"><i class="icon-question"></i></sup>Property Insurance</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B30" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B30" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C30" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C30" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D30" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D30" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="HOA (if applicable)"><i class="icon-question"></i></sup><label class="form-label" for="D31">HOA</label></td>
+                                    <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="HOA (if applicable)"><i class="icon-question"></i></sup><label class="form-label" for="D31">HOA</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B31" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B31" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C31" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C31" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D31" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D31" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td class="tabcalctitle"><label class="form-label text-break" for="D32"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Property Management (if applicable)"><i class="icon-question"></i></sup>Property Management</label></td>
+                                    <td class="tabcalctitle"><label class="form-label text-break" for="D32"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Property Management (if applicable)"><i class="icon-question"></i></sup>Property Management</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B32" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B32" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C32" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C32" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D32" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D32" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- Start: Custom_Expenses_Row1 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFN1" class="form-control" type="text" data-type="text" placeholder="Custom Expense" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN1" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFB1" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB1" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFC1" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFC1" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFD1" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD1" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Expenses_Row1 -->
+                                <!-- Start: Custom_Expenses_Row2 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFN2" class="form-control" type="text" data-type="text" placeholder="Custom Expense" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN2" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFB2" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB2" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFC2" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFC2" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFD2" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD2" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Expenses_Row2 -->
+                                <!-- Start: Custom_Expenses_Row3 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFN3" class="form-control" type="text" data-type="text" placeholder="Custom Expense" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN3" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFB3" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB3" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFC3" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFC3" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFD3" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD3" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Expenses_Row3 -->
+                                <!-- Start: Custom_Expenses_Row4 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFN4" class="form-control" type="text" data-type="text" placeholder="Custom Expense" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN4" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFB4" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB4" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFC4" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFC4" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFD4" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD4" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Expenses_Row4 -->
+                                <!-- Start: Custom_Expenses_Row5 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFN5" class="form-control" type="text" data-type="text" placeholder="Custom Expense" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN5" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFB5" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB5" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFC5" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFC5" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFD5" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD5" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Expenses_Row5 -->
+                                <!-- Start: Custom_Expenses_Row6 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFN6" class="form-control" type="text" data-type="text" placeholder="Custom Expense" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN6" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFB6" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB6" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFC6" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFC6" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFD6" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD6" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Expenses_Row6 -->
+                                <!-- Start: Custom_Expenses_Row7 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFN7" class="form-control" type="text" data-type="text" placeholder="Custom Expense" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN7" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFB7" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB7" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFC7" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFC7" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFD7" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD7" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Expenses_Row7 -->
+                                <!-- Start: Custom_Expenses_Row8 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFN8" class="form-control" type="text" data-type="text" placeholder="Custom Expense" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN8" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFB8" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB8" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFC8" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFC8" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFD8" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD8" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Expenses_Row8 -->
+                                <!-- Start: Custom_Expenses_Row9 -->
                                 <tr class="cust-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFN9" class="form-control" type="text" data-type="text" placeholder="Custom Expense" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFN9" data-type="text" placeholder="Custom Expense"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFB9" class="form-control" type="text" data-type="currency" placeholder="-0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFB9" data-type="currency" placeholder="-0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFC9" class="form-control" type="text" data-type="currency" placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFC9" data-type="currency" placeholder="-0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFD9" class="form-control" type="text" data-type="currency" readonly placeholder="-0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFD9" data-type="currency" readonly="" placeholder="-0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Expenses_Row9 -->
+                                <!-- Start: Custom Field Buttons -->
                                 <tr>
                                     <td>
                                         <div class="row d-flex flex-row cell-tab-lable">
-                                            <div class="col text-nowrap col-titl"><span class="form-label"><sup class="wrapper mtooltip" data-bs-toggle="tooltip" data-bss-tooltip title="&#39;Custom Expense&#39; Own Name Input Field"><i class="icon-question icon"></i></sup>Custom</span></div>
+                                            <div class="col text-nowrap col-titl"><span class="form-label"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="wrapper mtooltip" title="'Custom Expense' Own Name Input Field"><i class="icon-question icon"></i></sup>Custom</span></div>
                                             <div class="col d-flex justify-content-center align-items-center">
                                                 <div class="btn-group d-inline-flex" role="group">
                                                     <div id="addRowC" class="triangle triangle-add"></div>
@@ -519,23 +557,24 @@
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                </tr>
+                                </tr><!-- End: Custom Field Buttons -->
                                 <tr>
-                                    <td><label class="form-label fw-bold" for="D64"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Total Expense / Month"><i class="icon-question"></i></sup>Total Expense</label></td>
+                                    <td><label class="form-label fw-bold" for="D64"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Expense / Month"><i class="icon-question"></i></sup>Total Expense</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B64" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B64" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C64" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C64" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D64" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D64" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </div><!-- End: Gross Expenses -->
+                <!-- Start: Gross Revenue -->
                 <div class="income-subsection">
                     <h4 class="subsection-heading">Revenue</h4>
                     <div class="table-responsive">
@@ -550,10 +589,11 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <!-- Start: Unit_1 -->
                                 <tr>
                                     <td>
                                         <div class="row d-flex align-items-center cell-tab-lable">
-                                            <div class="col text-nowrap col-titl"><label class="col-form-label form-label" for="D33"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Unit"><i class="icon-question"></i></sup>Unit 1</label></div>
+                                            <div class="col text-nowrap col-titl"><label class="col-form-label form-label" for="D33"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Unit"><i class="icon-question"></i></sup>Unit 1</label></div>
                                             <div class="col d-flex justify-content-center align-items-center">
                                                 <div class="btn-group d-inline-flex" role="group">
                                                     <div id="addRowU" class="triangle triangle-add"></div>
@@ -563,187 +603,202 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B33" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B33" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C33" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C33" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D33" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D33" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_1 -->
+                                <!-- Start: Unit_2 -->
                                 <tr class="unit-row">
                                     <td>Unit 2</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B34" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B34" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C34" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C34" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D34" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D34" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_2 -->
+                                <!-- Start: Unit_3 -->
                                 <tr class="unit-row">
                                     <td>Unit 3</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B35" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B35" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C35" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C35" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D35" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D35" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_3 -->
+                                <!-- Start: Unit_4 -->
                                 <tr class="unit-row">
                                     <td>Unit 4</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B36" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B36" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C36" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C36" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D36" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D36" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_4 -->
+                                <!-- Start: Unit_5 -->
                                 <tr class="unit-row">
                                     <td>Unit 5</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B37" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B37" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C37" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C37" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D37" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D37" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_5 -->
+                                <!-- Start: Unit_6 -->
                                 <tr class="unit-row">
                                     <td>Unit 6</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B38" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B38" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C38" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C38" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D38" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D38" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_6 -->
+                                <!-- Start: Unit_7 -->
                                 <tr class="unit-row">
                                     <td>Unit 7</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B39" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B39" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C39" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C39" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D39" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D39" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_7 -->
+                                <!-- Start: Unit_8 -->
                                 <tr class="unit-row">
                                     <td>Unit 8</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B40" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B40" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C40" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C40" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D40" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D40" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_8 -->
+                                <!-- Start: Unit_9 -->
                                 <tr class="unit-row">
                                     <td>Unit 9</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B41" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B41" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C41" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C41" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D41" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D41" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_9 -->
+                                <!-- Start: Unit_10 -->
                                 <tr class="unit-row">
                                     <td>Unit 10</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B42" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B42" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C42" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C42" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D42" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D42" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_10 -->
+                                <!-- Start: Unit_11 -->
                                 <tr class="unit-row">
                                     <td>Unit 11</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B43" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B43" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C43" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C43" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D43" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D43" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_11 -->
+                                <!-- Start: Unit_12 -->
                                 <tr class="unit-row">
                                     <td>Unit 12</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B44" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B44" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C44" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C44" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D44" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D44" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_12 -->
+                                <!-- Start: Unit_13 -->
                                 <tr class="unit-row">
                                     <td>Unit 13</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B45" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B45" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C45" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C45" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D45" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D45" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_13 -->
+                                <!-- Start: Unit_14 -->
                                 <tr class="unit-row">
                                     <td>Unit 14</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B46" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B46" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C46" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C46" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D46" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D46" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_14 -->
+                                <!-- Start: Unit_15 -->
                                 <tr class="unit-row">
                                     <td>Unit 15</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B47" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B47" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C47" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C47" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D47" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D47" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Unit_15 -->
+                                <!-- Start: Parking_1 -->
                                 <tr>
                                     <td>
                                         <div class="row d-flex align-items-center cell-tab-lable">
-                                            <div class="col text-nowrap col-titl"><label class="col-form-label form-label" for="D48"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Parking"><i class="icon-question"></i></sup>Parking 1</label></div>
+                                            <div class="col text-nowrap col-titl"><label class="col-form-label form-label" for="D48"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Parking"><i class="icon-question"></i></sup>Parking 1</label></div>
                                             <div class="col d-flex justify-content-center align-items-center">
                                                 <div class="btn-group d-inline-flex" role="group">
                                                     <div id="addRowP" class="triangle triangle-add"></div>
@@ -753,313 +808,337 @@
                                         </div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B48" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B48" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C48" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C48" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D48" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D48" data-type="currency" placeholder="0.00" readonly=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_1 -->
+                                <!-- Start: Parking_2 -->
                                 <tr class="park-row">
                                     <td>Parking 2</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B49" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B49" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C49" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C49" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D49" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D49" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_2 -->
+                                <!-- Start: Parking_3 -->
                                 <tr class="park-row">
                                     <td>Parking 3</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="B50" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="B50" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="C50" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="C50" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="D50" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="D50" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_3 -->
+                                <!-- Start: Parking_4 -->
                                 <tr class="park-row">
                                     <td>Parking 4</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="B51" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="B51" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="C51" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="C51" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="D51" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="D51" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_4 -->
+                                <!-- Start: Parking_5 -->
                                 <tr class="park-row">
                                     <td>Parking 5</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="B52" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="B52" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="C52" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="C52" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="D52" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="D52" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_5 -->
+                                <!-- Start: Parking_6 -->
                                 <tr class="park-row">
                                     <td>Parking 6</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="B53" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="B53" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="C53" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="C53" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="D53" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control" type="text" id="D53" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_6 -->
+                                <!-- Start: Parking_7 -->
                                 <tr class="park-row">
                                     <td>Parking 7</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="B54" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="B54" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="C54" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="C54" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input id="D54" class="form-control form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control" type="text" id="D54" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_7 -->
+                                <!-- Start: Parking_8 -->
                                 <tr class="park-row">
                                     <td>Parking 8</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B55" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B55" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C55" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C55" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D55" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D55" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_8 -->
+                                <!-- Start: Parking_9 -->
                                 <tr class="park-row">
                                     <td>Parking 9</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B56" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B56" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C56" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C56" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D56" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D56" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_9 -->
+                                <!-- Start: Parking_10 -->
                                 <tr class="park-row">
                                     <td>Parking 10</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B57" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B57" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C57" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C57" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D57" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D57" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_10 -->
+                                <!-- Start: Parking_11 -->
                                 <tr class="park-row">
                                     <td>Parking 11</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B58" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B58" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C58" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C58" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D58" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D58" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_11 -->
+                                <!-- Start: Parking_12 -->
                                 <tr class="park-row">
                                     <td>Parking 12</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B59" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B59" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C59" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C59" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D59" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D59" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_12 -->
+                                <!-- Start: Parking_13 -->
                                 <tr class="park-row">
                                     <td>Parking 13</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B60" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B60" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C60" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C60" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D60" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D60" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_13 -->
+                                <!-- Start: Parking_14 -->
                                 <tr class="park-row">
                                     <td>Parking 14</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B61" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B61" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C61" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C61" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D61" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D61" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_14 -->
+                                <!-- Start: Parking_15 -->
                                 <tr class="park-row">
                                     <td>Parking 15</td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B62" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B62" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C62" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C62" data-type="currency" placeholder="0.00" step="0.01" value=""></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D62" class="form-control" type="text" data-type="currency" placeholder="0.00" readonly value /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D62" data-type="currency" placeholder="0.00" readonly="" value=""></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Parking_15 -->
+                                <!-- Start: Custom_Revenue_Row1 -->
                                 <tr class="cust_reve-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFRN1" class="form-control" type="text" data-type="text" placeholder="Custom Revenue" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN1" data-type="text" placeholder="Custom Revenue"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRB1" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB1" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRC1" class="form-control" type="text" data-type="currency" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC1" data-type="currency" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRD1" class="form-control" type="text" data-type="currency" readonly placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD1" data-type="currency" readonly="" placeholder="0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Revenue_Row1 -->
+                                <!-- Start: Custom_Revenue_Row2 -->
                                 <tr class="cust_reve-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFRN2" class="form-control" type="text" data-type="text" placeholder="Custom Revenue" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN2" data-type="text" placeholder="Custom Revenue"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRB2" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB2" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRC2" class="form-control" type="text" data-type="currency" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC2" data-type="currency" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRD2" class="form-control" type="text" data-type="currency" readonly placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD2" data-type="currency" readonly="" placeholder="0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Revenue_Row2 -->
+                                <!-- Start: Custom_Revenue_Row3 -->
                                 <tr class="cust_reve-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFRN3" class="form-control" type="text" data-type="text" placeholder="Custom Revenue" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN3" data-type="text" placeholder="Custom Revenue"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRB3" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB3" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRC3" class="form-control" type="text" data-type="currency" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC3" data-type="currency" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRD3" class="form-control" type="text" data-type="currency" readonly placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD3" data-type="currency" readonly="" placeholder="0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Revenue_Row3 -->
+                                <!-- Start: Custom_Revenue_Row4 -->
                                 <tr class="cust_reve-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFRN4" class="form-control" type="text" data-type="text" placeholder="Custom Revenue" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN4" data-type="text" placeholder="Custom Revenue"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRB4" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB4" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRC4" class="form-control" type="text" data-type="currency" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC4" data-type="currency" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRD4" class="form-control" type="text" data-type="currency" readonly placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD4" data-type="currency" readonly="" placeholder="0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Revenue_Row4 -->
+                                <!-- Start: Custom_Revenue_Row5 -->
                                 <tr class="cust_reve-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFRN5" class="form-control" type="text" data-type="text" placeholder="Custom Revenue" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN5" data-type="text" placeholder="Custom Revenue"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRB5" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB5" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRC5" class="form-control" type="text" data-type="currency" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC5" data-type="currency" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRD5" class="form-control" type="text" data-type="currency" readonly placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD5" data-type="currency" readonly="" placeholder="0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Revenue_Row5 -->
+                                <!-- Start: Custom_Revenue_Row6 -->
                                 <tr class="cust_reve-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFRN6" class="form-control" type="text" data-type="text" placeholder="Custom Revenue" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN6" data-type="text" placeholder="Custom Revenue"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRB6" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB6" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRC6" class="form-control" type="text" data-type="currency" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC6" data-type="currency" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRD6" class="form-control" type="text" data-type="currency" readonly placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD6" data-type="currency" readonly="" placeholder="0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Revenue_Row6 -->
+                                <!-- Start: Custom_Revenue_Row7 -->
                                 <tr class="cust_reve-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFRN7" class="form-control" type="text" data-type="text" placeholder="Custom Revenue" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN7" data-type="text" placeholder="Custom Revenue"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRB7" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB7" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRC7" class="form-control" type="text" data-type="currency" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC7" data-type="currency" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRD7" class="form-control" type="text" data-type="currency" readonly placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD7" data-type="currency" readonly="" placeholder="0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Revenue_Row7 -->
+                                <!-- Start: Custom_Revenue_Row8 -->
                                 <tr class="cust_reve-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFRN8" class="form-control" type="text" data-type="text" placeholder="Custom Revenue" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN8" data-type="text" placeholder="Custom Revenue"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRB8" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB8" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRC8" class="form-control" type="text" data-type="currency" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC8" data-type="currency" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRD8" class="form-control" type="text" data-type="currency" readonly placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD8" data-type="currency" readonly="" placeholder="0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Revenue_Row8 -->
+                                <!-- Start: Custom_Revenue_Row9 -->
                                 <tr class="cust_reve-row">
                                     <td class="tabcalctitle">
-                                        <div class="input-group"><input id="CFRN9" class="form-control" type="text" data-type="text" placeholder="Custom Revenue" /></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CFRN9" data-type="text" placeholder="Custom Revenue"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRB9" class="form-control" type="text" data-type="currency" placeholder="0.00" step="0.01" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRB9" data-type="currency" placeholder="0.00" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRC9" class="form-control" type="text" data-type="currency" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRC9" data-type="currency" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CFRD9" class="form-control" type="text" data-type="currency" readonly placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="CFRD9" data-type="currency" readonly="" placeholder="0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: Custom_Revenue_Row9 -->
+                                <!-- Start: Custom Field Buttons -->
                                 <tr>
                                     <td>
                                         <div class="row d-flex flex-row align-items-center cell-tab-lable">
-                                            <div class="col text-nowrap col-titl"><span class="form-label"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="&#39;Custom Revenue&#39; Own Name Input Field"><i class="icon-question"></i></sup>Custom</span></div>
+                                            <div class="col text-nowrap col-titl"><span class="form-label"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="'Custom Revenue' Own Name Input Field"><i class="icon-question"></i></sup>Custom</span></div>
                                             <div class="col d-flex justify-content-center align-items-center">
                                                 <div class="btn-group d-inline-flex" role="group">
                                                     <div id="addRowCR" class="triangle triangle-add"></div>
@@ -1071,23 +1150,24 @@
                                     <td></td>
                                     <td></td>
                                     <td></td>
-                                </tr>
+                                </tr><!-- End: Custom Field Buttons -->
                                 <tr>
-                                    <td><label class="form-label fw-bold" for="D65"><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Total Revenue / Month"><i class="icon-question"></i></sup>Total Revenue</label></td>
+                                    <td><label class="form-label fw-bold" for="D65"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Revenue / Month"><i class="icon-question"></i></sup>Total Revenue</label></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B65" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B65" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C65" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C65" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D65" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D65" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </div><!-- End: Gross Revenue -->
+                <!-- Start: Total Cash Flow -->
                 <div class="total-cashflow-subsection">
                     <h4 class="subsection-heading"><span class="fs-5">Summary</span></h4>
                     <div class="table-responsive">
@@ -1103,108 +1183,66 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td><span><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Cash Flow"><i class="icon-question"></i></sup>Cash Flow</span></td>
+                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Cash Flow"><i class="icon-question"></i></sup>Cash Flow</span></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="B66" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control" type="text" id="B66" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="C66" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control" type="text" id="C66" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="D66" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><span><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Gross Rental Multiplier"><i class="icon-question"></i></sup>GRM</span></td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="GRM1" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="GRM2" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="GRM3" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
+                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control" type="text" id="D66" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><span><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Net Operating Income"><i class="icon-question"></i></sup>NOI</span></td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="NOI1" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="NOI2" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="NOI3" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
+                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Gross Rental Multiplier"><i class="icon-question"></i></sup>GRM</span></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="GRM1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="GRM2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="GRM3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
                                 </tr>
                                 <tr>
-                                    <td><span><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Capitalization Rate"><i class="icon-question"></i></sup>Cap Rate</span></td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CR1" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CR2" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CR3" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
+                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Net Operating Income"><i class="icon-question"></i></sup>NOI</span></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="NOI1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="NOI2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="NOI3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
                                 </tr>
                                 <tr>
-                                    <td><span><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Cash on Cash Return"><i class="icon-question"></i></sup>CoC Return</span></td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CCR1" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CCR2" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="CCR3" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
+                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Capitalization Rate"><i class="icon-question"></i></sup>Cap Rate</span></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CR1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CR2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CR3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
                                 </tr>
                                 <tr>
-                                    <td><span><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Total Return on Investment"><i class="icon-question"></i></sup>ROI</span></td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="ROI1" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="ROI2" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="ROI3" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
+                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Cash on Cash Return"><i class="icon-question"></i></sup>CoC Return</span></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CCR1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CCR2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CCR3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
                                 </tr>
                                 <tr>
-                                    <td><span><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Debt Service Coverage Ratio"><i class="icon-question"></i></sup>DSCR</span></td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="DSCR1" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="DSCR2" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="DSCR3" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
+                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Return on Investment"><i class="icon-question"></i></sup>ROI</span></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="ROI1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="ROI2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="ROI3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
                                 </tr>
                                 <tr>
-                                    <td><span><sup class="mtool" data-bs-toggle="tooltip" data-bss-tooltip title="Internal Rate of Return"><i class="icon-question"></i></sup>IRR</span></td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="IRR1" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="IRR2" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
-                                    <td>
-                                        <div class="input-group"><span class="input-group-text">$</span><input id="IRR3" class="form-control" type="text" data-type="currency" readonly step="0.01" placeholder="0.00" /></div>
-                                    </td>
+                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Debt Service Coverage Ratio"><i class="icon-question"></i></sup>DSCR</span></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="DSCR1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="DSCR2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="DSCR3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                </tr>
+                                <tr>
+                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Internal Rate of Return"><i class="icon-question"></i></sup>IRR</span></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="IRR1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="IRR2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
+                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="IRR3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </div><!-- End: Total Cash Flow -->
             </div>
             <section class="ATTENTION-SECTION" style="border-style: inset;">
-                <h5 class="font-monospace lh-1 text-center">Disclaimer.<br />Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br />(It&#39;s not a substitute for your calculations.)</h5>
+                <h5 class="font-monospace lh-1 text-center">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br>(It's not a substitute for your calculations.)</h5>
             </section>
         </div>
     </div>
