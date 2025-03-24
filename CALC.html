@@ -56,7 +56,7 @@
                         </div>
                     </div><button class="btn btn-secondary btn-sm" id="bt-reset-modal" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button><button class="btn btn-primary btn-sm" id="savepdf" type="button"><span>PDF</span></button><button class="btn btn-success btn-sm" id="sendtoemail" type="button"><span>E-MAIL</span></button>
                 </div><!-- End: Modal-Reset-Cinfirmation -->
-                <!-- Start: Investment -->
+                <!-- Start: CALC_MAIN -->
                 <div class="mb-3">
                     <!-- Start: PROPERTY -->
                     <div class="row" style="border: 1px dashed #1DA1F2;">
@@ -82,7 +82,7 @@
                             <div class="input-group"><input class="form-control" type="text" id="A4_2" name="Year-days-passed" data-name="Year-days-passed" readonly=""><span class="input-group-text">days</span></div>
                         </div><!-- End: Days_Passed_in_Year -->
                     </div><!-- End: PROPERTY -->
-                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 10px;margin-bottom: 10px;">Loan Profile</h4><!-- Start: LOAN_PROFILE -->
+                    <h4 class="text-center">Loan Profile</h4><!-- Start: LOAN_PROFILE -->
                     <div class="row" style="border: 1px dashed #1DA1F2 ;">
                         <!-- Start: Down_Payment_% -->
                         <div class="col-md-3"><label class="form-label" for="B2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment %"><i class="icon-question"></i></sup>Down Payment</label>
@@ -164,7 +164,7 @@
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B11" data-type="currency" readonly="" data-name="Total-Loan-Cost" name="Total Loan Cost" placeholder="0.00"></div>
                         </div><!-- End: Total_Loan_Cost -->
                     </div><!-- End: LOAN_PROFILE -->
-                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 5px;margin-bottom: 10px;">Taxes</h4><!-- Start: TAXES -->
+                    <h4 class="text-center">Taxes</h4><!-- Start: TAXES -->
                     <div class="row" style="border: 1px dashed #1DA1F2 ;">
                         <!-- Start: Annual_Tax_Amount_$ -->
                         <div class="col-md-3"><label class="form-label" for="A5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount $"><i class="icon-question"></i></sup>Annual Tax Amount</label>
@@ -183,7 +183,7 @@
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A7" data-type="currency" name="Tax-Depreciation" data-name="Tax-Depreciation" placeholder="0.00"></div>
                         </div><!-- End: Tax_Depreciation_$ -->
                     </div><!-- End: TAXES -->
-                    <h4 class="text-center" style="margin-top: 10px;/*font-family: 'Roboto', sans-serif;*/font-weight: bold;padding-top: 10px;margin-bottom: 10px;">Cash to Close</h4><!-- Start: CASH_TO_CLOSE -->
+                    <h4 class="text-center">Cash to Close</h4><!-- Start: CASH_TO_CLOSE -->
                     <div class="row" style="border: 1px dashed #1DA1F2 ;">
                         <!-- Start: Escrow_$ -->
                         <div class="col-md-3"><label class="form-label" for="A10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Escrow $"><i class="icon-question"></i></sup>Escrow</label>
@@ -210,8 +210,8 @@
                             <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B15" data-type="currency" readonly="" step="0.01" name="Cash-to-Close" data-name="Cash-to-Close" placeholder="0.00"></div>
                         </div><!-- End: Cash_To_Close -->
                     </div><!-- End: CASH_TO_CLOSE -->
-                </div><!-- End: Investment -->
-                <!-- Start: Gross Expenses -->
+                </div><!-- End: CALC_MAIN -->
+                <!-- Start: EXPENSES -->
                 <div class="subsection" style="background: rgb(240, 128, 128);">
                     <h4 class="subsection-heading">Expenses</h4>
                     <div class="table-responsive">
@@ -558,6 +558,7 @@
                                     <td></td>
                                     <td></td>
                                 </tr><!-- End: Custom Field Buttons -->
+                                <!-- Start: TOTAL_EXPENSE -->
                                 <tr>
                                     <td><label class="form-label fw-bold" for="D64"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Expense / Month"><i class="icon-question"></i></sup>Total Expense</label></td>
                                     <td>
@@ -569,12 +570,12 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D64" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: TOTAL_EXPENSE -->
                             </tbody>
                         </table>
                     </div>
-                </div><!-- End: Gross Expenses -->
-                <!-- Start: Gross Revenue -->
+                </div><!-- End: EXPENSES -->
+                <!-- Start: REVENUE -->
                 <div class="income-subsection">
                     <h4 class="subsection-heading">Revenue</h4>
                     <div class="table-responsive">
@@ -1151,6 +1152,7 @@
                                     <td></td>
                                     <td></td>
                                 </tr><!-- End: Custom Field Buttons -->
+                                <!-- Start: TOTAL_REVENUE -->
                                 <tr>
                                     <td><label class="form-label fw-bold" for="D65"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Revenue / Month"><i class="icon-question"></i></sup>Total Revenue</label></td>
                                     <td>
@@ -1162,12 +1164,12 @@
                                     <td>
                                         <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D65" data-type="currency" readonly="" step="0.01" placeholder="0.00"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: TOTAL_REVENUE -->
                             </tbody>
                         </table>
                     </div>
-                </div><!-- End: Gross Revenue -->
-                <!-- Start: Total Cash Flow -->
+                </div><!-- End: REVENUE -->
+                <!-- Start: SUMMARY -->
                 <div class="total-cashflow-subsection">
                     <h4 class="subsection-heading"><span class="fs-5">Summary</span></h4>
                     <div class="table-responsive">
@@ -1182,68 +1184,118 @@
                                 </tr>
                             </thead>
                             <tbody>
+                                <!-- Start: CASH_FLOW -->
                                 <tr>
-                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Cash Flow"><i class="icon-question"></i></sup>Cash Flow</span></td>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Cash Flow"><i class="icon-question"></i></sup><span>Cash Flow</span></td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control" type="text" id="B66" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B66" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control" type="text" id="C66" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="C66" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control" type="text" id="D66" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="D66" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
                                     </td>
-                                </tr>
+                                </tr><!-- End: CASH_FLOW -->
+                                <!-- Start: GRM -->
                                 <tr>
-                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Gross Rental Multiplier"><i class="icon-question"></i></sup>GRM</span></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="GRM1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="GRM2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="GRM3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                </tr>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Gross Rental Multiplier"><i class="icon-question"></i></sup><span>GRM</span></td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="GRM-min" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="GRM-max" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="GRM-avg" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                    </td>
+                                </tr><!-- End: GRM -->
+                                <!-- Start: NOI -->
                                 <tr>
-                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Net Operating Income"><i class="icon-question"></i></sup>NOI</span></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="NOI1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="NOI2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="NOI3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                </tr>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Net Operating Income"><i class="icon-question"></i></sup><span>NOI</span></td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="NOI-min" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="NOI-max" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="NOI-avg" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                </tr><!-- End: NOI -->
+                                <!-- Start: CR -->
                                 <tr>
-                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Capitalization Rate"><i class="icon-question"></i></sup>Cap Rate</span></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CR1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CR2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CR3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                </tr>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Capitalization Rate"><i class="icon-question"></i></sup><span>Cap Rate</span></td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="CR-min" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="CR-max" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="CR-avg" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                    </td>
+                                </tr><!-- End: CR -->
+                                <!-- Start: CCR -->
                                 <tr>
-                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Cash on Cash Return"><i class="icon-question"></i></sup>CoC Return</span></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CCR1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CCR2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="CCR3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                </tr>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Cash on Cash Return"><i class="icon-question"></i></sup><span>CoC Return</span></td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="CCR-min" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="CCR-max" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><input class="form-control" type="number" id="CCR-avg" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                    </td>
+                                </tr><!-- End: CCR -->
+                                <!-- Start: ROI -->
                                 <tr>
-                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Return on Investment"><i class="icon-question"></i></sup>ROI</span></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="ROI1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="ROI2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="ROI3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                </tr>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Return on Investment"><i class="icon-question"></i></sup><span>ROI</span></td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="ROI-min" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="ROI-max" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="ROI-avg" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                </tr><!-- End: ROI -->
+                                <!-- Start: DSCR -->
                                 <tr>
-                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Debt Service Coverage Ratio"><i class="icon-question"></i></sup>DSCR</span></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="DSCR1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="DSCR2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="DSCR3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                </tr>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Debt Service Coverage Ratio"><i class="icon-question"></i></sup><span>DSCR</span></td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="DSCR-min" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="DSCR-max" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="DSCR-avg" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                </tr><!-- End: DSCR -->
+                                <!-- Start: IRR -->
                                 <tr>
-                                    <td><span><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Internal Rate of Return"><i class="icon-question"></i></sup>IRR</span></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="IRR1" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="IRR2" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                    <td><div class="input-group"><span class="input-group-text">$</span><input class="form-control" data-type="currency" id="IRR3" placeholder="0.00" readonly="" step="0.01" type="text"></div></td>
-                                </tr>
+                                    <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Internal Rate of Return"><i class="icon-question"></i></sup><span>IRR</span></td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="IRR-min" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="IRR-max" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                    <td>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="IRR-avg" data-type="currency" placeholder="0.00" readonly="" step="0.01"></div>
+                                    </td>
+                                </tr><!-- End: IRR -->
                             </tbody>
                         </table>
                     </div>
-                </div><!-- End: Total Cash Flow -->
-            </div>
-            <section class="ATTENTION-SECTION" style="border-style: inset;">
+                </div><!-- End: SUMMARY -->
+            </div><!-- Start: DISCLAIMER -->
+            <section class="ATTENTION-SECTION">
                 <h5 class="font-monospace lh-1 text-center">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br>(It's not a substitute for your calculations.)</h5>
-            </section>
+            </section><!-- End: DISCLAIMER -->
         </div>
     </div>
 </main>
