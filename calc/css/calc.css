@@ -215,7 +215,7 @@ input[readonly] {
 }
 
 .table > tbody > tr > td {
-  width: 4.1rem;
+  width: 4.6rem;
   max-width: 4.6rem;
   vertical-align: middle;
   background-color: #ffc8c8;
@@ -622,7 +622,8 @@ tbody > tr > td.tabcalctitle > div.input-group > input.form-control {
 .ATTENTION-SECTION {
   background-color: #fff3cd;
   border-color: #ffeeba;
-  border-style: solid;
+  border-style: inset;
+  padding-top: 8px;
 }
 
 h4.font-monospace {
@@ -841,5 +842,11 @@ button.btn.btn-primary, button.btn.btn-secondary {
   font-weight: 600;
   /*text-transform: capitalize;*/
   text-align: center;
+}
+
+#calculator > div.mb-3 > h4 {
+  margin-bottom: 0px;
+  padding-top: 20px;
+  font-weight: bold;
 }
 
