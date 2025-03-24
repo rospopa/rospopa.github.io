@@ -152,18 +152,18 @@ function calculateRow64() {
     return { b64, c64, d64 };
 }
 
-// Calculate row 66 (sum of rows 63-65)
+// Calculate row 66 (Net Cash Flow)
 function calculateRow66() {
     const row64Values = calculateRow64();
     const row65Values = calculateRow65();
     
-    // Get monthly payment value directly from B10
+    // Get monthly payment value from B10
     const monthlyPayment = parseFloat(document.getElementById('B10').value.replace(/,/g, '')) || 0;
 
-    // Simple sum using B10 value instead of B63/C63/D63
-    const b66 = monthlyPayment + row64Values.b64 + row65Values.b65;
-    const c66 = monthlyPayment + row64Values.c64 + row65Values.c65;
-    const d66 = monthlyPayment + row64Values.d64 + row65Values.d65;
+    // Calculate net cash flow (Income - Expenses - Monthly Payment)
+    const b66 = row65Values.b65 - row64Values.b64 - monthlyPayment;
+    const c66 = row65Values.c65 - row64Values.c64 - monthlyPayment;
+    const d66 = row65Values.d65 - row64Values.d64 - monthlyPayment;
 
     document.getElementById('B66').value = formatCalculatedValue(b66);
     document.getElementById('C66').value = formatCalculatedValue(c66);
