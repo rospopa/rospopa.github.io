@@ -97,7 +97,7 @@ function sumInputs(prefix, numbers) {
 // Calculate row 65 (sum of rows 33-62)
 function calculateRow65() {
     const range = Array.from({length: 30}, (_, i) => i + 33);
-    const range2 = Array.from({length: 9}, (_, i) => i + 1);
+    const range2 = Array.from({length: 1}, (_, i) => i + 9);
     const b65 = sumInputs('B', range) + sumInputs('CFRB', range2);
     const c65 = sumInputs('C', range) + sumInputs('CFRC', range2);
     const d65 = sumInputs('D', range) + sumInputs('CFRD', range2);
@@ -255,21 +255,75 @@ function calculateAll() {
 		
         calculateRow66(); // This will trigger calculation of rows 64 and 65 as well
 
+        // Calculate GRM values
+        if (B1 !== 0) {
+            const grmMin = (row65Values.b65 / B1 * 100);
+            const grmMax = (row65Values.c65 / B1 * 100);
+            const grmAvg = (row65Values.d65 / B1 * 100);
+            
+            document.getElementById('GRM-min').value = grmMin.toFixed(2);
+            document.getElementById('GRM-max').value = grmMax.toFixed(2);
+            document.getElementById('GRM-avg').value = grmAvg.toFixed(2);
+        } else {
+            document.getElementById('GRM-min').value = "0.00";
+            document.getElementById('GRM-max').value = "0.00";
+            document.getElementById('GRM-avg').value = "0.00";
+        }
+
+        // Calculate NOI values
+        const row64Values = calculateRow64();
+        const noiMin = row65Values.b65 - row64Values.b64;
+        const noiMax = row65Values.c65 - row64Values.c64;
+        const noiAvg = row65Values.d65 - row64Values.d64;
+        
+        document.getElementById('NOI-min').value = formatCalculatedValue(noiMin);
+        document.getElementById('NOI-max').value = formatCalculatedValue(noiMax);
+        document.getElementById('NOI-avg').value = formatCalculatedValue(noiAvg);
+
+        // Calculate CR (Cap Rate) values
+        if (B1 !== 0) {
+            const crMin = (noiMin / B1 * 100);
+            const crMax = (noiMax / B1 * 100);
+            const crAvg = (noiAvg / B1 * 100);
+            
+            document.getElementById('CR-min').value = crMin.toFixed(2);
+            document.getElementById('CR-max').value = crMax.toFixed(2);
+            document.getElementById('CR-avg').value = crAvg.toFixed(2);
+        } else {
+            document.getElementById('CR-min').value = "0.00";
+            document.getElementById('CR-max').value = "0.00";
+            document.getElementById('CR-avg').value = "0.00";
+        }
+
+        // Calculate CCR (Cash-on-Cash Return) values
+        // Avoid division by zero by checking if the denominators are not zero
+        if (row65Values.b65 !== 0 && row65Values.c65 !== 0 && row65Values.d65 !== 0) {
+            const ccrMin = (B15 / (row65Values.b65 * 12) * 100);
+            const ccrMax = (B15 / (row65Values.c65 * 12) * 100);
+            const ccrAvg = (B15 / (row65Values.d65 * 12) * 100);
+            
+            document.getElementById('CCR-min').value = ccrMin.toFixed(2);
+            document.getElementById('CCR-max').value = ccrMax.toFixed(2);
+            document.getElementById('CCR-avg').value = ccrAvg.toFixed(2);
+        } else {
+            document.getElementById('CCR-min').value = "0.00";
+            document.getElementById('CCR-max').value = "0.00";
+            document.getElementById('CCR-avg').value = "0.00";
+        }
+
     } catch (error) {
         console.error('Calculation error:', error);
     }
 }
 
 // Add new function for date calculations
-function calculateDates() {
-    const dateInput = document.getElementById('B4').value;
-    if (!dateInput) {
+function calculateDates(selectedDate) {
+    if (isNaN(selectedDate)) {
         document.getElementById('A4').value = "";
         document.getElementById('A4_2').value = "";
         return;
     }
 
-    const selectedDate = new Date(dateInput);
     const currentYear = selectedDate.getFullYear();
     
     // Calculate days to end of year
@@ -294,6 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32',
         'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9',
         'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9',
+        'NOI-min', 'NOI-max', 'NOI-avg',
         // Revenue fields without minus sign
         'B33', 'B34', 'B35', 'B36', 'B37', 'B38', 'B39', 'B40', 'B41', 'B42', 'B43', 'B44', 'B45', 'B46', 'B47',
         'C33', 'C34', 'C35', 'C36', 'C37', 'C38', 'C39', 'C40', 'C41', 'C42', 'C43', 'C44', 'C45', 'C46', 'C47',
@@ -306,6 +361,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Configure percentage inputs
     const percentageInputs = [
         'B2', 'B6', 'B13', 'B28', 'C28', 'D28',
+        'GRM-min', 'GRM-max', 'GRM-avg',
+        'CR-min', 'CR-max', 'CR-avg',
+        'CCR-min', 'CCR-max', 'CCR-avg',
     ];
     
     // Set up calculation triggers
@@ -403,13 +461,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     calculateAll(); // Initial calculation
-
-    // Add date input listener
-    const dateInput = document.getElementById('B4');
-    if (dateInput) {
-        dateInput.setAttribute('type', 'date');
-        dateInput.addEventListener('input', calculateDates);
-        dateInput.addEventListener('change', calculateDates);
-    }
 });
-
