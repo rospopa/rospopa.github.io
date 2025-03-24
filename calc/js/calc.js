@@ -298,9 +298,9 @@ function calculateAll() {
         // Calculate CCR (Cash-on-Cash Return) values
         // Avoid division by zero by checking if the denominators are not zero
         if (row65Values.b65 !== 0 && row65Values.c65 !== 0 && row65Values.d65 !== 0) {
-            const ccrMin = (B15 / (row65Values.b65 * 12) * 100);
-            const ccrMax = (B15 / (row65Values.c65 * 12) * 100);
-            const ccrAvg = (B15 / (row65Values.d65 * 12) * 100);
+            const ccrMin = ((row65Values.b65 * 12) / B15);
+            const ccrMax = ((row65Values.c65 * 12) / B15);
+            const ccrAvg = ((row65Values.d65 * 12) / B15);
             
             document.getElementById('CCR-min').value = ccrMin.toFixed(2);
             document.getElementById('CCR-max').value = ccrMax.toFixed(2);
