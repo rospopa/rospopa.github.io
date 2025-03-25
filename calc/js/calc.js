@@ -318,7 +318,7 @@ function calculateAll() {
 
 // Add new function for date calculations
 function calculateDates(selectedDate) {
-    if (isNaN(selectedDate)) {
+    if (!selectedDate || isNaN(selectedDate)) {
         document.getElementById('A4').value = "";
         document.getElementById('A4_2').value = "";
         return;
@@ -461,4 +461,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     
     calculateAll(); // Initial calculation
+
+    // Add date input listener
+    const dateInput = document.getElementById('B4');
+    if (dateInput) {
+        dateInput.addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            calculateDates(selectedDate);
+            calculateAll(); // Trigger all calculations after date change
+        });
+    }
 });
