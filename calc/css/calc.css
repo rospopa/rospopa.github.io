@@ -855,3 +855,14 @@ sub, sup {
   top: -.5em;
 }
 
+#pdfPreviewModal > div > div > div > button {
+	line-height: 1;
+    padding-top: 9px;
+    padding-bottom: 6px;
+}
+
+#pdfPreviewModal > div > div#pdf_prv_btn > div {
+	width: 50%;
+	display: inline-flex;
+	justify-content: space-around;
+}
