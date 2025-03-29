@@ -330,9 +330,9 @@ function populatePDFFields(container) {
                 { id: ['NOI-min', 'NOI-max', 'NOI-avg'], label: 'Monthly NOI ($)', format: pdf_formatCurrency },
                 { id: ['B66', 'C66', 'D66'], label: 'Monthly Cash Flow ($)', format: pdf_formatCurrency },
                 // Ratios / Rates (%) - Make sure IDs match calc.html
-                { id: ['GRM-min', 'GRM-max', 'GRM-avg'], label: 'GRM (%)', format: pdf_formatPercentage }, // Based on provided formula (Rev/Price*100)
-                { id: ['CR-min', 'CR-max', 'CR-avg'], label: 'Cap Rate (%)', format: pdf_formatPercentage },
-                { id: ['CCR-min', 'CCR-max', 'CCR-avg'], label: 'CoC Return (%)', format: pdf_formatPercentage },
+                { id: ['GRM-min', 'GRM-max', 'GRM-avg'], label: 'GRM (Ratio)', format: pdf_formatPercentage }, // Based on provided formula (Rev/Price*100)
+                { id: ['CR-min', 'CR-max', 'CR-avg'], label: 'Cap Rate (Ratio)', format: pdf_formatPercentage },
+                { id: ['CCR-min', 'CCR-max', 'CCR-avg'], label: 'CoC Return (Ratio)', format: pdf_formatPercentage },
                 { id: ['DSCR-min', 'DSCR-max', 'DSCR-avg'], label: 'DSCR (Ratio)', format: (val) => parseFloat(val).toFixed(2) }, // Format as number
                 // Add placeholders for non-implemented ones
                  { id: ['ROI-min', 'ROI-max', 'ROI-avg'], label: 'ROI', format: () => 'N/A' },
