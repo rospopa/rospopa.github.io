@@ -127,7 +127,7 @@ function sumInputs(prefix, numbers) {
     return sum;
 }
 
-// Calculate row 65 (Total Revenue)
+// Calculate row 65 (Monthly Revenue)
 function calculateRow65() {
     // Range for standard revenue fields (Units, Parking)
     const standardRange = Array.from({length: 30}, (_, i) => i + 33); // B33-B62, C33-C62
@@ -138,19 +138,28 @@ function calculateRow65() {
     const b65 = sumInputs('B', standardRange) + sumInputs('CFRB', customRange);
     const c65 = sumInputs('C', standardRange) + sumInputs('CFRC', customRange);
     const d65 = sumInputs('D', standardRange) + sumInputs('CFRD', customRange); // Avg column
+    // Calculate final Annual Revenue (Monthly Revenue * 12)
+    const ARmin = b65 * 12; // Annual Min Revenue
+    const ARmax = c65 * 12; // Annual Max Revenue
+    const ARavg = d65 * 12; // Annual Avg Revenue
 
-    // Update the display fields
+    
+    // Update Monthly Revenue display fields
     document.getElementById('B65').value = formatCalculatedValue(b65);
     document.getElementById('C65').value = formatCalculatedValue(c65);
     document.getElementById('D65').value = formatCalculatedValue(d65);
+    // Update Annual Revenue display fields
+    document.getElementById('AR-min').value = formatCalculatedValue(ARmin);
+    document.getElementById('AR-max').value = formatCalculatedValue(ARmax);
+    document.getElementById('AR-avg').value = formatCalculatedValue(ARavg);
 
     // Return the calculated values for use in other functions
-    return { b65, c65, d65 };
+    return { b65, c65, d65, ARmin, ARmax, ARavg };
 }
 
-// Calculate row 64 (Total Expenses, including Vacancy)
+// Calculate row 64 (Monthly Expenses, including Vacancy)
 function calculateRow64() {
-    // First, ensure Row 65 (Total Revenue) is calculated to get vacancy base
+    // First, ensure Row 65 (Monthly Revenue) is calculated to get vacancy base
     const row65Values = calculateRow65();
 
     // Get vacancy rates from percentage inputs
@@ -179,25 +188,32 @@ function calculateRow64() {
     const c_base_expenses = sumInputs('C', standardRange1) + sumInputs('C', standardRange2) + sumInputs('CFC', customRange);
     const d_base_expenses = sumInputs('D', standardRange1) + sumInputs('D', standardRange2) + sumInputs('CFD', customRange); // Avg column
 
-    // Calculate final Total Expense (Base Expenses + Vacancy Loss)
+    // Calculate final Monthly Expense (Base Expenses + Vacancy Loss)
     const b64 = b_base_expenses + vacancyLossB;
     const c64 = c_base_expenses + vacancyLossC;
     const d64 = d_base_expenses + vacancyLossD; // Use average vacancy loss for average column
+    // Calculate final Annual Expense (Monthly Expense * 12)
+    const AEmin = b64 * 12; // Annual Min Expense
+    const AEmax = c64 * 12; // Annual Max Expense
+    const AEavg = d64 * 12; // Annual Avg Expense
 
-    // Update Total Expense display fields
+    // Update Monthly Expense display fields
     document.getElementById('B64').value = formatCalculatedValue(b64);
     document.getElementById('C64').value = formatCalculatedValue(c64);
     document.getElementById('D64').value = formatCalculatedValue(d64);
-
+    // Update Annual Expense display fields
+    document.getElementById('AE-min').value = formatCalculatedValue(AEmin);
+    document.getElementById('AE-max').value = formatCalculatedValue(AEmax);
+    document.getElementById('AE-avg').value = formatCalculatedValue(AEavg);
     // Return calculated values
-    return { b64, c64, d64 };
+    return { b64, c64, d64, AEmin, AEmax, AEavg };
 }
 
 // Calculate row 66 (Net Cash Flow = NOI - Monthly Payment)
 function calculateRow66() {
-    // Calculate Total Expenses (Row 64) first, which also calculates Total Revenue (Row 65)
+    // Calculate Monthly Expenses (Row 64) first, which also calculates Monthly Revenue (Row 65)
     const row64Values = calculateRow64(); // This now returns {b64, c64, d64}
-    // We also need Row 65 values (Total Revenue), which are calculated inside calculateRow64
+    // We also need Row 65 values (Monthly Revenue), which are calculated inside calculateRow64
     // Let's re-fetch them directly from the DOM after calculateRow64 runs
     const b65 = parseFloat(document.getElementById('B65').value.replace(/[^-\d.]/g, '')) || 0;
     const c65 = parseFloat(document.getElementById('C65').value.replace(/[^-\d.]/g, '')) || 0;
@@ -431,8 +447,10 @@ document.addEventListener('DOMContentLoaded', () => {
         'CFRC1', 'CFRC2', 'CFRC3', 'CFRC4', 'CFRC5', 'CFRC6', 'CFRC7', 'CFRC8', 'CFRC9', // Custom Revenue C
         'CFRD1', 'CFRD2', 'CFRD3', 'CFRD4', 'CFRD5', 'CFRD6', 'CFRD7', 'CFRD8', 'CFRD9', // Custom Revenue D (Avg - Readonly)
         'VRB28', 'VRC28', 'VRD28', // Vacancy Risk (Readonly)
-        'B64', 'C64', 'D64', // Total Expenses (Readonly)
-        'B65', 'C65', 'D65', // Total Revenue (Readonly)
+        'B64', 'C64', 'D64', // Monthly Expenses (Readonly)
+        'B65', 'C65', 'D65', // Monthly Revenue (Readonly)
+        'AE-min', 'AE-max', 'AE-avg', // Annual Expenses (Readonly)
+        'AR-min', 'AR-max', 'AR-avg', // Annual Revenue (Readonly)
         'B66', 'C66', 'D66', // Cash Flow (Readonly)
         'NOI-min', 'NOI-max', 'NOI-avg', // NOI Summary (Readonly)
         'ROI-min', 'ROI-max', 'ROI-avg', // ROI Summary (Readonly - N/A)
