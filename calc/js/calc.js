@@ -349,9 +349,9 @@ function calculateAll() {
             const grmMin = (b65 * 12) / B1 * 100;
             const grmMax = (c65 * 12) / B1 * 100;
             const grmAvg = (d65 * 12) / B1 * 100;
-            document.getElementById('GRM-min').value = grmMin.toFixed(2);
-            document.getElementById('GRM-max').value = grmMax.toFixed(2);
-            document.getElementById('GRM-avg').value = grmAvg.toFixed(2);
+            document.getElementById('GRM-min').value = isNaN(grmMin) ? "0.00" : grmMin.toFixed(2);
+            document.getElementById('GRM-max').value = isNaN(grmMax) ? "0.00" : grmMax.toFixed(2);
+            document.getElementById('GRM-avg').value = isNaN(grmAvg) ? "0.00" : grmAvg.toFixed(2);
         } else {
             document.getElementById('GRM-min').value = "0.00";
             document.getElementById('GRM-max').value = "0.00";
@@ -365,9 +365,9 @@ function calculateAll() {
             const crMin = (noiMin * 12) / B1 * 100;
             const crMax = (noiMax * 12) / B1 * 100;
             const crAvg = (noiAvg * 12) / B1 * 100;
-            document.getElementById('CR-min').value = crMin.toFixed(2);
-            document.getElementById('CR-max').value = crMax.toFixed(2);
-            document.getElementById('CR-avg').value = crAvg.toFixed(2);
+            document.getElementById('CR-min').value = isNaN(crMin) ? "0.00" : crMin.toFixed(2);
+            document.getElementById('CR-max').value = isNaN(crMax) ? "0.00" : crMax.toFixed(2);
+            document.getElementById('CR-avg').value = isNaN(crAvg) ? "0.00" : crAvg.toFixed(2);
         } else {
             document.getElementById('CR-min').value = "0.00";
             document.getElementById('CR-max').value = "0.00";
@@ -381,9 +381,9 @@ function calculateAll() {
             const ccrMin = (b66 * 12) / cashInvested * 100;
             const ccrMax = (c66 * 12) / cashInvested * 100;
             const ccrAvg = (d66 * 12) / cashInvested * 100;
-            document.getElementById('CCR-min').value = ccrMin.toFixed(2);
-            document.getElementById('CCR-max').value = ccrMax.toFixed(2);
-            document.getElementById('CCR-avg').value = ccrAvg.toFixed(2);
+            document.getElementById('CCR-min').value = isNaN(ccrMin) ? "0.00" : ccrMin.toFixed(2);
+            document.getElementById('CCR-max').value = isNaN(ccrMax) ? "0.00" : ccrMax.toFixed(2);
+            document.getElementById('CCR-avg').value = isNaN(ccrAvg) ? "0.00" : ccrAvg.toFixed(2);
         } else {
             document.getElementById('CCR-min').value = "0.00";
             document.getElementById('CCR-max').value = "0.00";
@@ -397,9 +397,9 @@ function calculateAll() {
             const dscrMax = (noiMax * 12) / annualDebtService;
             const dscrAvg = (noiAvg * 12) / annualDebtService;
             // Display DSCR (format as number, not currency)
-            document.getElementById('DSCR-min').value = dscrMin.toFixed(2);
-            document.getElementById('DSCR-max').value = dscrMax.toFixed(2);
-            document.getElementById('DSCR-avg').value = dscrAvg.toFixed(2);
+            document.getElementById('DSCR-min').value = isNaN(dscrMin) ? "0.00" : dscrMin.toFixed(2);
+            document.getElementById('DSCR-max').value = isNaN(dscrMax) ? "0.00" : dscrMax.toFixed(2);
+            document.getElementById('DSCR-avg').value = isNaN(dscrAvg) ? "0.00" : dscrAvg.toFixed(2);
         } else {
             // Handle case with no debt (infinite DSCR technically, display 0 or N/A)
              document.getElementById('DSCR-min').value = (noiMin > 0) ? "N/A" : "0.00"; // Or just 0.00
