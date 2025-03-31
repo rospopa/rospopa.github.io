@@ -308,9 +308,9 @@ function calculateAll() {
         // GRM (Gross Rental Multiplier = Annual Revenue / Purchase Price * 100)
         let grmMin = 0, grmMax = 0, grmAvg = 0;
         if (B1_PurchasePrice !== 0) {
-            grmMin = (b65 * 12) / B1_PurchasePrice * 100;
-            grmMax = (c65 * 12) / B1_PurchasePrice * 100;
-            grmAvg = (d65 * 12) / B1_PurchasePrice * 100;
+            grmMin = B1_PurchasePrice / (b65 * 12);
+            grmMax = B1_PurchasePrice / (c65 * 12);
+            grmAvg = B1_PurchasePrice / (d65 * 12);
         }
         document.getElementById('GRM-min').value = isFinite(grmMin) ? grmMin.toFixed(2) : "0.00";
         document.getElementById('GRM-max').value = isFinite(grmMax) ? grmMax.toFixed(2) : "0.00";
