@@ -762,8 +762,9 @@ button.btn.btn-primary, button.btn.btn-secondary {
   -webkit-box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.4);
   -moz-box-shadow: 0px 1px 2px 0px rgba(0,0,0,0.4);
   /*margin-right: 2px;*/
-  /*margin-left: 0px;*/
+  /*margin-left: -1px;*/
   max-height: 12px;
+  border-width: 0px;
   border-radius: 50%;
   color: #FFFFFF;
   background: #1DA1F2;
@@ -856,13 +857,13 @@ sub, sup {
 }
 
 #pdfPreviewModal > div > div > div > button {
-	line-height: 1;
-    padding-top: 9px;
-    padding-bottom: 6px;
+  line-height: 1;
+  padding-top: 9px;
+  padding-bottom: 6px;
 }
 
 #pdfPreviewModal > div > div#pdf_prv_btn > div {
-	width: 50%;
-	display: inline-flex;
-	justify-content: space-around;
+  width: 50%;
+  display: inline-flex;
+  justify-content: space-around;
 }
