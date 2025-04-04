@@ -136,7 +136,7 @@
                         </div><!-- End: Loan_Term_Period_ -->
                         <!-- Start: Payments_per_ -->
                         <div class="col-md-3"><label class="form-label" for="B8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Payments per Year"><i class="icon-question"></i></sup>Payments per Year</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B8" step="0" max="12" name="Payments per Year" data-name="Payments-per-Period" min="1" value="12"><span class="input-group-text" id="per">#</span></div>
+                            <div class="input-group"><input class="form-control" type="number" id="B8" step="1" max="12" name="Payments per Year" data-name="Payments-per-Period" min="1" value="12"><span class="input-group-text" id="per">#</span></div>
                         </div><!-- End: Payments_per_ -->
                         <!-- Start: Annual_Interest_Rate_$ -->
                         <div class="col-md-3"><label class="form-label" for="B6"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Interest Rate %"><i class="icon-question"></i></sup>Annual Interest Rate</label>
@@ -144,7 +144,7 @@
                         </div><!-- End: Annual_Interest_Rate_$ -->
                         <!-- Start: Total_Payments_# -->
                         <div class="col-md-3"><label class="form-label" for="B9"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Payments"><i class="icon-question"></i></sup>Total Payments</label>
-                            <div class="input-group"><input class="form-control" type="number" id="B9" name="Total Payments" data-name="Total-Payments" placeholder="0" readonly=""><span class="input-group-text">#</span></div>
+                            <div class="input-group"><input class="form-control" type="number" id="B9" name="Total Payments" data-name="Total-Payments" placeholder="0" readonly="" step="1"><span class="input-group-text">#</span></div>
                         </div><!-- End: Total_Payments_# -->
                         <!-- Start: Amount_per_Payment_$ -->
                         <div class="col-md-3"><label class="form-label" for="B10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Amount per Payment $"><i class="icon-question"></i></sup>Amount per Payment</label>
@@ -348,10 +348,10 @@
                                 <tr>
                                     <td class="tabcalctitle"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Vacancy Rate"><i class="icon-question"></i></sup><span>Vacancy Rate</span></td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="number" id="B28" placeholder="0" step="0.01" max="100" min="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="number" id="B28" placeholder="0,00" step="0.01" max="100" min="0"><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="number" id="C28" placeholder="0" step="0.01" max="100" min="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="number" id="C28" placeholder="0,00" step="0.01" max="100" min="0"><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
                                         <div class="input-group"><input class="form-control" type="number" id="D28" readonly="" placeholder="0,00"><span class="input-group-text">%</span></div>
@@ -360,13 +360,13 @@
                                 <tr>
                                     <td class="tabcalctitle vrbcd"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Vacancy Risk"><i class="icon-question"></i></sup><span>Vacancy Risk</span></td>
                                     <td class="tabcalctitle vrbcd">
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="VRB28" data-type="currency" readonly=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="VRB28" data-type="currency" readonly="" placeholder="-0.00" name="VR-min"></div>
                                     </td>
                                     <td class="tabcalctitle vrbcd">
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="VRC28" data-type="currency" readonly=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="VRC28" data-type="currency" readonly="" placeholder="-0.00" name="VR-max"></div>
                                     </td>
                                     <td class="tabcalctitle vrbcd">
-                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="VRD28" data-type="currency" readonly=""></div>
+                                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="VRD28" data-type="currency" readonly="" placeholder="-0.00" name="VR-avg"></div>
                                     </td>
                                 </tr>
                                 <tr>
