@@ -61,13 +61,13 @@
                     <!-- Start: PROPERTY -->
                     <div class="row" style="border: 1px dashed #1DA1F2;">
                         <!-- Start: Address -->
-                        <div class="col-md-12" style="box-shadow: 0px 0px 0px 0px rgb(0,13,25);"><label class="form-label" for="autocomplete"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Address"><i class="icon-question"></i></sup>Address*</label>
-                            <div class="input-group searchbox"><span class="input-group-text currency-span">Address</span><input type="text" id="autocomplete" class="form-control" placeholder="Enter an address" data-type="text"></div>
+                        <div class="col-md-12" style="box-shadow: 0px 0px 0px 0px rgb(0,13,25);"><label class="form-label" for="autocomplete"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Address"><i class="icon-question icon-question"></i></sup>Address*</label>
+                            <div class="input-group searchbox"><span class="input-group-text">Address</span><input type="text" id="autocomplete" class="form-control" placeholder="Enter an address" data-type="text"></div>
                             <div id="suggestions" class="suggestions"></div>
                         </div><!-- End: Address -->
                         <!-- Start: Purchase_Price_$ -->
                         <div class="col-md-3"><label class="form-label" for="B1"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Purchase Price $"><i class="icon-question"></i></sup>Purchase Price</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="B1" data-name="Purchase-Price" data-type="currency" maxlength="12" name="Purchase-Price" placeholder="0.00" step="0.01"></div>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="B1" data-name="Purchase-Price" data-type="currency" maxlength="12" name="Purchase-Price" placeholder="0.00" step="0.01"></div>
                         </div><!-- End: Purchase_Price_$ -->
                         <!-- Start: Closing_Date_select -->
                         <div class="col-md-3"><label class="form-label" for="B4"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Date"><i class="icon-question"></i></sup>Closing Date</label>
@@ -94,7 +94,7 @@
                         </div><!-- End: Down_Payment_$ -->
                         <!-- Start: Loan_Type -->
                         <div class="col-md-6"><label class="form-label" for="Loan-Type"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Type"><i class="icon-question"></i></sup>Loan Type</label>
-                            <form class="form-inline">
+                            <form>
                                 <div class="form-group"><select class="form-select form-control form-loantype" id="Loan-Type" name="Loan Type" data-name="Loan-Type">
                                         <option value="None (All Cash)">None (All Cash)</option>
                                         <option value="Conventional Loan">Conventional Loan</option>
@@ -144,7 +144,7 @@
                         </div><!-- End: Annual_Interest_Rate_$ -->
                         <!-- Start: Total_Payments_# -->
                         <div class="col-md-3"><label class="form-label" for="B9"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Payments"><i class="icon-question"></i></sup>Total Payments</label>
-                            <div class="input-group"><input class="form-control" type="text" id="B9" name="Total Payments" data-name="Total-Payments" placeholder="0" readonly=""><span class="input-group-text">#</span></div>
+                            <div class="input-group"><input class="form-control" type="number" id="B9" name="Total Payments" data-name="Total-Payments" placeholder="0" readonly=""><span class="input-group-text">#</span></div>
                         </div><!-- End: Total_Payments_# -->
                         <!-- Start: Amount_per_Payment_$ -->
                         <div class="col-md-3"><label class="form-label" for="B10"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Amount per Payment $"><i class="icon-question"></i></sup>Amount per Payment</label>
@@ -163,11 +163,11 @@
                     <div class="row" style="border: 1px dashed #1DA1F2 ;">
                         <!-- Start: Annual_Tax_Amount_$ -->
                         <div class="col-md-3"><label class="form-label" for="A5"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount $"><i class="icon-question"></i></sup>Annual Tax Amount</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5" data-name="Annual-Tax-Amount" data-type="currency" maxlength="12" name="Annual-Tax-Amount" placeholder="0.00" step="0.01"></div>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A5" data-name="Annual-Tax-Amount" data-type="currency" maxlength="12" name="Annual-Tax-Amount" placeholder="0.00" step="0.01"></div>
                         </div><!-- End: Annual_Tax_Amount_$ -->
                         <!-- Start: Annual_Tax_Amount_Daily_$ -->
                         <div class="col-md-3"><label class="form-label" for="A5_2"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Daily Tax Amount $"><i class="icon-question"></i></sup>Daily Tax Amount</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A5_2" data-name="Annual-Tax-Amount-Daily" data-type="currency" maxlength="12" name="Annual-Tax-Amount-Daily" placeholder="0.00" step="0.01" readonly=""></div>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A5_2" data-name="Annual-Tax-Amount-Daily" data-type="currency" maxlength="12" name="Annual-Tax-Amount-Daily" placeholder="0.00" step="0.01" readonly=""></div>
                         </div><!-- End: Annual_Tax_Amount_Daily_$ -->
                         <!-- Start: Tax_Proration_Amount_$ -->
                         <div class="col-md-3"><label class="form-label" for="A8"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration Amount $"><i class="icon-question"></i></sup>Tax Proration Amount</label>
@@ -213,7 +213,7 @@
                         </div><!-- End: Inspection_$ -->
                         <!-- Start: Encumbrances_$ -->
                         <div class="col-md-3"><label class="form-label" for="A11"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Encumbrances $"><i class="icon-question"></i></sup>Encumbrances</label>
-                            <div class="input-group"><span class="input-group-text currency-span">$</span><input class="form-control" type="text" id="A11" data-name="Encumbrances" data-type="currency" maxlength="12" name="Encumbrances" placeholder="0.00" step="0.01"></div>
+                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="text" id="A11" data-name="Encumbrances" data-type="currency" maxlength="12" name="Encumbrances" placeholder="0.00" step="0.01"></div>
                         </div><!-- End: Encumbrances_$ -->
                         <!-- Start: Cash_To_Close -->
                         <div class="col-md-3"><label class="form-label" for="B15"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment + Closing Cost (% of Purchase Price) + Inspection - Tax Proration $"><i class="icon-question"></i></sup>Cash to Close</label>
@@ -354,7 +354,7 @@
                                         <div class="input-group"><input class="form-control" type="number" id="C28" placeholder="0" step="0.01" max="100" min="0"><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="D28" readonly="" placeholder="0,00"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="number" id="D28" readonly="" placeholder="0,00"><span class="input-group-text">%</span></div>
                                     </td>
                                 </tr>
                                 <tr>
@@ -558,8 +558,8 @@
                                             <div class="col text-nowrap col-titl"><span class="form-label"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="'Custom Expense' Own Name Input Field"><i class="icon-question"></i></sup>Custom</span></div>
                                             <div class="col d-flex justify-content-center align-items-center">
                                                 <div class="btn-group d-inline-flex" role="group">
-                                                    <div id="addRowC" class="triangle triangle-add"></div>
-                                                    <div id="removeRowC" class="triangle triangle-rem"></div>
+                                                    <div id="addRowC" class="triangle-add"></div>
+                                                    <div id="removeRowC" class="triangle-rem"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -620,8 +620,8 @@
                                             <div class="col text-nowrap col-titl"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Unit"><i class="icon-question"></i></sup><span>Unit 1</span></div>
                                             <div class="col d-flex justify-content-center align-items-center">
                                                 <div class="btn-group d-inline-flex" role="group">
-                                                    <div id="addRowU" class="triangle triangle-add"></div>
-                                                    <div id="removeRowU" class="triangle triangle-rem"></div>
+                                                    <div id="addRowU" class="triangle-add"></div>
+                                                    <div id="removeRowU" class="triangle-rem"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -825,8 +825,8 @@
                                             <div class="col text-nowrap col-titl"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Parking"><i class="icon-question"></i></sup><span>Parking 1</span></div>
                                             <div class="col d-flex justify-content-center align-items-center">
                                                 <div class="btn-group d-inline-flex" role="group">
-                                                    <div id="addRowP" class="triangle triangle-add"></div>
-                                                    <div id="removeRowP" class="triangle triangle-rem"></div>
+                                                    <div id="addRowP" class="triangle-add"></div>
+                                                    <div id="removeRowP" class="triangle-rem"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1165,8 +1165,8 @@
                                             <div class="col text-nowrap col-titl"><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="'Custom Revenue' Own Name Input Field"><i class="icon-question"></i></sup><span class="form-label">Custom</span></div>
                                             <div class="col d-flex justify-content-center align-items-center">
                                                 <div class="btn-group d-inline-flex" role="group">
-                                                    <div id="addRowCR" class="triangle triangle-add"></div>
-                                                    <div id="removeRowCR" class="triangle triangle-rem"></div>
+                                                    <div id="addRowCR" class="triangle-add"></div>
+                                                    <div id="removeRowCR" class="triangle-rem"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -1237,13 +1237,13 @@
                                 <tr>
                                     <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Gross Rental Multiplier"><i class="icon-question"></i></sup><span>GRM</span></td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="GRM-min" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="GRM-min" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="GRM-max" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="GRM-max" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="GRM-avg" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="GRM-avg" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                 </tr><!-- End: GRM -->
                                 <!-- Start: NOI -->
@@ -1263,65 +1263,65 @@
                                 <tr>
                                     <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Capitalization Rate"><i class="icon-question"></i></sup><span>Cap Rate</span></td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="CR-min" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CR-min" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="CR-max" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CR-max" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="CR-avg" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CR-avg" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                 </tr><!-- End: CR -->
                                 <!-- Start: CCR -->
                                 <tr>
                                     <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Cash on Cash Return"><i class="icon-question"></i></sup><span>CoC Return</span></td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="CCR-min" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CCR-min" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="CCR-max" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CCR-max" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="CCR-avg" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="CCR-avg" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                 </tr><!-- End: CCR -->
                                 <!-- Start: ROI -->
                                 <tr>
                                     <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Return on Investment"><i class="icon-question"></i></sup><span>ROI</span></td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="ROI-min" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="ROI-min" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="ROI-max" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="ROI-max" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="ROI-avg" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="ROI-avg" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                 </tr><!-- End: ROI -->
                                 <!-- Start: DSCR -->
                                 <tr>
                                     <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Debt Service Coverage Ratio"><i class="icon-question"></i></sup><span>DSCR</span></td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="DSCR-min" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="DSCR-min" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="DSCR-max" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="DSCR-max" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="DSCR-avg" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="DSCR-avg" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                 </tr><!-- End: DSCR -->
                                 <!-- Start: IRR -->
                                 <tr>
                                     <td><sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Internal Rate of Return"><i class="icon-question"></i></sup><span>IRR</span></td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="IRR-min" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="IRR-min" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="IRR-max" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="IRR-max" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                     <td>
-                                        <div class="input-group"><input class="form-control" type="text" id="IRR-avg" readonly="" placeholder="0"><span class="input-group-text">%</span></div>
+                                        <div class="input-group"><input class="form-control" type="text" id="IRR-avg" placeholder="0" readonly=""><span class="input-group-text">%</span></div>
                                     </td>
                                 </tr><!-- End: IRR -->
                             </tbody>
