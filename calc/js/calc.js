@@ -203,27 +203,23 @@ function calculateRow65() {
 function calculateRow64(revenueResults) { // Takes revenue object as input
     const { b65, c65, d65 } = revenueResults; // Destructure needed monthly revenue values
 
-    // --- Calculate Averages first ('D' column for expenses) ---
+    // --- Calculate Averages for individual expense lines ('D' column) ---
     for (let i = 19; i <= 32; i++) {
-         if (i === 28) continue; // Skip Vacancy Rate % row (handled separately)
-         const B_val = document.getElementById('B' + i)?.value;
-         const C_val = document.getElementById('C' + i)?.value;
+         if (i === 28) continue; // Skip Vacancy Rate % row (handled separately below)
+
+         const bInput = document.getElementById('B' + i);
+         const cInput = document.getElementById('C' + i);
          const dInput = document.getElementById('D' + i);
 
-         // Only average if the target D field is not readonly itself
-         if (dInput && !dInput.readOnly) {
-            const B = parseCurrency(B_val);
-            const C = parseCurrency(C_val);
+         if (dInput) { // Check if D input exists
+            const B = parseCurrency(bInput?.value);
+            const C = parseCurrency(cInput?.value);
+            // Apply AVG(B, C) formula to all D expense fields (D19-D27, D29-D32)
             dInput.value = formatCalculatedValue((B + C) / 2);
-         } else if (i === 22 && dInput) {
-             // Specifically handle D22 (Avg Property Tax) - it should mirror B22 if B22 is calculated/readonly
-             const B22_input = document.getElementById('B22');
-             if (B22_input) {
-                 dInput.value = B22_input.value; // Make D22 match B22 (already formatted)
-             }
          }
      }
-     for (let i = 1; i <= 9; i++) { // Custom Expenses B/C -> D
+     // Custom Expenses Averages (CFD1-9)
+     for (let i = 1; i <= 9; i++) {
          const CFB = parseCurrency(document.getElementById('CFB' + i)?.value);
          const CFC = parseCurrency(document.getElementById('CFC' + i)?.value);
          document.getElementById('CFD' + i).value = formatCalculatedValue((CFB + CFC) / 2);
@@ -249,33 +245,37 @@ function calculateRow64(revenueResults) { // Takes revenue object as input
     document.getElementById('VRC28').value = formatCalculatedValue(vacancyLossC);
     document.getElementById('VRD28').value = formatCalculatedValue(vacancyLossD);
 
-    // Sum the standard operating expense ranges
+    // --- Sum MIN/MAX Monthly Expenses ---
     const standardRange1 = Array.from({length: 9}, (_, i) => i + 19); // 19-27
     const standardRange2 = Array.from({length: 4}, (_, i) => i + 29); // 29-32
-    const customRange = Array.from({length: 9}, (_, i) => i + 1);    // CFB1-9, CFC1-9, CFD1-9
+    const customRange = Array.from({length: 9}, (_, i) => i + 1);    // CFB1-9, CFC1-9
 
-    // Calculate base operating expenses using updated 'D' columns as well
+    // Calculate base operating expenses for MIN (B) and MAX (C) columns
     const b_base_expenses = sumInputs('B', standardRange1) + sumInputs('B', standardRange2) + sumInputs('CFB', customRange);
     const c_base_expenses = sumInputs('C', standardRange1) + sumInputs('C', standardRange2) + sumInputs('CFC', customRange);
-    // Sum D column (average column) - includes D22 mirroring B22
-    const d_base_expenses = sumInputs('D', standardRange1) + sumInputs('D', standardRange2) + sumInputs('CFD', customRange);
 
-    // Calculate final Monthly Expense (Base Expenses + Vacancy Loss)
+    // Calculate final MIN (B64) and MAX (C64) Monthly Expense (Base Expenses + Vacancy Loss)
     const b64 = b_base_expenses + vacancyLossB;
     const c64 = c_base_expenses + vacancyLossC;
-    const d64 = d_base_expenses + vacancyLossD; // Use average base expense + average vacancy loss
-    const AEmin = b64 * 12;
-    const AEmax = c64 * 12;
-    const AEavg = d64 * 12;
 
-    // Update Monthly Expense display fields
+    // Update B64 and C64 display fields
     document.getElementById('B64').value = formatCalculatedValue(b64);
     document.getElementById('C64').value = formatCalculatedValue(c64);
-    document.getElementById('D64').value = formatCalculatedValue(d64);
+
+    // --- Calculate AVG Monthly Expense (D64) based on B64 and C64 ---
+    const d64 = (b64 + c64) / 2;
+    document.getElementById('D64').value = formatCalculatedValue(d64); // Update D64 display
+
+    // --- Calculate Annual Expenses ---
+    const AEmin = b64 * 12;
+    const AEmax = c64 * 12;
+    // Calculate AVG Annual Expense (AE-avg) based on AEmin and AEmax
+    const AEavg = (AEmin + AEmax) / 2;
+
     // Update Annual Expense display fields
     document.getElementById('AE-min').value = formatCalculatedValue(AEmin);
     document.getElementById('AE-max').value = formatCalculatedValue(AEmax);
-    document.getElementById('AE-avg').value = formatCalculatedValue(AEavg);
+    document.getElementById('AE-avg').value = formatCalculatedValue(AEavg); // Update AE-avg display
 
     // Return calculated expense values (both monthly and annual)
     return { b64, c64, d64, AEmin, AEmax, AEavg }; // Return numeric values
@@ -293,7 +293,7 @@ function calculateRow66(revenueResults, expenseResults, monthlyPayment) {
     // Calculate Monthly Net Operating Income (NOI = Monthly Revenue + Monthly Expenses)
     const noiMonthlyMin = b65 + b64;
     const noiMonthlyMax = c65 + c64;
-    const noiMonthlyAvg = d65 + d64;
+    const noiMonthlyAvg = d65 + d64; // Uses the D64 calculated as AVG(B64, C64)
 
     // Calculate Monthly Cash Flow (Monthly NOI - Monthly Payment)
     const b66 = noiMonthlyMin - paymentExpense;
@@ -329,26 +329,19 @@ function calculateAll() {
             // User edited Rate (B2), calculate Amount (B3)
             B2_DownPayRate = B2_DownPayRate_Input / 100; // Convert percentage input to rate
             B3_DownPayAmount = B1_PurchasePrice * B2_DownPayRate;
-            // Update B3 display *without* triggering loop
             const currentB3Formatted = formatCalculatedValue(B3_DownPayAmount);
-            // --- B3 Placeholder Logic ---
-            // Only update B3 if the calculated amount is not 0 OR if B3 already has a non-zero/non-empty value.
-            // This prevents overwriting the placeholder with "0.00" if B2 is set to 0.
             if (B3_DownPayAmount !== 0 || (b3Input.value && b3Input.value !== '0.00')) {
                 if (b3Input.value !== currentB3Formatted) {
                     b3Input.value = currentB3Formatted;
                 }
             } else if (B3_DownPayAmount === 0 && b3Input.value && b3Input.value !== '0.00') {
-                // If calculation results in 0, but B3 had a value, clear it (allows placeholder)
                  b3Input.value = '';
             }
-            // --- End B3 Placeholder Logic ---
         } else if (lastEditedDownPaymentField === 'B3') {
             // User edited Amount (B3), calculate Rate (B2)
             B3_DownPayAmount = B3_DownPayAmount_Input;
             B2_DownPayRate = (B1_PurchasePrice !== 0) ? (B3_DownPayAmount / B1_PurchasePrice) : 0;
-            // Update B2 display *without* triggering loop
-            const b2ValueToSet = B2_DownPayRate * 100; // Store the percentage value
+            const b2ValueToSet = B2_DownPayRate * 100;
             const currentB2Parsed = parseFloat(b2Input.value.replace(/,/g, ''));
             if (isNaN(currentB2Parsed) || Math.abs(currentB2Parsed - b2ValueToSet) > 0.001) {
                  b2Input.value = b2ValueToSet.toFixed(2);
@@ -364,20 +357,16 @@ function calculateAll() {
                  b2Input.value = (B2_DownPayRate * 100).toFixed(2);
                  b3Input.value = formatCalculatedValue(B3_DownPayAmount); // Update B3 display
              } else {
-                  // Update B3 based on B2 (or both are 0)
                   const currentB3Formatted = formatCalculatedValue(B3_DownPayAmount);
-                  // --- B3 Placeholder Logic (Initial Load) ---
                    if (B3_DownPayAmount !== 0 || (b3Input.value && b3Input.value !== '0.00')) {
                        if (b3Input.value !== currentB3Formatted) {
                            b3Input.value = currentB3Formatted;
                        }
                    } else if (B3_DownPayAmount === 0 && !b3Input.value) {
-                       // If calculated is 0 and field is currently empty (placeholder showing), DO NOTHING.
+                       // DO NOTHING if calculated is 0 and field is empty (placeholder showing).
                    } else if (B3_DownPayAmount === 0 && b3Input.value) {
-                       // If calculated is 0 but field has a value (e.g. "0.00"), clear it for placeholder
-                       b3Input.value = '';
+                       b3Input.value = ''; // Clear if calculated is 0 but field has a value
                    }
-                  // --- End B3 Placeholder Logic (Initial Load) ---
              }
         }
         // Ensure B3_DownPayAmount reflects the final state after potential adjustments
@@ -413,14 +402,13 @@ function calculateAll() {
         const B22_MonthlyTax = (A5_AnnualTax / 12) * -1; // Monthly Property Tax Expense
 
         // --- 5. Update Display for Initial Calculated Inputs ---
-        // B3 and B2 were potentially updated above.
         document.getElementById('B5').value = formatCalculatedValue(B5_LoanAmount);
         document.getElementById('B9').value = B9_TotalPayments.toLocaleString('en-US');
         document.getElementById('B10').value = formatCalculatedValue(B10_PaymentPerPeriod);
         document.getElementById('B11').value = formatCalculatedValue(B11_TotalLoanCost);
         document.getElementById('B12').value = formatCalculatedValue(B12_InterestCost);
         document.getElementById('B15').value = formatCalculatedValue(B15_CashToClose);
-        document.getElementById('B22').value = formatCalculatedValue(B22_MonthlyTax);
+        document.getElementById('B22').value = formatCalculatedValue(B22_MonthlyTax); // B22 is calculated monthly tax
 
         // --- 6. Calculate Revenue, Expenses, Cash Flow by Calling Helpers ---
         const revenueResults = calculateRow65(); // Gets { b65, c65, d65, ARmin, ARmax, ARavg }
@@ -429,13 +417,13 @@ function calculateAll() {
 
         // --- 7. Extract Needed Results & Calculate Annual Figures ---
         const { ARmin, ARmax, ARavg } = revenueResults;
-        const { AEmin, AEmax, AEavg } = expenseResults; // Annual Expenses (negative)
+        const { AEmin, AEmax, AEavg } = expenseResults; // Annual Expenses (negative), AEavg now AVG(AEmin, AEmax)
         const { b66, c66, d66 } = cashFlowResults; // Monthly Cash Flow
 
         // --- Calculate Annual NOI ---
         const noiAnnMin = ARmin + AEmin; // AR is positive, AE is negative
         const noiAnnMax = ARmax + AEmax;
-        const noiAnnAvg = ARavg + AEavg;
+        const noiAnnAvg = ARavg + AEavg; // AEavg is now AVG(AEmin,AEmax)
 
         // --- Update Annual NOI Display ---
         document.getElementById('NOI-min').value = formatCalculatedValue(noiAnnMin);
@@ -451,9 +439,9 @@ function calculateAll() {
         const cashInvested = Math.abs(B15_CashToClose);
         const annualDebtService = Math.abs(B10_PaymentPerPeriod * 12);
 
-        // --- 8. Calculate and Display Summary Metrics (Using formatRateOutput) ---
+        // --- 8. Calculate and Display Summary Metrics ---
 
-        // GRM (Gross Rental Multiplier = Purchase Price / Annual Revenue )
+        // GRM
         let grmMin = 0, grmMax = 0, grmAvg = 0;
         if (ARmin !== 0) grmMin = B1_PurchasePrice / ARmin;
         if (ARmax !== 0) grmMax = B1_PurchasePrice / ARmax;
@@ -486,11 +474,11 @@ function calculateAll() {
 
          // DSCR (Debt Service Coverage Ratio = Annual NOI / Annual Debt Service)
          let dscrMin = 0, dscrMax = 0, dscrAvg = 0;
-         let dscrMinDisp = "0", dscrMaxDisp = "0", dscrAvgDisp = "0"; // Use "0" as default string
+         let dscrMinDisp = "0", dscrMaxDisp = "0", dscrAvgDisp = "0";
          if (annualDebtService !== 0) {
              dscrMin = noiAnnMin / annualDebtService;
              dscrMax = noiAnnMax / annualDebtService;
-             dscrAvg = noiAnnAvg / annualDebtService;
+             dscrAvg = noiAnnAvg / annualDebtService; // Uses noiAnnAvg calculated from AEavg = AVG(AEmin,AEmax)
              dscrMinDisp = isFinite(dscrMin) ? formatRateOutput(dscrMin) : "N/A";
              dscrMaxDisp = isFinite(dscrMax) ? formatRateOutput(dscrMax) : "N/A";
              dscrAvgDisp = isFinite(dscrAvg) ? formatRateOutput(dscrAvg) : "N/A";
@@ -515,11 +503,10 @@ function calculateAll() {
 
     } catch (error) {
         console.error('Calculation error:', error);
-        // Consider adding user-facing error display here
     }
 }
 
-// --- Event Listener Setup --- (Handles B2/B3 linkage)
+// --- Event Listener Setup ---
 document.addEventListener('DOMContentLoaded', () => {
     // Reset the tracker on load
     lastEditedDownPaymentField = 'B2';
@@ -529,7 +516,7 @@ document.addEventListener('DOMContentLoaded', () => {
         'B1', 'B3', 'B5', 'B10', 'B11', 'B12', 'B14', 'B15', 'A5', 'A5_2', 'A7', 'A8', 'A10', 'A11', 'A12',
         'B19', 'B20', 'B21', 'B22', 'B23', 'B24', 'B25', 'B26', 'B27', 'B29', 'B30', 'B31', 'B32', // Standard Expenses B
         'C19', 'C20', 'C21', 'C22', 'C23', 'C24', 'C25', 'C26', 'C27', 'C29', 'C30', 'C31', 'C32', // Standard Expenses C
-        'D19', 'D20', 'D21', 'D22', 'D23', 'D24', 'D25', 'D26', 'D27', 'D29', 'D30', 'D31', 'D32', // Standard Expenses D (Avg - Mostly Readonly)
+        'D19', 'D20', 'D21', 'D22', 'D23', 'D24', 'D25', 'D26', 'D27', 'D29', 'D30', 'D31', 'D32', // Standard Expenses D (Avg - Readonly)
         'CFB1', 'CFB2', 'CFB3', 'CFB4', 'CFB5', 'CFB6', 'CFB7', 'CFB8', 'CFB9', // Custom Expenses B
         'CFC1', 'CFC2', 'CFC3', 'CFC4', 'CFC5', 'CFC6', 'CFC7', 'CFC8', 'CFC9', // Custom Expenses C
         'CFD1', 'CFD2', 'CFD3', 'CFD4', 'CFD5', 'CFD6', 'CFD7', 'CFD8', 'CFD9', // Custom Expenses D (Avg - Readonly)
@@ -581,63 +568,56 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Apply Formatting and Listeners ---
 
-    // Currency Inputs
     currencyInputs.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
             input.setAttribute('type', 'text');
-            input.setAttribute('data-type', 'currency'); // Custom attribute for identification
+            input.setAttribute('data-type', 'currency');
             input.addEventListener('input', function(e) { formatCurrency(e.target, false); });
             input.addEventListener('blur', function(e) { formatCurrency(e.target, true); });
-            // Initial formatting (excluding B3 if empty)
             if (input.id === 'B3' && !input.value) {
-                 // Do nothing on load if B3 is empty, preserve placeholder
-             } else if (!input.readOnly || input.value) { // Format readonly if they have a value
+                 // Skip initial formatting for B3 if empty
+             } else if (!input.readOnly || input.value) {
                 formatCurrency(input, true);
              }
         } else { console.warn(`Currency input element not found: ${id}`); }
     });
 
-    // Percentage Inputs
     percentageInputs.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
             input.setAttribute('type', 'number');
             input.setAttribute('step', '0.01');
             input.addEventListener('blur', function(e) { formatPercentage(e.target, true); });
-            if (!input.readOnly || input.value) formatPercentage(input, true); // Format existing values on load
+            if (!input.readOnly || input.value) formatPercentage(input, true);
          } else { console.warn(`Percentage input element not found: ${id}`); }
      });
 
-     // Rate Output Fields (Readonly)
      rateOutputFields.forEach(id => {
          const input = document.getElementById(id);
          if (input) {
-             input.setAttribute('type', 'text'); // Use text for N/A or formatted numbers
+             input.setAttribute('type', 'text');
              input.setAttribute('readonly', true);
          } else { console.warn(`Rate output element not found: ${id}`); }
      });
 
-    // Text Inputs
-     textInputs.forEach(id => {
+    textInputs.forEach(id => {
          const input = document.getElementById(id);
          if (input) { input.setAttribute('type', 'text'); }
          else { console.warn(`Text input element not found: ${id}`); }
      });
 
-      // Integer Inputs
      integerInputs.forEach(id => {
           const input = document.getElementById(id);
           if (input) {
               input.setAttribute('type', 'number');
               input.setAttribute('step', '1');
-              if (id === 'B9' || id === 'A4' || id === 'A4_2') { // Calculated integers
+              if (id === 'B9' || id === 'A4' || id === 'A4_2') {
                   input.setAttribute('readonly', true);
               }
           } else { console.warn(`Integer input element not found: ${id}`); }
       });
 
-    // Mark Expense Fields for Formatting Logic
     expenseFields.forEach(id => {
         const input = document.getElementById(id);
         if (input) {
@@ -666,16 +646,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const b3Input = document.getElementById('B3');
 
     if (b2Input) {
-        b2Input.addEventListener('input', () => {
-            lastEditedDownPaymentField = 'B2';
-            debouncedCalculateAll();
-        });
+        b2Input.addEventListener('input', () => { lastEditedDownPaymentField = 'B2'; debouncedCalculateAll(); });
     }
     if (b3Input) {
-        b3Input.addEventListener('input', () => {
-            lastEditedDownPaymentField = 'B3';
-            debouncedCalculateAll();
-        });
+        b3Input.addEventListener('input', () => { lastEditedDownPaymentField = 'B3'; debouncedCalculateAll(); });
     }
 
     const allOtherInputs = document.querySelectorAll(
@@ -698,44 +672,34 @@ document.addEventListener('DOMContentLoaded', () => {
             const selectedDateValue = dateInput.value;
             if (selectedDateValue) {
                  const selectedDate = new Date(selectedDateValue + 'T00:00:00');
-                 if (!isNaN(selectedDate.getTime())) {
-                      calculateDates(selectedDate); // This now calls calculateDailyTax
-                 } else {
-                      clearDateFields();
-                 }
-            } else {
-                clearDateFields();
-            }
+                 if (!isNaN(selectedDate.getTime())) { calculateDates(selectedDate); }
+                 else { clearDateFields(); }
+            } else { clearDateFields(); }
+            // Always recalculate all after date change as it affects taxes/proration
+            calculateAll();
         };
-
         const clearDateFields = () => {
              document.getElementById('A4').value = "";
              document.getElementById('A4_2').value = "";
-             calculateDailyTax(); // Recalculate daily tax (will likely be 0)
+             calculateDailyTax(); // Recalculate daily tax (will use default 365 days)
         };
-
         dateInput.addEventListener('change', updateDates);
-        if(dateInput.value) { // Initial check on load
-            updateDates();
-        } else {
-            calculateDailyTax(); // Ensure daily tax is calculated even if no date initially
-        }
+        if(dateInput.value) { updateDates(); }
+        else { calculateDailyTax(); } // Initial daily tax calc if no date
     } else {
-         calculateDailyTax(); // Calculate daily tax on load even if date input non-existent
+         calculateDailyTax(); // Initial daily tax calc if no date input
     }
 
-    // Listener for Annual Tax to update Daily Tax
+    // Listener for Annual Tax (A5)
     const annualTaxInput = document.getElementById('A5');
     if (annualTaxInput) {
-        // Use debounce here too if many calcs depend on daily tax later
         annualTaxInput.addEventListener('input', debounce(() => {
-            calculateDailyTax();
-            calculateAll(); // Recalculate everything if annual tax changes
+            calculateDailyTax(); // Update daily tax first
+            calculateAll(); // Recalculate everything
         }, 300));
     }
 
     // --- Initial Calculation ---
-    // calculateDailyTax is called within the date logic now or separately if no date input
     calculateAll(); // Run once on page load
 
 }); // End DOMContentLoaded
@@ -744,8 +708,8 @@ document.addEventListener('DOMContentLoaded', () => {
 function calculateDates(selectedDate) {
     let totalDaysInYear = 365; // Default
     if (!selectedDate || !(selectedDate instanceof Date) || isNaN(selectedDate.getTime())) {
-        document.getElementById('A4').value = ""; // Days Remain
-        document.getElementById('A4_2').value = ""; // Days Passed
+        document.getElementById('A4').value = "";
+        document.getElementById('A4_2').value = "";
     } else {
         const currentYear = selectedDate.getFullYear();
         const startOfYear = new Date(currentYear, 0, 1);
@@ -759,7 +723,7 @@ function calculateDates(selectedDate) {
         document.getElementById('A4').value = daysRemaining >= 0 ? daysRemaining : 0;
         document.getElementById('A4_2').value = differenceFromStartOfYearDays;
     }
-    calculateDailyTax(totalDaysInYear); // Pass total days for accuracy
+    calculateDailyTax(totalDaysInYear);
 }
 
 // Separate function to calculate Daily Tax Amount (A5_2)
@@ -768,7 +732,6 @@ function calculateDailyTax(daysInYear = null) {
     let dailyTax = 0;
 
     if (daysInYear === null) {
-        // If daysInYear not provided, try to get it from the date input
         const dateInput = document.getElementById('B4');
         const selectedDateValue = dateInput ? dateInput.value : null;
         if (selectedDateValue) {
@@ -780,18 +743,10 @@ function calculateDailyTax(daysInYear = null) {
             }
         }
     }
+    if (daysInYear === null || daysInYear <= 0) { daysInYear = 365; }
 
-    // Default to 365 if year/date couldn't be determined
-    if (daysInYear === null || daysInYear <= 0) {
-        daysInYear = 365;
-    }
-
-    if (annualTax !== 0 && daysInYear > 0) {
-        dailyTax = annualTax / daysInYear;
-    }
+    if (annualTax !== 0 && daysInYear > 0) { dailyTax = annualTax / daysInYear; }
 
     const dailyTaxInput = document.getElementById('A5_2');
-    if (dailyTaxInput) {
-        dailyTaxInput.value = formatCalculatedValue(dailyTax);
-    }
+    if (dailyTaxInput) { dailyTaxInput.value = formatCalculatedValue(dailyTax); }
 }
