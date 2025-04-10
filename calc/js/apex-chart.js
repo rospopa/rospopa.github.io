@@ -528,14 +528,24 @@ window.updateApexRangeChartFromTableData = function() {
     // Define series using regular area charts instead of rangeArea
     const series = [
         {
-            name: 'Revenue Max',
-            type: 'area',
-            data: revenueMaxData
-        },
-        {
             name: 'Revenue Min',
             type: 'area',
             data: revenueMinData
+        },
+        {
+            name: 'Expense Min',
+            type: 'area',
+            data: expenseMinData
+        },
+        {
+            name: 'Cash Flow Min',
+            type: 'area',
+            data: cashFlowMinData
+        },
+        {
+            name: 'Revenue Max',
+            type: 'area',
+            data: revenueMaxData
         },
         {
             name: 'Expense Max',
@@ -543,9 +553,9 @@ window.updateApexRangeChartFromTableData = function() {
             data: expenseMaxData
         },
         {
-            name: 'Expense Min',
+            name: 'Cash Flow Max',
             type: 'area',
-            data: expenseMinData
+            data: cashFlowMaxData
         },
         {
             name: 'Revenue Forecast',
@@ -556,16 +566,6 @@ window.updateApexRangeChartFromTableData = function() {
             name: 'Expense Forecast',
             type: 'line',
             data: expenseAvgData
-        },
-        {
-            name: 'Cash Flow Max',
-            type: 'area',
-            data: cashFlowMaxData
-        },
-        {
-            name: 'Cash Flow Min',
-            type: 'area',
-            data: cashFlowMinData
         },
         {
             name: 'Cash Flow Forecast',
@@ -591,28 +591,28 @@ window.updateApexRangeChartFromTableData = function() {
             background: '#fff'
         },
         colors: [
-            'rgba(29, 105, 150, 0.8)',   // Revenue Max - dark blue
             'rgba(29, 105, 150, 0.2)',   // Revenue Min - light blue
-            'rgba(220, 53, 69, 0.8)',    // Expense Max - dark red
             'rgba(220, 53, 69, 0.2)',    // Expense Min - light red
+            'rgba(40, 167, 69, 0.2)',    // Cash Flow Min - light green
+            'rgba(29, 105, 150, 0.8)',   // Revenue Max - dark blue
+            'rgba(220, 53, 69, 0.8)',    // Expense Max - dark red
+            'rgba(40, 167, 69, 0.8)',    // Cash Flow Max - dark green
             '#1a73e8',                   // Revenue Forecast - blue line
             '#b32851',                   // Expense Forecast - red line
-            'rgba(40, 167, 69, 0.8)',    // Cash Flow Max - dark green
-            'rgba(40, 167, 69, 0.2)',    // Cash Flow Min - light green
             '#28a745'                    // Cash Flow Forecast - green line
         ],
         fill: {
             type: ['solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid', 'solid'],
-            opacity: [0.6, 0.1, 0.6, 0.1, 1, 1, 0.6, 0.1, 1]
+            opacity: [0.1, 0.1, 0.1, 0.6, 0.6, 0.6, 1, 1, 1]
         },
         stroke: {
             curve: 'straight',
-            width: [1, 1, 1, 1, 3, 3, 1, 1, 3],
+            width: [1, 1, 1, 1, 1, 1, 3, 3, 3],
             dashArray: [0, 0, 0, 0, 0, 0, 0, 0, 0]
         },
         markers: {
             size: [0, 0, 0, 0, 0, 0, 0, 0, 0], // Hide all markers by default - too many points for markers
-            strokeWidth: [1, 1, 1, 1, 2, 2, 1, 1, 2],
+            strokeWidth: [1, 1, 1, 1, 1, 1, 2, 2, 2],
             hover: { 
                 size: 6
             }
