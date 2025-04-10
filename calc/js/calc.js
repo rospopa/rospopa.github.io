@@ -501,6 +501,62 @@ function calculateAll() {
         document.getElementById('IRR-max').value = formatRateOutput(0);
         document.getElementById('IRR-avg').value = formatRateOutput(0);
 
+        // --- 9. Trigger Graph and Table Update ---
+        // Get starting calendar year from closing date (B4) or default to current year
+        const closingDateValue = document.getElementById('B4')?.value;
+        let startCalendarYear = new Date().getFullYear(); // Default to current year
+        if (closingDateValue) {
+            // Try parsing as YYYY-MM-DD first
+            const dateParts = closingDateValue.split('-');
+            let closingDate;
+            if (dateParts.length === 3) {
+                // Construct date carefully to avoid timezone interpretation issues if possible
+                 closingDate = new Date(Date.UTC(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2])));
+            } else {
+                // Fallback to direct parsing if not YYYY-MM-DD
+                closingDate = new Date(closingDateValue + 'T00:00:00');
+            }
+
+            if (closingDate && !isNaN(closingDate.getTime())) {
+                startCalendarYear = closingDate.getUTCFullYear(); // Use UTC year to be consistent
+            }
+        }
+
+        let currentPeriodData = []; // Initialize with empty array
+        if (typeof window.drawAmortizationChart === 'function') {
+            currentPeriodData = window.drawAmortizationChart(startCalendarYear); // Get data back
+        } else {
+            console.warn("drawAmortizationChart function not found when trying to update visuals.");
+        }
+
+        // Call ApexCharts update function (from apex-chart.js) - requires periodData
+        // We pass fullPeriodData (made global by drawAmortizationChart), start year, and payments/year
+        if (typeof window.updateApexAmortizationChart === 'function') {
+            // Pass the data received from drawAmortizationChart
+            window.updateApexAmortizationChart(currentPeriodData, startCalendarYear, globalPaymentsPerYear);
+        } else {
+            console.warn("updateApexAmortizationChart function not found.");
+        }
+
+        // First call the Google Table function for the summary, which will then update the chart
+        if (typeof window.drawCumulativeDataTable === 'function') {
+             // Get closing date from B13 field or use current date as fallback
+             const closingDateStr = document.getElementById('B13')?.value;
+             const closingDate = closingDateStr ? new Date(closingDateStr) : new Date();
+             
+             // Calculate loan term in months
+             const loanTermMonths = B7_LoanTermYears * 12;
+             
+             window.drawCumulativeDataTable(
+                 closingDate,    // Start date (closing date)
+                 loanTermMonths, // Number of months to display
+                 expenseResults, // Contains monthly expense data
+                 revenueResults  // Contains monthly revenue data
+             );
+          } else {
+             console.warn("drawCumulativeDataTable function not found.");
+          }
+
     } catch (error) {
         console.error('Calculation error:', error);
     }
@@ -697,10 +753,75 @@ document.addEventListener('DOMContentLoaded', () => {
             calculateDailyTax(); // Update daily tax first
             calculateAll(); // Recalculate everything
         }, 300));
+    } else {
+         // If A5 doesn't exist, still call calculateAll on dependency changes (like B4)
+         // This might be redundant depending on other listeners, but ensures updates
+         // if B4 changes and A5 isn't present.
+         // debounce(calculateAll, 300)(); // Consider if needed
     }
 
-    // --- Initial Calculation ---
-    calculateAll(); // Run once on page load
+    // Add listener for loan term year changes (B7) as it directly impacts the range chart x-axis
+     const loanTermInput = document.getElementById('B7');
+     if (loanTermInput) {
+         loanTermInput.addEventListener('input', debouncedCalculateAll);
+     }
+
+    // --- Clear Charts on Invalid Data --- (Add range chart and table clearing)
+    const clearCharts = () => {
+        if (typeof window.clearApexChart === 'function') {
+            window.clearApexChart();
+        }
+        if (typeof window.clearApexRangeChart === 'function') {
+             window.clearApexRangeChart();
+         }
+          // Clear the summary Google Table
+          if (typeof window.clearCumulativeTable === 'function') {
+               window.clearCumulativeTable();
+          }
+          // Potentially clear Google Chart AMORTIZATION tables if they weren't handled by drawAmortizationChart returning empty
+          // document.getElementById('annual_table_body').innerHTML = '<tr><td colspan="7" class="text-center p-3">Enter valid loan details.</td></tr>';
+    };
+
+    // Trigger clearCharts when calculateAll detects invalid base data
+    // Modify the beginning of calculateAll to include this
+    const originalCalculateAll = calculateAll; // Store original function
+    window.calculateAll = function() { // Override global calculateAll
+        const B1_PurchasePrice = parseCurrency(document.getElementById('B1')?.value);
+        const B6_InterestRate = (parseFloat(document.getElementById('B6')?.value.replace(/,/g, '')) / 100) || 0;
+        const B7_LoanTermYears = parseFloat(document.getElementById('B7')?.value.replace(/,/g, '')) || 0;
+        // Check for essential data validity before proceeding
+         if (B1_PurchasePrice <= 0 || B7_LoanTermYears <= 0) {
+             console.log("Essential data (Price or Term) invalid, clearing charts.");
+             clearCharts();
+             // Optionally reset some calculated fields display if needed
+             document.getElementById('B5').value = formatCalculatedValue(0);
+             document.getElementById('B9').value = '0';
+             // ... etc.
+             // Reset summary fields
+             const summaryFields = ['GRM-min', 'GRM-max', 'GRM-avg', 'CR-min', 'CR-max', 'CR-avg', 'CCR-min', 'CCR-max', 'CCR-avg', 'DSCR-min', 'DSCR-max', 'DSCR-avg', 'ROI-min', 'ROI-max', 'ROI-avg', 'IRR-min', 'IRR-max', 'IRR-avg', 'NOI-min', 'NOI-max', 'NOI-avg'];
+             summaryFields.forEach(id => { const el = document.getElementById(id); if(el) el.value = '0'; });
+             return; // Stop further calculation
+         }
+
+        // If data seems valid enough to start, call the original calculation logic
+        originalCalculateAll.apply(this, arguments);
+    };
+
+
+    // --- Initial Calculation --- (REMOVED - Now triggered by Google Charts callback in graph.js)
+    /*
+     setTimeout(() => {
+         if (typeof google !== 'undefined' && google.charts && google.charts.loaded) {
+             console.log("Triggering initial calculation after chart load confirmation.");
+             calculateAll();
+         } else {
+             console.warn("Google Charts not ready yet, initial calculation might be delayed or fail.");
+             // Fallback or retry logic might be needed here
+              // For now, attempt calculation anyway, graph.js has internal checks
+              calculateAll();
+         }
+     }, 100); // Small delay to ensure DOM elements and potentially graph.js setup are ready
+    */
 
 }); // End DOMContentLoaded
 
