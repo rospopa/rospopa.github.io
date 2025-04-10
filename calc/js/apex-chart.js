@@ -345,38 +345,31 @@ window.updateApexCumulativeRangeChart = function(ARmin, ARmax, AEmin, AEmax, loa
          legend: { position: 'top', horizontalAlign: 'center' },
          title: { text: 'Cumulative Revenue vs. Expense', align: 'center' }, // Simplified title
         tooltip: {
-            enabled: true, 
-            shared: true, // Keep shared for simplicity, might show both line/range info
-            intersect: false, 
-            y: {
-                formatter: function(val, opts) { 
-                    if (opts && typeof opts.seriesIndex !== 'undefined' && opts.dataPointIndex !== 'undefined' && opts.w && opts.w.config && opts.w.config.series) {
-                        const seriesIndex = opts.seriesIndex;
-                        const dataPointIndex = opts.dataPointIndex;
-                        const w = opts.w;
-                        const currentSeries = w.config.series[seriesIndex];
-                        const seriesDataPoint = currentSeries.data[dataPointIndex];
-                        
-                        // Check if the data point has a y value (for line) or an array (for range)
-                        if (seriesDataPoint && typeof seriesDataPoint.y !== 'undefined') {
-                            if (Array.isArray(seriesDataPoint.y) && seriesDataPoint.y.length === 2) {
-                                // Range Area
-                                return `${formatCurrencyForApex(seriesDataPoint.y[0])} - ${formatCurrencyForApex(seriesDataPoint.y[1])}`;
-                            } else if (typeof seriesDataPoint.y === 'number') {
-                                // Line
-                                return formatCurrencyForApex(seriesDataPoint.y);
-                            }
-                        }
-                        // Fallback if data structure is unexpected
-                         return formatCurrencyForApex(val); 
-                    } else {
-                        return formatCurrencyForApex(val); 
-                    }
-                },
-                title: { formatter: (seriesName) => seriesName, },
+            enabled: true,
+            shared: true,
+            intersect: false,
+            theme: 'light',
+            style: {
+                fontSize: '12px'
             },
-            x: { formatter: (val) => `Year: ${val}` },
-            marker: { show: true } 
+            x: {
+                show: true,
+                format: 'MMM yyyy',
+                formatter: undefined // Use default formatter for dates
+            },
+            y: {
+                formatter: function(value) {
+                    return formatCurrencyForApex(value);
+                }
+            },
+            marker: { show: true },
+            // Force the title to show correctly
+            fixed: {
+                enabled: false
+            },
+            onDatasetHover: {
+                highlightDataSeries: true
+            }
         },
         grid: {
              borderColor: '#f1f1f1',
@@ -693,15 +686,24 @@ window.updateApexRangeChartFromTableData = function() {
             style: {
                 fontSize: '12px'
             },
+            x: {
+                show: true,
+                format: 'MMM yyyy',
+                formatter: undefined // Use default formatter for dates
+            },
             y: {
-                formatter: function(val) {
-                    return formatCurrencyForApex(val);
+                formatter: function(value) {
+                    return formatCurrencyForApex(value);
                 }
             },
-            x: {
-                formatter: (val) => val
+            marker: { show: true },
+            // Force the title to show correctly
+            fixed: {
+                enabled: false
             },
-            marker: { show: true }
+            onDatasetHover: {
+                highlightDataSeries: true
+            }
         },
         grid: {
             borderColor: '#e0e0e0',
