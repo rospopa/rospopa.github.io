@@ -2,6 +2,47 @@
 let apexChartInstance = null;
 // Global variable for the new range chart instance
 let apexRangeChartInstance = null;
+// Track if legend selection buttons have been added to each chart
+const legendButtonsAdded = {
+    amortizationChart: false,
+    cumulativeRangeChart: false,
+    rangeChartFromTable: false
+};
+
+// Helper function to create a select all button for chart legends
+function createSelectAllButton(chartDiv, chartInstance, chartId) {
+    // Check if button already exists to avoid duplicates
+    if (legendButtonsAdded[chartId]) return;
+    legendButtonsAdded[chartId] = true;
+    
+    // Create button container
+    const buttonContainer = document.createElement('div');
+    buttonContainer.className = 'legend-select-container';
+    buttonContainer.style.cssText = 'text-align: center; margin-top: 5px; margin-bottom: 10px;';
+    
+    // Create the select all button
+    const selectAllButton = document.createElement('button');
+    selectAllButton.className = 'legend-select-all-btn btn btn-sm btn-primary';
+    selectAllButton.textContent = 'Reset Legends';
+    selectAllButton.style.cssText = 'padding: 3px 10px; font-size: 12px; margin-right: 5px;';
+    
+    // Add button click handler for "Select All"
+    selectAllButton.addEventListener('click', function() {
+        if (!chartInstance) return;
+        
+        // Get all series names from the chart
+        const seriesNames = chartInstance.w.globals.seriesNames;
+        
+        // Show all series
+        seriesNames.forEach(seriesName => {
+            chartInstance.showSeries(seriesName);
+        });
+    });
+    
+    // Add button to container and insert before chart
+    buttonContainer.appendChild(selectAllButton);
+    chartDiv.parentNode.insertBefore(buttonContainer, chartDiv);
+}
 
 // --- Define currency formatter locally ---
 const formatCurrencyForApex = function(value) {
@@ -174,6 +215,10 @@ window.updateApexAmortizationChart = function(periodData, startYear, paymentsPer
             apexChartInstance = new ApexCharts(chartDiv, options);
             apexChartInstance.render();
         }
+        
+        // Add select all button for legends after rendering
+        createSelectAllButton(chartDiv, apexChartInstance, 'amortizationChart');
+        
     } catch (err) {
         console.error("ApexCharts render/update error:", err);
         chartDiv.innerHTML = '<p style="text-align:center; padding: 20px; color: red;">Error rendering chart.</p>';
@@ -390,6 +435,10 @@ window.updateApexCumulativeRangeChart = function(ARmin, ARmax, AEmin, AEmax, loa
             apexRangeChartInstance = new ApexCharts(chartDiv, options);
             apexRangeChartInstance.render();
         }
+        
+        // Add select all button for legends after rendering
+        createSelectAllButton(chartDiv, apexRangeChartInstance, 'cumulativeRangeChart');
+        
     } catch (err) {
         console.error("ApexCharts range chart render/update error:", err);
         chartDiv.innerHTML = '<p style="text-align:center; padding: 20px; color: red;">Error rendering range chart.</p>';
@@ -738,6 +787,10 @@ window.updateApexRangeChartFromTableData = function() {
             apexRangeChartInstance = new ApexCharts(chartDiv, options);
             apexRangeChartInstance.render();
         }
+        
+        // Add select all button for legends after rendering
+        createSelectAllButton(chartDiv, apexRangeChartInstance, 'rangeChartFromTable');
+        
     } catch (err) {
         console.error("ApexCharts chart render/update error:", err);
         chartDiv.innerHTML = '<p style="text-align:center; padding: 20px; color: red;">Error rendering chart: ' + err.message + '</p>';
