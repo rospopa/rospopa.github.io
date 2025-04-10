@@ -1328,6 +1328,136 @@
                         </table>
                     </div>
                 </div><!-- End: SUMMARY -->
+                
+                <!-- Start: CHART -->
+                <div class="chart-container" style="margin-top:20px;margin-bottom:20px;border:1px dashed #17a2b8;padding:10px;">
+                    <h4 class="text-center subsection-heading" style="margin-bottom:15px;">Loan Amortization (ApexCharts)</h4>
+                    <div id="apex_amortization_chart"></div> <!-- Div for ApexCharts -->
+                    </div>
+                <!-- End: CHART -->
+                <!-- Start: AMORTIZATION TABS -->
+                <div class="amortization-tabs-container" style="margin-top:20px; margin-bottom:20px; border:1px dashed #ced4da; padding:10px;">
+                    <h5 class="text-center subsection-heading" style="margin-top: 5px; margin-bottom:15px;">Amortization Details</h5>
+                    <!-- Nav tabs -->
+                    <ul class="nav nav-tabs nav-fill mb-3" id="amortizationTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="annual-tab" data-bs-toggle="tab" data-bs-target="#annual-pane" type="button" role="tab" aria-controls="annual-pane" aria-selected="true">ANNUAL</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="period-tab" data-bs-toggle="tab" data-bs-target="#period-pane" type="button" role="tab" aria-controls="period-pane" aria-selected="false">PERIOD</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="payment-tab" data-bs-toggle="tab" data-bs-target="#payment-pane" type="button" role="tab" aria-controls="payment-pane" aria-selected="false">PAYMENT</button>
+                        </li>
+                    </ul>
+
+                    <!-- Tab panes -->
+                    <div class="tab-content" id="amortizationTabContent">
+                        <!-- Annual Tab Pane -->
+                        <div class="tab-pane fade show active" id="annual-pane" role="tabpanel" aria-labelledby="annual-tab" tabindex="0">
+                            <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                                <table class="table table-striped table-hover table-bordered table-sm caption-top">
+                                     <caption style="padding-top:0; padding-bottom: 5px;">Annual summary of payments</caption>
+                                     <thead class="table-light sticky-top">
+                                        <tr>
+                                            <th scope="col">Year</th>
+                                            <th scope="col">Interest Paid</th>
+                                            <th scope="col">Principal Paid</th>
+                                            <th scope="col">Extra Paid</th> <!-- Added -->
+                                            <th scope="col">Total Paid</th> <!-- Clarified (includes extra) -->
+                                            <th scope="col">LTV (%)</th>
+                                            <th scope="col">Ending Balance</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="annual_table_body">
+                                        <!-- Updated colspan -->
+                                        <tr><td colspan="7" class="text-center p-3">Enter valid loan details to see the annual summary.</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- Period Tab Pane -->
+                        <div class="tab-pane fade" id="period-pane" role="tabpanel" aria-labelledby="period-tab" tabindex="0">
+                            <!-- Year Slider -->
+                            <div class="year-slider-container mb-3 p-2 border rounded bg-light d-flex align-items-center">
+                                <label for="period-year-slider" class="form-label small me-3 mb-0">Selected Year:</label>
+                                <div id="period-year-display" class="me-3 fw-bold" style="min-width: 3em; text-align: center;">1</div>
+                                <div class="flex-grow-1">
+                                    <input type="range" class="form-range" id="period-year-slider" min="1" max="1" value="1" step="1">
+                                </div>
+                            </div>
+                            <div class="table-responsive"> <!-- Removed max-height and overflow -->
+                                 <table class="table table-striped table-hover table-bordered table-sm caption-top">
+                                     <caption style="padding-top:0; padding-bottom: 5px;">Detailed payment schedule by period</caption>
+                                     <thead class="table-light sticky-top">
+                                         <tr>
+                                             <th scope="col">Month</th>
+                                             <th scope="col">Scheduled Payment</th>
+                                             <!-- Removed Extra Payment Header -->
+                                             <th scope="col">Interest</th>
+                                             <th scope="col">Principal</th>
+                                             <th scope="col">Total Payment</th> <!-- Will be editable -->
+                                             <th scope="col">LTV (%)</th>
+                                             <th scope="col">Balance</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody id="period_table_body">
+                                          <!-- Updated colspan -->
+                                          <tr><td colspan="7" class="text-center p-3">Enter valid loan details to see the periodic schedule.</td></tr>
+                                     </tbody>
+                                 </table>
+                             </div>
+                        </div>
+
+                        <!-- Payment Tab Pane -->
+                        <div class="tab-pane fade" id="payment-pane" role="tabpanel" aria-labelledby="payment-tab" tabindex="0">
+                             <!-- Year Slider -->
+                             <div class="year-slider-container mb-3 p-2 border rounded bg-light d-flex align-items-center">
+                                 <label for="payment-year-slider" class="form-label small me-3 mb-0">Selected Year:</label>
+                                 <div id="payment-year-display" class="me-3 fw-bold" style="min-width: 3em; text-align: center;">1</div>
+                                 <div class="flex-grow-1">
+                                     <input type="range" class="form-range" id="payment-year-slider" min="1" max="1" value="1" step="1">
+                                  </div>
+                              </div>
+                              <div class="table-responsive"> <!-- Removed max-height and overflow -->
+                                   <table class="table table-striped table-hover table-bordered table-sm caption-top">
+                                     <caption style="padding-top:0; padding-bottom: 5px;">Payment breakdown by period</caption>
+                                     <thead class="table-light sticky-top">
+                                          <tr>
+                                              <th scope="col">Month</th>
+                                              <th scope="col">Scheduled Payment</th>
+                                              <!-- Removed Extra Payment Header -->
+                                              <th scope="col">Total Payment</th>
+                                              <th scope="col">LTV (%)</th>
+                                              <th scope="col">Balance</th>
+                                          </tr>
+                                      </thead>
+                                      <tbody id="payment_table_body">
+                                           <!-- Updated colspan -->
+                                           <tr><td colspan="5" class="text-center p-3">Enter valid loan details to see the payment schedule.</td></tr>
+                                      </tbody>
+                                  </table>
+                              </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- End: AMORTIZATION TABS -->
+
+                <!-- Start: Cumulative Revenue/Expense Chart -->
+                <div class="chart-container" style="margin-top:20px; margin-bottom:20px; border:1px dashed #28a745; padding:10px;">
+                     <h4 class="text-center subsection-heading" style="margin-bottom:15px;">Cumulative Revenue vs. Expense Range</h4>
+                     <div id="apex_cumulative_range_chart"></div> <!-- Div for new ApexChart -->
+                </div>
+                <!-- End: Cumulative Revenue/Expense Chart -->
+
+                <!-- Start: Cumulative Range Table -->
+                <div class="table-container" style="margin-top:20px; margin-bottom:20px; border:1px dashed #ffc107; padding:10px;">
+                     <h4 class="text-center subsection-heading" style="margin-bottom:15px;">Cumulative Expenses, Revenue & Cash Flow</h4>
+                     <div id="google_cumulative_range_table" style="width: 100%;"></div> <!-- Div for Google Table -->
+                </div>
+                <!-- End: Cumulative Range Table -->
+                
             </div><!-- Start: DISCLAIMER -->
             <section class="ATTENTION-SECTION">
                 <h5 class="font-monospace lh-1 text-center">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br>(It's not a substitute for your calculations.)</h5>
@@ -1365,12 +1495,16 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/calc/js/bs-init.js"></script>
-<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1HsnCUe7p2CE8kgBjbnG-A8v8aLUFM1E&amp;libraries=places&amp;callback=initAutocomplete&amp;loading=async"></script>
 <script src="/calc/js/auto_address_full.js"></script>
-<script src="/calc/js/add_rem.js"></script>
-<script src="/calc/js/calc.js"></script>
+<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyB1HsnCUe7p2CE8kgBjbnG-A8v8aLUFM1E&amp;libraries=places&amp;callback=initAutocomplete&amp;loading=async"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/pdfmake.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.2.7/vfs_fonts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script> <!-- ApexCharts Library -->
+<script src="https://www.gstatic.com/charts/loader.js"></script> <!-- Google Charts Loader -->
+<script src="/calc/js/add_rem.js"></script>
+<script src="/calc/js/graph.js"></script>
+<script src="/calc/js/apex-chart.js"></script> <!-- New ApexCharts Script -->
+<script src="/calc/js/calc.js"></script>
 <script src="/calc/js/pdf.js"></script>
 <script src="/calc/js/reset-btn.js"></script>
 <script src="/calc/js/reset.js"></script>
