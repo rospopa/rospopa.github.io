@@ -8,40 +8,189 @@ const legendButtonsAdded = {
     cumulativeRangeChart: false,
     rangeChartFromTable: false
 };
+// Store original cumulative data to apply percentage adjustments
+let originalCumulativeData = null;
+// Current adjustment percentage
+let currentAdjustmentPercentage = 0;
 
-// Helper function to create a select all button for chart legends
-function createSelectAllButton(chartDiv, chartInstance, chartId) {
-    // Check if button already exists to avoid duplicates
-    if (legendButtonsAdded[chartId]) return;
-    legendButtonsAdded[chartId] = true;
-    
-    // Create button container
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'legend-select-container';
-    buttonContainer.style.cssText = 'text-align: center; margin-top: 5px; margin-bottom: 10px;';
-    
-    // Create the select all button
-    const selectAllButton = document.createElement('button');
-    selectAllButton.className = 'legend-select-all-btn btn btn-sm btn-primary';
-    selectAllButton.textContent = 'Reset Legends';
-    selectAllButton.style.cssText = 'padding: 3px 10px; font-size: 12px; margin-right: 5px;';
-    
-    // Add button click handler for "Select All"
-    selectAllButton.addEventListener('click', function() {
-        if (!chartInstance) return;
+// Function to handle the manual reset operations - doesn't need ApexCharts access
+function handleChartReset(chart, chartDiv) {
+    try {
+        console.log('Manual reset handler called for chart', chartDiv ? chartDiv.id : 'unknown');
         
-        // Get all series names from the chart
-        const seriesNames = chartInstance.w.globals.seriesNames;
+        if (!chart) {
+            console.warn('Chart instance not available for reset');
+            return;
+        }
         
-        // Show all series
-        seriesNames.forEach(seriesName => {
-            chartInstance.showSeries(seriesName);
-        });
+        // Reset all legends to show all series if the chart has series
+        try {
+            if (chart.w && chart.w.globals && chart.w.globals.seriesNames) {
+                const seriesNames = chart.w.globals.seriesNames;
+                if (seriesNames && seriesNames.length) {
+                    console.log('Showing all series:', seriesNames.length);
+                    seriesNames.forEach(seriesName => {
+                        chart.showSeries(seriesName);
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Error resetting series visibility:', err);
+        }
+        
+        // FORCE-RESET THE SLIDER FIRST
+        currentAdjustmentPercentage = 0;
+        console.log('Reset global adjustment percentage to 0');
+        
+        // Use direct DOM operations for most reliable reset
+        try {
+            // First try to find slider in the chart container
+            const slider = document.querySelector('.cashflow-adjustment-slider');
+            const percentageDisplay = document.querySelector('.cashflow-adjustment-display');
+            
+            console.log('Slider found:', !!slider, 'Display found:', !!percentageDisplay);
+            
+            if (slider) {
+                console.log('Setting slider value to 0 directly');
+                slider.value = 0;
+                
+                // Force fire input event for listeners
+                try {
+                    const inputEvent = new Event('input', { bubbles: true });
+                    slider.dispatchEvent(inputEvent);
+                    
+                    // Also try change event
+                    const changeEvent = new Event('change', { bubbles: true });
+                    slider.dispatchEvent(changeEvent);
+                    
+                    console.log('Fired input and change events on slider');
+                } catch (e) {
+                    console.warn('Error dispatching slider events:', e);
+                }
+            }
+            
+            if (percentageDisplay) {
+                console.log('Updating percentage display text directly');
+                percentageDisplay.textContent = '0%';
+                percentageDisplay.style.color = '#333';
+            }
+        } catch (err) {
+            console.error('Error in direct slider manipulation:', err);
+        }
+        
+        // Use our adjustment function as a backup approach
+        try {
+            if (originalCumulativeData && typeof applyAdjustmentToData === 'function') {
+                console.log('Applying direct 0% adjustment to data');
+                applyAdjustmentToData(0);
+                
+                // Reset chart title
+                if (chart === apexRangeChartInstance) {
+                    try {
+                        console.log('Updating chart title to default');
+                        chart.updateOptions({
+                            title: {
+                                text: 'Monthly Cumulative Revenue, Expense & Cash Flow',
+                                align: 'center',
+                                style: {
+                                    fontSize: '16px',
+                                    fontWeight: 'bold'
+                                }
+                            }
+                        }, false, false);
+                    } catch (e) {
+                        console.warn('Error updating chart title:', e);
+                    }
+                }
+            } else {
+                console.warn('Cannot apply adjustment - missing data or function');
+            }
+        } catch (err) {
+            console.error('Error applying data adjustment:', err);
+        }
+        
+        console.log('Chart reset completed');
+    } catch (error) {
+        console.error('Critical error in manual reset handler:', error);
+    }
+}
+
+// Add reset button event listener manually
+function addManualResetButtonListener(chartDiv, chartInstance, chartId) {
+    // Skip if already added
+    if (legendButtonsAdded[chartId]) {
+        console.log(`Reset button listener already added for ${chartId}`);
+        return;
+    }
+    
+    console.log(`Setting up reset button listener for ${chartId}`, chartDiv.id);
+    
+    // Attach a click handler to the chart container itself to capture all clicks inside it
+    chartDiv.addEventListener('click', (event) => {
+        // Check if the clicked element is the reset button or contains the reset button
+        const resetButton = event.target.closest('.apexcharts-reset-icon, .apexcharts-toolbar svg[data-event="reset"]');
+        if (resetButton) {
+            console.log(`Reset button clicked in ${chartId} (delegated handler)`);
+            // Wait for the default zoom reset to complete
+            setTimeout(() => {
+                handleChartReset(chartInstance, chartDiv);
+            }, 300);
+        }
     });
     
-    // Add button to container and insert before chart
-    buttonContainer.appendChild(selectAllButton);
-    chartDiv.parentNode.insertBefore(buttonContainer, chartDiv);
+    // Also setup a global document click handler as a fallback
+    if (!window._apexChartResetHandlerAdded) {
+        document.addEventListener('click', (event) => {
+            const clickedElement = event.target;
+            
+            // Check if the clicked element is the reset button
+            if (clickedElement && (
+                clickedElement.classList?.contains('apexcharts-reset-icon') || 
+                clickedElement.closest('.apexcharts-reset-icon') || 
+                clickedElement.closest('.apexcharts-toolbar svg[data-event="reset"]')
+            )) {
+                console.log('Reset button clicked (global handler)');
+                
+                // Find which chart this button belongs to
+                let targetChart = null;
+                let targetDiv = null;
+                
+                // Check if the clicked button is in the amortization chart
+                const amortDiv = document.querySelector('#apex_amortization_chart');
+                if (amortDiv && amortDiv.contains(clickedElement)) {
+                    console.log('Reset button belongs to amortization chart');
+                    targetChart = apexChartInstance;
+                    targetDiv = amortDiv;
+                }
+                
+                // Check if the clicked button is in the range chart
+                const rangeDiv = document.querySelector('#apex_cumulative_range_chart');
+                if (rangeDiv && rangeDiv.contains(clickedElement)) {
+                    console.log('Reset button belongs to range chart');
+                    targetChart = apexRangeChartInstance;
+                    targetDiv = rangeDiv;
+                }
+                
+                // If we found a matching chart, reset it
+                if (targetChart) {
+                    setTimeout(() => {
+                        handleChartReset(targetChart, targetDiv);
+                    }, 300);
+                }
+            }
+        });
+        
+        window._apexChartResetHandlerAdded = true;
+        console.log('Global reset button handler added');
+    }
+    
+    // Mark as added to prevent duplicate listeners
+    legendButtonsAdded[chartId] = true;
+}
+
+// Replace extendResetButtonFunctionality with the new approach
+function extendResetButtonFunctionality(chartDiv, chartInstance, chartId) {
+    addManualResetButtonListener(chartDiv, chartInstance, chartId);
 }
 
 // --- Define currency formatter locally ---
@@ -216,8 +365,8 @@ window.updateApexAmortizationChart = function(periodData, startYear, paymentsPer
             apexChartInstance.render();
         }
         
-        // Add select all button for legends after rendering
-        createSelectAllButton(chartDiv, apexChartInstance, 'amortizationChart');
+        // Add our custom reset button listener
+        addManualResetButtonListener(chartDiv, apexChartInstance, 'amortizationChart');
         
     } catch (err) {
         console.error("ApexCharts render/update error:", err);
@@ -436,8 +585,8 @@ window.updateApexCumulativeRangeChart = function(ARmin, ARmax, AEmin, AEmax, loa
             apexRangeChartInstance.render();
         }
         
-        // Add select all button for legends after rendering
-        createSelectAllButton(chartDiv, apexRangeChartInstance, 'cumulativeRangeChart');
+        // Extend reset button functionality to also reset legends
+        extendResetButtonFunctionality(chartDiv, apexRangeChartInstance, 'cumulativeRangeChart');
         
     } catch (err) {
         console.error("ApexCharts range chart render/update error:", err);
@@ -451,18 +600,524 @@ window.updateApexCumulativeRangeChart = function(ARmin, ARmax, AEmin, AEmax, loa
 
 // Function to clear the cumulative range chart
 window.clearApexRangeChart = function() {
+     console.log('clearApexRangeChart: очистка графика начата');
      const chartDiv = document.querySelector("#apex_cumulative_range_chart");
-     // Note: we don't need to clear cumulativeDataForChart here as that should be handled by clearCumulativeTable
-     if (apexRangeChartInstance) {
-         apexRangeChartInstance.updateOptions({
-             series: [],
-             xaxis: { categories: [] },
-             noData: { text: 'Enter valid revenue/expense data and loan term.' }
-         });
-     } else if(chartDiv) {
-        chartDiv.innerHTML = '<p style="text-align:center; padding: 20px;">Enter valid revenue/expense data and loan term.</p>';
+     
+     try {
+         // Note: we don't need to clear cumulativeDataForChart here as that should be handled by clearCumulativeTable
+         if (apexRangeChartInstance) {
+             console.log('clearApexRangeChart: инстанс графика найден, выполняем очистку');
+             
+             // Clear the chart data safely
+             try {
+                 // First, try a safer method of clearing
+                 apexRangeChartInstance.updateSeries([]);
+                 console.log('clearApexRangeChart: серии очищены');
+             } catch (err) {
+                 console.warn('Ошибка при очистке серий:', err);
+             }
+             
+             // Then update other options
+             try {
+                 apexRangeChartInstance.updateOptions({
+                     noData: { text: 'Enter valid revenue/expense data and loan term.' }
+                 }, false, false);
+                 console.log('clearApexRangeChart: опции обновлены');
+             } catch (err) {
+                 console.warn('Ошибка при обновлении опций:', err);
+             }
+             
+             // Reset the global adjustment percentage
+             currentAdjustmentPercentage = 0;
+             
+             // Remove the slider if it exists
+             const sliderContainer = document.querySelector('.cashflow-adjustment-container');
+             if (sliderContainer) {
+                 sliderContainer.remove();
+                 console.log('clearApexRangeChart: слайдер удален');
+             }
+         } else if (chartDiv) {
+             console.log('clearApexRangeChart: инстанс графика не найден, очищаем DOM');
+             chartDiv.innerHTML = '<p style="text-align:center; padding: 20px;">Enter valid revenue/expense data and loan term.</p>';
+         } else {
+             console.log('clearApexRangeChart: элемент графика не найден');
+         }
+         
+         console.log('clearApexRangeChart: очистка выполнена успешно');
+     } catch (err) {
+         console.error('clearApexRangeChart: ошибка при очистке графика:', err);
+         // Attempt to restore a consistent state
+         if (chartDiv) {
+             chartDiv.innerHTML = '<p style="text-align:center; padding: 20px;">Error clearing chart. Please refresh the page.</p>';
+         }
+         
+         // Try to destroy and rebuild the chart instance in case of severe corruption
+         if (apexRangeChartInstance) {
+             try {
+                 apexRangeChartInstance.destroy();
+                 console.log('clearApexRangeChart: поврежденный инстанс уничтожен');
+             } catch (e) {
+                 console.error('clearApexRangeChart: не удалось уничтожить поврежденный инстанс:', e);
+             }
+             apexRangeChartInstance = null;
+         }
      }
 };
+
+// Function to create and add the adjustment slider to the chart
+function createCashFlowAdjustmentSlider(chartDiv) {
+    // Check if slider already exists to avoid duplicates
+    if (chartDiv.parentNode.querySelector('.cashflow-adjustment-container')) {
+        // Reset slider to center position when recalculating
+        const slider = chartDiv.parentNode.querySelector('.cashflow-adjustment-slider');
+        if (slider) {
+            slider.value = 0;
+            updateAdjustmentDisplay(0);
+        }
+        return;
+    }
+    
+    // Create container for the slider
+    const sliderContainer = document.createElement('div');
+    sliderContainer.className = 'cashflow-adjustment-container';
+    sliderContainer.style.cssText = 'width: 100%; padding: 10px 20px; margin-top: 10px; margin-bottom: 20px; text-align: center;';
+    
+    // Add title/label for the slider
+    const sliderTitle = document.createElement('div');
+    sliderTitle.className = 'cashflow-adjustment-title';
+    sliderTitle.textContent = 'Cash Flow Adjustment';
+    sliderTitle.style.cssText = 'font-weight: bold; margin-bottom: 5px; font-size: 14px;';
+    
+    // Create display for current percentage
+    const percentageDisplay = document.createElement('div');
+    percentageDisplay.className = 'cashflow-adjustment-display';
+    percentageDisplay.textContent = '0%';
+    percentageDisplay.style.cssText = 'font-weight: bold; margin-bottom: 5px; font-size: 16px; color: #333;';
+    
+    // Create the slider
+    const slider = document.createElement('input');
+    slider.type = 'range';
+    slider.min = -10;
+    slider.max = 10;
+    slider.step = 0.01;
+    slider.value = 0;
+    slider.className = 'cashflow-adjustment-slider';
+    slider.style.cssText = 'width: 100%; margin: 10px 0;';
+    
+    // Add labels for min/center/max
+    const labelsContainer = document.createElement('div');
+    labelsContainer.style.cssText = 'display: flex; justify-content: space-between; width: 100%; font-size: 12px; color: #666;';
+    
+    const minLabel = document.createElement('span');
+    minLabel.textContent = '-10%';
+    
+    const centerLabel = document.createElement('span');
+    centerLabel.textContent = '0%';
+    
+    const maxLabel = document.createElement('span');
+    maxLabel.textContent = '+10%';
+    
+    labelsContainer.appendChild(minLabel);
+    labelsContainer.appendChild(centerLabel);
+    labelsContainer.appendChild(maxLabel);
+    
+    // Add event listener to handle slider changes
+    slider.addEventListener('input', function() {
+        const percentage = parseFloat(this.value);
+        updateAdjustmentDisplay(percentage);
+        applyAdjustmentToData(percentage);
+    });
+    
+    // Assemble the slider container
+    sliderContainer.appendChild(sliderTitle);
+    sliderContainer.appendChild(percentageDisplay);
+    sliderContainer.appendChild(slider);
+    sliderContainer.appendChild(labelsContainer);
+    
+    // Insert slider after the chart
+    chartDiv.parentNode.insertBefore(sliderContainer, chartDiv.nextSibling);
+    
+    // Initialize display
+    updateAdjustmentDisplay(0);
+}
+
+// Function to update the percentage display
+function updateAdjustmentDisplay(percentage) {
+    currentAdjustmentPercentage = percentage;
+    console.log('updateAdjustmentDisplay: обновляем отображение на', percentage);
+    
+    // Find the display element across the document
+    const display = document.querySelector('.cashflow-adjustment-display');
+    if (display) {
+        // Format with sign and 2 decimal places
+        const formattedPercentage = (percentage >= 0 ? '+' : '') + percentage.toFixed(2) + '%';
+        display.textContent = formattedPercentage;
+        
+        // Change color based on value
+        if (percentage > 0) {
+            display.style.color = '#28a745'; // Green for positive
+        } else if (percentage < 0) {
+            display.style.color = '#dc3545'; // Red for negative
+        } else {
+            display.style.color = '#333'; // Default for zero
+        }
+        console.log('updateAdjustmentDisplay: отображение обновлено на', formattedPercentage);
+    } else {
+        console.log('updateAdjustmentDisplay: элемент отображения не найден');
+    }
+}
+
+// Function to apply the percentage adjustment to the data and update chart and table
+function applyAdjustmentToData(percentage) {
+    console.log('applyAdjustmentToData: применяем корректировку', percentage, '%');
+    
+    if (!originalCumulativeData || !originalCumulativeData.monthlyData || !originalCumulativeData.monthlyData.length) {
+        console.warn('No original data to adjust');
+        return;
+    }
+    
+    // Update slider UI if it exists and value is different
+    try {
+        const slider = document.querySelector('.cashflow-adjustment-slider');
+        if (slider && parseFloat(slider.value) !== percentage) {
+            console.log('applyAdjustmentToData: обновляем слайдер на', percentage);
+            slider.value = percentage;
+        }
+    } catch (err) {
+        console.error('Error updating slider:', err);
+    }
+    
+    // Always update percentage display and global variable
+    currentAdjustmentPercentage = percentage;
+    try {
+        updateAdjustmentDisplay(percentage);
+    } catch (err) {
+        console.error('Error updating display:', err);
+        // Try direct update as fallback
+        try {
+            const percentageDisplay = document.querySelector('.cashflow-adjustment-display');
+            if (percentageDisplay) {
+                // Format with sign and 2 decimal places
+                const formattedPercentage = (percentage >= 0 ? '+' : '') + percentage.toFixed(2) + '%';
+                percentageDisplay.textContent = formattedPercentage;
+                
+                // Change color based on value
+                if (percentage > 0) {
+                    percentageDisplay.style.color = '#28a745'; // Green for positive
+                } else if (percentage < 0) {
+                    percentageDisplay.style.color = '#dc3545'; // Red for negative
+                } else {
+                    percentageDisplay.style.color = '#333'; // Default for zero
+                }
+            }
+        } catch (e) {
+            console.error('Complete failure updating display:', e);
+        }
+    }
+    
+    // Make a deep copy of the original data
+    const adjustedData = JSON.parse(JSON.stringify(originalCumulativeData));
+    
+    // Apply the adjustment to each month's data
+    adjustedData.monthlyData.forEach((month, index) => {
+        const originalMonth = originalCumulativeData.monthlyData[index];
+        
+        // Calculate adjustment factor (e.g., 5% = 1.05, -5% = 0.95)
+        const adjustmentFactor = 1 + (percentage / 100);
+        
+        // Adjust revenue values (increase/decrease by percentage)
+        month.revenueMin = originalMonth.revenueMin * adjustmentFactor;
+        month.revenueMax = originalMonth.revenueMax * adjustmentFactor;
+        month.revenueAvg = originalMonth.revenueAvg * adjustmentFactor;
+        
+        // Adjust expense values (opposite direction for better cash flow effect)
+        // Note: Expenses are negative, so reducing absolute value improves cash flow
+        const expenseAdjustmentFactor = percentage >= 0 ? (1 - (percentage / 200)) : (1 + (Math.abs(percentage) / 200));
+        month.expenseMin = originalMonth.expenseMin * expenseAdjustmentFactor;
+        month.expenseMax = originalMonth.expenseMax * expenseAdjustmentFactor;
+        month.expenseAvg = originalMonth.expenseAvg * expenseAdjustmentFactor;
+        
+        // Recalculate cash flow values
+        month.flowMin = month.revenueMin + month.expenseMin;
+        month.flowMax = month.revenueMax + month.expenseMax;
+        month.flowAvg = month.revenueAvg + month.expenseAvg;
+    });
+    
+    // Update the global data object with adjusted values
+    window.cumulativeDataForChart = adjustedData;
+    
+    // Update the table and chart with the adjusted data
+    try {
+        // Update the table with the adjusted data
+        updateCumulativeTable(adjustedData);
+    } catch (err) {
+        console.error('Error updating table:', err);
+    }
+    
+    try {
+        // Update the chart with the adjusted data
+        updateChartWithAdjustedData(adjustedData);
+    } catch (err) {
+        console.error('Error updating chart:', err);
+    }
+    
+    console.log('applyAdjustmentToData: корректировка применена успешно');
+}
+
+// Function to update the cumulative table with adjusted data
+function updateCumulativeTable(adjustedData) {
+    // Check if the table exists and Google Charts is loaded
+    const tableDiv = document.getElementById('google_cumulative_range_table');
+    if (!tableDiv || !window.cumulativeDataTable || typeof google === 'undefined' || 
+        typeof google.visualization === 'undefined' || typeof google.visualization.Table === 'undefined') {
+        console.warn('Cumulative table not ready for update');
+        // Continue with chart update even if table isn't ready
+        updateChartWithAdjustedData(adjustedData);
+        return;
+    }
+    
+    try {
+        // Create a new DataTable
+        const data = new google.visualization.DataTable();
+        
+        // Define columns (same as in original table)
+        data.addColumn('string', 'Date');
+        data.addColumn('number', 'Monthly Expense [Min]');
+        data.addColumn('number', 'Cumulative Expense [Min]');
+        data.addColumn('number', 'Monthly Expense [Max]');
+        data.addColumn('number', 'Cumulative Expense [Max]');
+        data.addColumn('number', 'Monthly Expense [Avg]');
+        data.addColumn('number', 'Cumulative Expense [Avg]');
+        data.addColumn('number', 'Monthly Revenue [Min]');
+        data.addColumn('number', 'Cumulative Revenue [Min]');
+        data.addColumn('number', 'Monthly Revenue [Max]');
+        data.addColumn('number', 'Cumulative Revenue [Max]');
+        data.addColumn('number', 'Monthly Revenue [Avg]');
+        data.addColumn('number', 'Cumulative Revenue [Avg]');
+        data.addColumn('number', 'Cash Flow [Min]');
+        data.addColumn('number', 'Cash Flow [Max]');
+        data.addColumn('number', 'Cash Flow [Avg]');
+        data.addColumn('number', 'Year');
+        
+        // Loop through monthlyData and calculate monthly values from cumulative
+        let prevMonth = null;
+        adjustedData.monthlyData.forEach((month, index) => {
+            // Calculate monthly values by finding difference with previous month
+            let monthlyExpenseMin = month.expenseMin;
+            let monthlyExpenseMax = month.expenseMax;
+            let monthlyExpenseAvg = month.expenseAvg;
+            let monthlyRevenueMin = month.revenueMin;
+            let monthlyRevenueMax = month.revenueMax;
+            let monthlyRevenueAvg = month.revenueAvg;
+            
+            if (index > 0) {
+                prevMonth = adjustedData.monthlyData[index - 1];
+                monthlyExpenseMin = month.expenseMin - prevMonth.expenseMin;
+                monthlyExpenseMax = month.expenseMax - prevMonth.expenseMax;
+                monthlyExpenseAvg = month.expenseAvg - prevMonth.expenseAvg;
+                monthlyRevenueMin = month.revenueMin - prevMonth.revenueMin;
+                monthlyRevenueMax = month.revenueMax - prevMonth.revenueMax;
+                monthlyRevenueAvg = month.revenueAvg - prevMonth.revenueAvg;
+            }
+            
+            const cashFlowMin = monthlyRevenueMin + monthlyExpenseMin;
+            const cashFlowMax = monthlyRevenueMax + monthlyExpenseMax;
+            const cashFlowAvg = monthlyRevenueAvg + monthlyExpenseAvg;
+            
+            // Add the row with all values
+            data.addRow([
+                month.date,
+                monthlyExpenseMin,
+                month.expenseMin,
+                monthlyExpenseMax,
+                month.expenseMax,
+                monthlyExpenseAvg,
+                month.expenseAvg,
+                monthlyRevenueMin,
+                month.revenueMin,
+                monthlyRevenueMax,
+                month.revenueMax,
+                monthlyRevenueAvg,
+                month.revenueAvg,
+                cashFlowMin,
+                cashFlowMax,
+                cashFlowAvg,
+                month.year
+            ]);
+        });
+        
+        // Apply currency formatting to all numeric columns
+        const currencyFormatter = new google.visualization.NumberFormat({
+            prefix: '$', 
+            pattern: '#,##0.00;(#,##0.00)', // Standard accounting format
+            fractionDigits: 2
+        });
+        
+        // Apply formatter to all numeric columns (indices 1 through 15)
+        for (let i = 1; i <= 15; i++) {
+            currencyFormatter.format(data, i);
+        }
+        
+        // Get current view settings to maintain current year filter
+        const currentYearElement = document.getElementById('year-indicator');
+        const currentYear = currentYearElement ? parseInt(currentYearElement.textContent.replace(/\D/g, '')) : null;
+        
+        // Create a view with the year column hidden
+        const view = new google.visualization.DataView(data);
+        view.hideColumns([16]); // Hide the year column (index 16)
+        
+        // If we have a current year, filter by it
+        if (currentYear !== null) {
+            const rows = data.getFilteredRows([{column: 16, value: currentYear}]);
+            view.setRows(rows);
+        }
+        
+        // Define table options (same as original)
+        const options = {
+            showRowNumber: false, 
+            width: '100%', 
+            height: '400px',
+            allowHtml: true,
+            page: 'enable',
+            pageSize: 12,
+            cssClassNames: {
+                headerRow: 'table-light sticky-top small',
+                tableRow: 'small',
+                oddTableRow: 'small bg-light',
+                headerCell: 'text-center fw-bold',
+                tableCell: 'text-end'
+            }
+        };
+        
+        // Update the table
+        window.cumulativeDataTable.draw(view, options);
+        
+    } catch (err) {
+        console.error("Error updating cumulative table with adjusted data:", err);
+    }
+}
+
+// Function to update the chart with adjusted data
+function updateChartWithAdjustedData(adjustedData) {
+    console.log('updateChartWithAdjustedData: начинаем обновление графика');
+    
+    if (!apexRangeChartInstance) {
+        console.warn('Range chart instance not found for update');
+        return;
+    }
+    
+    try {
+        // Prepare data series from adjusted data
+        const revenueMinData = [];
+        const revenueMaxData = [];
+        const revenueAvgData = [];
+        const expenseMinData = [];
+        const expenseMaxData = [];
+        const expenseAvgData = [];
+        const cashFlowMinData = [];
+        const cashFlowMaxData = [];
+        const cashFlowAvgData = [];
+        const categories = [];
+        
+        // Transform the data for chart format
+        adjustedData.monthlyData.forEach(month => {
+            categories.push(month.date);
+            
+            // Revenue min/max/avg
+            revenueMinData.push({
+                x: month.date,
+                y: isFinite(month.revenueMin) ? parseFloat(month.revenueMin.toFixed(2)) : 0
+            });
+            
+            revenueMaxData.push({
+                x: month.date,
+                y: isFinite(month.revenueMax) ? parseFloat(month.revenueMax.toFixed(2)) : 0
+            });
+            
+            revenueAvgData.push({
+                x: month.date,
+                y: isFinite(month.revenueAvg) ? parseFloat(month.revenueAvg.toFixed(2)) : 0
+            });
+            
+            // Expense min/max/avg
+            expenseMinData.push({
+                x: month.date,
+                y: isFinite(month.expenseMin) ? parseFloat(month.expenseMin.toFixed(2)) : 0
+            });
+            
+            expenseMaxData.push({
+                x: month.date,
+                y: isFinite(month.expenseMax) ? parseFloat(month.expenseMax.toFixed(2)) : 0
+            });
+            
+            expenseAvgData.push({
+                x: month.date,
+                y: isFinite(month.expenseAvg) ? parseFloat(month.expenseAvg.toFixed(2)) : 0
+            });
+            
+            // Cash Flow min/max/avg
+            cashFlowMinData.push({
+                x: month.date,
+                y: isFinite(month.flowMin) ? parseFloat(month.flowMin.toFixed(2)) : 0
+            });
+            
+            cashFlowMaxData.push({
+                x: month.date,
+                y: isFinite(month.flowMax) ? parseFloat(month.flowMax.toFixed(2)) : 0
+            });
+            
+            cashFlowAvgData.push({
+                x: month.date,
+                y: isFinite(month.flowAvg) ? parseFloat(month.flowAvg.toFixed(2)) : 0
+            });
+        });
+        
+        // Update chart series with adjusted data
+        console.log('updateChartWithAdjustedData: обновляем серии данных');
+        apexRangeChartInstance.updateSeries([
+            { name: 'Revenue Min', type: 'area', data: revenueMinData },
+            { name: 'Expense Min', type: 'area', data: expenseMinData },
+            { name: 'Cash Flow Min', type: 'area', data: cashFlowMinData },
+            { name: 'Revenue Max', type: 'area', data: revenueMaxData },
+            { name: 'Expense Max', type: 'area', data: expenseMaxData },
+            { name: 'Cash Flow Max', type: 'area', data: cashFlowMaxData },
+            { name: 'Revenue Forecast', type: 'line', data: revenueAvgData },
+            { name: 'Expense Forecast', type: 'line', data: expenseAvgData },
+            { name: 'Cash Flow Forecast', type: 'line', data: cashFlowAvgData }
+        ]);
+        
+        // Add adjustment indication to chart title if not 0%
+        let chartTitle = 'Monthly Cumulative Revenue, Expense & Cash Flow';
+        if (currentAdjustmentPercentage !== 0) {
+            const sign = currentAdjustmentPercentage > 0 ? '+' : '';
+            chartTitle += ` (${sign}${currentAdjustmentPercentage.toFixed(2)}% Adjusted)`;
+        }
+        
+        // Update chart title
+        console.log('updateChartWithAdjustedData: обновляем заголовок графика на', chartTitle);
+        apexRangeChartInstance.updateOptions({
+            title: {
+                text: chartTitle,
+                align: 'center',
+                style: {
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                }
+            }
+        }, false, false); // Don't redraw or animate the title change
+        
+        // Make sure all series are visible after updating
+        const seriesNames = apexRangeChartInstance.w.globals.seriesNames;
+        seriesNames.forEach(seriesName => {
+            apexRangeChartInstance.showSeries(seriesName);
+        });
+        
+        console.log('updateChartWithAdjustedData: обновление графика завершено успешно');
+        
+    } catch (err) {
+        console.error("Error updating chart with adjusted data:", err);
+    }
+}
 
 // Function to update the cumulative range chart using data from the table
 window.updateApexRangeChartFromTableData = function() {
@@ -484,6 +1139,11 @@ window.updateApexRangeChartFromTableData = function() {
         return;
     }
 
+    // Store the original data for slider adjustments
+    originalCumulativeData = JSON.parse(JSON.stringify(window.cumulativeDataForChart));
+    // Reset adjustment percentage
+    currentAdjustmentPercentage = 0;
+    
     const { monthlyData, years } = window.cumulativeDataForChart;
     
     // Check if we have valid data
@@ -788,8 +1448,11 @@ window.updateApexRangeChartFromTableData = function() {
             apexRangeChartInstance.render();
         }
         
-        // Add select all button for legends after rendering
-        createSelectAllButton(chartDiv, apexRangeChartInstance, 'rangeChartFromTable');
+        // Add our custom reset button listener
+        addManualResetButtonListener(chartDiv, apexRangeChartInstance, 'rangeChartFromTable');
+        
+        // Add the adjustment slider after rendering the chart
+        createCashFlowAdjustmentSlider(chartDiv);
         
     } catch (err) {
         console.error("ApexCharts chart render/update error:", err);
@@ -800,3 +1463,101 @@ window.updateApexRangeChartFromTableData = function() {
         }
     }
 };
+
+// Function to override the ApexCharts reset functionality globally
+function overrideApexResetFunction() {
+    // This function is no longer needed - we're using manual button listeners instead
+    console.warn('overrideApexResetFunction is deprecated - using direct event listeners instead');
+    return false;
+}
+
+// Attempt to detect when ApexCharts is loaded through script observation
+(function setupGlobalClickHandler() {
+    // Add a global click handler to catch all reset button clicks
+    if (!window._globalApexClickHandler) {
+        window._globalApexClickHandler = true;
+        
+        console.log('Setting up global document click handler for ApexCharts reset buttons');
+        
+        document.addEventListener('click', function(e) {
+            // Check if clicked on or inside reset button
+            const isResetButton = 
+                // Match the reset icon element directly
+                e.target.classList?.contains('apexcharts-reset-icon') || 
+                // Match reset button inner svg
+                e.target.closest('.apexcharts-reset-icon') || 
+                // Match reset button through data attribute
+                e.target.closest('svg[data-event="reset"]') ||
+                // Match the button in DOM with helper attribute if available
+                e.target.closest('[data-apexcharts-reset="true"]');
+            
+            if (isResetButton) {
+                console.log('GLOBAL HANDLER: Reset button clicked!');
+                
+                // Determine which chart was clicked
+                const amortDiv = document.querySelector('#apex_amortization_chart');
+                const rangeDiv = document.querySelector('#apex_cumulative_range_chart');
+                
+                let targetChart = null;
+                let targetDiv = null;
+                
+                // Find the chart container that contains this button
+                if (amortDiv && amortDiv.contains(e.target)) {
+                    console.log('Reset button belongs to amortization chart');
+                    targetChart = window.apexChartInstance;
+                    targetDiv = amortDiv;
+                } else if (rangeDiv && rangeDiv.contains(e.target)) {
+                    console.log('Reset button belongs to range chart');
+                    targetChart = window.apexRangeChartInstance;
+                    targetDiv = rangeDiv;
+                }
+                
+                // Wait for the default zoom reset to complete
+                setTimeout(function() {
+                    // Force-reset the slider even if we can't determine the chart
+                    const slider = document.querySelector('.cashflow-adjustment-slider');
+                    const percentageDisplay = document.querySelector('.cashflow-adjustment-display');
+                    
+                    if (slider) {
+                        console.log('Forcing slider reset to 0');
+                        slider.value = 0;
+                        
+                        try {
+                            // Generate events to trigger listeners
+                            slider.dispatchEvent(new Event('input', { bubbles: true }));
+                            slider.dispatchEvent(new Event('change', { bubbles: true }));
+                        } catch (err) {
+                            console.error('Error triggering slider events:', err);
+                        }
+                    }
+                    
+                    if (percentageDisplay) {
+                        percentageDisplay.textContent = '0%';
+                        percentageDisplay.style.color = '#333';
+                    }
+                    
+                    // Reset global adjustment value
+                    window.currentAdjustmentPercentage = 0;
+                    
+                    // Apply data adjustment if we have original data
+                    if (window.originalCumulativeData && typeof window.applyAdjustmentToData === 'function') {
+                        try {
+                            window.applyAdjustmentToData(0);
+                        } catch (err) {
+                            console.error('Error applying data adjustment:', err);
+                        }
+                    }
+                    
+                    // If we know which chart was clicked, do a full reset for that chart
+                    if (targetChart && targetDiv) {
+                        try {
+                            handleChartReset(targetChart, targetDiv);
+                        } catch (err) {
+                            console.error('Error in handleChartReset:', err);
+                        }
+                    }
+                }, 500);
+            }
+        }, true); // Use capture to ensure we get the event first
+    }
+})();
