@@ -540,9 +540,21 @@ function calculateAll() {
 
         // First call the Google Table function for the summary, which will then update the chart
         if (typeof window.drawCumulativeDataTable === 'function') {
-             // Get closing date from B13 field or use current date as fallback
-             const closingDateStr = document.getElementById('B13')?.value;
-             const closingDate = closingDateStr ? new Date(closingDateStr) : new Date();
+             // Get closing date from B4 field or use current date as fallback
+             const closingDateStr = document.getElementById('B4')?.value;
+             // Make sure we parse the date properly to avoid timezone issues
+             let closingDate;
+             if (closingDateStr) {
+                 closingDate = new Date(closingDateStr + 'T00:00:00');
+                 if (isNaN(closingDate.getTime())) {
+                     console.warn("Invalid closing date format, using current date instead");
+                     closingDate = new Date();
+                 }
+             } else {
+                 closingDate = new Date();
+             }
+             
+             console.log("Using closing date for cumulative table:", closingDate.toISOString());
              
              // Calculate loan term in months
              const loanTermMonths = B7_LoanTermYears * 12;
@@ -768,18 +780,53 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Clear Charts on Invalid Data --- (Add range chart and table clearing)
     const clearCharts = () => {
-        if (typeof window.clearApexChart === 'function') {
-            window.clearApexChart();
+        console.log("clearCharts: начало очистки графиков");
+        
+        try {
+            if (typeof window.clearApexChart === 'function') {
+                console.log("clearCharts: вызов clearApexChart");
+                window.clearApexChart();
+            }
+            
+            if (typeof window.clearApexRangeChart === 'function') {
+                console.log("clearCharts: вызов clearApexRangeChart");
+                try {
+                    window.clearApexRangeChart();
+                } catch (e) {
+                    console.error("clearCharts: ошибка при очистке range chart:", e);
+                    // Handle error - attempt to reset the chart instance
+                    const chartDiv = document.querySelector("#apex_cumulative_range_chart");
+                    if (chartDiv) {
+                        chartDiv.innerHTML = '<p style="text-align:center; padding: 20px;">Error clearing chart. Please refresh the page.</p>';
+                    }
+                    if (window.apexRangeChartInstance) {
+                        try {
+                            window.apexRangeChartInstance.destroy();
+                        } catch (destroyError) {
+                            console.error("Failed to destroy corrupted chart instance:", destroyError);
+                        }
+                        window.apexRangeChartInstance = null;
+                    }
+                }
+            }
+            
+            // Clear the summary Google Table
+            if (typeof window.clearCumulativeTable === 'function') {
+                console.log("clearCharts: вызов clearCumulativeTable");
+                try {
+                    window.clearCumulativeTable();
+                } catch (e) {
+                    console.error("clearCharts: ошибка при очистке таблицы:", e);
+                }
+            }
+            
+            console.log("clearCharts: очистка графиков завершена");
+            
+            // Potentially clear Google Chart AMORTIZATION tables if they weren't handled by drawAmortizationChart returning empty
+            // document.getElementById('annual_table_body').innerHTML = '<tr><td colspan="7" class="text-center p-3">Enter valid loan details.</td></tr>';
+        } catch (error) {
+            console.error("clearCharts: критическая ошибка при очистке:", error);
         }
-        if (typeof window.clearApexRangeChart === 'function') {
-             window.clearApexRangeChart();
-         }
-          // Clear the summary Google Table
-          if (typeof window.clearCumulativeTable === 'function') {
-               window.clearCumulativeTable();
-          }
-          // Potentially clear Google Chart AMORTIZATION tables if they weren't handled by drawAmortizationChart returning empty
-          // document.getElementById('annual_table_body').innerHTML = '<tr><td colspan="7" class="text-center p-3">Enter valid loan details.</td></tr>';
     };
 
     // Trigger clearCharts when calculateAll detects invalid base data
