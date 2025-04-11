@@ -391,8 +391,8 @@ function formatTotalPaymentBlur(inputElement) {
  * Draws a detailed table showing monthly and cumulative data for expenses, revenue and cash flow.
  * @param {Date} startDate - The closing date (starting point for calculations)
  * @param {number} loanTermMonths - Number of months to display
- * @param {object} expenseData - Contains monthly expense data (b64, c64, d64)
- * @param {object} revenueData - Contains monthly revenue data (b65, c65, d65)
+ * @param {object} expenseData - Contains monthly expense data (b64, c65, d66)
+ * @param {object} revenueData - Contains monthly revenue data (b67, c68, d69)
  */
 window.drawCumulativeDataTable = function(startDate, loanTermMonths, expenseData, revenueData) {
     const tableDiv = document.getElementById('google_cumulative_range_table');
@@ -451,8 +451,25 @@ window.drawCumulativeDataTable = function(startDate, loanTermMonths, expenseData
     // Add hidden year column for grouping
     data.addColumn('number', 'Year');
 
-    // Prepare starting date and cumulative counters
+    // Prepare starting date - always first day of the next month after closing date
     let currentDate = new Date(startDate);
+    
+    // Make sure we're working with a valid date
+    if (isNaN(currentDate.getTime())) {
+        console.warn('Invalid start date provided, using current date');
+        currentDate = new Date();
+    }
+    
+    console.log('Original start date:', currentDate.toISOString());
+    
+    // Calculate the first day of the next month
+    // First move to the first day of the current month
+    currentDate.setDate(1);
+    // Then move to the next month
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    
+    console.log('Adjusted start date (1st of next month):', currentDate.toISOString());
+    
     let cumulativeExpenseMin = 0;
     let cumulativeExpenseMax = 0;
     let cumulativeExpenseAvg = 0;
@@ -478,7 +495,7 @@ window.drawCumulativeDataTable = function(startDate, loanTermMonths, expenseData
     
     // First pass - collect years and calculate year boundaries
     const yearData = {};
-    let tempDate = new Date(startDate);
+    let tempDate = new Date(currentDate); // Use the adjusted start date
     
     for (let i = 0; i < loanTermMonths; i++) {
         const year = tempDate.getFullYear();
