@@ -34,9 +34,9 @@ function handleChartReset(chart, chartDiv) {
             
             console.log('Slider found:', !!slider, 'Display found:', !!percentageDisplay);
             
-            if (slider) {
+        if (slider) {
                 console.log('Setting slider value to 0 directly');
-                slider.value = 0;
+            slider.value = 0;
                 
                 // Force fire input event for listeners
                 try {
@@ -53,9 +53,9 @@ function handleChartReset(chart, chartDiv) {
                 }
             }
             
-            if (percentageDisplay) {
+        if (percentageDisplay) {
                 console.log('Updating percentage display text directly');
-                percentageDisplay.textContent = '0%';
+            percentageDisplay.textContent = '0%';
                 percentageDisplay.style.color = '#333';
             }
             
@@ -137,18 +137,18 @@ function addManualResetButtonListener(chartDiv, chartInstance, chartId) {
     chartDiv.addEventListener('click', (event) => {
         // Check if the clicked element is the reset button or contains the reset button
         const resetButton = event.target.closest('.apexcharts-reset-icon, .apexcharts-toolbar svg[data-event="reset"]');
-        if (resetButton) {
+    if (resetButton) {
             console.log(`Reset button clicked in ${chartId} (delegated handler)`);
             // Wait for the default zoom reset to complete
             setTimeout(() => {
                 handleChartReset(chartInstance, chartDiv);
             }, 300);
         }
-    });
+        });
     
     // Mark as added to prevent duplicate listeners
     legendButtonsAdded[chartId] = true;
-}
+    }
 
 // Replace extendResetButtonFunctionality with the new approach
 function extendResetButtonFunctionality(chartDiv, chartInstance, chartId) {
@@ -566,8 +566,8 @@ window.clearApexRangeChart = function() {
      const chartDiv = document.querySelector("#apex_cumulative_range_chart");
      
      try {
-         // Note: we don't need to clear cumulativeDataForChart here as that should be handled by clearCumulativeTable
-         if (apexRangeChartInstance) {
+     // Note: we don't need to clear cumulativeDataForChart here as that should be handled by clearCumulativeTable
+     if (apexRangeChartInstance) {
              console.log('clearApexRangeChart: инстанс графика найден, выполняем очистку');
              
              // Clear the chart data safely
@@ -581,8 +581,8 @@ window.clearApexRangeChart = function() {
              
              // Then update other options
              try {
-                 apexRangeChartInstance.updateOptions({
-                     noData: { text: 'Enter valid revenue/expense data and loan term.' }
+         apexRangeChartInstance.updateOptions({
+             noData: { text: 'Enter valid revenue/expense data and loan term.' }
                  }, false, false);
                  console.log('clearApexRangeChart: опции обновлены');
              } catch (err) {
@@ -600,7 +600,7 @@ window.clearApexRangeChart = function() {
              }
          } else if (chartDiv) {
              console.log('clearApexRangeChart: инстанс графика не найден, очищаем DOM');
-             chartDiv.innerHTML = '<p style="text-align:center; padding: 20px;">Enter valid revenue/expense data and loan term.</p>';
+        chartDiv.innerHTML = '<p style="text-align:center; padding: 20px;">Enter valid revenue/expense data and loan term.</p>';
          } else {
              console.log('clearApexRangeChart: элемент графика не найден');
          }
@@ -810,15 +810,15 @@ function applyAdjustmentToData(percentage) {
     
     // Update the table and chart with the adjusted data
     try {
-        // Update the table with the adjusted data
-        updateCumulativeTable(adjustedData);
+    // Update the table with the adjusted data
+    updateCumulativeTable(adjustedData);
     } catch (err) {
         console.error('Error updating table:', err);
     }
     
     try {
-        // Update the chart with the adjusted data
-        updateChartWithAdjustedData(adjustedData);
+    // Update the chart with the adjusted data
+    updateChartWithAdjustedData(adjustedData);
     } catch (err) {
         console.error('Error updating chart:', err);
     }
@@ -1034,30 +1034,45 @@ function updateChartWithAdjustedData(adjustedData) {
             });
         });
         
-        // Update chart series with adjusted data
-        console.log('updateChartWithAdjustedData: обновляем серии данных');
+        // ЗМІНЕНО: Зберігаємо стан видимості серій ДО оновлення даних
+        // Створюємо масив для збереження індексів прихованих серій
+        let hiddenSeriesIndices = [];
         
-        // Get the current visible series from the chart before updating
-        const visibleSeries = {};
         if (apexRangeChartInstance.w && apexRangeChartInstance.w.globals) {
-            const seriesNames = apexRangeChartInstance.w.globals.seriesNames || [];
-            const hiddenSeries = apexRangeChartInstance.w.globals.collapsedSeries || [];
+            // Отримуємо інформацію про згорнуті серії
+            const collapsedSeries = apexRangeChartInstance.w.globals.collapsedSeries || [];
+            const collapsedSeriesIndices = apexRangeChartInstance.w.globals.collapsedSeriesIndices || [];
             
-            // Mark all series as visible by default
-            seriesNames.forEach(name => {
-                visibleSeries[name] = true;
+            // Зберігаємо індекси прихованих серій
+            hiddenSeriesIndices = [...collapsedSeriesIndices];
+            
+            console.log('Збережено стан видимості серій:', {
+                hiddenCount: hiddenSeriesIndices.length,
+                indices: hiddenSeriesIndices
             });
-            
-            // Mark hidden series as not visible
-            hiddenSeries.forEach(series => {
-                if (series && series.name) {
-                    visibleSeries[series.name] = false;
-                }
-            });
-            
-            console.log('Current visible series state:', visibleSeries);
         }
         
+        // Додаємо індикацію коригування в заголовок, якщо не 0%
+        let chartTitle = 'Monthly Cumulative Revenue, Expense & Cash Flow';
+        if (currentAdjustmentPercentage !== 0) {
+            const sign = currentAdjustmentPercentage > 0 ? '+' : '';
+            chartTitle += ` (${sign}${currentAdjustmentPercentage.toFixed(2)}% Adjusted)`;
+        }
+        
+        // Оновлюємо заголовок графіка
+        apexRangeChartInstance.updateOptions({
+            title: {
+                text: chartTitle,
+                align: 'center',
+                style: {
+                    fontSize: '16px',
+                    fontWeight: 'bold'
+                }
+            }
+        }, false, false); // Не перемальовуємо і не анімуємо зміну заголовка
+        
+        // Оновлюємо дані серій
+        console.log('Оновлюємо серії даних');
         apexRangeChartInstance.updateSeries([
             { name: 'Revenue Min', type: 'area', data: revenueMinData },
             { name: 'Expense Min', type: 'area', data: expenseMinData },
@@ -1068,41 +1083,28 @@ function updateChartWithAdjustedData(adjustedData) {
             { name: 'Revenue Forecast', type: 'line', data: revenueAvgData },
             { name: 'Expense Forecast', type: 'line', data: expenseAvgData },
             { name: 'Cash Flow Forecast', type: 'line', data: cashFlowAvgData }
-        ]);
+        ], false); // Додаємо параметр false, щоб не перемальовувати графік повністю
         
-        // Add adjustment indication to chart title if not 0%
-        let chartTitle = 'Monthly Cumulative Revenue, Expense & Cash Flow';
-        if (currentAdjustmentPercentage !== 0) {
-            const sign = currentAdjustmentPercentage > 0 ? '+' : '';
-            chartTitle += ` (${sign}${currentAdjustmentPercentage.toFixed(2)}% Adjusted)`;
-        }
-        
-        // Update chart title
-        console.log('updateChartWithAdjustedData: обновляем заголовок графика на', chartTitle);
-        apexRangeChartInstance.updateOptions({
-            title: {
-                text: chartTitle,
-                align: 'center',
-                style: {
-                    fontSize: '16px',
-                    fontWeight: 'bold'
+        // ЗМІНЕНО: Відновлюємо видимість серій ПІСЛЯ оновлення даних з невеликою затримкою
+        if (hiddenSeriesIndices.length > 0) {
+            setTimeout(() => {
+                try {
+                    console.log('Відновлюємо стан видимості серій');
+                    // Переховуємо серії за збереженими індексами
+                    hiddenSeriesIndices.forEach(index => {
+                        if (apexRangeChartInstance.w.globals.seriesNames[index]) {
+                            const seriesName = apexRangeChartInstance.w.globals.seriesNames[index];
+                            console.log(`Ховаємо серію #${index}: ${seriesName}`);
+                            apexRangeChartInstance.toggleSeries(seriesName);
+                        }
+                    });
+                    
+                    // Примушуємо графік перемалювати легенду
+                    apexRangeChartInstance.update();
+                } catch (err) {
+                    console.error('Помилка відновлення видимості серій:', err);
                 }
-            }
-        }, false, false); // Don't redraw or animate the title change
-        
-        // Restore the visibility state of series
-        try {
-            if (Object.keys(visibleSeries).length > 0) {
-                console.log('Restoring series visibility state');
-                Object.entries(visibleSeries).forEach(([seriesName, isVisible]) => {
-                    if (!isVisible) {
-                        console.log(`Hiding series: ${seriesName}`);
-                        apexRangeChartInstance.hideSeries(seriesName);
-                    }
-                });
-            }
-        } catch (err) {
-            console.error('Error restoring series visibility:', err);
+            }, 50); // Невелика затримка для стабільності
         }
         
         console.log('updateChartWithAdjustedData: обновление графика завершено успешно');
