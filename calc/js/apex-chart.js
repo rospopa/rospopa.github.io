@@ -23,26 +23,10 @@ function handleChartReset(chart, chartDiv) {
             return;
         }
         
-        // Reset all legends to show all series if the chart has series
-        try {
-            if (chart.w && chart.w.globals && chart.w.globals.seriesNames) {
-                const seriesNames = chart.w.globals.seriesNames;
-                if (seriesNames && seriesNames.length) {
-                    console.log('Showing all series:', seriesNames.length);
-                    seriesNames.forEach(seriesName => {
-                        chart.showSeries(seriesName);
-                    });
-                }
-            }
-        } catch (err) {
-            console.error('Error resetting series visibility:', err);
-        }
+        // Reset ALL legends to show ALL series - this is what the reset button SHOULD do
+        resetAllLegends(chart);
         
-        // FORCE-RESET THE SLIDER FIRST
-        currentAdjustmentPercentage = 0;
-        console.log('Reset global adjustment percentage to 0');
-        
-        // Use direct DOM operations for most reliable reset
+        // Reset slider and display if they exist
         try {
             // First try to find slider in the chart container
             const slider = document.querySelector('.cashflow-adjustment-slider');
@@ -74,6 +58,10 @@ function handleChartReset(chart, chartDiv) {
                 percentageDisplay.textContent = '0%';
                 percentageDisplay.style.color = '#333';
             }
+            
+            // FORCE-RESET THE ADJUSTMENT PERCENTAGE
+            currentAdjustmentPercentage = 0;
+            console.log('Reset global adjustment percentage to 0');
         } catch (err) {
             console.error('Error in direct slider manipulation:', err);
         }
@@ -115,6 +103,26 @@ function handleChartReset(chart, chartDiv) {
     }
 }
 
+// Separate function to specifically reset all legends to visible
+function resetAllLegends(chart) {
+    if (!chart) return;
+    
+    try {
+        // Reset all legends to show all series if the chart has series
+        if (chart.w && chart.w.globals && chart.w.globals.seriesNames) {
+            const seriesNames = chart.w.globals.seriesNames;
+            if (seriesNames && seriesNames.length) {
+                console.log('Showing all series:', seriesNames.length);
+                seriesNames.forEach(seriesName => {
+                    chart.showSeries(seriesName);
+                });
+            }
+        }
+    } catch (err) {
+        console.error('Error resetting series visibility:', err);
+    }
+}
+
 // Add reset button event listener manually
 function addManualResetButtonListener(chartDiv, chartInstance, chartId) {
     // Skip if already added
@@ -137,52 +145,6 @@ function addManualResetButtonListener(chartDiv, chartInstance, chartId) {
             }, 300);
         }
     });
-    
-    // Also setup a global document click handler as a fallback
-    if (!window._apexChartResetHandlerAdded) {
-        document.addEventListener('click', (event) => {
-            const clickedElement = event.target;
-            
-            // Check if the clicked element is the reset button
-            if (clickedElement && (
-                clickedElement.classList?.contains('apexcharts-reset-icon') || 
-                clickedElement.closest('.apexcharts-reset-icon') || 
-                clickedElement.closest('.apexcharts-toolbar svg[data-event="reset"]')
-            )) {
-                console.log('Reset button clicked (global handler)');
-                
-                // Find which chart this button belongs to
-                let targetChart = null;
-                let targetDiv = null;
-                
-                // Check if the clicked button is in the amortization chart
-                const amortDiv = document.querySelector('#apex_amortization_chart');
-                if (amortDiv && amortDiv.contains(clickedElement)) {
-                    console.log('Reset button belongs to amortization chart');
-                    targetChart = apexChartInstance;
-                    targetDiv = amortDiv;
-                }
-                
-                // Check if the clicked button is in the range chart
-                const rangeDiv = document.querySelector('#apex_cumulative_range_chart');
-                if (rangeDiv && rangeDiv.contains(clickedElement)) {
-                    console.log('Reset button belongs to range chart');
-                    targetChart = apexRangeChartInstance;
-                    targetDiv = rangeDiv;
-                }
-                
-                // If we found a matching chart, reset it
-                if (targetChart) {
-                    setTimeout(() => {
-                        handleChartReset(targetChart, targetDiv);
-                    }, 300);
-                }
-            }
-        });
-        
-        window._apexChartResetHandlerAdded = true;
-        console.log('Global reset button handler added');
-    }
     
     // Mark as added to prevent duplicate listeners
     legendButtonsAdded[chartId] = true;
@@ -769,7 +731,7 @@ function updateAdjustmentDisplay(percentage) {
 
 // Function to apply the percentage adjustment to the data and update chart and table
 function applyAdjustmentToData(percentage) {
-    console.log('applyAdjustmentToData: применяем корректировку', percentage, '%');
+    console.log('applyAdjustmentToData: застосовуємо коригування', percentage, '%');
     
     if (!originalCumulativeData || !originalCumulativeData.monthlyData || !originalCumulativeData.monthlyData.length) {
         console.warn('No original data to adjust');
@@ -780,7 +742,7 @@ function applyAdjustmentToData(percentage) {
     try {
         const slider = document.querySelector('.cashflow-adjustment-slider');
         if (slider && parseFloat(slider.value) !== percentage) {
-            console.log('applyAdjustmentToData: обновляем слайдер на', percentage);
+            console.log('applyAdjustmentToData: оновлюємо слайдер на', percentage);
             slider.value = percentage;
         }
     } catch (err) {
@@ -861,7 +823,7 @@ function applyAdjustmentToData(percentage) {
         console.error('Error updating chart:', err);
     }
     
-    console.log('applyAdjustmentToData: корректировка применена успешно');
+    console.log('applyAdjustmentToData: коригування застосовано успішно');
 }
 
 // Function to update the cumulative table with adjusted data
@@ -999,7 +961,7 @@ function updateCumulativeTable(adjustedData) {
 
 // Function to update the chart with adjusted data
 function updateChartWithAdjustedData(adjustedData) {
-    console.log('updateChartWithAdjustedData: начинаем обновление графика');
+    console.log('updateChartWithAdjustedData: починаем обновление графика');
     
     if (!apexRangeChartInstance) {
         console.warn('Range chart instance not found for update');
@@ -1074,6 +1036,28 @@ function updateChartWithAdjustedData(adjustedData) {
         
         // Update chart series with adjusted data
         console.log('updateChartWithAdjustedData: обновляем серии данных');
+        
+        // Get the current visible series from the chart before updating
+        const visibleSeries = {};
+        if (apexRangeChartInstance.w && apexRangeChartInstance.w.globals) {
+            const seriesNames = apexRangeChartInstance.w.globals.seriesNames || [];
+            const hiddenSeries = apexRangeChartInstance.w.globals.collapsedSeries || [];
+            
+            // Mark all series as visible by default
+            seriesNames.forEach(name => {
+                visibleSeries[name] = true;
+            });
+            
+            // Mark hidden series as not visible
+            hiddenSeries.forEach(series => {
+                if (series && series.name) {
+                    visibleSeries[series.name] = false;
+                }
+            });
+            
+            console.log('Current visible series state:', visibleSeries);
+        }
+        
         apexRangeChartInstance.updateSeries([
             { name: 'Revenue Min', type: 'area', data: revenueMinData },
             { name: 'Expense Min', type: 'area', data: expenseMinData },
@@ -1106,11 +1090,20 @@ function updateChartWithAdjustedData(adjustedData) {
             }
         }, false, false); // Don't redraw or animate the title change
         
-        // Make sure all series are visible after updating
-        const seriesNames = apexRangeChartInstance.w.globals.seriesNames;
-        seriesNames.forEach(seriesName => {
-            apexRangeChartInstance.showSeries(seriesName);
-        });
+        // Restore the visibility state of series
+        try {
+            if (Object.keys(visibleSeries).length > 0) {
+                console.log('Restoring series visibility state');
+                Object.entries(visibleSeries).forEach(([seriesName, isVisible]) => {
+                    if (!isVisible) {
+                        console.log(`Hiding series: ${seriesName}`);
+                        apexRangeChartInstance.hideSeries(seriesName);
+                    }
+                });
+            }
+        } catch (err) {
+            console.error('Error restoring series visibility:', err);
+        }
         
         console.log('updateChartWithAdjustedData: обновление графика завершено успешно');
         
@@ -1471,93 +1464,8 @@ function overrideApexResetFunction() {
     return false;
 }
 
-// Attempt to detect when ApexCharts is loaded through script observation
-(function setupGlobalClickHandler() {
-    // Add a global click handler to catch all reset button clicks
-    if (!window._globalApexClickHandler) {
-        window._globalApexClickHandler = true;
-        
-        console.log('Setting up global document click handler for ApexCharts reset buttons');
-        
-        document.addEventListener('click', function(e) {
-            // Check if clicked on or inside reset button
-            const isResetButton = 
-                // Match the reset icon element directly
-                e.target.classList?.contains('apexcharts-reset-icon') || 
-                // Match reset button inner svg
-                e.target.closest('.apexcharts-reset-icon') || 
-                // Match reset button through data attribute
-                e.target.closest('svg[data-event="reset"]') ||
-                // Match the button in DOM with helper attribute if available
-                e.target.closest('[data-apexcharts-reset="true"]');
-            
-            if (isResetButton) {
-                console.log('GLOBAL HANDLER: Reset button clicked!');
-                
-                // Determine which chart was clicked
-                const amortDiv = document.querySelector('#apex_amortization_chart');
-                const rangeDiv = document.querySelector('#apex_cumulative_range_chart');
-                
-                let targetChart = null;
-                let targetDiv = null;
-                
-                // Find the chart container that contains this button
-                if (amortDiv && amortDiv.contains(e.target)) {
-                    console.log('Reset button belongs to amortization chart');
-                    targetChart = window.apexChartInstance;
-                    targetDiv = amortDiv;
-                } else if (rangeDiv && rangeDiv.contains(e.target)) {
-                    console.log('Reset button belongs to range chart');
-                    targetChart = window.apexRangeChartInstance;
-                    targetDiv = rangeDiv;
-                }
-                
-                // Wait for the default zoom reset to complete
-                setTimeout(function() {
-                    // Force-reset the slider even if we can't determine the chart
-                    const slider = document.querySelector('.cashflow-adjustment-slider');
-                    const percentageDisplay = document.querySelector('.cashflow-adjustment-display');
-                    
-                    if (slider) {
-                        console.log('Forcing slider reset to 0');
-                        slider.value = 0;
-                        
-                        try {
-                            // Generate events to trigger listeners
-                            slider.dispatchEvent(new Event('input', { bubbles: true }));
-                            slider.dispatchEvent(new Event('change', { bubbles: true }));
-                        } catch (err) {
-                            console.error('Error triggering slider events:', err);
-                        }
-                    }
-                    
-                    if (percentageDisplay) {
-                        percentageDisplay.textContent = '0%';
-                        percentageDisplay.style.color = '#333';
-                    }
-                    
-                    // Reset global adjustment value
-                    window.currentAdjustmentPercentage = 0;
-                    
-                    // Apply data adjustment if we have original data
-                    if (window.originalCumulativeData && typeof window.applyAdjustmentToData === 'function') {
-                        try {
-                            window.applyAdjustmentToData(0);
-                        } catch (err) {
-                            console.error('Error applying data adjustment:', err);
-                        }
-                    }
-                    
-                    // If we know which chart was clicked, do a full reset for that chart
-                    if (targetChart && targetDiv) {
-                        try {
-                            handleChartReset(targetChart, targetDiv);
-                        } catch (err) {
-                            console.error('Error in handleChartReset:', err);
-                        }
-                    }
-                }, 500);
-            }
-        }, true); // Use capture to ensure we get the event first
-    }
+// Run once to set up the environment
+(function initializeApexChartAdditions() {
+    console.log('Initializing ApexChart extensions');
+    // No special key handlers needed anymore - reset button will handle showing all legends
 })();
