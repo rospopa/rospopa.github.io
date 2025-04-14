@@ -8,10 +8,7 @@ const legendButtonsAdded = {
     cumulativeRangeChart: false,
     rangeChartFromTable: false
 };
-// Store original cumulative data to apply percentage adjustments
-let originalCumulativeData = null;
-// Current adjustment percentage
-let currentAdjustmentPercentage = 0;
+// Global variables for chart instances
 
 // Function to handle the manual reset operations - doesn't need ApexCharts access
 function handleChartReset(chart, chartDiv) {
@@ -28,9 +25,7 @@ function handleChartReset(chart, chartDiv) {
         
         // Reset slider and display if they exist
         try {
-            // First try to find slider in the chart container
-            const slider = document.querySelector('.cashflow-adjustment-slider');
-            const percentageDisplay = document.querySelector('.cashflow-adjustment-display');
+            // No slider to find
             
             console.log('Slider found:', !!slider, 'Display found:', !!percentageDisplay);
             
@@ -59,18 +54,14 @@ function handleChartReset(chart, chartDiv) {
                 percentageDisplay.style.color = '#333';
             }
             
-            // FORCE-RESET THE ADJUSTMENT PERCENTAGE
-            currentAdjustmentPercentage = 0;
-            console.log('Reset global adjustment percentage to 0');
+            // No adjustment percentage to reset
+            console.log('Chart reset requested');
         } catch (err) {
             console.error('Error in direct slider manipulation:', err);
         }
         
-        // Use our adjustment function as a backup approach
+        // Reset chart title if needed
         try {
-            if (originalCumulativeData && typeof applyAdjustmentToData === 'function') {
-                console.log('Applying direct 0% adjustment to data');
-                applyAdjustmentToData(0);
                 
                 // Reset chart title
                 if (chart === apexRangeChartInstance) {
@@ -90,11 +81,8 @@ function handleChartReset(chart, chartDiv) {
                         console.warn('Error updating chart title:', e);
                     }
                 }
-            } else {
-                console.warn('Cannot apply adjustment - missing data or function');
-            }
         } catch (err) {
-            console.error('Error applying data adjustment:', err);
+            console.error('Error resetting chart:', err);
         }
         
         console.log('Chart reset completed');
@@ -589,15 +577,7 @@ window.clearApexRangeChart = function() {
                  console.warn('Ошибка при обновлении опций:', err);
              }
              
-             // Reset the global adjustment percentage
-             currentAdjustmentPercentage = 0;
-             
-             // Remove the slider if it exists
-             const sliderContainer = document.querySelector('.cashflow-adjustment-container');
-             if (sliderContainer) {
-                 sliderContainer.remove();
-                 console.log('clearApexRangeChart: слайдер удален');
-             }
+             // No slider to reset
          } else if (chartDiv) {
              console.log('clearApexRangeChart: инстанс графика не найден, очищаем DOM');
         chartDiv.innerHTML = '<p style="text-align:center; padding: 20px;">Enter valid revenue/expense data and loan term.</p>';
@@ -626,323 +606,7 @@ window.clearApexRangeChart = function() {
      }
 };
 
-// Function to create and add the adjustment slider to the chart
-function createCashFlowAdjustmentSlider(chartDiv) {
-    // Check if slider already exists to avoid duplicates
-    if (chartDiv.parentNode.querySelector('.cashflow-adjustment-container')) {
-        // Reset slider to center position when recalculating
-        const slider = chartDiv.parentNode.querySelector('.cashflow-adjustment-slider');
-        if (slider) {
-            slider.value = 0;
-            updateAdjustmentDisplay(0);
-        }
-        return;
-    }
-    
-    // Create container for the slider
-    const sliderContainer = document.createElement('div');
-    sliderContainer.className = 'cashflow-adjustment-container';
-    sliderContainer.style.cssText = 'width: 100%; padding: 10px 20px; margin-top: 10px; margin-bottom: 20px; text-align: center;';
-    
-    // Add title/label for the slider
-    const sliderTitle = document.createElement('div');
-    sliderTitle.className = 'cashflow-adjustment-title';
-    sliderTitle.textContent = 'Cash Flow Adjustment';
-    sliderTitle.style.cssText = 'font-weight: bold; margin-bottom: 5px; font-size: 14px;';
-    
-    // Create flex container for percentage display and input field
-    const adjustmentDisplayContainer = document.createElement('div');
-    adjustmentDisplayContainer.style.cssText = 'display: flex; justify-content: center; align-items: center; margin-bottom: 5px;';
-    
-    // Create display for current percentage
-    const percentageDisplay = document.createElement('div');
-    percentageDisplay.className = 'cashflow-adjustment-display';
-    percentageDisplay.textContent = '0%';
-    percentageDisplay.style.cssText = 'font-weight: bold; font-size: 16px; color: #333; margin-right: 10px; cursor: pointer;';
-    
-    // Create input field for manual adjustment
-    const manualInput = document.createElement('input');
-    manualInput.type = 'number';
-    manualInput.className = 'cashflow-adjustment-input';
-    manualInput.min = -10;
-    manualInput.max = 10;
-    manualInput.step = 0.01;
-    manualInput.value = '0';
-    manualInput.style.cssText = 'width: 70px; padding: 3px 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; text-align: right; display: none;';
-    
-    // Add toggle functionality between display and input
-    percentageDisplay.addEventListener('click', function() {
-        percentageDisplay.style.display = 'none';
-        manualInput.style.display = 'inline-block';
-        manualInput.focus();
-        manualInput.select();
-    });
-    
-    // Handle manual input
-    manualInput.addEventListener('blur', function() {
-        applyManualAdjustment(this.value);
-        percentageDisplay.style.display = 'inline-block';
-        manualInput.style.display = 'none';
-    });
-    
-    manualInput.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            applyManualAdjustment(this.value);
-            percentageDisplay.style.display = 'inline-block';
-            manualInput.style.display = 'none';
-        }
-    });
-    
-    // Function to apply manual adjustment
-    function applyManualAdjustment(value) {
-        // Parse and validate input
-        let percentage = parseFloat(value);
-        
-        // Check if it's a valid number
-        if (isNaN(percentage)) {
-            percentage = 0;
-        }
-        
-        // Clamp to allowed range
-        percentage = Math.max(-10, Math.min(10, percentage));
-        
-        // Update the adjustment
-        updateAdjustmentDisplay(percentage);
-        applyAdjustmentToData(percentage);
-    }
-    
-    // Add display and input to container
-    adjustmentDisplayContainer.appendChild(percentageDisplay);
-    adjustmentDisplayContainer.appendChild(manualInput);
-    
-    // Create the slider
-    const slider = document.createElement('input');
-    slider.type = 'range';
-    slider.min = -10;
-    slider.max = 10;
-    slider.step = 0.01;
-    slider.value = 0;
-    slider.className = 'cashflow-adjustment-slider';
-    slider.style.cssText = 'width: 100%; margin: 10px 0; --zero-mark-color: #0d6efd;';
-    
-    // Додаємо CSS для виділення центру слайдера
-    const sliderStyle = document.createElement('style');
-    sliderStyle.textContent = `
-        input.cashflow-adjustment-slider {
-            background: linear-gradient(to right,
-                #dc3545 0%, #dc3545 calc(50% - 3px),
-                var(--zero-mark-color) calc(50% - 3px), var(--zero-mark-color) calc(50% + 3px),
-                #28a745 calc(50% + 3px), #28a745 100%);
-            height: 5px;
-            outline: none;
-            -webkit-appearance: none;
-            appearance: none;
-            transition: opacity 0.2s;
-        }
-        
-        input.cashflow-adjustment-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #4c4c4c;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 0 2px rgba(0,0,0,0.5);
-        }
-        
-        input.cashflow-adjustment-slider::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #4c4c4c;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 0 2px rgba(0,0,0,0.5);
-        }
-    `;
-    document.head.appendChild(sliderStyle);
-    
-    // Add labels for min/center/max
-    const labelsContainer = document.createElement('div');
-    labelsContainer.style.cssText = 'display: flex; justify-content: space-between; width: 100%; font-size: 12px; margin-top: 5px;';
-    
-    const minLabel = document.createElement('span');
-    minLabel.textContent = '-10%';
-    minLabel.style.cssText = 'color: #666;';
-    
-    // Create center marker with click handler to reset to 0
-    const centerLabel = document.createElement('span');
-    centerLabel.textContent = '0%';
-    centerLabel.style.cssText = 'color: #0d6efd; font-weight: bold; cursor: pointer; padding: 2px 10px; border-radius: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6;';
-    centerLabel.title = 'Click to reset to 0%';
-    
-    // Add event listener to center label for reset
-    centerLabel.addEventListener('click', function() {
-        slider.value = 0;
-        manualInput.value = '0';
-        updateAdjustmentDisplay(0);
-        applyAdjustmentToData(0);
-    });
-    
-    const maxLabel = document.createElement('span');
-    maxLabel.textContent = '+10%';
-    maxLabel.style.cssText = 'color: #666;';
-    
-    labelsContainer.appendChild(minLabel);
-    labelsContainer.appendChild(centerLabel);
-    labelsContainer.appendChild(maxLabel);
-    
-    // Add event listener to handle slider changes
-    slider.addEventListener('input', function() {
-        const percentage = parseFloat(this.value);
-        updateAdjustmentDisplay(percentage);
-        // Update manual input value as well
-        manualInput.value = percentage.toFixed(2);
-        applyAdjustmentToData(percentage);
-        
-        // Update center label color based on distance from zero
-        if (Math.abs(percentage) < 0.1) {
-            centerLabel.style.backgroundColor = '#e6f2ff';
-        } else {
-            centerLabel.style.backgroundColor = '#f8f9fa';
-        }
-    });
-    
-    // Assemble the slider container
-    sliderContainer.appendChild(sliderTitle);
-    sliderContainer.appendChild(adjustmentDisplayContainer);
-    sliderContainer.appendChild(slider);
-    sliderContainer.appendChild(labelsContainer);
-    
-    // Insert slider after the chart
-    chartDiv.parentNode.insertBefore(sliderContainer, chartDiv.nextSibling);
-    
-    // Initialize display
-    updateAdjustmentDisplay(0);
-}
-
-// Function to update the percentage display
-function updateAdjustmentDisplay(percentage) {
-    currentAdjustmentPercentage = percentage;
-    console.log('updateAdjustmentDisplay: обновляем отображение на', percentage);
-    
-    // Find the display and input elements across the document
-    const display = document.querySelector('.cashflow-adjustment-display');
-    const manualInput = document.querySelector('.cashflow-adjustment-input');
-    const slider = document.querySelector('.cashflow-adjustment-slider');
-    
-    // Update display if it exists
-    if (display) {
-        // Format with sign and 2 decimal places
-        const formattedPercentage = (percentage >= 0 ? '+' : '') + percentage.toFixed(2) + '%';
-        display.textContent = formattedPercentage;
-        
-        // Change color based on value
-        if (percentage > 0) {
-            display.style.color = '#28a745'; // Green for positive
-        } else if (percentage < 0) {
-            display.style.color = '#dc3545'; // Red for negative
-        } else {
-            display.style.color = '#333'; // Default for zero
-        }
-        console.log('updateAdjustmentDisplay: отображение обновлено на', formattedPercentage);
-    } else {
-        console.log('updateAdjustmentDisplay: элемент отображения не найден');
-    }
-    
-    // Update manual input field if it exists
-    if (manualInput && manualInput.value !== percentage.toFixed(2)) {
-        manualInput.value = percentage.toFixed(2);
-        console.log('updateAdjustmentDisplay: поле ввода обновлено на', percentage.toFixed(2));
-    }
-    
-    // Update slider if it exists and value is different
-    if (slider && parseFloat(slider.value) !== percentage) {
-        slider.value = percentage;
-        console.log('updateAdjustmentDisplay: слайдер обновлен на', percentage);
-    }
-}
-
-// Function to apply the percentage adjustment to the data and update chart and table
-function applyAdjustmentToData(percentage) {
-    console.log('applyAdjustmentToData: застосовуємо коригування', percentage, '%');
-    
-    if (!originalCumulativeData || !originalCumulativeData.monthlyData || !originalCumulativeData.monthlyData.length) {
-        console.warn('No original data to adjust');
-        return;
-    }
-    
-    // Validate and sanitize percentage (ensure it's a number and within range)
-    percentage = parseFloat(percentage);
-    if (isNaN(percentage)) {
-        console.warn('Invalid percentage value, using 0');
-        percentage = 0;
-    }
-    
-    // Clamp to allowed range (-10 to 10)
-    percentage = Math.max(-10, Math.min(10, percentage));
-    
-    // Update UI controls to reflect any adjusted value
-    try {
-        // Always update the global adjustment percentage first
-        currentAdjustmentPercentage = percentage;
-        
-        // Use the dedicated function to update all displays
-        updateAdjustmentDisplay(percentage);
-    } catch (err) {
-        console.error('Error updating UI controls:', err);
-    }
-    
-    // Make a deep copy of the original data
-    const adjustedData = JSON.parse(JSON.stringify(originalCumulativeData));
-    
-    // Apply the adjustment to each month's data
-    adjustedData.monthlyData.forEach((month, index) => {
-        const originalMonth = originalCumulativeData.monthlyData[index];
-        
-        // Calculate adjustment factor (e.g., 5% = 1.05, -5% = 0.95)
-        const adjustmentFactor = 1 + (percentage / 100);
-        
-        // Adjust revenue values (increase/decrease by percentage)
-        month.revenueMin = originalMonth.revenueMin * adjustmentFactor;
-        month.revenueMax = originalMonth.revenueMax * adjustmentFactor;
-        month.revenueAvg = originalMonth.revenueAvg * adjustmentFactor;
-        
-        // Adjust expense values (opposite direction for better cash flow effect)
-        // Note: Expenses are negative, so reducing absolute value improves cash flow
-        const expenseAdjustmentFactor = percentage >= 0 ? (1 - (percentage / 200)) : (1 + (Math.abs(percentage) / 200));
-        month.expenseMin = originalMonth.expenseMin * expenseAdjustmentFactor;
-        month.expenseMax = originalMonth.expenseMax * expenseAdjustmentFactor;
-        month.expenseAvg = originalMonth.expenseAvg * expenseAdjustmentFactor;
-        
-        // Recalculate cash flow values
-        month.flowMin = month.revenueMin + month.expenseMin;
-        month.flowMax = month.revenueMax + month.expenseMax;
-        month.flowAvg = month.revenueAvg + month.expenseAvg;
-    });
-    
-    // Update the global data object with adjusted values
-    window.cumulativeDataForChart = adjustedData;
-    
-    // Update the table and chart with the adjusted data
-    try {
-        // Update the table with the adjusted data
-        updateCumulativeTable(adjustedData);
-    } catch (err) {
-        console.error('Error updating table:', err);
-    }
-    
-    try {
-        // Update the chart with the adjusted data
-        updateChartWithAdjustedData(adjustedData);
-    } catch (err) {
-        console.error('Error updating chart:', err);
-    }
-    
-    console.log('applyAdjustmentToData: коригування застосовано успішно');
-}
+// No slider functions needed
 
 // Function to update the cumulative table with adjusted data
 function updateCumulativeTable(adjustedData) {
@@ -1170,12 +834,8 @@ function updateChartWithAdjustedData(adjustedData) {
             });
         }
         
-        // Додаємо індикацію коригування в заголовок, якщо не 0%
+        // Set chart title
         let chartTitle = 'Monthly Cumulative Revenue, Expense & Cash Flow';
-        if (currentAdjustmentPercentage !== 0) {
-            const sign = currentAdjustmentPercentage > 0 ? '+' : '';
-            chartTitle += ` (${sign}${currentAdjustmentPercentage.toFixed(2)}% Adjusted)`;
-        }
         
         // Оновлюємо заголовок графіка
         apexRangeChartInstance.updateOptions({
@@ -1252,10 +912,7 @@ window.updateApexRangeChartFromTableData = function() {
         return;
     }
 
-    // Store the original data for slider adjustments
-    originalCumulativeData = JSON.parse(JSON.stringify(window.cumulativeDataForChart));
-    // Reset adjustment percentage
-    currentAdjustmentPercentage = 0;
+    // Process the data from the table
     
     const { monthlyData, years } = window.cumulativeDataForChart;
     
@@ -1564,8 +1221,7 @@ window.updateApexRangeChartFromTableData = function() {
         // Add our custom reset button listener
         addManualResetButtonListener(chartDiv, apexRangeChartInstance, 'rangeChartFromTable');
         
-        // Add the adjustment slider after rendering the chart
-        createCashFlowAdjustmentSlider(chartDiv);
+        // No slider needed
         
     } catch (err) {
         console.error("ApexCharts chart render/update error:", err);
