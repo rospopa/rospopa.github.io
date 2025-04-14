@@ -8,7 +8,6 @@ const legendButtonsAdded = {
     cumulativeRangeChart: false,
     rangeChartFromTable: false
 };
-// Global variables for chart instances
 
 // Function to handle the manual reset operations - doesn't need ApexCharts access
 function handleChartReset(chart, chartDiv) {
@@ -22,68 +21,6 @@ function handleChartReset(chart, chartDiv) {
         
         // Reset ALL legends to show ALL series - this is what the reset button SHOULD do
         resetAllLegends(chart);
-        
-        // Reset slider and display if they exist
-        try {
-            // No slider to find
-            
-            console.log('Slider found:', !!slider, 'Display found:', !!percentageDisplay);
-            
-        if (slider) {
-                console.log('Setting slider value to 0 directly');
-            slider.value = 0;
-                
-                // Force fire input event for listeners
-                try {
-                    const inputEvent = new Event('input', { bubbles: true });
-                    slider.dispatchEvent(inputEvent);
-                    
-                    // Also try change event
-                    const changeEvent = new Event('change', { bubbles: true });
-                    slider.dispatchEvent(changeEvent);
-                    
-                    console.log('Fired input and change events on slider');
-                } catch (e) {
-                    console.warn('Error dispatching slider events:', e);
-                }
-            }
-            
-        if (percentageDisplay) {
-                console.log('Updating percentage display text directly');
-            percentageDisplay.textContent = '0%';
-                percentageDisplay.style.color = '#333';
-            }
-            
-            // No adjustment percentage to reset
-            console.log('Chart reset requested');
-        } catch (err) {
-            console.error('Error in direct slider manipulation:', err);
-        }
-        
-        // Reset chart title if needed
-        try {
-                
-                // Reset chart title
-                if (chart === apexRangeChartInstance) {
-                    try {
-                        console.log('Updating chart title to default');
-                        chart.updateOptions({
-                            title: {
-                                text: 'Monthly Cumulative Revenue, Expense & Cash Flow',
-                                align: 'center',
-                                style: {
-                                    fontSize: '16px',
-                                    fontWeight: 'bold'
-                                }
-                            }
-                        }, false, false);
-                    } catch (e) {
-                        console.warn('Error updating chart title:', e);
-                    }
-                }
-        } catch (err) {
-            console.error('Error resetting chart:', err);
-        }
         
         console.log('Chart reset completed');
     } catch (error) {
@@ -576,8 +513,6 @@ window.clearApexRangeChart = function() {
              } catch (err) {
                  console.warn('Ошибка при обновлении опций:', err);
              }
-             
-             // No slider to reset
          } else if (chartDiv) {
              console.log('clearApexRangeChart: инстанс графика не найден, очищаем DOM');
         chartDiv.innerHTML = '<p style="text-align:center; padding: 20px;">Enter valid revenue/expense data and loan term.</p>';
@@ -606,292 +541,6 @@ window.clearApexRangeChart = function() {
      }
 };
 
-// No slider functions needed
-
-// Function to update the cumulative table with adjusted data
-function updateCumulativeTable(adjustedData) {
-    // Check if the table exists and Google Charts is loaded
-    const tableDiv = document.getElementById('google_cumulative_range_table');
-    if (!tableDiv || !window.cumulativeDataTable || typeof google === 'undefined' || 
-        typeof google.visualization === 'undefined' || typeof google.visualization.Table === 'undefined') {
-        console.warn('Cumulative table not ready for update');
-        // Continue with chart update even if table isn't ready
-        updateChartWithAdjustedData(adjustedData);
-        return;
-    }
-    
-    try {
-        // Create a new DataTable
-        const data = new google.visualization.DataTable();
-        
-        // Define columns (same as in original table)
-        data.addColumn('string', 'Date');
-        data.addColumn('number', 'Monthly Expense [Min]');
-        data.addColumn('number', 'Cumulative Expense [Min]');
-        data.addColumn('number', 'Monthly Expense [Max]');
-        data.addColumn('number', 'Cumulative Expense [Max]');
-        data.addColumn('number', 'Monthly Expense [Avg]');
-        data.addColumn('number', 'Cumulative Expense [Avg]');
-        data.addColumn('number', 'Monthly Revenue [Min]');
-        data.addColumn('number', 'Cumulative Revenue [Min]');
-        data.addColumn('number', 'Monthly Revenue [Max]');
-        data.addColumn('number', 'Cumulative Revenue [Max]');
-        data.addColumn('number', 'Monthly Revenue [Avg]');
-        data.addColumn('number', 'Cumulative Revenue [Avg]');
-        data.addColumn('number', 'Cash Flow [Min]');
-        data.addColumn('number', 'Cash Flow [Max]');
-        data.addColumn('number', 'Cash Flow [Avg]');
-        data.addColumn('number', 'Year');
-        
-        // Loop through monthlyData and calculate monthly values from cumulative
-        let prevMonth = null;
-        adjustedData.monthlyData.forEach((month, index) => {
-            // Calculate monthly values by finding difference with previous month
-            let monthlyExpenseMin = month.expenseMin;
-            let monthlyExpenseMax = month.expenseMax;
-            let monthlyExpenseAvg = month.expenseAvg;
-            let monthlyRevenueMin = month.revenueMin;
-            let monthlyRevenueMax = month.revenueMax;
-            let monthlyRevenueAvg = month.revenueAvg;
-            
-            if (index > 0) {
-                prevMonth = adjustedData.monthlyData[index - 1];
-                monthlyExpenseMin = month.expenseMin - prevMonth.expenseMin;
-                monthlyExpenseMax = month.expenseMax - prevMonth.expenseMax;
-                monthlyExpenseAvg = month.expenseAvg - prevMonth.expenseAvg;
-                monthlyRevenueMin = month.revenueMin - prevMonth.revenueMin;
-                monthlyRevenueMax = month.revenueMax - prevMonth.revenueMax;
-                monthlyRevenueAvg = month.revenueAvg - prevMonth.revenueAvg;
-            }
-            
-            const cashFlowMin = monthlyRevenueMin + monthlyExpenseMin;
-            const cashFlowMax = monthlyRevenueMax + monthlyExpenseMax;
-            const cashFlowAvg = monthlyRevenueAvg + monthlyExpenseAvg;
-            
-            // Add the row with all values
-            data.addRow([
-                month.date,
-                monthlyExpenseMin,
-                month.expenseMin,
-                monthlyExpenseMax,
-                month.expenseMax,
-                monthlyExpenseAvg,
-                month.expenseAvg,
-                monthlyRevenueMin,
-                month.revenueMin,
-                monthlyRevenueMax,
-                month.revenueMax,
-                monthlyRevenueAvg,
-                month.revenueAvg,
-                cashFlowMin,
-                cashFlowMax,
-                cashFlowAvg,
-                month.year
-            ]);
-        });
-        
-        // Apply currency formatting to all numeric columns
-        const currencyFormatter = new google.visualization.NumberFormat({
-            prefix: '$', 
-            pattern: '#,##0.00;(#,##0.00)', // Standard accounting format
-            fractionDigits: 2
-        });
-        
-        // Apply formatter to all numeric columns (indices 1 through 15)
-        for (let i = 1; i <= 15; i++) {
-            currencyFormatter.format(data, i);
-        }
-        
-        // Get current view settings to maintain current year filter
-        const currentYearElement = document.getElementById('year-indicator');
-        const currentYear = currentYearElement ? parseInt(currentYearElement.textContent.replace(/\D/g, '')) : null;
-        
-        // Create a view with the year column hidden
-        const view = new google.visualization.DataView(data);
-        view.hideColumns([16]); // Hide the year column (index 16)
-        
-        // If we have a current year, filter by it
-        if (currentYear !== null) {
-            const rows = data.getFilteredRows([{column: 16, value: currentYear}]);
-            view.setRows(rows);
-        }
-        
-        // Define table options (same as original)
-        const options = {
-            showRowNumber: false, 
-            width: '100%', 
-            height: '400px',
-            allowHtml: true,
-            page: 'enable',
-            pageSize: 12,
-            cssClassNames: {
-                headerRow: 'table-light sticky-top small',
-                tableRow: 'small',
-                oddTableRow: 'small bg-light',
-                headerCell: 'text-center fw-bold',
-                tableCell: 'text-end'
-            }
-        };
-        
-        // Update the table
-        window.cumulativeDataTable.draw(view, options);
-        
-    } catch (err) {
-        console.error("Error updating cumulative table with adjusted data:", err);
-    }
-}
-
-// Function to update the chart with adjusted data
-function updateChartWithAdjustedData(adjustedData) {
-    console.log('updateChartWithAdjustedData: commences updating the chart');
-    
-    if (!apexRangeChartInstance) {
-        console.warn('Range chart instance not found for update');
-        return;
-    }
-    
-    try {
-        // Prepare data series from adjusted data
-        const revenueMinData = [];
-        const revenueMaxData = [];
-        const revenueAvgData = [];
-        const expenseMinData = [];
-        const expenseMaxData = [];
-        const expenseAvgData = [];
-        const cashFlowMinData = [];
-        const cashFlowMaxData = [];
-        const cashFlowAvgData = [];
-        const categories = [];
-        
-        // Transform the data for chart format
-        adjustedData.monthlyData.forEach(month => {
-            categories.push(month.date);
-            
-            // Revenue min/max/avg
-            revenueMinData.push({
-                x: month.date,
-                y: isFinite(month.revenueMin) ? parseFloat(month.revenueMin.toFixed(2)) : 0
-            });
-            
-            revenueMaxData.push({
-                x: month.date,
-                y: isFinite(month.revenueMax) ? parseFloat(month.revenueMax.toFixed(2)) : 0
-            });
-            
-            revenueAvgData.push({
-                x: month.date,
-                y: isFinite(month.revenueAvg) ? parseFloat(month.revenueAvg.toFixed(2)) : 0
-            });
-            
-            // Expense min/max/avg
-            expenseMinData.push({
-                x: month.date,
-                y: isFinite(month.expenseMin) ? parseFloat(month.expenseMin.toFixed(2)) : 0
-            });
-            
-            expenseMaxData.push({
-                x: month.date,
-                y: isFinite(month.expenseMax) ? parseFloat(month.expenseMax.toFixed(2)) : 0
-            });
-            
-            expenseAvgData.push({
-                x: month.date,
-                y: isFinite(month.expenseAvg) ? parseFloat(month.expenseAvg.toFixed(2)) : 0
-            });
-            
-            // Cash Flow min/max/avg
-            cashFlowMinData.push({
-                x: month.date,
-                y: isFinite(month.flowMin) ? parseFloat(month.flowMin.toFixed(2)) : 0
-            });
-            
-            cashFlowMaxData.push({
-                x: month.date,
-                y: isFinite(month.flowMax) ? parseFloat(month.flowMax.toFixed(2)) : 0
-            });
-            
-            cashFlowAvgData.push({
-                x: month.date,
-                y: isFinite(month.flowAvg) ? parseFloat(month.flowAvg.toFixed(2)) : 0
-            });
-        });
-        
-        // ЗМІНЕНО: Зберігаємо стан видимості серій ДО оновлення даних
-        // Створюємо масив для збереження індексів прихованих серій
-        let hiddenSeriesIndices = [];
-        
-        if (apexRangeChartInstance.w && apexRangeChartInstance.w.globals) {
-            // Отримуємо інформацію про згорнуті серії
-            const collapsedSeries = apexRangeChartInstance.w.globals.collapsedSeries || [];
-            const collapsedSeriesIndices = apexRangeChartInstance.w.globals.collapsedSeriesIndices || [];
-            
-            // Зберігаємо індекси прихованих серій
-            hiddenSeriesIndices = [...collapsedSeriesIndices];
-            
-            console.log('Збережено стан видимості серій:', {
-                hiddenCount: hiddenSeriesIndices.length,
-                indices: hiddenSeriesIndices
-            });
-        }
-        
-        // Set chart title
-        let chartTitle = 'Monthly Cumulative Revenue, Expense & Cash Flow';
-        
-        // Оновлюємо заголовок графіка
-        apexRangeChartInstance.updateOptions({
-            title: {
-                text: chartTitle,
-                align: 'center',
-                style: {
-                    fontSize: '16px',
-                    fontWeight: 'bold'
-                }
-            }
-        }, false, false); // Не перемальовуємо і не анімуємо зміну заголовка
-        
-        // Оновлюємо дані серій
-        console.log('Оновлюємо серії даних');
-        apexRangeChartInstance.updateSeries([
-            { name: 'Revenue Min', type: 'area', data: revenueMinData },
-            { name: 'Expense Min', type: 'area', data: expenseMinData },
-            { name: 'Cash Flow Min', type: 'area', data: cashFlowMinData },
-            { name: 'Revenue Max', type: 'area', data: revenueMaxData },
-            { name: 'Expense Max', type: 'area', data: expenseMaxData },
-            { name: 'Cash Flow Max', type: 'area', data: cashFlowMaxData },
-            { name: 'Revenue Forecast', type: 'line', data: revenueAvgData },
-            { name: 'Expense Forecast', type: 'line', data: expenseAvgData },
-            { name: 'Cash Flow Forecast', type: 'line', data: cashFlowAvgData }
-        ], false); // Додаємо параметр false, щоб не перемальовувати графік повністю
-        
-        // ЗМІНЕНО: Відновлюємо видимість серій ПІСЛЯ оновлення даних з невеликою затримкою
-        if (hiddenSeriesIndices.length > 0) {
-            setTimeout(() => {
-                try {
-                    console.log('Відновлюємо стан видимості серій');
-                    // Переховуємо серії за збереженими індексами
-                    hiddenSeriesIndices.forEach(index => {
-                        if (apexRangeChartInstance.w.globals.seriesNames[index]) {
-                            const seriesName = apexRangeChartInstance.w.globals.seriesNames[index];
-                            console.log(`Ховаємо серію #${index}: ${seriesName}`);
-                            apexRangeChartInstance.toggleSeries(seriesName);
-                        }
-                    });
-                    
-                    // Примушуємо графік перемалювати легенду
-                    apexRangeChartInstance.update();
-                } catch (err) {
-                    console.error('Помилка відновлення видимості серій:', err);
-                }
-            }, 50); // Невелика затримка для стабільності
-        }
-        
-        console.log('updateChartWithAdjustedData: обновление графика завершено успешно');
-        
-    } catch (err) {
-        console.error("Error updating chart with adjusted data:", err);
-    }
-}
-
 // Function to update the cumulative range chart using data from the table
 window.updateApexRangeChartFromTableData = function() {
     // Check if the table data is available
@@ -911,8 +560,6 @@ window.updateApexRangeChartFromTableData = function() {
         chartDiv.innerHTML = '<p style="text-align:center; padding: 20px; color: red;">Error: ApexCharts library not loaded.</p>';
         return;
     }
-
-    // Process the data from the table
     
     const { monthlyData, years } = window.cumulativeDataForChart;
     
@@ -1220,8 +867,6 @@ window.updateApexRangeChartFromTableData = function() {
         
         // Add our custom reset button listener
         addManualResetButtonListener(chartDiv, apexRangeChartInstance, 'rangeChartFromTable');
-        
-        // No slider needed
         
     } catch (err) {
         console.error("ApexCharts chart render/update error:", err);
