@@ -650,11 +650,70 @@ function createCashFlowAdjustmentSlider(chartDiv) {
     sliderTitle.textContent = 'Cash Flow Adjustment';
     sliderTitle.style.cssText = 'font-weight: bold; margin-bottom: 5px; font-size: 14px;';
     
+    // Create flex container for percentage display and input field
+    const adjustmentDisplayContainer = document.createElement('div');
+    adjustmentDisplayContainer.style.cssText = 'display: flex; justify-content: center; align-items: center; margin-bottom: 5px;';
+    
     // Create display for current percentage
     const percentageDisplay = document.createElement('div');
     percentageDisplay.className = 'cashflow-adjustment-display';
     percentageDisplay.textContent = '0%';
-    percentageDisplay.style.cssText = 'font-weight: bold; margin-bottom: 5px; font-size: 16px; color: #333;';
+    percentageDisplay.style.cssText = 'font-weight: bold; font-size: 16px; color: #333; margin-right: 10px; cursor: pointer;';
+    
+    // Create input field for manual adjustment
+    const manualInput = document.createElement('input');
+    manualInput.type = 'number';
+    manualInput.className = 'cashflow-adjustment-input';
+    manualInput.min = -10;
+    manualInput.max = 10;
+    manualInput.step = 0.01;
+    manualInput.value = '0';
+    manualInput.style.cssText = 'width: 70px; padding: 3px 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; text-align: right; display: none;';
+    
+    // Add toggle functionality between display and input
+    percentageDisplay.addEventListener('click', function() {
+        percentageDisplay.style.display = 'none';
+        manualInput.style.display = 'inline-block';
+        manualInput.focus();
+        manualInput.select();
+    });
+    
+    // Handle manual input
+    manualInput.addEventListener('blur', function() {
+        applyManualAdjustment(this.value);
+        percentageDisplay.style.display = 'inline-block';
+        manualInput.style.display = 'none';
+    });
+    
+    manualInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            applyManualAdjustment(this.value);
+            percentageDisplay.style.display = 'inline-block';
+            manualInput.style.display = 'none';
+        }
+    });
+    
+    // Function to apply manual adjustment
+    function applyManualAdjustment(value) {
+        // Parse and validate input
+        let percentage = parseFloat(value);
+        
+        // Check if it's a valid number
+        if (isNaN(percentage)) {
+            percentage = 0;
+        }
+        
+        // Clamp to allowed range
+        percentage = Math.max(-10, Math.min(10, percentage));
+        
+        // Update the adjustment
+        updateAdjustmentDisplay(percentage);
+        applyAdjustmentToData(percentage);
+    }
+    
+    // Add display and input to container
+    adjustmentDisplayContainer.appendChild(percentageDisplay);
+    adjustmentDisplayContainer.appendChild(manualInput);
     
     // Create the slider
     const slider = document.createElement('input');
@@ -664,20 +723,72 @@ function createCashFlowAdjustmentSlider(chartDiv) {
     slider.step = 0.01;
     slider.value = 0;
     slider.className = 'cashflow-adjustment-slider';
-    slider.style.cssText = 'width: 100%; margin: 10px 0;';
+    slider.style.cssText = 'width: 100%; margin: 10px 0; --zero-mark-color: #0d6efd;';
+    
+    // Додаємо CSS для виділення центру слайдера
+    const sliderStyle = document.createElement('style');
+    sliderStyle.textContent = `
+        input.cashflow-adjustment-slider {
+            background: linear-gradient(to right,
+                #dc3545 0%, #dc3545 calc(50% - 3px),
+                var(--zero-mark-color) calc(50% - 3px), var(--zero-mark-color) calc(50% + 3px),
+                #28a745 calc(50% + 3px), #28a745 100%);
+            height: 5px;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+            transition: opacity 0.2s;
+        }
+        
+        input.cashflow-adjustment-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #4c4c4c;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 2px rgba(0,0,0,0.5);
+        }
+        
+        input.cashflow-adjustment-slider::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #4c4c4c;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 0 2px rgba(0,0,0,0.5);
+        }
+    `;
+    document.head.appendChild(sliderStyle);
     
     // Add labels for min/center/max
     const labelsContainer = document.createElement('div');
-    labelsContainer.style.cssText = 'display: flex; justify-content: space-between; width: 100%; font-size: 12px; color: #666;';
+    labelsContainer.style.cssText = 'display: flex; justify-content: space-between; width: 100%; font-size: 12px; margin-top: 5px;';
     
     const minLabel = document.createElement('span');
     minLabel.textContent = '-10%';
+    minLabel.style.cssText = 'color: #666;';
     
+    // Create center marker with click handler to reset to 0
     const centerLabel = document.createElement('span');
     centerLabel.textContent = '0%';
+    centerLabel.style.cssText = 'color: #0d6efd; font-weight: bold; cursor: pointer; padding: 2px 10px; border-radius: 10px; background-color: #f8f9fa; border: 1px solid #dee2e6;';
+    centerLabel.title = 'Click to reset to 0%';
+    
+    // Add event listener to center label for reset
+    centerLabel.addEventListener('click', function() {
+        slider.value = 0;
+        manualInput.value = '0';
+        updateAdjustmentDisplay(0);
+        applyAdjustmentToData(0);
+    });
     
     const maxLabel = document.createElement('span');
     maxLabel.textContent = '+10%';
+    maxLabel.style.cssText = 'color: #666;';
     
     labelsContainer.appendChild(minLabel);
     labelsContainer.appendChild(centerLabel);
@@ -687,12 +798,21 @@ function createCashFlowAdjustmentSlider(chartDiv) {
     slider.addEventListener('input', function() {
         const percentage = parseFloat(this.value);
         updateAdjustmentDisplay(percentage);
+        // Update manual input value as well
+        manualInput.value = percentage.toFixed(2);
         applyAdjustmentToData(percentage);
+        
+        // Update center label color based on distance from zero
+        if (Math.abs(percentage) < 0.1) {
+            centerLabel.style.backgroundColor = '#e6f2ff';
+        } else {
+            centerLabel.style.backgroundColor = '#f8f9fa';
+        }
     });
     
     // Assemble the slider container
     sliderContainer.appendChild(sliderTitle);
-    sliderContainer.appendChild(percentageDisplay);
+    sliderContainer.appendChild(adjustmentDisplayContainer);
     sliderContainer.appendChild(slider);
     sliderContainer.appendChild(labelsContainer);
     
@@ -708,8 +828,12 @@ function updateAdjustmentDisplay(percentage) {
     currentAdjustmentPercentage = percentage;
     console.log('updateAdjustmentDisplay: обновляем отображение на', percentage);
     
-    // Find the display element across the document
+    // Find the display and input elements across the document
     const display = document.querySelector('.cashflow-adjustment-display');
+    const manualInput = document.querySelector('.cashflow-adjustment-input');
+    const slider = document.querySelector('.cashflow-adjustment-slider');
+    
+    // Update display if it exists
     if (display) {
         // Format with sign and 2 decimal places
         const formattedPercentage = (percentage >= 0 ? '+' : '') + percentage.toFixed(2) + '%';
@@ -727,6 +851,18 @@ function updateAdjustmentDisplay(percentage) {
     } else {
         console.log('updateAdjustmentDisplay: элемент отображения не найден');
     }
+    
+    // Update manual input field if it exists
+    if (manualInput && manualInput.value !== percentage.toFixed(2)) {
+        manualInput.value = percentage.toFixed(2);
+        console.log('updateAdjustmentDisplay: поле ввода обновлено на', percentage.toFixed(2));
+    }
+    
+    // Update slider if it exists and value is different
+    if (slider && parseFloat(slider.value) !== percentage) {
+        slider.value = percentage;
+        console.log('updateAdjustmentDisplay: слайдер обновлен на', percentage);
+    }
 }
 
 // Function to apply the percentage adjustment to the data and update chart and table
@@ -738,43 +874,25 @@ function applyAdjustmentToData(percentage) {
         return;
     }
     
-    // Update slider UI if it exists and value is different
-    try {
-        const slider = document.querySelector('.cashflow-adjustment-slider');
-        if (slider && parseFloat(slider.value) !== percentage) {
-            console.log('applyAdjustmentToData: оновлюємо слайдер на', percentage);
-            slider.value = percentage;
-        }
-    } catch (err) {
-        console.error('Error updating slider:', err);
+    // Validate and sanitize percentage (ensure it's a number and within range)
+    percentage = parseFloat(percentage);
+    if (isNaN(percentage)) {
+        console.warn('Invalid percentage value, using 0');
+        percentage = 0;
     }
     
-    // Always update percentage display and global variable
-    currentAdjustmentPercentage = percentage;
+    // Clamp to allowed range (-10 to 10)
+    percentage = Math.max(-10, Math.min(10, percentage));
+    
+    // Update UI controls to reflect any adjusted value
     try {
+        // Always update the global adjustment percentage first
+        currentAdjustmentPercentage = percentage;
+        
+        // Use the dedicated function to update all displays
         updateAdjustmentDisplay(percentage);
     } catch (err) {
-        console.error('Error updating display:', err);
-        // Try direct update as fallback
-        try {
-            const percentageDisplay = document.querySelector('.cashflow-adjustment-display');
-            if (percentageDisplay) {
-                // Format with sign and 2 decimal places
-                const formattedPercentage = (percentage >= 0 ? '+' : '') + percentage.toFixed(2) + '%';
-                percentageDisplay.textContent = formattedPercentage;
-                
-                // Change color based on value
-                if (percentage > 0) {
-                    percentageDisplay.style.color = '#28a745'; // Green for positive
-                } else if (percentage < 0) {
-                    percentageDisplay.style.color = '#dc3545'; // Red for negative
-                } else {
-                    percentageDisplay.style.color = '#333'; // Default for zero
-                }
-            }
-        } catch (e) {
-            console.error('Complete failure updating display:', e);
-        }
+        console.error('Error updating UI controls:', err);
     }
     
     // Make a deep copy of the original data
@@ -810,15 +928,15 @@ function applyAdjustmentToData(percentage) {
     
     // Update the table and chart with the adjusted data
     try {
-    // Update the table with the adjusted data
-    updateCumulativeTable(adjustedData);
+        // Update the table with the adjusted data
+        updateCumulativeTable(adjustedData);
     } catch (err) {
         console.error('Error updating table:', err);
     }
     
     try {
-    // Update the chart with the adjusted data
-    updateChartWithAdjustedData(adjustedData);
+        // Update the chart with the adjusted data
+        updateChartWithAdjustedData(adjustedData);
     } catch (err) {
         console.error('Error updating chart:', err);
     }
@@ -961,7 +1079,7 @@ function updateCumulativeTable(adjustedData) {
 
 // Function to update the chart with adjusted data
 function updateChartWithAdjustedData(adjustedData) {
-    console.log('updateChartWithAdjustedData: починаем обновление графика');
+    console.log('updateChartWithAdjustedData: commences updating the chart');
     
     if (!apexRangeChartInstance) {
         console.warn('Range chart instance not found for update');
