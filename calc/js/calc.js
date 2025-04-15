@@ -1,6 +1,9 @@
 // Global variable to track the last edited down payment field
 let lastEditedDownPaymentField = 'B2'; // Default to rate being the driver
 
+// Global variable to hold the chart instance
+let rentVsOwnChartInstance = null;
+
 // Utility functions Debounce
 function debounce(func, wait) {
     let timeout;
@@ -309,6 +312,234 @@ function calculateRow66(revenueResults, expenseResults, monthlyPayment) {
      return { b66, c66, d66 }; // Return numeric values
 }
 
+// Function to calculate rent vs own comparison
+function calculateRentVsOwn() {
+    // Get rental costs from inputs
+    const monthlyRent = parseCurrency(document.getElementById('R1').value) || 0;
+    // Get utilities from D65 (Monthly Revenue AVG)
+    const d65Value = parseCurrency(document.getElementById('D65').value) || 0;
+    document.getElementById('R2').value = formatCalculatedValue(d65Value);
+    const rentalUtilities = d65Value;
+    const rentalInsurance = parseCurrency(document.getElementById('R3').value) || 0;
+    const rentalMaintenance = parseCurrency(document.getElementById('R4').value) || 0;
+    
+    // Get loan term from B7
+    const loanTermYears = parseFloat(document.getElementById('B7').value) || 30; // Default to 30 if not set
+    const midTermYears = Math.round(loanTermYears / 2); // Use half the loan term as the mid-point
+    
+    // Get owner costs from existing calculations
+    const monthlyMortgage = parseCurrency(document.getElementById('B10').value) || 0;
+    const propertyTax = Math.abs(parseCurrency(document.getElementById('B22').value)) || 0; // Remove negative sign
+    const propertyInsurance = Math.abs(parseCurrency(document.getElementById('D30').value)) || 0; // Average value
+    const ownerMaintenance = Math.abs(parseCurrency(document.getElementById('D27').value)) || 0; // Average value
+    const ownerUtilities = Math.abs(parseCurrency(document.getElementById('D23').value) + 
+                           parseCurrency(document.getElementById('D24').value) + 
+                           parseCurrency(document.getElementById('D25').value)) || 0; // Electric + Gas + Internet
+    
+    // Purchase price and appreciation rate for equity calculation
+    const purchasePrice = parseCurrency(document.getElementById('B1').value) || 0;
+    const appreciationRate = parseFloat(document.getElementById('A20').value) / 100 || 0;
+    
+    // Set owner costs
+    document.getElementById('O1').value = formatCalculatedValue(0); // No rent for owner
+    document.getElementById('O2').value = formatCalculatedValue(ownerUtilities);
+    document.getElementById('O3').value = formatCalculatedValue(propertyInsurance);
+    document.getElementById('O4').value = formatCalculatedValue(ownerMaintenance);
+    document.getElementById('O5').value = formatCalculatedValue(propertyTax);
+    document.getElementById('O6').value = formatCalculatedValue(monthlyMortgage);
+    
+    // Calculate differences
+    document.getElementById('D1').value = formatCalculatedValue(-monthlyRent); // Negative for owner (savings)
+    document.getElementById('D2').value = formatCalculatedValue(ownerUtilities - rentalUtilities);
+    document.getElementById('D3').value = formatCalculatedValue(propertyInsurance - rentalInsurance);
+    document.getElementById('D4').value = formatCalculatedValue(ownerMaintenance - rentalMaintenance);
+    document.getElementById('D5').value = formatCalculatedValue(propertyTax); // Renters don't pay property tax
+    document.getElementById('D6').value = formatCalculatedValue(monthlyMortgage); // Renters don't pay mortgage
+    
+    // Calculate totals
+    const monthlyRentalTotal = monthlyRent + rentalUtilities + rentalInsurance + rentalMaintenance;
+    const monthlyOwnerTotal = monthlyMortgage + propertyTax + propertyInsurance + ownerMaintenance + ownerUtilities;
+    const monthlyDifference = monthlyOwnerTotal - monthlyRentalTotal;
+    
+    document.getElementById('R-total').value = formatCalculatedValue(monthlyRentalTotal);
+    document.getElementById('O-total').value = formatCalculatedValue(monthlyOwnerTotal);
+    document.getElementById('D-total').value = formatCalculatedValue(monthlyDifference);
+    
+    // Annual costs
+    const annualRentalTotal = monthlyRentalTotal * 12;
+    const annualOwnerTotal = monthlyOwnerTotal * 12;
+    const annualDifference = monthlyDifference * 12;
+    
+    document.getElementById('R-annual').value = formatCalculatedValue(annualRentalTotal);
+    document.getElementById('O-annual').value = formatCalculatedValue(annualOwnerTotal);
+    document.getElementById('D-annual').value = formatCalculatedValue(annualDifference);
+    
+    // Mid-term and full loan term totals (using the loan term from B7)
+    const rentalMidTermTotal = annualRentalTotal * midTermYears;
+    const ownerMidTermTotal = annualOwnerTotal * midTermYears;
+    const rentalFullTermTotal = annualRentalTotal * loanTermYears;
+    const ownerFullTermTotal = annualOwnerTotal * loanTermYears;
+    
+    // Update the labels for mid-term and full-term costs
+    document.getElementById('midTermYearLabel').textContent = `${midTermYears}-Year Cost`;
+    document.getElementById('loanTermYearLabel').textContent = `${loanTermYears}-Year Total Cost`;
+    
+    // Update tooltip titles
+    const midTermTooltip = document.querySelector('tr.table-success:nth-child(9) td:first-child sup');
+    if (midTermTooltip) {
+        midTermTooltip.setAttribute('title', `${midTermYears}-Year Cost Difference`);
+    }
+    const fullTermTooltip = document.querySelector('tr.table-success:nth-child(10) td:first-child sup');
+    if (fullTermTooltip) {
+        fullTermTooltip.setAttribute('title', `${loanTermYears}-Year Cost Difference`);
+    }
+    
+    document.getElementById('R-MidYear').value = formatCalculatedValue(rentalMidTermTotal);
+    document.getElementById('O-MidYear').value = formatCalculatedValue(ownerMidTermTotal);
+    document.getElementById('D-MidYear').value = formatCalculatedValue(ownerMidTermTotal - rentalMidTermTotal);
+    
+    document.getElementById('R-TotalYear').value = formatCalculatedValue(rentalFullTermTotal);
+    document.getElementById('O-TotalYear').value = formatCalculatedValue(ownerFullTermTotal);
+    document.getElementById('D-TotalYear').value = formatCalculatedValue(ownerFullTermTotal - rentalFullTermTotal);
+    
+    // Calculate equity built after loan term years
+    const futureHomeValue = purchasePrice * Math.pow(1 + appreciationRate, loanTermYears);
+    const equityBuilt = futureHomeValue - 0; // Assuming loan is paid off after loan term
+    
+    // Update the equity label
+    document.getElementById('equityYearLabel').textContent = `${loanTermYears} Years`;
+    
+    // Update tooltip for equity
+    const equityTooltip = document.querySelector('tr.table-info td:first-child sup');
+    if (equityTooltip) {
+        equityTooltip.setAttribute('title', `Equity Built After ${loanTermYears} Years`);
+    }
+    
+    document.getElementById('R-equity').value = formatCalculatedValue(0); // Renters build no equity
+    document.getElementById('O-equity').value = formatCalculatedValue(equityBuilt);
+    document.getElementById('D-equity').value = formatCalculatedValue(equityBuilt);
+    
+    // Net benefit/cost calculation (full term costs - equity)
+    const renterNetCost = rentalFullTermTotal; // Cost for renter (no equity)
+    const ownerNetCost = ownerFullTermTotal - equityBuilt; // Cost minus equity
+    
+    // Update the net benefit label
+    document.getElementById('netBenefitYearLabel').textContent = `${loanTermYears} Years)`;
+    
+    // Update tooltip for net benefit
+    const netBenefitTooltip = document.querySelector('tr.table-warning td:first-child sup');
+    if (netBenefitTooltip) {
+        netBenefitTooltip.setAttribute('title', `Net Benefit/Cost After ${loanTermYears} Years (Including Equity)`);
+    }
+    
+    document.getElementById('R-netbenefit').value = formatCalculatedValue(-renterNetCost); // Negative cost = benefit
+    document.getElementById('O-netbenefit').value = formatCalculatedValue(-ownerNetCost);
+    document.getElementById('D-netbenefit').value = formatCalculatedValue(renterNetCost - ownerNetCost);
+    
+    // Display recommendation
+    const recommendationDiv = document.getElementById('rent_vs_own_recommendation');
+    if (!recommendationDiv) return;
+    
+    if (renterNetCost < ownerNetCost) {
+        recommendationDiv.className = 'alert alert-success mt-2';
+        recommendationDiv.innerHTML = '<strong>Recommendation:</strong> Renting appears to be more cost-effective over ' + 
+            loanTermYears + ' years by ' + formatCurrency(ownerNetCost - renterNetCost) + '.';
+    } else {
+        recommendationDiv.className = 'alert alert-success mt-2';
+        recommendationDiv.innerHTML = '<strong>Recommendation:</strong> Owning appears to be more cost-effective over ' + 
+            loanTermYears + ' years by ' + formatCurrency(renterNetCost - ownerNetCost) + '.';
+    }
+    
+    // Create a simple chart using ApexCharts if available
+    if (typeof ApexCharts !== 'undefined') {
+        createRentVsOwnChart(monthlyRentalTotal, monthlyOwnerTotal, rentalFullTermTotal, ownerFullTermTotal, equityBuilt, loanTermYears);
+    }
+}
+
+// Function to create a simple comparison chart
+function createRentVsOwnChart(monthlyRent, monthlyOwn, totalRent, totalOwn, equity, loanTermYears) {
+    const chartDiv = document.getElementById('rent_vs_own_chart');
+    if (!chartDiv) return;
+    
+    // Clear previous chart
+    if (rentVsOwnChartInstance) {
+        rentVsOwnChartInstance.destroy();
+        rentVsOwnChartInstance = null;
+    }
+    
+    // Get annual costs from the inputs
+    const annualRent = parseCurrency(document.getElementById('R-annual').value) || 0;
+    const annualOwn = parseCurrency(document.getElementById('O-annual').value) || 0;
+    
+    // Get mid-term costs from the inputs
+    const midTermRent = parseCurrency(document.getElementById('R-MidYear').value) || 0;
+    const midTermOwn = parseCurrency(document.getElementById('O-MidYear').value) || 0;
+    
+    // Get the mid-term year value from the label
+    const midTermYearLabel = document.getElementById('midTermYearLabel');
+    const midTermYearText = midTermYearLabel ? midTermYearLabel.textContent : '';
+    const midTermYears = parseInt(midTermYearText) || Math.round(loanTermYears / 2);
+    
+    const options = {
+        series: [{
+            name: 'Rental Costs',
+            data: [monthlyRent, annualRent, midTermRent, totalRent, 0]
+        }, {
+            name: 'Owner Costs',
+            data: [monthlyOwn, annualOwn, midTermOwn, totalOwn, equity]
+        }],
+        chart: {
+            type: 'bar',
+            height: 350,
+            toolbar: {
+                show: true
+            }
+        },
+        plotOptions: {
+            bar: {
+                horizontal: false,
+                columnWidth: '55%',
+                endingShape: 'rounded'
+            },
+        },
+        dataLabels: {
+            enabled: false
+        },
+        stroke: {
+            show: true,
+            width: 2,
+            colors: ['transparent']
+        },
+        xaxis: {
+            categories: ['Monthly Cost', 'Annual Cost', `${midTermYears}-Year Cost`, `${loanTermYears}-Year Total Cost`, 'Equity Built'],
+        },
+        yaxis: {
+            title: {
+                text: 'Amount ($)'
+            },
+            labels: {
+                formatter: function(val) {
+                    return formatCurrencyForApex(val);
+                }
+            }
+        },
+        fill: {
+            opacity: 1
+        },
+        tooltip: {
+            y: {
+                formatter: function(val) {
+                    return formatCurrencyForApex(val);
+                }
+            }
+        },
+        colors: ['#1976D2', '#43A047']
+    };
+
+    rentVsOwnChartInstance = new ApexCharts(chartDiv, options);
+    rentVsOwnChartInstance.render();
+}
+
 // Main calculation function triggered on input changes - Handles B2/B3 two-way calculation
 function calculateAll() {
     try {
@@ -568,6 +799,9 @@ function calculateAll() {
           } else {
              console.warn("drawCumulativeDataTable function not found.");
           }
+          
+          // Calculate Rent vs Own comparison
+          calculateRentVsOwn();
 
     } catch (error) {
         console.error('Calculation error:', error);
@@ -603,7 +837,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'AE-min', 'AE-max', 'AE-avg', // Annual Expenses (Readonly)
         'AR-min', 'AR-max', 'AR-avg', // Annual Revenue (Readonly)
         'B66', 'C66', 'D66', // Cash Flow (Readonly)
-        'NOI-min', 'NOI-max', 'NOI-avg' // NOI Summary (Readonly)
+        'NOI-min', 'NOI-max', 'NOI-avg', // NOI Summary (Readonly)
+        'R1', 'R3', 'R4' // Rental Inputs
     ];
     const percentageInputs = [
         'B2', 'B6', 'B13', // Base percentages
@@ -731,6 +966,15 @@ document.addEventListener('DOMContentLoaded', () => {
          if (input.type === 'date') {
              input.addEventListener('change', debouncedCalculateAll);
          }
+    });
+
+    // Add event listeners to rental inputs
+    const rentalInputs = ['R1', 'R3', 'R4'];
+    rentalInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.addEventListener('input', debouncedCalculateAll);
+        }
     });
 
     // --- Date Input Specific Logic ---
