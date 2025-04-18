@@ -321,7 +321,7 @@ def inject_into_template(news_html):
         .category-nav {{ margin-bottom: 30px; background-color: #f8f9fa; padding: 15px; border-radius: 5px; }}
         .category-nav ul {{ list-style-type: none; padding-left: 0; }}
         .category-nav li {{ display: inline-block; margin-right: 15px; }}
-        .last-updated {{ color: #666; font-style: italic; margin-bottom: 20px; }}
+        .last-updated {{ color: #666; font-style: italic; padding-top: 35px; margin-bottom: 20px; }}
         h1, h2, h3 {{ color: #333; }}
     </style>
 </head>
