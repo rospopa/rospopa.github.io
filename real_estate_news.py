@@ -286,7 +286,6 @@ def inject_into_template(news_html):
         .category-nav li {{ display: inline-block; margin-right: 15px; }}
         .last-updated {{ color: #666; font-style: italic; padding-top: 35px; margin-bottom: 20px; }}
         h1, h2, h3 {{ color: #333; }}
-        h1 {{ padding-top: 2px; }}
     </style>
 </head>
 <body>
