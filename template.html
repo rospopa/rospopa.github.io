@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Pavlo Rospopa Website</title>
+<meta name="viewport" content="width=device-width">
+<meta name="description" content="pavlo@rospopa.com">
+<link rel="canonical" href="http://rospopa.github.io/">
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
+<link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css'>
+<link rel="stylesheet" href="https://rospopa.com/css/styles.css">
+<!-- Custom CSS -->
+<link rel="stylesheet" href="https://rospopa.com/css/format.css">
+<style>
+    h2 {
+        margin-top: 2px;
+    }
+    
+    .news-item {
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+    }
+
+    .news-item.hidden {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    }
+</style>
+</head>
+
+<body>
+<header class="site-header">
+    <div class="wrap">
+        <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
+        <nav class="site-nav">
+            <div class="trigger">
+                <a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">pavlo@rospopa.com</a>
+            </div>
+            <div class="trigger2">
+                <a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">@</a>
+            </div>
+        </nav>
+    </div>
+</header>
+
+<div class="page-content">
+    <div class="wrap">
+      <div class="home">
+        <div class="form-group pull-right" style="margin-bottom:0px">
+            <input class="search form-control" type="text" placeholder="What you looking for?" />
+        </div>
+        <span class="counter pull-right"></span>
+
+
+<!-- NEWS_CONTENT_PLACEHOLDER -->
+
+<br>
+<br>
+<br>
+<br>
+<br>
+
+<p>Return to <A HREF="#top">the top of this page</a>.</p>
+        </div>
+    </div>
+</div>
+
+<footer>
+    <div class="wrap">
+        <div class="home">
+            <style>
+                .home {padding-top:20px;}
+                p {margin-bottom: 0;}
+            </style>
+            <p>Go to <a href="https://www.linkedin.com/in/prospopa/">LinkedIn</a>.</p>
+            <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
+            <p>Return to <a href="#top">Top of This Page</a>.</p>
+            <section class="d-flex flex-row justify-content-center" style="width:100%;">
+                <div class="container" style="margin-right:0px;margin-left:0px;padding-right:0px;padding-left:0px;width:100%;max-width:100%;">
+                    <div class="row" style="margin-right:0px;margin-left:0px;max-width:100%;padding-top:20px;padding-bottom:20px;">
+                        <div class="col" style="width:auto;padding-right:0px;padding-left:0px;max-width:100%;">
+                            <div class="text-center" style="text-align:center;">
+                                <p class="mb-0">Copyright&nbsp;©&nbsp;<span id="currentYear"></span> All Rights Reserved.</p>
+                            </div><script>
+                    document.getElementById('currentYear').textContent = new Date().getFullYear();
+                </script>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</footer>
+<script>
+    function filterNews() {
+      const query = document.querySelector(".search").value.trim().toLowerCase();
+      const newsItems = document.querySelectorAll(".news-item");
+      let count = 0;
+    
+      newsItems.forEach(item => {
+        const title = item.querySelector("a").textContent.toLowerCase();
+        const match = title.includes(query);
+        item.style.display = match ? "" : "none";
+        if (match) count++;
+      });
+    
+      const counter = document.querySelector(".counter");
+      if (counter) {
+        counter.textContent = count + " result" + (count !== 1 ? "s" : "");
+      }
+    }
+    
+    const searchInput = document.querySelector(".search");
+    if (searchInput) {
+      searchInput.addEventListener("input", filterNews); // замість keyup — краща реакція
+      searchInput.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          filterNews();
+        }
+      });
+    
+      // Запуск при старті
+      filterNews();
+    }
+</script>
+</body>
+</html>
