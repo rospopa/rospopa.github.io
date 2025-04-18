@@ -27,7 +27,7 @@ from bs4 import BeautifulSoup
 
 # Constants
 TEMPLATE_PATH = "template.html"  # Use existing template if available
-OUTPUT_PATH = "real_estate_news.html"
+OUTPUT_PATH = "real-estate-news.html"
 MAX_ARTICLES_PER_FEED = 100  # Google News RSS limit
 
 # Configuration
