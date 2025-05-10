@@ -286,7 +286,7 @@ function populatePDFFields(container) {
                     const valB = pdf_getInputValue(`B${baseIndex}`);
                     const valC = pdf_getInputValue(`C${baseIndex}`);
                     const valD = pdf_getInputValue(`D${baseIndex}`);
-                    return (valB || valC || valD) ? {
+                    return (valB !== '0.00' && valC !== '0.00' && valD !== '0.00') ? {
                         id: [`B${baseIndex}`, `C${baseIndex}`, `D${baseIndex}`],
                         label: `Unit ${i + 1}`,
                         format: pdf_formatCurrency
@@ -295,10 +295,10 @@ function populatePDFFields(container) {
                 // Parking (Dynamically add if ANY value exists)
                  ...Array.from({ length: 15 }, (_, i) => {
                     const baseIndex = 48 + i;
-                     const valB = pdf_getInputValue(`B${baseIndex}`);
-                     const valC = pdf_getInputValue(`C${baseIndex}`);
-                     const valD = pdf_getInputValue(`D${baseIndex}`);
-                     return (valB || valC || valD) ? {
+                    const valB = pdf_getInputValue(`B${baseIndex}`);
+                    const valC = pdf_getInputValue(`C${baseIndex}`);
+                    const valD = pdf_getInputValue(`D${baseIndex}`);
+                    return (valB !== '0.00' && valC !== '0.00' && valD !== '0.00') ? {
                         id: [`B${baseIndex}`, `C${baseIndex}`, `D${baseIndex}`],
                         label: `Parking ${i + 1}`,
                         format: pdf_formatCurrency
