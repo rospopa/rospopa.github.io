@@ -1,591 +1,91 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Real Estate Price Tracker</title>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 20px;
-            color: #333;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-        }
-        header {
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 20px;
-        }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-        .card {
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-            padding: 20px;
-            transition: transform 0.3s ease;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-        .card-title {
-            font-size: 1.2em;
-            font-weight: bold;
-            margin-bottom: 15px;
-            color: #2c3e50;
-        }
-        .price {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #2980b9;
-            margin: 10px 0;
-        }
-        .price-change {
-            font-size: 1em;
-            margin-bottom: 10px;
-        }
-        .price-up {
-            color: #27ae60;
-        }
-        .price-down {
-            color: #e74c3c;
-        }
-        .chart-container {
-            height: 200px;
-            margin-top: 15px;
-        }
-        .filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 30px;
-            padding: 15px;
-            background-color: #f1f5f9;
-            border-radius: 8px;
-        }
-        select, input {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 14px;
-        }
-        button {
-            background-color: #3498db;
-            color: white;
-            border: none;
-            padding: 10px 15px;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        .last-updated {
-            text-align: right;
-            font-size: 0.9em;
-            color: #7f8c8d;
-            margin-top: 10px;
-        }
-        .property-list {
-            margin-top: 30px;
-        }
-        .property-item {
-            display: grid;
-            grid-template-columns: 1fr 2fr 1fr;
-            gap: 15px;
-            padding: 15px;
-            border-bottom: 1px solid #eee;
-            align-items: center;
-        }
-        .property-item:hover {
-            background-color: #f8f9fa;
-        }
-        .property-image {
-            width: 100%;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 4px;
-        }
-        .property-details h3 {
-            margin-top: 0;
-            margin-bottom: 10px;
-        }
-        .property-price {
-            font-weight: bold;
-            font-size: 1.2em;
-            color: #2980b9;
-        }
-        footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid #eee;
-            color: #7f8c8d;
-        }
-        @media (max-width: 768px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            .property-item {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+  
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Pavlo Rospopa blog</title>
+<meta name="viewport" content="width=device-width">
+<meta name="description" content="pavlo@rospopa.com">
+<link rel="canonical" href="http://rospopa.github.io/">
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa blog posts" />
+  
+<!-- Custom CSS -->
+<link rel="stylesheet" href="/css/format.css">
 </head>
+  
 <body>
-    <div class="container">
-        <header>
-            <h1>Real Estate Price Tracker</h1>
-            <p>Track real estate prices in real-time across different markets</p>
-        </header>
-
-        <div class="filters">
-            <select id="location-filter">
-                <option value="all">All Locations</option>
-                <option value="new-york">New York</option>
-                <option value="los-angeles">Los Angeles</option>
-                <option value="chicago">Chicago</option>
-                <option value="miami">Miami</option>
-                <option value="seattle">Seattle</option>
-            </select>
-            <select id="property-type-filter">
-                <option value="all">All Property Types</option>
-                <option value="single-family">Single Family</option>
-                <option value="condo">Condo</option>
-                <option value="townhouse">Townhouse</option>
-                <option value="multi-family">Multi-Family</option>
-            </select>
-            <input type="number" id="min-price" placeholder="Min Price">
-            <input type="number" id="max-price" placeholder="Max Price">
-            <button id="apply-filters">Apply Filters</button>
-            <button id="reset-filters">Reset</button>
-        </div>
-
-        <div class="dashboard">
-            <div class="card">
-                <div class="card-title">Average Home Price</div>
-                <div class="price" id="avg-price">$532,700</div>
-                <div class="price-change price-up" id="avg-price-change">+2.3% from last month</div>
-                <div class="chart-container" id="avg-price-chart"></div>
-            </div>
-            <div class="card">
-                <div class="card-title">Median Home Price</div>
-                <div class="price" id="median-price">$425,000</div>
-                <div class="price-change price-up" id="median-price-change">+1.8% from last month</div>
-                <div class="chart-container" id="median-price-chart"></div>
-            </div>
-            <div class="card">
-                <div class="card-title">Price per Square Foot</div>
-                <div class="price" id="sqft-price">$305</div>
-                <div class="price-change price-down" id="sqft-price-change">-0.5% from last month</div>
-                <div class="chart-container" id="sqft-price-chart"></div>
-            </div>
-            <div class="card">
-                <div class="card-title">Market Inventory</div>
-                <div class="price" id="inventory">3,245</div>
-                <div class="price-change price-down" id="inventory-change">-5.2% from last month</div>
-                <div class="chart-container" id="inventory-chart"></div>
-            </div>
-        </div>
-
-        <div class="last-updated">Last updated: <span id="update-time">Loading...</span></div>
-
-        <div class="property-list" id="property-list">
-            <!-- Property listings will be dynamically inserted here -->
-        </div>
-
-        <footer>
-            <p>Copyright &copy; <span id="currentYear"></span> Real Estate Price Tracker. All Rights Reserved.</p>
-        </footer>
+<header class="site-header">
+    <div class="wrap"><a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
+        <nav class="site-nav">
+            <div class="trigger"><a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">pavlo@rospopa.com</a></div>
+            <div class="trigger2"><a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">@</a></div>
+        </nav>
     </div>
+</header>
 
-    <!-- Include Chart.js for data visualization -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
-    <script>
-        // Set current year in footer
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
+<main>
+<div class="page-content">
+<div class="wrap">
+<div class="home">
+
+<header class="post-header">
+<h1>United States: Modern Monetarism</h1>
+<p class="meta">November, 2019</p>
+</header>
         
-        // Sample property data (in a real application, this would come from an API)
-        const propertyData = [
-            {
-                id: 1,
-                image: 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-                title: 'Modern Apartment in Downtown',
-                location: 'new-york',
-                type: 'condo',
-                price: 750000,
-                sqft: 1200,
-                beds: 2,
-                baths: 2,
-                description: 'Beautiful modern apartment with stunning views of the city skyline.'
-            },
-            {
-                id: 2,
-                image: 'https://images.unsplash.com/photo-1512917774080-9991f1c4c750?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-                title: 'Spacious Family Home',
-                location: 'los-angeles',
-                type: 'single-family',
-                price: 1250000,
-                sqft: 2800,
-                beds: 4,
-                baths: 3.5,
-                description: 'Spacious family home with a large backyard and modern amenities.'
-            },
-            {
-                id: 3,
-                image: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-                title: 'Waterfront Townhouse',
-                location: 'miami',
-                type: 'townhouse',
-                price: 895000,
-                sqft: 1800,
-                beds: 3,
-                baths: 2.5,
-                description: 'Beautiful townhouse with direct access to the water and private dock.'
-            },
-            {
-                id: 4,
-                image: 'https://images.unsplash.com/photo-1568605114967-8130f3a36994?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-                title: 'Urban Loft',
-                location: 'chicago',
-                type: 'condo',
-                price: 520000,
-                sqft: 950,
-                beds: 1,
-                baths: 1,
-                description: 'Stylish urban loft in the heart of the city with high ceilings and exposed brick.'
-            },
-            {
-                id: 5,
-                image: 'https://images.unsplash.com/photo-1598228723793-52759bba239c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-                title: 'Mountain View Retreat',
-                location: 'seattle',
-                type: 'single-family',
-                price: 1450000,
-                sqft: 3200,
-                beds: 5,
-                baths: 4,
-                description: 'Stunning home with panoramic mountain views and modern architecture.'
-            },
-            {
-                id: 6,
-                image: 'https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-                title: 'Historic Brownstone',
-                location: 'new-york',
-                type: 'multi-family',
-                price: 2250000,
-                sqft: 4000,
-                beds: 6,
-                baths: 4,
-                description: 'Classic brownstone with original details and modern updates.'
-            }
-        ];
+<TITLE>United States: Modern Monetarism</TITLE><BODY>
+<BODY bgcolor="#FFFFFF" text="#000000" link="#6F00B9" vlink="#A88F00">
 
-        // Market data for charts (in a real application, this would come from an API)
-        const marketData = {
-            avgPrice: {
-                current: 532700,
-                change: 2.3,
-                history: [510000, 515000, 520500, 525000, 528000, 532700]
-            },
-            medianPrice: {
-                current: 425000,
-                change: 1.8,
-                history: [410000, 412000, 415000, 418000, 420000, 425000]
-            },
-            sqftPrice: {
-                current: 305,
-                change: -0.5,
-                history: [310, 312, 309, 308, 307, 305]
-            },
-            inventory: {
-                current: 3245,
-                change: -5.2,
-                history: [3500, 3450, 3400, 3350, 3300, 3245]
-            }
-        };
 
-        // Format currency
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-                maximumFractionDigits: 0
-            }).format(amount);
-        }
+<p>
+The purpose of this essay is to articulate the principles and practices of the Federal Reserve Bank in order to identify the factors and policies which determine the future course of the United States economy.<p>
+We will begin by taking a look at current macroeconomic trends. We will then determine the relationships between macroeconomic variables and assess how modern monetary policy shapes economic outlooks. Lastly,
+we will attempt uncover the future course of the United States economy given current monetary policy.
+</p>
+  
+<br>
+<br>
+<br>
+  
+<h4><b>Principles of Modern Monetarism</b></h4>
+  
+<p>
+The Federal Reserve Bank sells and purchases United States Treasury securities to regulate the money supply. It sells Treasury securities to reduce the money supply, and purchases Treasury securities to increase the money supply. Changes in the money supply cause changes in the interest rates. The money supply and interest rates are inversely related. The more money there is, the less interest lenders will charge borrowers making it easier to borrow, conversely, the less money there is, the more lenders will charge borrowers making it harder to borrow. Financial deregulation and lowering interest rates causes excessive lending and borrowing. So long as incomes continue to rise, the debt burden stays manageable. Over time the debt burdens increases. At some point debt repayments begin growing faster than incomes because too many loans have been made. This forces consumers to cut back on their spending to repay the loans. The fall of consumer spending ripples throughout the economy, causing incomes to fall. As incomes begin to fall, consumer credit begins to fall, and in turn lending and borrowing decreases because there are not as many creditworthy borrowers. Businesses are forced to cut costs and lay off workers, this leads into a full-scale debt deflation. Many borrowers find themselves unable to repay lenders and the economy crumbles, unemployment rises, the economy is in a recession. The Federal Reserve Bank is able to continue printing money because the dollar is the world's reserve currency because most international transactions are made in dollars. Nations that export to the United States use the dollar payments to purchase United States Treasury securities which causes the value of the dollar to increase.A strong dollar causes United States business to become less competitive because it makes United States goods most expensive and businesses exporting into the United States to become more competitive because it makes foreign goods less expensive. On the contrary, when the value of the dollar decreases it causes prices of imports to increase and United States businesses to become more competitive. Although it benefits business to have a strong dollar, consumers are hurt. This is because the prices of exports increase and goods become more expensive as the dollar weakens.
+It is a double edged sword, on which one edge is United States business and on the other is the average consumer.
+</p>
+  
+<br>
+  
+  <h4><b>Macroeconomic Trends</b></h4>
+  
+<p>
+The Federal Reserve Bank is increasing the money supply via Open Market Operations and interest rates are falling. Treasury yields are decreasing. U.S. GDP growth is sluggish. Manufacturing is shrinking. Wages are stagnant while household prices are rising. U.S. debt hit a record high, so did the stock market.
+</p>
 
-        // Display properties
-        function displayProperties(properties) {
-            const propertyList = document.getElementById('property-list');
-            propertyList.innerHTML = '';
-            
-            if (properties.length === 0) {
-                propertyList.innerHTML = '<p style="text-align: center; padding: 20px;">No properties match your filters.</p>';
-                return;
-            }
-            
-            properties.forEach(property => {
-                const propertyItem = document.createElement('div');
-                propertyItem.className = 'property-item';
-                propertyItem.innerHTML = `
-                    <img src="${property.image}" alt="${property.title}" class="property-image">
-                    <div class="property-details">
-                        <h3>${property.title}</h3>
-                        <p>${property.beds} beds | ${property.baths} baths | ${property.sqft} sqft</p>
-                        <p>${property.description}</p>
-                    </div>
-                    <div class="property-price">
-                        ${formatCurrency(property.price)}
-                    </div>
-                `;
-                propertyList.appendChild(propertyItem);
-            });
-        }
-
-        // Initialize charts
-        function initializeCharts() {
-            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-            
-            // Average Price Chart
-            new Chart(document.getElementById('avg-price-chart'), {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'Average Price',
-                        data: marketData.avgPrice.history,
-                        borderColor: '#3498db',
-                        backgroundColor: 'rgba(52, 152, 219, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false
-                        }
-                    }
-                }
-            });
-            
-            // Median Price Chart
-            new Chart(document.getElementById('median-price-chart'), {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'Median Price',
-                        data: marketData.medianPrice.history,
-                        borderColor: '#2ecc71',
-                        backgroundColor: 'rgba(46, 204, 113, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false
-                        }
-                    }
-                }
-            });
-            
-            // Price per Square Foot Chart
-            new Chart(document.getElementById('sqft-price-chart'), {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'Price per Sq Ft',
-                        data: marketData.sqftPrice.history,
-                        borderColor: '#e74c3c',
-                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false
-                        }
-                    }
-                }
-            });
-            
-            // Inventory Chart
-            new Chart(document.getElementById('inventory-chart'), {
-                type: 'line',
-                data: {
-                    labels: months,
-                    datasets: [{
-                        label: 'Inventory',
-                        data: marketData.inventory.history,
-                        borderColor: '#9b59b6',
-                        backgroundColor: 'rgba(155, 89, 182, 0.1)',
-                        tension: 0.3,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: false
-                        }
-                    }
-                }
-            });
-        }
-
-        // Apply filters
-        function applyFilters() {
-            const locationFilter = document.getElementById('location-filter').value;
-            const propertyTypeFilter = document.getElementById('property-type-filter').value;
-            const minPrice = document.getElementById('min-price').value ? parseInt(document.getElementById('min-price').value) : 0;
-            const maxPrice = document.getElementById('max-price').value ? parseInt(document.getElementById('max-price').value) : Number.MAX_SAFE_INTEGER;
-            
-            const filteredProperties = propertyData.filter(property => {
-                const locationMatch = locationFilter === 'all' || property.location === locationFilter;
-                const typeMatch = propertyTypeFilter === 'all' || property.type === propertyTypeFilter;
-                const priceMatch = property.price >= minPrice && property.price <= maxPrice;
-                
-                return locationMatch && typeMatch && priceMatch;
-            });
-            
-            displayProperties(filteredProperties);
-        }
-
-        // Reset filters
-        function resetFilters() {
-            document.getElementById('location-filter').value = 'all';
-            document.getElementById('property-type-filter').value = 'all';
-            document.getElementById('min-price').value = '';
-            document.getElementById('max-price').value = '';
-            
-            displayProperties(propertyData);
-        }
-
-        // Simulate real-time updates
-        function simulateRealTimeUpdates() {
-            // Update time
-            const now = new Date();
-            document.getElementById('update-time').textContent = now.toLocaleString();
-            
-            // Randomly adjust prices to simulate market fluctuations
-            const randomChange = (min, max) => {
-                return (Math.random() * (max - min) + min).toFixed(1);
-            };
-            
-            // Update average price
-            const avgPriceChange = parseFloat(randomChange(-0.5, 0.8));
-            const newAvgPrice = marketData.avgPrice.current * (1 + avgPriceChange / 100);
-            document.getElementById('avg-price').textContent = formatCurrency(newAvgPrice);
-            
-            const avgPriceChangeElement = document.getElementById('avg-price-change');
-            avgPriceChangeElement.textContent = `${avgPriceChange >= 0 ? '+' : ''}${avgPriceChange}% in last update`;
-            avgPriceChangeElement.className = `price-change ${avgPriceChange >= 0 ? 'price-up' : 'price-down'}`;
-            
-            // Update median price
-            const medianPriceChange = parseFloat(randomChange(-0.4, 0.7));
-            const newMedianPrice = marketData.medianPrice.current * (1 + medianPriceChange / 100);
-            document.getElementById('median-price').textContent = formatCurrency(newMedianPrice);
-            
-            const medianPriceChangeElement = document.getElementById('median-price-change');
-            medianPriceChangeElement.textContent = `${medianPriceChange >= 0 ? '+' : ''}${medianPriceChange}% in last update`;
-            medianPriceChangeElement.className = `price-change ${medianPriceChange >= 0 ? 'price-up' : 'price-down'}`;
-            
-            // Update price per square foot
-            const sqftPriceChange = parseFloat(randomChange(-0.6, 0.6));
-            const newSqftPrice = Math.round(marketData.sqftPrice.current * (1 + sqftPriceChange / 100));
-            document.getElementById('sqft-price').textContent = `$${newSqftPrice}`;
-            
-            const sqftPriceChangeElement = document.getElementById('sqft-price-change');
-            sqftPriceChangeElement.textContent = `${sqftPriceChange >= 0 ? '+' : ''}${sqftPriceChange}% in last update`;
-            sqftPriceChangeElement.className = `price-change ${sqftPriceChange >= 0 ? 'price-up' : 'price-down'}`;
-            
-            // Update inventory
-            const inventoryChange = parseFloat(randomChange(-1.2, 1.0));
-            const newInventory = Math.round(marketData.inventory.current * (1 + inventoryChange / 100));
-            document.getElementById('inventory').textContent = newInventory.toLocaleString();
-            
-            const inventoryChangeElement = document.getElementById('inventory-change');
-            inventoryChangeElement.textContent = `${inventoryChange >= 0 ? '+' : ''}${inventoryChange}% in last update`;
-            inventoryChangeElement.className = `price-change ${inventoryChange >= 0 ? 'price-up' : 'price-down'}`;
-        }
-
-        // Initialize the application
-        function initializeApp() {
-            // Display properties
-            displayProperties(propertyData);
-            
-            // Initialize charts
-            initializeCharts();
-            
-            // Set up event listeners
-            document.getElementById('apply-filters').addEventListener('click', applyFilters);
-            document.getElementById('reset-filters').addEventListener('click', resetFilters);
-            
-            // Initial update time
-            const now = new Date();
-            document.getElementById('update-time').textContent = now.toLocaleString();
-            
-            // Simulate real-time updates every 30 seconds
-            simulateRealTimeUpdates();
-            setInterval(simulateRealTimeUpdates, 30000);
-        }
-
-        // Start the application when the page loads
-        window.addEventListener('load', initializeApp);
-    </script>
-</body>
+        
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+                                
+Return to <A HREF="#top">the top of this page</a>.<p>
+</main>
+<footer>
+  <section class="d-flex flex-row justify-content-center" style="width: 100%;">
+    <div class="container" style="margin-right: 0px;margin-left: 0px;padding-right: 0px;padding-left: 0px;width: 100%;max-width: 100%;">
+        <div class="row" style="margin-right: 0px;margin-left: 0px;max-width: 100%;padding-top: 20px;padding-bottom: 20px;">
+            <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
+                <div class="text-center" style="text-align:center">
+                    <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
+                </div>
+<script>document.getElementById('currentYear').textContent = new Date().getFullYear();</script>
+            </div>
+        </div>
+    </div>
+</section>
+</footer>
+</BODY>
 </html>
