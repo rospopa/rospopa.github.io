@@ -338,6 +338,13 @@ function populatePDFFields(container) {
                  { id: ['ROI-min', 'ROI-max', 'ROI-avg'], label: 'ROI', format: () => 'N/A' },
                  { id: ['IRR-min', 'IRR-max', 'IRR-avg'], label: 'IRR', format: () => 'N/A' }
             ]
+        },
+        {
+            title: 'Charts',
+            inputs: [
+                { id: 'apex_amortization_chart', label: 'Amortization Chart', type: 'chart' },
+                { id: 'apex_cumulative_range_chart', label: 'Cumulative Revenue/Expense Chart', type: 'chart' }
+            ]
         }
     ];
 
@@ -474,7 +481,11 @@ function generatePDF(selectedFields) { // Accept map of selected fields
             }
         });
 
-        processImage.then(imageData => {
+        Promise.all([
+            processImage,
+            selectedFields['apex_amortization_chart'] ? captureChartAsImage('apex_amortization_chart') : Promise.resolve(null),
+            selectedFields['apex_cumulative_range_chart'] ? captureChartAsImage('apex_cumulative_range_chart') : Promise.resolve(null)
+        ]).then(([imageData, amortizationChartImage, cumulativeChartImage]) => {
             const content = [
                 { text: 'Investment Property Analysis', style: 'header' },
                 // Add address if available and selected
@@ -487,6 +498,34 @@ function generatePDF(selectedFields) { // Accept map of selected fields
                     width: imageData.width > 520 ? 520 : imageData.width, // Limit width slightly less than page width
                     alignment: 'center',
                     margin: [0, 5, 0, 15] // Add margin after image
+                });
+            }
+
+            if (amortizationChartImage) {
+                content.push({
+                    text: 'Loan Amortization Chart',
+                    style: 'chartHeader',
+                    margin: [0, 10, 0, 5]
+                });
+                content.push({
+                    image: amortizationChartImage,
+                    width: 520, // Adjust width as needed for PDF
+                    alignment: 'center',
+                    margin: [0, 0, 0, 15]
+                });
+            }
+
+            if (cumulativeChartImage) {
+                content.push({
+                    text: 'Cumulative Revenue/Expense Chart',
+                    style: 'chartHeader',
+                    margin: [0, 10, 0, 5]
+                });
+                content.push({
+                    image: cumulativeChartImage,
+                    width: 520, // Adjust width as needed for PDF
+                    alignment: 'center',
+                    margin: [0, 0, 0, 15]
                 });
             }
 
@@ -733,7 +772,8 @@ function generatePDF(selectedFields) { // Accept map of selected fields
                     header: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 5] },
                     subheader: { fontSize: 12, alignment: 'center', margin: [0, 0, 0, 10], color: '#444' },
                     sectionHeader: { fontSize: 13, bold: true, margin: [0, 10, 0, 4] }, // Slightly smaller section headers
-                     tableMargin: { margin: [0, 0, 0, 15] } // Add margin below tables
+                    chartHeader: { fontSize: 12, bold: true, alignment: 'center', margin: [0, 0, 0, 5] }, // New style for chart headers
+                    tableMargin: { margin: [0, 0, 0, 15] } // Add margin below tables
                 },
                 defaultStyle: { fontSize: 10 } // Smaller default font size
             };
@@ -783,4 +823,45 @@ function resetLoadingState() {
     }
     const mainPdfButton = document.getElementById('savepdf');
      if (mainPdfButton) mainPdfButton.disabled = false;
+}
+
+/**
+ * Captures an HTML element (like a chart) as an image data URL using html2canvas.
+ * @param {string} elementId The ID of the HTML element to capture.
+ * @returns {Promise<string|null>} A promise that resolves with the data URL of the captured image, or null if the element is not found or capture fails.
+ */
+async function captureChartAsImage(elementId) {
+    const element = document.getElementById(elementId);
+    if (!element) {
+        console.warn(`Chart element with ID "${elementId}" not found.`);
+        return null;
+    }
+
+    // Temporarily make the element visible if it's hidden, to ensure it renders correctly for html2canvas
+    const originalDisplay = element.style.display;
+    const originalVisibility = element.style.visibility;
+    const originalPosition = element.style.position;
+
+    element.style.display = 'block';
+    element.style.visibility = 'visible';
+    element.style.position = 'absolute'; // Take it out of flow to prevent layout shifts during capture
+
+    try {
+        const canvas = await html2canvas(element, {
+            useCORS: true, // Important for images loaded from other origins
+            allowTaint: true, // Allow tainting the canvas if cross-origin images are used
+            backgroundColor: '#ffffff', // Set a background color for transparent areas
+            scale: 2, // Increase scale for better resolution in PDF
+            logging: false // Disable html2canvas logging
+        });
+        return canvas.toDataURL('image/png');
+    } catch (error) {
+        console.error(`Error capturing chart "${elementId}":`, error);
+        return null;
+    } finally {
+        // Restore original styles
+        element.style.display = originalDisplay;
+        element.style.visibility = originalVisibility;
+        element.style.position = originalPosition;
+    }
 }
