@@ -464,9 +464,9 @@ function calculateAll() {
         // Cash-on-Cash Return (CCR = Annual Cash Flow / Cash Invested * 100)
         let ccrMin = 0, ccrMax = 0, ccrAvg = 0;
         if (cashInvested !== 0) {
-            ccrMin = (cashFlowAnnMin / cashInvested) * 100;
-            ccrMax = (cashFlowAnnMax / cashInvested) * 100;
-            ccrAvg = (cashFlowAnnAvg / cashInvested) * 100;
+            ccrMin = (cashFlowAnnMin / cashInvested) * 100 * -1;
+            ccrMax = (cashFlowAnnMax / cashInvested) * 100 * -1;
+            ccrAvg = (cashFlowAnnAvg / cashInvested) * 100 * -1;
         }
         document.getElementById('CCR-min').value = formatRateOutput(ccrMin);
         document.getElementById('CCR-max').value = formatRateOutput(ccrMax);
