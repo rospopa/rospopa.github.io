@@ -108,6 +108,32 @@ function showPDFPreview() {
         imageSection.appendChild(imageLabel);
         imageSection.appendChild(imageInput);
 
+        // Add image embed code section
+        const embedCodeSection = document.createElement('div');
+        embedCodeSection.style.marginBottom = '5px';
+        embedCodeSection.style.padding = '5px';
+        embedCodeSection.style.border = '1px dashed #ccc';
+
+        const embedCodeLabel = document.createElement('label');
+        embedCodeLabel.htmlFor = 'imageEmbedCodeInput';
+        embedCodeLabel.textContent = 'Or paste image embed code (e.g., <img> tag):';
+        embedCodeLabel.style.display = 'block';
+        embedCodeLabel.style.marginBottom = '5px';
+        embedCodeLabel.style.fontWeight = 'bold';
+
+        const embedCodeInput = document.createElement('textarea');
+        embedCodeInput.id = 'imageEmbedCodeInput';
+        embedCodeInput.placeholder = '<img width="800" height="600" src="https://example.com/image.jpg" />';
+        embedCodeInput.style.width = '100%';
+        embedCodeInput.style.minHeight = '60px';
+        embedCodeInput.style.resize = 'vertical';
+        embedCodeInput.style.padding = '5px';
+        embedCodeInput.style.border = '1px solid #ccc';
+        embedCodeInput.style.borderRadius = '4px';
+
+        embedCodeSection.appendChild(embedCodeLabel);
+        embedCodeSection.appendChild(embedCodeInput);
+
         // Add buttons
         const buttonContainer = document.createElement('div');
 		buttonContainer.id = 'pdf_prv_btn';
@@ -469,7 +495,9 @@ function generatePDF(selectedFields) { // Accept map of selected fields
         showLoadingState();
 
         const imageInput = document.getElementById('user_file');
-        const processImage = new Promise((resolve) => {
+        const embedCodeInput = document.getElementById('imageEmbedCodeInput');
+
+        const processImageFile = new Promise((resolve) => {
             if (imageInput && imageInput.files && imageInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -481,21 +509,70 @@ function generatePDF(selectedFields) { // Accept map of selected fields
             }
         });
 
+        const processImageEmbed = new Promise(async (resolve) => {
+            if (embedCodeInput && embedCodeInput.value.trim() !== '') {
+                const embedCode = embedCodeInput.value.trim();
+                const imgMatch = embedCode.match(/<img[^>]+src="([^"]+)"[^>]*width="(\d+)"[^>]*height="(\d+)"[^>]*\/?>/i);
+
+                if (imgMatch && imgMatch[1]) {
+                    const src = imgMatch[1];
+                    const width = parseInt(imgMatch[2]) || 500; // Default width if not found
+                    const height = parseInt(imgMatch[3]) || 300; // Default height if not found
+
+                    try {
+                        const response = await fetch(src);
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        const blob = await response.blob();
+
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            resolve({ image: e.target.result, width: width, height: height });
+                        };
+                        reader.readAsDataURL(blob);
+                    } catch (error) {
+                        console.error('Error fetching image from embed code:', error);
+                        resolve(null);
+                    }
+                } else {
+                    resolve(null);
+                }
+            } else {
+                resolve(null);
+            }
+        });
+
         Promise.all([
-            processImage,
+            processImageFile,
+            processImageEmbed,
             selectedFields['apex_amortization_chart'] ? captureChartAsImage('apex_amortization_chart') : Promise.resolve(null),
             selectedFields['apex_cumulative_range_chart'] ? captureChartAsImage('apex_cumulative_range_chart') : Promise.resolve(null)
-        ]).then(([imageData, amortizationChartImage, cumulativeChartImage]) => {
+        ]).then(([fileImageData, embedImageData, amortizationChartImage, cumulativeChartImage]) => {
             const content = [
                 { text: 'Investment Property Analysis', style: 'header' },
                 // Add address if available and selected
                 { text: selectedFields['autocomplete'] ? pdf_getInputValue('autocomplete') : '', style: 'subheader', alignment: 'center', margin: [0, 0, 0, 10] }
             ];
 
-            if (imageData) {
+            // Prioritize embed image if both are provided
+            const finalImageData = embedImageData || fileImageData;
+
+            if (finalImageData) {
+                // Calculate aspect ratio to maintain proportions
+                const originalWidth = finalImageData.width;
+                const originalHeight = finalImageData.height;
+                const maxWidth = 520; // Max width for PDF page
+                let displayWidth = originalWidth;
+                let displayHeight = originalHeight;
+
+                if (originalWidth > maxWidth) {
+                    displayWidth = maxWidth;
+                    displayHeight = (originalHeight / originalWidth) * maxWidth;
+                }
+
                 content.push({
-                    image: imageData.image,
-                    width: imageData.width > 520 ? 520 : imageData.width, // Limit width slightly less than page width
+                    image: finalImageData.image,
+                    width: displayWidth,
+                    height: displayHeight, // Set height based on aspect ratio
                     alignment: 'center',
                     margin: [0, 5, 0, 15] // Add margin after image
                 });
