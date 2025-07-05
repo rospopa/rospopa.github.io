@@ -66,14 +66,14 @@ function showPDFPreview() {
             background: white; padding: 10px; border-radius: 8px;
             width: 90%; /* Adjust width */
             max-width: 600px; /* Max width */
-            max-height: 90vh; /* Max height */
+            max-height: 91vh; /* Max height */
             overflow-y: auto; /* Allow content scroll */
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         `;
 
         const title = document.createElement('h3');
         title.textContent = 'Select Fields to Include in PDF';
-        title.style.marginBottom = '5px';
+        title.style.marginBottom = '0px';
         title.style.textAlign = 'center';
 
         const fieldsContainer = document.createElement('div');
@@ -108,31 +108,27 @@ function showPDFPreview() {
         imageSection.appendChild(imageLabel);
         imageSection.appendChild(imageInput);
 
-        // Add image embed code section
-        const embedCodeSection = document.createElement('div');
-        embedCodeSection.style.marginBottom = '5px';
-        embedCodeSection.style.padding = '5px';
-        embedCodeSection.style.border = '1px dashed #ccc';
+        // Add image embed code input
+        const embedLabel = document.createElement('label');
+        embedLabel.htmlFor = 'image_embed_code';
+        embedLabel.textContent = 'Or paste image embed code (e.g., <img src="..." />):';
+        embedLabel.style.display = 'block';
+        embedLabel.style.marginTop = '10px';
+        embedLabel.style.marginBottom = '5px';
+        embedLabel.style.fontWeight = 'bold';
 
-        const embedCodeLabel = document.createElement('label');
-        embedCodeLabel.htmlFor = 'imageEmbedCodeInput';
-        embedCodeLabel.textContent = 'Or paste image embed code (e.g., <img> tag):';
-        embedCodeLabel.style.display = 'block';
-        embedCodeLabel.style.marginBottom = '5px';
-        embedCodeLabel.style.fontWeight = 'bold';
+        const embedInput = document.createElement('textarea');
+        embedInput.id = 'image_embed_code';
+        embedInput.placeholder = '<img width="800" height="600" src="https://example.com/image.jpg" />';
+        embedInput.style.width = '100%';
+        embedInput.style.minHeight = '60px';
+        embedInput.style.padding = '5px';
+        embedInput.style.border = '1px solid #ccc';
+        embedInput.style.borderRadius = '4px';
+        embedInput.style.boxSizing = 'border-box'; // Include padding in width
 
-        const embedCodeInput = document.createElement('textarea');
-        embedCodeInput.id = 'imageEmbedCodeInput';
-        embedCodeInput.placeholder = '<img width="800" height="600" src="https://example.com/image.jpg" />';
-        embedCodeInput.style.width = '100%';
-        embedCodeInput.style.minHeight = '60px';
-        embedCodeInput.style.resize = 'vertical';
-        embedCodeInput.style.padding = '5px';
-        embedCodeInput.style.border = '1px solid #ccc';
-        embedCodeInput.style.borderRadius = '4px';
-
-        embedCodeSection.appendChild(embedCodeLabel);
-        embedCodeSection.appendChild(embedCodeInput);
+        imageSection.appendChild(embedLabel);
+        imageSection.appendChild(embedInput);
 
         // Add buttons
         const buttonContainer = document.createElement('div');
@@ -495,13 +491,71 @@ function generatePDF(selectedFields) { // Accept map of selected fields
         showLoadingState();
 
         const imageInput = document.getElementById('user_file');
-        const embedCodeInput = document.getElementById('imageEmbedCodeInput');
+        const embedCodeInput = document.getElementById('image_embed_code');
 
-        const processImageFile = new Promise((resolve) => {
+        const processImage = new Promise(async (resolve) => {
+            let imageData = null;
+            let imageWidth = 500; // Default width
+            let imageHeight = null; // Default height
+
+            // Prioritize embed code if present
+            if (embedCodeInput && embedCodeInput.value.trim() !== '') {
+                const embedCode = embedCodeInput.value.trim();
+                const imgMatch = embedCode.match(/<img[^>]+src="([^"]+)"/);
+                const widthMatch = embedCode.match(/width="(\d+)"/);
+                const heightMatch = embedCode.match(/height="(\d+)"/);
+
+                if (imgMatch && imgMatch[1]) {
+                    const imageUrl = imgMatch[1];
+                    if (widthMatch && widthMatch[1]) {
+                        imageWidth = parseInt(widthMatch[1], 10);
+                    }
+                    if (heightMatch && heightMatch[1]) {
+                        imageHeight = parseInt(heightMatch[1], 10);
+                    }
+
+                    try {
+                        const response = await fetch(imageUrl);
+                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                        const blob = await response.blob();
+
+                        if (!blob.type.startsWith('image/')) {
+                            console.error("Fetched content is not an image:", blob.type);
+                            resolve(null);
+                            return;
+                        }
+                        if (blob.size === 0) {
+                            console.error("Fetched image blob is empty.");
+                            resolve(null);
+                            return;
+                        }
+
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            resolve({ image: e.target.result, width: imageWidth, height: imageHeight });
+                        };
+                        reader.onerror = function() {
+                            console.error("FileReader error for embed image.");
+                            resolve(null);
+                        };
+                        reader.readAsDataURL(blob);
+                        return;
+                    } catch (error) {
+                        console.error("Error fetching or converting embed image:", error);
+                        // Fallback to file upload if embed image fails
+                    }
+                }
+            }
+
+            // Fallback to file upload if no embed code, invalid embed code, or embed image fetch failed
             if (imageInput && imageInput.files && imageInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    resolve({ image: e.target.result, width: 500 });
+                    resolve({ image: e.target.result, width: 500, height: null }); // Default width for uploaded image
+                };
+                reader.onerror = function() {
+                    console.error("FileReader error for uploaded image.");
+                    resolve(null);
                 };
                 reader.readAsDataURL(imageInput.files[0]);
             } else {
@@ -509,73 +563,49 @@ function generatePDF(selectedFields) { // Accept map of selected fields
             }
         });
 
-        const processImageEmbed = new Promise(async (resolve) => {
-            if (embedCodeInput && embedCodeInput.value.trim() !== '') {
-                const embedCode = embedCodeInput.value.trim();
-                const imgMatch = embedCode.match(/<img[^>]+src="([^"]+)"[^>]*width="(\d+)"[^>]*height="(\d+)"[^>]*\/?>/i);
-
-                if (imgMatch && imgMatch[1]) {
-                    const src = imgMatch[1];
-                    const width = parseInt(imgMatch[2]) || 500; // Default width if not found
-                    const height = parseInt(imgMatch[3]) || 300; // Default height if not found
-
-                    try {
-                        const response = await fetch(src);
-                        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                        const blob = await response.blob();
-
-                        const reader = new FileReader();
-                        reader.onload = function(e) {
-                            resolve({ image: e.target.result, width: width, height: height });
-                        };
-                        reader.readAsDataURL(blob);
-                    } catch (error) {
-                        console.error('Error fetching image from embed code:', error);
-                        resolve(null);
-                    }
-                } else {
-                    resolve(null);
-                }
-            } else {
-                resolve(null);
-            }
-        });
-
         Promise.all([
-            processImageFile,
-            processImageEmbed,
+            processImage,
             selectedFields['apex_amortization_chart'] ? captureChartAsImage('apex_amortization_chart') : Promise.resolve(null),
             selectedFields['apex_cumulative_range_chart'] ? captureChartAsImage('apex_cumulative_range_chart') : Promise.resolve(null)
-        ]).then(([fileImageData, embedImageData, amortizationChartImage, cumulativeChartImage]) => {
+        ]).then(([imageData, amortizationChartImage, cumulativeChartImage]) => {
             const content = [
                 { text: 'Investment Property Analysis', style: 'header' },
                 // Add address if available and selected
                 { text: selectedFields['autocomplete'] ? pdf_getInputValue('autocomplete') : '', style: 'subheader', alignment: 'center', margin: [0, 0, 0, 10] }
             ];
 
-            // Prioritize embed image if both are provided
-            const finalImageData = embedImageData || fileImageData;
+            let imagesForPdf = {};
+            let imageKey = null;
 
-            if (finalImageData) {
-                // Calculate aspect ratio to maintain proportions
-                const originalWidth = finalImageData.width;
-                const originalHeight = finalImageData.height;
-                const maxWidth = 520; // Max width for PDF page
-                let displayWidth = originalWidth;
-                let displayHeight = originalHeight;
+            if (imageData && imageData.image) {
+                console.log("Type of imageData.image:", typeof imageData.image);
+                console.log("First 100 chars of imageData.image:", imageData.image.substring(0, 100));
 
-                if (originalWidth > maxWidth) {
+                // Generate a unique key for the image and store it in imagesForPdf
+                imageKey = 'userImage_' + Date.now();
+                imagesForPdf[imageKey] = imageData.image; // Store the data URL
+
+                const maxWidth = 520;
+                let displayWidth = imageData.width;
+                let displayHeight = imageData.height;
+
+                if (displayWidth > maxWidth) {
+                    if (displayHeight) { // If original height is known, scale proportionally
+                        displayHeight = (displayHeight / displayWidth) * maxWidth;
+                    }
                     displayWidth = maxWidth;
-                    displayHeight = (originalHeight / originalWidth) * maxWidth;
                 }
 
-                content.push({
-                    image: finalImageData.image,
+                const imageObject = {
+                    image: imageKey, // Reference the image by its key
                     width: displayWidth,
-                    height: displayHeight, // Set height based on aspect ratio
                     alignment: 'center',
                     margin: [0, 5, 0, 15] // Add margin after image
-                });
+                };
+                if (displayHeight) { // Only add height if it's calculated or explicitly provided
+                    imageObject.height = displayHeight;
+                }
+                content.push(imageObject);
             }
 
             if (amortizationChartImage) {
@@ -845,6 +875,7 @@ function generatePDF(selectedFields) { // Accept map of selected fields
                 pageSize: 'A4',
                 pageMargins: [30, 30, 30, 30], // Margins [left, top, right, bottom]
                 content: content,
+                images: imagesForPdf, // Add the images dictionary here
                 styles: {
                     header: { fontSize: 18, bold: true, alignment: 'center', margin: [0, 0, 0, 5] },
                     subheader: { fontSize: 12, alignment: 'center', margin: [0, 0, 0, 10], color: '#444' },
