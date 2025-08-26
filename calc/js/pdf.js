@@ -95,23 +95,40 @@ function showPDFPreview() {
         const imageLabel = document.createElement('label');
         imageLabel.htmlFor = 'user_file';
         imageLabel.textContent = 'Add Optional Image to PDF:';
-        imageLabel.style.display = 'block';
-        imageLabel.style.marginBottom = '5px';
-        imageLabel.style.fontWeight = 'bold';
+        imageLabel.style.fontWeight = 'bold'; // Keep bold
 
-        const imageInput = document.createElement('input');
-        imageInput.id = 'user_file';
-        imageInput.type = 'file';
-        imageInput.name = 'file_upload';
-        imageInput.accept = 'image/*';
+        const addImageButton = document.createElement('button');
+        addImageButton.textContent = 'add image';
+        addImageButton.className = 'btn btn-sm btn-info';
+        addImageButton.style.marginLeft = '10px'; // Add some spacing
+        addImageButton.style.marginTop = '0px';
+        addImageButton.style.marginBottom = '0px';
+		addImageButton.style.paddingTop = '3px';
+		addImageButton.style.paddingBottom = '3px';
+        addImageButton.onclick = (e) => {
+            e.preventDefault(); // Prevent form submission
+            addSingleImageInput(imageInputsContainer);
+        };
 
-        imageSection.appendChild(imageLabel);
-        imageSection.appendChild(imageInput);
+        const imageHeader = document.createElement('div');
+        imageHeader.style.display = 'flex';
+        imageHeader.style.alignItems = 'center';
+        imageHeader.style.marginBottom = '5px'; // Keep some margin below the header
+        imageHeader.appendChild(imageLabel);
+        imageHeader.appendChild(addImageButton);
+        imageSection.appendChild(imageHeader);
 
-        // Add image embed code input
+        const imageInputsContainer = document.createElement('div');
+        imageInputsContainer.id = 'imageInputsContainer';
+        imageSection.appendChild(imageInputsContainer);
+
+        // Add initial image input
+        addSingleImageInput(imageInputsContainer);
+
+        // Add image embed code input (for the first image, or general)
         const embedLabel = document.createElement('label');
         embedLabel.htmlFor = 'image_embed_code';
-        embedLabel.textContent = 'Or paste image embed code (e.g., <img src="..." />):';
+        embedLabel.textContent = 'Or paste image embed code (e.g., <img src="..." />) for the first image:';
         embedLabel.style.display = 'block';
         embedLabel.style.marginTop = '10px';
         embedLabel.style.marginBottom = '5px';
@@ -199,6 +216,46 @@ function showPDFPreview() {
         populatePDFFields(fieldsContainer);
     }
 }
+
+// Function to add a single image input field
+function addSingleImageInput(container) {
+    const currentInputs = container.querySelectorAll('input[type="file"]').length;
+    if (currentInputs >= 6) {
+        alert('You can add a maximum of 6 images.');
+        return;
+    }
+
+    const inputWrapper = document.createElement('div');
+    inputWrapper.style.display = 'flex';
+    inputWrapper.style.alignItems = 'center';
+    inputWrapper.style.marginBottom = '5px';
+
+    const imageInput = document.createElement('input');
+    imageInput.id = `user_file_${currentInputs + 1}`;
+    imageInput.type = 'file';
+    imageInput.name = `file_upload_${currentInputs + 1}`;
+    imageInput.accept = 'image/*';
+    imageInput.style.flexGrow = '1';
+    imageInput.style.marginRight = '5px';
+
+    const removeButton = document.createElement('button');
+    removeButton.textContent = 'X';
+    removeButton.className = 'btn btn-sm btn-danger';
+    removeButton.style.width = '30px';
+    removeButton.style.height = '30px';
+    removeButton.style.flexShrink = '0';
+    removeButton.onclick = (e) => {
+        e.preventDefault();
+        inputWrapper.remove();
+    };
+
+    inputWrapper.appendChild(imageInput);
+    if (currentInputs > 0) { // Allow removing only if it's not the first input
+        inputWrapper.appendChild(removeButton);
+    }
+    container.appendChild(inputWrapper);
+}
+
 function updateSectionCheckboxes(container) {
      container.querySelectorAll('.pdf-section').forEach(sectionDiv => {
          const sectionCheckbox = sectionDiv.querySelector('input.section-checkbox');
@@ -490,16 +547,14 @@ function generatePDF(selectedFields) { // Accept map of selected fields
     try {
         showLoadingState();
 
-        const imageInput = document.getElementById('user_file');
+        const imageInputs = document.querySelectorAll('#imageInputsContainer input[type="file"]');
         const embedCodeInput = document.getElementById('image_embed_code');
 
-        const processImage = new Promise(async (resolve) => {
-            let imageData = null;
-            let imageWidth = 500; // Default width
-            let imageHeight = null; // Default height
+        const imagePromises = [];
 
-            // Prioritize embed code if present
-            if (embedCodeInput && embedCodeInput.value.trim() !== '') {
+        // Process embed code first, if present
+        if (embedCodeInput && embedCodeInput.value.trim() !== '') {
+            imagePromises.push(new Promise(async (resolve) => {
                 const embedCode = embedCodeInput.value.trim();
                 const imgMatch = embedCode.match(/<img[^>]+src="([^"]+)"/);
                 const widthMatch = embedCode.match(/width="(\d+)"/);
@@ -507,12 +562,8 @@ function generatePDF(selectedFields) { // Accept map of selected fields
 
                 if (imgMatch && imgMatch[1]) {
                     const imageUrl = imgMatch[1];
-                    if (widthMatch && widthMatch[1]) {
-                        imageWidth = parseInt(widthMatch[1], 10);
-                    }
-                    if (heightMatch && heightMatch[1]) {
-                        imageHeight = parseInt(heightMatch[1], 10);
-                    }
+                    let imageWidth = widthMatch && widthMatch[1] ? parseInt(widthMatch[1], 10) : 500;
+                    let imageHeight = heightMatch && heightMatch[1] ? parseInt(heightMatch[1], 10) : null;
 
                     try {
                         const response = await fetch(imageUrl);
@@ -542,32 +593,36 @@ function generatePDF(selectedFields) { // Accept map of selected fields
                         return;
                     } catch (error) {
                         console.error("Error fetching or converting embed image:", error);
-                        // Fallback to file upload if embed image fails
+                        resolve(null);
                     }
-                }
-            }
-
-            // Fallback to file upload if no embed code, invalid embed code, or embed image fetch failed
-            if (imageInput && imageInput.files && imageInput.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    resolve({ image: e.target.result, width: 500, height: null }); // Default width for uploaded image
-                };
-                reader.onerror = function() {
-                    console.error("FileReader error for uploaded image.");
+                } else {
                     resolve(null);
-                };
-                reader.readAsDataURL(imageInput.files[0]);
-            } else {
-                resolve(null);
+                }
+            }));
+        }
+
+        // Process file inputs
+        imageInputs.forEach(input => {
+            if (input.files && input.files[0]) {
+                imagePromises.push(new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        resolve({ image: e.target.result, width: 500, height: null }); // Default width for uploaded image
+                    };
+                    reader.onerror = function() {
+                        console.error("FileReader error for uploaded image.");
+                        resolve(null);
+                    };
+                    reader.readAsDataURL(input.files[0]);
+                }));
             }
         });
 
         Promise.all([
-            processImage,
+            Promise.all(imagePromises), // Process all images
             selectedFields['apex_amortization_chart'] ? captureChartAsImage('apex_amortization_chart') : Promise.resolve(null),
             selectedFields['apex_cumulative_range_chart'] ? captureChartAsImage('apex_cumulative_range_chart') : Promise.resolve(null)
-        ]).then(([imageData, amortizationChartImage, cumulativeChartImage]) => {
+        ]).then(([allImageData, amortizationChartImage, cumulativeChartImage]) => {
             const content = [
                 { text: 'Investment Property Analysis', style: 'header' },
                 // Add address if available and selected
@@ -575,38 +630,35 @@ function generatePDF(selectedFields) { // Accept map of selected fields
             ];
 
             let imagesForPdf = {};
-            let imageKey = null;
 
-            if (imageData && imageData.image) {
-                console.log("Type of imageData.image:", typeof imageData.image);
-                console.log("First 100 chars of imageData.image:", imageData.image.substring(0, 100));
+            allImageData.filter(Boolean).forEach((imageData, index) => {
+                console.log(`Processing image ${index + 1}:`, typeof imageData.image);
 
-                // Generate a unique key for the image and store it in imagesForPdf
-                imageKey = 'userImage_' + Date.now();
-                imagesForPdf[imageKey] = imageData.image; // Store the data URL
+                const imageKey = `userImage_${Date.now()}_${index}`;
+                imagesForPdf[imageKey] = imageData.image;
 
                 const maxWidth = 520;
                 let displayWidth = imageData.width;
                 let displayHeight = imageData.height;
 
                 if (displayWidth > maxWidth) {
-                    if (displayHeight) { // If original height is known, scale proportionally
+                    if (displayHeight) {
                         displayHeight = (displayHeight / displayWidth) * maxWidth;
                     }
                     displayWidth = maxWidth;
                 }
 
                 const imageObject = {
-                    image: imageKey, // Reference the image by its key
+                    image: imageKey,
                     width: displayWidth,
                     alignment: 'center',
-                    margin: [0, 5, 0, 15] // Add margin after image
+                    margin: [0, 5, 0, 15]
                 };
-                if (displayHeight) { // Only add height if it's calculated or explicitly provided
+                if (displayHeight) {
                     imageObject.height = displayHeight;
                 }
                 content.push(imageObject);
-            }
+            });
 
             if (amortizationChartImage) {
                 content.push({
