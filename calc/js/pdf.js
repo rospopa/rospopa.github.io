@@ -66,6 +66,7 @@ function showPDFPreview() {
             background: white; padding: 10px; border-radius: 8px;
             width: 90%; /* Adjust width */
             max-width: 600px; /* Max width */
+			height: 91vh; /* Height */
             max-height: 91vh; /* Max height */
             overflow-y: auto; /* Allow content scroll */
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
