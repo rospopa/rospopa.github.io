@@ -44,42 +44,20 @@
                     </div>
                 </div>
                 
-                <div class="form-group pull-right">
-                    <input type="text" class="search form-control" placeholder="What you looking for?">
-                </div>
-                <span class="counter pull-right"></span>
-                
-                <table class="table table-hover table-bordered results" style="display:none;">
-                    <tbody>
-                        <tr>
-                            <th scope="row">1</th>
-                            <td><a href="https://talosintelligence.com">Talos Intelligence</a></td>
-                            <td>Cisco's global threat intelligence and cybersecurity research team.</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">52</th>
-                            <td><a href="https://svgconverter.online/">SVG Converter</a></td>
-                            <td>Online tool to vectorise and convert raster images into SVG format.</td>
-                        </tr>
-                    </tbody>
-                </table>
-                
                 <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
                 
                 <script type="module">
-                  // Import the functions you need from the SDKs you need
                   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
                   import { getAuth, signInWithPopup, GithubAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-                  // 2. PASTE YOUR FIREBASE CONFIG HERE
-                  // (Get this from Project Settings in Firebase Console)
+                  // YOUR SPECIFIC CONFIGURATION
                   const firebaseConfig = {
-                    apiKey: "AIzaSyDOC...", 
-                    authDomain: "rospopa-login.firebaseapp.com",
-                    projectId: "rospopa-login",
-                    storageBucket: "rospopa-login.appspot.com",
-                    messagingSenderId: "123456...",
-                    appId: "1:12345..."
+                    apiKey: "AIzaSyAERTc3MbGaNLCCz0L4REs4ma9CN4gQ5ng",
+                    authDomain: "rospopa-oauth.firebaseapp.com",
+                    projectId: "rospopa-oauth",
+                    storageBucket: "rospopa-oauth.firebasestorage.app",
+                    messagingSenderId: "281529800860",
+                    appId: "1:281529800860:web:bd398d80ecd7335c10f559"
                   };
 
                   // Initialize Firebase
@@ -87,27 +65,28 @@
                   const auth = getAuth(app);
                   const provider = new GithubAuthProvider();
 
-                  // 3. HANDLE LOGIN CLICK
+                  // Handle Login Click
                   document.getElementById('github-login-btn').addEventListener('click', () => {
                       signInWithPopup(auth, provider)
                         .then((result) => {
-                            // User is signed in!
                             const user = result.user;
                             console.log("Logged in as: ", user.email);
                             
-                            // 4. CHECK IF IT IS YOU (ADMIN CHECK)
-                            // Replace this email with your actual GitHub email
+                            // ADMIN CHECK: Replace with your exact GitHub email
                             if (user.email === "pavlo@rospopa.com") {
-                                // SUCCESS: Redirect
                                 window.location.href = "https://www.google.com";
                             } else {
-                                // FAIL: Wrong user
-                                document.getElementById('login-error').innerText = "Access Denied: Not an admin account.";
+                                document.getElementById('login-error').innerText = "Access Denied: You are not the admin.";
                                 document.getElementById('login-error').style.display = "block";
                             }
                         }).catch((error) => {
                             console.error(error);
-                            document.getElementById('login-error').innerText = "Login Failed: " + error.message;
+                            // Clean up error message for user
+                            let msg = error.message;
+                            if (msg.includes("auth/operation-not-allowed")) {
+                                msg = "GitHub Login is not enabled in Firebase Console.";
+                            }
+                            document.getElementById('login-error').innerText = "Login Failed: " + msg;
                             document.getElementById('login-error').style.display = "block";
                         });
                   });
