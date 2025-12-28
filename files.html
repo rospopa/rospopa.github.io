@@ -69,31 +69,47 @@
                     </tbody>
                 </table>
                 
-                <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-                <script src="js/script.js"></script>
+               <script>
+    // 1. The "Secrets" (These are SHA-256 Hashes of your actual username/password)
+    // Username: "PavloAdmin"
+    const CORRECT_USER_HASH = "57f598282da41d3c010eb36307185c07746b14299b0c2049ba3f958df6df1097";
+    
+    // Password: "RospopaSecure2025!"
+    const CORRECT_PASS_HASH = "8c66e4a298246f2c3d9737526922e960309995168051e5e67272719702221b64";
 
-                <script>
-                    $(document).ready(function() {
-                        $('#customLoginFn').on('submit', function(e) {
-                            e.preventDefault(); // Prevent page refresh
-                            
-                            // GET VALUES
-                            var u = $('#usr_secret').val();
-                            var p = $('#pwd_secret').val();
-                            
-                            // LOGIC: Check credentials
-                            // NOTE: This is visible in "View Source". For real security, use a backend database.
-                            if(u === 'PavloAdmin' && p === 'RospopaSecure2025!') {
-                                alert('Login Successful! Welcome back, Pavlo.');
-                                $('#login-box').slideUp(); // Hide login box on success
-                                // You can add code here to redirect to a secret page:
-                                // window.location.href = "secret-page.html";
-                            } else {
-                                $('#login-error').show().fadeOut(3000); // Show error for 3 seconds
-                            }
-                        });
-                    });
-                </script>
+    $(document).ready(function() {
+        $('#customLoginFn').on('submit', async function(e) {
+            e.preventDefault(); // Prevent page refresh
+            
+            var u = $('#usr_secret').val();
+            var p = $('#pwd_secret').val();
+
+            // Convert inputs to hashes
+            const uHash = await sha256(u);
+            const pHash = await sha256(p);
+
+            // Compare the calculated hash with the stored hash
+            if(uHash === CORRECT_USER_HASH && pHash === CORRECT_PASS_HASH) {
+                alert('Login Successful! Welcome, Pavlo.');
+                $('#login-box').slideUp(); 
+                
+                // Optional: Reveal the hidden table if you hid it
+                // $('.results').fadeIn(); 
+            } else {
+                $('#login-error').show().fadeOut(3000);
+            }
+        });
+    });
+
+    // Helper function to create the SHA-256 Hash
+    async function sha256(message) {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    }
+</script>
 
                 <br><br><br><br><br>
                 Return to <A HREF="#top">the top of this page</a>.<p>
