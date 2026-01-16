@@ -19,19 +19,26 @@
     <link rel="stylesheet" href="css/format.css">
     
     <style>
-        /* Style for the summary row contents */
         .summary-row td {
-            /* Removed hardcoded background-color here so it adopts the stripe color or default white */
             font-style: normal;
             color: inherit;
             padding-left: 20px !important;
             border-top: none !important;
         }
 
-        /* New class applied via Javascript for zebra striping pairs */
-        .stripe-pair > td, 
-        .stripe-pair > th {
-            background-color: #f5f5f5 !important; /* A standard light grey contrast */
+        /* --- ZEBRA STRIPING CSS --- */
+        /* Since every "item" is 2 rows (Title + Summary), we have a repeating pattern of 4 rows.
+           Row 1 (Book 1) - White
+           Row 2 (Summary 1) - White
+           Row 3 (Book 2) - Grey
+           Row 4 (Summary 2) - Grey
+           
+           So we target rows 3, 4, 7, 8, etc. using nth-child logic.
+        */
+        .results tbody tr:nth-child(4n+3) > td,
+        .results tbody tr:nth-child(4n+3) > th,
+        .results tbody tr:nth-child(4n+4) > td {
+            background-color: #e9e9e9 !important; /* Visible Light Grey */
         }
 
         /* Ensure the no-result row is hidden by default */
@@ -59,6 +66,7 @@
                         <input type="text" class="search form-control" placeholder="What you looking for?">
                     </div>
                     <span class="counter pull-right"></span>
+                    
                     <table class="table table-bordered results">
                         <thead>
                             <tr>
@@ -401,23 +409,6 @@
                     
                     <script>
                         $(document).ready(function() {
-                            // --- Zebra Striping Logic for Pairs ---
-                            // Select all main book rows (excluding summary and warning rows)
-                            var bookRowsForStriping = $('.results tbody tr').not('.summary-row, .warning');
-
-                            // Iterate through them using index 'i'
-                            bookRowsForStriping.each(function(i) {
-                                // If the index is odd (meaning it's the 2nd, 4th, 6th book pair), add the stripe class.
-                                // (i is 0-indexed, so i=1 is the second book).
-                                if (i % 2 !== 0) {
-                                    var bookRow = $(this);
-                                    var summaryRow = bookRow.next('.summary-row');
-                                    // Add the custom class to both rows in the pair
-                                    bookRow.addClass('stripe-pair');
-                                    summaryRow.addClass('stripe-pair');
-                                }
-                            });
-
                             // --- Search Logic ---
                             $(".search").keyup(function () {
                                 var searchTerm = $(".search").val().toLowerCase();
@@ -426,8 +417,10 @@
                                 noResult.hide();
                                 var matchCount = 0;
 
-                                // Reuse the bookRows selection for searching
-                                bookRowsForStriping.each(function() {
+                                // Select all "book" rows (every row that is NOT a summary row and NOT the warning row)
+                                var bookRows = $('.results tbody tr').not('.summary-row, .warning');
+
+                                bookRows.each(function() {
                                     var bookRow = $(this);
                                     var summaryRow = bookRow.next('.summary-row');
                                     
