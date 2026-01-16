@@ -19,13 +19,21 @@
     <link rel="stylesheet" href="css/format.css">
     
     <style>
+        /* Style for the summary row contents */
         .summary-row td {
-            background-color: #f9f9f9;
-            font-style: normal; /* Removed italics */
-            color: inherit; /* Matches the text color of the other rows */
+            /* Removed hardcoded background-color here so it adopts the stripe color or default white */
+            font-style: normal;
+            color: inherit;
             padding-left: 20px !important;
             border-top: none !important;
         }
+
+        /* New class applied via Javascript for zebra striping pairs */
+        .stripe-pair > td, 
+        .stripe-pair > th {
+            background-color: #f5f5f5 !important; /* A standard light grey contrast */
+        }
+
         /* Ensure the no-result row is hidden by default */
         .no-result {
             display: none;
@@ -51,7 +59,7 @@
                         <input type="text" class="search form-control" placeholder="What you looking for?">
                     </div>
                     <span class="counter pull-right"></span>
-                    <table class="table table-hover table-bordered results">
+                    <table class="table table-bordered results">
                         <thead>
                             <tr>
                                 <th>#</th>
@@ -312,154 +320,4 @@
                                 <td>Keith Kyle</td>
                             </tr>
                             <tr class="summary-row">
-                                <td colspan="3">A detailed historical account of the 1956 Suez Crisis and its implications for the decline of the British Empire.</td>
-                            </tr>
-
-                            <tr>
-                                <th scope="row">29</th>
-                                <td>A Monetary History of the United States, 1867-1960</td>
-                                <td>Milton Friedman</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A definitive study of US monetary policy and its profound impact on the nation's economic history.</td>
-                            </tr>
-
-                            <tr>
-                                <th scope="row">30</th>
-                                <td>Brand It Like Serhant</td>
-                                <td>Ryan Serhant</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A guide to building a personal brand that generates business and drives success in any industry.</td>
-                            </tr>
-
-                            <tr>
-                                <th scope="row">31</th>
-                                <td>The Automatic Millionaire</td>
-                                <td>David Bach</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A practical guide to achieving financial security by automating your savings and investments.</td>
-                            </tr>
-
-                            <tr>
-                                <th scope="row">32</th>
-                                <td>Read Your Mind</td>
-                                <td>Oz Pearlman</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A mentalist reveals the secrets of reading people, influencing outcomes, and achieving success.</td>
-                            </tr>
-
-                            <tr>
-                                <th scope="row">33</th>
-                                <td>10x Is Easier Than 2x</td>
-                                <td>Benjamin Hardy and Dan Sullivan</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Argues that aiming for massive growth (10x) forces innovation and clarity, while small growth (2x) keeps you stuck.</td>
-                            </tr>
-
-                            <tr>
-                                <th scope="row">34</th>
-                                <td>The Behavior Operations Manual</td>
-                                <td>Chase Hughes</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A comprehensive technical manual on reading behavior, body language analysis, and human influence.</td>
-                            </tr>
-
-                            <tr>
-                                <th scope="row">35</th>
-                                <td>Selling Buildings</td>
-                                <td>Bob Knakal and Rod Santomassimo</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Insightful strategies and stories from top commercial real estate brokers on how to succeed in the industry.</td>
-                            </tr>
-
-                            <tr>
-                                <th scope="row">36</th>
-                                <td>Be Your Future Self Now</td>
-                                <td>Benjamin Hardy</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A psychological guide to connecting with your future self today to drive better decisions and actions.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-                    
-                    <script>
-                        $(document).ready(function() {
-                            $(".search").keyup(function () {
-                                var searchTerm = $(".search").val().toLowerCase();
-                                var noResult = $('.no-result');
-                                
-                                // Hide no-result initially
-                                noResult.hide();
-
-                                var matchCount = 0;
-
-                                // Loop through "Book" rows (rows that are NOT summary rows and NOT the warning row)
-                                var bookRows = $('.results tbody tr').not('.summary-row, .warning');
-
-                                bookRows.each(function() {
-                                    var bookRow = $(this);
-                                    // The summary row is immediately after the book row
-                                    var summaryRow = bookRow.next('.summary-row');
-                                    
-                                    // Combine text from both rows for searching
-                                    var combinedText = bookRow.text() + " " + summaryRow.text();
-
-                                    if (combinedText.toLowerCase().indexOf(searchTerm) === -1) {
-                                        // No match: hide both
-                                        bookRow.hide();
-                                        summaryRow.hide();
-                                    } else {
-                                        // Match: show both
-                                        bookRow.show();
-                                        summaryRow.show();
-                                        matchCount++;
-                                    }
-                                });
-
-                                // Show "No Result" if nothing matches
-                                if (matchCount === 0) {
-                                    noResult.show();
-                                }
-                            });
-                        });
-                    </script>
-
-                    <br>
-                    <br>
-                    <br>
-                    <br>
-                    <br>
-
-                    Return to <a href="#top">the top of this page</a>.
-                    <p></p>
-                </div>
-            </div>
-        </div>
-    </main>
-    <footer>
-        <section class="d-flex flex-row justify-content-center" style="width: 100%;">
-            <div class="container" style="margin-right: 0px;margin-left: 0px;padding-right: 0px;padding-left: 0px;width: 100%;max-width: 100%;">
-                <div class="row" style="margin-right: 0px;margin-left: 0px;max-width: 100%;padding-top: 20px;padding-bottom: 20px;">
-                    <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
-                        <div class="text-center" style="text-align:center">
-                            <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
-                        </div>
-                        <script>
-                            document.getElementById('currentYear').textContent = new Date().getFullYear();
-                        </script>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </footer>
-</body>
-</html>
+                                <td colspan="3">A detailed historical account of the 1956 Suez Crisis and its implications for the decline of the
