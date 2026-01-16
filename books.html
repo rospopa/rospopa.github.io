@@ -26,12 +26,12 @@
             border-top: none !important;
         }
 
-        /* --- FORCED GREY ROW CLASS --- */
-        /* This class is applied by JavaScript below */
-        .forced-grey td,
-        .forced-grey th {
-            /* Changed from #dddddd to #bbbbbb for a darker grey contrast */
-            background-color: #bbbbbb !important; 
+        /* --- DYNAMIC GREY ROW CLASS --- */
+        /* Applied via JavaScript to visible rows only */
+        .dynamic-grey td,
+        .dynamic-grey th {
+            /* Brighter grey than before, but still visible */
+            background-color: #e0e0e0 !important; 
         }
 
         /* Ensure the no-result row is hidden by default */
@@ -326,7 +326,7 @@
 
                             <tr>
                                 <th scope="row">29</th>
-                                <td>A Monetary History of the United States</td>
+                                <td>A Monetary History of the United States, 1867-1960</td>
                                 <td>Milton Friedman</td>
                             </tr>
                             <tr class="summary-row">
@@ -403,23 +403,31 @@
                     <script>
                         $(document).ready(function() {
                             
-                            // --- EXPLICIT ZEBRA STRIPING LOGIC (JS) ---
-                            // We do this via JS to guarantee we hit the correct rows regardless of browser/CSS quirks.
-                            
-                            var rows = $('.results tbody tr');
-                            // Start at index 2 (Book 2) and jump 4 rows at a time
-                            // Pattern:
-                            // i=0 (Book 1) - White
-                            // i=1 (Summary 1) - White
-                            // i=2 (Book 2) - DARKER GREY
-                            // i=3 (Summary 2) - DARKER GREY
-                            // i=4 (Book 3) - White ...
-                            for (var i = 2; i < rows.length; i += 4) {
-                                $(rows[i]).addClass('forced-grey');   // Grey the book row
-                                if (i + 1 < rows.length) {
-                                    $(rows[i+1]).addClass('forced-grey'); // Grey the summary row
-                                }
+                            // Function to apply zebra striping to visible rows only
+                            function reapplyStriping() {
+                                // 1. Clear existing styling from all rows
+                                $('.results tbody tr').removeClass('dynamic-grey');
+
+                                // 2. Select only visible BOOK rows (ignore summary rows in selection, we handle them as pairs)
+                                var visibleBookRows = $('.results tbody tr').not('.summary-row, .warning').filter(':visible');
+
+                                // 3. Loop through visible book rows
+                                visibleBookRows.each(function(index) {
+                                    // If index is odd (1, 3, 5...), apply grey to it and its next sibling (summary)
+                                    // Note: If you want the SECOND visible row to be grey, index % 2 !== 0 is correct.
+                                    // Row 0 = White, Row 1 = Grey, Row 2 = White, etc.
+                                    if (index % 2 !== 0) {
+                                        var bookRow = $(this);
+                                        var summaryRow = bookRow.next('.summary-row');
+                                        
+                                        bookRow.addClass('dynamic-grey');
+                                        summaryRow.addClass('dynamic-grey');
+                                    }
+                                });
                             }
+
+                            // --- Run initially on load ---
+                            reapplyStriping();
 
                             // --- SEARCH LOGIC ---
                             $(".search").keyup(function () {
@@ -452,6 +460,9 @@
                                 if (matchCount === 0) {
                                     noResult.show();
                                 }
+
+                                // --- Re-run striping after showing/hiding rows ---
+                                reapplyStriping();
                             });
                         });
                     </script>
