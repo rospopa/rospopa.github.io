@@ -27,10 +27,11 @@
         }
 
         /* --- FORCED GREY ROW CLASS --- */
-        /* This class will be applied by JavaScript to ensure it overrides Bootstrap */
+        /* This class is applied by JavaScript below */
         .forced-grey td,
         .forced-grey th {
-            background-color: #dddddd !important; /* Clearly visible grey */
+            /* Changed from #dddddd to #bbbbbb for a darker grey contrast */
+            background-color: #bbbbbb !important; 
         }
 
         /* Ensure the no-result row is hidden by default */
@@ -410,8 +411,8 @@
                             // Pattern:
                             // i=0 (Book 1) - White
                             // i=1 (Summary 1) - White
-                            // i=2 (Book 2) - GREY
-                            // i=3 (Summary 2) - GREY
+                            // i=2 (Book 2) - DARKER GREY
+                            // i=3 (Summary 2) - DARKER GREY
                             // i=4 (Book 3) - White ...
                             for (var i = 2; i < rows.length; i += 4) {
                                 $(rows[i]).addClass('forced-grey');   // Grey the book row
