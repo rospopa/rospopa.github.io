@@ -26,19 +26,11 @@
             border-top: none !important;
         }
 
-        /* --- ZEBRA STRIPING CSS --- */
-        /* Since every "item" is 2 rows (Title + Summary), we have a repeating pattern of 4 rows.
-           Row 1 (Book 1) - White
-           Row 2 (Summary 1) - White
-           Row 3 (Book 2) - Grey
-           Row 4 (Summary 2) - Grey
-           
-           So we target rows 3, 4, 7, 8, etc. using nth-child logic.
-        */
-        .results tbody tr:nth-child(4n+3) > td,
-        .results tbody tr:nth-child(4n+3) > th,
-        .results tbody tr:nth-child(4n+4) > td {
-            background-color: #e9e9e9 !important; /* Visible Light Grey */
+        /* --- FORCED GREY ROW CLASS --- */
+        /* This class will be applied by JavaScript to ensure it overrides Bootstrap */
+        .forced-grey td,
+        .forced-grey th {
+            background-color: #dddddd !important; /* Clearly visible grey */
         }
 
         /* Ensure the no-result row is hidden by default */
@@ -63,7 +55,7 @@
             <div class="wrap">
                 <div class="home">
                     <div class="form-group pull-right">
-                        <input type="text" class="search form-control" placeholder="What are you looking for?">
+                        <input type="text" class="search form-control" placeholder="What you looking for?">
                     </div>
                     <span class="counter pull-right"></span>
                     
@@ -409,7 +401,26 @@
                     
                     <script>
                         $(document).ready(function() {
-                            // --- Search Logic ---
+                            
+                            // --- EXPLICIT ZEBRA STRIPING LOGIC (JS) ---
+                            // We do this via JS to guarantee we hit the correct rows regardless of browser/CSS quirks.
+                            
+                            var rows = $('.results tbody tr');
+                            // Start at index 2 (Book 2) and jump 4 rows at a time
+                            // Pattern:
+                            // i=0 (Book 1) - White
+                            // i=1 (Summary 1) - White
+                            // i=2 (Book 2) - GREY
+                            // i=3 (Summary 2) - GREY
+                            // i=4 (Book 3) - White ...
+                            for (var i = 2; i < rows.length; i += 4) {
+                                $(rows[i]).addClass('forced-grey');   // Grey the book row
+                                if (i + 1 < rows.length) {
+                                    $(rows[i+1]).addClass('forced-grey'); // Grey the summary row
+                                }
+                            }
+
+                            // --- SEARCH LOGIC ---
                             $(".search").keyup(function () {
                                 var searchTerm = $(".search").val().toLowerCase();
                                 var noResult = $('.no-result');
