@@ -26,11 +26,11 @@
             border-top: none !important;
         }
 
-        /* --- HIGH SPECIFICITY GREY ROW CLASS --- */
-        /* We use "body .page-content table..." to force this color over any Desktop/Bootstrap styles */
-        body .page-content table.results tbody tr.dynamic-grey > td,
-        body .page-content table.results tbody tr.dynamic-grey > th {
-            background-color: #e0e0e0 !important; /* Brighter Grey */
+        /* --- "NUCLEAR OPTION" SPECIFICITY FOR DESKTOP --- */
+        /* This extremely long selector ensures that your desktop CSS cannot override the grey. */
+        html body main .page-content .wrap .home table.results tbody tr.dynamic-grey > td,
+        html body main .page-content .wrap .home table.results tbody tr.dynamic-grey > th {
+            background-color: #e0e0e0 !important; /* Visible Light Grey */
         }
 
         /* Ensure the no-result row is hidden by default */
@@ -325,7 +325,7 @@
 
                             <tr>
                                 <th scope="row">29</th>
-                                <td>A Monetary History of the United States</td>
+                                <td>A Monetary History of the United States, 1867-1960</td>
                                 <td>Milton Friedman</td>
                             </tr>
                             <tr class="summary-row">
