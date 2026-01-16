@@ -26,12 +26,11 @@
             border-top: none !important;
         }
 
-        /* --- DYNAMIC GREY ROW CLASS --- */
-        /* Applied via JavaScript to visible rows only */
-        .dynamic-grey td,
-        .dynamic-grey th {
-            /* Brighter grey than before, but still visible */
-            background-color: #e0e0e0 !important; 
+        /* --- HIGH SPECIFICITY GREY ROW CLASS --- */
+        /* We use "body .page-content table..." to force this color over any Desktop/Bootstrap styles */
+        body .page-content table.results tbody tr.dynamic-grey > td,
+        body .page-content table.results tbody tr.dynamic-grey > th {
+            background-color: #e0e0e0 !important; /* Brighter Grey */
         }
 
         /* Ensure the no-result row is hidden by default */
@@ -326,7 +325,7 @@
 
                             <tr>
                                 <th scope="row">29</th>
-                                <td>A Monetary History of the United States, 1867-1960</td>
+                                <td>A Monetary History of the United States</td>
                                 <td>Milton Friedman</td>
                             </tr>
                             <tr class="summary-row">
@@ -408,14 +407,12 @@
                                 // 1. Clear existing styling from all rows
                                 $('.results tbody tr').removeClass('dynamic-grey');
 
-                                // 2. Select only visible BOOK rows (ignore summary rows in selection, we handle them as pairs)
+                                // 2. Select only visible BOOK rows (ignore summary rows in selection)
                                 var visibleBookRows = $('.results tbody tr').not('.summary-row, .warning').filter(':visible');
 
                                 // 3. Loop through visible book rows
                                 visibleBookRows.each(function(index) {
-                                    // If index is odd (1, 3, 5...), apply grey to it and its next sibling (summary)
-                                    // Note: If you want the SECOND visible row to be grey, index % 2 !== 0 is correct.
-                                    // Row 0 = White, Row 1 = Grey, Row 2 = White, etc.
+                                    // If index is odd (1, 3, 5...), apply grey to it and its summary
                                     if (index % 2 !== 0) {
                                         var bookRow = $(this);
                                         var summaryRow = bookRow.next('.summary-row');
@@ -437,7 +434,7 @@
                                 noResult.hide();
                                 var matchCount = 0;
 
-                                // Select all "book" rows (every row that is NOT a summary row and NOT the warning row)
+                                // Select all "book" rows
                                 var bookRows = $('.results tbody tr').not('.summary-row, .warning');
 
                                 bookRows.each(function() {
