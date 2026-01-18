@@ -17,481 +17,482 @@
     <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css'>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/format.css">
-    
+  
     <style>
-        /* --- 1. COMPOSITING FIX (The "Nuclear" Solution) --- */
-        /* This un-merges table borders so background colors can't be ignored */
+        /* --- 1. THE LAYOUT FIX --- */
+        /* 'separate' forces the browser to draw every cell individually, 
+           preventing the background color from hiding behind collapsed borders. */
         table.results {
             border-collapse: separate !important; 
             border-spacing: 0;
         }
-
-        /* --- 2. BOLD TITLES --- */
-        table.results tbody tr:not(.summary-row):not(.warning) td {
-            font-weight: bold;
-        }
-        .summary-row td {
-            font-style: normal;
-            color: inherit;
-            padding-left: 20px !important;
-            border-top: none !important;
-            font-weight: normal; 
+        /* Manually add borders back since we separated them */
+        table.results td, table.results th {
+            border-bottom: 1px solid #ddd !important;
         }
 
-        /* --- 3. ZEBRA STRIPING --- */
+        /* --- 2. TYPOGRAPHY --- */
+        table.results tbody tr td:nth-of-type(1) { font-weight: bold; }
+        table.results tbody tr td:nth-of-type(2) { font-weight: normal; }
+
+        /* --- 3. ZEBRA STRIPING (The Gradient Fix) --- */
+        /* Browsers can ignore background-color, but they CANNOT ignore background-image.
+           We use a gradient that looks like a solid color to force the paint. */
         table.results tbody tr.dynamic-grey > td,
         table.results tbody tr.dynamic-grey > th {
+            background-image: linear-gradient(#e0e0e0, #e0e0e0) !important;
             background-color: #e0e0e0 !important;
-            /* Force GPU Layer to prevent paint skipping */
-            will-change: transform; 
-            transform: scale(1);
             -webkit-print-color-adjust: exact;
         }
 
-        /* --- 4. HIGHLIGHTER YELLOW HOVER --- */
+        /* --- 4. HOVER EFFECT (Highlighter Yellow) --- */
         table.results tbody tr.active-hover > td,
         table.results tbody tr.active-hover > th {
+            background-image: linear-gradient(#ffff99, #ffff99) !important;
             background-color: #ffff99 !important;
-            will-change: transform;
-            transform: scale(1);
             cursor: pointer;
         }
 
         .no-result { display: none; }
     </style>
 </head>
-
+  
 <body>
-    <header class="site-header">
-        <div class="wrap"><a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
-            <nav class="site-nav">
-                <div class="trigger"><a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">pavlo@rospopa.com</a></div>
-                <div class="trigger2"><a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">@</a></div>
-            </nav>
-        </div>
-    </header>
+<header class="site-header">
+    <div class="wrap"><a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
+        <nav class="site-nav">
+            <div class="trigger"><a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">pavlo@rospopa.com</a></div>
+            <div class="trigger2"><a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">@</a></div>
+        </nav>
+    </div>
+</header>
 
-    <main>
-        <div class="page-content">
-            <div class="wrap">
-                <div class="home">
-                    <div class="form-group pull-right">
-                        <input type="text" class="search form-control" placeholder="What you looking for?">
-                    </div>
-                    <span class="counter pull-right"></span>
-                    
-                    <table class="table table-bordered results" id="bookTable">
-                        <thead>
-                            <tr>
-                                <th style="width: 5%; min-width: 40px;">#</th>
-                                <th style="width: 55%;">Title</th>
-                                <th style="width: 40%;">Author</th>
-                            </tr>
-                            <tr class="warning no-result">
-                                <td colspan="4"><i class="fa fa-warning"></i> No result</td>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <th scope="row">1</th>
-                                <td>Man’s Search for Meaning</td>
-                                <td>Viktor E. Frankl</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A psychiatrist's memoir of the Holocaust and an introduction to Logotherapy, finding meaning in suffering.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">2</th>
-                                <td>The Untethered Soul: The Journey Beyond Yourself</td>
-                                <td>Michael A. Singer</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A guide to spiritual growth, exploring how to free yourself from habitual thoughts and emotions.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">3</th>
-                                <td>Atomic Habits: An Easy & Proven Way to Build Good Habits & Break Bad Ones</td>
-                                <td>James Clear</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A practical framework for improving every day by building good habits and breaking bad ones.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">4</th>
-                                <td>Meditations</td>
-                                <td>Marcus Aurelius</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Private notes of the Roman Emperor, offering timeless wisdom on Stoic philosophy and duty.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">5</th>
-                                <td>Sapiens: A Brief History of Humankind</td>
-                                <td>Yuval Noah Harari</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">An exploration of the history of the human species from the Stone Age up to the twenty-first century.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">6</th>
-                                <td>Factfulness: Ten Reasons We're Wrong About the World – and Why Things Are Better Than You Think</td>
-                                <td>Hans Rosling</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Reveals that the world is in a much better state than we think and explains the instincts that distort our perspective.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">7</th>
-                                <td>Guns, Germs, and Steel: The Fates of Human Societies</td>
-                                <td>Jared Diamond</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Argues that environmental factors, rather than racial or cultural differences, shaped modern history.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">8</th>
-                                <td>The Sixth Extinction: An Unnatural History</td>
-                                <td>Elizabeth Kolbert</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Investigates the current mass extinction event caused by human activity and its consequences for the planet.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">9</th>
-                                <td>The Alignment Problem: Machine Learning and Human Values</td>
-                                <td>Brian Christian</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Discusses the technical and ethical challenges of ensuring artificial intelligence aligns with human values.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">10</th>
-                                <td>Thinking, Fast and Slow</td>
-                                <td>Daniel Kahneman</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Explores the two systems that drive the way we think: the fast, intuitive system and the slow, rational system.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">11</th>
-                                <td>The Art of War</td>
-                                <td>Sun Tzu</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">An ancient Chinese military treatise attributed to Sun Tzu, dealing with military strategy and tactics.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">12</th>
-                                <td>The Structure of Scientific Revolutions</td>
-                                <td>Thomas S. Kuhn</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Argues that scientific advancement is not evolutionary, but rather a series of peaceful interludes punctuated by violent revolutions.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">13</th>
-                                <td>The Power of Now: A Guide to Spiritual Enlightenment</td>
-                                <td>Eckhart Tolle</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A spiritual guide emphasizing the importance of living in the present moment to achieve enlightenment.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">14</th>
-                                <td>Daring Greatly: How the Courage to Be Vulnerable Transforms the Way We Live, Love, Parent, and Lead</td>
-                                <td>Brené Brown</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Explores how the courage to be vulnerable transforms the way we live, love, parent, and lead.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">15</th>
-                                <td>The Road Less Traveled: A New Psychology of Love, Traditional Values and Spiritual Growth</td>
-                                <td>M. Scott Peck</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A classic work combining psychology and spirituality to guide readers toward higher levels of self-understanding.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">16</th>
-                                <td>The Wealth of Nations</td>
-                                <td>Adam Smith</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">The fundamental work on classical economics, describing the division of labor and the nature of the free market.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">17</th>
-                                <td>The Richest Man in Babylon</td>
-                                <td>George Samuel Clason</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Financial advice and common sense delivered through parables set in ancient Babylon.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">18</th>
-                                <td>The Tao of Physics: An Exploration of the Parallels Between Modern Physics and Eastern Mysticism</td>
-                                <td>Fritjof Capra</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Explores the parallels between the underlying concepts of modern physics and Eastern mysticism.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">19</th>
-                                <td>Principles: Life and Work</td>
-                                <td>Ray Dalio</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Ray Dalio shares the unconventional principles he used to create unique results in life and business.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">20</th>
-                                <td>Deep Work: Rules for Focused Success in a Distracted World</td>
-                                <td>Cal Newport</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Rules for focused success in a distracted world, emphasizing the ability to master hard things quickly.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">21</th>
-                                <td>The Singularity Is Near: When Humans Transcend Biology</td>
-                                <td>Ray Kurzweil</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Predicts the exponential growth of technology leading to a point where human and machine intelligence merge.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">22</th>
-                                <td>The Alchemist</td>
-                                <td>Paulo Coelho</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A fable about following your dream, listening to your heart, and reading the omens strewn along life's path.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">23</th>
-                                <td>The Subtle Art of Not Giving a F*ck: A Counterintuitive Approach to Living a Good Life</td>
-                                <td>Mark Manson</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A counterintuitive approach to living a good life by stopping the attempt to be "positive" all the time.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">24</th>
-                                <td>The 7 Habits of Highly Effective People: Powerful Lessons in Personal Change</td>
-                                <td>Stephen R. Covey</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A holistic, integrated, principle-centered approach for solving personal and professional problems.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">25</th>
-                                <td>Machines of Loving Grace: The Quest for Common Ground Between Humans and Robots</td>
-                                <td>John Markoff</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Chronicles the history of robotics and AI, focusing on the tension between intelligence augmentation and artificial intelligence.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">26</th>
-                                <td>The Red Book: Liber Novus</td>
-                                <td>C. G. Jung</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Jung's personal journal recording his imaginative experiences and the development of his psychological theories.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">27</th>
-                                <td>Suez: Britain's End of Empire in the Middle East</td>
-                                <td>Keith Kyle</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A detailed historical account of the 1956 Suez Crisis and its implications for the decline of the British Empire.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">28</th>
-                                <td>A Monetary History of the United States, 1867-1960</td>
-                                <td>Milton Friedman</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A definitive study of US monetary policy and its profound impact on the nation's economic history.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">29</th>
-                                <td>Brand It Like Serhant: Stand Out From the Crowd, Build Your Following, and Earn More Money</td>
-                                <td>Ryan Serhant</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A guide to building a personal brand that generates business and drives success in any industry.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">30</th>
-                                <td>The Automatic Millionaire: A Powerful One-Step Plan to Live and Finish Rich</td>
-                                <td>David Bach</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A practical guide to achieving financial security by automating your savings and investments.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">31</th>
-                                <td>Read Your Mind: Proven Habits for Success from the World's Greatest Mentalist</td>
-                                <td>Oz Pearlman</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A mentalist reveals the secrets of reading people, influencing outcomes, and achieving success.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">32</th>
-                                <td>10x Is Easier Than 2x: How World-Class Entrepreneurs Achieve More by Doing Less</td>
-                                <td>Benjamin Hardy and Dan Sullivan</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Argues that aiming for massive growth (10x) forces innovation and clarity, while small growth (2x) keeps you stuck.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">33</th>
-                                <td>The Behavior Operations Manual</td>
-                                <td>Chase Hughes</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A comprehensive technical manual on reading behavior, body language analysis, and human influence.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">34</th>
-                                <td>Selling Buildings: Maximizing Prices and Profits in Commercial Real Estate</td>
-                                <td>Bob Knakal and Rod Santomassimo</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">Insightful strategies and stories from top commercial real estate brokers on how to succeed in the industry.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">35</th>
-                                <td>Be Your Future Self Now: The Science of Intentional Transformation</td>
-                                <td>Benjamin Hardy</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A psychological guide to connecting with your future self today to drive better decisions and actions.</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">36</th>
-                                <td>Stalin: Paradoxes of Power, 1878–1928</td>
-                                <td>Stephen Kotkin</td>
-                            </tr>
-                            <tr class="summary-row">
-                                <td colspan="3">A monumental biography detailing Stalin's rise from poverty to absolute power, exploring the paradoxes of his rule and the Soviet regime.</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    
-                    <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-                    
-                    <script>
-                        $(window).on('load', function() {
-                            
-                            function reapplyStriping() {
-                                $('.results tbody tr').removeClass('dynamic-grey');
-                                // Select all rows except the warning "No Result" row
-                                var visibleBookRows = $('.results tbody tr').not('.summary-row, .warning').filter(':visible');
+<main>
+<div class="page-content">
+<div class="wrap">
+<div class="home">
+        
+  <div class="form-group pull-right">
+    <input type="text" class="search form-control" placeholder="What you looking for?">
+</div>
+<span class="counter pull-right"></span>
 
-                                visibleBookRows.each(function(index) {
-                                    // If row index is odd (1, 3, 5...), add grey class
-                                    if (index % 2 !== 0) {
-                                        var bookRow = $(this);
-                                        var summaryRow = bookRow.next('.summary-row');
-                                        bookRow.addClass('dynamic-grey');
-                                        summaryRow.addClass('dynamic-grey');
-                                    }
-                                });
-                            }
+<table class="table table-hover table-bordered results" id="toolsTable">
+    <thead>
+        <tr class="warning no-result">
+          <td colspan="4"><i class="fa fa-warning"></i> No result</td>
+        </tr>
+    </thead>
+<tbody>
+    <tr>
+      <th scope="row">1</th>
+      <td><a href="https://talosintelligence.com">Talos Intelligence</a></td>
+      <td>Cisco's global threat intelligence and cybersecurity research team.</td>
+    </tr>
+    <tr>
+      <th scope="row">2</th>
+      <td><a href="https://www.virustotal.com">VirusTotal</a></td>
+      <td>Scans files and URLs for malware using multiple antivirus engines.</td>
+    </tr>
+    <tr>
+      <th scope="row">3</th>
+      <td><a href="https://www.browserling.com">Browserling</a></td>
+      <td>Live interactive cross-browser testing for web developers.</td>
+    </tr>
+    <tr>
+      <th scope="row">4</th>
+      <td><a href="https://www.joesandbox.com/">Joe Sandbox</a></td>
+      <td>Deep malware analysis and automated sandboxing.</td>
+    </tr>
+    <tr>
+      <th scope="row">5</th>
+      <td><a href="https://any.run/">Any.Run</a></td>
+      <td>Interactive online malware analysis sandbox.</td>
+    </tr>
+    <tr>
+      <th scope="row">6</th>
+      <td><a href="https://hybrid-analysis.com/">Hybrid Analysis</a></td>
+      <td>Free automated malware analysis service for the community.</td>
+    </tr>
+    <tr>
+      <th scope="row">7</th>
+      <td><a href="https://unlec.com/">Unlec</a></td>
+      <td>Detailed phone number and carrier lookup tool.</td>
+    </tr>
+    <tr>
+      <th scope="row">8</th>
+      <td><a href="https://www.lambdatest.com/">LambdaTest</a></td>
+      <td>Cross-browser testing on cloud infrastructure.</td>
+    </tr>
+    <tr>
+      <th scope="row">9</th>
+      <td><a href="https://otx.alienvault.com/">AlienVault OTX</a></td>
+      <td>Open Threat Exchange for sharing threat intelligence.</td>
+    </tr>
+    <tr>
+      <th scope="row">10</th>
+      <td><a href="https://go.microsoft.com/fwlink/?LinkId=212732">Microsoft Safety Scanner</a></td>
+      <td>On-demand malware scanning and removal tool.</td>
+    </tr>
+    <tr>
+      <th scope="row">11</th>
+      <td><a href="https://www.yubico.com/">Yubico</a></td>
+      <td>Hardware security keys for strong authentication.</td>
+    </tr>
+    <tr>
+      <th scope="row">12</th>
+      <td><a href="https://cloud.google.com/security/products/titan-security-key">Titan Security Key</a></td>
+      <td>Google's hardware two-factor authentication key.</td>
+    </tr>
+    <tr>
+      <th scope="row">13</th>
+      <td><a href="https://www.lastpass.com/">LastPass</a></td>
+      <td>Cloud-based password management and secure vault.</td>
+    </tr>
+    <tr>
+      <th scope="row">14</th>
+      <td><a href="https://bitwarden.com/">Bitwarden</a></td>
+      <td>Open-source secure password manager.</td>
+    </tr>
+    <tr>
+      <th scope="row">15</th>
+      <td><a href="https://keepassxc.org/">KeePassXC</a></td>
+      <td>Offline, open-source password manager.</td>
+    </tr>
+    <tr>
+      <th scope="row">16</th>
+      <td><a href="https://www.autopsy.com/">Autopsy</a></td>
+      <td>Digital forensics platform for disk analysis.</td>
+    </tr>
+    <tr>
+      <th scope="row">17</th>
+      <td><a href="https://brokersnapshot.com/">BrokerSnapshot</a></td>
+      <td>Financial broker regulatory verification and scam detection.</td>
+    </tr>
+    <tr>
+      <th scope="row">18</th>
+      <td><a href="https://www.ghisler.com/">Total Commander</a></td>
+      <td>Advanced file manager replacement for Windows.</td>
+    </tr>
+    <tr>
+      <th scope="row">19</th>
+      <td><a href="https://www.apachefriends.org/">XAMPP</a></td>
+      <td>Open-source web server solution stack package.</td>
+    </tr>
+    <tr>
+      <th scope="row">20</th>
+      <td><a href="https://notepad-plus-plus.org/">Notepad++</a></td>
+      <td>Free source code editor and Notepad replacement.</td>
+    </tr>
+    <tr>
+      <th scope="row">21</th>
+      <td><a href="https://www.wireshark.org/">Wireshark</a></td>
+      <td>Network protocol analyzer for traffic inspection.</td>
+    </tr>
+    <tr>
+      <th scope="row">22</th>
+      <td><a href="https://www.pgadmin.org/">pgAdmin</a></td>
+      <td>Open-source management tool for PostgreSQL databases.</td>
+    </tr>
+    <tr>
+      <th scope="row">23</th>
+      <td><a href="https://www.atlassian.com/software/jira">Jira</a></td>
+      <td>Issue tracking and agile project management tool.</td>
+    </tr>
+    <tr>
+      <th scope="row">24</th>
+      <td><a href="https://bitbucket.org/">Bitbucket</a></td>
+      <td>Git-based source code repository hosting service.</td>
+    </tr>
+    <tr>
+      <th scope="row">25</th>
+      <td><a href="https://aistudio.google.com">Google AI Studio</a></td>
+      <td>Platform for building and prototyping with Gemini models.</td>
+    </tr>
+    <tr>
+      <th scope="row">26</th>
+      <td><a href="https://www.vultr.com/">Vultr</a></td>
+      <td>High-performance cloud infrastructure and hosting.</td>
+    </tr>
+    <tr>
+      <th scope="row">27</th>
+      <td><a href="https://www.twilio.com/en-us">Twilio</a></td>
+      <td>Communication APIs for messaging, voice, and video.</td>
+    </tr>
+    <tr>
+      <th scope="row">28</th>
+      <td><a href="https://zadarma.com">Zadarma</a></td>
+      <td>Cloud PBX and VoIP telecommunications provider.</td>
+    </tr>
+    <tr>
+      <th scope="row">29</th>
+      <td><a href="https://flowroute.com/">Flowroute</a></td>
+      <td>Carrier-grade SIP trunking and telecom services.</td>
+    </tr>
+    <tr>
+      <th scope="row">30</th>
+      <td><a href="https://www.bandwidth.com/">Bandwidth</a></td>
+      <td>Enterprise CPaaS provider for voice and messaging.</td>
+    </tr>
+    <tr>
+      <th scope="row">31</th>
+      <td><a href="https://fusionpbx.com/">FusionPBX</a></td>
+      <td>Multi-tenant GUI for FreeSWITCH.</td>
+    </tr>
+    <tr>
+      <th scope="row">32</th>
+      <td><a href="https://signalwire.com/freeswitch">FreeSWITCH</a></td>
+      <td>Open-source telephony platform maintained by SignalWire.</td>
+    </tr>
+    <tr>
+      <th scope="row">33</th>
+      <td><a href="https://www.ringotel.com/">Ringotel</a></td>
+      <td>Softphone app and unified communication platform.</td>
+    </tr>
+    <tr>
+      <th scope="row">34</th>
+      <td><a href="https://www.t38fax.com/">T38Fax</a></td>
+      <td>SIP trunks optimized for reliable Fax over IP.</td>
+    </tr>
+    <tr>
+      <th scope="row">35</th>
+      <td><a href="https://www.didww.com/">DIDWW</a></td>
+      <td>Global provider of phone numbers and SIP trunking.</td>
+    </tr>
+    <tr>
+      <th scope="row">36</th>
+      <td><a href="https://www.cyberghostvpn.com/">CyberGhost VPN</a></td>
+      <td>Virtual Private Network service for online privacy.</td>
+    </tr>
+    <tr>
+      <th scope="row">37</th>
+      <td><a href="https://n8n.io/">n8n</a></td>
+      <td>Fair-code workflow automation tool for technical people.</td>
+    </tr>
+    <tr>
+      <th scope="row">38</th>
+      <td><a href="https://www.trychroma.com/">Chroma</a></td>
+      <td>Open-source AI-native embedding database.</td>
+    </tr>
+    <tr>
+      <th scope="row">39</th>
+      <td><a href="https://ollama.com/">Ollama</a></td>
+      <td>Tool for running large language models locally.</td>
+    </tr>
+    <tr>
+      <th scope="row">40</th>
+      <td><a href="https://www.windmill.dev/">Windmill</a></td>
+      <td>Open-source developer platform for internal tools and APIs.</td>
+    </tr>
+    <tr>
+      <th scope="row">41</th>
+      <td><a href="https://www.docker.com/">Docker</a></td>
+      <td>Platform for developing, shipping, and running applications in containers.</td>
+    </tr>
+    <tr>
+      <th scope="row">42</th>
+      <td><a href="https://flipper.net/">Flipper</a></td>
+      <td>Portable multi-tool device for penetration testing and hardware hacking.</td>
+    </tr>
+    <tr>
+      <th scope="row">43</th>
+      <td><a href="https://hak5.org/">Hak5</a></td>
+      <td>Security hardware, penetration testing gear, and IT education.</td>
+    </tr>
+    <tr>
+      <th scope="row">44</th>
+      <td><a href="https://powerspec.com">PowerSpec</a></td>
+      <td>Micro Center's house brand of pre-built high-performance computers.</td>
+    </tr>
+    <tr>
+      <th scope="row">45</th>
+      <td><a href="https://www.vantajs.com">Vanta.js</a></td>
+      <td>Lightweight library for creating animated 3D website backgrounds.</td>
+    </tr>
+    <tr>
+      <th scope="row">46</th>
+      <td><a href="https://www.nayax.com/">Nayax</a></td>
+      <td>Cashless payment and telemetry solutions for unattended retail.</td>
+    </tr>
+    <tr>
+      <th scope="row">47</th>
+      <td><a href="https://www.nar.realtor/">National Association of Realtors</a></td>
+      <td>Trade association providing resources for real estate professionals.</td>
+    </tr>
+    <tr>
+      <th scope="row">48</th>
+      <td><a href="https://www.carrier411.com/">Carrier411</a></td>
+      <td>Monitoring and qualification service for checking trucking carrier safety.</td>
+    </tr>
+    <tr>
+      <th scope="row">49</th>
+      <td><a href="https://mred.remine.com/">Remine (MRED)</a></td>
+      <td>Map-based property intelligence and MLS platform for real estate agents.</td>
+    </tr>
+    <tr>
+      <th scope="row">50</th>
+      <td><a href="https://ww2.mredllc.com/">Midwest Real Estate Data (MRED)</a></td>
+      <td>The primary Multiple Listing Service (MLS) for the greater Chicago area.</td>
+    </tr>
+    <tr>
+      <th scope="row">51</th>
+      <td><a href="http://www.identifont.com/">Identifont</a></td>
+      <td>Tool to identify unknown fonts by answering questions about their appearance.</td>
+    </tr>
+    <tr>
+      <th scope="row">52</th>
+      <td><a href="https://svgconverter.online/">SVG Converter</a></td>
+      <td>Online tool to vectorise and convert raster images into SVG format.</td>
+    </tr>
+    <tr>
+      <th scope="row">53</th>
+      <td><a href="https://www.renderhub.com/">RenderHub</a></td>
+      <td>Marketplace for high-quality 3D models, textures, and VR content.</td>
+    </tr>
+    <tr>
+      <th scope="row">54</th>
+      <td><a href="https://www.turbosquid.com/">TurboSquid</a></td>
+      <td>Large professional 3D model marketplace for creative professionals.</td>
+    </tr>
+    <tr>
+      <th scope="row">55</th>
+      <td><a href="https://sketchfab.com/">Sketchfab</a></td>
+      <td>Platform to publish, share, discover, buy and sell 3D, VR and AR content.</td>
+    </tr>
+    <tr>
+      <th scope="row">56</th>
+      <td><a href="https://gltf.report/">glTF Report</a></td>
+      <td>Online viewer and validator to analyze and debug glTF 2.0 files.</td>
+    </tr>
+    <tr>
+      <th scope="row">57</th>
+      <td><a href="https://modelviewer.dev/">Model Viewer</a></td>
+      <td>Web component for easily displaying interactive 3D models on the web.</td>
+    </tr>
+    <tr>
+      <th scope="row">58</th>
+      <td><a href="https://duo.com/">Duo Security</a></td>
+      <td>Cloud-based two-factor authentication (2FA) and zero-trust security.</td>
+    </tr>
+    <tr>
+      <th scope="row">59</th>
+      <td><a href="https://1password.com/">1Password</a></td>
+      <td>Highly secure, multi-platform password manager and digital wallet.</td>
+    </tr>
+    <tr>
+      <th scope="row">60</th>
+      <td><a href="https://github.com/features/copilot">GitHub Copilot</a></td>
+      <td>AI-powered pair programmer for auto-completing and generating code.</td>
+    </tr>
+    <tr>
+      <th scope="row">61</th>
+      <td><a href="https://threejs.org/">Three.js</a></td>
+      <td>JavaScript 3D library which makes WebGL easier to use.</td>
+    </tr>
+    <tr>
+      <th scope="row">62</th>
+      <td><a href="https://www.experianidworks.com/">Experian IdentityWorks</a></td>
+      <td>Identity theft protection and credit monitoring service.</td>
+    </tr>
+    <tr>
+      <th scope="row">63</th>
+      <td><a href="https://siorchicago.org/">SIOR Chicago</a></td>
+      <td>The Chicago Chapter of the Society of Industrial and Office Realtors.</td>
+    </tr>
+</tbody>
+</table>
 
-                            // 1. Initial Apply
-                            reapplyStriping();
+<script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
 
-                            // 2. FORCE REPAINT
-                            var table = $('#bookTable');
-                            table.hide();
-                            setTimeout(function(){
-                                table.show(); 
-                            }, 10); 
+<script>
+    // Define the zebra function in global scope or inside the event listener
+    function applyZebraAndHover() {
+        // Select all rows that are NOT the warning row
+        var rows = document.querySelectorAll('table.results tbody tr:not(.warning)');
+        var searchTerm = document.querySelector('.search').value.toLowerCase();
+        var hasVisibleResult = false;
 
-                            // --- HOVER LOGIC ---
-                            var allRows = $('.results tbody tr').not('.warning');
+        // Loop through rows
+        for (var i = 0; i < rows.length; i++) {
+            var row = rows[i];
+            
+            // 1. Search Logic
+            var text = row.innerText.toLowerCase();
+            if (text.indexOf(searchTerm) === -1 && searchTerm.length > 0) {
+                row.style.display = 'none';
+            } else {
+                row.style.display = ''; // Show row
+                hasVisibleResult = true;
+                
+                // 2. Zebra Logic (Odd visible rows get grey)
+                // We need to count visible rows to stripe correctly
+                // Note: The logic below stripes based on DOM index, not visible index. 
+                // To match previous logic:
+                if (i % 2 !== 0) {
+                    row.classList.add('dynamic-grey');
+                } else {
+                    row.classList.remove('dynamic-grey');
+                }
+            }
 
-                            allRows.on('mouseenter', function() {
-                                var currentRow = $(this);
-                                var partnerRow;
+            // 3. Hover Logic (Vanilla JS Event Listeners)
+            // Remove old listeners to prevent duplicates (cloning technique)
+            var newRow = row.cloneNode(true);
+            row.parentNode.replaceChild(newRow, row);
+            
+            // Add new listeners
+            newRow.addEventListener('mouseenter', function() {
+                this.classList.add('active-hover');
+            });
+            newRow.addEventListener('mouseleave', function() {
+                this.classList.remove('active-hover');
+            });
+        }
 
-                                if (currentRow.hasClass('summary-row')) {
-                                    partnerRow = currentRow.prev();
-                                } else {
-                                    partnerRow = currentRow.next('.summary-row');
-                                }
+        // Show/Hide "No Result" message
+        var noResultRow = document.querySelector('.no-result');
+        if (noResultRow) {
+            noResultRow.style.display = hasVisibleResult ? 'none' : 'table-row';
+        }
+    }
 
-                                currentRow.addClass('active-hover');
-                                if (partnerRow.length) partnerRow.addClass('active-hover');
-                            });
+    // Run when DOM is ready
+    document.addEventListener("DOMContentLoaded", function() {
+        applyZebraAndHover();
 
-                            allRows.on('mouseleave', function() {
-                                $('.results tbody tr').removeClass('active-hover');
-                            });
+        // Attach Search Listener
+        var searchInput = document.querySelector('.search');
+        if (searchInput) {
+            searchInput.addEventListener('keyup', applyZebraAndHover);
+        }
+    });
 
-                            // --- SEARCH LOGIC ---
-                            $(".search").keyup(function () {
-                                var searchTerm = $(".search").val().toLowerCase();
-                                var noResult = $('.no-result');
+    // Run AGAIN on Window Load (forces repaint after images/css load)
+    window.addEventListener("load", function() {
+        applyZebraAndHover();
+        // Force a layout reflow to fix the paint bug
+        document.body.offsetHeight; 
+    });
+</script>
+        
+<br><br><br><br><br>
                                 
-                                noResult.hide();
-                                var matchCount = 0;
-
-                                var bookRows = $('.results tbody tr').not('.summary-row, .warning');
-
-                                bookRows.each(function() {
-                                    var bookRow = $(this);
-                                    var summaryRow = bookRow.next('.summary-row');
-                                    var combinedText = bookRow.text() + " " + summaryRow.text();
-
-                                    if (combinedText.toLowerCase().indexOf(searchTerm) === -1) {
-                                        bookRow.hide();
-                                        summaryRow.hide();
-                                    } else {
-                                        bookRow.show();
-                                        summaryRow.show();
-                                        matchCount++;
-                                    }
-                                });
-
-                                if (matchCount === 0) {
-                                    noResult.show();
-                                }
-
-                                reapplyStriping();
-                            });
-                        });
-                    </script>
-
-                    <br><br><br><br><br>
-                    Return to <a href="#top">the top of this page</a>.
-                    <p></p>
+Return to <A HREF="#top">the top of this page</a>.<p>
+</main>
+<footer>
+<section class="d-flex flex-row justify-content-center" style="width: 100%;">
+    <div class="container" style="margin-right: 0px;margin-left: 0px;padding-right: 0px;padding-left: 0px;width: 100%;max-width: 100%;">
+        <div class="row" style="margin-right: 0px;margin-left: 0px;max-width: 100%;padding-top: 20px;padding-bottom: 20px;">
+            <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
+                <div class="text-center" style="text-align:center">
+                    <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
+                    <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v2.3 (Vanilla JS + Gradient Fix)</p>
                 </div>
+                <script>document.getElementById('currentYear').textContent = new Date().getFullYear();</script>
             </div>
         </div>
-    </main>
-    <footer>
-        <section class="d-flex flex-row justify-content-center" style="width: 100%;">
-            <div class="container" style="margin-right: 0px;margin-left: 0px;padding-right: 0px;padding-left: 0px;width: 100%;max-width: 100%;">
-                <div class="row" style="margin-right: 0px;margin-left: 0px;max-width: 100%;padding-top: 20px;padding-bottom: 20px;">
-                    <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
-                        <div class="text-center" style="text-align:center">
-                            <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
-                            <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v2.2 (Compositing Fix)</p>
-                        </div>
-                        <script>
-                            document.getElementById('currentYear').textContent = new Date().getFullYear();
-                        </script>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </footer>
-</body>
+    </div>
+</section>
+</footer>
+</BODY>
 </html>
