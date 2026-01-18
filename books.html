@@ -18,55 +18,94 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/format.css">
     
-    <style>
-        /* --- 1. BOLD TITLES AND AUTHORS --- */
-        table.results tbody tr:not(.summary-row):not(.warning) td {
-            font-weight: bold;
-        }
-        
-        .summary-row td {
-            font-style: normal;
-            color: inherit;
-            padding-left: 20px !important;
-            border-top: none !important;
-            font-weight: normal; 
+    <script>
+    $(window).on('load', function() {
+
+        function reapplyStriping() {
+            $('.results tbody tr').removeClass('dynamic-grey');
+
+            var visibleBookRows = $('.results tbody tr')
+                .not('.summary-row, .warning')
+                .filter(':visible');
+
+            visibleBookRows.each(function(index) {
+                if (index % 2 !== 0) {
+                    var bookRow = $(this);
+                    var summaryRow = bookRow.next('.summary-row');
+
+                    bookRow.addClass('dynamic-grey');
+                    summaryRow.addClass('dynamic-grey');
+                }
+            });
         }
 
-        /* --- 2. ZEBRA STRIPING (The "Compositing" Fix) --- */
-        table.results tbody tr.dynamic-grey > td,
-        table.results tbody tr.dynamic-grey > th {
-            /* The Color */
-            background-color: #e0e0e0 !important;
-            
-            /* The Paint Forcers - Forces browser to put this row on its own GPU layer */
-            will-change: transform; 
-            transform: scale(1); 
-            
-            /* The Backup */
-            box-shadow: inset 0 0 0 9999px rgba(224, 224, 224, 1) !important;
-            -webkit-print-color-adjust: exact;
-        }
+        // 1. Initial Apply
+        reapplyStriping();
 
-        /* --- 3. MOUSE HOVER EFFECT (Highlighter Yellow) --- */
-        table.results tbody tr.active-hover > td,
-        table.results tbody tr.active-hover > th {
-            background-color: #ffff99 !important;
-            box-shadow: inset 0 0 0 9999px rgba(255, 255, 153, 1) !important;
-            will-change: transform;
-            transform: scale(1);
-            cursor: pointer;
-        }
+        // 2. FORCE REPAINT (FIXED)
+        var table = $('#bookTable');
+        table.hide();
 
-        .no-result {
-            display: none;
-        }
-        
-        /* Fix for Bootstrap Table Borders interfering with background */
-        table.results {
-            border-collapse: separate !important; 
-            border-spacing: 0;
-        }
-    </style>
+        setTimeout(function(){
+            table.show();
+            reapplyStriping(); // ✅ REAPPLY AFTER VISIBILITY
+        }, 10);
+
+        // --- HOVER LOGIC ---
+        var allRows = $('.results tbody tr').not('.warning');
+
+        allRows.on('mouseenter', function() {
+            var currentRow = $(this);
+            var partnerRow;
+
+            if (currentRow.hasClass('summary-row')) {
+                partnerRow = currentRow.prev();
+            } else {
+                partnerRow = currentRow.next('.summary-row');
+            }
+
+            currentRow.addClass('active-hover');
+            if (partnerRow.length) partnerRow.addClass('active-hover');
+        });
+
+        allRows.on('mouseleave', function() {
+            $('.results tbody tr').removeClass('active-hover');
+        });
+
+        // --- SEARCH LOGIC ---
+        $(".search").keyup(function () {
+            var searchTerm = $(".search").val().toLowerCase();
+            var noResult = $('.no-result');
+
+            noResult.hide();
+            var matchCount = 0;
+
+            var bookRows = $('.results tbody tr')
+                .not('.summary-row, .warning');
+
+            bookRows.each(function() {
+                var bookRow = $(this);
+                var summaryRow = bookRow.next('.summary-row');
+                var combinedText = bookRow.text() + " " + summaryRow.text();
+
+                if (combinedText.toLowerCase().indexOf(searchTerm) === -1) {
+                    bookRow.hide();
+                    summaryRow.hide();
+                } else {
+                    bookRow.show();
+                    summaryRow.show();
+                    matchCount++;
+                }
+            });
+
+            if (matchCount === 0) {
+                noResult.show();
+            }
+
+            reapplyStriping();
+        });
+    });
+</script>
 </head>
 
 <body>
