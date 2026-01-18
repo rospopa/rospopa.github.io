@@ -18,94 +18,55 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/format.css">
     
-    <script>
-    $(window).on('load', function() {
-
-        function reapplyStriping() {
-            $('.results tbody tr').removeClass('dynamic-grey');
-
-            var visibleBookRows = $('.results tbody tr')
-                .not('.summary-row, .warning')
-                .filter(':visible');
-
-            visibleBookRows.each(function(index) {
-                if (index % 2 !== 0) {
-                    var bookRow = $(this);
-                    var summaryRow = bookRow.next('.summary-row');
-
-                    bookRow.addClass('dynamic-grey');
-                    summaryRow.addClass('dynamic-grey');
-                }
-            });
+    <style>
+        /* --- 1. BOLD TITLES AND AUTHORS --- */
+        table.results tbody tr:not(.summary-row):not(.warning) td {
+            font-weight: bold;
+        }
+        
+        .summary-row td {
+            font-style: normal;
+            color: inherit;
+            padding-left: 20px !important;
+            border-top: none !important;
+            font-weight: normal; 
         }
 
-        // 1. Initial Apply
-        reapplyStriping();
+        /* --- 2. ZEBRA STRIPING (The "Compositing" Fix) --- */
+        table.results tbody tr.dynamic-grey > td,
+        table.results tbody tr.dynamic-grey > th {
+            /* The Color */
+            background-color: #e0e0e0 !important;
+            
+            /* The Paint Forcers - Forces browser to put this row on its own GPU layer */
+            will-change: transform; 
+            transform: scale(1); 
+            
+            /* The Backup */
+            box-shadow: inset 0 0 0 9999px rgba(224, 224, 224, 1) !important;
+            -webkit-print-color-adjust: exact;
+        }
 
-        // 2. FORCE REPAINT (FIXED)
-        var table = $('#bookTable');
-        table.hide();
+        /* --- 3. MOUSE HOVER EFFECT (Highlighter Yellow) --- */
+        table.results tbody tr.active-hover > td,
+        table.results tbody tr.active-hover > th {
+            background-color: #ffff99 !important;
+            box-shadow: inset 0 0 0 9999px rgba(255, 255, 153, 1) !important;
+            will-change: transform;
+            transform: scale(1);
+            cursor: pointer;
+        }
 
-        setTimeout(function(){
-            table.show();
-            reapplyStriping(); // ✅ REAPPLY AFTER VISIBILITY
-        }, 10);
-
-        // --- HOVER LOGIC ---
-        var allRows = $('.results tbody tr').not('.warning');
-
-        allRows.on('mouseenter', function() {
-            var currentRow = $(this);
-            var partnerRow;
-
-            if (currentRow.hasClass('summary-row')) {
-                partnerRow = currentRow.prev();
-            } else {
-                partnerRow = currentRow.next('.summary-row');
-            }
-
-            currentRow.addClass('active-hover');
-            if (partnerRow.length) partnerRow.addClass('active-hover');
-        });
-
-        allRows.on('mouseleave', function() {
-            $('.results tbody tr').removeClass('active-hover');
-        });
-
-        // --- SEARCH LOGIC ---
-        $(".search").keyup(function () {
-            var searchTerm = $(".search").val().toLowerCase();
-            var noResult = $('.no-result');
-
-            noResult.hide();
-            var matchCount = 0;
-
-            var bookRows = $('.results tbody tr')
-                .not('.summary-row, .warning');
-
-            bookRows.each(function() {
-                var bookRow = $(this);
-                var summaryRow = bookRow.next('.summary-row');
-                var combinedText = bookRow.text() + " " + summaryRow.text();
-
-                if (combinedText.toLowerCase().indexOf(searchTerm) === -1) {
-                    bookRow.hide();
-                    summaryRow.hide();
-                } else {
-                    bookRow.show();
-                    summaryRow.show();
-                    matchCount++;
-                }
-            });
-
-            if (matchCount === 0) {
-                noResult.show();
-            }
-
-            reapplyStriping();
-        });
-    });
-</script>
+        .no-result {
+            display: none;
+        }
+        
+        /* Fix for Bootstrap Table Borders interfering with background */
+        table.results {
+            border-collapse: separate !important; 
+            border-spacing: 0;
+        }
+    </style>
 </head>
 
 <body>
@@ -465,93 +426,62 @@
                         </tbody>
                     </table>
                     
-                    <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
-                    
-                    <script>
-                        $(window).on('load', function() {
-                            
-                            function reapplyStriping() {
-                                $('.results tbody tr').removeClass('dynamic-grey');
-                                var visibleBookRows = $('.results tbody tr').not('.summary-row, .warning').filter(':visible');
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    <script>
+        $(function() {
+            const $table = $('#bookTable');
+            const $tbody = $table.find('tbody');
+            const $allRows = $tbody.find('tr').not('.warning');
+            const $search = $('.search');
+            const $noResult = $('.no-result');
 
-                                visibleBookRows.each(function(index) {
-                                    if (index % 2 !== 0) {
-                                        var bookRow = $(this);
-                                        var summaryRow = bookRow.next('.summary-row');
-                                        bookRow.addClass('dynamic-grey');
-                                        summaryRow.addClass('dynamic-grey');
-                                    }
-                                });
-                            }
+            function reapplyStriping() {
+                $tbody.find('tr').removeClass('dynamic-grey');
+                const $bookRows = $tbody.find('tr').not('.summary-row, .warning').filter(':visible');
+                $bookRows.each(function(i){
+                    if(i % 2 !== 0){
+                        const $book = $(this);
+                        const $summary = $book.next('.summary-row');
+                        $book.addClass('dynamic-grey');
+                        if($summary.length) $summary.addClass('dynamic-grey');
+                    }
+                });
+            }
 
-                            // 1. Initial Apply
-                            reapplyStriping();
+            reapplyStriping();
 
-                            // 2. FORCE REPAINT
-                            var table = $('#bookTable');
-                            table.hide();
-                            setTimeout(function(){
-                                table.show(); 
-                            }, 10); 
+            // Hover logic
+            $allRows.on('mouseenter', function(){
+                const $row = $(this);
+                const $partner = $row.hasClass('summary-row') ? $row.prev() : $row.next('.summary-row');
+                $row.addClass('active-hover');
+                if($partner.length) $partner.addClass('active-hover');
+            }).on('mouseleave', function(){
+                $allRows.removeClass('active-hover');
+            });
 
-
-                            // --- NEW: INTELLIGENT HOVER LOGIC ---
-                            // Select all rows except the warning row
-                            var allRows = $('.results tbody tr').not('.warning');
-
-                            allRows.on('mouseenter', function() {
-                                var currentRow = $(this);
-                                var partnerRow;
-
-                                if (currentRow.hasClass('summary-row')) {
-                                    partnerRow = currentRow.prev();
-                                } else {
-                                    partnerRow = currentRow.next('.summary-row');
-                                }
-
-                                // Add hover class to BOTH
-                                currentRow.addClass('active-hover');
-                                if (partnerRow.length) partnerRow.addClass('active-hover');
-                            });
-
-                            allRows.on('mouseleave', function() {
-                                $('.results tbody tr').removeClass('active-hover');
-                            });
-
-
-                            // --- SEARCH LOGIC ---
-                            $(".search").keyup(function () {
-                                var searchTerm = $(".search").val().toLowerCase();
-                                var noResult = $('.no-result');
-                                
-                                noResult.hide();
-                                var matchCount = 0;
-
-                                var bookRows = $('.results tbody tr').not('.summary-row, .warning');
-
-                                bookRows.each(function() {
-                                    var bookRow = $(this);
-                                    var summaryRow = bookRow.next('.summary-row');
-                                    var combinedText = bookRow.text() + " " + summaryRow.text();
-
-                                    if (combinedText.toLowerCase().indexOf(searchTerm) === -1) {
-                                        bookRow.hide();
-                                        summaryRow.hide();
-                                    } else {
-                                        bookRow.show();
-                                        summaryRow.show();
-                                        matchCount++;
-                                    }
-                                });
-
-                                if (matchCount === 0) {
-                                    noResult.show();
-                                }
-
-                                reapplyStriping();
-                            });
-                        });
-                    </script>
+            // Search logic
+            $search.on('keyup', function(){
+                const term = $(this).val().toLowerCase();
+                let matches = 0;
+                $tbody.find('tr').not('.summary-row, .warning').each(function(){
+                    const $book = $(this);
+                    const $summary = $book.next('.summary-row');
+                    const text = ($book.text() + ' ' + $summary.text()).toLowerCase();
+                    if(text.includes(term)){
+                        $book.show();
+                        $summary.show();
+                        matches++;
+                    } else {
+                        $book.hide();
+                        $summary.hide();
+                    }
+                });
+                $noResult.toggle(matches === 0);
+                reapplyStriping();
+            });
+        });
+    </script>
 
                     <br><br><br><br><br>
                     Return to <a href="#top">the top of this page</a>.
@@ -567,7 +497,7 @@
                     <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
                         <div class="text-center" style="text-align:center">
                             <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
-                            <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v2.2 (Beta)</p>
+                            <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v2.2 (Compositing Fix)</p>
                         </div>
                         <script>
                             document.getElementById('currentYear').textContent = new Date().getFullYear();
