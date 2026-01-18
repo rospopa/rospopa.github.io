@@ -42,15 +42,14 @@
             -webkit-print-color-adjust: exact;
         }
 
-        /* --- 3. MOUSE HOVER EFFECT (Darker Grey) --- */
-        /* This class is added by JS when mouse enters a book or summary row.
-           It overrides the zebra striping with a darker color (#c0c0c0). */
+        /* --- 3. MOUSE HOVER EFFECT (Highlighter Yellow) --- */
+        /* Changed to bright yellow (#ffff99) */
         table.results tbody tr.active-hover > td,
         table.results tbody tr.active-hover > th {
-            background-color: #c0c0c0 !important;
-            box-shadow: inset 0 0 0 9999px #c0c0c0 !important;
-            transform: translateZ(0); /* Keeps the paint snappy */
-            transition: box-shadow 0.1s ease-in-out; /* Smooth transition */
+            background-color: #ffff99 !important; /* Highlighter Yellow */
+            box-shadow: inset 0 0 0 9999px #ffff99 !important;
+            transform: translateZ(0); 
+            transition: background-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
         }
 
         /* Ensure the no-result row is hidden by default */
@@ -457,9 +456,6 @@
 
 
                             // --- NEW: INTELLIGENT HOVER LOGIC ---
-                            // Since the table is split into "Title" rows and "Summary" rows, we want
-                            // to highlight both at the same time when hovering either one.
-                            
                             // Select all rows except the warning row
                             var allRows = $('.results tbody tr').not('.warning');
 
@@ -468,10 +464,8 @@
                                 var partnerRow;
 
                                 if (currentRow.hasClass('summary-row')) {
-                                    // If hovering summary, partner is the row BEFORE it
                                     partnerRow = currentRow.prev();
                                 } else {
-                                    // If hovering book title, partner is the row AFTER it
                                     partnerRow = currentRow.next('.summary-row');
                                 }
 
@@ -481,7 +475,6 @@
                             });
 
                             allRows.on('mouseleave', function() {
-                                // Remove hover class from everything to be safe/clean
                                 $('.results tbody tr').removeClass('active-hover');
                             });
 
@@ -534,7 +527,7 @@
                     <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
                         <div class="text-center" style="text-align:center">
                             <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
-                            <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v1.6 (Hover Highlight)</p>
+                            <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v1.7 (Yellow Highlighter)</p>
                         </div>
                         <script>
                             document.getElementById('currentYear').textContent = new Date().getFullYear();
