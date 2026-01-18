@@ -17,40 +17,60 @@
     <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css'>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/format.css">
-  
+   
     <style>
         /* --- 1. TYPOGRAPHY --- */
+        /* Bold the Title/Link column */
         table.results tbody tr td:nth-of-type(1) {
             font-weight: bold;
         }
+        /* Normal weight for description */
         table.results tbody tr td:nth-of-type(2) {
             font-weight: normal;
         }
 
-        /* --- 2. ZEBRA STRIPING (The Gradient Fix) --- */
+        /* --- 2. ZEBRA STRIPING (Robust Box-Shadow Method) --- */
         table.results tbody tr.dynamic-grey > td,
         table.results tbody tr.dynamic-grey > th {
-            background-image: linear-gradient(#e0e0e0, #e0e0e0) !important;
+            /* The Color */
             background-color: #e0e0e0 !important;
+            /* The Backup for border safety */
+            box-shadow: inset 0 0 0 9999px rgba(224, 224, 224, 1) !important;
             -webkit-print-color-adjust: exact;
         }
 
         /* --- 3. MOUSE HOVER EFFECT (Highlighter Yellow) --- */
         table.results tbody tr.active-hover > td,
         table.results tbody tr.active-hover > th {
-            background-image: linear-gradient(#ffff99, #ffff99) !important;
             background-color: #ffff99 !important;
-            transition: background-image 0.1s;
+            box-shadow: inset 0 0 0 9999px rgba(255, 255, 153, 1) !important;
             cursor: pointer;
         }
 
-        /* Ensure the no-result row is hidden by default */
         .no-result {
             display: none;
         }
+
+        /* Fix for Bootstrap Table Borders interfering with background */
+        table.results {
+            border-collapse: separate !important; 
+            border-spacing: 0;
+        }
+
+        /* --- 4. FORCE SOFT CHARCOAL BORDERS (Universal Visibility) --- */
+        .table-bordered,
+        .table-bordered > thead > tr > th,
+        .table-bordered > tbody > tr > th,
+        .table-bordered > tfoot > tr > th,
+        .table-bordered > thead > tr > td,
+        .table-bordered > tbody > tr > td,
+        .table-bordered > tfoot > tr > td {
+            /* Charcoal Grey for contrast without harshness */
+            border-color: #555555 !important;
+        }
     </style>
 </head>
-  
+   
 <body>
 <header class="site-header">
     <div class="wrap"><a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
@@ -415,12 +435,14 @@
 
         reapplyStriping();
 
+        // FORCE REPAINT to ensure borders render correctly on all browsers
         var table = $('#toolsTable');
         table.hide();
         setTimeout(function(){
             table.show(); 
         }, 10); 
 
+        // Consistent Hover Logic
         $('.results tbody tr').not('.warning').hover(
             function() { $(this).addClass('active-hover'); },
             function() { $(this).removeClass('active-hover'); }
@@ -437,6 +459,7 @@
 
             rows.each(function() {
                 var row = $(this);
+                // Simple search in all text within the row
                 if (row.text().toLowerCase().indexOf(searchTerm) === -1) {
                     row.hide();
                 } else {
@@ -469,7 +492,7 @@ Return to <A HREF="#top">the top of this page</a>.<p>
             <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
                 <div class="text-center" style="text-align:center">
                     <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
-                    <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v2.1 (Paint Fix)</p>
+                    <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v2.5</p>
                 </div>
                 <script>document.getElementById('currentYear').textContent = new Date().getFullYear();</script>
             </div>
