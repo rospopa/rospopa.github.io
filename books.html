@@ -24,7 +24,6 @@
             font-weight: bold;
         }
         
-        /* Ensure summaries are NOT bold */
         .summary-row td {
             font-style: normal;
             color: inherit;
@@ -36,7 +35,7 @@
         /* --- 2. ZEBRA STRIPING (The Gradient Fix) --- */
         /* We use a linear-gradient image because browsers treat images 
            with higher priority than background-colors. This prevents the 
-           "white background" from overriding our grey. */
+           desktop "white background" bug. */
         table.results tbody tr.dynamic-grey > td,
         table.results tbody tr.dynamic-grey > th {
             background-image: linear-gradient(#e0e0e0, #e0e0e0) !important;
@@ -52,7 +51,6 @@
             transition: background-image 0.1s; /* Snap transition */
         }
 
-        /* Ensure the no-result row is hidden by default */
         .no-result {
             display: none;
         }
@@ -435,18 +433,16 @@
                                 });
                             }
 
-                            // 1. Initial Apply
                             reapplyStriping();
 
-                            // 2. FORCE REPAINT
+                            // FORCE REPAINT (Gradient Fix)
                             var table = $('#bookTable');
                             table.hide();
                             setTimeout(function(){
                                 table.show(); 
                             }, 10); 
 
-
-                            // --- HOVER LOGIC ---
+                            // HOVER LOGIC
                             var allRows = $('.results tbody tr').not('.warning');
 
                             allRows.on('mouseenter', function() {
@@ -467,8 +463,7 @@
                                 $('.results tbody tr').removeClass('active-hover');
                             });
 
-
-                            // --- SEARCH LOGIC ---
+                            // SEARCH LOGIC
                             $(".search").keyup(function () {
                                 var searchTerm = $(".search").val().toLowerCase();
                                 var noResult = $('.no-result');
