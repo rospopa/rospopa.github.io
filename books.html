@@ -20,7 +20,6 @@
     
     <style>
         /* --- BOLD TITLES AND AUTHORS --- */
-        /* Targets 'td' cells in rows that are NOT summary rows or warning rows */
         table.results tbody tr:not(.summary-row):not(.warning) td {
             font-weight: bold;
         }
@@ -30,22 +29,20 @@
             color: inherit;
             padding-left: 20px !important;
             border-top: none !important;
-            font-weight: normal; /* Ensures summaries stay normal weight */
+            font-weight: normal; 
         }
 
-        /* --- THE BOX-SHADOW HACK --- */
-        /* background-color wars are messy. Box-shadow wins every time.
-           This creates an "inner shadow" of solid grey that covers the white background 
-           forced by your desktop CSS. 
-        */
+        /* --- THE GRADIENT FIX (The "Nuclear" Paint Solution) --- */
+        /* Browsers treat gradients as images. This places a solid grey "image" 
+           on top of any white background color. This forces the browser to render 
+           it differently than a simple color or shadow, fixing the repaint glitch. */
         table.results tbody tr.dynamic-grey > td,
         table.results tbody tr.dynamic-grey > th {
-            box-shadow: inset 0 0 0 9999px #e0e0e0 !important;
-            background-color: #e0e0e0 !important; /* Fallback */
+            background-image: linear-gradient(#e0e0e0, #e0e0e0) !important;
+            background-color: #e0e0e0 !important; 
             -webkit-print-color-adjust: exact;
         }
 
-        /* Ensure the no-result row is hidden by default */
         .no-result {
             display: none;
         }
@@ -406,7 +403,7 @@
                             <tr class="summary-row">
                                 <td colspan="3">A psychological guide to connecting with your future self today to drive better decisions and actions.</td>
                             </tr>
-
+                            
                             <tr>
                                 <th scope="row">37</th>
                                 <td>Stalin: Paradoxes of Power, 1878-1928</td>
@@ -421,25 +418,26 @@
                     <script src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
                     
                     <script>
-                        // We use window.load to ensure all external CSS (Bootstrap etc) is fully loaded
-                        // before we start calculating which rows to stripe.
                         $(window).on('load', function() {
                             
                             function reapplyStriping() {
                                 $('.results tbody tr').removeClass('dynamic-grey');
-                                
-                                // Select only visible BOOK rows (ignore summary rows in selection)
                                 var visibleBookRows = $('.results tbody tr').not('.summary-row, .warning').filter(':visible');
 
                                 visibleBookRows.each(function(index) {
                                     if (index % 2 !== 0) {
                                         var bookRow = $(this);
                                         var summaryRow = bookRow.next('.summary-row');
-                                        
                                         bookRow.addClass('dynamic-grey');
                                         summaryRow.addClass('dynamic-grey');
                                     }
                                 });
+
+                                // --- FORCE REPAINT FIX ---
+                                // This seemingly useless line reads the offsetHeight, which forces the 
+                                // browser to immediately calculate the layout and paint the grey colors,
+                                // solving the "tab overlay" bug.
+                                var forceReflow = document.body.offsetHeight; 
                             }
 
                             reapplyStriping();
