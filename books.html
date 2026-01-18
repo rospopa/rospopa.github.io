@@ -33,17 +33,24 @@
             font-weight: normal; 
         }
 
-        /* --- 2. THE "NUCLEAR" ZEBRA STRIPE FIX --- */
-        /* We use 'box-shadow: inset' because it sits ON TOP of background-color.
-           We use 'transform: translateZ(0)' to force the browser to use the GPU,
-           which fixes the "only shows when tab is open" paint glitch.
-        */
+        /* --- 2. ZEBRA STRIPING (Light Grey) --- */
         table.results tbody tr.dynamic-grey > td,
         table.results tbody tr.dynamic-grey > th {
             background-color: #e0e0e0 !important;
             box-shadow: inset 0 0 0 9999px #e0e0e0 !important;
-            transform: translateZ(0); /* Forces GPU layer paint */
+            transform: translateZ(0);
             -webkit-print-color-adjust: exact;
+        }
+
+        /* --- 3. MOUSE HOVER EFFECT (Darker Grey) --- */
+        /* This class is added by JS when mouse enters a book or summary row.
+           It overrides the zebra striping with a darker color (#c0c0c0). */
+        table.results tbody tr.active-hover > td,
+        table.results tbody tr.active-hover > th {
+            background-color: #c0c0c0 !important;
+            box-shadow: inset 0 0 0 9999px #c0c0c0 !important;
+            transform: translateZ(0); /* Keeps the paint snappy */
+            transition: box-shadow 0.1s ease-in-out; /* Smooth transition */
         }
 
         /* Ensure the no-result row is hidden by default */
@@ -441,16 +448,42 @@
                             // 1. Initial Apply
                             reapplyStriping();
 
-                            // 2. FORCE REPAINT (The Fix)
-                            // We quickly hide and show the table. This forces the browser to discard 
-                            // its cached "image" of the table and draw it fresh with the new grey rows.
+                            // 2. FORCE REPAINT
                             var table = $('#bookTable');
                             table.hide();
                             setTimeout(function(){
                                 table.show(); 
                             }, 10); 
-                            // 10ms delay is imperceptible to humans but an eternity to a CPU, 
-                            // ensuring the render cycle completes.
+
+
+                            // --- NEW: INTELLIGENT HOVER LOGIC ---
+                            // Since the table is split into "Title" rows and "Summary" rows, we want
+                            // to highlight both at the same time when hovering either one.
+                            
+                            // Select all rows except the warning row
+                            var allRows = $('.results tbody tr').not('.warning');
+
+                            allRows.on('mouseenter', function() {
+                                var currentRow = $(this);
+                                var partnerRow;
+
+                                if (currentRow.hasClass('summary-row')) {
+                                    // If hovering summary, partner is the row BEFORE it
+                                    partnerRow = currentRow.prev();
+                                } else {
+                                    // If hovering book title, partner is the row AFTER it
+                                    partnerRow = currentRow.next('.summary-row');
+                                }
+
+                                // Add hover class to BOTH
+                                currentRow.addClass('active-hover');
+                                if (partnerRow.length) partnerRow.addClass('active-hover');
+                            });
+
+                            allRows.on('mouseleave', function() {
+                                // Remove hover class from everything to be safe/clean
+                                $('.results tbody tr').removeClass('active-hover');
+                            });
 
 
                             // --- SEARCH LOGIC ---
@@ -501,6 +534,7 @@
                     <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
                         <div class="text-center" style="text-align:center">
                             <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
+                            <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v1.6 (Hover Highlight)</p>
                         </div>
                         <script>
                             document.getElementById('currentYear').textContent = new Date().getFullYear();
