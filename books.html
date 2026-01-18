@@ -26,13 +26,10 @@
             border-top: none !important;
         }
 
-        /* --- FIXED CSS SELECTOR --- */
-        /* We use 'background' shorthand to override any specific background-color or 
-           background-image settings from desktop stylesheets. We also use a cleaner
-           selector that is less likely to break. */
+        /* --- FIXED ZEBRA STRIPING CSS --- */
         table.results tbody tr.dynamic-grey > td,
         table.results tbody tr.dynamic-grey > th {
-            background: #e0e0e0 !important; /* Visible Light Grey */
+            background: #e0e0e0 !important; /* Forces grey background */
             -webkit-print-color-adjust: exact;
         }
 
@@ -65,9 +62,9 @@
                     <table class="table table-bordered results">
                         <thead>
                             <tr>
-                                <th>#</th>
-                                <th class="col-md-5 col-xs-5">Title</th>
-                                <th class="col-md-4 col-xs-4">Author</th>
+                                <th style="width: 5%; min-width: 40px;">#</th>
+                                <th style="width: 55%;">Title</th>
+                                <th style="width: 40%;">Author</th>
                             </tr>
                             <tr class="warning no-result">
                                 <td colspan="4"><i class="fa fa-warning"></i> No result</td>
@@ -405,17 +402,13 @@
                     <script>
                         $(document).ready(function() {
                             
-                            // Function to apply zebra striping to visible rows only
                             function reapplyStriping() {
-                                // 1. Clear existing styling from all rows
                                 $('.results tbody tr').removeClass('dynamic-grey');
-
-                                // 2. Select only visible BOOK rows (ignore summary rows in selection)
+                                
+                                // Select only visible BOOK rows (ignore summary rows in selection)
                                 var visibleBookRows = $('.results tbody tr').not('.summary-row, .warning').filter(':visible');
 
-                                // 3. Loop through visible book rows
                                 visibleBookRows.each(function(index) {
-                                    // If index is odd (1, 3, 5...), apply grey to it and its summary
                                     if (index % 2 !== 0) {
                                         var bookRow = $(this);
                                         var summaryRow = bookRow.next('.summary-row');
@@ -426,10 +419,8 @@
                                 });
                             }
 
-                            // --- Run initially on load ---
                             reapplyStriping();
 
-                            // --- SEARCH LOGIC ---
                             $(".search").keyup(function () {
                                 var searchTerm = $(".search").val().toLowerCase();
                                 var noResult = $('.no-result');
@@ -437,14 +428,11 @@
                                 noResult.hide();
                                 var matchCount = 0;
 
-                                // Select all "book" rows
                                 var bookRows = $('.results tbody tr').not('.summary-row, .warning');
 
                                 bookRows.each(function() {
                                     var bookRow = $(this);
                                     var summaryRow = bookRow.next('.summary-row');
-                                    
-                                    // Combine text from both rows for searching
                                     var combinedText = bookRow.text() + " " + summaryRow.text();
 
                                     if (combinedText.toLowerCase().indexOf(searchTerm) === -1) {
@@ -461,18 +449,12 @@
                                     noResult.show();
                                 }
 
-                                // --- Re-run striping after showing/hiding rows ---
                                 reapplyStriping();
                             });
                         });
                     </script>
 
-                    <br>
-                    <br>
-                    <br>
-                    <br>
-                    <br>
-
+                    <br><br><br><br><br>
                     Return to <a href="#top">the top of this page</a>.
                     <p></p>
                 </div>
