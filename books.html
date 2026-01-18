@@ -33,22 +33,23 @@
             font-weight: normal; 
         }
 
-        /* --- 2. ZEBRA STRIPING (Light Grey) --- */
+        /* --- 2. ZEBRA STRIPING (The Gradient Fix) --- */
+        /* We use a linear-gradient image because browsers treat images 
+           with higher priority than background-colors. This prevents the 
+           "white background" from overriding our grey. */
         table.results tbody tr.dynamic-grey > td,
         table.results tbody tr.dynamic-grey > th {
-            background-color: #e0e0e0 !important;
-            box-shadow: inset 0 0 0 9999px #e0e0e0 !important;
-            transform: translateZ(0);
+            background-image: linear-gradient(#e0e0e0, #e0e0e0) !important;
+            background-color: #e0e0e0 !important; /* Fallback */
             -webkit-print-color-adjust: exact;
         }
 
         /* --- 3. MOUSE HOVER EFFECT (Highlighter Yellow) --- */
         table.results tbody tr.active-hover > td,
         table.results tbody tr.active-hover > th {
-            background-color: #ffff99 !important; /* Highlighter Yellow */
-            box-shadow: inset 0 0 0 9999px #ffff99 !important;
-            transform: translateZ(0); 
-            transition: background-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+            background-image: linear-gradient(#ffff99, #ffff99) !important;
+            background-color: #ffff99 !important;
+            transition: background-image 0.1s; /* Snap transition */
         }
 
         /* Ensure the no-result row is hidden by default */
@@ -445,8 +446,7 @@
                             }, 10); 
 
 
-                            // --- NEW: INTELLIGENT HOVER LOGIC ---
-                            // Select all rows except the warning row
+                            // --- HOVER LOGIC ---
                             var allRows = $('.results tbody tr').not('.warning');
 
                             allRows.on('mouseenter', function() {
@@ -459,7 +459,6 @@
                                     partnerRow = currentRow.next('.summary-row');
                                 }
 
-                                // Add hover class to BOTH
                                 currentRow.addClass('active-hover');
                                 if (partnerRow.length) partnerRow.addClass('active-hover');
                             });
@@ -517,7 +516,7 @@
                     <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
                         <div class="text-center" style="text-align:center">
                             <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
-                            <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v2.0 (Official Titles)</p>
+                            <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v2.1 (Paint Fix)</p>
                         </div>
                         <script>
                             document.getElementById('currentYear').textContent = new Date().getFullYear();
