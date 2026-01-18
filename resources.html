@@ -20,32 +20,27 @@
   
     <style>
         /* --- 1. TYPOGRAPHY --- */
-        /* Bold the Tool Name (1st td) */
         table.results tbody tr td:nth-of-type(1) {
             font-weight: bold;
         }
-        /* Keep Description (2nd td) normal weight */
         table.results tbody tr td:nth-of-type(2) {
             font-weight: normal;
         }
 
-        /* --- 2. ZEBRA STRIPING (Light Grey) --- */
-        /* Uses box-shadow to override any desktop background-color wars */
+        /* --- 2. ZEBRA STRIPING (The Gradient Fix) --- */
         table.results tbody tr.dynamic-grey > td,
         table.results tbody tr.dynamic-grey > th {
+            background-image: linear-gradient(#e0e0e0, #e0e0e0) !important;
             background-color: #e0e0e0 !important;
-            box-shadow: inset 0 0 0 9999px #e0e0e0 !important;
-            transform: translateZ(0); /* Force GPU paint */
             -webkit-print-color-adjust: exact;
         }
 
         /* --- 3. MOUSE HOVER EFFECT (Highlighter Yellow) --- */
         table.results tbody tr.active-hover > td,
         table.results tbody tr.active-hover > th {
+            background-image: linear-gradient(#ffff99, #ffff99) !important;
             background-color: #ffff99 !important;
-            box-shadow: inset 0 0 0 9999px #ffff99 !important;
-            transform: translateZ(0); 
-            transition: background-color 0.1s ease-in-out, box-shadow 0.1s ease-in-out;
+            transition: background-image 0.1s;
             cursor: pointer;
         }
 
@@ -406,15 +401,11 @@
 <script>
     $(window).on('load', function() {
         
-        // 1. ZEBRA STRIPING FUNCTION
         function reapplyStriping() {
-            // Clear old classes
             $('.results tbody tr').removeClass('dynamic-grey');
             
-            // Select visible rows (ignoring warning row)
             var visibleRows = $('.results tbody tr').not('.warning').filter(':visible');
 
-            // Apply grey to odd numbered rows (1, 3, 5...)
             visibleRows.each(function(index) {
                 if (index % 2 !== 0) {
                     $(this).addClass('dynamic-grey');
@@ -422,24 +413,19 @@
             });
         }
 
-        // Apply initially
         reapplyStriping();
 
-        // 2. FORCE REPAINT (The Fix)
         var table = $('#toolsTable');
         table.hide();
         setTimeout(function(){
             table.show(); 
         }, 10); 
 
-        // 3. HOVER LOGIC
-        // Simple hover logic since these are single rows
         $('.results tbody tr').not('.warning').hover(
             function() { $(this).addClass('active-hover'); },
             function() { $(this).removeClass('active-hover'); }
         );
 
-        // 4. SEARCH LOGIC
         $(".search").keyup(function () {
             var searchTerm = $(".search").val().toLowerCase();
             var noResult = $('.no-result');
@@ -451,7 +437,6 @@
 
             rows.each(function() {
                 var row = $(this);
-                // Search in all text within the row
                 if (row.text().toLowerCase().indexOf(searchTerm) === -1) {
                     row.hide();
                 } else {
@@ -484,7 +469,7 @@ Return to <A HREF="#top">the top of this page</a>.<p>
             <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
                 <div class="text-center" style="text-align:center">
                     <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
-                    <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v1.8 (Tools List)</p>
+                    <p style="font-size: 10px; color: #888; margin-top: 5px;">System Version: v2.1 (Paint Fix)</p>
                 </div>
                 <script>document.getElementById('currentYear').textContent = new Date().getFullYear();</script>
             </div>
