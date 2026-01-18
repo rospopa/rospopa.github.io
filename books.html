@@ -18,41 +18,49 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/format.css">
     
-    <style>
-        /* --- 1. BOLD TITLES AND AUTHORS --- */
-        table.results tbody tr:not(.summary-row):not(.warning) td {
+   <style>
+        /* --- 1. TYPOGRAPHY --- */
+        table.results tbody tr td:nth-of-type(1) {
             font-weight: bold;
         }
-        
-        .summary-row td {
-            font-style: normal;
-            color: inherit;
-            padding-left: 20px !important;
-            border-top: none !important;
-            font-weight: normal; 
+        table.results tbody tr td:nth-of-type(2) {
+            font-weight: normal;
         }
 
-        /* --- 2. ZEBRA STRIPING (The Gradient Fix) --- */
-        /* We use a linear-gradient image because browsers treat images 
-           with higher priority than background-colors. This prevents the 
-           desktop "white background" bug. */
+        /* --- 2. ZEBRA STRIPING (The "Compositing" Fix) --- */
         table.results tbody tr.dynamic-grey > td,
         table.results tbody tr.dynamic-grey > th {
-            background-image: linear-gradient(#e0e0e0, #e0e0e0) !important;
-            background-color: #e0e0e0 !important; /* Fallback */
+            /* 1. The Color */
+            background-color: #e0e0e0 !important;
+            
+            /* 2. The Paint Forcers */
+            /* This forces the browser to put this row on its own GPU layer */
+            will-change: transform; 
+            transform: scale(1); 
+            
+            /* 3. The Backup */
+            box-shadow: inset 0 0 0 9999px rgba(224, 224, 224, 1) !important;
             -webkit-print-color-adjust: exact;
         }
 
-        /* --- 3. MOUSE HOVER EFFECT (Highlighter Yellow) --- */
+        /* --- 3. HOVER EFFECT (Highlighter Yellow) --- */
         table.results tbody tr.active-hover > td,
         table.results tbody tr.active-hover > th {
-            background-image: linear-gradient(#ffff99, #ffff99) !important;
             background-color: #ffff99 !important;
-            transition: background-image 0.1s; /* Snap transition */
+            box-shadow: inset 0 0 0 9999px rgba(255, 255, 153, 1) !important;
+            will-change: transform;
+            transform: scale(1);
+            cursor: pointer;
         }
 
         .no-result {
             display: none;
+        }
+        
+        /* Fix for Bootstrap Table Borders interfering with background */
+        table.results {
+            border-collapse: separate !important; 
+            border-spacing: 0;
         }
     </style>
 </head>
