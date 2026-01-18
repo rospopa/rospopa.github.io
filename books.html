@@ -26,11 +26,14 @@
             border-top: none !important;
         }
 
-        /* --- "NUCLEAR OPTION" SPECIFICITY FOR DESKTOP --- */
-        /* This extremely long selector ensures that your desktop CSS cannot override the grey. */
-        html body main .page-content .wrap .home table.results tbody tr.dynamic-grey > td,
-        html body main .page-content .wrap .home table.results tbody tr.dynamic-grey > th {
-            background-color: #e0e0e0 !important; /* Visible Light Grey */
+        /* --- FIXED CSS SELECTOR --- */
+        /* We use 'background' shorthand to override any specific background-color or 
+           background-image settings from desktop stylesheets. We also use a cleaner
+           selector that is less likely to break. */
+        table.results tbody tr.dynamic-grey > td,
+        table.results tbody tr.dynamic-grey > th {
+            background: #e0e0e0 !important; /* Visible Light Grey */
+            -webkit-print-color-adjust: exact;
         }
 
         /* Ensure the no-result row is hidden by default */
