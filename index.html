@@ -317,4 +317,121 @@
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
             for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
-                let index = (y * 4 *
+                let index = (y * 4 * textCoordinates.width) + (x * 4);
+                
+                // If pixel is visible (alpha > 128)
+                if (textCoordinates.data[index + 3] > 128){
+                    let r = textCoordinates.data[index];
+                    let g = textCoordinates.data[index + 1];
+                    let b = textCoordinates.data[index + 2];
+                    let color = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    
+                    let xOffset = x - centerX;
+                    let yOffset = y - centerY;
+                    
+                    particlesArray.push(new Particle(xOffset, yOffset, color));
+                }
+            }
+        }
+        
+        // Clear the source text
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+    }
+
+    function animate(){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // Dynamic Anchor Positioning
+        let anchorRect = anchor.getBoundingClientRect();
+        let anchorX = anchorRect.left + (anchorRect.width / 2);
+        let anchorY = anchorRect.top + (anchorRect.height / 2);
+
+        for (let i = 0; i < particlesArray.length; i++){
+            particlesArray[i].update(anchorX, anchorY);
+            particlesArray[i].draw();
+        }
+        requestAnimationFrame(animate);
+    }
+
+    // Wait for everything to load (fonts/layout)
+    window.addEventListener('load', function() {
+        init();
+        animate();
+    });
+
+    window.addEventListener('resize', function(){
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        init();
+    });
+
+</script>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLHWsaJvRo4CPVU1f1umMXBT4Tazy3s1vUTMTTrOv0AVLjw4xs0pEkj5TpocbJdnyMJw/exec";
+
+    const form = document.getElementById('contact-form');
+    const statusMsg = document.getElementById('form-status');
+    const btn = document.getElementById('submit-btn');
+
+    function isValidEmail(email) {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    }
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            statusMsg.innerText = "";
+            
+            const formData = new FormData(form);
+            const email = formData.get('email');
+
+            if (!isValidEmail(email)) {
+                statusMsg.innerText = "Please enter a valid email address.";
+                statusMsg.style.color = "red";
+                return;
+            }
+
+            const captchaResponse = grecaptcha.getResponse();
+            if (!captchaResponse || captchaResponse.length === 0) {
+                statusMsg.innerText = "Please check the captcha box.";
+                statusMsg.style.color = "red";
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Sending...";
+
+            const data = {
+                name: formData.get('name'),
+                email: email,
+                message: formData.get('message'),
+                captchaToken: captchaResponse
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                statusMsg.innerText = "Message sent successfully!";
+                statusMsg.style.color = "green";
+                form.reset();
+                grecaptcha.reset(); 
+            } catch (error) {
+                console.error('Error:', error);
+                statusMsg.innerText = "Something went wrong. Please try again.";
+                statusMsg.style.color = "red";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Send Message";
+            }
+        });
+    }
+</script>
+</body>
+</html>
