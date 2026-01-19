@@ -15,11 +15,56 @@
     <link rel="icon" type="image/png" sizes="231x231" href="/css/favicons/unnamed-231x231.png">
     <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
     
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="css/format.css">
     
-    <!-- Custom JS -->
     <script src="js/lastUpdated.js"></script>
+
+    <style>
+        #contact-form-container {
+            margin: 40px 0;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        #contact-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 100%;
+        }
+        #contact-form input, #contact-form textarea {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 1rem;
+            width: 100%;
+            box-sizing: border-box; /* Ensures padding doesn't break width */
+        }
+        #contact-form button {
+            padding: 10px 20px;
+            background-color: #333;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            align-self: flex-start;
+            transition: background-color 0.2s;
+        }
+        #contact-form button:hover {
+            background-color: #555;
+        }
+        #contact-form button:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+        #form-status {
+            margin-top: 10px;
+            font-weight: 500;
+        }
+    </style>
 </head>
     
 <body>
@@ -42,30 +87,29 @@
         <div class="wrap">
             <div class="home">
                 <ul id="update-list" class="posts">
-                                        </li>
-                                                                                                    <li>
+                    <li>
                         <a class="post-link" href="/login">Login</a>
                         <br>
                         Testing encrypted auth <i>(In progress -- auth occurs -- missing platform)</i>
                     </li>
                     
-                                                            <li>
+                    <li>
                         <a class="post-link" href="/calculator">Rental Property Calculator</a>
                         <br>
                         Calculate your real estate ROI. <i>(Project in progress)</i>
                     </li>
 
-                                                                                <li>
+                    <li>
                         <a class="post-link" href="/books">Books</a>
                         <br>
                         Books worth reading.
                     </li>
-                                                                                                    <li>
+                    <li>
                         <a class="post-link" href="/resources">Resources</a>
                         <br>
                         Resources worth exploring.
                     </li>
-                                                                                                                        <li>
+                    <li>
                         <a class="post-link" href="/resources">Resources</a>
                         <br>
                         Resources worth exploring.
@@ -73,9 +117,20 @@
                 </ul>
 
                 <div align="center">
-  <img src="/gif/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6e474d6e447165627a4463666d2f67697068792e676966.gif" width="auto" height="auto"/>
-</div>
+                    <img src="/gif/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6e474d6e447165627a4463666d2f67697068792e676966.gif" width="auto" height="auto"/>
+                </div>
 
+                <div id="contact-form-container">
+                    <h3>Contact Me</h3>
+                    <form id="contact-form">
+                        <input type="text" name="name" placeholder="Your Name" required />
+                        <input type="email" name="email" placeholder="Your Email" required />
+                        <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+                        
+                        <button type="submit" id="submit-btn">Send Message</button>
+                        <p id="form-status"></p>
+                    </form>
+                </div>
                 <p>Go to <a href="https://www.linkedin.com/in/prospopa/">LinkedIn</a>.</p>
                 <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
                 <p>Go to <a href="https://medium.com/@pavlorospopa">Medium</a>.</p>
@@ -102,6 +157,51 @@
         </div>
     </section>
 </footer>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdstB41Nph1bIWDc18EBr5l9jrQ1_oBkPd_lEJjCJ9TNv24_O-xOLRbnkDA7AN_mVrXA/exec";
+
+    const form = document.getElementById('contact-form');
+    const statusMsg = document.getElementById('form-status');
+    const btn = document.getElementById('submit-btn');
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            btn.disabled = true;
+            btn.innerText = "Sending...";
+            statusMsg.innerText = "";
+
+            const formData = new FormData(form);
+            const data = {
+                name: formData.get('name'),
+                email: formData.get('email'),
+                message: formData.get('message')
+            };
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', 
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+
+                statusMsg.innerText = "Message sent successfully!";
+                statusMsg.style.color = "green";
+                form.reset();
+            } catch (error) {
+                console.error('Error:', error);
+                statusMsg.innerText = "Something went wrong. Please try again.";
+                statusMsg.style.color = "red";
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Send Message";
+            }
+        });
+    }
+</script>
 
 </body>
 </html>
