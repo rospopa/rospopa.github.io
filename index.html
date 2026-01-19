@@ -116,6 +116,7 @@
                 </div>
 
                 <div id="contact-form-container">
+                    <h3>Contact Me</h3>
                     <form id="contact-form">
                         <input type="text" name="name" placeholder="Your Name" required />
                         <input type="email" name="email" placeholder="Your Email" required />
@@ -159,18 +160,36 @@
     const statusMsg = document.getElementById('form-status');
     const btn = document.getElementById('submit-btn');
 
+    // Function to validate email strictly
+    function isValidEmail(email) {
+        // Checks for: [chars] @ [chars] . [chars]
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(email);
+    }
+
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             
+            // Clear previous status
+            statusMsg.innerText = "";
+            const formData = new FormData(form);
+            const email = formData.get('email');
+
+            // --- VALIDATION STEP ---
+            if (!isValidEmail(email)) {
+                statusMsg.innerText = "Please enter a valid email address (e.g. name@example.com)";
+                statusMsg.style.color = "red";
+                return; // Stop here, do not send data
+            }
+            // -----------------------
+
             btn.disabled = true;
             btn.innerText = "Sending...";
-            statusMsg.innerText = "";
 
-            const formData = new FormData(form);
             const data = {
                 name: formData.get('name'),
-                email: formData.get('email'),
+                email: email,
                 message: formData.get('message')
             };
 
