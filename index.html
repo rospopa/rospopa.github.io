@@ -281,9 +281,10 @@
 
     function init() {
         particlesArray = [];
-        let fontSize = window.innerWidth < 600 ? 50 : 100;
         
-        // Font setup
+        // --- 1. SETUP ---
+        // Increase font size slightly to match reference impact
+        let fontSize = window.innerWidth < 600 ? 50 : 100;
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -292,56 +293,61 @@
         let centerY = canvas.height / 2;
         let text = 'Hello World';
 
-        // 1. MEASURE TEXT to define gradient boundaries exactly
+        // --- 2. DETECTION PHASE (Robustness) ---
+        // We draw in SOLID RED to ensure the scanner finds every pixel.
+        // Gradient logic happens later in step 4.
+        ctx.fillStyle = 'red';
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        ctx.fillText(text, centerX, centerY);
+        
+        // --- 3. MEASURE FOR GRADIENT MATH ---
         let metrics = ctx.measureText(text);
         let textWidth = metrics.width;
         let startX = centerX - (textWidth / 2);
-        let endX = centerX + (textWidth / 2);
-
-        // 2. CREATE GRADIENT based on text width
-        let gradient = ctx.createLinearGradient(startX, 0, endX, 0);
-        gradient.addColorStop(0, '#4285F4'); // Blue (Start)
-        gradient.addColorStop(0.5, '#a855f7'); // Purple (Middle)
-        gradient.addColorStop(1, '#ec4899'); // Pink (End)
-
-        ctx.fillStyle = gradient;
-        ctx.clearRect(0,0, canvas.width, canvas.height);
         
-        // 3. DRAW TEXT with Gradient
-        ctx.fillText(text, centerX, centerY);
-        
-        // 4. SCAN PIXELS
+        // --- 4. SCAN & COLOR ---
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        
         let step = 6; 
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
             for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
                 let index = (y * 4 * textCoordinates.width) + (x * 4);
                 
-                // If pixel is visible (alpha > 128)
-                if (textCoordinates.data[index + 3] > 128){
-                    let r = textCoordinates.data[index];
-                    let g = textCoordinates.data[index + 1];
-                    let b = textCoordinates.data[index + 2];
-                    let color = 'rgb(' + r + ',' + g + ',' + b + ')';
+                // If pixel is visible (Red channel > 200 means we hit the text)
+                if (textCoordinates.data[index] > 200){
                     
                     let xOffset = x - centerX;
                     let yOffset = y - centerY;
+                    
+                    // --- THE COLOR LOGIC ---
+                    // Instead of copying the canvas pixel (which is red),
+                    // we calculate the Gemini Gradient based on X position.
+                    
+                    // 0.0 = Left, 1.0 = Right
+                    let relativePos = (x - startX) / textWidth;
+                    
+                    let color;
+                    if (relativePos < 0.33) {
+                         color = '#4285F4'; // Google Blue
+                    } else if (relativePos < 0.66) {
+                         color = '#a855f7'; // Purple
+                    } else {
+                         color = '#ec4899'; // Pink
+                    }
                     
                     particlesArray.push(new Particle(xOffset, yOffset, color));
                 }
             }
         }
         
-        // Clear the source text
+        // Clear the red detection text
         ctx.clearRect(0,0, canvas.width, canvas.height);
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Dynamic Anchor Positioning
+        // Find anchor position relative to viewport
         let anchorRect = anchor.getBoundingClientRect();
         let anchorX = anchorRect.left + (anchorRect.width / 2);
         let anchorY = anchorRect.top + (anchorRect.height / 2);
@@ -353,7 +359,7 @@
         requestAnimationFrame(animate);
     }
 
-    // Wait for everything to load (fonts/layout)
+    // Wait for window to fully load to ensure fonts are ready
     window.addEventListener('load', function() {
         init();
         animate();
