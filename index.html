@@ -19,6 +19,8 @@
     
     <script src="js/lastUpdated.js"></script>
 
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+
     <style>
         #contact-form-container {
             margin: 40px 0;
@@ -40,7 +42,7 @@
             font-family: inherit;
             font-size: 1rem;
             width: 100%;
-            box-sizing: border-box; /* Ensures padding doesn't break width */
+            box-sizing: border-box; 
         }
         #contact-form button {
             padding: 10px 20px;
@@ -63,6 +65,10 @@
         #form-status {
             margin-top: 10px;
             font-weight: 500;
+        }
+        /* Add spacing for captcha */
+        .g-recaptcha {
+            margin-bottom: 5px;
         }
     </style>
 </head>
@@ -116,11 +122,12 @@
                 </div>
 
                 <div id="contact-form-container">
-                    <h3>Contact Me</h3>
                     <form id="contact-form">
                         <input type="text" name="name" placeholder="Your Name" required />
                         <input type="email" name="email" placeholder="Your Email" required />
                         <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
+                        
+                        <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
                         
                         <button type="submit" id="submit-btn">Send Message</button>
                         <p id="form-status"></p>
@@ -160,9 +167,7 @@
     const statusMsg = document.getElementById('form-status');
     const btn = document.getElementById('submit-btn');
 
-    // Function to validate email strictly
     function isValidEmail(email) {
-        // Checks for: [chars] @ [chars] . [chars]
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     }
@@ -170,19 +175,25 @@
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
-            // Clear previous status
             statusMsg.innerText = "";
+            
             const formData = new FormData(form);
             const email = formData.get('email');
 
-            // --- VALIDATION STEP ---
+            // --- VALIDATION 1: EMAIL ---
             if (!isValidEmail(email)) {
-                statusMsg.innerText = "Please enter a valid email address (e.g. name@example.com)";
+                statusMsg.innerText = "Please enter a valid email address.";
                 statusMsg.style.color = "red";
-                return; // Stop here, do not send data
+                return;
             }
-            // -----------------------
+
+            // --- VALIDATION 2: CAPTCHA ---
+            const captchaResponse = grecaptcha.getResponse();
+            if (!captchaResponse || captchaResponse.length === 0) {
+                statusMsg.innerText = "Please check the captcha box.";
+                statusMsg.style.color = "red";
+                return;
+            }
 
             btn.disabled = true;
             btn.innerText = "Sending...";
@@ -190,7 +201,8 @@
             const data = {
                 name: formData.get('name'),
                 email: email,
-                message: formData.get('message')
+                message: formData.get('message'),
+                captchaToken: captchaResponse // Send to backend for verification
             };
 
             try {
@@ -204,6 +216,7 @@
                 statusMsg.innerText = "Message sent successfully!";
                 statusMsg.style.color = "green";
                 form.reset();
+                grecaptcha.reset(); // Clear the checkmark
             } catch (error) {
                 console.error('Error:', error);
                 statusMsg.innerText = "Something went wrong. Please try again.";
@@ -215,6 +228,5 @@
         });
     }
 </script>
-
 </body>
 </html>
