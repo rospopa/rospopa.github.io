@@ -138,7 +138,7 @@
                 
                 <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
                     
-                    <div id="particle-anchor" style="width: 100%; height: 120px;"></div>
+                    <div id="particle-anchor" style="width: 100%; height: 200px;"></div>
 
                     <p>
                         The purpose of this website is to share information and host tools.  All of this code is source-available via the <a href="https://github.com/rospopa/rospopa.github.io">repository</a>.  Let's build a better future together.
@@ -200,18 +200,14 @@
         radius: 120
     }
 
-    // --- FIX FOR MOBILE GHOST TOUCHES ---
-    // We use a flag to track if the user is using touch.
-    // If they are, we ignore standard mouse events.
     let isTouch = false;
 
     window.addEventListener('mousemove', function(event){
-        if (isTouch) return; // Don't let the mouse event override touch cleanup
+        if (isTouch) return; 
         mouse.x = event.x;
         mouse.y = event.y;
     });
     
-    // Handle Touch Start/Move
     const handleTouch = (event) => {
         isTouch = true;
         if(event.touches.length > 0) {
@@ -223,12 +219,9 @@
     window.addEventListener('touchstart', handleTouch, {passive: true});
     window.addEventListener('touchmove', handleTouch, {passive: true});
 
-    // Handle Touch End/Cancel
     const clearTouch = () => {
         mouse.x = undefined;
         mouse.y = undefined;
-        
-        // Keep the 'isTouch' flag true for a moment to block the ghost click
         setTimeout(() => {
             isTouch = false;
         }, 500);
@@ -237,7 +230,6 @@
     window.addEventListener('touchend', clearTouch);
     window.addEventListener('touchcancel', clearTouch);
     
-    // Normal mouse out for desktop
     window.addEventListener('mouseout', function(){
         if (!isTouch) {
             mouse.x = undefined;
@@ -251,7 +243,10 @@
             this.yOffset = yOffset;
             this.x = Math.random() * canvas.width; 
             this.y = Math.random() * canvas.height;
-            this.size = size; 
+            
+            // UPDATED: Particle size set to 3 for a denser, blockier look
+            this.size = 3; 
+            
             this.baseX = 0;
             this.baseY = 0;
             this.density = (Math.random() * 30) + 5;
@@ -269,13 +264,10 @@
             this.baseX = anchorX + this.xOffset;
             this.baseY = anchorY + this.yOffset;
 
-            // Physics Calculation
             let dx = mouse.x - this.x;
             let dy = mouse.y - this.y;
             
-            // Safety check for NaN (happens if mouse.x is undefined)
             if (mouse.x == null || mouse.y == null) {
-                // If no mouse/touch, return to base immediately
                 if (this.x !== this.baseX) {
                     let dx = this.x - this.baseX;
                     this.x -= dx/10;
@@ -296,11 +288,9 @@
             let directionY = forceDirectionY * force * this.density;
 
             if (distance < mouse.radius) {
-                // Push away
                 this.x -= directionX;
                 this.y -= directionY;
             } else {
-                // Return to base
                 if (this.x !== this.baseX){
                     let dx = this.x - this.baseX;
                     this.x -= dx/10;
@@ -316,10 +306,14 @@
     function init() {
         particlesArray = [];
         let isMobile = window.innerWidth < 600;
-        let fontSize = isMobile ? 50 : 100;
         
-        let step = isMobile ? 8 : 6;
-        let particleSize = isMobile ? 6 : 5;
+        // UPDATED: Increased font size for larger, bolder text
+        let fontSize = isMobile ? 80 : 180;
+        
+        // UPDATED: Decreased step to 3 for much higher density (more particles)
+        let step = 3;
+        // UPDATED: Particle size passed to constructor is now 3
+        let particleSize = 3;
         
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
@@ -329,7 +323,6 @@
         let centerY = canvas.height / 2;
         let text = 'Hello World';
 
-        // MEASURE & DRAW
         let metrics = ctx.measureText(text);
         let textWidth = metrics.width;
         let startX = centerX - (textWidth / 2);
@@ -338,7 +331,6 @@
         ctx.clearRect(0,0, canvas.width, canvas.height);
         ctx.fillText(text, centerX, centerY);
         
-        // SCAN
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
