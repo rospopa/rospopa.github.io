@@ -70,17 +70,26 @@
             margin-bottom: 5px;
         }
         
-        /* CANVAS STYLES */
+        /* CANVAS STYLES - GLOBAL OVERLAY 
+           We move the canvas out of the flow entirely.
+           It now covers the screen like a HUD.
+        */
         #canvas1 {
-            display: block;
-            width: 100%;
-            height: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999; /* Very high so it stays on top */
+            pointer-events: none; /* KEY: Lets clicks pass through to links/forms below */
             image-rendering: pixelated; 
         }
     </style>
 </head>
     
 <body>
+<canvas id="canvas1"></canvas>
+
 <header class="site-header">
     <div class="wrap">
         <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
@@ -125,35 +134,21 @@
                 </ul>
 
                 <div align="center">
-                    <div style="position: relative; z-index: 1;">
+                    <div style="position: relative; margin-bottom: 20px;">
                         <img src="/gif/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6e474d6e447165627a4463666d2f67697068792e676966.gif" width="auto" height="auto"/>
                     </div>
                 </div>
                 
                 <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
                     
-                    <div id="canvas-container" style="
-                        position: relative; 
-                        width: 99vw; 
-                        height: 400px; 
-                        left: 50%;
-                        right: 50%;
-                        margin-left: -49.5vw;
-                        margin-right: -49.5vw;
-                        margin-top: -120px;
-                        margin-bottom: -100px;
-                        overflow: visible; 
-                        z-index: 10;
-                        pointer-events: auto;">
-                        <canvas id="canvas1"></canvas>
-                    </div>
+                    <div id="particle-anchor" style="width: 100%; height: 120px;"></div>
 
-                    <p style="position: relative; z-index: 5;">
+                    <p>
                         The purpose of this website is to share information and host tools.  All of this code is source-available via the <a href="https://github.com/rospopa/rospopa.github.io">repository</a>.  Let's build a better future together.
                     </p>
                 </div>
 
-                <div id="contact-form-container" style="position: relative; z-index: 5;">
+                <div id="contact-form-container">
                     <form id="contact-form">
                         <input type="text" name="name" placeholder="Your Name" required />
                         <input type="email" name="email" placeholder="Your Email" required />
@@ -195,45 +190,38 @@
 <script>
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
-    const container = document.getElementById('canvas-container');
+    
+    // We will sync with this element
+    const anchor = document.getElementById('particle-anchor');
 
-    canvas.width = container.offsetWidth;
-    canvas.height = container.offsetHeight;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     let particlesArray = [];
 
     const mouse = {
         x: null,
         y: null,
-        radius: 100
+        radius: 120
     }
 
+    // --- INTERACTION HANDLERS ---
     window.addEventListener('mousemove', function(event){
-        const rect = canvas.getBoundingClientRect();
-        mouse.x = event.x - rect.left;
-        mouse.y = event.y - rect.top;
+        mouse.x = event.x;
+        mouse.y = event.y;
     });
     
+    window.addEventListener('touchmove', function(event){
+        if(event.touches.length > 0) {
+            mouse.x = event.touches[0].clientX;
+            mouse.y = event.touches[0].clientY;
+        }
+    }, {passive: true});
+
     window.addEventListener('mouseout', function(){
         mouse.x = undefined;
         mouse.y = undefined;
     });
-
-    window.addEventListener('touchmove', function(event){
-        const rect = canvas.getBoundingClientRect();
-        if(event.touches.length > 0) {
-            mouse.x = event.touches[0].clientX - rect.left;
-            mouse.y = event.touches[0].clientY - rect.top;
-        }
-    }, {passive: true});
-
-    window.addEventListener('touchstart', function(event){
-        const rect = canvas.getBoundingClientRect();
-        if(event.touches.length > 0) {
-            mouse.x = event.touches[0].clientX - rect.left;
-            mouse.y = event.touches[0].clientY - rect.top;
-        }
-    }, {passive: true});
 
     window.addEventListener('touchend', function(){
         mouse.x = undefined;
@@ -241,12 +229,18 @@
     });
 
     class Particle {
-        constructor(x, y, color){
-            this.x = x;
-            this.y = y;
+        constructor(xOffset, yOffset, color){
+            // Store the OFFSET relative to the anchor center
+            this.xOffset = xOffset;
+            this.yOffset = yOffset;
+            
+            // Current Position (starts at anchor)
+            this.x = 0; 
+            this.y = 0;
+            
             this.size = 5; 
-            this.baseX = x;
-            this.baseY = y;
+            this.baseX = 0;
+            this.baseY = 0;
             this.density = (Math.random() * 30) + 5;
             this.color = color;
         }
@@ -258,7 +252,12 @@
             ctx.closePath();
         }
         
-        update(){
+        update(anchorX, anchorY){
+            // Calculate where this particle "should" be based on the anchor's current screen position
+            this.baseX = anchorX + this.xOffset;
+            this.baseY = anchorY + this.yOffset;
+
+            // Standard Physics
             let dx = mouse.x - this.x;
             let dy = mouse.y - this.y;
             let distance = Math.sqrt(dx * dx + dy * dy);
@@ -287,27 +286,33 @@
 
     function init() {
         particlesArray = [];
-        ctx.clearRect(0,0, canvas.width, canvas.height);
         
-        let fontSize = canvas.width < 600 ? 50 : 100;
+        // Use a temporary virtual canvas to scan the text
+        // This ensures the particles form the correct shape regardless of current scroll
+        // We calculate offsets relative to CENTER (0,0)
         
+        let fontSize = window.innerWidth < 600 ? 50 : 100;
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // --- GRADIENT CREATION ---
+        // 1. Create Gradient
         let gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-        gradient.addColorStop(0.2, '#3b82f6'); // Blue (slightly darker for white BG)
-        gradient.addColorStop(0.5, '#a855f7'); // Purple
-        gradient.addColorStop(0.8, '#ec4899'); // Pink
-        
+        gradient.addColorStop(0.2, '#3b82f6'); 
+        gradient.addColorStop(0.5, '#a855f7'); 
+        gradient.addColorStop(0.8, '#ec4899'); 
         ctx.fillStyle = gradient;
         
-        // Use fillText to draw the shape for scanning
-        ctx.fillText('Hello World', canvas.width/2, canvas.height/2);
+        // 2. Draw text in the absolute center of the screen momentarily to scan it
+        let centerX = canvas.width / 2;
+        let centerY = canvas.height / 2;
+        
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        ctx.fillText('Hello World', centerX, centerY);
         
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
+        // 3. Scan & Store Offsets
         let step = 6; 
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
@@ -319,26 +324,40 @@
                     let b = textCoordinates.data[index + 2];
                     let color = 'rgb(' + r + ',' + g + ',' + b + ')';
                     
-                    let positionX = x;
-                    let positionY = y;
-                    particlesArray.push(new Particle(positionX, positionY, color));
+                    // IMPORTANT: We store the distance from the CenterX/CenterY
+                    // This allows us to re-project the text anywhere on screen later
+                    let xOffset = x - centerX;
+                    let yOffset = y - centerY;
+                    
+                    particlesArray.push(new Particle(xOffset, yOffset, color));
                 }
             }
         }
+        
+        // Clear the setup drawing
+        ctx.clearRect(0,0, canvas.width, canvas.height);
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // 4. FIND THE ANCHOR
+        // We get the current screen position of the invisible anchor div
+        let anchorRect = anchor.getBoundingClientRect();
+        let anchorX = anchorRect.left + (anchorRect.width / 2);
+        let anchorY = anchorRect.top + (anchorRect.height / 2);
+
         for (let i = 0; i < particlesArray.length; i++){
+            // 5. UPDATE PARTICLES relative to the anchor's current position
+            particlesArray[i].update(anchorX, anchorY);
             particlesArray[i].draw();
-            particlesArray[i].update();
         }
         requestAnimationFrame(animate);
     }
 
     window.addEventListener('resize', function(){
-        canvas.width = container.offsetWidth;
-        canvas.height = container.offsetHeight;
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
         init();
     });
 
