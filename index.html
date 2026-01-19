@@ -66,17 +66,15 @@
             margin-top: 10px;
             font-weight: 500;
         }
-        /* Add spacing for captcha */
         .g-recaptcha {
             margin-bottom: 5px;
         }
         
-        /* Styles for the new Particle Canvas */
+        /* CANVAS STYLES */
         #canvas1 {
             display: block;
             width: 100%;
             height: 100%;
-            /* Pixelated look for "Terminal" vibe */
             image-rendering: pixelated; 
         }
     </style>
@@ -127,7 +125,9 @@
                 </ul>
 
                 <div align="center">
-                    <img src="/gif/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6e474d6e447165627a4463666d2f67697068792e676966.gif" width="auto" height="auto"/>
+                    <div style="position: relative; z-index: 1;">
+                        <img src="/gif/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6e474d6e447165627a4463666d2f67697068792e676966.gif" width="auto" height="auto"/>
+                    </div>
                 </div>
                 
                 <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
@@ -135,23 +135,25 @@
                     <div id="canvas-container" style="
                         position: relative; 
                         width: 99vw; 
-                        height: 300px; 
+                        height: 400px; 
                         left: 50%;
                         right: 50%;
                         margin-left: -49.5vw;
                         margin-right: -49.5vw;
+                        margin-top: -120px;
+                        margin-bottom: -100px;
                         overflow: visible; 
-                        margin-bottom: 10px;
-                        background-color: #1a1a1a;">
+                        z-index: 10;
+                        pointer-events: auto;">
                         <canvas id="canvas1"></canvas>
                     </div>
 
-                    <p>
+                    <p style="position: relative; z-index: 5;">
                         The purpose of this website is to share information and host tools.  All of this code is source-available via the <a href="https://github.com/rospopa/rospopa.github.io">repository</a>.  Let's build a better future together.
                     </p>
                 </div>
 
-                <div id="contact-form-container">
+                <div id="contact-form-container" style="position: relative; z-index: 5;">
                     <form id="contact-form">
                         <input type="text" name="name" placeholder="Your Name" required />
                         <input type="email" name="email" placeholder="Your Email" required />
@@ -206,7 +208,6 @@
         radius: 100
     }
 
-    // --- MOUSE EVENTS ---
     window.addEventListener('mousemove', function(event){
         const rect = canvas.getBoundingClientRect();
         mouse.x = event.x - rect.left;
@@ -218,7 +219,6 @@
         mouse.y = undefined;
     });
 
-    // --- TOUCH EVENTS ---
     window.addEventListener('touchmove', function(event){
         const rect = canvas.getBoundingClientRect();
         if(event.touches.length > 0) {
@@ -241,15 +241,14 @@
     });
 
     class Particle {
-        // Updated Constructor: Now accepts 'color' as an argument
         constructor(x, y, color){
             this.x = x;
             this.y = y;
-            this.size = 5; // Matches the step size for solid block look
+            this.size = 5; 
             this.baseX = x;
             this.baseY = y;
             this.density = (Math.random() * 30) + 5;
-            this.color = color; // Use the exact color from the gradient
+            this.color = color;
         }
         
         draw(){
@@ -290,40 +289,31 @@
         particlesArray = [];
         ctx.clearRect(0,0, canvas.width, canvas.height);
         
-        let fontSize = canvas.width < 600 ? 50 : 100; // Increased size for impact
+        let fontSize = canvas.width < 600 ? 50 : 100;
         
-        // FONT: Using 'Arial Black' for the thick, blocky look from the image
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // --- CREATE GEMINI GRADIENT ---
-        // We create a gradient that spans the width of the text area
+        // --- GRADIENT CREATION ---
         let gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-        gradient.addColorStop(0.2, '#4285F4'); // Google Blue (Left)
-        gradient.addColorStop(0.5, '#9d50bb'); // Purple (Middle)
-        gradient.addColorStop(0.8, '#d946ef'); // Pink/Fuchsia (Right)
+        gradient.addColorStop(0.2, '#3b82f6'); // Blue (slightly darker for white BG)
+        gradient.addColorStop(0.5, '#a855f7'); // Purple
+        gradient.addColorStop(0.8, '#ec4899'); // Pink
         
-        // Apply gradient to text
         ctx.fillStyle = gradient;
         
-        // Draw the text (invisible to user, used for data scanning)
+        // Use fillText to draw the shape for scanning
         ctx.fillText('Hello World', canvas.width/2, canvas.height/2);
         
-        // Scan the canvas
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
-        // STEP 6: Chunky pixels to match the "8-bit" image style
         let step = 6; 
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
             for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
-                // Check alpha to find text
                 let index = (y * 4 * textCoordinates.width) + (x * 4);
                 if (textCoordinates.data[index + 3] > 128){
-                    
-                    // CAPTURE COLOR:
-                    // We grab the R, G, B values from the gradient pixel
                     let r = textCoordinates.data[index];
                     let g = textCoordinates.data[index + 1];
                     let b = textCoordinates.data[index + 2];
