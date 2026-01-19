@@ -70,9 +70,10 @@
             margin-bottom: 5px;
         }
         
-        /* CANVAS STYLES - GLOBAL OVERLAY 
-           We move the canvas out of the flow entirely.
-           It now covers the screen like a HUD.
+        /* GLOBAL OVERLAY CANVAS
+           Fixed position covers the whole screen.
+           Z-Index 9999 ensures it floats on top of everything.
+           pointer-events: none ensures you can still click links behind it.
         */
         #canvas1 {
             position: fixed;
@@ -80,8 +81,8 @@
             left: 0;
             width: 100vw;
             height: 100vh;
-            z-index: 9999; /* Very high so it stays on top */
-            pointer-events: none; /* KEY: Lets clicks pass through to links/forms below */
+            z-index: 9999; 
+            pointer-events: none; 
             image-rendering: pixelated; 
         }
     </style>
@@ -190,8 +191,6 @@
 <script>
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
-    
-    // We will sync with this element
     const anchor = document.getElementById('particle-anchor');
 
     canvas.width = window.innerWidth;
@@ -229,20 +228,28 @@
     });
 
     class Particle {
-        constructor(xOffset, yOffset, color){
-            // Store the OFFSET relative to the anchor center
+        constructor(xOffset, yOffset, relativePos){
             this.xOffset = xOffset;
             this.yOffset = yOffset;
             
-            // Current Position (starts at anchor)
-            this.x = 0; 
-            this.y = 0;
+            // Start particle at random location to "fly in"
+            this.x = Math.random() * canvas.width; 
+            this.y = Math.random() * canvas.height;
             
             this.size = 5; 
             this.baseX = 0;
             this.baseY = 0;
             this.density = (Math.random() * 30) + 5;
-            this.color = color;
+
+            // GEMINI GRADIENT LOGIC (Blue -> Purple -> Pink)
+            // relativePos is 0 (left) to 1 (right)
+            if (relativePos < 0.33) {
+                this.color = '#4285F4'; // Google Blue
+            } else if (relativePos < 0.66) {
+                this.color = '#a855f7'; // Purple
+            } else {
+                this.color = '#ec4899'; // Pink
+            }
         }
         
         draw(){
@@ -253,11 +260,9 @@
         }
         
         update(anchorX, anchorY){
-            // Calculate where this particle "should" be based on the anchor's current screen position
             this.baseX = anchorX + this.xOffset;
             this.baseY = anchorY + this.yOffset;
 
-            // Standard Physics
             let dx = mouse.x - this.x;
             let dy = mouse.y - this.y;
             let distance = Math.sqrt(dx * dx + dy * dy);
@@ -286,74 +291,77 @@
 
     function init() {
         particlesArray = [];
-        
-        // Use a temporary virtual canvas to scan the text
-        // This ensures the particles form the correct shape regardless of current scroll
-        // We calculate offsets relative to CENTER (0,0)
-        
         let fontSize = window.innerWidth < 600 ? 50 : 100;
+        
+        // Use a heavy font
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // 1. Create Gradient
-        let gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
-        gradient.addColorStop(0.2, '#3b82f6'); 
-        gradient.addColorStop(0.5, '#a855f7'); 
-        gradient.addColorStop(0.8, '#ec4899'); 
-        ctx.fillStyle = gradient;
-        
-        // 2. Draw text in the absolute center of the screen momentarily to scan it
         let centerX = canvas.width / 2;
         let centerY = canvas.height / 2;
         
+        // 1. DRAW IN SOLID RED (High Contrast for Scanning)
+        ctx.fillStyle = 'red';
         ctx.clearRect(0,0, canvas.width, canvas.height);
         ctx.fillText('Hello World', centerX, centerY);
         
+        // 2. SCAN
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
-        // 3. Scan & Store Offsets
+        // 3. GENERATE PARTICLES
         let step = 6; 
+        
+        // Calculate text width approx for gradient logic
+        let estimatedTextWidth = fontSize * 6; // roughly 6 chars wide visually
+        let startX = centerX - (estimatedTextWidth/2);
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
             for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
                 let index = (y * 4 * textCoordinates.width) + (x * 4);
+                
+                // If pixel is red (alpha > 128)
                 if (textCoordinates.data[index + 3] > 128){
-                    let r = textCoordinates.data[index];
-                    let g = textCoordinates.data[index + 1];
-                    let b = textCoordinates.data[index + 2];
-                    let color = 'rgb(' + r + ',' + g + ',' + b + ')';
                     
-                    // IMPORTANT: We store the distance from the CenterX/CenterY
-                    // This allows us to re-project the text anywhere on screen later
                     let xOffset = x - centerX;
                     let yOffset = y - centerY;
                     
-                    particlesArray.push(new Particle(xOffset, yOffset, color));
+                    // Calculate relative position (0 to 1) for coloring
+                    // We map the x offset to a 0-1 gradient range
+                    let relativePos = (x - (centerX - 300)) / 600; 
+                    if (relativePos < 0) relativePos = 0;
+                    if (relativePos > 1) relativePos = 1;
+                    
+                    particlesArray.push(new Particle(xOffset, yOffset, relativePos));
                 }
             }
         }
         
-        // Clear the setup drawing
+        // Clear the Red Text
         ctx.clearRect(0,0, canvas.width, canvas.height);
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // 4. FIND THE ANCHOR
-        // We get the current screen position of the invisible anchor div
+        // Find anchor position relative to viewport
         let anchorRect = anchor.getBoundingClientRect();
         let anchorX = anchorRect.left + (anchorRect.width / 2);
         let anchorY = anchorRect.top + (anchorRect.height / 2);
 
         for (let i = 0; i < particlesArray.length; i++){
-            // 5. UPDATE PARTICLES relative to the anchor's current position
             particlesArray[i].update(anchorX, anchorY);
             particlesArray[i].draw();
         }
         requestAnimationFrame(animate);
     }
+
+    // Wait for window to fully load before initializing
+    // This ensures fonts are loaded and layout is set
+    window.addEventListener('load', function() {
+        init();
+        animate();
+    });
 
     window.addEventListener('resize', function(){
         canvas.width = window.innerWidth;
@@ -361,8 +369,6 @@
         init();
     });
 
-    init();
-    animate();
 </script>
 
 <script>
