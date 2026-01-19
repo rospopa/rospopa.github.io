@@ -70,11 +70,7 @@
             margin-bottom: 5px;
         }
         
-        /* GLOBAL OVERLAY CANVAS
-           - Fixed position covers the entire screen (100vw x 100vh).
-           - pointer-events: none ensures you can click buttons/links behind it.
-           - z-index: 9999 ensures it flies on top of everything.
-        */
+        /* GLOBAL OVERLAY CANVAS */
         #canvas1 {
             position: fixed;
             top: 0;
@@ -82,7 +78,7 @@
             width: 100vw;
             height: 100vh;
             z-index: 9999; 
-            pointer-events: none; 
+            pointer-events: none; /* Allows scrolling/clicking through the canvas */
             image-rendering: pixelated; 
         }
     </style>
@@ -204,11 +200,14 @@
         radius: 120
     }
 
+    // --- INTERACTION HANDLERS ---
     window.addEventListener('mousemove', function(event){
         mouse.x = event.x;
         mouse.y = event.y;
     });
     
+    // Touch Logic: We update mouse position but do NOT prevent default
+    // This allows scrolling to happen naturally while particles react
     window.addEventListener('touchmove', function(event){
         if(event.touches.length > 0) {
             mouse.x = event.touches[0].clientX;
@@ -227,15 +226,14 @@
     });
 
     class Particle {
-        constructor(xOffset, yOffset, color){
+        constructor(xOffset, yOffset, color, size){
             this.xOffset = xOffset;
             this.yOffset = yOffset;
             
-            // Random start position for "fly-in" effect
             this.x = Math.random() * canvas.width; 
             this.y = Math.random() * canvas.height;
             
-            this.size = 5; 
+            this.size = size; 
             this.baseX = 0;
             this.baseY = 0;
             this.density = (Math.random() * 30) + 5;
@@ -282,9 +280,14 @@
     function init() {
         particlesArray = [];
         
-        // --- 1. SETUP ---
-        // Increase font size slightly to match reference impact
-        let fontSize = window.innerWidth < 600 ? 50 : 100;
+        // Responsive Font & Performance settings
+        let isMobile = window.innerWidth < 600;
+        let fontSize = isMobile ? 50 : 100;
+        
+        // Increase step size on mobile to improve performance (fewer particles)
+        let step = isMobile ? 8 : 6;
+        let particleSize = isMobile ? 6 : 5;
+        
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
@@ -293,61 +296,53 @@
         let centerY = canvas.height / 2;
         let text = 'Hello World';
 
-        // --- 2. DETECTION PHASE (Robustness) ---
-        // We draw in SOLID RED to ensure the scanner finds every pixel.
-        // Gradient logic happens later in step 4.
-        ctx.fillStyle = 'red';
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-        ctx.fillText(text, centerX, centerY);
-        
-        // --- 3. MEASURE FOR GRADIENT MATH ---
+        // 1. MEASURE TEXT
         let metrics = ctx.measureText(text);
         let textWidth = metrics.width;
         let startX = centerX - (textWidth / 2);
         
-        // --- 4. SCAN & COLOR ---
+        // 2. DRAW RED TEXT (Detection)
+        ctx.fillStyle = 'red';
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        ctx.fillText(text, centerX, centerY);
+        
+        // 3. SCAN PIXELS
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let step = 6; 
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
             for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
                 let index = (y * 4 * textCoordinates.width) + (x * 4);
                 
-                // If pixel is visible (Red channel > 200 means we hit the text)
+                // If pixel is red (visible)
                 if (textCoordinates.data[index] > 200){
                     
                     let xOffset = x - centerX;
                     let yOffset = y - centerY;
                     
-                    // --- THE COLOR LOGIC ---
-                    // Instead of copying the canvas pixel (which is red),
-                    // we calculate the Gemini Gradient based on X position.
-                    
-                    // 0.0 = Left, 1.0 = Right
+                    // --- COLOR LOGIC ---
                     let relativePos = (x - startX) / textWidth;
-                    
                     let color;
+                    
                     if (relativePos < 0.33) {
-                         color = '#4285F4'; // Google Blue
+                         color = '#4285F4'; // Blue
                     } else if (relativePos < 0.66) {
                          color = '#a855f7'; // Purple
                     } else {
                          color = '#ec4899'; // Pink
                     }
                     
-                    particlesArray.push(new Particle(xOffset, yOffset, color));
+                    particlesArray.push(new Particle(xOffset, yOffset, color, particleSize));
                 }
             }
         }
         
-        // Clear the red detection text
         ctx.clearRect(0,0, canvas.width, canvas.height);
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Find anchor position relative to viewport
+        // Get Anchor Position
         let anchorRect = anchor.getBoundingClientRect();
         let anchorX = anchorRect.left + (anchorRect.width / 2);
         let anchorY = anchorRect.top + (anchorRect.height / 2);
@@ -359,16 +354,25 @@
         requestAnimationFrame(animate);
     }
 
-    // Wait for window to fully load to ensure fonts are ready
     window.addEventListener('load', function() {
         init();
         animate();
     });
 
+    // MOBILE FIX: Store last width to detect orientation change vs scroll
+    let lastWidth = window.innerWidth;
+
     window.addEventListener('resize', function(){
+        // Always update canvas size to match viewport
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        init();
+
+        // Only reset particles if width changes (Orientation change)
+        // This prevents the address bar glitch on mobile scroll
+        if (window.innerWidth !== lastWidth) {
+            lastWidth = window.innerWidth;
+            init();
+        }
     });
 
 </script>
