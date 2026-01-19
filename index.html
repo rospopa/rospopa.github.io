@@ -141,7 +141,8 @@
                         margin-left: -49.5vw;
                         margin-right: -49.5vw;
                         overflow: visible; 
-                        margin-bottom: 10px;">
+                        margin-bottom: 10px;
+                        background-color: #1a1a1a;">
                         <canvas id="canvas1"></canvas>
                     </div>
 
@@ -199,11 +200,10 @@
 
     let particlesArray = [];
 
-    // Interaction State
     const mouse = {
         x: null,
         y: null,
-        radius: 100 // Slightly larger radius for more impact
+        radius: 100
     }
 
     // --- MOUSE EVENTS ---
@@ -241,30 +241,20 @@
     });
 
     class Particle {
-        constructor(x, y){
+        // Updated Constructor: Now accepts 'color' as an argument
+        constructor(x, y, color){
             this.x = x;
             this.y = y;
-            // Slightly smaller particles for that "pixel" look
-            this.size = 3; 
+            this.size = 5; // Matches the step size for solid block look
             this.baseX = x;
             this.baseY = y;
             this.density = (Math.random() * 30) + 5;
-            
-            // GEMINI / TERMINAL COLOR PALETTE (Gradient from Cyan to Purple)
-            // Normalized position relative to center (0 to 1)
-            const relativePos = this.x / canvas.width;
-            
-            // HSL Logic:
-            // 180 is Cyan
-            // 280 is Purple
-            const hue = 180 + (relativePos * 100); 
-            this.color = 'hsl(' + hue + ', 100%, 65%)';
+            this.color = color; // Use the exact color from the gradient
         }
         
         draw(){
             ctx.fillStyle = this.color;
             ctx.beginPath();
-            // SQUARE PARTICLES (The "Terminal" Block Look)
             ctx.fillRect(this.x, this.y, this.size, this.size);
             ctx.closePath();
         }
@@ -286,7 +276,6 @@
             } else {
                 if (this.x !== this.baseX){
                     let dx = this.x - this.baseX;
-                    // Snappy return for digital feel
                     this.x -= dx/10;
                 }
                 if (this.y !== this.baseY){
@@ -301,28 +290,48 @@
         particlesArray = [];
         ctx.clearRect(0,0, canvas.width, canvas.height);
         
-        let fontSize = canvas.width < 600 ? 50 : 80;
+        let fontSize = canvas.width < 600 ? 50 : 100; // Increased size for impact
         
-        // MONOSPACE FONT for Terminal Look
-        ctx.font = '700 ' + fontSize + 'px "Courier New", monospace'; 
-        ctx.fillStyle = 'white'; 
+        // FONT: Using 'Arial Black' for the thick, blocky look from the image
+        ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // Draw centered text
+        // --- CREATE GEMINI GRADIENT ---
+        // We create a gradient that spans the width of the text area
+        let gradient = ctx.createLinearGradient(0, 0, canvas.width, 0);
+        gradient.addColorStop(0.2, '#4285F4'); // Google Blue (Left)
+        gradient.addColorStop(0.5, '#9d50bb'); // Purple (Middle)
+        gradient.addColorStop(0.8, '#d946ef'); // Pink/Fuchsia (Right)
+        
+        // Apply gradient to text
+        ctx.fillStyle = gradient;
+        
+        // Draw the text (invisible to user, used for data scanning)
         ctx.fillText('Hello World', canvas.width/2, canvas.height/2);
         
+        // Scan the canvas
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
-        // Step 5 makes for a slightly "blockier" grid which suits the terminal look
-        let step = 5; 
+        // STEP 6: Chunky pixels to match the "8-bit" image style
+        let step = 6; 
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
             for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
-                if (textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3] > 128){
+                // Check alpha to find text
+                let index = (y * 4 * textCoordinates.width) + (x * 4);
+                if (textCoordinates.data[index + 3] > 128){
+                    
+                    // CAPTURE COLOR:
+                    // We grab the R, G, B values from the gradient pixel
+                    let r = textCoordinates.data[index];
+                    let g = textCoordinates.data[index + 1];
+                    let b = textCoordinates.data[index + 2];
+                    let color = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    
                     let positionX = x;
                     let positionY = y;
-                    particlesArray.push(new Particle(positionX, positionY));
+                    particlesArray.push(new Particle(positionX, positionY, color));
                 }
             }
         }
@@ -338,7 +347,6 @@
     }
 
     window.addEventListener('resize', function(){
-        // Recalculate dimensions to maintain full width
         canvas.width = container.offsetWidth;
         canvas.height = container.offsetHeight;
         init();
@@ -368,14 +376,12 @@
             const formData = new FormData(form);
             const email = formData.get('email');
 
-            // --- VALIDATION 1: EMAIL ---
             if (!isValidEmail(email)) {
                 statusMsg.innerText = "Please enter a valid email address.";
                 statusMsg.style.color = "red";
                 return;
             }
 
-            // --- VALIDATION 2: CAPTCHA ---
             const captchaResponse = grecaptcha.getResponse();
             if (!captchaResponse || captchaResponse.length === 0) {
                 statusMsg.innerText = "Please check the captcha box.";
