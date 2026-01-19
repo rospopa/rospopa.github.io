@@ -70,6 +70,13 @@
         .g-recaptcha {
             margin-bottom: 5px;
         }
+        
+        /* Styles for the new Particle Canvas */
+        #canvas1 {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
     </style>
 </head>
     
@@ -121,14 +128,17 @@
                     <img src="/gif/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6e474d6e447165627a4463666d2f67697068792e676966.gif" width="auto" height="auto"/>
                 </div>
                 
-<div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
-    <h1>
-        Hello World
-    </h1>
-    <p>
-        The purpose of this website is to share information and host tools.  All of this code is source-available via the <a href="https://github.com/rospopa/rospopa.github.io">repository</a>.  Let's build a better future together.
-    </p>
-</div>
+                <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
+                    
+                    <div id="canvas-container" style="position: relative; width: 100%; height: 150px; overflow: hidden; margin-bottom: 10px;">
+                        <canvas id="canvas1"></canvas>
+                    </div>
+
+                    <p>
+                        The purpose of this website is to share information and host tools.  All of this code is source-available via the <a href="https://github.com/rospopa/rospopa.github.io">repository</a>.  Let's build a better future together.
+                    </p>
+                </div>
+
                 <div id="contact-form-container">
                     <form id="contact-form">
                         <input type="text" name="name" placeholder="Your Name" required />
@@ -167,6 +177,148 @@
         </div>
     </section>
 </footer>
+
+<script>
+    const canvas = document.getElementById('canvas1');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('canvas-container');
+
+    canvas.width = container.offsetWidth;
+    canvas.height = container.offsetHeight;
+
+    let particlesArray = [];
+
+    // Mouse Interaction
+    const mouse = {
+        x: null,
+        y: null,
+        radius: 80 
+    }
+
+    window.addEventListener('mousemove', function(event){
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = event.x - rect.left;
+        mouse.y = event.y - rect.top;
+    });
+    
+    // Reset mouse when leaving canvas to prevent stuck particles
+    window.addEventListener('mouseout', function(){
+        mouse.x = undefined;
+        mouse.y = undefined;
+    });
+
+    class Particle {
+        constructor(x, y){
+            this.x = x;
+            this.y = y;
+            this.size = 2; 
+            this.baseX = x;
+            this.baseY = y;
+            this.density = (Math.random() * 30) + 5;
+        }
+        draw(){
+            ctx.fillStyle = '#555555'; // Matches your site text color
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.fill();
+        }
+        update(){
+            let dx = mouse.x - this.x;
+            let dy = mouse.y - this.y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+            let forceDirectionX = dx / distance;
+            let forceDirectionY = dy / distance;
+            let maxDistance = mouse.radius;
+            let force = (maxDistance - distance) / maxDistance;
+            let directionX = forceDirectionX * force * this.density;
+            let directionY = forceDirectionY * force * this.density;
+
+            if (distance < mouse.radius) {
+                this.x -= directionX;
+                this.y -= directionY;
+            } else {
+                if (this.x !== this.baseX){
+                    let dx = this.x - this.baseX;
+                    this.x -= dx/10;
+                }
+                if (this.y !== this.baseY){
+                    let dy = this.y - this.baseY;
+                    this.y -= dy/10;
+                }
+            }
+        }
+    }
+
+    function init() {
+        particlesArray = [];
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        
+        let fontSize = canvas.width < 600 ? 50 : 80;
+        ctx.font = '700 ' + fontSize + 'px Verdana'; 
+        ctx.fillStyle = 'white'; 
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('Hello World', canvas.width/2, canvas.height/2);
+        
+        // Scan pixel data
+        const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        
+        // Loop through pixels to create particles
+        let step = 3; // Skips pixels for performance (lower = denser)
+        
+        for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
+            for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
+                // Check opacity
+                if (textCoordinates.data[(y * 4 * textCoordinates.width) + (x * 4) + 3] > 128){
+                    let positionX = x;
+                    let positionY = y;
+                    particlesArray.push(new Particle(positionX * 1, positionY * 1));
+                }
+            }
+        }
+    }
+
+    function animate(){
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        for (let i = 0; i < particlesArray.length; i++){
+            particlesArray[i].draw();
+            particlesArray[i].update();
+        }
+        connect();
+        requestAnimationFrame(animate);
+    }
+
+    function connect(){
+        let opacityValue = 1;
+        for (let a = 0; a < particlesArray.length; a++){
+            for (let b = a; b < particlesArray.length; b++){
+                let dx = particlesArray[a].x - particlesArray[b].x;
+                let dy = particlesArray[a].y - particlesArray[b].y;
+                let distance = Math.sqrt(dx * dx + dy * dy);
+                
+                if (distance < 20){
+                    opacityValue = 1 - (distance/20);
+                    ctx.strokeStyle = 'rgba(85,85,85,' + opacityValue + ')';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                    ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    window.addEventListener('resize', function(){
+        canvas.width = container.offsetWidth;
+        canvas.height = container.offsetHeight;
+        init();
+    });
+
+    init();
+    animate();
+</script>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLHWsaJvRo4CPVU1f1umMXBT4Tazy3s1vUTMTTrOv0AVLjw4xs0pEkj5TpocbJdnyMJw/exec";
