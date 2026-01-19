@@ -78,7 +78,7 @@
             width: 100vw;
             height: 100vh;
             z-index: 9999; 
-            pointer-events: none; /* Allows scrolling/clicking through the canvas */
+            pointer-events: none; 
             image-rendering: pixelated; 
         }
     </style>
@@ -200,39 +200,57 @@
         radius: 120
     }
 
-    // --- INTERACTION HANDLERS ---
+    // --- FIX FOR MOBILE GHOST TOUCHES ---
+    // We use a flag to track if the user is using touch.
+    // If they are, we ignore standard mouse events.
+    let isTouch = false;
+
     window.addEventListener('mousemove', function(event){
+        if (isTouch) return; // Don't let the mouse event override touch cleanup
         mouse.x = event.x;
         mouse.y = event.y;
     });
     
-    // Touch Logic: We update mouse position but do NOT prevent default
-    // This allows scrolling to happen naturally while particles react
-    window.addEventListener('touchmove', function(event){
+    // Handle Touch Start/Move
+    const handleTouch = (event) => {
+        isTouch = true;
         if(event.touches.length > 0) {
             mouse.x = event.touches[0].clientX;
             mouse.y = event.touches[0].clientY;
         }
-    }, {passive: true});
+    };
 
+    window.addEventListener('touchstart', handleTouch, {passive: true});
+    window.addEventListener('touchmove', handleTouch, {passive: true});
+
+    // Handle Touch End/Cancel
+    const clearTouch = () => {
+        mouse.x = undefined;
+        mouse.y = undefined;
+        
+        // Keep the 'isTouch' flag true for a moment to block the ghost click
+        setTimeout(() => {
+            isTouch = false;
+        }, 500);
+    };
+
+    window.addEventListener('touchend', clearTouch);
+    window.addEventListener('touchcancel', clearTouch);
+    
+    // Normal mouse out for desktop
     window.addEventListener('mouseout', function(){
-        mouse.x = undefined;
-        mouse.y = undefined;
-    });
-
-    window.addEventListener('touchend', function(){
-        mouse.x = undefined;
-        mouse.y = undefined;
+        if (!isTouch) {
+            mouse.x = undefined;
+            mouse.y = undefined;
+        }
     });
 
     class Particle {
         constructor(xOffset, yOffset, color, size){
             this.xOffset = xOffset;
             this.yOffset = yOffset;
-            
             this.x = Math.random() * canvas.width; 
             this.y = Math.random() * canvas.height;
-            
             this.size = size; 
             this.baseX = 0;
             this.baseY = 0;
@@ -251,8 +269,24 @@
             this.baseX = anchorX + this.xOffset;
             this.baseY = anchorY + this.yOffset;
 
+            // Physics Calculation
             let dx = mouse.x - this.x;
             let dy = mouse.y - this.y;
+            
+            // Safety check for NaN (happens if mouse.x is undefined)
+            if (mouse.x == null || mouse.y == null) {
+                // If no mouse/touch, return to base immediately
+                if (this.x !== this.baseX) {
+                    let dx = this.x - this.baseX;
+                    this.x -= dx/10;
+                }
+                if (this.y !== this.baseY) {
+                    let dy = this.y - this.baseY;
+                    this.y -= dy/10;
+                }
+                return;
+            }
+
             let distance = Math.sqrt(dx * dx + dy * dy);
             let forceDirectionX = dx / distance;
             let forceDirectionY = dy / distance;
@@ -262,9 +296,11 @@
             let directionY = forceDirectionY * force * this.density;
 
             if (distance < mouse.radius) {
+                // Push away
                 this.x -= directionX;
                 this.y -= directionY;
             } else {
+                // Return to base
                 if (this.x !== this.baseX){
                     let dx = this.x - this.baseX;
                     this.x -= dx/10;
@@ -279,12 +315,9 @@
 
     function init() {
         particlesArray = [];
-        
-        // Responsive Font & Performance settings
         let isMobile = window.innerWidth < 600;
         let fontSize = isMobile ? 50 : 100;
         
-        // Increase step size on mobile to improve performance (fewer particles)
         let step = isMobile ? 8 : 6;
         let particleSize = isMobile ? 6 : 5;
         
@@ -296,53 +329,45 @@
         let centerY = canvas.height / 2;
         let text = 'Hello World';
 
-        // 1. MEASURE TEXT
+        // MEASURE & DRAW
         let metrics = ctx.measureText(text);
         let textWidth = metrics.width;
         let startX = centerX - (textWidth / 2);
         
-        // 2. DRAW RED TEXT (Detection)
         ctx.fillStyle = 'red';
         ctx.clearRect(0,0, canvas.width, canvas.height);
         ctx.fillText(text, centerX, centerY);
         
-        // 3. SCAN PIXELS
+        // SCAN
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
             for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
                 let index = (y * 4 * textCoordinates.width) + (x * 4);
                 
-                // If pixel is red (visible)
                 if (textCoordinates.data[index] > 200){
-                    
                     let xOffset = x - centerX;
                     let yOffset = y - centerY;
-                    
-                    // --- COLOR LOGIC ---
                     let relativePos = (x - startX) / textWidth;
                     let color;
                     
                     if (relativePos < 0.33) {
-                         color = '#4285F4'; // Blue
+                         color = '#4285F4'; 
                     } else if (relativePos < 0.66) {
-                         color = '#a855f7'; // Purple
+                         color = '#a855f7'; 
                     } else {
-                         color = '#ec4899'; // Pink
+                         color = '#ec4899'; 
                     }
-                    
                     particlesArray.push(new Particle(xOffset, yOffset, color, particleSize));
                 }
             }
         }
-        
         ctx.clearRect(0,0, canvas.width, canvas.height);
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Get Anchor Position
         let anchorRect = anchor.getBoundingClientRect();
         let anchorX = anchorRect.left + (anchorRect.width / 2);
         let anchorY = anchorRect.top + (anchorRect.height / 2);
@@ -359,16 +384,10 @@
         animate();
     });
 
-    // MOBILE FIX: Store last width to detect orientation change vs scroll
     let lastWidth = window.innerWidth;
-
     window.addEventListener('resize', function(){
-        // Always update canvas size to match viewport
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-
-        // Only reset particles if width changes (Orientation change)
-        // This prevents the address bar glitch on mobile scroll
         if (window.innerWidth !== lastWidth) {
             lastWidth = window.innerWidth;
             init();
@@ -393,7 +412,6 @@
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             statusMsg.innerText = "";
-            
             const formData = new FormData(form);
             const email = formData.get('email');
 
@@ -427,7 +445,6 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)
                 });
-
                 statusMsg.innerText = "Message sent successfully!";
                 statusMsg.style.color = "green";
                 form.reset();
