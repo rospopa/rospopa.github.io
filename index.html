@@ -71,9 +71,9 @@
         }
         
         /* GLOBAL OVERLAY CANVAS
-           Fixed position covers the whole screen.
-           Z-Index 9999 ensures it floats on top of everything.
-           pointer-events: none ensures you can still click links behind it.
+           - Fixed position covers the entire screen (100vw x 100vh).
+           - pointer-events: none ensures you can click buttons/links behind it.
+           - z-index: 9999 ensures it flies on top of everything.
         */
         #canvas1 {
             position: fixed;
@@ -204,7 +204,6 @@
         radius: 120
     }
 
-    // --- INTERACTION HANDLERS ---
     window.addEventListener('mousemove', function(event){
         mouse.x = event.x;
         mouse.y = event.y;
@@ -228,11 +227,11 @@
     });
 
     class Particle {
-        constructor(xOffset, yOffset, relativePos){
+        constructor(xOffset, yOffset, color){
             this.xOffset = xOffset;
             this.yOffset = yOffset;
             
-            // Start particle at random location to "fly in"
+            // Random start position for "fly-in" effect
             this.x = Math.random() * canvas.width; 
             this.y = Math.random() * canvas.height;
             
@@ -240,16 +239,7 @@
             this.baseX = 0;
             this.baseY = 0;
             this.density = (Math.random() * 30) + 5;
-
-            // GEMINI GRADIENT LOGIC (Blue -> Purple -> Pink)
-            // relativePos is 0 (left) to 1 (right)
-            if (relativePos < 0.33) {
-                this.color = '#4285F4'; // Google Blue
-            } else if (relativePos < 0.66) {
-                this.color = '#a855f7'; // Purple
-            } else {
-                this.color = '#ec4899'; // Pink
-            }
+            this.color = color;
         }
         
         draw(){
@@ -293,149 +283,38 @@
         particlesArray = [];
         let fontSize = window.innerWidth < 600 ? 50 : 100;
         
-        // Use a heavy font
+        // Font setup
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
         let centerX = canvas.width / 2;
         let centerY = canvas.height / 2;
-        
-        // 1. DRAW IN SOLID RED (High Contrast for Scanning)
-        ctx.fillStyle = 'red';
+        let text = 'Hello World';
+
+        // 1. MEASURE TEXT to define gradient boundaries exactly
+        let metrics = ctx.measureText(text);
+        let textWidth = metrics.width;
+        let startX = centerX - (textWidth / 2);
+        let endX = centerX + (textWidth / 2);
+
+        // 2. CREATE GRADIENT based on text width
+        let gradient = ctx.createLinearGradient(startX, 0, endX, 0);
+        gradient.addColorStop(0, '#4285F4'); // Blue (Start)
+        gradient.addColorStop(0.5, '#a855f7'); // Purple (Middle)
+        gradient.addColorStop(1, '#ec4899'); // Pink (End)
+
+        ctx.fillStyle = gradient;
         ctx.clearRect(0,0, canvas.width, canvas.height);
-        ctx.fillText('Hello World', centerX, centerY);
         
-        // 2. SCAN
+        // 3. DRAW TEXT with Gradient
+        ctx.fillText(text, centerX, centerY);
+        
+        // 4. SCAN PIXELS
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
-        // 3. GENERATE PARTICLES
         let step = 6; 
-        
-        // Calculate text width approx for gradient logic
-        let estimatedTextWidth = fontSize * 6; // roughly 6 chars wide visually
-        let startX = centerX - (estimatedTextWidth/2);
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
             for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
-                let index = (y * 4 * textCoordinates.width) + (x * 4);
-                
-                // If pixel is red (alpha > 128)
-                if (textCoordinates.data[index + 3] > 128){
-                    
-                    let xOffset = x - centerX;
-                    let yOffset = y - centerY;
-                    
-                    // Calculate relative position (0 to 1) for coloring
-                    // We map the x offset to a 0-1 gradient range
-                    let relativePos = (x - (centerX - 300)) / 600; 
-                    if (relativePos < 0) relativePos = 0;
-                    if (relativePos > 1) relativePos = 1;
-                    
-                    particlesArray.push(new Particle(xOffset, yOffset, relativePos));
-                }
-            }
-        }
-        
-        // Clear the Red Text
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-    }
-
-    function animate(){
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Find anchor position relative to viewport
-        let anchorRect = anchor.getBoundingClientRect();
-        let anchorX = anchorRect.left + (anchorRect.width / 2);
-        let anchorY = anchorRect.top + (anchorRect.height / 2);
-
-        for (let i = 0; i < particlesArray.length; i++){
-            particlesArray[i].update(anchorX, anchorY);
-            particlesArray[i].draw();
-        }
-        requestAnimationFrame(animate);
-    }
-
-    // Wait for window to fully load before initializing
-    // This ensures fonts are loaded and layout is set
-    window.addEventListener('load', function() {
-        init();
-        animate();
-    });
-
-    window.addEventListener('resize', function(){
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        init();
-    });
-
-</script>
-
-<script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLHWsaJvRo4CPVU1f1umMXBT4Tazy3s1vUTMTTrOv0AVLjw4xs0pEkj5TpocbJdnyMJw/exec";
-
-    const form = document.getElementById('contact-form');
-    const statusMsg = document.getElementById('form-status');
-    const btn = document.getElementById('submit-btn');
-
-    function isValidEmail(email) {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
-    }
-
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            statusMsg.innerText = "";
-            
-            const formData = new FormData(form);
-            const email = formData.get('email');
-
-            if (!isValidEmail(email)) {
-                statusMsg.innerText = "Please enter a valid email address.";
-                statusMsg.style.color = "red";
-                return;
-            }
-
-            const captchaResponse = grecaptcha.getResponse();
-            if (!captchaResponse || captchaResponse.length === 0) {
-                statusMsg.innerText = "Please check the captcha box.";
-                statusMsg.style.color = "red";
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "Sending...";
-
-            const data = {
-                name: formData.get('name'),
-                email: email,
-                message: formData.get('message'),
-                captchaToken: captchaResponse
-            };
-
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-
-                statusMsg.innerText = "Message sent successfully!";
-                statusMsg.style.color = "green";
-                form.reset();
-                grecaptcha.reset(); 
-            } catch (error) {
-                console.error('Error:', error);
-                statusMsg.innerText = "Something went wrong. Please try again.";
-                statusMsg.style.color = "red";
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Send Message";
-            }
-        });
-    }
-</script>
-</body>
-</html>
+                let index = (y * 4 *
