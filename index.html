@@ -221,10 +221,6 @@
     canvas.height = window.innerHeight;
 
     let particlesArray = [];
-    
-    // Track anchor position to fix scroll lag
-    let previousAnchorX = 0;
-    let previousAnchorY = 0;
 
     const mouse = {
         x: null,
@@ -271,72 +267,72 @@
 
     class Particle {
         constructor(xOffset, yOffset, color, size){
-            this.xOffset = xOffset;
-            this.yOffset = yOffset;
-            this.x = Math.random() * canvas.width; 
-            this.y = Math.random() * canvas.height;
-            this.size = size; 
-            this.baseX = 0;
-            this.baseY = 0;
-            this.density = (Math.random() * 30) + 5;
+            this.xOffset = xOffset; // Fixed offset from the text center
+            this.yOffset = yOffset; // Fixed offset from the text center
             this.color = color;
+            this.size = size;
+            
+            this.density = (Math.random() * 30) + 5;
+            
+            // DISPLACEMENT: These values track how far the particle has been pushed
+            // by the mouse. 0,0 means it is perfectly at home.
+            this.dx = 0; 
+            this.dy = 0; 
         }
         
-        draw(){
+        draw(anchorX, anchorY){
+            // Draw position is simply Home Position + Displacement
+            // We calculate Home Position fresh every frame using the Anchor
+            let drawX = anchorX + this.xOffset + this.dx;
+            let drawY = anchorY + this.yOffset + this.dy;
+
             ctx.fillStyle = this.color;
             ctx.beginPath();
-            ctx.fillRect(this.x, this.y, this.size, this.size);
+            ctx.fillRect(drawX, drawY, this.size, this.size);
             ctx.closePath();
         }
         
-        // Accepted deltaX/Y to move particle instantly with scroll
-        update(anchorX, anchorY, deltaX, deltaY){
-            // 1. Move the particle instantly by the amount the user scrolled
-            // This prevents the "swimming" or "floating" lag effect.
-            this.x += deltaX;
-            this.y += deltaY;
+        update(anchorX, anchorY){
+            // Calculate where the particle "currently is" on screen
+            let currentX = anchorX + this.xOffset + this.dx;
+            let currentY = anchorY + this.yOffset + this.dy;
 
-            // 2. Set base position relative to the anchor
-            this.baseX = anchorX + this.xOffset;
-            this.baseY = anchorY + this.yOffset;
-
-            // 3. --- MOUSE INTERACTION & RETURN ---
-            let dx = mouse.x - this.x;
-            let dy = mouse.y - this.y;
+            // --- MOUSE INTERACTION ---
+            // Calculate distance between mouse and the particle's current screen position
+            let distMouseX = mouse.x - currentX;
+            let distMouseY = mouse.y - currentY;
             
-            // If no mouse interaction, ease back to base
+            // If no mouse, just decay displacement (return to home)
             if (mouse.x == null || mouse.y == null) {
-                if (this.x !== this.baseX) {
-                    let dx = this.x - this.baseX;
-                    this.x -= dx * CONFIG.returnSpeed;
-                }
-                if (this.y !== this.baseY) {
-                    let dy = this.y - this.baseY;
-                    this.y -= dy * CONFIG.returnSpeed; 
-                }
+                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
+                else this.dx = 0;
+                
+                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
+                else this.dy = 0;
                 return;
             }
 
-            let distance = Math.sqrt(dx * dx + dy * dy);
-            let forceDirectionX = dx / distance;
-            let forceDirectionY = dy / distance;
-            let maxDistance = mouse.radius;
-            let force = (maxDistance - distance) / maxDistance;
-            let directionX = forceDirectionX * force * this.density;
-            let directionY = forceDirectionY * force * this.density;
-
+            let distance = Math.sqrt(distMouseX * distMouseX + distMouseY * distMouseY);
+            
+            // Physics: If mouse is close, push displacement further away
             if (distance < mouse.radius) {
-                this.x -= directionX;
-                this.y -= directionY;
+                let forceDirectionX = distMouseX / distance;
+                let forceDirectionY = distMouseY / distance;
+                let maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance;
+                let directionX = forceDirectionX * force * this.density;
+                let directionY = forceDirectionY * force * this.density;
+                
+                // Add to the displacement
+                this.dx -= directionX;
+                this.dy -= directionY;
             } else {
-                if (this.x !== this.baseX){
-                    let dx = this.x - this.baseX;
-                    this.x -= dx * CONFIG.returnSpeed;
-                }
-                if (this.y !== this.baseY){
-                    let dy = this.y - this.baseY;
-                    this.y -= dy * CONFIG.returnSpeed;
-                }
+                // Return to home (0 displacement) if mouse is far
+                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
+                else this.dx = 0;
+                
+                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
+                else this.dy = 0;
             }
         }
     }
@@ -344,7 +340,6 @@
     function init() {
         particlesArray = [];
         
-        // Mobile optimization: slightly larger particles for performance
         let isMobile = window.innerWidth < 600;
         let step = isMobile ? 4 : 3; 
         
@@ -360,6 +355,7 @@
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
+        // We generate particles based on the CENTER of the screen initially
         let centerX = canvas.width / 2;
         let centerY = canvas.height / 2;
         let text = 'Hello World';
@@ -390,6 +386,7 @@
                     let b = textCoordinates.data[index + 2];
                     let color = 'rgb(' + r + ',' + g + ',' + b + ')';
                     
+                    // Store offset relative to CENTER
                     let xOffset = x - centerX;
                     let yOffset = y - centerY;
                     
@@ -399,35 +396,23 @@
         }
         ctx.clearRect(0,0, canvas.width, canvas.height);
         
-        // Set initial anchor position
-        if(anchor) {
-            anchor.style.height = (fontSize + 60) + "px";
-            let anchorRect = anchor.getBoundingClientRect();
-            previousAnchorX = anchorRect.left + (anchorRect.width / 2);
-            previousAnchorY = anchorRect.top + (anchorRect.height / 2);
-        }
+        if(anchor) anchor.style.height = (fontSize + 60) + "px";
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Get the current position of the anchor element
+        // --- KEY FIX FOR MOBILE ---
+        // We get the EXACT position of the anchor element every single frame.
+        // This ensures that if the page scrolls (even via momentum scroll),
+        // we draw the particles exactly where the HTML element is.
         let anchorRect = anchor.getBoundingClientRect();
         let currentAnchorX = anchorRect.left + (anchorRect.width / 2);
         let currentAnchorY = anchorRect.top + (anchorRect.height / 2);
 
-        // Calculate how much the user scrolled since the last frame
-        let deltaX = currentAnchorX - previousAnchorX;
-        let deltaY = currentAnchorY - previousAnchorY;
-
-        // Update previous position for the next frame
-        previousAnchorX = currentAnchorX;
-        previousAnchorY = currentAnchorY;
-
         for (let i = 0; i < particlesArray.length; i++){
-            // Pass the scroll movement (delta) to the update function
-            particlesArray[i].update(currentAnchorX, currentAnchorY, deltaX, deltaY);
-            particlesArray[i].draw();
+            particlesArray[i].update(currentAnchorX, currentAnchorY);
+            particlesArray[i].draw(currentAnchorX, currentAnchorY);
         }
         requestAnimationFrame(animate);
     }
@@ -439,7 +424,8 @@
 
     let lastWidth = window.innerWidth;
     window.addEventListener('resize', function(){
-        // Prevent canvas clear on mobile address bar scroll
+        // Prevent re-init on mobile address bar scroll (vertical resize)
+        // Only re-init if the WIDTH changes significantly
         if (Math.abs(window.innerWidth - lastWidth) > 50) {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
