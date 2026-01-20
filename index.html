@@ -217,9 +217,6 @@
         returnSpeed: 0.15        // Speed of particles returning to base
     };
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
     let particlesArray = [];
 
     const mouse = {
@@ -267,22 +264,16 @@
 
     class Particle {
         constructor(xOffset, yOffset, color, size){
-            this.xOffset = xOffset; // Fixed offset from the text center
-            this.yOffset = yOffset; // Fixed offset from the text center
+            this.xOffset = xOffset; 
+            this.yOffset = yOffset; 
             this.color = color;
             this.size = size;
-             
             this.density = (Math.random() * 30) + 5;
-             
-            // DISPLACEMENT: These values track how far the particle has been pushed
-            // by the mouse. 0,0 means it is perfectly at home.
             this.dx = 0; 
             this.dy = 0; 
         }
         
         draw(anchorX, anchorY){
-            // Draw position is simply Home Position + Displacement
-            // We calculate Home Position fresh every frame using the Anchor
             let drawX = anchorX + this.xOffset + this.dx;
             let drawY = anchorY + this.yOffset + this.dy;
 
@@ -293,16 +284,12 @@
         }
         
         update(anchorX, anchorY){
-            // Calculate where the particle "currently is" on screen
             let currentX = anchorX + this.xOffset + this.dx;
             let currentY = anchorY + this.yOffset + this.dy;
 
-            // --- MOUSE INTERACTION ---
-            // Calculate distance between mouse and the particle's current screen position
             let distMouseX = mouse.x - currentX;
             let distMouseY = mouse.y - currentY;
              
-            // If no mouse, just decay displacement (return to home)
             if (mouse.x == null || mouse.y == null) {
                 if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
                 else this.dx = 0;
@@ -314,7 +301,6 @@
 
             let distance = Math.sqrt(distMouseX * distMouseX + distMouseY * distMouseY);
              
-            // Physics: If mouse is close, push displacement further away
             if (distance < mouse.radius) {
                 let forceDirectionX = distMouseX / distance;
                 let forceDirectionY = distMouseY / distance;
@@ -323,11 +309,9 @@
                 let directionX = forceDirectionX * force * this.density;
                 let directionY = forceDirectionY * force * this.density;
                 
-                // Add to the displacement
                 this.dx -= directionX;
                 this.dy -= directionY;
             } else {
-                // Return to home (0 displacement) if mouse is far
                 if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
                 else this.dx = 0;
                 
@@ -351,11 +335,18 @@
 
         CONFIG.particleSize = step;
         
+        // --- FIX: Lock the canvas size to pixels ---
+        // This overrides the CSS '100vh', preventing the stretch effect
+        // when the mobile address bar retracts.
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        canvas.style.width = window.innerWidth + 'px';
+        canvas.style.height = window.innerHeight + 'px';
+
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // We generate particles based on the CENTER of the screen initially
         let centerX = canvas.width / 2;
         let centerY = canvas.height / 2;
         let text = 'Hello World';
@@ -386,7 +377,6 @@
                     let b = textCoordinates.data[index + 2];
                     let color = 'rgb(' + r + ',' + g + ',' + b + ')';
                     
-                    // Store offset relative to CENTER
                     let xOffset = x - centerX;
                     let yOffset = y - centerY;
                     
@@ -402,10 +392,6 @@
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // --- KEY FIX FOR MOBILE ---
-        // We get the EXACT position of the anchor element every single frame.
-        // This ensures that if the page scrolls (even via momentum scroll),
-        // we draw the particles exactly where the HTML element is.
         let anchorRect = anchor.getBoundingClientRect();
         let currentAnchorX = anchorRect.left + (anchorRect.width / 2);
         let currentAnchorY = anchorRect.top + (anchorRect.height / 2);
@@ -424,17 +410,13 @@
 
     let lastWidth = window.innerWidth;
     window.addEventListener('resize', function(){
-        // Prevent re-init on mobile address bar scroll (vertical resize)
-        // Only re-init if the WIDTH changes significantly (rotation/desktop resize)
+        // Only re-init if the WIDTH changes significantly (rotation)
+        // We ignore vertical resizing from the address bar
         if (Math.abs(window.innerWidth - lastWidth) > 50) {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
             lastWidth = window.innerWidth;
             init();
         }
-        // FIXED: Removed the 'else' block that reset canvas.height on scroll
     });
-
 </script>
 
 <script>
