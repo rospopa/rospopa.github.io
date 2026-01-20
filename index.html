@@ -24,6 +24,14 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
+        /* --- GLOBAL FIXES --- */
+        /* Forces the removal of any default black top-border from the theme */
+        body {
+            border-top: none !important;
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
         /* --- SECURITY / DISABLE SELECTION START --- */
         body {
             -webkit-user-select: none; /* Safari */
@@ -41,11 +49,30 @@
         }
         /* --- SECURITY END --- */
 
-        /* --- MOBILE FIXES --- */
-        /* Hide the long date on mobile to prevent layout breaking */
+        /* --- MOBILE LAYOUT FIXES --- */
+        /* 1. Hide the long date on mobile */
         @media screen and (max-width: 600px) {
             #last-updated {
                 display: none !important;
+            }
+            /* 2. Fix the header alignment */
+            .site-header .wrap {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                padding: 10px 15px; /* Add breathing room */
+            }
+            /* 3. Ensure the title doesn't get squished */
+            .site-title {
+                font-size: 1.1rem !important;
+                white-space: nowrap;
+            }
+            /* 4. Ensure the @ button is easily tappable */
+            .trigger2 a {
+                font-size: 1.5rem !important;
+                padding: 5px;
+                display: block;
             }
         }
 
