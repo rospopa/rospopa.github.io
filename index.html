@@ -1,4 +1,5 @@
 ---
+layout: null
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -24,79 +25,22 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
-        /* --- 1. REMOVE BLACK BAR (The Nuclear Option) --- */
-        html, body {
-            border-top: 0 !important;
-            margin-top: 0 !important;
-            padding-top: 0 !important;
-        }
-        /* Double check: Ensure the header itself doesn't have a top border */
-        .site-header {
-            border-top: none !important;
-        }
-
-        /* --- SECURITY / DISABLE SELECTION --- */
+        /* --- SECURITY / DISABLE SELECTION START --- */
         body {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+            user-select: none; /* Standard */
         }
+          
+        /* Re-enable selection for the form so people can type! */
         input, textarea {
             -webkit-user-select: text;
             -moz-user-select: text;
             -ms-user-select: text;
             user-select: text;
         }
-
-        /* --- 2. MOBILE HEADER FIX --- */
-        @media screen and (max-width: 600px) {
-            /* Hide the date */
-            #last-updated {
-                display: none !important;
-            }
-
-            /* Force the header container to be a row */
-            .site-header .wrap {
-                display: flex !important;
-                flex-direction: row !important;
-                justify-content: space-between !important;
-                align-items: center !important;
-                width: 100% !important;
-                padding: 15px 20px; /* Add breathing room */
-                box-sizing: border-box;
-            }
-
-            /* Force Title to the LEFT */
-            .site-title {
-                text-align: left !important;
-                float: none !important; /* Disable any floating from theme */
-                font-size: 1.2rem !important;
-                margin: 0 !important;
-                line-height: 1.2;
-            }
-
-            /* Force Icon to the RIGHT */
-            .trigger2 {
-                display: block !important;
-                margin: 0 !important;
-            }
-            .trigger2 a {
-                font-size: 1.5rem !important;
-                text-decoration: none;
-                display: block;
-                line-height: 1;
-            }
-
-            /* Hide the normal nav if it interferes */
-            .site-nav {
-                display: flex !important;
-                align-items: center;
-            }
-            .site-nav .trigger {
-                display: none; /* Double ensure date container is gone */
-            }
-        }
+        /* --- SECURITY END --- */
 
         #contact-form-container {
             margin: 40px 0;
@@ -173,9 +117,10 @@
         <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
         <nav class="site-nav">
             <div class="trigger">
-                <span id="last-updated" style="font-size: 0.9em; color: #666; cursor: default;">
+                <span id="last-updated" style="font-size: 16px; line-height: 1.5; color: #666; cursor: default; display: inline-block;">
                     Last updated: {{ site.time | date: '%B %d, %Y' }}
                 </span>
+                
                 <script>
                     (function() {
                         try {
@@ -188,6 +133,7 @@
                     })();
                 </script>
             </div>
+            
             <div class="trigger2">
                 <a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">@</a>
             </div>
@@ -312,267 +258,4 @@
         isTouch = true;
         if(event.touches.length > 0) {
             mouse.x = event.touches[0].clientX;
-            mouse.y = event.touches[0].clientY;
-        }
-    };
-
-    window.addEventListener('touchstart', handleTouch, {passive: true});
-    window.addEventListener('touchmove', handleTouch, {passive: true});
-
-    const clearTouch = () => {
-        mouse.x = undefined;
-        mouse.y = undefined;
-        setTimeout(() => {
-            isTouch = false;
-        }, 500);
-    };
-
-    window.addEventListener('touchend', clearTouch);
-    window.addEventListener('touchcancel', clearTouch);
-      
-    window.addEventListener('mouseout', function(){
-        if (!isTouch) {
-            mouse.x = undefined;
-            mouse.y = undefined;
-        }
-    });
-
-    class Particle {
-        constructor(xOffset, yOffset, color, size){
-            this.xOffset = xOffset; // Fixed offset from the text center
-            this.yOffset = yOffset; // Fixed offset from the text center
-            this.color = color;
-            this.size = size;
-             
-            this.density = (Math.random() * 30) + 5;
-             
-            // DISPLACEMENT: These values track how far the particle has been pushed
-            // by the mouse. 0,0 means it is perfectly at home.
-            this.dx = 0; 
-            this.dy = 0; 
-        }
-         
-        draw(anchorX, anchorY){
-            // Draw position is simply Home Position + Displacement
-            // We calculate Home Position fresh every frame using the Anchor
-            let drawX = anchorX + this.xOffset + this.dx;
-            let drawY = anchorY + this.yOffset + this.dy;
-
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.fillRect(drawX, drawY, this.size, this.size);
-            ctx.closePath();
-        }
-         
-        update(anchorX, anchorY){
-            // Calculate where the particle "currently is" on screen
-            let currentX = anchorX + this.xOffset + this.dx;
-            let currentY = anchorY + this.yOffset + this.dy;
-
-            // --- MOUSE INTERACTION ---
-            // Calculate distance between mouse and the particle's current screen position
-            let distMouseX = mouse.x - currentX;
-            let distMouseY = mouse.y - currentY;
-             
-            // If no mouse, just decay displacement (return to home)
-            if (mouse.x == null || mouse.y == null) {
-                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
-                else this.dx = 0;
-                 
-                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
-                else this.dy = 0;
-                return;
-            }
-
-            let distance = Math.sqrt(distMouseX * distMouseX + distMouseY * distMouseY);
-             
-            // Physics: If mouse is close, push displacement further away
-            if (distance < mouse.radius) {
-                let forceDirectionX = distMouseX / distance;
-                let forceDirectionY = distMouseY / distance;
-                let maxDistance = mouse.radius;
-                let force = (maxDistance - distance) / maxDistance;
-                let directionX = forceDirectionX * force * this.density;
-                let directionY = forceDirectionY * force * this.density;
-                 
-                // Add to the displacement
-                this.dx -= directionX;
-                this.dy -= directionY;
-            } else {
-                // Return to home (0 displacement) if mouse is far
-                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
-                else this.dx = 0;
-                 
-                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
-                else this.dy = 0;
-            }
-        }
-    }
-
-    function init() {
-        particlesArray = [];
-         
-        let isMobile = window.innerWidth < 600;
-        let step = isMobile ? 4 : 3; 
-         
-        let contentWidth = Math.min(window.innerWidth - 40, 600); 
-        let fontSize = Math.floor(contentWidth * 0.16);
-         
-        if (fontSize < 40) fontSize = 40;
-        if (fontSize > 180) fontSize = 180;
-
-        CONFIG.particleSize = step;
-         
-        ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-         
-        // We generate particles based on the CENTER of the screen initially
-        let centerX = canvas.width / 2;
-        let centerY = canvas.height / 2;
-        let text = 'Hello World';
-
-        let metrics = ctx.measureText(text);
-        let textWidth = metrics.width;
-        let startX = centerX - (textWidth / 2);
-        let endX = centerX + (textWidth / 2);
-
-        let gradient = ctx.createLinearGradient(startX, 0, endX, 0);
-        gradient.addColorStop(0, '#4285F4'); 
-        gradient.addColorStop(0.5, '#a855f7'); 
-        gradient.addColorStop(1, '#ec4899'); 
-
-        ctx.fillStyle = gradient;
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-        ctx.fillText(text, centerX, centerY);
-         
-        const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
-         
-        for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
-            for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
-                let index = (y * 4 * textCoordinates.width) + (x * 4);
-                 
-                if (textCoordinates.data[index + 3] > 128){
-                    let r = textCoordinates.data[index];
-                    let g = textCoordinates.data[index + 1];
-                    let b = textCoordinates.data[index + 2];
-                    let color = 'rgb(' + r + ',' + g + ',' + b + ')';
-                     
-                    // Store offset relative to CENTER
-                    let xOffset = x - centerX;
-                    let yOffset = y - centerY;
-                     
-                    particlesArray.push(new Particle(xOffset, yOffset, color, CONFIG.particleSize));
-                }
-            }
-        }
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-         
-        if(anchor) anchor.style.height = (fontSize + 60) + "px";
-    }
-
-    function animate(){
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-         
-        // --- KEY FIX FOR MOBILE ---
-        // We get the EXACT position of the anchor element every single frame.
-        // This ensures that if the page scrolls (even via momentum scroll),
-        // we draw the particles exactly where the HTML element is.
-        let anchorRect = anchor.getBoundingClientRect();
-        let currentAnchorX = anchorRect.left + (anchorRect.width / 2);
-        let currentAnchorY = anchorRect.top + (anchorRect.height / 2);
-
-        for (let i = 0; i < particlesArray.length; i++){
-            particlesArray[i].update(currentAnchorX, currentAnchorY);
-            particlesArray[i].draw(currentAnchorX, currentAnchorY);
-        }
-        requestAnimationFrame(animate);
-    }
-
-    window.addEventListener('load', function() {
-        setTimeout(init, 100); 
-        animate();
-    });
-
-    let lastWidth = window.innerWidth;
-    window.addEventListener('resize', function(){
-        // Prevent re-init on mobile address bar scroll (vertical resize)
-        // Only re-init if the WIDTH changes significantly
-        if (Math.abs(window.innerWidth - lastWidth) > 50) {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-            lastWidth = window.innerWidth;
-            init();
-        } else {
-             canvas.height = window.innerHeight;
-        }
-    });
-
-</script>
-
-<script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLHWsaJvRo4CPVU1f1umMXBT4Tazy3s1vUTMTTrOv0AVLjw4xs0pEkj5TpocbJdnyMJw/exec";
-
-    const form = document.getElementById('contact-form');
-    const statusMsg = document.getElementById('form-status');
-    const btn = document.getElementById('submit-btn');
-
-    function isValidEmail(email) {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
-    }
-
-    if (form) {
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            statusMsg.innerText = "";
-            const formData = new FormData(form);
-            const email = formData.get('email');
-
-            if (!isValidEmail(email)) {
-                statusMsg.innerText = "Please enter a valid email address.";
-                statusMsg.style.color = "red";
-                return;
-            }
-
-            const captchaResponse = grecaptcha.getResponse();
-            if (!captchaResponse || captchaResponse.length === 0) {
-                statusMsg.innerText = "Please check the captcha box.";
-                statusMsg.style.color = "red";
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "Sending...";
-
-            const data = {
-                name: formData.get('name'),
-                email: email,
-                message: formData.get('message'),
-                captchaToken: captchaResponse
-            };
-
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                statusMsg.innerText = "Message sent successfully!";
-                statusMsg.style.color = "green";
-                form.reset();
-                grecaptcha.reset(); 
-            } catch (error) {
-                console.error('Error:', error);
-                statusMsg.innerText = "Something went wrong. Please try again.";
-                statusMsg.style.color = "red";
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Send Message";
-            }
-        });
-    }
-</script>
-</body>
-</html>
+            mouse.
