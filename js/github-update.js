@@ -1,6 +1,6 @@
 const user = 'rospopa';
   const repo = 'rospopa.github.io';
-  const branch = 'master'; // explicitly using the branch you linked
+  const branch = 'main'; // explicitly using the branch you linked
 
   fetch(`https://api.github.com/repos/${user}/${repo}/commits/${branch}`)
     .then(response => response.json())
