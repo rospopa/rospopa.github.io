@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Pavlo Rospopa Website</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width">
     <meta name="description" content="pavlo@rospopa.com">
     <link rel="canonical" href="http://rospopa.github.io/">
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
@@ -29,7 +29,7 @@
             -ms-user-select: none; /* IE10+/Edge */
             user-select: none; /* Standard */
         }
-          
+         
         /* Re-enable selection for the form so people can type! */
         input, textarea {
             -webkit-user-select: text;
@@ -86,34 +86,28 @@
         .g-recaptcha {
             margin-bottom: 5px;
         }
-          
-        /* --- FULL SCREEN OVERLAY CANVAS --- */
+         
+        /* GLOBAL OVERLAY CANVAS */
         #canvas1 {
-            position: fixed;       /* Locks it to the screen */
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 9999;         /* Puts it in front of everything */
-            pointer-events: none;  /* Allows clicks to pass through to buttons/links */
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999; 
+            pointer-events: none; 
             image-rendering: pixelated; 
-        }
-        
-        /* Just a placeholder to push content down if you want space for the text, 
-           though the text is now floating on top. */
-        #header-spacer {
-            height: 150px;
         }
     </style>
 </head>
-      
+     
 <body>
-<canvas id="canvas1"></canvas>
-
 <script>
     document.addEventListener('contextmenu', event => event.preventDefault());
     document.addEventListener('dragstart', event => event.preventDefault());
 </script>
+
+<canvas id="canvas1"></canvas>
 
 <header class="site-header">
     <div class="wrap">
@@ -139,7 +133,7 @@
                         <br>
                         Testing encrypted auth <i>(In progress -- auth occurs -- missing platform)</i>
                     </li>
-                      
+                     
                     <li>
                         <a class="post-link" href="/calculator">Investment Property Calculator</a>
                         <br>
@@ -165,8 +159,8 @@
                 </div>
                  
                 <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
-                      
-                    <div id="header-spacer"></div>
+                     
+                    <div id="particle-anchor" style="width: 100%; height: 150px; margin-top: 20px; margin-bottom: 20px;"></div>
 
                     <p>
                         The purpose of this website is to share information and host tools.  All of this code is source-available via the <a href="https://github.com/rospopa/rospopa.github.io">repository</a>.  Let's build a better future together.
@@ -178,9 +172,9 @@
                         <input type="text" name="name" placeholder="Your Name" required />
                         <input type="email" name="email" placeholder="Your Email" required />
                         <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
-                          
+                         
                         <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
-                          
+                         
                         <button type="submit" id="submit-btn">Send Message</button>
                         <p id="form-status"></p>
                     </form>
@@ -215,12 +209,16 @@
 <script>
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
+    const anchor = document.getElementById('particle-anchor');
 
     // --- CONFIGURATION ---
     const CONFIG = {
-        particleSize: 3,         
-        returnSpeed: 0.15        
+        particleSize: 3,         // Size of squares
+        returnSpeed: 0.15        // Speed of particles returning to base
     };
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
     let particlesArray = [];
 
@@ -234,10 +232,10 @@
 
     window.addEventListener('mousemove', function(event){
         if (isTouch) return; 
-        mouse.x = event.clientX;
-        mouse.y = event.clientY;
+        mouse.x = event.x;
+        mouse.y = event.y;
     });
-      
+     
     const handleTouch = (event) => {
         isTouch = true;
         if(event.touches.length > 0) {
@@ -259,7 +257,7 @@
 
     window.addEventListener('touchend', clearTouch);
     window.addEventListener('touchcancel', clearTouch);
-      
+     
     window.addEventListener('mouseout', function(){
         if (!isTouch) {
             mouse.x = undefined;
@@ -268,77 +266,83 @@
     });
 
     class Particle {
-        constructor(xOffset, yOffset, color, size, centerX, centerY){
-            this.x = Math.random() * canvas.width; 
-            this.y = Math.random() * canvas.height;
-            this.size = size; 
-            
-            // Base position is now the fixed center of screen
-            this.baseX = centerX + xOffset;
-            this.baseY = centerY + yOffset;
+        constructor(xOffset, yOffset, color, size){
+            this.xOffset = xOffset; // Fixed offset from the text center
+            this.yOffset = yOffset; // Fixed offset from the text center
+            this.color = color;
+            this.size = size;
             
             this.density = (Math.random() * 30) + 5;
-            this.color = color;
+            
+            // DISPLACEMENT: These values track how far the particle has been pushed
+            // by the mouse. 0,0 means it is perfectly at home.
+            this.dx = 0; 
+            this.dy = 0; 
         }
         
-        draw(){
+        draw(anchorX, anchorY){
+            // Draw position is simply Home Position + Displacement
+            // We calculate Home Position fresh every frame using the Anchor
+            let drawX = anchorX + this.xOffset + this.dx;
+            let drawY = anchorY + this.yOffset + this.dy;
+
             ctx.fillStyle = this.color;
             ctx.beginPath();
-            ctx.fillRect(this.x, this.y, this.size, this.size);
+            ctx.fillRect(drawX, drawY, this.size, this.size);
             ctx.closePath();
         }
         
-        update(){
-            // --- MOUSE INTERACTION & RETURN ---
-            // Since canvas is fixed, mouse coords map 1:1 to particle coords
-            let dx = mouse.x - this.x;
-            let dy = mouse.y - this.y;
+        update(anchorX, anchorY){
+            // Calculate where the particle "currently is" on screen
+            let currentX = anchorX + this.xOffset + this.dx;
+            let currentY = anchorY + this.yOffset + this.dy;
+
+            // --- MOUSE INTERACTION ---
+            // Calculate distance between mouse and the particle's current screen position
+            let distMouseX = mouse.x - currentX;
+            let distMouseY = mouse.y - currentY;
             
+            // If no mouse, just decay displacement (return to home)
             if (mouse.x == null || mouse.y == null) {
-                if (this.x !== this.baseX) {
-                    let dx = this.x - this.baseX;
-                    this.x -= dx * CONFIG.returnSpeed;
-                }
-                if (this.y !== this.baseY) {
-                    let dy = this.y - this.baseY;
-                    this.y -= dy * CONFIG.returnSpeed; 
-                }
+                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
+                else this.dx = 0;
+                
+                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
+                else this.dy = 0;
                 return;
             }
 
-            let distance = Math.sqrt(dx * dx + dy * dy);
-            let forceDirectionX = dx / distance;
-            let forceDirectionY = dy / distance;
-            let maxDistance = mouse.radius;
-            let force = (maxDistance - distance) / maxDistance;
-            let directionX = forceDirectionX * force * this.density;
-            let directionY = forceDirectionY * force * this.density;
-
+            let distance = Math.sqrt(distMouseX * distMouseX + distMouseY * distMouseY);
+            
+            // Physics: If mouse is close, push displacement further away
             if (distance < mouse.radius) {
-                this.x -= directionX;
-                this.y -= directionY;
+                let forceDirectionX = distMouseX / distance;
+                let forceDirectionY = distMouseY / distance;
+                let maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance;
+                let directionX = forceDirectionX * force * this.density;
+                let directionY = forceDirectionY * force * this.density;
+                
+                // Add to the displacement
+                this.dx -= directionX;
+                this.dy -= directionY;
             } else {
-                if (this.x !== this.baseX){
-                    let dx = this.x - this.baseX;
-                    this.x -= dx * CONFIG.returnSpeed;
-                }
-                if (this.y !== this.baseY){
-                    let dy = this.y - this.baseY;
-                    this.y -= dy * CONFIG.returnSpeed;
-                }
+                // Return to home (0 displacement) if mouse is far
+                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
+                else this.dx = 0;
+                
+                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
+                else this.dy = 0;
             }
         }
     }
 
     function init() {
         particlesArray = [];
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
         
         let isMobile = window.innerWidth < 600;
         let step = isMobile ? 4 : 3; 
         
-        // Calculate font size based on screen width
         let contentWidth = Math.min(window.innerWidth - 40, 600); 
         let fontSize = Math.floor(contentWidth * 0.16);
         
@@ -351,6 +355,7 @@
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
+        // We generate particles based on the CENTER of the screen initially
         let centerX = canvas.width / 2;
         let centerY = canvas.height / 2;
         let text = 'Hello World';
@@ -381,21 +386,33 @@
                     let b = textCoordinates.data[index + 2];
                     let color = 'rgb(' + r + ',' + g + ',' + b + ')';
                     
+                    // Store offset relative to CENTER
                     let xOffset = x - centerX;
                     let yOffset = y - centerY;
                     
-                    particlesArray.push(new Particle(xOffset, yOffset, color, CONFIG.particleSize, centerX, centerY));
+                    particlesArray.push(new Particle(xOffset, yOffset, color, CONFIG.particleSize));
                 }
             }
         }
         ctx.clearRect(0,0, canvas.width, canvas.height);
+        
+        if(anchor) anchor.style.height = (fontSize + 60) + "px";
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // --- KEY FIX FOR MOBILE ---
+        // We get the EXACT position of the anchor element every single frame.
+        // This ensures that if the page scrolls (even via momentum scroll),
+        // we draw the particles exactly where the HTML element is.
+        let anchorRect = anchor.getBoundingClientRect();
+        let currentAnchorX = anchorRect.left + (anchorRect.width / 2);
+        let currentAnchorY = anchorRect.top + (anchorRect.height / 2);
+
         for (let i = 0; i < particlesArray.length; i++){
-            particlesArray[i].update();
-            particlesArray[i].draw();
+            particlesArray[i].update(currentAnchorX, currentAnchorY);
+            particlesArray[i].draw(currentAnchorX, currentAnchorY);
         }
         requestAnimationFrame(animate);
     }
@@ -406,20 +423,17 @@
     });
 
     let lastWidth = window.innerWidth;
-    
-    // Resize Listener
     window.addEventListener('resize', function(){
-        // CRITICAL MOBILE FIX:
-        // Mobile browsers hide/show the address bar on scroll, changing innerHeight.
-        // This causes "jitter" if we redraw on every resize event.
-        // We only re-initialize if the WIDTH changes (actual device rotation or desktop resize).
-        
-        let newWidth = window.innerWidth;
-        if (newWidth !== lastWidth) {
-            lastWidth = newWidth;
+        // Prevent re-init on mobile address bar scroll (vertical resize)
+        // Only re-init if the WIDTH changes significantly
+        if (Math.abs(window.innerWidth - lastWidth) > 50) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            lastWidth = window.innerWidth;
             init();
+        } else {
+             canvas.height = window.innerHeight;
         }
-        // We intentionally do NOT reset height here to prevent address-bar jitter.
     });
 
 </script>
