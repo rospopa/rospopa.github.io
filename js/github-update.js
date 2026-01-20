@@ -4,9 +4,7 @@ const branch = 'master';
 
 fetch(`https://api.github.com/repos/${user}/${repo}/commits/${branch}`)
   .then(response => {
-    if (!response.ok) {
-      throw new Error(`GitHub API Error: ${response.status}`);
-    }
+    if (!response.ok) throw new Error('Network response was not ok');
     return response.json();
   })
   .then(data => {
@@ -25,18 +23,11 @@ fetch(`https://api.github.com/repos/${user}/${repo}/commits/${branch}`)
 
     const localDate = dateDate.toLocaleString(undefined, options);
 
-    // Update the HTML elements
-    const timeElement = document.getElementById('repo-update-time');
-    const msgElement = document.getElementById('repo-commit-msg');
-
-    if (timeElement) timeElement.innerText = localDate;
-    if (msgElement) msgElement.innerText = commitMessage;
+    document.getElementById('repo-update-time').innerText = localDate;
+    document.getElementById('repo-commit-msg').innerText = commitMessage;
   })
   .catch(error => {
-    console.error('Error details:', error);
-    const timeElement = document.getElementById('repo-update-time');
-    const msgElement = document.getElementById('repo-commit-msg');
-
-    if (timeElement) timeElement.innerText = "Unable to fetch info";
-    if (msgElement) msgElement.innerText = "Check Console for error";
+    console.error('Error:', error);
+    document.getElementById('repo-update-time').innerText = "Error loading data";
+    document.getElementById('repo-commit-msg').innerText = "Error loading data";
   });
