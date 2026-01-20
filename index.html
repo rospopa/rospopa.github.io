@@ -25,52 +25,92 @@ layout: null
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
-        /* --- 1. FORCE REMOVE BLACK BAR --- */
+        /* --- 1. GLOBAL RESET (Fixes the black bar) --- */
         html, body {
             border-top: none !important;
             margin-top: 0 !important;
             padding-top: 0 !important;
         }
 
-        /* --- 2. SECURITY / DISABLE SELECTION --- */
-        body {
-            -webkit-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
+        /* --- 2. HEADER DESIGN (Clean Layout) --- */
+        .site-header {
+            border-top: 5px solid #333; /* Restore original top border style if desired */
+            padding: 15px 0;
+            background: #fff; /* Ensure header has background over particles */
+            position: relative;
+            z-index: 10;
         }
-        input, textarea {
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
+        
+        .site-header .wrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
         }
 
-        /* --- 3. MOBILE HEADER FIX (THE MISSING PIECE) --- */
-        /* This forces the container holding the Date to be visible on mobile */
+        /* Group Title and Date together on the left */
+        .header-left {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .site-title {
+            font-size: 26px;
+            line-height: 1.2;
+            margin-bottom: 4px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        /* Clean, small date style */
+        #last-updated {
+            font-size: 12px;
+            color: #828282;
+            font-family: Helvetica, Arial, sans-serif;
+        }
+
+        /* The @ Icon on the right */
+        .trigger2 a {
+            font-size: 24px;
+            text-decoration: none;
+            color: blue;
+            display: block;
+        }
+
+        /* --- 3. MOBILE ADJUSTMENTS --- */
         @media screen and (max-width: 600px) {
+            .site-title {
+                font-size: 20px; /* Slightly smaller title on phone */
+            }
+            .site-header .wrap {
+                padding: 0 15px;
+            }
+            /* Ensure nav doesn't interfere */
             .site-nav {
-                display: block !important;
-                background: none !important;
-                border: none !important;
-                float: right;
-            }
-            .site-nav .trigger {
-                display: block !important; /* Forces the date to show */
-            }
-            /* Adjust date size for small screens so it fits */
-            #last-updated {
-                font-size: 11px !important;
-                margin-right: 5px;
+                display: none; 
             }
         }
 
+        /* --- 4. CANVAS (Animation Background) --- */
+        #canvas1 {
+            position: fixed; /* Stays in place while scrolling */
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1; /* Behind text so it doesn't block reading */
+            pointer-events: none; /* Let clicks pass through */
+        }
+
+        /* --- 5. CONTENT STYLING --- */
         #contact-form-container {
             margin: 40px 0;
             padding: 20px;
             border: 1px solid #e0e0e0;
             border-radius: 8px;
-            background-color: #f9f9f9;
+            background-color: rgba(249, 249, 249, 0.95); /* Slight opacity to read over particles */
         }
         #contact-form {
             display: flex;
@@ -112,18 +152,6 @@ layout: null
         .g-recaptcha {
             margin-bottom: 5px;
         }
-          
-        /* GLOBAL OVERLAY CANVAS */
-        #canvas1 {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 9999; 
-            pointer-events: none; 
-            image-rendering: pixelated; 
-        }
     </style>
 </head>
       
@@ -137,30 +165,28 @@ layout: null
 
 <header class="site-header">
     <div class="wrap">
-        <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
-        <nav class="site-nav">
-            <div class="trigger">
-                <span id="last-updated" style="font-size: 0.9em; color: #666; cursor: default; vertical-align: middle;">
-                    Last updated: {{ site.time | date: '%B %d, %Y' }}
-                </span>
-                
-                <script>
-                    (function() {
-                        try {
-                            var buildTime = new Date("{{ site.time | date_to_xmlschema }}");
-                            var localDate = buildTime.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-                            if (localDate !== "Invalid Date") {
-                                document.getElementById('last-updated').textContent = "Last updated: " + localDate;
-                            }
-                        } catch(e) {}
-                    })();
-                </script>
-            </div>
+        <div class="header-left">
+            <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
             
-            <div class="trigger2">
-                <a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">@</a>
-            </div>
-        </nav>
+            <span id="last-updated">
+                Last updated: {{ site.time | date: '%B %d, %Y' }}
+            </span>
+            <script>
+                (function() {
+                    try {
+                        var buildTime = new Date("{{ site.time | date_to_xmlschema }}");
+                        var localDate = buildTime.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
+                        if (localDate !== "Invalid Date") {
+                            document.getElementById('last-updated').textContent = "Last updated: " + localDate;
+                        }
+                    } catch(e) {}
+                })();
+            </script>
+        </div>
+
+        <div class="trigger2">
+            <a href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">@</a>
+        </div>
     </div>
 </header>
 
@@ -254,8 +280,8 @@ layout: null
 
     // --- CONFIGURATION ---
     const CONFIG = {
-        particleSize: 3,         // Size of squares
-        returnSpeed: 0.15        // Speed of particles returning to base
+        particleSize: 3,         
+        returnSpeed: 0.15        
     };
 
     canvas.width = window.innerWidth;
@@ -327,8 +353,40 @@ layout: null
         }
          
         update(anchorX, anchorY){
-            // Standard update logic... but we won't call this loop anymore
-            // to keep the text static.
+            let currentX = anchorX + this.xOffset + this.dx;
+            let currentY = anchorY + this.yOffset + this.dy;
+
+            let distMouseX = mouse.x - currentX;
+            let distMouseY = mouse.y - currentY;
+             
+            if (mouse.x == null || mouse.y == null) {
+                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
+                else this.dx = 0;
+                 
+                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
+                else this.dy = 0;
+                return;
+            }
+
+            let distance = Math.sqrt(distMouseX * distMouseX + distMouseY * distMouseY);
+             
+            if (distance < mouse.radius) {
+                let forceDirectionX = distMouseX / distance;
+                let forceDirectionY = distMouseY / distance;
+                let maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance;
+                let directionX = forceDirectionX * force * this.density;
+                let directionY = forceDirectionY * force * this.density;
+                 
+                this.dx -= directionX;
+                this.dy -= directionY;
+            } else {
+                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
+                else this.dx = 0;
+                 
+                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
+                else this.dy = 0;
+            }
         }
     }
 
@@ -362,43 +420,59 @@ layout: null
 
         ctx.fillStyle = gradient;
         ctx.clearRect(0,0, canvas.width, canvas.height);
-        
-        // --- DRAW STATIC TEXT ONLY (No Particles) ---
         ctx.fillText(text, centerX, centerY);
+         
+        const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
+         
+        for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
+            for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
+                let index = (y * 4 * textCoordinates.width) + (x * 4);
+                 
+                if (textCoordinates.data[index + 3] > 128){
+                    let r = textCoordinates.data[index];
+                    let g = textCoordinates.data[index + 1];
+                    let b = textCoordinates.data[index + 2];
+                    let color = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    let xOffset = x - centerX;
+                    let yOffset = y - centerY;
+                    particlesArray.push(new Particle(xOffset, yOffset, color, CONFIG.particleSize));
+                }
+            }
+        }
+        ctx.clearRect(0,0, canvas.width, canvas.height);
          
         if(anchor) anchor.style.height = (fontSize + 60) + "px";
     }
 
-    // --- ANIMATION STOPPED ---
-    // The animate function is commented out to prevent movement.
-    /*
+    // --- ANIMATION LOOP (Active) ---
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        // This ensures scrolling doesn't break the animation logic
         let anchorRect = anchor.getBoundingClientRect();
         let currentAnchorX = anchorRect.left + (anchorRect.width / 2);
         let currentAnchorY = anchorRect.top + (anchorRect.height / 2);
+
         for (let i = 0; i < particlesArray.length; i++){
             particlesArray[i].update(currentAnchorX, currentAnchorY);
             particlesArray[i].draw(currentAnchorX, currentAnchorY);
         }
         requestAnimationFrame(animate);
     }
-    */
 
     window.addEventListener('load', function() {
         setTimeout(init, 100); 
-        // animate(); <--- Disabled to stop movement
+        animate(); 
     });
 
     let lastWidth = window.innerWidth;
     window.addEventListener('resize', function(){
+        // Ignore vertical resize (address bar)
         if (Math.abs(window.innerWidth - lastWidth) > 50) {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
             lastWidth = window.innerWidth;
             init();
-        } else {
-             canvas.height = window.innerHeight;
         }
     });
 
@@ -406,46 +480,38 @@ layout: null
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLHWsaJvRo4CPVU1f1umMXBT4Tazy3s1vUTMTTrOv0AVLjw4xs0pEkj5TpocbJdnyMJw/exec";
-
     const form = document.getElementById('contact-form');
     const statusMsg = document.getElementById('form-status');
     const btn = document.getElementById('submit-btn');
-
     function isValidEmail(email) {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     }
-
     if (form) {
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
             statusMsg.innerText = "";
             const formData = new FormData(form);
             const email = formData.get('email');
-
             if (!isValidEmail(email)) {
                 statusMsg.innerText = "Please enter a valid email address.";
                 statusMsg.style.color = "red";
                 return;
             }
-
             const captchaResponse = grecaptcha.getResponse();
             if (!captchaResponse || captchaResponse.length === 0) {
                 statusMsg.innerText = "Please check the captcha box.";
                 statusMsg.style.color = "red";
                 return;
             }
-
             btn.disabled = true;
             btn.innerText = "Sending...";
-
             const data = {
                 name: formData.get('name'),
                 email: email,
                 message: formData.get('message'),
                 captchaToken: captchaResponse
             };
-
             try {
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
