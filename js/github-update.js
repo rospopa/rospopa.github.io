@@ -30,7 +30,7 @@ fetch(`https://api.github.com/repos/${user}/${repo}/commits?per_page=1&sha=${bra
     if (linkHeader) {
       const match = linkHeader.match(/page=(\d+)>; rel="last"/);
       if (match) {
-        document.getElementById('repo-commit-msg').innerText = `Commit #${match[1]}`;
+        document.getElementById('repo-commit-msg').innerText = `${match[1]}`;
       }
     } else {
       // If there's only 1 commit, there is no link header
