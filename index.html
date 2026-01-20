@@ -104,10 +104,7 @@
     
 <body>
 <script>
-    // Disable Right Click
     document.addEventListener('contextmenu', event => event.preventDefault());
-    
-    // Disable Dragging (optional, stops dragging images out)
     document.addEventListener('dragstart', event => event.preventDefault());
 </script>
 
@@ -220,6 +217,13 @@
 
     let particlesArray = [];
 
+    // --- PHYSICS VARIABLES ---
+    let lastScrollY = window.scrollY;
+    let currentVelocity = 0;
+    let lastVelocity = 0;
+    let scrollAcceleration = 0;
+    // ------------------------
+
     const mouse = {
         x: null,
         y: null,
@@ -287,10 +291,24 @@
             this.baseX = anchorX + this.xOffset;
             this.baseY = anchorY + this.yOffset;
 
+            // --- 1. SCROLL ACCELERATION IMPACT ---
+            // If there is significant acceleration (start or stop), shake the particles
+            if (Math.abs(scrollAcceleration) > 0.5) {
+                // Determine Jolt intensity based on accel and particle density
+                // This makes lighter particles fly further than heavy ones
+                let jolt = scrollAcceleration * 0.5;
+                
+                // Add random direction noise so they don't all move in a perfect line
+                this.x += (Math.random() - 0.5) * jolt * (this.density / 2);
+                this.y += (Math.random() - 0.5) * jolt * (this.density / 2);
+            }
+
+            // --- 2. MOUSE INTERACTION ---
             let dx = mouse.x - this.x;
             let dy = mouse.y - this.y;
             
             if (mouse.x == null || mouse.y == null) {
+                // Return to base
                 if (this.x !== this.baseX) {
                     let dx = this.x - this.baseX;
                     this.x -= dx/10;
@@ -330,22 +348,12 @@
         particlesArray = [];
         let isMobile = window.innerWidth < 600;
         
-        // --- 1. DYNAMIC WIDTH CALCULATION ---
-        // Instead of full screen width, target the content width (max 600px)
-        // If screen is smaller than 600px, use screen width (with padding)
-        // If screen is larger, cap it at 600px.
         let contentWidth = Math.min(window.innerWidth - 40, 600); 
-        
-        // Calculate font size to fit "Hello World" (approx 7 chars wide ratio)
-        // Ratio ~ 0.16 of container width works well for Arial Black
         let fontSize = Math.floor(contentWidth * 0.16);
         
-        // Enforce limits
         if (fontSize < 40) fontSize = 40;
         if (fontSize > 180) fontSize = 180;
 
-        // --- 2. DENSITY ---
-        // Step 3 for BOTH desktop and mobile = High Density
         let step = 3; 
         let particleSize = step;
         
@@ -357,7 +365,6 @@
         let centerY = canvas.height / 2;
         let text = 'Hello World';
 
-        // 3. GRADIENT & DRAW
         let metrics = ctx.measureText(text);
         let textWidth = metrics.width;
         let startX = centerX - (textWidth / 2);
@@ -372,7 +379,6 @@
         ctx.clearRect(0,0, canvas.width, canvas.height);
         ctx.fillText(text, centerX, centerY);
         
-        // 4. SCAN
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
@@ -394,13 +400,24 @@
         }
         ctx.clearRect(0,0, canvas.width, canvas.height);
         
-        // Update anchor height
         if(anchor) anchor.style.height = (fontSize + 60) + "px";
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
+        // --- PHYSICS CALCULATION START ---
+        let currentScrollY = window.scrollY;
+        // 1. Velocity (Change in position)
+        currentVelocity = currentScrollY - lastScrollY;
+        // 2. Acceleration (Change in velocity)
+        scrollAcceleration = currentVelocity - lastVelocity;
+        
+        // 3. Update trackers
+        lastVelocity = currentVelocity;
+        lastScrollY = currentScrollY;
+        // --- PHYSICS CALCULATION END ---
+
         let anchorRect = anchor.getBoundingClientRect();
         let anchorX = anchorRect.left + (anchorRect.width / 2);
         let anchorY = anchorRect.top + (anchorRect.height / 2);
