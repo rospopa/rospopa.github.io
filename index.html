@@ -211,6 +211,14 @@
     const ctx = canvas.getContext('2d');
     const anchor = document.getElementById('particle-anchor');
 
+    // --- CONFIGURATION ---
+    const CONFIG = {
+        particleSize: 3,         // Size of squares (3 is good balance)
+        returnSpeed: 0.15,       // 0.1 = slow/floaty, 0.2 = snappy. Increased to 0.15 for better mobile feel.
+        physicsSensitivity: 0.10, // Lowered from 0.5 to prevent explosions
+        maxDisplacement: 40      // Cap: Particles can never move more than 40px from origin
+    };
+
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
@@ -286,40 +294,50 @@
             ctx.closePath();
         }
         
-        update(anchorX, anchorY){
+        update(anchorX, anchorY, scrollVel){
             this.baseX = anchorX + this.xOffset;
             this.baseY = anchorY + this.yOffset;
 
-            // --- 1. SCROLL ACCELERATION IMPACT ---
-            // Only react if acceleration is significantly high (reduces jitter on slow scroll)
-            if (Math.abs(scrollAcceleration) > 2) {
-                // LOWER sensitivity to prevent explosion
-                const sensitivity = 0.15; 
-                
+            // --- 1. INSTANT SCROLL LOCK (The Fix) ---
+            // Instead of waiting for the particle to glide to the new position,
+            // we manually move it by the exact amount the page scrolled.
+            // This keeps it visually pinned to the cowboy image.
+            this.y -= scrollVel;
+
+            // --- 2. PHYSICS ---
+            // Only react if acceleration is significant but NOT excessive (filtering glitchy bounces)
+            if (Math.abs(scrollAcceleration) > 2 && Math.abs(scrollAcceleration) < 50) {
                 // Calculate "Drag" force
-                // If we accelerate down (+), particles drag up (-)
-                const dragForce = scrollAcceleration * sensitivity * (this.density / 10);
+                const dragForce = scrollAcceleration * CONFIG.physicsSensitivity * (this.density / 10);
                 
-                // Apply drag primarily to Y axis (Inertia)
-                this.y -= dragForce;
+                // Apply drag to Y axis (Inertia)
+                let targetY = this.y - dragForce;
                 
-                // Apply tiny amount of X noise just for organic look (not 50/50 scatter)
-                this.x += (Math.random() - 0.5) * Math.abs(dragForce) * 0.2;
+                // LIMIT DISPLACEMENT (The "Mess" Fix)
+                // Don't let particles fly too far from their base
+                let distY = targetY - this.baseY;
+                if (distY > CONFIG.maxDisplacement) targetY = this.baseY + CONFIG.maxDisplacement;
+                if (distY < -CONFIG.maxDisplacement) targetY = this.baseY - CONFIG.maxDisplacement;
+                
+                this.y = targetY;
+                
+                // Tiny X noise
+                this.x += (Math.random() - 0.5) * Math.abs(dragForce) * 0.1;
             }
 
-            // --- 2. MOUSE INTERACTION ---
+            // --- 3. MOUSE INTERACTION & RETURN ---
             let dx = mouse.x - this.x;
             let dy = mouse.y - this.y;
             
+            // If no mouse interaction, just return to base
             if (mouse.x == null || mouse.y == null) {
-                // Return to base
                 if (this.x !== this.baseX) {
                     let dx = this.x - this.baseX;
-                    this.x -= dx/10;
+                    this.x -= dx * CONFIG.returnSpeed; // Uses new faster return speed
                 }
                 if (this.y !== this.baseY) {
                     let dy = this.y - this.baseY;
-                    this.y -= dy/10;
+                    this.y -= dy * CONFIG.returnSpeed; 
                 }
                 return;
             }
@@ -338,11 +356,11 @@
             } else {
                 if (this.x !== this.baseX){
                     let dx = this.x - this.baseX;
-                    this.x -= dx/10;
+                    this.x -= dx * CONFIG.returnSpeed;
                 }
                 if (this.y !== this.baseY){
                     let dy = this.y - this.baseY;
-                    this.y -= dy/10;
+                    this.y -= dy * CONFIG.returnSpeed;
                 }
             }
         }
@@ -350,7 +368,10 @@
 
     function init() {
         particlesArray = [];
+        
+        // Mobile optimization: slightly larger particles for performance
         let isMobile = window.innerWidth < 600;
+        let step = isMobile ? 4 : 3; 
         
         let contentWidth = Math.min(window.innerWidth - 40, 600); 
         let fontSize = Math.floor(contentWidth * 0.16);
@@ -358,8 +379,7 @@
         if (fontSize < 40) fontSize = 40;
         if (fontSize > 180) fontSize = 180;
 
-        let step = 3; 
-        let particleSize = step;
+        CONFIG.particleSize = step;
         
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
@@ -375,9 +395,9 @@
         let endX = centerX + (textWidth / 2);
 
         let gradient = ctx.createLinearGradient(startX, 0, endX, 0);
-        gradient.addColorStop(0, '#4285F4'); // Blue
-        gradient.addColorStop(0.5, '#a855f7'); // Purple
-        gradient.addColorStop(1, '#ec4899'); // Pink
+        gradient.addColorStop(0, '#4285F4'); 
+        gradient.addColorStop(0.5, '#a855f7'); 
+        gradient.addColorStop(1, '#ec4899'); 
 
         ctx.fillStyle = gradient;
         ctx.clearRect(0,0, canvas.width, canvas.height);
@@ -398,7 +418,7 @@
                     let xOffset = x - centerX;
                     let yOffset = y - centerY;
                     
-                    particlesArray.push(new Particle(xOffset, yOffset, color, particleSize));
+                    particlesArray.push(new Particle(xOffset, yOffset, color, CONFIG.particleSize));
                 }
             }
         }
@@ -410,24 +430,26 @@
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // --- PHYSICS CALCULATION START ---
+        // --- PHYSICS CALCULATION ---
         let currentScrollY = window.scrollY;
-        // 1. Velocity (Change in position)
+        
+        // Exact scroll movement this frame
         currentVelocity = currentScrollY - lastScrollY;
-        // 2. Acceleration (Change in velocity)
+        
+        // Change in movement (Acceleration)
         scrollAcceleration = currentVelocity - lastVelocity;
         
-        // 3. Update trackers
         lastVelocity = currentVelocity;
         lastScrollY = currentScrollY;
-        // --- PHYSICS CALCULATION END ---
+        // ---------------------------
 
         let anchorRect = anchor.getBoundingClientRect();
         let anchorX = anchorRect.left + (anchorRect.width / 2);
         let anchorY = anchorRect.top + (anchorRect.height / 2);
 
         for (let i = 0; i < particlesArray.length; i++){
-            particlesArray[i].update(anchorX, anchorY);
+            // Pass currentVelocity to the update method so particles move WITH the page
+            particlesArray[i].update(anchorX, anchorY, currentVelocity);
             particlesArray[i].draw();
         }
         requestAnimationFrame(animate);
@@ -440,11 +462,16 @@
 
     let lastWidth = window.innerWidth;
     window.addEventListener('resize', function(){
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+        // Prevent canvas clear on mobile address bar scroll
+        // Only re-init if width changes (orientation change or desktop resize)
         if (Math.abs(window.innerWidth - lastWidth) > 50) {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
             lastWidth = window.innerWidth;
             init();
+        } else {
+            // Just update height to avoid "stretching", but don't re-init logic
+             canvas.height = window.innerHeight;
         }
     });
 
