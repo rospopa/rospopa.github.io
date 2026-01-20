@@ -202,7 +202,6 @@
 
     let isTouch = false;
 
-    // --- INTERACTION HANDLING ---
     window.addEventListener('mousemove', function(event){
         if (isTouch) return; 
         mouse.x = event.x;
@@ -305,16 +304,23 @@
         particlesArray = [];
         let isMobile = window.innerWidth < 600;
         
-        // --- SCALE FONT SIZE ---
-        // Fits "Hello World" (approx 11 chars) into view
-        // 0.14 ensures it fills width without clipping
-        let calculatedSize = Math.floor(window.innerWidth * 0.14);
-        let fontSize = Math.min(calculatedSize, 180);
+        // --- 1. DYNAMIC WIDTH CALCULATION ---
+        // Instead of full screen width, target the content width (max 600px)
+        // If screen is smaller than 600px, use screen width (with padding)
+        // If screen is larger, cap it at 600px.
+        let contentWidth = Math.min(window.innerWidth - 40, 600); 
         
-        // --- DENSITY ---
-        // Step 3 = High density (desktop)
-        // Step 4 = Optimized (mobile)
-        let step = isMobile ? 4 : 3; 
+        // Calculate font size to fit "Hello World" (approx 7 chars wide ratio)
+        // Ratio ~ 0.16 of container width works well for Arial Black
+        let fontSize = Math.floor(contentWidth * 0.16);
+        
+        // Enforce limits
+        if (fontSize < 40) fontSize = 40;
+        if (fontSize > 180) fontSize = 180;
+
+        // --- 2. DENSITY ---
+        // Step 3 for BOTH desktop and mobile = High Density
+        let step = 3; 
         let particleSize = step;
         
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
@@ -325,19 +331,17 @@
         let centerY = canvas.height / 2;
         let text = 'Hello World';
 
-        // 1. MEASURE
+        // 3. GRADIENT & DRAW
         let metrics = ctx.measureText(text);
         let textWidth = metrics.width;
         let startX = centerX - (textWidth / 2);
         let endX = centerX + (textWidth / 2);
 
-        // 2. GRADIENT
         let gradient = ctx.createLinearGradient(startX, 0, endX, 0);
         gradient.addColorStop(0, '#4285F4'); // Blue
         gradient.addColorStop(0.5, '#a855f7'); // Purple
         gradient.addColorStop(1, '#ec4899'); // Pink
 
-        // 3. DRAW
         ctx.fillStyle = gradient;
         ctx.clearRect(0,0, canvas.width, canvas.height);
         ctx.fillText(text, centerX, centerY);
@@ -364,14 +368,13 @@
         }
         ctx.clearRect(0,0, canvas.width, canvas.height);
         
-        // Update anchor height so text doesn't overlap content
+        // Update anchor height
         if(anchor) anchor.style.height = (fontSize + 60) + "px";
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Always get fresh anchor position in case layout shifted
         let anchorRect = anchor.getBoundingClientRect();
         let anchorX = anchorRect.left + (anchorRect.width / 2);
         let anchorY = anchorRect.top + (anchorRect.height / 2);
@@ -383,7 +386,6 @@
         requestAnimationFrame(animate);
     }
 
-    // Initialize with a small delay to allow layout to settle
     window.addEventListener('load', function() {
         setTimeout(init, 100); 
         animate();
@@ -393,7 +395,6 @@
     window.addEventListener('resize', function(){
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        // Only re-init if width changes significantly (orientation change)
         if (Math.abs(window.innerWidth - lastWidth) > 50) {
             lastWidth = window.innerWidth;
             init();
