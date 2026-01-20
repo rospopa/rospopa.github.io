@@ -1,6 +1,4 @@
-<script>
-  // Your repository details
-  const user = 'rospopa';
+const user = 'rospopa';
   const repo = 'rospopa.github.io';
   const branch = 'master'; // explicitly using the branch you linked
 
@@ -36,4 +34,3 @@
       document.getElementById('repo-update-time').innerText = "Unable to fetch info";
       document.getElementById('repo-commit-msg').innerText = "Unable to fetch info";
     });
-</script>
