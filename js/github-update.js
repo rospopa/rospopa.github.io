@@ -2,16 +2,11 @@ const user = 'rospopa';
 const repo = 'rospopa.github.io';
 const branch = 'master'; 
 
+// Fetch the latest commit details
 fetch(`https://api.github.com/repos/${user}/${repo}/commits/${branch}`)
-  .then(response => {
-    if (!response.ok) throw new Error('Network response was not ok');
-    return response.json();
-  })
+  .then(response => response.json())
   .then(data => {
-    const commitMessage = data.commit.message;
-    const dateString = data.commit.committer.date;
-    const dateDate = new Date(dateString);
-    
+    const dateDate = new Date(data.commit.committer.date);
     const options = { 
       year: 'numeric', 
       month: 'long', 
@@ -22,12 +17,27 @@ fetch(`https://api.github.com/repos/${user}/${repo}/commits/${branch}`)
     };
 
     const localDate = dateDate.toLocaleString(undefined, options);
-
     document.getElementById('repo-update-time').innerText = localDate;
-    document.getElementById('repo-commit-msg').innerText = commitMessage;
+  })
+  .catch(error => console.error('Error fetching date:', error));
+
+// Fetch the total number of commits
+// This uses a trick: setting per_page=1 tells us how many pages (commits) there are in the header
+fetch(`https://api.github.com/repos/${user}/${repo}/commits?per_page=1&sha=${branch}`)
+  .then(response => {
+    // The "Link" header contains the count of the last page
+    const linkHeader = response.headers.get('Link');
+    if (linkHeader) {
+      const match = linkHeader.match(/page=(\d+)>; rel="last"/);
+      if (match) {
+        document.getElementById('repo-commit-msg').innerText = `Commit #${match[1]}`;
+      }
+    } else {
+      // If there's only 1 commit, there is no link header
+      document.getElementById('repo-commit-msg').innerText = `Commit #1`;
+    }
   })
   .catch(error => {
-    console.error('Error:', error);
-    document.getElementById('repo-update-time').innerText = "Error loading data";
-    document.getElementById('repo-commit-msg').innerText = "Error loading data";
+    console.error('Error fetching commit count:', error);
+    document.getElementById('repo-commit-msg').innerText = "Unable to count commits";
   });
