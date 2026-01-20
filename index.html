@@ -1,5 +1,4 @@
 ---
-layout: null
 ---
 <!DOCTYPE html>
 <html lang="en">
@@ -41,6 +40,14 @@ layout: null
             user-select: text;
         }
         /* --- SECURITY END --- */
+
+        /* --- MOBILE FIXES --- */
+        /* Hide the long date on mobile to prevent layout breaking */
+        @media screen and (max-width: 600px) {
+            #last-updated {
+                display: none !important;
+            }
+        }
 
         #contact-form-container {
             margin: 40px 0;
@@ -123,15 +130,12 @@ layout: null
                 <script>
                     (function() {
                         try {
-                            // Get the exact ISO time from Jekyll (UTC)
                             var buildTime = new Date("{{ site.time | date_to_xmlschema }}");
-                            // Convert to the visitor's local date format
                             var localDate = buildTime.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' });
-                            // Update the text if the date is valid
                             if (localDate !== "Invalid Date") {
                                 document.getElementById('last-updated').textContent = "Last updated: " + localDate;
                             }
-                        } catch(e) { console.log("Date parsing error", e); }
+                        } catch(e) {}
                     })();
                 </script>
             </div>
