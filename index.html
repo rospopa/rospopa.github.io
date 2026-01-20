@@ -102,7 +102,7 @@
 </head>
      
 <body>
-<script>
+<>
     document.addEventListener('contextmenu', event => event.preventDefault());
     document.addEventListener('dragstart', event => event.preventDefault());
 </script>
@@ -334,16 +334,17 @@
 
         CONFIG.particleSize = step;
         
-        // --- FIX STARTS HERE ---
-        // 1. Lock internal resolution
+        // --- KEY FIX FOR SCROLL JITTER ---
+        // 1. Set the internal resolution
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
         
-        // 2. Lock visual style to pixels. 
-        // This overrides CSS '100vh', preventing the stretch/wobble when the address bar moves.
+        // 2. Lock the CSS size to pixels.
+        // This overrides the '100vh' in your CSS file.
+        // When the address bar moves, the viewport height changes, but this fixed pixel value 
+        // will prevent the browser from stretching the canvas.
         canvas.style.width = window.innerWidth + 'px';
         canvas.style.height = window.innerHeight + 'px';
-        // --- FIX ENDS HERE ---
 
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
@@ -412,8 +413,9 @@
 
     let lastWidth = window.innerWidth;
     window.addEventListener('resize', function(){
-        // Only re-init if the WIDTH changes significantly (rotation)
-        // We ignore vertical resizing from the address bar to stop the jitter.
+        // Prevent canvas reset on mobile scroll.
+        // We only re-initialize if the width changes significantly (like rotating the phone).
+        // Vertical resizing (address bar) is ignored.
         if (Math.abs(window.innerWidth - lastWidth) > 50) {
             lastWidth = window.innerWidth;
             init();
