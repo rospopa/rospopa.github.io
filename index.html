@@ -138,7 +138,7 @@
                 
                 <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
                     
-                    <div id="particle-anchor" style="width: 100%; height: 220px;"></div>
+                    <div id="particle-anchor" style="width: 100%; height: 150px; margin-top: 20px; margin-bottom: 20px;"></div>
 
                     <p>
                         The purpose of this website is to share information and host tools.  All of this code is source-available via the <a href="https://github.com/rospopa/rospopa.github.io">repository</a>.  Let's build a better future together.
@@ -242,11 +242,8 @@
         constructor(xOffset, yOffset, color, size){
             this.xOffset = xOffset;
             this.yOffset = yOffset;
-            
-            // Random start pos
             this.x = Math.random() * canvas.width; 
             this.y = Math.random() * canvas.height;
-            
             this.size = size; 
             this.baseX = 0;
             this.baseY = 0;
@@ -308,22 +305,16 @@
         particlesArray = [];
         let isMobile = window.innerWidth < 600;
         
-        // --- DYNAMIC SCALING ---
-        // Calculate font size based on screen width.
-        // We want it to be about 12% of screen width, maxing out at 180px.
-        // This ensures it fits "Hello World" (approx 7 chars width ratio) without clipping.
-        let calculatedSize = Math.floor(window.innerWidth * 0.12);
+        // --- SCALE FONT SIZE ---
+        // Fits "Hello World" (approx 11 chars) into view
+        // 0.14 ensures it fills width without clipping
+        let calculatedSize = Math.floor(window.innerWidth * 0.14);
         let fontSize = Math.min(calculatedSize, 180);
         
-        // Enforce a minimum size for readability on very small phones
-        if (fontSize < 40) fontSize = 40;
-
-        // --- DENSITY SETTINGS ---
-        // Step 4 is very dense (good for desktop). 
-        // Step 6 or 8 is better for mobile performance.
-        let step = isMobile ? 6 : 4; 
-        
-        // Particle size should match step to look "solid"
+        // --- DENSITY ---
+        // Step 3 = High density (desktop)
+        // Step 4 = Optimized (mobile)
+        let step = isMobile ? 4 : 3; 
         let particleSize = step;
         
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
@@ -334,30 +325,30 @@
         let centerY = canvas.height / 2;
         let text = 'Hello World';
 
-        // 1. MEASURE & GRADIENT
+        // 1. MEASURE
         let metrics = ctx.measureText(text);
         let textWidth = metrics.width;
         let startX = centerX - (textWidth / 2);
         let endX = centerX + (textWidth / 2);
 
+        // 2. GRADIENT
         let gradient = ctx.createLinearGradient(startX, 0, endX, 0);
         gradient.addColorStop(0, '#4285F4'); // Blue
         gradient.addColorStop(0.5, '#a855f7'); // Purple
         gradient.addColorStop(1, '#ec4899'); // Pink
 
-        // 2. DRAW
+        // 3. DRAW
         ctx.fillStyle = gradient;
         ctx.clearRect(0,0, canvas.width, canvas.height);
         ctx.fillText(text, centerX, centerY);
         
-        // 3. SCAN
+        // 4. SCAN
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
         for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
             for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
                 let index = (y * 4 * textCoordinates.width) + (x * 4);
                 
-                // If pixel is visible
                 if (textCoordinates.data[index + 3] > 128){
                     let r = textCoordinates.data[index];
                     let g = textCoordinates.data[index + 1];
@@ -373,13 +364,14 @@
         }
         ctx.clearRect(0,0, canvas.width, canvas.height);
         
-        // Update anchor height to match the new large text so layout flows well
-        if(anchor) anchor.style.height = (fontSize + 40) + "px";
+        // Update anchor height so text doesn't overlap content
+        if(anchor) anchor.style.height = (fontSize + 60) + "px";
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
+        // Always get fresh anchor position in case layout shifted
         let anchorRect = anchor.getBoundingClientRect();
         let anchorX = anchorRect.left + (anchorRect.width / 2);
         let anchorY = anchorRect.top + (anchorRect.height / 2);
@@ -391,8 +383,9 @@
         requestAnimationFrame(animate);
     }
 
+    // Initialize with a small delay to allow layout to settle
     window.addEventListener('load', function() {
-        init();
+        setTimeout(init, 100); 
         animate();
     });
 
@@ -400,8 +393,8 @@
     window.addEventListener('resize', function(){
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
-        // Only re-init particles if width changes (orientation change)
-        if (window.innerWidth !== lastWidth) {
+        // Only re-init if width changes significantly (orientation change)
+        if (Math.abs(window.innerWidth - lastWidth) > 50) {
             lastWidth = window.innerWidth;
             init();
         }
