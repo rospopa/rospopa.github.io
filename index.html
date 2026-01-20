@@ -14,14 +14,32 @@
     <link rel="icon" type="image/png" sizes="192x192" href="/css/favicons/unnamed-192x192.png">
     <link rel="icon" type="image/png" sizes="231x231" href="/css/favicons/unnamed-231x231.png">
     <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
-    
+     
     <link rel="stylesheet" href="css/format.css">
-    
+     
     <script src="js/lastUpdated.js"></script>
 
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
+        /* --- SECURITY / DISABLE SELECTION START --- */
+        body {
+            /* Disable selection for the whole page */
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+            user-select: none; /* Standard */
+        }
+        
+        /* Re-enable selection for the form so people can type! */
+        input, textarea {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
+        /* --- SECURITY END --- */
+
         #contact-form-container {
             margin: 40px 0;
             padding: 20px;
@@ -85,6 +103,14 @@
 </head>
     
 <body>
+<script>
+    // Disable Right Click
+    document.addEventListener('contextmenu', event => event.preventDefault());
+    
+    // Disable Dragging (optional, stops dragging images out)
+    document.addEventListener('dragstart', event => event.preventDefault());
+</script>
+
 <canvas id="canvas1"></canvas>
 
 <header class="site-header">
