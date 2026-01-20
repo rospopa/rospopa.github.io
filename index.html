@@ -24,55 +24,77 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
-        /* --- GLOBAL FIXES --- */
-        /* Forces the removal of any default black top-border from the theme */
-        body {
-            border-top: none !important;
+        /* --- 1. REMOVE BLACK BAR (The Nuclear Option) --- */
+        html, body {
+            border-top: 0 !important;
             margin-top: 0 !important;
             padding-top: 0 !important;
         }
-
-        /* --- SECURITY / DISABLE SELECTION START --- */
-        body {
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE10+/Edge */
-            user-select: none; /* Standard */
+        /* Double check: Ensure the header itself doesn't have a top border */
+        .site-header {
+            border-top: none !important;
         }
-          
-        /* Re-enable selection for the form so people can type! */
+
+        /* --- SECURITY / DISABLE SELECTION --- */
+        body {
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
         input, textarea {
             -webkit-user-select: text;
             -moz-user-select: text;
             -ms-user-select: text;
             user-select: text;
         }
-        /* --- SECURITY END --- */
 
-        /* --- MOBILE LAYOUT FIXES --- */
-        /* 1. Hide the long date on mobile */
+        /* --- 2. MOBILE HEADER FIX --- */
         @media screen and (max-width: 600px) {
+            /* Hide the date */
             #last-updated {
                 display: none !important;
             }
-            /* 2. Fix the header alignment */
+
+            /* Force the header container to be a row */
             .site-header .wrap {
                 display: flex !important;
                 flex-direction: row !important;
                 justify-content: space-between !important;
                 align-items: center !important;
-                padding: 10px 15px; /* Add breathing room */
+                width: 100% !important;
+                padding: 15px 20px; /* Add breathing room */
+                box-sizing: border-box;
             }
-            /* 3. Ensure the title doesn't get squished */
+
+            /* Force Title to the LEFT */
             .site-title {
-                font-size: 1.1rem !important;
-                white-space: nowrap;
+                text-align: left !important;
+                float: none !important; /* Disable any floating from theme */
+                font-size: 1.2rem !important;
+                margin: 0 !important;
+                line-height: 1.2;
             }
-            /* 4. Ensure the @ button is easily tappable */
+
+            /* Force Icon to the RIGHT */
+            .trigger2 {
+                display: block !important;
+                margin: 0 !important;
+            }
             .trigger2 a {
                 font-size: 1.5rem !important;
-                padding: 5px;
+                text-decoration: none;
                 display: block;
+                line-height: 1;
+            }
+
+            /* Hide the normal nav if it interferes */
+            .site-nav {
+                display: flex !important;
+                align-items: center;
+            }
+            .site-nav .trigger {
+                display: none; /* Double ensure date container is gone */
             }
         }
 
