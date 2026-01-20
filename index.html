@@ -87,14 +87,23 @@
             margin-bottom: 5px;
         }
          
-        /* CSS FIX: Canvas is now embedded, not fixed. 
-           We remove the 'position: fixed' and '100vh' logic. */
+        /* --- OPTION 2 CANVAS CSS --- */
         #canvas1 {
-            display: block;
+            /* ABSOLUTE: It scrolls WITH the page (no drift) */
+            position: absolute; 
+            top: 0;
+            left: 0;
             width: 100%;
-            height: 200px; /* Fixed height for the banner area */
-            margin: 0 auto 20px auto;
-            image-rendering: pixelated;
+            /* Height is handled in JS to ensure it covers the area */
+            
+            /* Z-INDEX: High number puts it IN FRONT of everything */
+            z-index: 99; 
+            
+            /* POINTER-EVENTS: This is critical. It allows you to click "Through" 
+               the canvas to the links below, while still seeing the particles. */
+            pointer-events: none; 
+            
+            image-rendering: pixelated; 
         }
     </style>
 </head>
@@ -104,6 +113,8 @@
     document.addEventListener('contextmenu', event => event.preventDefault());
     document.addEventListener('dragstart', event => event.preventDefault());
 </script>
+
+<canvas id="canvas1"></canvas>
 
 <header class="site-header">
     <div class="wrap">
@@ -156,7 +167,7 @@
                  
                 <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
                       
-                    <canvas id="canvas1"></canvas>
+                    <div id="particle-anchor" style="width: 100%; height: 150px; margin-top: 20px; margin-bottom: 20px;"></div>
 
                     <p>
                         The purpose of this website is to share information and host tools.  All of this code is source-available via the <a href="https://github.com/rospopa/rospopa.github.io">repository</a>.  Let's build a better future together.
@@ -178,7 +189,7 @@
                 <p>Go to <a href="https://www.linkedin.com/in/prospopa">LinkedIn</a>.</p>
                 <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
                 <p>Go to <a href="https://medium.com/@pavlorospopa">Medium</a>.</p>
-                <p>Version 820</p>
+                <p>Version 834</p>
                  
                 <p>Return to <a href="#top">Top of This Page</a>.</p>
             </div>
@@ -206,11 +217,8 @@
 <script>
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
-    
-    // We don't need the anchor element anymore because the canvas IS the element.
-    // const anchor = document.getElementById('particle-anchor'); 
+    const anchor = document.getElementById('particle-anchor');
 
-    // --- CONFIGURATION ---
     const CONFIG = {
         particleSize: 3,         
         returnSpeed: 0.15        
@@ -226,17 +234,20 @@
 
     let isTouch = false;
 
+    // --- MOUSE COORDINATE FIX ---
+    // Since the canvas is absolute (covering the document), 
+    // we need Page coordinates (relative to document), not Client coordinates (relative to window)
     window.addEventListener('mousemove', function(event){
         if (isTouch) return; 
-        mouse.x = event.clientX; // Use clientX/Y to match getBoundingClientRect
-        mouse.y = event.clientY;
+        mouse.x = event.pageX; 
+        mouse.y = event.pageY;
     });
       
     const handleTouch = (event) => {
         isTouch = true;
         if(event.touches.length > 0) {
-            mouse.x = event.touches[0].clientX;
-            mouse.y = event.touches[0].clientY;
+            mouse.x = event.touches[0].pageX;
+            mouse.y = event.touches[0].pageY;
         }
     };
 
@@ -272,11 +283,9 @@
             this.dy = 0; 
         }
         
-        // draw is now simpler: 0,0 is always the top-left of the canvas
-        // so we just use the fixed center position.
-        draw(centerX, centerY){
-            let drawX = centerX + this.xOffset + this.dx;
-            let drawY = centerY + this.yOffset + this.dy;
+        draw(anchorX, anchorY){
+            let drawX = anchorX + this.xOffset + this.dx;
+            let drawY = anchorY + this.yOffset + this.dy;
 
             ctx.fillStyle = this.color;
             ctx.beginPath();
@@ -284,19 +293,14 @@
             ctx.closePath();
         }
         
-        update(centerX, centerY){
-            let currentX = centerX + this.xOffset + this.dx;
-            let currentY = centerY + this.yOffset + this.dy;
+        update(anchorX, anchorY){
+            let currentX = anchorX + this.xOffset + this.dx;
+            let currentY = anchorY + this.yOffset + this.dy;
 
-            // --- MOUSE MAPPING FIX ---
-            // Because the canvas scrolls with the page, we need to map the 
-            // global mouse position (clientX) to the canvas's local position.
-            let canvasRect = canvas.getBoundingClientRect();
-            let mouseLocalX = mouse.x - canvasRect.left;
-            let mouseLocalY = mouse.y - canvasRect.top;
-
-            let distMouseX = mouseLocalX - currentX;
-            let distMouseY = mouseLocalY - currentY;
+            // Distance calculation remains simple because both Mouse and Canvas 
+            // are now using Document coordinates.
+            let distMouseX = mouse.x - currentX;
+            let distMouseY = mouse.y - currentY;
              
             if (mouse.x == null || mouse.y == null) {
                 if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
@@ -334,15 +338,7 @@
         let isMobile = window.innerWidth < 600;
         let step = isMobile ? 4 : 3; 
         
-        // --- EMBEDDED CANVAS FIX ---
-        // Instead of setting it to window size, we match the parent container
-        // or just set it to 100% of the available width.
-        canvas.style.width = '100%';
-        canvas.style.height = '200px'; // Matching CSS
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
-
-        let contentWidth = Math.min(canvas.width, 600); 
+        let contentWidth = Math.min(window.innerWidth - 40, 600); 
         let fontSize = Math.floor(contentWidth * 0.16);
         
         if (fontSize < 40) fontSize = 40;
@@ -350,12 +346,31 @@
 
         CONFIG.particleSize = step;
         
+        // --- OPTION 2 SETUP ---
+        // 1. Calculate how far down the "Anchor" div is on the page.
+        //    We use offsetTop to get the distance from the top of the document.
+        let anchorTop = anchor.offsetTop; 
+
+        // 2. Set Canvas Width to full window width
+        canvas.width = window.innerWidth;
+        canvas.style.width = window.innerWidth + 'px';
+
+        // 3. Set Canvas Height.
+        //    We make it tall enough to cover the top of the page + the text + some room for explosion.
+        //    We don't need it to go all the way to the footer (saves memory).
+        let safeHeight = anchorTop + 600; 
+        canvas.height = safeHeight;
+        canvas.style.height = safeHeight + 'px';
+
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
+        // 4. Position the Text
+        //    CenterX is middle of screen.
+        //    CenterY is the middle of the Anchor div (anchorTop + half height)
         let centerX = canvas.width / 2;
-        let centerY = canvas.height / 2;
+        let centerY = anchorTop + (150 / 2); // 150 is the anchor div height in HTML
         let text = 'Hello World';
 
         let metrics = ctx.measureText(text);
@@ -369,6 +384,7 @@
         gradient.addColorStop(1, '#ec4899'); 
 
         ctx.fillStyle = gradient;
+        // Clear specifically around where we are drawing to avoid clearing the whole giant canvas unnecessarily
         ctx.clearRect(0,0, canvas.width, canvas.height);
         ctx.fillText(text, centerX, centerY);
         
@@ -392,15 +408,17 @@
             }
         }
         ctx.clearRect(0,0, canvas.width, canvas.height);
+        
+        if(anchor) anchor.style.height = (fontSize + 60) + "px";
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Since the canvas is embedded, the "center" is just the center of the canvas
-        // No need to calculate anchor client rects relative to the viewport.
+        // Calculate the Anchor position ONCE based on document flow
+        // Since canvas is absolute 0,0, the "CenterY" is just the anchor's top offset + half its height
         let centerX = canvas.width / 2;
-        let centerY = canvas.height / 2;
+        let centerY = anchor.offsetTop + (anchor.offsetHeight / 2);
 
         for (let i = 0; i < particlesArray.length; i++){
             particlesArray[i].update(centerX, centerY);
@@ -410,13 +428,13 @@
     }
 
     window.addEventListener('load', function() {
+        // Wait a tiny bit for layout to settle so offsetTop is correct
         setTimeout(init, 100); 
         animate();
     });
 
     let lastWidth = window.innerWidth;
     window.addEventListener('resize', function(){
-        // Only re-init if the WIDTH changes (rotation/desktop resize)
         if (Math.abs(window.innerWidth - lastWidth) > 50) {
             lastWidth = window.innerWidth;
             init();
