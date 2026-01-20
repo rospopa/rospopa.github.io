@@ -24,7 +24,6 @@
     <style>
         /* --- SECURITY / DISABLE SELECTION START --- */
         body {
-            /* Disable selection for the whole page */
             -webkit-user-select: none; /* Safari */
             -moz-user-select: none; /* Firefox */
             -ms-user-select: none; /* IE10+/Edge */
@@ -292,15 +291,20 @@
             this.baseY = anchorY + this.yOffset;
 
             // --- 1. SCROLL ACCELERATION IMPACT ---
-            // If there is significant acceleration (start or stop), shake the particles
-            if (Math.abs(scrollAcceleration) > 0.5) {
-                // Determine Jolt intensity based on accel and particle density
-                // This makes lighter particles fly further than heavy ones
-                let jolt = scrollAcceleration * 0.5;
+            // Only react if acceleration is significantly high (reduces jitter on slow scroll)
+            if (Math.abs(scrollAcceleration) > 2) {
+                // LOWER sensitivity to prevent explosion
+                const sensitivity = 0.15; 
                 
-                // Add random direction noise so they don't all move in a perfect line
-                this.x += (Math.random() - 0.5) * jolt * (this.density / 2);
-                this.y += (Math.random() - 0.5) * jolt * (this.density / 2);
+                // Calculate "Drag" force
+                // If we accelerate down (+), particles drag up (-)
+                const dragForce = scrollAcceleration * sensitivity * (this.density / 10);
+                
+                // Apply drag primarily to Y axis (Inertia)
+                this.y -= dragForce;
+                
+                // Apply tiny amount of X noise just for organic look (not 50/50 scatter)
+                this.x += (Math.random() - 0.5) * Math.abs(dragForce) * 0.2;
             }
 
             // --- 2. MOUSE INTERACTION ---
