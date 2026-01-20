@@ -314,7 +314,6 @@
             } else {
                 if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
                 else this.dx = 0;
-                
                 if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
                 else this.dy = 0;
             }
@@ -335,13 +334,16 @@
 
         CONFIG.particleSize = step;
         
-        // --- FIX: Lock the canvas size to pixels ---
-        // This overrides the CSS '100vh', preventing the stretch effect
-        // when the mobile address bar retracts.
+        // --- FIX STARTS HERE ---
+        // 1. Lock internal resolution
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
+        
+        // 2. Lock visual style to pixels. 
+        // This overrides CSS '100vh', preventing the stretch when the address bar retracts.
         canvas.style.width = window.innerWidth + 'px';
         canvas.style.height = window.innerHeight + 'px';
+        // --- FIX ENDS HERE ---
 
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
@@ -411,7 +413,7 @@
     let lastWidth = window.innerWidth;
     window.addEventListener('resize', function(){
         // Only re-init if the WIDTH changes significantly (rotation)
-        // We ignore vertical resizing from the address bar
+        // We ignore vertical resizing from the address bar to stop the jitter.
         if (Math.abs(window.innerWidth - lastWidth) > 50) {
             lastWidth = window.innerWidth;
             init();
