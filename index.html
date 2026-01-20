@@ -29,7 +29,7 @@
             -ms-user-select: none; /* IE10+/Edge */
             user-select: none; /* Standard */
         }
-         
+          
         /* Re-enable selection for the form so people can type! */
         input, textarea {
             -webkit-user-select: text;
@@ -86,28 +86,35 @@
         .g-recaptcha {
             margin-bottom: 5px;
         }
-         
-        /* GLOBAL OVERLAY CANVAS */
+          
+        /* --- UPDATED CANVAS STYLES --- */
+        /* This container acts as the anchor frame */
+        #particle-anchor {
+            position: relative; 
+            width: 100%; 
+            margin-top: 20px; 
+            margin-bottom: 20px;
+        }
+
+        /* Canvas is now absolute inside the anchor, not fixed on screen */
         #canvas1 {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 9999; 
+            width: 100%;
+            height: 100%;
+            z-index: 1; 
             pointer-events: none; 
             image-rendering: pixelated; 
         }
     </style>
 </head>
-     
+      
 <body>
 <script>
     document.addEventListener('contextmenu', event => event.preventDefault());
     document.addEventListener('dragstart', event => event.preventDefault());
 </script>
-
-<canvas id="canvas1"></canvas>
 
 <header class="site-header">
     <div class="wrap">
@@ -133,7 +140,7 @@
                         <br>
                         Testing encrypted auth <i>(In progress -- auth occurs -- missing platform)</i>
                     </li>
-                     
+                      
                     <li>
                         <a class="post-link" href="/calculator">Investment Property Calculator</a>
                         <br>
@@ -159,8 +166,10 @@
                 </div>
                  
                 <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
-                     
-                    <div id="particle-anchor" style="width: 100%; height: 150px; margin-top: 20px; margin-bottom: 20px;"></div>
+                      
+                    <div id="particle-anchor">
+                        <canvas id="canvas1"></canvas>
+                    </div>
 
                     <p>
                         The purpose of this website is to share information and host tools.  All of this code is source-available via the <a href="https://github.com/rospopa/rospopa.github.io">repository</a>.  Let's build a better future together.
@@ -172,9 +181,9 @@
                         <input type="text" name="name" placeholder="Your Name" required />
                         <input type="email" name="email" placeholder="Your Email" required />
                         <textarea name="message" placeholder="Your Message" rows="5" required></textarea>
-                         
+                          
                         <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
-                         
+                          
                         <button type="submit" id="submit-btn">Send Message</button>
                         <p id="form-status"></p>
                     </form>
@@ -217,9 +226,6 @@
         returnSpeed: 0.15        // Speed of particles returning to base
     };
 
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
     let particlesArray = [];
 
     const mouse = {
@@ -232,10 +238,10 @@
 
     window.addEventListener('mousemove', function(event){
         if (isTouch) return; 
-        mouse.x = event.x;
-        mouse.y = event.y;
+        mouse.x = event.clientX;
+        mouse.y = event.clientY;
     });
-     
+      
     const handleTouch = (event) => {
         isTouch = true;
         if(event.touches.length > 0) {
@@ -257,7 +263,7 @@
 
     window.addEventListener('touchend', clearTouch);
     window.addEventListener('touchcancel', clearTouch);
-     
+      
     window.addEventListener('mouseout', function(){
         if (!isTouch) {
             mouse.x = undefined;
@@ -266,14 +272,18 @@
     });
 
     class Particle {
-        constructor(xOffset, yOffset, color, size){
+        constructor(xOffset, yOffset, color, size, centerX, centerY){
             this.xOffset = xOffset;
             this.yOffset = yOffset;
+            // Particles start scattered
             this.x = Math.random() * canvas.width; 
             this.y = Math.random() * canvas.height;
             this.size = size; 
-            this.baseX = 0;
-            this.baseY = 0;
+            
+            // Base position is now static relative to the canvas
+            this.baseX = centerX + this.xOffset;
+            this.baseY = centerY + this.yOffset;
+            
             this.density = (Math.random() * 30) + 5;
             this.color = color;
         }
@@ -285,17 +295,13 @@
             ctx.closePath();
         }
         
-        update(anchorX, anchorY){
-            // Set base position relative to the anchor's current on-screen position
-            this.baseX = anchorX + this.xOffset;
-            this.baseY = anchorY + this.yOffset;
-
+        update(mouseLocalX, mouseLocalY){
             // --- MOUSE INTERACTION & RETURN ---
-            let dx = mouse.x - this.x;
-            let dy = mouse.y - this.y;
+            let dx = mouseLocalX - this.x;
+            let dy = mouseLocalY - this.y;
             
             // If no mouse interaction, just return to base
-            if (mouse.x == null || mouse.y == null) {
+            if (mouseLocalX == null || mouseLocalY == null) {
                 if (this.x !== this.baseX) {
                     let dx = this.x - this.baseX;
                     this.x -= dx * CONFIG.returnSpeed;
@@ -334,7 +340,6 @@
     function init() {
         particlesArray = [];
         
-        // Mobile optimization: slightly larger particles for performance
         let isMobile = window.innerWidth < 600;
         let step = isMobile ? 4 : 3; 
         
@@ -344,12 +349,20 @@
         if (fontSize < 40) fontSize = 40;
         if (fontSize > 180) fontSize = 180;
 
+        // Set Anchor Height
+        if(anchor) anchor.style.height = (fontSize + 60) + "px";
+
+        // Resize Canvas to fit the Anchor container
+        canvas.width = anchor.clientWidth;
+        canvas.height = anchor.clientHeight;
+
         CONFIG.particleSize = step;
         
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
+        // Center text in the local canvas
         let centerX = canvas.width / 2;
         let centerY = canvas.height / 2;
         let text = 'Hello World';
@@ -365,6 +378,7 @@
         gradient.addColorStop(1, '#ec4899'); 
 
         ctx.fillStyle = gradient;
+        // Clear before measuring
         ctx.clearRect(0,0, canvas.width, canvas.height);
         ctx.fillText(text, centerX, centerY);
         
@@ -383,26 +397,29 @@
                     let xOffset = x - centerX;
                     let yOffset = y - centerY;
                     
-                    particlesArray.push(new Particle(xOffset, yOffset, color, CONFIG.particleSize));
+                    particlesArray.push(new Particle(xOffset, yOffset, color, CONFIG.particleSize, centerX, centerY));
                 }
             }
         }
         ctx.clearRect(0,0, canvas.width, canvas.height);
-        
-        if(anchor) anchor.style.height = (fontSize + 60) + "px";
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Get the current position of the anchor element on the screen
-        // This ensures the particles follow the page scroll naturally without physics calculations
-        let anchorRect = anchor.getBoundingClientRect();
-        let anchorX = anchorRect.left + (anchorRect.width / 2);
-        let anchorY = anchorRect.top + (anchorRect.height / 2);
+        // Calculate mouse position RELATIVE to the canvas
+        // This allows the canvas to scroll with the page while the mouse uses viewport coords
+        let canvasRect = canvas.getBoundingClientRect();
+        let mouseLocalX = null;
+        let mouseLocalY = null;
+
+        if (mouse.x !== undefined && mouse.y !== undefined) {
+             mouseLocalX = mouse.x - canvasRect.left;
+             mouseLocalY = mouse.y - canvasRect.top;
+        }
 
         for (let i = 0; i < particlesArray.length; i++){
-            particlesArray[i].update(anchorX, anchorY);
+            particlesArray[i].update(mouseLocalX, mouseLocalY);
             particlesArray[i].draw();
         }
         requestAnimationFrame(animate);
@@ -415,14 +432,10 @@
 
     let lastWidth = window.innerWidth;
     window.addEventListener('resize', function(){
-        // Prevent canvas clear on mobile address bar scroll
-        if (Math.abs(window.innerWidth - lastWidth) > 50) {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+        // Prevent re-init on mobile address bar vertical scroll
+        if (Math.abs(window.innerWidth - lastWidth) > 20) {
             lastWidth = window.innerWidth;
             init();
-        } else {
-             canvas.height = window.innerHeight;
         }
     });
 
