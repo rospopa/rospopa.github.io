@@ -221,6 +221,10 @@
     canvas.height = window.innerHeight;
 
     let particlesArray = [];
+    
+    // Track anchor position to fix scroll lag
+    let previousAnchorX = 0;
+    let previousAnchorY = 0;
 
     const mouse = {
         x: null,
@@ -285,16 +289,22 @@
             ctx.closePath();
         }
         
-        update(anchorX, anchorY){
-            // Set base position relative to the anchor's current on-screen position
+        // Accepted deltaX/Y to move particle instantly with scroll
+        update(anchorX, anchorY, deltaX, deltaY){
+            // 1. Move the particle instantly by the amount the user scrolled
+            // This prevents the "swimming" or "floating" lag effect.
+            this.x += deltaX;
+            this.y += deltaY;
+
+            // 2. Set base position relative to the anchor
             this.baseX = anchorX + this.xOffset;
             this.baseY = anchorY + this.yOffset;
 
-            // --- MOUSE INTERACTION & RETURN ---
+            // 3. --- MOUSE INTERACTION & RETURN ---
             let dx = mouse.x - this.x;
             let dy = mouse.y - this.y;
             
-            // If no mouse interaction, just return to base
+            // If no mouse interaction, ease back to base
             if (mouse.x == null || mouse.y == null) {
                 if (this.x !== this.baseX) {
                     let dx = this.x - this.baseX;
@@ -389,20 +399,34 @@
         }
         ctx.clearRect(0,0, canvas.width, canvas.height);
         
-        if(anchor) anchor.style.height = (fontSize + 60) + "px";
+        // Set initial anchor position
+        if(anchor) {
+            anchor.style.height = (fontSize + 60) + "px";
+            let anchorRect = anchor.getBoundingClientRect();
+            previousAnchorX = anchorRect.left + (anchorRect.width / 2);
+            previousAnchorY = anchorRect.top + (anchorRect.height / 2);
+        }
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         
-        // Get the current position of the anchor element on the screen
-        // This ensures the particles follow the page scroll naturally without physics calculations
+        // Get the current position of the anchor element
         let anchorRect = anchor.getBoundingClientRect();
-        let anchorX = anchorRect.left + (anchorRect.width / 2);
-        let anchorY = anchorRect.top + (anchorRect.height / 2);
+        let currentAnchorX = anchorRect.left + (anchorRect.width / 2);
+        let currentAnchorY = anchorRect.top + (anchorRect.height / 2);
+
+        // Calculate how much the user scrolled since the last frame
+        let deltaX = currentAnchorX - previousAnchorX;
+        let deltaY = currentAnchorY - previousAnchorY;
+
+        // Update previous position for the next frame
+        previousAnchorX = currentAnchorX;
+        previousAnchorY = currentAnchorY;
 
         for (let i = 0; i < particlesArray.length; i++){
-            particlesArray[i].update(anchorX, anchorY);
+            // Pass the scroll movement (delta) to the update function
+            particlesArray[i].update(currentAnchorX, currentAnchorY, deltaX, deltaY);
             particlesArray[i].draw();
         }
         requestAnimationFrame(animate);
