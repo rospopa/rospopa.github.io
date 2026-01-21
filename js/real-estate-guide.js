@@ -1,59 +1,108 @@
 const tree = {
     start: {
-        text: "What kind of project are you building?",
+        text: "What is your primary real estate goal today?",
         options: [
-            { label: "Web App", next: "web_path" },
-            { label: "Mobile App", next: "mobile_path" }
+            { label: "I want to Buy a home", next: "buy_start" },
+            { label: "I want to Sell my property", next: "sell_start" },
+            { label: "I want to Invest for profit", next: "invest_start" }
         ]
     },
-    web_path: {
-        text: "Do you need SEO (Search Engine Optimization)?",
+    // BUYING BRANCH
+    buy_start: {
+        text: "Is this your first time buying a home?",
         options: [
-            { label: "Yes, it's a public site", next: "seo_yes" },
-            { label: "No, it's a private dashboard", next: "seo_no" }
+            { label: "Yes, I'm a first-time buyer", next: "buy_preapproval" },
+            { label: "No, I've done this before", next: "buy_search" }
         ]
     },
-    // End states
-    seo_yes: { text: "Use Next.js for Server-Side Rendering.", options: [] },
-    seo_no: { text: "A standard React or Vue app will work great!", options: [] }
+    buy_preapproval: {
+        text: "Do you have a mortgage pre-approval letter yet?",
+        options: [
+            { label: "Yes, I'm ready to shop", next: "buy_search" },
+            { label: "No, I need to know my budget", next: "res_finance" }
+        ]
+    },
+    // SELLING BRANCH
+    sell_start: {
+        text: "How quickly do you need to sell?",
+        options: [
+            { label: "ASAP (Under 30 days)", next: "res_fast_sell" },
+            { label: "No rush (Targeting top dollar)", next: "sell_prep" }
+        ]
+    },
+    // INVESTING BRANCH
+    invest_start: {
+        text: "What is your preferred investment strategy?",
+        options: [
+            { label: "Rental Income (Passive)", next: "res_rentals" },
+            { label: "Fix & Flip (Active)", next: "res_flip" }
+        ]
+    },
+    // RESULTS (The Ends of the paths)
+    res_finance: { text: "Focus on financing first. A pre-approval letter is your ticket to being taken seriously by sellers.", options: [] },
+    res_rentals: { text: "Look for multi-family units. Focus on the Cap Rate and Cash-on-Cash return metrics.", options: [] },
+    res_fast_sell: { text: "Consider off-market investor buyers or iBuyers to close in as little as 10 days.", options: [] }
 };
 
 let currentNode = 'start';
-let history = []; // Keeps track of where the user has been
-
-const questionEl = document.getElementById('question-text');
-const optionsEl = document.getElementById('options-container');
-const backBtn = document.getElementById('back-btn');
+let history = [];
 
 function renderNode() {
     const node = tree[currentNode];
+    const questionEl = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const backBtn = document.getElementById('back-btn');
+    const progressFill = document.getElementById('progress-bar-fill');
+    const stepCounter = document.getElementById('step-counter');
+
+    // Update UI
     questionEl.innerText = node.text;
-    optionsEl.innerHTML = '';
+    optionsContainer.innerHTML = '';
+    
+    // Toggle Back Button and Progress
+    backBtn.style.display = history.length > 0 ? 'block' : 'none';
+    const progressWidth = Math.min((history.length + 1) * 33, 100);
+    progressFill.style.width = `${progressWidth}%`;
+    stepCounter.innerText = `Step ${history.length + 1}`;
 
-    // Show/Hide back button
-    backBtn.style.display = history.length > 0 ? 'inline-block' : 'none';
-
-    // Create buttons for each option
-    node.options.forEach(option => {
-        const btn = document.createElement('button');
-        btn.innerText = option.label;
-        btn.className = "choice-button"; // For styling later
-        btn.onclick = () => {
-            history.push(currentNode); // Save current spot before moving
-            currentNode = option.next;
+    if (node.options.length === 0) {
+        // Result State
+        questionEl.classList.add('result-node');
+        const restartBtn = document.createElement('button');
+        restartBtn.innerText = "Start Over";
+        restartBtn.className = "tree-option-btn";
+        restartBtn.style.marginTop = "20px";
+        restartBtn.style.backgroundColor = "#333";
+        restartBtn.style.color = "white";
+        restartBtn.onclick = () => {
+            history = [];
+            currentNode = 'start';
+            questionEl.classList.remove('result-node');
             renderNode();
         };
-        optionsEl.appendChild(btn);
-    });
+        optionsContainer.appendChild(restartBtn);
+    } else {
+        // Option State
+        node.options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.innerText = opt.label;
+            btn.className = "tree-option-btn";
+            btn.onclick = () => {
+                history.push(currentNode);
+                currentNode = opt.next;
+                renderNode();
+            };
+            optionsContainer.appendChild(btn);
+        });
+    }
 }
 
-// Back button logic
-backBtn.onclick = () => {
+document.getElementById('back-btn').onclick = () => {
     if (history.length > 0) {
-        currentNode = history.pop(); // Get the last item from history
+        currentNode = history.pop();
+        document.getElementById('question-text').classList.remove('result-node');
         renderNode();
     }
 };
 
-// Initial start
 renderNode();
