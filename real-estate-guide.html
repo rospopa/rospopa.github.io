@@ -1,95 +1,44 @@
-const tree = {
-    // --- STARTING POINT ---
-    start: {
-        text: "Welcome to the Real Estate Navigator. What is your goal?",
-        options: [
-            { label: "I want to Buy", next: "buy_start" },
-            { label: "I want to Sell", next: "sell_start" },
-            { label: "I want to Invest", next: "invest_start" }
-        ]
-    },
+<div id="real-estate-guide-container" style="margin: 40px 0; padding: 25px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9;">
+    
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <span id="back-btn" style="cursor: pointer; font-size: 0.9rem; color: #666; display: none;">← Back</span>
+        <div id="progress-bar-bg" style="flex-grow: 1; height: 4px; background: #e0e0e0; margin: 0 15px; border-radius: 2px; position: relative;">
+            <div id="progress-bar-fill" style="width: 10%; height: 100%; background: #333; border-radius: 2px; transition: width 0.3s ease;"></div>
+        </div>
+        <span id="step-counter" style="font-size: 0.8rem; color: #999; min-width: 50px; text-align: right;">Step 1</span>
+    </div>
 
-    // --- BUYING BRANCH ---
-    buy_start: {
-        text: "Are you a first-time homebuyer?",
-        options: [
-            { label: "Yes, first time", next: "buy_preapproval" },
-            { label: "No, I've bought before", next: "buy_equity" }
-        ]
-    },
-    buy_preapproval: {
-        text: "Do you have a mortgage pre-approval letter?",
-        options: [
-            { label: "Yes", next: "buy_search" },
-            { label: "No / Not yet", next: "result_finance_first" }
-        ]
-    },
-    buy_equity: {
-        text: "Will you be using equity from a current home to buy the next one?",
-        options: [
-            { label: "Yes, I need to sell first", next: "sell_start" },
-            { label: "No, I have the funds ready", next: "buy_search" }
-        ]
-    },
-    buy_search: {
-        text: "What is your priority for the new home?",
-        options: [
-            { label: "Move-in ready", next: "result_traditional_buy" },
-            { label: "A 'fixer-upper' for value", next: "result_reno_loan" }
-        ]
-    },
+    <div id="tree-content">
+        <h3 id="question-text" style="margin-bottom: 20px; font-weight: 600; line-height: 1.4;">Loading your guide...</h3>
+        <div id="options-container" style="display: flex; flex-direction: column; gap: 10px;">
+            </div>
+    </div>
+</div>
 
-    // --- SELLING BRANCH ---
-    sell_start: {
-        text: "What is your timeline for selling?",
-        options: [
-            { label: "Urgent (Under 30 days)", next: "sell_ibuyer" },
-            { label: "Standard (Looking for top dollar)", next: "sell_prep" }
-        ]
-    },
-    sell_prep: {
-        text: "Has the home been professionally inspected or staged?",
-        options: [
-            { label: "Yes, it's ready", next: "result_market_list" },
-            { label: "No, I need advice on repairs", next: "result_prep_guide" }
-        ]
-    },
-    sell_ibuyer: {
-        text: "Since you're in a hurry, are you open to cash offers below market value?",
-        options: [
-            { label: "Yes, convenience is key", next: "result_cash_offer" },
-            { label: "No, I'll try to list quickly", next: "result_market_list" }
-        ]
-    },
-
-    // --- INVESTING BRANCH ---
-    invest_start: {
-        text: "What is your primary investment goal?",
-        options: [
-            { label: "Passive Income (Rentals)", next: "invest_rental_type" },
-            { label: "Short-term Profit (Flipping)", next: "invest_flip_strategy" }
-        ]
-    },
-    invest_rental_type: {
-        text: "Are you interested in Short-term (Airbnb) or Long-term rentals?",
-        options: [
-            { label: "Short-term", next: "result_airbnb" },
-            { label: "Long-term", next: "result_landlord" }
-        ]
-    },
-    invest_flip_strategy: {
-        text: "Do you have a contractor team ready?",
-        options: [
-            { label: "Yes", next: "result_flip_ready" },
-            { label: "No, I'm doing it myself", next: "result_diy_warning" }
-        ]
-    },
-
-    // --- RESULT NODES ---
-    result_finance_first: { text: "Action Plan: Contact a local lender. You cannot effectively shop without knowing your budget and showing sellers you are qualified.", options: [] },
-    result_traditional_buy: { text: "Action Plan: We'll set up a custom MLS search for move-in ready homes in your target zip codes.", options: [] },
-    result_market_list: { text: "Action Plan: We will perform a Comparative Market Analysis (CMA) to price your home competitively for the current market.", options: [] },
-    result_cash_offer: { text: "Action Plan: We will look into 'iBuyer' programs and local investor groups to get you a fast cash closing.", options: [] },
-    result_airbnb: { text: "Action Plan: Check local zoning laws first! We will then analyze 'cash-on-cash' return for vacation properties.", options: [] },
-    result_landlord: { text: "Action Plan: Focus on multi-family units or low-maintenance condos to maximize your monthly cash flow.", options: [] }
-};
+<style>
+    /* Styling buttons to match your "Send Message" button */
+    .tree-option-btn {
+        padding: 12px 20px;
+        background-color: white;
+        color: #333;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 1rem;
+        text-align: left;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+    .tree-option-btn:hover {
+        background-color: #333;
+        color: white;
+        border-color: #333;
+    }
+    .result-node {
+        line-height: 1.6;
+        color: #555;
+        border-left: 4px solid #333;
+        padding-left: 20px;
+        margin-bottom: 20px;
+    }
+</style>
