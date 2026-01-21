@@ -1,19 +1,95 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decision Tree</title>
-    <link rel="stylesheet" href="style.css"> </head>
-<body>
+const tree = {
+    // --- STARTING POINT ---
+    start: {
+        text: "Welcome to the Real Estate Navigator. What is your goal?",
+        options: [
+            { label: "I want to Buy", next: "buy_start" },
+            { label: "I want to Sell", next: "sell_start" },
+            { label: "I want to Invest", next: "invest_start" }
+        ]
+    },
 
-    <div id="quiz-container">
-        <h2 id="question-text">Loading question...</h2>
-        <div id="options-container"></div>
-        <hr>
-        <button id="back-btn" style="display:none;">← Back</button>
-    </div>
+    // --- BUYING BRANCH ---
+    buy_start: {
+        text: "Are you a first-time homebuyer?",
+        options: [
+            { label: "Yes, first time", next: "buy_preapproval" },
+            { label: "No, I've bought before", next: "buy_equity" }
+        ]
+    },
+    buy_preapproval: {
+        text: "Do you have a mortgage pre-approval letter?",
+        options: [
+            { label: "Yes", next: "buy_search" },
+            { label: "No / Not yet", next: "result_finance_first" }
+        ]
+    },
+    buy_equity: {
+        text: "Will you be using equity from a current home to buy the next one?",
+        options: [
+            { label: "Yes, I need to sell first", next: "sell_start" },
+            { label: "No, I have the funds ready", next: "buy_search" }
+        ]
+    },
+    buy_search: {
+        text: "What is your priority for the new home?",
+        options: [
+            { label: "Move-in ready", next: "result_traditional_buy" },
+            { label: "A 'fixer-upper' for value", next: "result_reno_loan" }
+        ]
+    },
 
-    <script src="js/real-estate-guide.js"></script>
-</body>
-</html>
+    // --- SELLING BRANCH ---
+    sell_start: {
+        text: "What is your timeline for selling?",
+        options: [
+            { label: "Urgent (Under 30 days)", next: "sell_ibuyer" },
+            { label: "Standard (Looking for top dollar)", next: "sell_prep" }
+        ]
+    },
+    sell_prep: {
+        text: "Has the home been professionally inspected or staged?",
+        options: [
+            { label: "Yes, it's ready", next: "result_market_list" },
+            { label: "No, I need advice on repairs", next: "result_prep_guide" }
+        ]
+    },
+    sell_ibuyer: {
+        text: "Since you're in a hurry, are you open to cash offers below market value?",
+        options: [
+            { label: "Yes, convenience is key", next: "result_cash_offer" },
+            { label: "No, I'll try to list quickly", next: "result_market_list" }
+        ]
+    },
+
+    // --- INVESTING BRANCH ---
+    invest_start: {
+        text: "What is your primary investment goal?",
+        options: [
+            { label: "Passive Income (Rentals)", next: "invest_rental_type" },
+            { label: "Short-term Profit (Flipping)", next: "invest_flip_strategy" }
+        ]
+    },
+    invest_rental_type: {
+        text: "Are you interested in Short-term (Airbnb) or Long-term rentals?",
+        options: [
+            { label: "Short-term", next: "result_airbnb" },
+            { label: "Long-term", next: "result_landlord" }
+        ]
+    },
+    invest_flip_strategy: {
+        text: "Do you have a contractor team ready?",
+        options: [
+            { label: "Yes", next: "result_flip_ready" },
+            { label: "No, I'm doing it myself", next: "result_diy_warning" }
+        ]
+    },
+
+    // --- RESULT NODES ---
+    result_finance_first: { text: "Action Plan: Contact a local lender. You cannot effectively shop without knowing your budget and showing sellers you are qualified.", options: [] },
+    result_traditional_buy: { text: "Action Plan: We'll set up a custom MLS search for move-in ready homes in your target zip codes.", options: [] },
+    result_market_list: { text: "Action Plan: We will perform a Comparative Market Analysis (CMA) to price your home competitively for the current market.", options: [] },
+    result_cash_offer: { text: "Action Plan: We will look into 'iBuyer' programs and local investor groups to get you a fast cash closing.", options: [] },
+    result_airbnb: { text: "Action Plan: Check local zoning laws first! We will then analyze 'cash-on-cash' return for vacation properties.", options: [] },
+    result_landlord: { text: "Action Plan: Focus on multi-family units or low-maintenance condos to maximize your monthly cash flow.", options: [] }
+};
