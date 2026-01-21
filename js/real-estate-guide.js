@@ -1,85 +1,94 @@
 document.addEventListener('DOMContentLoaded', () => {
     const tree = {
         start: {
-            text: "What is your primary focus in Real Estate today?",
+            text: "Welcome. What is your primary real estate objective?",
             options: [
-                { label: "🏠 Buying a Home", next: "buy_type" },
-                { label: "💰 Selling a Property", next: "sell_reason" },
-                { label: "📈 Investing for Wealth", next: "invest_strategy" },
+                { label: "🏠 I want to Buy", next: "buy_type" },
+                { label: "💰 I want to Sell", next: "sell_situation" },
+                { label: "📈 I want to Invest", next: "invest_strategy" },
                 { label: "🏢 Commercial / Industrial", next: "res_commercial" }
             ]
         },
 
-        // --- BUYING PATH ---
+        // --- BUYING BRANCH ---
         buy_type: {
             text: "What type of buyer are you?",
             options: [
-                { label: "First-Time Buyer", next: "buy_finance" },
-                { label: "Moving Up / Downsizing", next: "buy_contingency" },
+                { label: "First-Time Homebuyer", next: "buy_finance" },
+                { label: "Repeat Buyer (Upsizing/Downsizing)", next: "buy_contingency" },
                 { label: "Relocating from out of state", next: "res_relocation" }
             ]
         },
         buy_finance: {
             text: "How do you plan to finance the purchase?",
             options: [
-                { label: "Conventional / FHA Loan", next: "res_finance_standard" },
-                { label: "Cash Purchase", next: "res_cash_buyer" },
-                { label: "VA Loan (Military)", next: "res_va_loan" }
+                { label: "Mortgage (Conventional/FHA/VA)", next: "buy_preapproval" },
+                { label: "All-Cash Purchase", next: "res_cash_strategy" },
+                { label: "Creative (Seller Finance/Subject-To)", next: "res_creative" }
+            ]
+        },
+        buy_preapproval: {
+            text: "Do you have an active pre-approval letter?",
+            options: [
+                { label: "Yes, I'm ready to shop", next: "res_buy_now" },
+                { label: "No, I need a lender recommendation", next: "res_lender_match" }
             ]
         },
         buy_contingency: {
             text: "Do you need to sell your current home to buy the new one?",
             options: [
-                { label: "Yes (Contingent Offer)", next: "res_contingency" },
-                { label: "No (Funds are separate)", next: "buy_finance" }
+                { label: "Yes, I have a home-sale contingency", next: "res_contingent_plan" },
+                { label: "No, I am non-contingent", next: "buy_finance" }
             ]
         },
 
-        // --- SELLING PATH ---
-        sell_reason: {
-            text: "What best describes your selling situation?",
+        // --- SELLING BRANCH ---
+        sell_situation: {
+            text: "What best describes your selling scenario?",
             options: [
-                { label: "Standard Sale (Market Value)", next: "sell_condition" },
-                { label: "1031 Tax-Deferred Exchange", next: "res_1031" },
-                { label: "Inherited / Probate Property", next: "res_probate" }
+                { label: "Standard Residential Sale", next: "sell_condition" },
+                { label: "1031 Tax-Deferred Exchange", next: "res_1031_info" },
+                { label: "Inherited / Probate / Estate Sale", next: "res_probate_info" }
             ]
         },
         sell_condition: {
-            text: "What is the condition of the property?",
+            text: "What is the current condition of the property?",
             options: [
-                { label: "Turnkey / Great Shape", next: "res_market_list" },
-                { label: "Needs Significant Repair", next: "sell_urgent" }
+                { label: "Turnkey (Ready for market)", next: "res_market_list" },
+                { label: "Fixer (Needs significant work)", next: "sell_speed" }
             ]
         },
-        sell_urgent: {
-            text: "Is speed or price more important to you?",
+        sell_speed: {
+            text: "Which is your priority: Highest Price or Fast Closing?",
             options: [
-                { label: "Speed (Cash offer now)", next: "res_as_is" },
-                { label: "Price (I'll fix it first)", next: "res_prep_guide" }
+                { label: "Highest Price (I'll do the repairs)", next: "res_reno_guide" },
+                { label: "Fast Closing (Sell 'As-Is' for cash)", next: "res_as_is_cash" }
             ]
         },
 
-        // --- INVESTING PATH ---
+        // --- INVESTING BRANCH ---
         invest_strategy: {
-            text: "What is your preferred investing vehicle?",
+            text: "What is your preferred investment vehicle?",
             options: [
-                { label: "House Hacking (Live + Rent)", next: "res_house_hack" },
-                { label: "Short-Term Rental (Airbnb)", next: "res_str" },
-                { label: "Fix and Flip", next: "res_flip" },
-                { label: "Buy and Hold (Long-Term)", next: "res_rental" }
+                { label: "House Hacking (Live-in Multi-family)", next: "res_house_hack" },
+                { label: "Short-Term Rental (Airbnb/VRBO)", next: "res_str_analysis" },
+                { label: "Fix and Flip", next: "res_flip_ops" },
+                { label: "Long-Term Rental (Buy & Hold)", next: "res_rental_hold" }
             ]
         },
 
         // --- FINAL RESULTS ---
-        res_finance_standard: { text: "<h4>Your Action Plan:</h4>Get pre-approved immediately. In a competitive market, a standard offer without a pre-approval letter is rarely considered.", options: [] },
-        res_cash_buyer: { text: "<h4>Your Action Plan:</h4>Prepare your 'Proof of Funds' (POF). Cash is king, but you still need to act fast on quality inventory.", options: [] },
-        res_va_loan: { text: "<h4>Your Action Plan:</h4>Ensure your lender is VA-certified. We will focus on homes that meet VA 'Minimum Property Requirements' (MPR).", options: [] },
-        res_1031: { text: "<h4>Your Action Plan:</h4>Identify your replacement property within 45 days. You need a Qualified Intermediary (QI) to handle the funds to avoid taxes.", options: [] },
-        res_probate: { text: "<h4>Your Action Plan:</h4>Verify the 'Letters of Administration.' I can help coordinate with your attorney for a smooth court-ordered sale.", options: [] },
-        res_house_hack: { text: "<h4>Your Action Plan:</h4>We'll look for duplexes or homes with ADUs (Accessory Dwelling Units) that qualify for FHA 3.5% down payments.", options: [] },
-        res_commercial: { text: "<h4>Your Action Plan:</h4>Commercial deals are driven by NOI (Net Operating Income). Let's review the rent roll and P&L of your target sector.", options: [] },
-        res_as_is: { text: "<h4>Your Action Plan:</h4>Skip the repairs. We will market to my private list of cash investors for a 10-day close.", options: [] },
-        res_contingency: { text: "<h4>Your Action Plan:</h4>We should list your home 'Subject to Seller Finding Replacement Home' to ensure you aren't homeless between closings.", options: [] }
+        res_relocation: { text: "<h4>Relocation Strategy</h4>Focus on neighborhood data and commute times. I recommend a virtual tour sequence of top 3 zip codes before your visit.", options: [] },
+        res_cash_strategy: { text: "<h4>Cash Strategy</h4>Prepare your 'Proof of Funds'. In a competitive market, we can leverage your cash position to shorten inspection periods.", options: [] },
+        res_lender_match: { text: "<h4>Lender Matching</h4>I can connect you with lenders specializing in your specific loan type (FHA vs. Conventional) to get your pre-approval started.", options: [] },
+        res_buy_now: { text: "<h4>Touring Mode</h4>Let's refine your criteria. I will set up a real-time MLS portal to alert you the second a match hits the market.", options: [] },
+        res_contingent_plan: { text: "<h4>Contingent Planning</h4>We need to coordinate two timelines. We should list your current home 'subject to finding a replacement'.", options: [] },
+        res_1031_info: { text: "<h4>1031 Exchange</h4>Crucial: Do not touch the proceeds. You need a Qualified Intermediary and must identify a new property within 45 days.", options: [] },
+        res_probate_info: { text: "<h4>Probate Sale</h4>We will coordinate with your estate attorney. We need to verify if the sale requires court confirmation or has 'Full Authority'.", options: [] },
+        res_market_list: { text: "<h4>Market Launch</h4>Step 1: Professional Photography and Staging. We want to maximize the 'First 7 Days' of market exposure.", options: [] },
+        res_as_is_cash: { text: "<h4>As-Is Sale</h4>I will present your property to my private network of cash investors for a 7-14 day closing with no repairs needed.", options: [] },
+        res_house_hack: { text: "<h4>House Hacking</h4>Look for 2-4 unit properties. You can use an FHA loan with only 3.5% down while the other units pay your mortgage.", options: [] },
+        res_commercial: { text: "<h4>Commercial Interests</h4>Commercial deals are driven by NOI (Net Operating Income). Let's review the rent roll and P&L of your target sector.", options: [] }
     };
 
     let currentNode = 'start';
@@ -94,13 +103,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderNode() {
         const node = tree[currentNode];
         
-        // Setup Question
         questionEl.innerHTML = node.text;
         optionsContainer.innerHTML = '';
         
-        // UI Updates
+        // Show/Hide Back Button
         backBtn.style.display = history.length > 0 ? 'block' : 'none';
-        const progress = Math.min((history.length) * 33 + 10, 100);
+        
+        // Update Progress Bar (assuming ~4 steps max)
+        const progress = Math.min((history.length + 1) * 25, 100);
         progressFill.style.width = (node.options.length === 0) ? '100%' : `${progress}%`;
         stepCounter.innerText = (node.options.length === 0) ? 'FINISH' : `STEP ${history.length + 1}`;
 
