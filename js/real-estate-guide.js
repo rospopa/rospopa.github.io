@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "📈 Investing for Wealth", next: "invest_path" }
             ]
         },
-        // BUYING
+        // --- BUYING PATHS ---
         buy_path: {
             text: "What is your current buying status?",
             options: [
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "No, I am ready to buy", next: "buy_finance" }
             ]
         },
-        // SELLING
+        // --- SELLING PATHS ---
         sell_path: {
             text: "What best describes your selling situation?",
             options: [
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "1031 Tax-Deferred Exchange", next: "res_1031" }
             ]
         },
-        // INVESTING
+        // --- INVESTING PATHS ---
         invest_path: {
             text: "What is your target investment strategy?",
             options: [
@@ -48,20 +48,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "House Hacking", next: "res_house_hack" }
             ]
         },
-        // FINAL RESULTS (Dead Ends)
+        // --- TERMINAL NODES (All trigger the form) ---
         res_finance: { text: "Action: Get Pre-Approved. In a competitive market, a lender's letter is your most powerful tool.", options: [] },
         res_cash: { text: "Action: Prepare Proof of Funds. Cash allows for aggressive negotiation and fast closings.", options: [] },
         res_standard_sell: { text: "Action: Comparative Market Analysis. We need to price your home accurately to capture peak interest.", options: [] },
         res_probate: { text: "Action: Verify court authority. We will coordinate with your estate attorney for a smooth sale.", options: [] },
         res_1031: { text: "Action: Identify your replacement property within 45 days. You MUST use a Qualified Intermediary.", options: [] },
         res_rental: { text: "Action: Focus on Cap Rate. We'll look for multi-family units with strong vacancy historical data.", options: [] },
-        res_flip: { text: "Action: Secure your team. We'll identify distressed properties with a high 'After Repair Value' (ARV).", options: [] },
+        res_flip: { text: "Action: Secure your team. We'll identify distressed properties with a high After Repair Value.", options: [] },
         res_house_hack: { text: "Action: Seek 2-4 unit properties. You can live in one unit while others pay your mortgage.", options: [] }
     };
 
     let currentNode = 'start';
-    let history = []; // Stores the node IDs
-    let pathLabels = []; // Stores the labels clicked
+    let history = []; 
+    let pathLabels = []; 
 
     const questionEl = document.getElementById('question-text');
     const optionsContainer = document.getElementById('options-container');
@@ -73,47 +73,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderNode() {
         const node = tree[currentNode];
-        
-        // Update Question Text
+        if (!node) return;
+
         questionEl.innerText = node.text;
         optionsContainer.innerHTML = '';
         
-        // --- 1. UPDATE STEPS AND PROGRESS ---
-        // Step is calculated as history length + 1
+        // Update Steps: history.length + 1
         const currentStep = history.length + 1;
         stepCounter.innerText = (node.options.length === 0) ? 'FINISH' : `Step ${currentStep}`;
         
-        // Calculate progress percentage (Base 33% per step, max 100%)
+        // Update Progress: 33% per step, max 100%
         const progressPercentage = Math.min(currentStep * 33, 100);
         progressFill.style.width = (node.options.length === 0) ? '100%' : `${progressPercentage}%`;
 
-        // --- 2. HANDLE BACK BUTTON VISIBILITY ---
+        // Back button visibility
         backBtn.style.display = (history.length > 0) ? 'block' : 'none';
 
-        // --- 3. HANDLE VIEW TRANSITION ---
         if (node.options.length === 0) {
-            // Reached a Result Node
+            // Result Node: Show Result Card and Form
             questionEl.className = 'result-card';
             contactFormContainer.style.display = 'block';
             
-            // Auto-populate message
             if (messageField) {
-                messageField.value = `Hello Pavlo,\n\nI just completed the Real Estate Guide.\n\nPath Taken: ${pathLabels.join(" > ")}\n\nRecommendation: ${node.text}`;
+                messageField.value = `Hello Pavlo,\n\nI just completed the Real Estate Guide.\nPath Taken: ${pathLabels.join(" > ")}\nRecommendation: ${node.text}`;
             }
 
-            // Create "Start Over" button
+            // Restart Button
             const restartBtn = document.createElement('button');
             restartBtn.innerText = "Start Over";
             restartBtn.className = "tree-option-btn";
-            restartBtn.style.marginTop = "20px";
-            restartBtn.style.textAlign = "center";
-            restartBtn.style.backgroundColor = "#333";
-            restartBtn.style.color = "#fff";
+            restartBtn.style.cssText = "margin-top: 20px; text-align: center; background-color: #333; color: #fff;";
             restartBtn.onclick = () => resetGuide();
             optionsContainer.appendChild(restartBtn);
-
         } else {
-            // Reached a Question Node
+            // Question Node: Reset UI and hide form
             questionEl.className = '';
             contactFormContainer.style.display = 'none';
 
@@ -139,12 +132,11 @@ document.addEventListener('DOMContentLoaded', () => {
         renderNode();
     }
 
-    // --- 4. BACK BUTTON LOGIC ---
     backBtn.onclick = () => {
         if (history.length > 0) {
             currentNode = history.pop();
             pathLabels.pop();
-            renderNode(); // Re-render will automatically hide form and update steps
+            renderNode(); 
         }
     };
 
