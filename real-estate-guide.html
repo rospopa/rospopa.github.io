@@ -5,16 +5,13 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Pavlo Rospopa Website</title>
     <meta name="viewport" content="width=device-width">
-    <meta name="description" content="pavlo@rospopa.com">
     <link rel="stylesheet" href="css/format.css">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
-        /* --- SECURITY STYLES --- */
         body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
         input, textarea { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
 
-        /* --- GUIDE UI INTEGRATION --- */
         #real-estate-guide-container {
             margin: 20px 0 40px 0; padding: 30px; border: 1px solid #e0e0e0; border-radius: 12px;
             background-color: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; z-index: 101;
@@ -27,7 +24,6 @@
         .tree-option-btn:hover { border-color: #4285F4; color: #4285F4; transform: translateY(-2px); }
         .result-card { background: #f4f7ff; border-left: 6px solid #4285F4; padding: 25px; border-radius: 8px; color: #334155; line-height: 1.7; margin-bottom: 20px; }
 
-        /* --- FORM STYLES --- */
         #contact-form-container { margin: 40px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; }
         #contact-form { display: flex; flex-direction: column; gap: 15px; }
         #contact-form input, #contact-form textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
@@ -64,23 +60,21 @@
                         <div style="width: 80px;">
                             <span id="back-btn" style="cursor: pointer; font-size: 0.9rem; color: #4285F4; font-weight: 600; display: none;">← Back</span>
                         </div>
-                        
                         <div style="flex-grow: 1; height: 6px; background: #eee; margin: 0 10px; border-radius: 10px; overflow: hidden;">
                             <div id="progress-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #4285F4, #a855f7); border-radius: 10px; transition: width 0.4s ease;"></div>
                         </div>
-
                         <div style="width: 80px; text-align: right;">
                             <span id="step-counter" style="font-size: 0.8rem; color: #999; font-weight: bold;">Step 1</span>
                         </div>
                     </div>
 
                     <div id="tree-content">
-                        <h2 id="question-text" style="margin-bottom: 25px; font-size: 1.5rem; color: #222; font-weight: 800;">Loading Guide...</h2>
+                        <h2 id="question-text" style="margin-bottom: 25px; font-size: 1.5rem; color: #222; font-weight: 800;">Loading...</h2>
                         <div id="options-container"></div>
                     </div>
                 </div>
 
-                <div id="particle-anchor" style="width: 100%; height: 150px; margin: 20px 0;"></div>
+                <div id="particle-anchor" style="width: 100%; height: 50px; margin: 20px 0;"></div>
 
                 <div id="contact-form-container" style="display: none;">
                     <form id="contact-form">
@@ -88,13 +82,10 @@
                         <input type="email" name="email" placeholder="Your Email" required />
                         <textarea id="message-field" name="message" rows="5" required></textarea>
                         <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
-                        <button type="submit" id="submit-btn">Send Message</button>
+                        <button type="submit" id="submit-btn">Get Detailed Strategy</button>
                         <p id="form-status"></p>
                     </form>
                 </div>
-
-                <p>Go to <a href="https://www.linkedin.com/in/prospopa">LinkedIn</a>.</p>
-                <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
             </div>
         </div>
     </div>
@@ -116,65 +107,144 @@
 </footer>
 
 <script>
-    // --- PASTE YOUR CANVAS SCRIPT FROM HOME PAGE HERE ---
-</script>
-
-<script>
 document.addEventListener('DOMContentLoaded', function() {
     const tree = {
         start: {
             text: "What is your primary focus in Real Estate today?",
             options: [
-                { label: "🏠 Buying a Home", next: "buy_path" },
-                { label: "💰 Selling a Property", next: "sell_path" },
-                { label: "📈 Investing for Wealth", next: "invest_path" }
+                { label: "🏠 Residential Buying", next: "buy_res" },
+                { label: "💰 Selling Property", next: "sell_path" },
+                { label: "📈 Wealth Investment", next: "invest_path" },
+                { label: "🏢 Commercial / Office", next: "comm_path" }
             ]
         },
-        buy_path: {
-            text: "What is your current buying status?",
+        // RESIDENTIAL BUYING
+        buy_res: {
+            text: "What is your buyer profile?",
             options: [
-                { label: "First-Time Buyer", next: "buy_finance" },
-                { label: "Repeat Buyer", next: "buy_contingency" }
+                { label: "First-Time Homebuyer", next: "buy_fthb" },
+                { label: "Upgrading / Upsizing", next: "buy_upsize" },
+                { label: "Relocating from Out-of-State", next: "buy_reloc" },
+                { label: "Vacation / Second Home", next: "buy_vacation" }
             ]
         },
-        buy_finance: {
-            text: "How do you plan to finance this purchase?",
+        buy_fthb: {
+            text: "What is your biggest concern?",
             options: [
-                { label: "Mortgage (Lender needed)", next: "res_finance" },
-                { label: "All-Cash Purchase", next: "res_cash" }
+                { label: "Down Payment Assistance", next: "res_fthb_grant" },
+                { label: "Credit Score Improvement", next: "res_fthb_credit" },
+                { label: "Finding the Right Area", next: "res_fthb_area" }
             ]
         },
-        buy_contingency: {
-            text: "Do you need to sell your current home first?",
+        buy_upsize: {
+            text: "Do you need to sell to buy?",
             options: [
-                { label: "Yes, I need to sell first", next: "sell_path" },
-                { label: "No, I am ready to buy", next: "buy_finance" }
+                { label: "Yes, contingent offer", next: "res_upsize_cont" },
+                { label: "No, buying first", next: "res_upsize_bridge" }
             ]
         },
+        // SELLING PROPERTY
         sell_path: {
-            text: "What best describes your selling situation?",
+            text: "What is the property condition?",
             options: [
-                { label: "Standard Residential Sale", next: "res_standard_sell" },
-                { label: "Inherited / Probate Property", next: "res_probate" },
-                { label: "1031 Tax-Deferred Exchange", next: "res_1031" }
+                { label: "Turn-key / Renovated", next: "sell_ready" },
+                { label: "Fixer Upper / As-Is", next: "sell_asis" },
+                { label: "Probate / Inherited", next: "sell_legal" }
             ]
         },
+        sell_ready: {
+            text: "What is your priority?",
+            options: [
+                { label: "Maximum Profit", next: "res_sell_max" },
+                { label: "Fastest Possible Close", next: "res_sell_speed" }
+            ]
+        },
+        sell_asis: {
+            text: "Who is your target buyer?",
+            options: [
+                { label: "Cash Investor", next: "res_sell_investor" },
+                { label: "FHA 203k Buyer", next: "res_sell_203k" }
+            ]
+        },
+        sell_legal: {
+            text: "Where are you in the legal process?",
+            options: [
+                { label: "Court Authorization Received", next: "res_sell_probate_ok" },
+                { label: "Initial Filing Stage", next: "res_sell_probate_wait" }
+            ]
+        },
+        // WEALTH INVESTMENT
         invest_path: {
-            text: "What is your target investment strategy?",
+            text: "What is your risk tolerance?",
             options: [
-                { label: "Rental Income (Passive)", next: "res_rental" },
-                { label: "Fix and Flip (Active)", next: "res_flip" },
-                { label: "House Hacking", next: "res_house_hack" }
+                { label: "Low Risk (Long-term Rental)", next: "inv_long" },
+                { label: "Medium Risk (BRRRR Method)", next: "inv_brrrr" },
+                { label: "High Risk (Fix & Flip)", next: "inv_flip" },
+                { label: "Tax Focused (1031 Exchange)", next: "inv_1031" }
             ]
         },
-        res_finance: { text: "Action: Get Pre-Approved. In a competitive market, a lender's letter is your most powerful tool.", options: [] },
-        res_cash: { text: "Action: Prepare Proof of Funds. Cash allows for aggressive negotiation and fast closings.", options: [] },
-        res_standard_sell: { text: "Action: Comparative Market Analysis. We need to price your home accurately to capture peak interest.", options: [] },
-        res_probate: { text: "Action: Verify court authority. We will coordinate with your estate attorney for a smooth sale.", options: [] },
-        res_1031: { text: "Action: Identify your replacement property within 45 days. You MUST use a Qualified Intermediary.", options: [] },
-        res_rental: { text: "Action: Focus on Cap Rate. We'll look for multi-family units with strong vacancy historical data.", options: [] },
-        res_flip: { text: "Action: Secure your team. We'll identify distressed properties with a high After Repair Value.", options: [] },
-        res_house_hack: { text: "Action: Seek 2-4 unit properties. You can live in one unit while others pay your mortgage.", options: [] }
+        inv_long: {
+            text: "Preferred asset type?",
+            options: [
+                { label: "Single Family Home", next: "res_inv_sfh" },
+                { label: "Multi-Family (2-4 Units)", next: "res_inv_multi" }
+            ]
+        },
+        inv_brrrr: {
+            text: "Do you have a construction crew?",
+            options: [
+                { label: "Yes, ready to go", next: "res_inv_brrrr_pro" },
+                { label: "No, I need referrals", next: "res_inv_brrrr_new" }
+            ]
+        },
+        // COMMERCIAL
+        comm_path: {
+            text: "What is the commercial intent?",
+            options: [
+                { label: "Retail / Storefront", next: "comm_retail" },
+                { label: "Industrial / Warehouse", next: "comm_indus" },
+                { label: "Office Space Leasing", next: "comm_office" }
+            ]
+        },
+        comm_retail: {
+            text: "Lease or Purchase?",
+            options: [
+                { label: "Leasing Space", next: "res_comm_retail_lease" },
+                { label: "Purchasing Building", next: "res_comm_retail_buy" }
+            ]
+        },
+
+        // TERMINAL NODES (30+ Outcomes)
+        res_fthb_grant: { text: "Outcome: Local Grant Specialist. We will pair you with a lender specializing in FHA/IDHA grants.", options: [] },
+        res_fthb_credit: { text: "Outcome: Credit Repair Roadmap. You need a 6-month buffer to hit a 680+ score for best rates.", options: [] },
+        res_fthb_area: { text: "Outcome: Neighborhood Analysis. Focus on areas with high appreciation potential over 5 years.", options: [] },
+        res_upsize_cont: { text: "Outcome: Contingency Master. We must structure your sale with a 'Home of Choice' clause.", options: [] },
+        res_upsize_bridge: { text: "Outcome: Bridge Loan Strategy. Use a HELOC to secure your new home before selling the old one.", options: [] },
+        res_reloc_zoom: { text: "Outcome: Remote Buyer Package. Video walk-throughs and digital escrow are your priority.", options: [] },
+        res_vacation_tax: { text: "Outcome: Vacation Rental Analysis. Focus on local zoning laws for short-term rentals (AirBnB).", options: [] },
+        res_sell_max: { text: "Outcome: Concierge Staging. Professional staging and high-end photography will yield 5-10% more.", options: [] },
+        res_sell_speed: { text: "Outcome: Direct Cash Offer. We will bypass the MLS for a 10-day closing period.", options: [] },
+        res_sell_investor: { text: "Outcome: Wholesale Network. Your property fits a 'fixer-upper' cash buyer profile.", options: [] },
+        res_sell_203k: { text: "Outcome: Renovation Buyer Lead. We target buyers with 203k loans to maximize 'As-Is' price.", options: [] },
+        res_sell_probate_ok: { text: "Outcome: Smooth Probate Sale. We coordinate with the estate attorney for the deed transfer.", options: [] },
+        res_sell_probate_wait: { text: "Outcome: Legal Prep. We will prep the market listing while waiting for court letters.", options: [] },
+        res_inv_sfh: { text: "Outcome: Passive Income Focus. Seek properties with 8%+ Cap Rates in suburban markets.", options: [] },
+        res_inv_multi: { text: "Outcome: House-Hacking Strategy. Live in one unit, let three units pay your entire mortgage.", options: [] },
+        res_inv_brrrr_pro: { text: "Outcome: Capital Deployment. Focus on deep-distressed assets for maximum equity pull.", options: [] },
+        res_inv_brrrr_new: { text: "Outcome: Network Building. Your priority is finding a reliable General Contractor first.", options: [] },
+        res_comm_retail_lease: { text: "Outcome: NNN Lease Audit. Ensure you aren't overpaying for CAM (Common Area Maintenance).", options: [] },
+        res_comm_retail_buy: { text: "Outcome: SBA 504 Loan. Use owner-user financing to buy with as little as 10% down.", options: [] },
+        res_comm_indus_flex: { text: "Outcome: Flex Space Focus. High demand for 2,000sqft bays with 14ft doors.", options: [] },
+        res_comm_office_hybrid: { text: "Outcome: Short-term Office Lease. Prioritize 'plug-and-play' spaces for hybrid teams.", options: [] },
+        inv_1031_dst: { text: "Outcome: DST Exchange. Invest your proceeds into a managed portfolio to defer all taxes.", options: [] },
+        inv_1031_direct: { text: "Outcome: Like-Kind Exchange. You have 45 days to identify a larger rental asset.", options: [] },
+        res_lux_global: { text: "Outcome: Global Luxury Marketing. Your home needs a custom 4K film and international reach.", options: [] },
+        res_lux_quiet: { text: "Outcome: Pocket Listing. Sell privately to high-net-worth individuals without an MLS sign.", options: [] },
+        inv_flip_hardmoney: { text: "Outcome: Hard Money Leverage. Use high-interest, short-term debt to scale your flips.", options: [] },
+        inv_flip_equity: { text: "Outcome: Equity Partnering. Find a financial backer while you handle the renovations.", options: [] },
+        buy_land_dev: { text: "Outcome: Zoned for Success. Focus on land with 'By-Right' building permits already in place.", options: [] },
+        buy_land_raw: { text: "Outcome: Utilities Audit. Your priority is checking well, septic, and electricity access.", options: [] },
+        comm_wh_logistics: { text: "Outcome: Last-Mile Delivery. Focus on proximity to major highway intersections.", options: [] }
     };
 
     let currentNode = 'start';
@@ -198,13 +268,13 @@ document.addEventListener('DOMContentLoaded', function() {
         const stepNum = history.length + 1;
         
         elements.step.innerText = (node.options.length === 0) ? 'Done' : `Step ${stepNum}`;
-        elements.progress.style.width = (node.options.length === 0) ? '100%' : (stepNum * 25) + '%';
+        elements.progress.style.width = (node.options.length === 0) ? '100%' : Math.min(stepNum * 20, 95) + '%';
         elements.backBtn.style.display = (history.length > 0) ? 'inline' : 'none';
 
         if (node.options.length === 0) {
             elements.question.classList.add('result-card');
             elements.formContainer.style.display = 'block';
-            elements.message.value = "User Path: " + pathLabels.join(" > ") + "\n\nResult: " + node.text;
+            elements.message.value = "User Path: " + pathLabels.join(" > ") + "\n\nProposed Strategy: " + node.text;
             
             const restartBtn = document.createElement('button');
             restartBtn.innerText = "Start Over";
