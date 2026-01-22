@@ -60,8 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     let currentNode = 'start';
-    let history = [];
-    let pathLabels = [];
+    let history = []; // Stores the node IDs
+    let pathLabels = []; // Stores the labels clicked
 
     const questionEl = document.getElementById('question-text');
     const optionsContainer = document.getElementById('options-container');
@@ -73,32 +73,35 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderNode() {
         const node = tree[currentNode];
-        if (!node) return; // Safety check
-
+        
+        // Update Question Text
         questionEl.innerText = node.text;
         optionsContainer.innerHTML = '';
         
-        // UI Logic: Back button visibility
-        backBtn.style.display = history.length > 0 ? 'block' : 'none';
-        
-        // Progress bar and Step Counter logic
+        // --- 1. UPDATE STEPS AND PROGRESS ---
+        // Step is calculated as history length + 1
         const currentStep = history.length + 1;
-        const progress = Math.min(currentStep * 25, 100); 
-        
-        progressFill.style.width = (node.options.length === 0) ? '100%' : `${progress}%`;
         stepCounter.innerText = (node.options.length === 0) ? 'FINISH' : `Step ${currentStep}`;
+        
+        // Calculate progress percentage (Base 33% per step, max 100%)
+        const progressPercentage = Math.min(currentStep * 33, 100);
+        progressFill.style.width = (node.options.length === 0) ? '100%' : `${progressPercentage}%`;
 
+        // --- 2. HANDLE BACK BUTTON VISIBILITY ---
+        backBtn.style.display = (history.length > 0) ? 'block' : 'none';
+
+        // --- 3. HANDLE VIEW TRANSITION ---
         if (node.options.length === 0) {
-            // Dead end reached: Show Form
+            // Reached a Result Node
             questionEl.className = 'result-card';
             contactFormContainer.style.display = 'block';
             
-            // Populate contact form message
+            // Auto-populate message
             if (messageField) {
-                messageField.value = `Hello Pavlo,\n\nI just completed the Real Estate Guide.\nPath Taken: ${pathLabels.join(" > ")}\nRecommendation: ${node.text}`;
+                messageField.value = `Hello Pavlo,\n\nI just completed the Real Estate Guide.\n\nPath Taken: ${pathLabels.join(" > ")}\n\nRecommendation: ${node.text}`;
             }
-            
-            // Add a "Start Over" button
+
+            // Create "Start Over" button
             const restartBtn = document.createElement('button');
             restartBtn.innerText = "Start Over";
             restartBtn.className = "tree-option-btn";
@@ -106,15 +109,14 @@ document.addEventListener('DOMContentLoaded', () => {
             restartBtn.style.textAlign = "center";
             restartBtn.style.backgroundColor = "#333";
             restartBtn.style.color = "#fff";
-            restartBtn.onclick = () => {
-                resetTree();
-            };
+            restartBtn.onclick = () => resetGuide();
             optionsContainer.appendChild(restartBtn);
+
         } else {
-            // Question phase: Hide Form
-            contactFormContainer.style.display = 'none';
+            // Reached a Question Node
             questionEl.className = '';
-            
+            contactFormContainer.style.display = 'none';
+
             node.options.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.innerText = opt.label;
@@ -130,23 +132,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    function resetTree() {
+    function resetGuide() {
         history = [];
         pathLabels = [];
         currentNode = 'start';
-        contactFormContainer.style.display = 'none';
-        questionEl.className = '';
         renderNode();
     }
 
+    // --- 4. BACK BUTTON LOGIC ---
     backBtn.onclick = () => {
         if (history.length > 0) {
             currentNode = history.pop();
             pathLabels.pop();
-            // Ensure form is hidden when going back from a result
-            contactFormContainer.style.display = 'none';
-            questionEl.className = '';
-            renderNode();
+            renderNode(); // Re-render will automatically hide form and update steps
         }
     };
 
