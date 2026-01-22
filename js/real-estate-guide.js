@@ -73,40 +73,48 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderNode() {
         const node = tree[currentNode];
+        if (!node) return; // Safety check
+
         questionEl.innerText = node.text;
         optionsContainer.innerHTML = '';
         
-        // UI Logic
+        // UI Logic: Back button visibility
         backBtn.style.display = history.length > 0 ? 'block' : 'none';
-        const progress = Math.min((history.length + 1) * 33, 100);
+        
+        // Progress bar and Step Counter logic
+        const currentStep = history.length + 1;
+        const progress = Math.min(currentStep * 25, 100); 
+        
         progressFill.style.width = (node.options.length === 0) ? '100%' : `${progress}%`;
-        stepCounter.innerText = (node.options.length === 0) ? 'FINISH' : `Step ${history.length + 1}`;
+        stepCounter.innerText = (node.options.length === 0) ? 'FINISH' : `Step ${currentStep}`;
 
         if (node.options.length === 0) {
-            // Dead end reached
+            // Dead end reached: Show Form
             questionEl.className = 'result-card';
             contactFormContainer.style.display = 'block';
-            messageField.value = `Hello Pavlo, I just completed the Real Estate Guide.\n\nPath Taken: ${pathLabels.join(" > ")}\n\nResult Recommendation: ${node.text}`;
             
-            // Add a "Start Over" button inside the options container
+            // Populate contact form message
+            if (messageField) {
+                messageField.value = `Hello Pavlo,\n\nI just completed the Real Estate Guide.\nPath Taken: ${pathLabels.join(" > ")}\nRecommendation: ${node.text}`;
+            }
+            
+            // Add a "Start Over" button
             const restartBtn = document.createElement('button');
             restartBtn.innerText = "Start Over";
             restartBtn.className = "tree-option-btn";
             restartBtn.style.marginTop = "20px";
             restartBtn.style.textAlign = "center";
+            restartBtn.style.backgroundColor = "#333";
+            restartBtn.style.color = "#fff";
             restartBtn.onclick = () => {
-                history = [];
-                pathLabels = [];
-                currentNode = 'start';
-                contactFormContainer.style.display = 'none';
-                questionEl.className = '';
-                renderNode();
+                resetTree();
             };
             optionsContainer.appendChild(restartBtn);
         } else {
-            // Question phase
+            // Question phase: Hide Form
             contactFormContainer.style.display = 'none';
             questionEl.className = '';
+            
             node.options.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.innerText = opt.label;
@@ -122,10 +130,22 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function resetTree() {
+        history = [];
+        pathLabels = [];
+        currentNode = 'start';
+        contactFormContainer.style.display = 'none';
+        questionEl.className = '';
+        renderNode();
+    }
+
     backBtn.onclick = () => {
         if (history.length > 0) {
             currentNode = history.pop();
             pathLabels.pop();
+            // Ensure form is hidden when going back from a result
+            contactFormContainer.style.display = 'none';
+            questionEl.className = '';
             renderNode();
         }
     };
