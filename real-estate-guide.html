@@ -14,106 +14,89 @@
     <link rel="icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/css/favicons/unnamed-192x192.png">
     <link rel="icon" type="image/png" sizes="231x231" href="/css/favicons/unnamed-231x231.png">
-    <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
-      
+    
     <link rel="stylesheet" href="css/format.css">
     
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
-        /* --- SECURITY / DISABLE SELECTION START --- */
+        /* --- CORE / RESET --- */
         body {
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE10+/Edge */
-            user-select: none; /* Standard */
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            background-color: #f4f7f9;
-            margin: 0;
+            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background-color: #f8f9fa; margin: 0; color: #333;
         }
-         
-        /* Re-enable selection for inputs */
-        input, textarea, select {
-            -webkit-user-select: text;
-            -moz-user-select: text;
-            -ms-user-select: text;
-            user-select: text;
-        }
+        input, textarea, select { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
 
-        /* --- CANVAS CSS --- */
-        #canvas1 {
-            position: absolute; 
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: 99; 
-            pointer-events: none; 
-            image-rendering: pixelated; 
-        }
+        /* --- VISUALS --- */
+        #canvas1 { position: absolute; top: 0; left: 0; width: 100%; z-index: 99; pointer-events: none; image-rendering: pixelated; }
 
-        /* --- STRATEGY ENGINE STYLES --- */
+        /* --- CONTAINER --- */
         #real-estate-guide-container {
-            margin: 40px auto; padding: 30px; border: 1px solid #e0e0e0; border-radius: 12px;
-            background-color: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; z-index: 101;
-            max-width: 950px;
+            margin: 40px auto; padding: 40px; border: 0; border-radius: 16px;
+            background-color: #ffffff; box-shadow: 0 10px 40px rgba(0,0,0,0.08); 
+            position: relative; z-index: 101; max-width: 800px;
         }
         
-        /* Button Style */
+        /* --- UI ELEMENTS --- */
         .tree-option-btn {
-            padding: 12px 16px; background-color: #f8f9fa; color: #333; border: 2px solid #eef0f2;
-            border-radius: 8px; cursor: pointer; font-size: 0.95rem; text-align: left;
-            transition: all 0.2s; font-weight: 500; width: 100%; margin-bottom: 6px; display: block;
+            padding: 16px 20px; background-color: #fff; color: #2c3e50; border: 1px solid #e2e8f0;
+            border-radius: 12px; cursor: pointer; font-size: 1rem; text-align: left;
+            transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); font-weight: 500; width: 100%; margin-bottom: 10px; display: block;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
         }
-        .tree-option-btn:hover { border-color: #4285F4; color: #4285F4; transform: translateX(4px); }
+        .tree-option-btn:hover { 
+            border-color: #4285F4; color: #4285F4; transform: translateY(-2px); 
+            box-shadow: 0 5px 15px rgba(66, 133, 244, 0.15); 
+        }
         
-        /* Input & Select Styles */
         .tree-input, .tree-select {
-            width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #ddd;
-            border-radius: 8px; font-size: 1rem; box-sizing: border-box;
+            width: 100%; padding: 14px; margin-bottom: 20px; border: 2px solid #e2e8f0;
+            border-radius: 10px; font-size: 1rem; box-sizing: border-box; transition: 0.2s;
         }
-        .tree-input:focus, .tree-select:focus { border-color: #4285F4; outline: none; }
+        .tree-input:focus, .tree-select:focus { border-color: #4285F4; outline: none; box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1); }
         
         .next-btn {
-            background-color: #4285F4; color: white; border: none; padding: 12px 24px;
-            border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1rem;
+            background: linear-gradient(135deg, #4285F4, #2b6cb0); color: white; border: none; padding: 14px 28px;
+            border-radius: 10px; cursor: pointer; font-weight: 600; width: 100%; font-size: 1.05rem; letter-spacing: 0.5px;
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3); transition: 0.2s;
         }
-        .next-btn:hover { background-color: #3367d6; }
+        .next-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(66, 133, 244, 0.4); }
 
-        .result-card { background: #f4f7ff; border-left: 6px solid #4285F4; padding: 25px; border-radius: 8px; color: #334155; line-height: 1.7; margin-bottom: 20px; }
-
-        /* --- CONTACT FORM STYLES --- */
-        #contact-form-container { 
-            margin: 40px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; 
+        .result-card { 
+            background: #eff6ff; border-left: 5px solid #4285F4; padding: 30px; 
+            border-radius: 12px; color: #1e3a8a; line-height: 1.6; margin-bottom: 30px; 
         }
+        .result-title { font-weight: 700; font-size: 1.2rem; display: block; margin-bottom: 10px; color: #1e40af; }
+
+        /* --- CONTACT FORM --- */
+        #contact-form-container { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; }
         #contact-form { display: flex; flex-direction: column; gap: 15px; }
         #contact-form input, #contact-form textarea { 
-            padding: 12px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; font-family: inherit;
+            padding: 14px; border: 1px solid #cbd5e1; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;
         }
         #contact-form button { 
-            padding: 12px 24px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; align-self: flex-start; font-weight: bold; 
+            padding: 14px 28px; background-color: #1f2937; color: white; border: none; border-radius: 8px; cursor: pointer; align-self: flex-start; font-weight: 600; 
         }
-        #contact-form button:hover { background-color: #555; }
-        #contact-form button:disabled { background-color: #999; cursor: not-allowed; }
+        #contact-form button:hover { background-color: #000; }
         
-        .progress-container { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin: 15px 0; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #4285F4, #34a853); transition: width 0.3s ease; }
+        .progress-container { width: 100%; height: 6px; background: #f1f5f9; border-radius: 10px; margin: 20px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #4285F4, #8b5cf6); transition: width 0.4s ease; }
 
-        #form-status { margin-top: 10px; font-weight: 500; }
-        .g-recaptcha { margin-bottom: 5px; }
+        #form-status { margin-top: 15px; font-weight: 500; font-size: 0.95rem; }
+        .g-recaptcha { margin-bottom: 10px; }
         
-        /* Basic Header Styling (in case css/format.css is missing) */
-        .site-header { background: #fff; padding: 15px 0; border-bottom: 1px solid #eee; position: relative; z-index: 100; }
+        /* Header/Footer Minimal */
+        .site-header { background: #fff; padding: 15px 0; border-bottom: 1px solid #f0f0f0; position: relative; z-index: 100; }
         .site-header .wrap { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
-        .site-title { font-weight: bold; color: #333; font-size: 1.2rem; }
-        .site-nav a { margin-left: 20px; color: #666; font-size: 0.9rem; }
-        
-        /* Footer Styling */
-        footer { background: #fff; padding: 20px 0; margin-top: 50px; border-top: 1px solid #eee; position: relative; z-index: 100; }
+        .site-title { font-weight: 800; color: #1a202c; font-size: 1.3rem; letter-spacing: -0.5px; }
+        footer { background: #fff; padding: 40px 0; margin-top: 60px; border-top: 1px solid #f0f0f0; position: relative; z-index: 100; color: #64748b; }
     </style>
 </head>
      
 <body>
 <script>
+    // Security Prevention
     document.addEventListener('contextmenu', event => event.preventDefault());
     document.addEventListener('dragstart', event => event.preventDefault());
 </script>
@@ -122,11 +105,9 @@
 
 <header class="site-header">
     <div class="wrap">
-        <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
+        <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa</a>
         <nav class="site-nav">
-            <div class="trigger">
-                <a style="text-decoration: none;" href="/login">Login</a>
-            </div>
+            <a style="text-decoration: none; font-weight: 600; color: #4285F4;" href="/login">Client Login</a>
         </nav>
     </div>
 </header>
@@ -135,13 +116,13 @@
     <div class="page-content">
         <div class="wrap" style="max-width: 1000px; margin: 0 auto; padding: 0 20px;">
             
-            <div id="particle-anchor" style="width: 100%; height: 150px; margin-top: 20px; margin-bottom: 20px;"></div>
+            <div id="particle-anchor" style="width: 100%; height: 140px; margin-top: 30px; margin-bottom: 10px;"></div>
 
             <div id="real-estate-guide-container">
                 
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <button id="back-btn" style="background:none; border:none; color:#4285F4; cursor:pointer; font-weight:bold; display:none;">← Back</button>
-                    <span id="step-counter" style="color:#888; font-size:0.9rem;">Start</span>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <button id="back-btn" style="background:none; border:none; color:#64748b; cursor:pointer; font-weight:600; font-size: 0.9rem; display:none; padding: 5px 0;">&larr; Previous</button>
+                    <span id="step-counter" style="color:#94a3b8; font-size:0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px;">Start</span>
                 </div>
                 
                 <div class="progress-container">
@@ -149,22 +130,24 @@
                 </div>
 
                 <div id="tree-content">
-                    <h2 id="question-text" style="margin-bottom: 25px; font-size: 1.4rem; color: #222; font-weight: 700;">Loading Logic...</h2>
+                    <h2 id="question-text" style="margin-bottom: 30px; font-size: 1.5rem; color: #1e293b; font-weight: 800; line-height: 1.3;">Initializing Engine...</h2>
                     <div id="options-container"></div>
                 </div>
 
                 <div id="contact-form-container" style="display: none;">
-                    <h3 style="margin-top:0;">Request This Strategy</h3>
-                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Based on your inputs, this is the most efficient path forward.</p>
+                    <h3 style="margin-top:0; color: #111;">Execute Strategy</h3>
+                    <p style="font-size: 0.95rem; color: #666; margin-bottom: 20px; line-height: 1.5;">We have identified the optimal path based on your inputs. Enter your details to receive the full execution plan.</p>
                     <form id="contact-form">
-                        <input type="text" name="name" placeholder="Your Name" required />
-                        <input type="email" name="email" placeholder="Your Email" required />
-                        <input type="tel" name="phone" placeholder="Phone Number (Optional)" />
-                        <textarea id="message-field" name="message" rows="8" required></textarea>
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <input type="text" name="name" placeholder="Full Name" required />
+                            <input type="email" name="email" placeholder="Email Address" required />
+                        </div>
+                        <input type="tel" name="phone" placeholder="Phone Number (Optional - for faster response)" />
+                        <textarea id="message-field" name="message" rows="5" required></textarea>
                         
                         <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
                         
-                        <button type="submit" id="submit-btn">Send Request</button>
+                        <button type="submit" id="submit-btn">Unlock Strategy</button>
                         <p id="form-status"></p>
                     </form>
                 </div>
@@ -176,7 +159,7 @@
 <footer>
     <section class="d-flex flex-row justify-content-center" style="width: 100%;">
         <div class="container" style="text-align: center;">
-             <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
+             <p class="mb-0">&copy; <span id="currentYear"></span> Pavlo Rospopa. All Rights Reserved.</p>
         </div>
     </section>
 </footer>
@@ -184,812 +167,420 @@
 <script>
     document.getElementById('currentYear').textContent = new Date().getFullYear();
 
-    // --- PARTICLE ANIMATION SCRIPT ---
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
     const anchor = document.getElementById('particle-anchor');
 
-    const CONFIG = {
-        particleSize: 3,           
-        returnSpeed: 0.15        
-    };
-
+    const CONFIG = { particleSize: 3, returnSpeed: 0.12 };
     let particlesArray = [];
-
-    const mouse = {
-        x: null,
-        y: null,
-        radius: 120
-    }
-
+    const mouse = { x: null, y: null, radius: 100 }
     let isTouch = false;
 
     window.addEventListener('mousemove', function(event){
         if (isTouch) return; 
-        mouse.x = event.pageX; 
-        mouse.y = event.pageY;
+        mouse.x = event.pageX; mouse.y = event.pageY;
     });
       
     const handleTouch = (event) => {
         isTouch = true;
         if(event.touches.length > 0) {
-            mouse.x = event.touches[0].pageX;
-            mouse.y = event.touches[0].pageY;
+            mouse.x = event.touches[0].pageX; mouse.y = event.touches[0].pageY;
         }
     };
-
     window.addEventListener('touchstart', handleTouch, {passive: true});
     window.addEventListener('touchmove', handleTouch, {passive: true});
-
-    const clearTouch = () => {
-        mouse.x = undefined;
-        mouse.y = undefined;
-        setTimeout(() => {
-            isTouch = false;
-        }, 500);
-    };
-
+    const clearTouch = () => { mouse.x = undefined; mouse.y = undefined; setTimeout(() => { isTouch = false; }, 500); };
     window.addEventListener('touchend', clearTouch);
     window.addEventListener('touchcancel', clearTouch);
-      
-    window.addEventListener('mouseout', function(){
-        if (!isTouch) {
-            mouse.x = undefined;
-            mouse.y = undefined;
-        }
-    });
+    window.addEventListener('mouseout', function(){ if (!isTouch) { mouse.x = undefined; mouse.y = undefined; } });
 
     class Particle {
         constructor(xOffset, yOffset, color, size){
-            this.xOffset = xOffset; 
-            this.yOffset = yOffset; 
-            this.color = color;
-            this.size = size;
+            this.xOffset = xOffset; this.yOffset = yOffset; 
+            this.color = color; this.size = size;
             this.density = (Math.random() * 30) + 5;
-            this.dx = 0; 
-            this.dy = 0; 
+            this.dx = 0; this.dy = 0; 
         }
-        
         draw(anchorX, anchorY){
             let drawX = anchorX + this.xOffset + this.dx;
             let drawY = anchorY + this.yOffset + this.dy;
-
             ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.fillRect(drawX, drawY, this.size, this.size);
-            ctx.closePath();
+            ctx.beginPath(); ctx.fillRect(drawX, drawY, this.size, this.size); ctx.closePath();
         }
-        
         update(anchorX, anchorY){
             let currentX = anchorX + this.xOffset + this.dx;
             let currentY = anchorY + this.yOffset + this.dy;
-
             let distMouseX = mouse.x - currentX;
             let distMouseY = mouse.y - currentY;
-             
+            
             if (mouse.x == null || mouse.y == null) {
-                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
-                else this.dx = 0;
-                
-                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
-                else this.dy = 0;
+                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed; else this.dx = 0;
+                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed; else this.dy = 0;
                 return;
             }
-
             let distance = Math.sqrt(distMouseX * distMouseX + distMouseY * distMouseY);
-             
             if (distance < mouse.radius) {
-                let forceDirectionX = distMouseX / distance;
-                let forceDirectionY = distMouseY / distance;
-                let maxDistance = mouse.radius;
-                let force = (maxDistance - distance) / maxDistance;
-                let directionX = forceDirectionX * force * this.density;
-                let directionY = forceDirectionY * force * this.density;
-                
-                this.dx -= directionX;
-                this.dy -= directionY;
+                let force = (mouse.radius - distance) / mouse.radius;
+                let directionX = (distMouseX / distance) * force * this.density;
+                let directionY = (distMouseY / distance) * force * this.density;
+                this.dx -= directionX; this.dy -= directionY;
             } else {
-                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
-                else this.dx = 0;
-                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
-                else this.dy = 0;
+                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed; else this.dx = 0;
+                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed; else this.dy = 0;
             }
         }
     }
 
     function init() {
         particlesArray = [];
-        
         let isMobile = window.innerWidth < 600;
         let step = isMobile ? 4 : 3; 
-        
         let contentWidth = Math.min(window.innerWidth - 40, 600); 
         let fontSize = Math.floor(contentWidth * 0.16);
-        
-        if (fontSize < 40) fontSize = 40;
-        if (fontSize > 180) fontSize = 180;
-
+        if (fontSize < 40) fontSize = 40; if (fontSize > 160) fontSize = 160;
         CONFIG.particleSize = step;
         
         let anchorTop = anchor.offsetTop; 
-
-        canvas.width = window.innerWidth;
-        canvas.style.width = window.innerWidth + 'px';
-
-        let safeHeight = anchorTop + 600; 
-        canvas.height = safeHeight;
-        canvas.style.height = safeHeight + 'px';
+        canvas.width = window.innerWidth; canvas.style.width = window.innerWidth + 'px';
+        let safeHeight = anchorTop + 400; 
+        canvas.height = safeHeight; canvas.style.height = safeHeight + 'px';
 
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
         
         let centerX = canvas.width / 2;
-        let centerY = anchorTop + (150 / 2); 
-        // Changed text to match the content
+        let centerY = anchorTop + (140 / 2); 
         let text = 'Strategy'; 
-
         let metrics = ctx.measureText(text);
-        let textWidth = metrics.width;
-        let startX = centerX - (textWidth / 2);
-        let endX = centerX + (textWidth / 2);
-
+        let startX = centerX - (metrics.width / 2); let endX = centerX + (metrics.width / 2);
         let gradient = ctx.createLinearGradient(startX, 0, endX, 0);
-        gradient.addColorStop(0, '#4285F4'); 
-        gradient.addColorStop(0.5, '#a855f7'); 
-        gradient.addColorStop(1, '#ec4899'); 
+        gradient.addColorStop(0, '#2563eb'); gradient.addColorStop(0.5, '#7c3aed'); gradient.addColorStop(1, '#db2777'); 
 
-        ctx.fillStyle = gradient;
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-        ctx.fillText(text, centerX, centerY);
-        
+        ctx.fillStyle = gradient; ctx.clearRect(0,0, canvas.width, canvas.height); ctx.fillText(text, centerX, centerY);
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
-        for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
-            for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
+        for (let y = 0; y < textCoordinates.height; y += step){
+            for (let x = 0; x < textCoordinates.width; x += step){
                 let index = (y * 4 * textCoordinates.width) + (x * 4);
-                
                 if (textCoordinates.data[index + 3] > 128){
-                    let r = textCoordinates.data[index];
-                    let g = textCoordinates.data[index + 1];
-                    let b = textCoordinates.data[index + 2];
-                    let color = 'rgb(' + r + ',' + g + ',' + b + ')';
-                    
-                    let xOffset = x - centerX;
-                    let yOffset = y - centerY;
-                    
-                    particlesArray.push(new Particle(xOffset, yOffset, color, CONFIG.particleSize));
+                    let r = textCoordinates.data[index]; let g = textCoordinates.data[index + 1]; let b = textCoordinates.data[index + 2];
+                    let xOffset = x - centerX; let yOffset = y - centerY;
+                    particlesArray.push(new Particle(xOffset, yOffset, 'rgb('+r+','+g+','+b+')', CONFIG.particleSize));
                 }
             }
         }
         ctx.clearRect(0,0, canvas.width, canvas.height);
-        
-        if(anchor) anchor.style.height = (fontSize + 60) + "px";
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
         let centerX = canvas.width / 2;
         let centerY = anchor.offsetTop + (anchor.offsetHeight / 2);
-
         for (let i = 0; i < particlesArray.length; i++){
-            particlesArray[i].update(centerX, centerY);
-            particlesArray[i].draw(centerX, centerY);
+            particlesArray[i].update(centerX, centerY); particlesArray[i].draw(centerX, centerY);
         }
         requestAnimationFrame(animate);
     }
-
-    window.addEventListener('load', function() {
-        setTimeout(init, 100); 
-        animate();
-    });
-
+    window.addEventListener('load', function() { setTimeout(init, 100); animate(); });
     let lastWidth = window.innerWidth;
-    window.addEventListener('resize', function(){
-        if (Math.abs(window.innerWidth - lastWidth) > 50) {
-            lastWidth = window.innerWidth;
-            init();
-        }
-    });
+    window.addEventListener('resize', function(){ if (Math.abs(window.innerWidth - lastWidth) > 50) { lastWidth = window.innerWidth; init(); } });
 </script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    
-    // Global object to store user answers
     let userAnswers = {};
 
     const tree = {
-        // --- ROOT ---
+        // ==========================================
+        // ROOT
+        // ==========================================
         start: {
-            text: "What is your primary Real Estate Goal?",
+            text: "Welcome to the Strategy Engine. How can we help you today?",
             type: 'button',
             options: [
-                { label: "Residential: Buying", next: "buy_node_1" },
-                { label: "Residential: Selling", next: "sell_node_1" },
-                { label: "Refinancing Existing Loan", next: "refi_node_1" },
-                { label: "Mortgage Qualification", next: "mortgage_qual_node" },
-                { label: "Wealth: Investing", next: "invest_node_1" },
-                { label: "Commercial Real Estate", next: "comm_node_1" },
-                { label: "Business Acquisition", next: "comm_node_1" }, 
-                { label: "Raw Land", next: "land_node_1" },
-                { label: "Development Project", next: "land_node_1" }
+                { label: "I want to BUY a property", next: "buy_experience_check" },
+                { label: "I want to SELL a property", next: "sell_motivation" },
+                { label: "I want to INVEST (Build Wealth)", next: "invest_goal" },
+                { label: "I'm just exploring / Not sure yet", next: "explore_path" },
+                { label: "I have a complex situation (Legal/Divorce)", next: "complex_triage" }
             ]
         },
 
         // ==========================================
-        // BRANCH 1: BUYING
+        // BRANCH 1: BUYING (Refined)
         // ==========================================
-        buy_node_1: {
-            text: "Are you a US Citizen or Permanent Resident?",
+        buy_experience_check: {
+            text: "Have you purchased real estate before?",
             type: 'button',
             options: [
-                { label: "Yes", next: "buy_loc_status" },
-                { label: "No", next: "buy_visa_status" }
+                { label: "No, I'm a First-Time Buyer", next: "buy_finance_check" },
+                { label: "Yes, I'm an experienced buyer", next: "buy_contingency_check" }
             ]
         },
-        buy_visa_status: { 
-            text: "Do you have a valid Work Visa or ITIN?",
+        buy_contingency_check: {
+            text: "Do you need to sell your current home to buy the new one?",
             type: 'button',
+            variable: 'Contingency',
             options: [
-                { label: "Work Visa (H1B, etc)", next: "buy_loc_status" },
-                { label: "ITIN Number only", next: "strat_itin_loan" },
-                { label: "Foreign National (No US Credit)", next: "strat_foreign_national" }
+                { label: "Yes, I need to sell first", next: "strat_buy_sell_bridge" },
+                { label: "No, I can buy without selling", next: "buy_finance_check" },
+                { label: "I'm not sure if I qualify for both", next: "strat_lender_analysis" }
             ]
         },
-        buy_loc_status: {
-            text: "How do you plan to purchase?",
+        buy_finance_check: {
+            text: "What is your current financing status?",
             type: 'button',
+            variable: 'Financing Status',
             options: [
-                { label: "Buying Locally", next: "buy_timeframe_select" },
-                { label: "Relocating Here", next: "buy_timeframe_select" },
-                { label: "Online Auction", next: "buy_auction_type" },
-                { label: "Foreclosure / Bank Owned", next: "strat_sheriff_cash" },
-                { label: "New Construction", next: "buy_new_const_path" }
+                { label: "Cash Buyer (Proof of Funds ready)", next: "buy_timeline" },
+                { label: "Pre-Approved (Letter in hand)", next: "buy_timeline" },
+                { label: "Just starting / Haven't spoken to lender", next: "buy_credit_self_assess" },
+                { label: "I don't know my budget yet", next: "strat_affordability_calc" }
             ]
         },
-
-        // --- Timeframe Selector ---
-        buy_timeframe_select: {
-            text: "What is your desired timeframe to close?",
+        buy_credit_self_assess: {
+            text: "How would you rate your credit?",
+            type: 'button',
+            variable: 'Self-Credit',
+            options: [
+                { label: "Excellent (720+)", next: "buy_timeline" },
+                { label: "Fair (620-719)", next: "buy_timeline" },
+                { label: "Challenged (<620)", next: "strat_credit_repair_first" },
+                { label: "I honestly don't know", next: "strat_soft_pull_consult" }
+            ]
+        },
+        buy_timeline: {
+            text: "When are you hoping to move in?",
             type: 'select',
             variable: 'Timeline',
-            choices: [
-                "ASAP",
-                "Within 30 Days",
-                "1 - 3 Months",
-                "3 - 6 Months",
-                "6+ Months",
-                "Just Browsing"
-            ],
-            next: "buy_location_input"
+            choices: ["ASAP (Urgent)", "30-60 Days", "3-6 Months", "6-12 Months", "Just casually looking"],
+            next: "buy_property_type"
         },
-
-        // --- Location Text Input ---
+        buy_property_type: {
+            text: "What type of property are you looking for?",
+            type: 'button',
+            variable: 'Property Type',
+            options: [
+                { label: "Single Family House", next: "buy_sfh_maintenance" },
+                { label: "Condo / Townhome (Low Maintenance)", next: "buy_condo_details" },
+                { label: "Multi-Unit (Live in one, rent others)", next: "strat_house_hacking" },
+                { label: "I'm undecided / Open to both", next: "buy_lifestyle_check" }
+            ]
+        },
+        // --- SFH Sub-Branch ---
+        buy_sfh_maintenance: {
+            text: "How do you feel about renovations?",
+            type: 'button',
+            variable: 'Reno Tolerance',
+            options: [
+                { label: "Turnkey only (Move-in Ready)", next: "buy_location_input" },
+                { label: "Cosmetic work is okay (Paint/Floors)", next: "buy_location_input" },
+                { label: "I want a Fixer-Upper (Sweat Equity)", next: "strat_reno_loan" },
+                { label: "I don't know / Depends on price", next: "strat_value_vs_condition" }
+            ]
+        },
+        // --- Condo Sub-Branch ---
+        buy_condo_details: {
+            text: "Are you familiar with HOA fees and rules?",
+            type: 'button',
+            options: [
+                { label: "Yes, I understand them", next: "buy_location_input" },
+                { label: "No, explain how they work", next: "strat_hoa_education" }
+            ]
+        },
+        // --- Undecided Sub-Branch ---
+        buy_lifestyle_check: {
+            text: "What matters more to you right now?",
+            type: 'button',
+            options: [
+                { label: "Privacy and Yard Space", next: "strat_sfh_search" },
+                { label: "Convenience and Location", next: "strat_condo_search" },
+                { label: "I need to see both to decide", next: "strat_hybrid_tour" }
+            ]
+        },
+        
         buy_location_input: {
-            text: "What City, Neighborhood, or Zip Code are you looking in?",
+            text: "Do you have a specific neighborhood in mind?",
             type: 'text',
-            variable: 'Target Location',
-            placeholder: "e.g. Downtown, 90210, North Side...",
-            next: "buy_inventory_triage"
+            variable: 'Target Area',
+            placeholder: "e.g. Downtown, School District 203, Near Work...",
+            next: "buy_final_check"
         },
-
-        // --- PROPERTY TYPE (Refactored) ---
-        buy_inventory_triage: {
-            text: "Property Type Preference?",
+        buy_final_check: {
+            text: "Any absolute deal-breakers?",
             type: 'button',
             options: [
-                { label: "Single Family Home", next: "buy_bed_count" },
-                { label: "Condo", next: "buy_condo_floor_pref" },
-                { label: "Co-Op", next: "buy_coop_path" },
-                { label: "Multi-Unit (2-4)", next: "buy_bed_count" },
-                { label: "Manufactured Home", next: "buy_manu_foundation" },
-                { label: "Mobile Home (Park)", next: "strat_chattel_loan" }
+                { label: "Must have specific school district", next: "strat_school_zone_targeting" },
+                { label: "Commute time is #1 priority", next: "strat_commute_analysis" },
+                { label: "Need a bedroom on main floor", next: "strat_accessibility_search" },
+                { label: "No major deal breakers", next: "strat_vip_buyer_consult" }
             ]
-        },
-
-        // --- Condo Specific ---
-        buy_condo_floor_pref: {
-            text: "Floor Level Preference?",
-            type: 'button',
-            variable: 'Floor Preference',
-            options: [
-                { label: "Ground Floor", next: "buy_bed_count" },
-                { label: "Top Floor", next: "buy_bed_count" },
-                { label: "Mid-Rise", next: "buy_bed_count" },
-                { label: "High-Rise", next: "buy_bed_count" },
-                { label: "Walk-up OK", next: "buy_bed_count" }
-            ]
-        },
-        
-        // --- Co-Op Specific (New Node) ---
-        buy_coop_path: {
-            text: "Are you prepared for a Board Interview?",
-            type: 'button',
-            options: [
-                { label: "Yes, finances are ready", next: "strat_coop_board_pack" },
-                { label: "Unsure what that entails", next: "strat_coop_board_pack" }
-            ]
-        },
-
-        // --- Numeric Inputs ---
-        buy_bed_count: {
-            text: "Minimum Bedrooms required?",
-            type: 'number',
-            variable: 'Min Bedrooms',
-            placeholder: "e.g. 3",
-            next: "buy_bath_count"
-        },
-        buy_bath_count: {
-            text: "Minimum Bathrooms required?",
-            type: 'number',
-            variable: 'Min Bathrooms',
-            placeholder: "e.g. 2",
-            next: "buy_garage_pref"
-        },
-
-        // --- Garage (Refactored) ---
-        buy_garage_pref: {
-            text: "Parking / Garage Requirement?",
-            type: 'button',
-            variable: 'Garage',
-            options: [
-                { label: "Attached Garage", next: "buy_school_pref" },
-                { label: "Detached Garage", next: "buy_school_pref" },
-                { label: "Carport", next: "buy_school_pref" },
-                { label: "Street Parking OK", next: "buy_school_pref" },
-                { label: "RV / Boat Parking Needed", next: "buy_school_pref" }
-            ]
-        },
-        buy_school_pref: {
-            text: "Is School District a priority?",
-            type: 'button',
-            variable: 'School Importance',
-            options: [
-                { label: "Critical", next: "buy_nature_pref" },
-                { label: "Important", next: "buy_nature_pref" },
-                { label: "Not a factor", next: "buy_nature_pref" }
-            ]
-        },
-        buy_nature_pref: {
-            text: "Lifestyle / Surroundings Preference?",
-            type: 'button',
-            variable: 'Lifestyle',
-            options: [
-                { label: "Near Parks", next: "buy_sfh_features" },
-                { label: "Lakefront", next: "strat_littoral_rights" },
-                { label: "Oceanfront", next: "strat_coastal_construction_line" },
-                { label: "Near Transit", next: "buy_sfh_features" },
-                { label: "No Preference", next: "buy_sfh_features" }
-            ]
-        },
-
-        buy_sfh_features: {
-            text: "Any other specific needs?",
-            type: 'button',
-            options: [
-                { label: "Multi-Generational Suite", next: "strat_multigen_search" },
-                { label: "Swimming Pool", next: "strat_pool_inspection" },
-                { label: "Basement Issues", next: "buy_foundation_check" },
-                { label: "Historic Home", next: "buy_vintage_risk" },
-                { label: "None / Standard", next: "buy_fthb_triage" }
-            ]
-        },
-
-        // --- FINANCING TRIAGE ---
-        buy_fthb_triage: {
-            text: "What is your biggest hurdle right now?",
-            type: 'button',
-            options: [
-                { label: "Down Payment", next: "buy_down_source" },
-                { label: "Credit Score", next: "buy_credit_deep" },
-                { label: "Income Type", next: "buy_income_check" },
-                { label: "No Hurdles", next: "buy_offer_market" }
-            ]
-        },
-
-        // --- NEW CONSTRUCTION SUB-BRANCH ---
-        buy_new_const_path: {
-            text: "Type of New Construction?",
-            type: 'button',
-            options: [
-                { label: "Custom Build (Own Lot)", next: "buy_custom_build_lot" },
-                { label: "Production Builder", next: "buy_production_rep" },
-                { label: "Spec Home (Already Built)", next: "strat_new_home_warranty" }
-            ]
-        },
-        buy_custom_build_lot: {
-            text: "Do you already own the lot?",
-            type: 'button',
-            options: [
-                { label: "Yes, Lot Owned", next: "buy_construction_loan" },
-                { label: "No, Need Lot + Build", next: "strat_land_build_package" }
-            ]
-        },
-        buy_construction_loan: {
-            text: "Loan Preference?",
-            type: 'button',
-            options: [
-                { label: "One-Time Close", next: "strat_one_time_close_const" },
-                { label: "Two-Time Close", next: "strat_two_time_close" }
-            ]
-        },
-        buy_production_rep: {
-            text: "Have you visited the sales office yet?",
-            type: 'button',
-            options: [
-                { label: "No, not yet", next: "strat_builder_registration" }, 
-                { label: "Yes, I signed a registry", next: "strat_builder_procurement_risk" }
-            ]
-        },
-
-        buy_auction_type: {
-            text: "Which Auction Platform?",
-            type: 'button',
-            options: [
-                { label: "Hubzu", next: "strat_auction_tech_fee" },
-                { label: "Xome", next: "strat_auction_tech_fee" },
-                { label: "Auction.com", next: "strat_auction_tech_fee" }
-            ]
-        },
-        
-        buy_vintage_risk: {
-            text: "Concerned about lead or asbestos?",
-            type: 'button',
-            options: [
-                { label: "Yes, Safety First", next: "strat_lead_paint" },
-                { label: "No, I will rehab", next: "buy_rehab_loan" }
-            ]
-        },
-        buy_rehab_loan: {
-            text: "Scope of Rehab?",
-            type: 'button',
-            options: [
-                { label: "Cosmetic (<$35k)", next: "strat_fha_203k_limited" },
-                { label: "Structural (Additions)", next: "strat_fha_203k_standard" }
-            ]
-        },
-        buy_foundation_check: {
-            text: "Foundation Preference?",
-            type: 'button',
-            options: [
-                { label: "Full Basement", next: "strat_radon_mitigation" },
-                { label: "Crawl Space", next: "strat_crawl_encapsulation" },
-                { label: "Slab", next: "strat_plumbing_scope" }
-            ]
-        },
-        
-        buy_manu_foundation: {
-            text: "Is it on a permanent foundation?",
-            type: 'button',
-            options: [
-                { label: "Yes, HUD Tags present", next: "strat_fha_manufactured" },
-                { label: "No / Pre-1976", next: "strat_cash_only_manu" }
-            ]
-        },
-        
-        // --- OFFER STRATEGIES ---
-        buy_offer_market: {
-            text: "How competitive is the market?",
-            type: 'button',
-            options: [
-                { label: "Bidding Wars", next: "buy_aggressive_offer" },
-                { label: "Balanced", next: "buy_inspection_pref" },
-                { label: "Slow", next: "buy_inspection_pref" }
-            ]
-        },
-        buy_aggressive_offer: {
-            text: "Willing to cover Appraisal Gap?",
-            type: 'button',
-            options: [
-                { label: "Yes, I have cash", next: "strat_appraisal_gap_guarantee" },
-                { label: "No, max budget", next: "strat_escalation_clause" }
-            ]
-        },
-        buy_inspection_pref: {
-            text: "Inspection preferences?",
-            type: 'button',
-            options: [
-                { label: "Info Only (Pass/Fail)", next: "strat_info_only_inspection" },
-                { label: "Full Negotiation", next: "buy_vintage_risk" }
-            ]
-        },
-        
-        // --- FINANCING DETAILS ---
-        buy_down_source: {
-            text: "Are you a Veteran?",
-            type: 'button',
-            options: [ { label: "Yes", next: "strat_va_loan" }, { label: "No", next: "buy_gift_check" } ]
-        },
-        buy_gift_check: {
-            text: "Do you have gift funds?",
-            type: 'button',
-            options: [ { label: "Yes", next: "strat_gift_letter" }, { label: "No", next: "res_grant" } ]
-        },
-        buy_credit_deep: {
-            text: "Score Range?",
-            type: 'button',
-            options: [
-                { label: "720+", next: "buy_offer_market" },
-                { label: "580-619", next: "res_credit_repair" },
-                { label: "Under 580", next: "res_credit_repair" }
-            ]
-        },
-        buy_income_check: {
-            text: "Income Source?",
-            type: 'button',
-            options: [
-                { label: "W-2 Salary", next: "buy_offer_market" },
-                { label: "Self-Employed", next: "strat_bank_statement" },
-                { label: "Commission", next: "strat_2yr_avg" },
-                { label: "Bonus", next: "strat_2yr_avg" }
-            ]
-        },
-
-
-        // ==========================================
-        // BRANCH 2: SELLING
-        // ==========================================
-        sell_node_1: {
-            text: "Occupancy Status?",
-            type: 'button',
-            options: [
-                { label: "Occupied by Me", next: "sell_pets_check" },
-                { label: "Occupied by Tenant", next: "sell_tenant_lease" },
-                { label: "Vacant", next: "sell_vacant_issues" },
-                { label: "Hoarder Situation", next: "strat_hoarder_cleanout" }
-            ]
-        },
-        sell_pets_check: {
-            text: "Do you have pets in the home?",
-            type: 'button',
-            options: [
-                { label: "Yes", next: "strat_pet_showing_plan" },
-                { label: "No", next: "sell_reason_check" }
-            ]
-        },
-        sell_vacant_issues: {
-            text: "Is the property winterized?",
-            type: 'button',
-            options: [
-                { label: "Yes, secured", next: "strat_vacant_staging" },
-                { label: "No, utilities off", next: "strat_utility_activation" }
-            ]
-        },
-        sell_tenant_lease: {
-            text: "Lease Type?",
-            type: 'button',
-            options: [
-                { label: "Month-to-Month", next: "strat_cash_keys_coop" },
-                { label: "Long Term", next: "strat_tenant_sale" },
-                { label: "Eviction needed", next: "strat_eviction_sale" }
-            ]
-        },
-        sell_reason_check: {
-            text: "Selling Motivation?",
-            type: 'button',
-            options: [
-                { label: "Move Up", next: "sell_taxes_check" },
-                { label: "Downsizing", next: "sell_taxes_check" },
-                { label: "Financial Distress", next: "sell_distress" },
-                { label: "Divorce", next: "sell_divorce_status" },
-                { label: "Inheritance", next: "sell_probate" }
-            ]
-        },
-        sell_taxes_check: {
-            text: "Lived in 2 of last 5 years?",
-            type: 'button',
-            options: [ { label: "Yes", next: "sell_title_check" }, { label: "No", next: "strat_cap_gains_calc" } ]
-        },
-        sell_title_check: {
-            text: "Is the home in a Trust?",
-            type: 'button',
-            options: [ { label: "Yes", next: "strat_trust_sale" }, { label: "No", next: "sell_luxury_check" } ]
-        },
-        sell_luxury_check: {
-            text: "Value > $800k or Unique?",
-            type: 'button',
-            options: [
-                { label: "Yes, Luxury", next: "sell_luxury_amenities" },
-                { label: "No, Standard", next: "sell_prep_check" }
-            ]
-        },
-        sell_luxury_amenities: {
-            text: "Special Amenities?",
-            type: 'button',
-            options: [
-                { label: "Smart Home Tech", next: "strat_tech_transfer" },
-                { label: "Art Collection", next: "strat_valuable_inclusions" },
-                { label: "Wine Cellar", next: "strat_valuable_inclusions" },
-                { label: "Privacy Required", next: "sell_privacy_check" }
-            ]
-        },
-        sell_privacy_check: {
-            text: "Require privacy from public?",
-            type: 'button',
-            options: [ 
-                { label: "Yes, Public Figure", next: "strat_luxury_private" }, 
-                { label: "No, market widely", next: "strat_luxury_listing" } 
-            ]
-        },
-        sell_prep_check: {
-            text: "Condition of the home?",
-            type: 'button',
-            options: [
-                { label: "Turnkey", next: "sell_marketing_media" },
-                { label: "Retail Ready", next: "sell_marketing_media" },
-                { label: "Dated", next: "strat_as_is_pricing" },
-                { label: "Major Repairs Needed", next: "strat_cash_offer_network" }
-            ]
-        },
-        sell_marketing_media: {
-            text: "Marketing Preference?",
-            type: 'button',
-            options: [
-                { label: "Full Media (Drone/Video)", next: "strat_drone_video" },
-                { label: "Standard Photos", next: "strat_fsbo_conversion" }
-            ]
-        },
-        sell_distress: {
-            text: "Any Liens?",
-            type: 'button',
-            options: [ { label: "Yes", next: "strat_title_clearance" }, { label: "No", next: "sell_mortgage_status" } ]
-        },
-        sell_mortgage_status: {
-            text: "Behind on payments?",
-            type: 'button',
-            options: [ { label: "Yes", next: "strat_short_sale" }, { label: "No", next: "strat_hold_rent" } ]
-        },
-        sell_divorce_status: {
-            text: "Amicable or Contested?",
-            type: 'button',
-            options: [
-                { label: "Amicable", next: "strat_divorce_neutral" },
-                { label: "Contested", next: "strat_high_conflict_listing" }
-            ]
-        },
-        sell_probate: {
-            text: "Letters of Office?",
-            type: 'button',
-            options: [ { label: "Yes", next: "strat_probate_easy" }, { label: "No", next: "strat_probate_court" } ]
         },
 
         // ==========================================
-        // BRANCH 3-6 (Refi, Invest, Commercial, Land)
+        // BRANCH 2: SELLING (Refined)
         // ==========================================
-        refi_node_1: {
-            text: "Refinance Goal?",
+        sell_motivation: {
+            text: "What is driving your decision to sell?",
             type: 'button',
+            variable: 'Motivation',
             options: [
-                { label: "Lower Payment", next: "strat_rate_term_refi" },
-                { label: "Cash Out", next: "strat_cash_out_refi" },
-                { label: "Remove PMI", next: "strat_pmi_removal" }
+                { label: "Upsizing / Downsizing", next: "sell_timeline_vs_price" },
+                { label: "Relocating out of area", next: "sell_timeline_vs_price" },
+                { label: "Financial Distress / Too expensive", next: "strat_confidential_distress" },
+                { label: "Inherited Property / Probate", next: "sell_probate_check" },
+                { label: "Just curious about value", next: "strat_cma_valuation" }
             ]
         },
-        mortgage_qual_node: {
-            text: "Qualification Status?",
+        sell_timeline_vs_price: {
+            text: "The Golden Trade-off: Which is more important?",
             type: 'button',
+            variable: 'Priority',
             options: [
-                { label: "Pre-Approval", next: "buy_income_check" },
-                { label: "Refinancing", next: "refi_node_1" }
+                { label: "Maximum Price (I can wait)", next: "sell_condition_honest" },
+                { label: "Speed / Convenience (Sell fast)", next: "strat_express_sale" },
+                { label: "A balance of both", next: "sell_condition_honest" }
             ]
         },
-        invest_node_1: {
-            text: "Investment Strategy?",
+        sell_condition_honest: {
+            text: "How would you rate your home's condition?",
             type: 'button',
+            variable: 'Condition',
             options: [
-                { label: "Long Term Rental", next: "strat_buy_hold" },
-                { label: "Short Term Rental", next: "strat_str_self" },
-                { label: "Airbnb / VRBO", next: "strat_str_self" },
-                { label: "Fix & Flip", next: "strat_fix_flip" }
+                { label: "Showroom Ready (Updates < 5 yrs)", next: "strat_luxury_marketing" },
+                { label: "Good, but dated (Liveable)", next: "sell_prep_willingness" },
+                { label: "Needs significant repairs", next: "sell_repair_ability" },
+                { label: "I have no idea / Need opinion", next: "strat_pre_listing_inspection" }
             ]
         },
-        comm_node_1: {
-            text: "Asset Class?",
+        sell_prep_willingness: {
+            text: "Are you willing to paint or stage before listing?",
             type: 'button',
             options: [
-                { label: "Retail", next: "strat_retail_ti_allowance" },
-                { label: "Office", next: "strat_flex_space" },
-                { label: "Industrial", next: "strat_heavy_industrial" }
+                { label: "Yes, I'll do what it takes", next: "strat_concierge_prep" },
+                { label: "No, sell it 'As-Is'", next: "strat_as_is_pricing" },
+                { label: "What would give me the best ROI?", next: "strat_roi_consult" }
             ]
         },
-        land_node_1: {
-            text: "Land Type?",
+        sell_repair_ability: {
+            text: "Do you have funds to fix it up before selling?",
             type: 'button',
             options: [
-                { label: "Infill Residential", next: "strat_infill_development" },
-                { label: "Raw Acreage", next: "strat_land_hold" }
+                { label: "Yes, I can invest in repairs", next: "strat_flip_yourself" },
+                { label: "No, I need to sell strictly As-Is", next: "strat_investor_network" }
+            ]
+        },
+        sell_probate_check: {
+            text: "Do you have the legal authority (Letters of Office)?",
+            type: 'button',
+            options: [
+                { label: "Yes, I am the Executor", next: "strat_probate_market" },
+                { label: "No, process hasn't started", next: "strat_probate_attorney" },
+                { label: "I don't know what that is", next: "strat_probate_education" }
             ]
         },
 
+        // ==========================================
+        // BRANCH 3: INVESTING (Refined)
+        // ==========================================
+        invest_goal: {
+            text: "What is your primary investment goal?",
+            type: 'button',
+            variable: 'Invest Goal',
+            options: [
+                { label: "Monthly Cash Flow (Income)", next: "invest_involvement" },
+                { label: "Long Term Appreciation (Growth)", next: "strat_appreciation_play" },
+                { label: "Quick Profit (Flip)", next: "strat_fix_flip_analysis" },
+                { label: "Tax Benefits / Write-offs", next: "strat_tax_deferral" }
+            ]
+        },
+        invest_involvement: {
+            text: "How involved do you want to be?",
+            type: 'button',
+            variable: 'Involvement',
+            options: [
+                { label: "Active (I'll manage tenants/repairs)", next: "strat_house_hacking" },
+                { label: "Semi-Active (I'll manage manager)", next: "strat_turnkey_rental" },
+                { label: "Passive (Hands off)", next: "strat_syndication_referral" },
+                { label: "I don't know the difference", next: "strat_investor_education" }
+            ]
+        },
 
         // ==========================================
-        // OUTCOMES (STRATEGIES)
+        // BRANCH 4: EXPLORATION / UNKNOWN
+        // ==========================================
+        explore_path: {
+            text: "That's okay! What topic interests you most?",
+            type: 'button',
+            options: [
+                { label: "Can I afford to buy?", next: "strat_affordability_calc" },
+                { label: "What is my home worth?", next: "strat_cma_valuation" },
+                { label: "Is now a good time to act?", next: "strat_market_report" },
+                { label: "Rent vs. Buy Analysis", next: "strat_rent_vs_buy" }
+            ]
+        },
+        complex_triage: {
+            text: "What is the nature of the situation?",
+            type: 'button',
+            options: [
+                { label: "Divorce / Separation", next: "strat_divorce_neutral" },
+                { label: "Bankruptcy / Foreclosure", next: "strat_short_sale_help" },
+                { label: "Estate / Trust Sale", next: "strat_trust_sale" }
+            ]
+        },
+
+        // ==========================================
+        // STRATEGY END POINTS (The "Result" Nodes)
         // ==========================================
         
-        // --- NEW CONSTRUCTION STRATEGIES ---
-        strat_builder_registration: { text: "Strategy: Builder Registration. You MUST have your agent register you on your first visit, or the builder will refuse to pay their commission.", options: [] },
-        strat_builder_procurement_risk: { text: "Strategy: Procurement Cause Risk. Since you signed in alone, we must negotiate nicely to get agent representation added retroactively.", options: [] },
-        strat_one_time_close_const: { text: "Strategy: One-Time Close Loan. You lock your rate now, close once, and interest-only payments are made during the build.", options: [] },
-        strat_two_time_close: { text: "Strategy: Two-Time Close. Greater flexibility if you want to switch lenders after the build, but you pay closing costs twice.", options: [] },
-        strat_new_home_warranty: { text: "Strategy: 1-2-10 Warranty. Ensure the builder provides a 1-year workmanship, 2-year systems, and 10-year structural warranty.", options: [] },
-        strat_land_build_package: { text: "Strategy: Land/Build Package. We find a builder who owns the lots to simplify financing into a standard purchase contract.", options: [] },
+        // Buyers
+        strat_lender_analysis: { text: "Strategy: Dual-Track Analysis. We need to have a lender run two scenarios: one where you sell first, and one where you keep the home. This determines your leverage.", options: [] },
+        strat_buy_sell_bridge: { text: "Strategy: The Bridge or Contingency. We will aim for a 'Close-Concurrent' strategy where you close on the sale in the morning and the purchase in the afternoon. Alternatively, we explore Bridge Loans.", options: [] },
+        strat_affordability_calc: { text: "Strategy: Purchase Power Audit. Before looking at homes, we will do a reverse-engineering of your finances to find a monthly payment you are comfortable with, then determine the price.", options: [] },
+        strat_credit_repair_first: { text: "Strategy: Credit Restoration Plan. Buying now might mean a high rate. We'll connect you with a credit specialist to boost your score for 3-6 months, potentially saving you thousands.", options: [] },
+        strat_soft_pull_consult: { text: "Strategy: Soft-Pull Consultation. We can have a lender do a 'Soft Pull' that doesn't hurt your credit, just to give us a baseline of where you stand.", options: [] },
+        strat_house_hacking: { text: "Strategy: House Hacking. You buy a 2-4 unit building with an FHA loan (3.5% down), live in one unit, and let the tenants pay your mortgage.", options: [] },
+        strat_reno_loan: { text: "Strategy: FHA 203k / Reno Loan. We find a home with 'bones' in a great area, and wrap the renovation costs into your mortgage with a single closing.", options: [] },
+        strat_value_vs_condition: { text: "Strategy: The 5-House Test. We will tour 3 turnkey homes and 2 fixer-uppers in the same price range. You will know instantly which trade-off you prefer.", options: [] },
+        strat_hoa_education: { text: "Strategy: HOA Deep Dive. We need to review 'Reserves' and 'Bylaws'. A low HOA fee might mean a special assessment is coming. We will audit the condo docs before you buy.", options: [] },
+        strat_sfh_search: { text: "Strategy: Single Family Focus. We prioritize lot size and zoning privacy. We'll check for easements and future development plans near the property.", options: [] },
+        strat_condo_search: { text: "Strategy: Lifestyle Condo Search. We focus on amenities, reserve funds, and rental restrictions (in case you want to rent it out later).", options: [] },
+        strat_hybrid_tour: { text: "Strategy: The Hybrid Tour. We dedicate one afternoon to seeing the best Condo vs. the best House at the same price point to crystallize your decision.", options: [] },
+        strat_school_zone_targeting: { text: "Strategy: School Zone Targeting. We search strictly by school district boundaries, not just zip codes, to ensure resale value protection.", options: [] },
+        strat_vip_buyer_consult: { text: "Strategy: VIP Buyer Consultation. Since you are flexible, we can hunt for off-market deals and 'Coming Soon' listings that match your broad criteria.", options: [] },
+        strat_commute_analysis: { text: "Strategy: Commute Radius Search. We map your drive time during rush hour and only look at homes within that specific time-radius.", options: [] },
+        strat_accessibility_search: { text: "Strategy: Universal Design Search. We filter specifically for ranches, elevators, or wide-doorway properties to ensure long-term comfort.", options: [] },
 
-        // --- BUYING STRATEGIES ---
-        strat_itin_loan: { text: "Strategy: ITIN Loan. Expect 15-20% down payment and higher interest rates, but no SSN required.", options: [] },
-        strat_foreign_national: { text: "Strategy: Foreign National Loan. Liquidity verification is key. Funds must be seasoned in a verifiable bank.", options: [] },
-        strat_auction_tech_fee: { text: "Strategy: Buyer's Premium. Calculate the 'Technology Fee' or 'Buyer's Premium' (usually 5%) on top of your bid price.", options: [] },
-        strat_sheriff_cash: { text: "Strategy: Sheriff Sale Cash. You usually need 10% certified funds immediately at the courthouse and the rest within 24 hours.", options: [] },
-        strat_corp_relo: { text: "Strategy: Relocation Rider. We must use the specific addendums required by your relocation company to ensure your benefits apply.", options: [] },
-        strat_solar_check: { text: "Strategy: Solar Lease Transfer. We must review the solar contract. If it's a lease, you have to qualify for that payment debt.", options: [] },
-        strat_pool_inspection: { text: "Strategy: Specialized Pool Inspection. Standard home inspectors miss leaks. Hire a dedicated pool company for a pressure test.", options: [] },
-        strat_radon_mitigation: { text: "Strategy: Radon Mitigation. Common in basements. We negotiate a credit for a mitigation system if levels are high.", options: [] },
-        strat_crawl_encapsulation: { text: "Strategy: Crawl Space Encapsulation. Essential for moisture control. Negotiate a vapor barrier if one is missing.", options: [] },
-        strat_plumbing_scope: { text: "Strategy: Sewer Scope (Slab). With slab foundations, a broken pipe means jackhammering the floor. A camera scope is mandatory.", options: [] },
-        strat_lead_paint: { text: "Strategy: Lead Paint Disclosure. Pre-1978 homes. Don't sand painted surfaces. We can ask for a credit for encapsulation.", options: [] },
-        strat_fha_203k_limited: { text: "Strategy: FHA 203k Limited. Financing up to $35k in repairs (kitchen/bath updates) into your mortgage.", options: [] },
-        strat_fha_203k_standard: { text: "Strategy: FHA 203k Standard. For major structural repairs or additions. Requires a HUD consultant to manage the project.", options: [] },
-        strat_condo_warrantable: { text: "Strategy: Warrantable Condo. Easy financing. Fannie Mae guidelines are met.", options: [] },
-        strat_coop_board_pack: { text: "Strategy: Co-Op Board Packet. We must prepare a financial resume and reference letters before making an offer.", options: [] },
-        strat_limited_review_condo: { text: "Strategy: Limited Review Condo. Put 25% down to bypass the strict HOA questionnaire requirements.", options: [] },
-        strat_non_warrantable: { text: "Strategy: Non-Warrantable Loan. Portfolio lender required. Interest rates will be higher.", options: [] },
-        strat_riparian_rights: { text: "Strategy: Riparian Rights. You own to the center of the river (usually). Check flood insurance costs immediately.", options: [] },
-        strat_littoral_rights: { text: "Strategy: Littoral Rights. You own to the high-water mark of the lake. Ensure the dock is permitted.", options: [] },
-        strat_coastal_construction_line: { text: "Strategy: Coastal Setbacks. If you are seaward of the Coastal Construction Line, rebuilding may be restricted.", options: [] },
-        strat_chattel_loan: { text: "Strategy: Chattel Loan. Higher rate personal property loan because you don't own the land.", options: [] },
-        strat_fha_manufactured: { text: "Strategy: FHA Manufactured. Requires structural engineering cert to prove the tie-downs are secure.", options: [] },
-        strat_cash_only_manu: { text: "Strategy: Cash Only (Pre-1976). Homes built before June 1976 are often unfinanceable due to code changes.", options: [] },
-        strat_appraisal_gap_guarantee: { text: "Strategy: Appraisal Gap Guarantee. We agree to pay the difference between the low appraisal and the contract price.", options: [] },
-        strat_escalation_clause: { text: "Strategy: Escalation Clause. We automatically beat competing offers by $1,000 up to your max cap.", options: [] },
-        strat_info_only_inspection: { text: "Strategy: Information Only Inspection. We inspect, but we promise not to ask for small repairs. Pass/Fail only.", options: [] },
-        strat_gift_letter: { text: "Strategy: Gift Letter. If parents help, they must sign a letter stating it is NOT a loan.", options: [] },
-        strat_multigen_search: { text: "Strategy: Multi-Gen Zoning. We need to check zoning laws to ensure that 'In-Law Suite' with a second kitchen is actually legal.", options: [] },
-        strat_va_loan: { text: "Strategy: VA Loan. 0% Down. Sellers can pay all your closing costs and even pay off some of your debt to help you qualify.", options: [] },
-        strat_2yr_avg: { text: "Strategy: 2-Year Average. Lenders will average your last 2 years of commission/bonus income to calculate your buying power.", options: [] },
-        strat_bank_statement: { text: "Strategy: Bank Statement Loan. No Tax Returns required. We qualify you based on the cash deposits into your business account.", options: [] },
+        // Sellers
+        strat_confidential_distress: { text: "Strategy: Confidential Solvency Review. We privately analyze if there is equity. If yes, we sell fast. If no, we negotiate with the bank (Short Sale).", options: [] },
+        strat_cma_valuation: { text: "Strategy: Comprehensive Market Analysis (CMA). An algorithm isn't enough. I will manually adjust for your specific upgrades and view to give you a real price range.", options: [] },
+        strat_express_sale: { text: "Strategy: Investor Express. We solicit cash offers from our investor network. You get speed and no repairs, but sell at a wholesale discount.", options: [] },
+        strat_luxury_marketing: { text: "Strategy: Luxury Lifestyle Launch. Professional video, drone footage, twilight photography, and international syndication to attract emotional buyers.", options: [] },
+        strat_pre_listing_inspection: { text: "Strategy: Pre-Listing Inspection. We spend a few hundred dollars now to inspect the home ourselves. This prevents buyers from negotiating huge price drops later.", options: [] },
+        strat_concierge_prep: { text: "Strategy: Concierge Service. We manage the contractors for paint/staging. The cost is often paid at closing, maximizing your sale price with zero upfront hassle.", options: [] },
+        strat_as_is_pricing: { text: "Strategy: Strategic 'As-Is' Pricing. We price slightly below market to create a bidding war, letting the market dictate the final value despite conditions.", options: [] },
+        strat_roi_consult: { text: "Strategy: ROI Walkthrough. I walk your home and tell you exactly what NOT to fix. Usually, cleaning and painting return 300%, while full remodels lose money.", options: [] },
+        strat_flip_yourself: { text: "Strategy: The 'Flip-Yourself' Sale. You act as the developer. We identify the top 3 upgrades that maximize value, you execute them, and we sell for top dollar.", options: [] },
+        strat_investor_network: { text: "Strategy: Off-Market Investor Blast. We send your property details to our private list of cash buyers who buy 'ugly' houses.", options: [] },
+        strat_probate_market: { text: "Strategy: Probate Market Sale. We list the home while adhering to court timelines, ensuring the estate gets fair market value.", options: [] },
+        strat_probate_attorney: { text: "Strategy: Legal Referral. You cannot sell yet. We connect you with a probate attorney to get 'Letters of Office' so we can legally list the home.", options: [] },
+        strat_probate_education: { text: "Strategy: Estate Planning 101. We need to sit down and determine if the property is in a Trust or if it must go through Probate Court.", options: [] },
 
-        // --- SELLING STRATEGIES ---
-        strat_pet_showing_plan: { text: "Strategy: Pet Logistics. We need a 2-hour notice for showings so you can remove the dog. No litter boxes in listing photos.", options: [] },
-        strat_vacant_staging: { text: "Strategy: Virtual Staging. We leave the home empty but digitally add furniture to the photos to show scale and warmth.", options: [] },
-        strat_utility_activation: { text: "Strategy: De-Winterization. Utilities MUST be on for the inspection. We need to activate water/electric 3 days before inspection.", options: [] },
-        strat_cash_keys_coop: { text: "Strategy: Cash for Keys. Offer the tenant the security deposit + extra cash to vacate early so we can clean and list vacant.", options: [] },
-        strat_tenant_sale: { text: "Strategy: Investor Sale. We market the property 'Tenant Occupied' and sell the lease cash flow to another investor.", options: [] },
-        strat_eviction_sale: { text: "Strategy: Eviction Sale. Sell 'As-Is' with the problem tenant attached. Price will be below market value.", options: [] },
-        strat_cap_gains_calc: { text: "Strategy: Capital Gains Tax. If you haven't lived there 2 years, you may owe tax on the profit.", options: [] },
-        strat_trust_sale: { text: "Strategy: Trust Certificate. The Title company needs the 'Certificate of Trust' to verify who has authority to sign.", options: [] },
-        strat_tech_transfer: { text: "Strategy: Smart Home Transfer. We need a 'Digital Keys' rider. You must factory reset devices and transfer admin rights.", options: [] },
-        strat_valuable_inclusions: { text: "Strategy: Bill of Sale. High-end art or inclusions must be sold on a separate Bill of Sale.", options: [] },
-        strat_luxury_private: { text: "Strategy: Pocket Listing. We market only to top brokers via email and avoid the MLS to maintain your privacy.", options: [] },
-        strat_luxury_listing: { text: "Strategy: Global MLS. We syndicate the listing to international portals to find overseas cash buyers.", options: [] },
-        strat_drone_video: { text: "Strategy: Lifestyle Video. We hire a cinema crew to film actors using the home to sell the lifestyle, not just the walls.", options: [] },
-        strat_fsbo_conversion: { text: "Strategy: Flat Fee MLS. List on MLS for a flat fee but manage the showings yourself.", options: [] },
-        strat_as_is_pricing: { text: "Strategy: As-Is Pricing. We price slightly low and state 'Seller will make no repairs' to attract flippers.", options: [] },
-        strat_cash_offer_network: { text: "Strategy: Institutional Cash Offer. We request offers from investors to give you a baseline, then try to beat it.", options: [] },
-        strat_title_clearance: { text: "Strategy: Title Curative. We hire a specialist to hunt down old payoffs or satisfactions of mortgage that were never recorded.", options: [] },
-        strat_short_sale: { text: "Strategy: Short Sale. The bank agrees to take less than what is owed. Takes 4-6 months.", options: [] },
-        strat_hold_rent: { text: "Strategy: Rent and Hold. If you can't sell, we rent it out. We just need to ensure the rent covers your PITI mortgage payment.", options: [] },
-        strat_hoarder_cleanout: { text: "Strategy: Compassionate Cleanout. We hire a specialized crew to clear the home. We sell 'As-Is' to cash buyers only.", options: [] },
-        strat_divorce_neutral: { text: "Strategy: Neutral Third Party. We communicate equally with both attorneys to ensure fair pricing and asset division.", options: [] },
-        strat_high_conflict_listing: { text: "Strategy: Court Ordered Sale. We follow the strict judge's order for price reductions and showing availability.", options: [] },
-        strat_probate_easy: { text: "Strategy: Independent Administration. With Letters of Office, you can sell without a judge approving every step.", options: [] },
-        strat_probate_court: { text: "Strategy: Court Confirmation. We must accept an offer, then go to court to see if anyone wants to overbid it.", options: [] },
-        
-        // --- OTHER STRATEGIES ---
-        strat_rate_term_refi: { text: "Strategy: Rate & Term Refi. We just change the interest rate. Closing costs are lower than cash-out refis.", options: [] },
-        strat_cash_out_refi: { text: "Strategy: Cash Out Refi. Replace your mortgage with a larger one and pocket the difference for renovations or debt.", options: [] },
-        strat_pmi_removal: { text: "Strategy: PMI Removal. If values have risen, we order a new appraisal to delete the mortgage insurance.", options: [] },
-        strat_buy_hold: { text: "Strategy: Buy & Hold. Focus on Cash on Cash Return. Ensure rents exceed expenses by at least $300/mo.", options: [] },
-        strat_str_self: { text: "Strategy: Short Term Rental. Verify city ordinances first. Use dynamic pricing tools like PriceLabs to maximize revenue.", options: [] },
-        strat_fix_flip: { text: "Strategy: 70% Rule. Buy at 70% of the After Repair Value (ARV) minus repairs. If the numbers don't fit, walk away.", options: [] },
-        strat_retail_ti_allowance: { text: "Strategy: TI Allowance. Ask the landlord for a Tenant Improvement allowance to build out your shell.", options: [] },
-        strat_flex_space: { text: "Strategy: Flex Space. Warehouse back / Office front. The most versatile and safe commercial investment.", options: [] },
-        strat_heavy_industrial: { text: "Strategy: 3-Phase Power. Ensure the building has heavy power (480v) to attract manufacturing tenants.", options: [] },
-        strat_infill_development: { text: "Strategy: Infill Spec. Building in an established neighborhood. Watch out for neighbors fighting your variances.", options: [] },
-        strat_land_hold: { text: "Strategy: Land Banking. Buy in the path of progress. Low carrying costs (ag exemption) while value appreciates.", options: [] }
+        // Investors / Other
+        strat_appreciation_play: { text: "Strategy: Path of Progress. We buy in 'B' neighborhoods that are becoming 'A' neighborhoods. Cash flow might be low now, but equity explodes in 5-10 years.", options: [] },
+        strat_fix_flip_analysis: { text: "Strategy: 70% Rule Analysis. We analyze deals based on After Repair Value (ARV). If the purchase price + repairs > 70% of ARV, we pass.", options: [] },
+        strat_tax_deferral: { text: "Strategy: 1031 Exchange. We look for a property to buy so you can roll your profits from a previous sale into this one, deferring all capital gains taxes.", options: [] },
+        strat_turnkey_rental: { text: "Strategy: Turnkey Investing. We identify properties that are already renovated and tenanted. You buy the cash flow stream immediately.", options: [] },
+        strat_syndication_referral: { text: "Strategy: Real Estate Syndication. You pool your money with others to buy a large apartment complex. You get checks, but make no decisions.", options: [] },
+        strat_investor_education: { text: "Strategy: Investor Discovery Session. We need to define your 'Why'. Are you looking to quit your job (Cash Flow) or build retirement wealth (Equity)?", options: [] },
+        strat_market_report: { text: "Strategy: Micro-Market Report. Real estate is local. We will pull data specifically for your zip code to see if it's a Buyer's or Seller's market right now.", options: [] },
+        strat_rent_vs_buy: { text: "Strategy: Rent vs. Buy Calculator. We compare your current rent with a mortgage payment, factoring in tax benefits and equity buildup over 5 years.", options: [] },
+        strat_divorce_neutral: { text: "Strategy: Neutral Valuation. I act as an unbiased third party to determine fair market value, helping both sides agree on a buyout or listing price.", options: [] },
+        strat_short_sale_help: { text: "Strategy: Short Sale Negotiation. We list the home and negotiate with your bank to accept less than the mortgage balance, saving you from foreclosure on your record.", options: [] },
+        strat_trust_sale: { text: "Strategy: Trustee Sale. We work with the Successor Trustee to sell the asset and distribute funds to beneficiaries according to the trust.", options: [] }
     };
 
-    // --- STATE MANAGEMENT VARIABLES ---
+    // --- STATE MANAGEMENT ---
     let currentNode = 'start';
     let history = []; 
     let pathLabels = []; 
@@ -1004,277 +595,149 @@ document.addEventListener('DOMContentLoaded', function() {
         message: document.getElementById('message-field')
     };
 
-    // --- 1. INITIALIZE BROWSER HISTORY ---
-    // This tells the browser: "We are at the start, and this is the data for this step."
-    const initialState = { 
-        node: 'start', 
-        internalHistory: [], 
-        pathLabels: [], 
-        answers: {} 
-    };
+    const initialState = { node: 'start', internalHistory: [], pathLabels: [], answers: {} };
     window.history.replaceState(initialState, "", "");
 
-    // --- 2. LISTEN FOR BROWSER BACK BUTTON ---
     window.addEventListener('popstate', (event) => {
         if (event.state) {
-            // Restore the app to the state of the previous step
             currentNode = event.state.node;
             history = event.state.internalHistory || [];
             pathLabels = event.state.pathLabels || [];
             userAnswers = event.state.answers || {};
-            
-            // Re-render the screen (pass false to say "don't push state again")
             renderNode(false);
         }
     });
 
-    // --- 3. HELPER TO SAVE STATE WHEN MOVING FORWARD ---
     function navigateTo(nextNode, labelToAdd, variableKey, variableValue) {
-        // Save answer if needed
-        if (variableKey) {
-            userAnswers[variableKey] = variableValue;
-        }
-
-        // Create the NEW history arrays
+        if (variableKey) userAnswers[variableKey] = variableValue;
         const newHistory = [...history, currentNode];
         const newLabels = [...pathLabels, labelToAdd];
-        
-        // Push to Browser History
         window.history.pushState({
-            node: nextNode,
-            internalHistory: newHistory,
-            pathLabels: newLabels,
-            answers: {...userAnswers} // Copy current answers
+            node: nextNode, internalHistory: newHistory, pathLabels: newLabels, answers: {...userAnswers} 
         }, "", "");
-
-        // Update Global Variables
-        history = newHistory;
-        pathLabels = newLabels;
-        currentNode = nextNode;
-
+        history = newHistory; pathLabels = newLabels; currentNode = nextNode;
         renderNode(false);
     }
 
-    // --- 4. RENDER FUNCTION (UPDATED) ---
     function renderNode(shouldPushState = false) {
         const node = tree[currentNode];
-        
-        // Error Check
-        if(!node) {
-            console.error("Node not found:", currentNode);
-            elements.question.innerText = "Error: Logic path end reached unexpectedly.";
-            return;
-        }
+        if(!node) { elements.question.innerText = "Error: Logic path end reached."; return; }
 
         elements.question.innerText = node.text;
+        elements.question.classList.remove('result-title'); 
         elements.options.innerHTML = '';
         
         const isResult = (node.options && node.options.length === 0);
         const stepCount = history.length + 1;
         
-        elements.step.innerText = isResult ? 'Strategy Found' : `Step ${stepCount}`;
-        elements.progress.style.width = isResult ? '100%' : Math.min(stepCount * 5, 95) + '%';
-        
-        // Only show back button if we have history
+        elements.step.innerText = isResult ? 'Strategy Identified' : `Step ${stepCount}`;
+        elements.progress.style.width = isResult ? '100%' : Math.min(stepCount * 12, 95) + '%';
         elements.backBtn.style.display = (history.length > 0) ? 'block' : 'none';
 
-        // === HANDLING DIFFERENT INPUT TYPES ===
-
         if (isResult) {
-            // === RESULT SCREEN ===
             elements.question.classList.add('result-card');
+            elements.question.innerHTML = `<span class="result-title">Recommendation:</span> ${node.text}`;
             elements.formContainer.style.display = 'block';
             
             let answersString = "";
-            for (const [key, value] of Object.entries(userAnswers)) {
-                answersString += `- ${key}: ${value}\n`;
-            }
-
+            for (const [key, value] of Object.entries(userAnswers)) { answersString += `- ${key}: ${value}\n`; }
             elements.message.value = `Client Path:\n${pathLabels.join(" > ")}\n\nSpecific Data:\n${answersString}\n\nGenerated Strategy:\n${node.text}`;
             
             const restartBtn = document.createElement('button');
-            restartBtn.innerText = "Start Over / Try Another Scenario";
+            restartBtn.innerText = "Start Over / Explore Different Path";
             restartBtn.className = "tree-option-btn";
-            restartBtn.style.textAlign = "center";
-            restartBtn.style.marginTop = "20px";
-            restartBtn.style.background = "#fff";
+            restartBtn.style.textAlign = "center"; restartBtn.style.marginTop = "20px"; restartBtn.style.background = "#fff";
             restartBtn.onclick = () => { 
-                // Reset everything
-                history = []; 
-                pathLabels = []; 
-                userAnswers = {}; 
-                currentNode = 'start'; 
+                history = []; pathLabels = []; userAnswers = {}; currentNode = 'start'; 
                 elements.question.classList.remove('result-card'); 
-                
-                // Clear browser history for the user by replacing current state
                 window.history.pushState(initialState, "", "");
-                
                 renderNode(false); 
             };
             elements.options.appendChild(restartBtn);
 
         } else if (node.type === 'select') {
-            // === SELECT MENU ===
             elements.formContainer.style.display = 'none';
             elements.question.classList.remove('result-card');
-
-            const select = document.createElement('select');
-            select.className = "tree-select";
-            
+            const select = document.createElement('select'); select.className = "tree-select";
             const defaultOpt = document.createElement('option');
-            defaultOpt.text = "Please Select...";
-            defaultOpt.value = "";
-            defaultOpt.disabled = true;
-            defaultOpt.selected = true;
+            defaultOpt.text = "Please Select..."; defaultOpt.value = ""; defaultOpt.disabled = true; defaultOpt.selected = true;
             select.add(defaultOpt);
-
             node.choices.forEach(choice => {
-                const opt = document.createElement('option');
-                opt.value = choice;
-                opt.text = choice;
-                select.add(opt);
+                const opt = document.createElement('option'); opt.value = choice; opt.text = choice; select.add(opt);
             });
             elements.options.appendChild(select);
-
             const nextBtn = document.createElement('button');
-            nextBtn.innerText = "Next Step →";
-            nextBtn.className = "next-btn";
+            nextBtn.innerText = "Next Step →"; nextBtn.className = "next-btn";
             nextBtn.onclick = () => {
                 if(select.value === "") { alert("Please make a selection."); return; }
-                // Use helper to Navigate
                 navigateTo(node.next, select.value, node.variable, select.value);
             };
             elements.options.appendChild(nextBtn);
 
         } else if (node.type === 'text' || node.type === 'number') {
-            // === TEXT / NUMBER INPUT ===
             elements.formContainer.style.display = 'none';
             elements.question.classList.remove('result-card');
-
             const input = document.createElement('input');
-            input.type = node.type; 
-            input.className = "tree-input";
-            input.placeholder = node.placeholder || "";
-            // Pre-fill if we have an answer already (useful when going back)
-            if (node.variable && userAnswers[node.variable]) {
-                input.value = userAnswers[node.variable];
-            }
+            input.type = node.type; input.className = "tree-input"; input.placeholder = node.placeholder || "";
+            if (node.variable && userAnswers[node.variable]) input.value = userAnswers[node.variable];
             elements.options.appendChild(input);
-
             const nextBtn = document.createElement('button');
-            nextBtn.innerText = "Next Step →";
-            nextBtn.className = "next-btn";
+            nextBtn.innerText = "Next Step →"; nextBtn.className = "next-btn";
             nextBtn.onclick = () => {
                 if(input.value.trim() === "") { alert("Please enter a value."); return; }
-                // Use helper to Navigate
                 navigateTo(node.next, `${node.variable}: ${input.value}`, node.variable, input.value);
             };
             elements.options.appendChild(nextBtn);
 
         } else {
-            // === STANDARD BUTTONS ===
             elements.formContainer.style.display = 'none';
             elements.question.classList.remove('result-card');
-            
             node.options.forEach(opt => {
                 const btn = document.createElement('button');
-                btn.innerText = opt.label;
-                btn.className = "tree-option-btn";
-                btn.onclick = () => {
-                    // Use helper to Navigate
-                    navigateTo(opt.next, opt.label, node.variable, opt.label);
-                };
+                btn.innerText = opt.label; btn.className = "tree-option-btn";
+                btn.onclick = () => { navigateTo(opt.next, opt.label, node.variable, opt.label); };
                 elements.options.appendChild(btn);
             });
         }
     }
-
-    // === 5. UPDATE BACK BUTTON LOGIC ===
-    // Instead of manual logic, we just tell the browser to go back.
-    // This triggers the 'popstate' listener we wrote above.
-    elements.backBtn.onclick = () => {
-        window.history.back();
-    };
-
+    elements.backBtn.onclick = () => { window.history.back(); };
     renderNode(false);
 });
 </script>
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLHWsaJvRo4CPVU1f1umMXBT4Tazy3s1vUTMTTrOv0AVLjw4xs0pEkj5TpocbJdnyMJw/exec";
-
     const form = document.getElementById('contact-form');
     const statusMsg = document.getElementById('form-status');
     const btn = document.getElementById('submit-btn');
 
-    function isValidEmail(email) {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
-    }
+    function isValidEmail(email) { const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; return regex.test(email); }
 
     if (form) {
         form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            statusMsg.innerText = "";
+            e.preventDefault(); statusMsg.innerText = "";
             const formData = new FormData(form);
             const email = formData.get('email');
-
-            if (!isValidEmail(email)) {
-                statusMsg.innerText = "Please enter a valid email address.";
-                statusMsg.style.color = "red";
-                return;
-            }
-
+            if (!isValidEmail(email)) { statusMsg.innerText = "Please enter a valid email address."; statusMsg.style.color = "#ef4444"; return; }
             const captchaResponse = grecaptcha.getResponse();
-            if (!captchaResponse || captchaResponse.length === 0) {
-                statusMsg.innerText = "Please check the captcha box.";
-                statusMsg.style.color = "red";
-                return;
-            }
+            if (!captchaResponse || captchaResponse.length === 0) { statusMsg.innerText = "Please check the captcha box."; statusMsg.style.color = "#ef4444"; return; }
 
-            btn.disabled = true;
-            btn.innerText = "Sending...";
-
-            const data = {
-                name: formData.get('name'),
-                email: email,
-                message: formData.get('message'),
-                captchaToken: captchaResponse
-            };
-
-            // Setup Abort Controller for timeout (10 seconds)
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 10000);
+            btn.disabled = true; btn.innerText = "Processing...";
+            const data = { name: formData.get('name'), email: email, phone: formData.get('phone'), message: formData.get('message'), captchaToken: captchaResponse };
+            const controller = new AbortController(); const timeoutId = setTimeout(() => controller.abort(), 10000);
 
             try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
-                    signal: controller.signal
-                });
-                
+                await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(data), signal: controller.signal });
                 clearTimeout(timeoutId);
-                statusMsg.innerText = "Request Sent Successfully! We'll be in touch.";
-                statusMsg.style.color = "green";
-                form.reset();
-                grecaptcha.reset(); 
+                statusMsg.innerText = "Strategy Request Received. We will be in touch shortly."; statusMsg.style.color = "#10b981";
+                form.reset(); grecaptcha.reset(); 
             } catch (error) {
                 console.error('Error:', error);
-                if (error.name === 'AbortError') {
-                     statusMsg.innerText = "Request timed out. Please check your connection.";
-                } else {
-                     statusMsg.innerText = "Something went wrong. Please try again.";
-                }
-                statusMsg.style.color = "red";
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Send Request";
-            }
+                if (error.name === 'AbortError') statusMsg.innerText = "Request timed out."; else statusMsg.innerText = "Transmission error. Please try again.";
+                statusMsg.style.color = "#ef4444";
+            } finally { btn.disabled = false; btn.innerText = "Unlock Strategy"; }
         });
     }
 </script>
-<script src="js/github-update.js"></script>
 </body>
 </html>
