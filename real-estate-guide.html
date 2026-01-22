@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Pavlo Rospopa Universe Strategy Engine</title>
+    <title>Pavlo Rospopa Singularity Strategy Engine</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/format.css">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // BRANCH 1: BUYING (UNIVERSE EXPANSION)
+        // BRANCH 1: BUYING (SINGULARITY EXPANSION)
         // ==========================================
         buy_node_1: {
             text: "Are you a US Citizen or Permanent Resident?",
@@ -349,11 +349,11 @@ document.addEventListener('DOMContentLoaded', function() {
         buy_condo_check: {
             text: "Is the HOA healthy?",
             options: [
-                { label: "Yes/Unknown", next: "buy_condo_reserves" }, // NEW
+                { label: "Yes/Unknown", next: "buy_condo_reserves" },
                 { label: "No (Litigation)", next: "strat_non_warrantable" }
             ]
         },
-        buy_condo_reserves: { // NEW
+        buy_condo_reserves: {
             text: "Does the HOA transfer 10% to reserves?",
             options: [
                 { label: "Yes", next: "strat_condo_warrantable" },
@@ -380,14 +380,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Barndominium", next: "strat_barndominium" },
                 { label: "Log Cabin", next: "strat_log_cabin" },
                 { label: "Geodesic Dome / Earth", next: "strat_unique_appraisal" },
-                { label: "Waterfront", next: "buy_waterfront_check" } // NEW
+                { label: "Waterfront", next: "buy_waterfront_check" },
+                { label: "Equestrian / Horse", next: "buy_equestrian_check" } // NEW
             ]
         },
-        buy_waterfront_check: { // NEW
+        buy_equestrian_check: { // NEW
+            text: "Number of Horses?",
+            options: [
+                { label: "Personal (1-3)", next: "strat_equestrian_zoning" },
+                { label: "Boarding Business", next: "strat_commercial_ag_loan" }
+            ]
+        },
+        buy_waterfront_check: {
             text: "Does it have water rights?",
             options: [
                 { label: "Riparian (River)", next: "strat_riparian_rights" },
-                { label: "Littoral (Lake)", next: "strat_littoral_rights" }
+                { label: "Littoral (Lake)", next: "strat_littoral_rights" },
+                { label: "Ocean / Gulf", next: "strat_coastal_construction_line" } // NEW
             ]
         },
         buy_sfh_features: {
@@ -396,7 +405,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Multi-Generational", next: "strat_multigen_search" },
                 { label: "Green/Solar", next: "strat_solar_check" },
                 { label: "Pool", next: "strat_pool_inspection" },
-                { label: "Basement/Foundation", next: "buy_foundation_check" }
+                { label: "Basement/Foundation", next: "buy_foundation_check" },
+                { label: "Elevator", next: "strat_elevator_inspect" } // NEW
             ]
         },
         buy_foundation_check: {
@@ -460,8 +470,15 @@ document.addEventListener('DOMContentLoaded', function() {
         buy_well_type: {
             text: "Type of Well?",
             options: [
-                { label: "Private on Property", next: "strat_well_water_test" },
+                { label: "Private on Property", next: "buy_well_flow" }, // Updated
                 { label: "Shared Well", next: "strat_shared_well_agreement" }
+            ]
+        },
+        buy_well_flow: { // NEW
+            text: "Known Flow Rate?",
+            options: [
+                { label: "Standard (5+ GPM)", next: "strat_well_water_test" },
+                { label: "Low (<3 GPM)", next: "strat_cistern_system" }
             ]
         },
         
@@ -517,7 +534,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // BRANCH 2: SELLING (MEGA EXPANSION)
+        // BRANCH 2: SELLING (SINGULARITY EXPANSION)
         // ==========================================
         sell_node_1: {
             text: "Occupancy Status?",
@@ -558,9 +575,9 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         sell_title_check: {
             text: "Is the home in a Trust?",
-            options: [ { label: "Yes", next: "strat_trust_sale" }, { label: "No", next: "sell_foreign_check" } ] // NEW
+            options: [ { label: "Yes", next: "strat_trust_sale" }, { label: "No", next: "sell_foreign_check" } ]
         },
-        sell_foreign_check: { // NEW
+        sell_foreign_check: {
             text: "Are you a Foreign Person (FIRPTA)?",
             options: [
                 { label: "Yes", next: "strat_firpta_withholding" },
@@ -647,7 +664,8 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Type of Lien?",
             options: [
                 { label: "Mechanic's Lien", next: "strat_bond_over_lien" },
-                { label: "IRS / Tax Lien", next: "strat_title_clearance" }
+                { label: "IRS / Tax Lien", next: "strat_title_clearance" },
+                { label: "Medicaid Recovery", next: "strat_medicaid_lien" } // NEW
             ]
         },
         sell_mortgage_status: {
@@ -713,7 +731,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // BRANCH 4: INVESTING (MASSIVE EXPANSION)
+        // BRANCH 4: INVESTING (SINGULARITY EXPANSION)
         // ==========================================
         invest_node_1: {
             text: "Funding Source?",
@@ -721,7 +739,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Cash / Conventional", next: "inv_creative_check" },
                 { label: "Retirement Funds", next: "strat_sdir_custodian" },
                 { label: "1031 Exchange", next: "inv_1031_window" },
-                { label: "Portfolio Loan", next: "strat_blanket_mortgage" } // NEW
+                { label: "Portfolio Loan", next: "strat_blanket_mortgage" }
             ]
         },
         inv_creative_check: {
@@ -774,7 +792,8 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Note Type?",
             options: [
                 { label: "Performing", next: "strat_performing_note" },
-                { label: "Non-Performing", next: "strat_non_performing_note" }
+                { label: "Non-Performing", next: "strat_non_performing_note" },
+                { label: "Create a Note", next: "strat_wraparound_mortgage" } // NEW
             ]
         },
         inv_niche_check: {
@@ -786,7 +805,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Laundromat / Car Wash", next: "strat_operational_asset" },
                 { label: "Assisted Living", next: "strat_alf_invest" },
                 { label: "Billboards / Cell Towers", next: "strat_billboard_lease" },
-                { label: "PadSplit / Rooming", next: "strat_padsplit" }
+                { label: "PadSplit / Rooming", next: "strat_padsplit" },
+                { label: "Marina / Boat Slips", next: "strat_marina_invest" } // NEW
             ]
         },
         inv_mhp_util: {
@@ -814,9 +834,9 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         inv_unit_count: {
             text: "Size?",
-            options: [ { label: "2-4 Units", next: "inv_dscr_ratio" }, { label: "5+ Units", next: "strat_multifamily_commercial" } ] // Updated
+            options: [ { label: "2-4 Units", next: "inv_dscr_ratio" }, { label: "5+ Units", next: "strat_multifamily_commercial" } ]
         },
-        inv_dscr_ratio: { // NEW
+        inv_dscr_ratio: {
             text: "Is the projected rent > mortgage?",
             options: [ { label: "Yes (DSCR > 1.0)", next: "strat_buy_hold" }, { label: "No (DSCR < 1.0)", next: "strat_no_ratio_loan" } ]
         },
@@ -830,7 +850,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         inv_1031_window: {
             text: "Sold <45 days ago?",
-            options: [ { label: "Yes", next: "inv_1031_boot" }, { label: "No", next: "strat_1031_reverse" } ] // Updated
+            options: [ { label: "Yes", next: "inv_1031_boot" }, { label: "No", next: "strat_1031_reverse" } ]
         },
         inv_1031_boot: {
             text: "Are you taking any cash out (Boot)?",
@@ -838,7 +858,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // BRANCH 5: COMMERCIAL
+        // BRANCH 5: COMMERCIAL (SINGULARITY EXPANSION)
         // ==========================================
         comm_node_1: {
             text: "Asset Class?",
@@ -846,7 +866,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Retail", next: "comm_retail_node" },
                 { label: "Office", next: "comm_office_node" },
                 { label: "Industrial", next: "comm_industrial_node" },
-                { label: "Special Purpose", next: "comm_special_purpose" }
+                { label: "Special Purpose", next: "comm_special_purpose" },
+                { label: "Hospitality", next: "comm_hotel_flag" } // NEW
+            ]
+        },
+        comm_hotel_flag: { // NEW
+            text: "Flagged or Boutique?",
+            options: [
+                { label: "Flagged (Marriott/Hilton)", next: "strat_hotel_pip" },
+                { label: "Independent Boutique", next: "strat_boutique_hotel" }
             ]
         },
         comm_special_purpose: {
@@ -877,12 +905,19 @@ document.addEventListener('DOMContentLoaded', function() {
         comm_retail_node: {
             text: "Use?",
             options: [
-                { label: "Restaurant", next: "strat_restaurant_buy" },
+                { label: "Restaurant", next: "comm_restaurant_type" }, // Updated
                 { label: "Liquor Store", next: "strat_liquor_license" },
-                { label: "General", next: "comm_retail_traffic" } // Updated
+                { label: "General", next: "comm_retail_traffic" }
             ]
         },
-        comm_retail_traffic: { // NEW
+        comm_restaurant_type: { // NEW
+            text: "Infrastructure?",
+            options: [
+                { label: "2nd Gen (Hood/Grease Trap)", next: "strat_restaurant_buy" },
+                { label: "Cold Shell (Empty)", next: "strat_retail_ti_allowance" }
+            ]
+        },
+        comm_retail_traffic: {
             text: "Traffic Count needed?",
             options: [ { label: "High (>20k cars)", next: "comm_retail_signage" }, { label: "Destination (Low)", next: "comm_lease_own" } ]
         },
@@ -919,13 +954,14 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         comm_lease_own: {
             text: "Strategy?",
-            options: [ { label: "Buy", next: "strat_sba_504" }, { label: "Lease", next: "comm_lease_type" }, { label: "Biz Only", next: "strat_biz_opp" } ] // Updated
+            options: [ { label: "Buy", next: "strat_sba_504" }, { label: "Lease", next: "comm_lease_type" }, { label: "Biz Only", next: "strat_biz_opp" } ]
         },
-        comm_lease_type: { // NEW
+        comm_lease_type: {
             text: "Lease Structure?",
             options: [
                 { label: "Triple Net (NNN)", next: "comm_lease_guarantee" },
-                { label: "Full Service Gross", next: "strat_base_year_audit" }
+                { label: "Full Service Gross", next: "strat_base_year_audit" },
+                { label: "Percentage Rent", next: "strat_percentage_rent" } // NEW
             ]
         },
         comm_lease_guarantee: {
@@ -975,142 +1011,180 @@ document.addEventListener('DOMContentLoaded', function() {
         // OUTCOMES
         // ==========================================
         
-        // --- NEW OUTCOMES (Total >290) ---
-        strat_riparian_rights: { text: "Strategy: Riparian Rights. For flowing water (Rivers), you typically own to the center of the stream. We must verify this deed right so you can legally build a dock or withdraw water.", options: [] },
-        strat_littoral_rights: { text: "Strategy: Littoral Rights. For static water (Lakes), you own to the high-water mark. We need a survey to ensure the existing dock isn't encroaching on your neighbor's water frontage.", options: [] },
-        strat_limited_review_condo: { text: "Strategy: Limited Review Condo Loan. If the HOA has low reserves, we can do a 'Limited Review' loan if you put 25% down (owner-occupied) or 30% (investment). This bypasses the full questionnaire.", options: [] },
-        strat_no_ratio_loan: { text: "Strategy: No-Ratio DSCR. The rent doesn't cover the mortgage (<1.0 DSCR). We can still lend, but you need 30-35% down and 12 months of cash reserves in the bank.", options: [] },
-        strat_1031_reverse: { text: "Strategy: Reverse 1031 Exchange. You found the new property *before* selling the old one. We need an Exchange Accommodation Titleholder (EAT) to hold the new title until your old property sells.", options: [] },
-        strat_base_year_audit: { text: "Strategy: Base Year Audit. In a Full Service lease, you pay increases over a 'Base Year'. We must audit the landlord's current year expenses to ensure the Base Year isn't artificially low, which would spike your future rent.", options: [] },
-        strat_firpta_withholding: { text: "Strategy: FIRPTA Withholding. As a foreign seller, the IRS requires the buyer to withhold 15% of the sale price at closing. We need a CPA to file for a Withholding Certificate to reduce this amount if you owe less tax.", options: [] },
-        strat_blanket_mortgage: { text: "Strategy: Blanket Mortgage. If you are buying multiple properties, we use one loan to cover all of them. This reduces closing costs but requires a 'Partial Release Clause' so you can sell one house without paying off the whole loan.", options: [] },
+        // --- NEW OUTCOMES (Total >320) ---
+        strat_equestrian_zoning: { text: "Strategy: Equestrian Zoning. You generally need 1 acre per horse. We must verify if the land is zoned for 'Animal Husbandry' and check manure management ordinances.", options: [] },
+        strat_commercial_ag_loan: { text: "Strategy: Ag Loan. A boarding business is a commercial farm operation. Residential mortgages won't work. We need an Ag Lender (e.g., Farm Credit) who values the business income + the land.", options: [] },
+        strat_cistern_system: { text: "Strategy: Cistern Install. Low-flow wells (<3 GPM) require a holding tank (cistern) to buffer usage. We must estimate the $5k-$10k cost to install this if one isn't present.", options: [] },
+        strat_elevator_inspect: { text: "Strategy: Residential Elevator Inspection. Elevators are costly to maintain. We need a specialized mechanic to inspect the hydraulic fluid and safety brakes, separate from the home inspector.", options: [] },
+        strat_coastal_construction_line: { text: "Strategy: Coastal Control Line. Building near the ocean requires strict adherence to the Coastal Construction Control Line (CCCL). We must verify setback/elevation rules to ensure the home is insurable.", options: [] },
+        strat_medicaid_lien: { text: "Strategy: Medicaid Estate Recovery. If the owner used Medicaid for nursing care, the state may have a lien on the home. We must negotiate a 'Hardship Waiver' or pay it from closing proceeds.", options: [] },
+        strat_wraparound_mortgage: { text: "Strategy: Wraparound Mortgage. You create a new loan for the buyer that 'wraps' around your existing low-rate mortgage. You earn the spread on the interest rate. Risky due to 'Due on Sale' clause.", options: [] },
+        strat_marina_invest: { text: "Strategy: Marina Acquisition. Valued on slip rental income + fuel sales. We must inspect the bulkheads/seawalls and check EPA compliance for fuel tanks in the water.", options: [] },
+        strat_hotel_pip: { text: "Strategy: PIP Analysis. Buying a flagged hotel (e.g., Marriott) often triggers a Property Improvement Plan (PIP). You must budget millions for mandatory upgrades to keep the flag.", options: [] },
+        strat_boutique_hotel: { text: "Strategy: Boutique Operations. No franchise fees, but no reservation system support. We must audit the OTA (Online Travel Agency) dependency and direct booking marketing strategy.", options: [] },
+        strat_retail_ti_allowance: { text: "Strategy: TI Negotiation. For a cold shell, we need a massive Tenant Improvement (TI) allowance ($50-$100/sqft) from the landlord to build walls, HVAC, and bathrooms.", options: [] },
+        strat_percentage_rent: { text: "Strategy: Percentage Rent. We negotiate a lower base rent in exchange for paying the landlord a % of gross sales over a 'natural breakpoint'. Lowers your risk in slow months.", options: [] },
+        strat_quiet_title: { text: "Strategy: Quiet Title Action. If there is a break in the chain of title (e.g., old unreleased mortgage), we must file a lawsuit to 'Quiet Title' before you can sell with title insurance.", options: [] },
         
         // --- RETAINED OUTCOMES ---
-        strat_construction_loan: { text: "Strategy: Construction-to-Perm Loan. One closing for lot+build.", options: [] },
-        strat_pool_inspection: { text: "Strategy: Pool Inspect. Pressure test lines.", options: [] },
-        strat_stigma_disclosure: { text: "Strategy: Stigma Disclosure. Transparency prevents lawsuits.", options: [] },
-        strat_operational_asset: { text: "Strategy: Operational Asset. EBITDA value.", options: [] },
-        strat_mixed_use: { text: "Strategy: Mixed Use. Commercial loan.", options: [] },
-        strat_ag_zoning: { text: "Strategy: Ag Zoning. Future use check.", options: [] },
-        strat_infill_development: { text: "Strategy: Infill Dev. Buildability check.", options: [] },
-        strat_subdivision: { text: "Strategy: Subdivision. Entitlement profit.", options: [] },
-        strat_employment_gap_letter: { text: "Strategy: Gap Letter. Explain employment gap.", options: [] },
-        strat_offer_letter_loan: { text: "Strategy: Offer Letter Loan. Close before start.", options: [] },
-        strat_pool_marketing: { text: "Strategy: Pool Marketing. Lifestyle photos.", options: [] },
-        strat_unique_appraisal: { text: "Strategy: Complex Appraisal. Specialist required.", options: [] },
-        strat_data_center: { text: "Strategy: Data Center. Power focus.", options: [] },
-        strat_str_glamping: { text: "Strategy: Glamping. Land use permit.", options: [] },
+        strat_riparian_rights: { text: "Strategy: Riparian Rights. Verify river ownership rights.", options: [] },
+        strat_littoral_rights: { text: "Strategy: Littoral Rights. Verify lake ownership/dock rights.", options: [] },
+        strat_limited_review_condo: { text: "Strategy: Limited Review Condo. 25% down to skip HOA scrutiny.", options: [] },
+        strat_no_ratio_loan: { text: "Strategy: No-Ratio DSCR. 35% down, no income verification.", options: [] },
+        strat_1031_reverse: { text: "Strategy: Reverse 1031. Buy first, sell later via EAT.", options: [] },
+        strat_base_year_audit: { text: "Strategy: Base Year Audit. Prevent expense spike.", options: [] },
+        strat_firpta_withholding: { text: "Strategy: FIRPTA. 15% withholding for foreign sellers.", options: [] },
+        strat_blanket_mortgage: { text: "Strategy: Blanket Loan. One loan for multiple properties.", options: [] },
+        strat_bond_over_lien: { text: "Strategy: Bond Over Lien. Escrow 150% to close.", options: [] },
+        strat_probation_letter: { text: "Strategy: Probation Letter. Employer confirms stability.", options: [] },
+        strat_fair_housing_risk: { text: "Strategy: Love Letter Risk. Avoid bias litigation.", options: [] },
+        strat_mhp_lagoon: { text: "Strategy: MHP Lagoon. Environmental inspection.", options: [] },
+        strat_flood_elevation: { text: "Strategy: Elevation Cert. Lower insurance costs.", options: [] },
+        strat_fair_plan_ins: { text: "Strategy: FAIR Plan. Wildfire insurance.", options: [] },
+        strat_wetland_mitigation: { text: "Strategy: Wetland Credits. Expensive permitting.", options: [] },
+        strat_mold_remediation: { text: "Strategy: Mold Removal. Certified clearance needed.", options: [] },
+        strat_asbestos_abatement: { text: "Strategy: Asbestos. Encapsulate or remove.", options: [] },
+        strat_oil_tank_removal: { text: "Strategy: Tank Sweep. Remove buried tanks.", options: [] },
+        strat_shared_well_agreement: { text: "Strategy: Shared Well. Recorded easement required.", options: [] },
+        strat_well_water_test: { text: "Strategy: Well Test. Bacterial/Chemical check.", options: [] },
+        strat_fha_203k_limited: { text: "Strategy: 203k Limited. Cosmetic reno.", options: [] },
+        strat_fha_203k_standard: { text: "Strategy: 203k Standard. Structural reno.", options: [] },
+        strat_tax_lien_invest: { text: "Strategy: Tax Liens. High interest/Foreclosure.", options: [] },
+        strat_non_qm_foreclosure: { text: "Strategy: Recent Foreclosure. High rate/down payment.", options: [] },
+        strat_alf_invest: { text: "Strategy: ALF. Senior housing conversion.", options: [] },
+        strat_billboard_lease: { text: "Strategy: Billboard. Triple net easement.", options: [] },
+        strat_performing_note: { text: "Strategy: Perf Note. Passive cash flow.", options: [] },
+        strat_non_performing_note: { text: "Strategy: Non-Perf Note. Workout/Foreclose.", options: [] },
+        strat_opportunity_zone: { text: "Strategy: Opp Zone. Tax free gain.", options: [] },
+        strat_blind_trust: { text: "Strategy: Blind Trust. Privacy protection.", options: [] },
+        strat_dscr_llc: { text: "Strategy: DSCR LLC. Business loan.", options: [] },
+        strat_trust_purchase: { text: "Strategy: Trust Buy. Estate planning.", options: [] },
+        strat_system_upgrade_credit: { text: "Strategy: System Credit. Update wiring/plumbing.", options: [] },
+        strat_construction_loan: { text: "Strategy: Const Loan. Build custom.", options: [] },
+        strat_pool_inspection: { text: "Strategy: Pool Inspect. Leak detection.", options: [] },
+        strat_stigma_disclosure: { text: "Strategy: Stigma. Disclose death/crime.", options: [] },
+        strat_operational_asset: { text: "Strategy: Op Asset. Business valuation.", options: [] },
+        strat_mixed_use: { text: "Strategy: Mixed Use. Commercial finance.", options: [] },
+        strat_ag_zoning: { text: "Strategy: Ag Zoning. Development check.", options: [] },
+        strat_infill_development: { text: "Strategy: Infill. Setback check.", options: [] },
+        strat_subdivision: { text: "Strategy: Subdivision. Entitlement play.", options: [] },
+        strat_employment_gap_letter: { text: "Strategy: Gap Letter. Explain unemployment.", options: [] },
+        strat_offer_letter_loan: { text: "Strategy: Offer Letter. Future income.", options: [] },
+        strat_pool_marketing: { text: "Strategy: Pool Marketing. Summer photos.", options: [] },
+        strat_unique_appraisal: { text: "Strategy: Unique Appraisal. Specialist needed.", options: [] },
+        strat_data_center: { text: "Strategy: Data Center. Power/Fiber.", options: [] },
+        strat_str_glamping: { text: "Strategy: Glamping. Zoning permit.", options: [] },
         strat_religious_zoning: { text: "Strategy: Religious Zoning. Tax impact.", options: [] },
-        strat_remote_worker_letter: { text: "Strategy: Remote Letter. HR verification.", options: [] },
+        strat_remote_worker_letter: { text: "Strategy: Remote Letter. HR confirm.", options: [] },
         strat_transfer_letter: { text: "Strategy: Transfer Letter. Moving date.", options: [] },
-        strat_fixed_income_gross_up: { text: "Strategy: Income Gross Up. Non-taxable credit.", options: [] },
+        strat_fixed_income_gross_up: { text: "Strategy: Gross Up. 125% income.", options: [] },
         strat_cold_storage: { text: "Strategy: Cold Storage. Equipment value.", options: [] },
         strat_drive_thru: { text: "Strategy: Drive Thru. Special use permit.", options: [] },
-        strat_office_conversion: { text: "Strategy: Office Convert. Plumbing check.", options: [] },
-        strat_coop_board: { text: "Strategy: Co-Op Board. Interview prep.", options: [] },
-        strat_barndominium: { text: "Strategy: Barndo Loan. Local bank.", options: [] },
-        strat_fha_manufactured: { text: "Strategy: FHA Manufactured. Perm foundation.", options: [] },
+        strat_office_conversion: { text: "Strategy: Office Convert. Plumbing retrofit.", options: [] },
+        strat_coop_board: { text: "Strategy: Co-Op Board. Interview.", options: [] },
+        strat_barndominium: { text: "Strategy: Barndo Loan. Portfolio lender.", options: [] },
+        strat_fha_manufactured: { text: "Strategy: FHA Manu. Perm foundation.", options: [] },
         strat_chattel_loan: { text: "Strategy: Chattel Loan. Personal property.", options: [] },
-        strat_bk13_manual: { text: "Strategy: BK13 Buy. Court approval.", options: [] },
+        strat_bk13_manual: { text: "Strategy: BK13. Court approval.", options: [] },
         strat_identity_interest: { text: "Strategy: Identity Interest. Family buy.", options: [] },
         strat_1099_only_loan: { text: "Strategy: 1099 Only. No tax returns.", options: [] },
         strat_1yr_tax_return: { text: "Strategy: 1 Yr Tax Return. Strong year.", options: [] },
-        strat_va_fee_waiver: { text: "Strategy: VA Fee Waiver. Disability exemption.", options: [] },
-        strat_va_bonus_entitlement: { text: "Strategy: VA Bonus. Second entitlement.", options: [] },
-        strat_subject_to: { text: "Strategy: Subject-To. Take over payments.", options: [] },
-        strat_seller_finance: { text: "Strategy: Seller Finance. Direct payments.", options: [] },
-        strat_lease_option: { text: "Strategy: Lease Option. Rent to own.", options: [] },
-        strat_airbnb_dynamic_pricing: { text: "Strategy: Dynamic Pricing. Automated rates.", options: [] },
-        strat_cost_seg: { text: "Strategy: Cost Segregation. Tax write-offs.", options: [] },
-        strat_1031_boot_tax: { text: "Strategy: Partial Exchange. Tax on boot.", options: [] },
-        strat_pylon_signage: { text: "Strategy: Pylon Signage. Negotiate visibility.", options: [] },
-        strat_burn_off_clause: { text: "Strategy: Burn-Off Clause. Limit guarantee.", options: [] },
-        strat_cash_keys_coop: { text: "Strategy: Cash for Keys. Tenant buyout.", options: [] },
-        strat_probate_intestate: { text: "Strategy: Intestate. State law heirs.", options: [] },
-        strat_quit_claim: { text: "Strategy: Quit Claim. Transfer title.", options: [] },
-        strat_info_only_inspection: { text: "Strategy: Info-Only. Pass/Fail inspection.", options: [] },
+        strat_va_fee_waiver: { text: "Strategy: VA Waiver. Disability.", options: [] },
+        strat_va_bonus_entitlement: { text: "Strategy: VA Bonus. 2nd loan.", options: [] },
+        strat_subject_to: { text: "Strategy: Subject-To. Take payments.", options: [] },
+        strat_seller_finance: { text: "Strategy: Seller Fin. Direct.", options: [] },
+        strat_lease_option: { text: "Strategy: Lease Option. Rent-to-own.", options: [] },
+        strat_airbnb_dynamic_pricing: { text: "Strategy: Dynamic Pricing. Auto rates.", options: [] },
+        strat_cost_seg: { text: "Strategy: Cost Seg. Bonus dep.", options: [] },
+        strat_1031_boot_tax: { text: "Strategy: Boot Tax. Partial exchange.", options: [] },
+        strat_pylon_signage: { text: "Strategy: Pylon Sign. Visibility.", options: [] },
+        strat_burn_off_clause: { text: "Strategy: Burn-Off. Limit PG.", options: [] },
+        strat_cash_keys_coop: { text: "Strategy: Cash for Keys. Tenant exit.", options: [] },
+        strat_probate_intestate: { text: "Strategy: Intestate. State heirs.", options: [] },
+        strat_quit_claim: { text: "Strategy: Quit Claim. Title transfer.", options: [] },
+        strat_info_only_inspection: { text: "Strategy: Info-Only. Pass/Fail.", options: [] },
         strat_appraisal_gap_guarantee: { text: "Strategy: Appraisal Gap. Cash cover.", options: [] },
-        strat_escalation_clause: { text: "Strategy: Escalation Clause. Beat offers.", options: [] },
+        strat_escalation_clause: { text: "Strategy: Escalation. Beat offers.", options: [] },
         strat_lead_paint: { text: "Strategy: Lead Paint. Disclosure.", options: [] },
         strat_sewer_scope: { text: "Strategy: Sewer Scope. Pipe check.", options: [] },
-        strat_septic_inspection: { text: "Strategy: Septic Load. Tank test.", options: [] },
+        strat_septic_inspection: { text: "Strategy: Septic. Load test.", options: [] },
         strat_pet_showing_plan: { text: "Strategy: Pet Plan. Logistics.", options: [] },
-        strat_green_mortgage: { text: "Strategy: Energy Mortgage. Finance upgrades.", options: [] },
-        strat_itin_loan: { text: "Strategy: ITIN Loan. Non-SSN financing.", options: [] },
-        strat_foreign_national: { text: "Strategy: Foreign National. DSCR loan.", options: [] },
-        strat_co_buy_agreement: { text: "Strategy: Co-Buy. Tenants in Common.", options: [] },
-        strat_corp_relo: { text: "Strategy: Corp Relo. Benefit protection.", options: [] },
-        strat_tiny_home: { text: "Strategy: Tiny Home. Zoning check.", options: [] },
-        strat_hoarder_cleanout: { text: "Strategy: Cleanout. Compassionate removal.", options: [] },
-        strat_vacant_staging: { text: "Strategy: Virtual Staging. Digital furniture.", options: [] },
-        strat_utility_activation: { text: "Strategy: Utility On. Inspection prep.", options: [] },
-        strat_structural_eng: { text: "Strategy: Structural Engineer. Foundation check.", options: [] },
-        strat_home_warranty: { text: "Strategy: Warranty. System protection.", options: [] },
-        strat_solar_lease_transfer: { text: "Strategy: Solar Transfer. Lease assumption.", options: [] },
-        strat_historic_sale: { text: "Strategy: Historic Tax Freeze. Tax incentive.", options: [] },
-        strat_divorce_refi: { text: "Strategy: Owelty Lien. Equity buyout.", options: [] },
-        strat_reverse_purchase: { text: "Strategy: HECM Purchase. 50% down.", options: [] },
-        strat_sdir_custodian: { text: "Strategy: SDIRA. Custodian purchase.", options: [] },
-        strat_wholesaling: { text: "Strategy: Wholesaling. Assignment fee.", options: [] },
+        strat_green_mortgage: { text: "Strategy: EEM. Finance energy.", options: [] },
+        strat_itin_loan: { text: "Strategy: ITIN. Non-SSN.", options: [] },
+        strat_foreign_national: { text: "Strategy: Foreign Nat. DSCR.", options: [] },
+        strat_co_buy_agreement: { text: "Strategy: Co-Buy. Tenants Common.", options: [] },
+        strat_corp_relo: { text: "Strategy: Corp Relo. Benefits.", options: [] },
+        strat_tiny_home: { text: "Strategy: Tiny Home. Zoning.", options: [] },
+        strat_hoarder_cleanout: { text: "Strategy: Cleanout. Crew.", options: [] },
+        strat_vacant_staging: { text: "Strategy: Virtual Stage. Digital.", options: [] },
+        strat_utility_activation: { text: "Strategy: Util On. Inspect.", options: [] },
+        strat_structural_eng: { text: "Strategy: Struct Eng. Foundation.", options: [] },
+        strat_home_warranty: { text: "Strategy: Warranty. Systems.", options: [] },
+        strat_solar_lease_transfer: { text: "Strategy: Solar Transfer. Lease.", options: [] },
+        strat_historic_sale: { text: "Strategy: Historic Tax. Freeze.", options: [] },
+        strat_divorce_refi: { text: "Strategy: Owelty. Buyout.", options: [] },
+        strat_reverse_purchase: { text: "Strategy: HECM Buy. 50% down.", options: [] },
+        strat_sdir_custodian: { text: "Strategy: SDIRA. Custodian.", options: [] },
+        strat_wholesaling: { text: "Strategy: Wholesaling. Assignment.", options: [] },
         strat_mhp_invest: { text: "Strategy: MHP. Pad rent.", options: [] },
-        strat_student_housing: { text: "Strategy: Student Housing. Per bed rent.", options: [] },
-        strat_storage_invest: { text: "Strategy: Storage. Climate control.", options: [] },
-        strat_phase_2_env: { text: "Strategy: Phase 2. Soil drill.", options: [] },
-        strat_liquor_license: { text: "Strategy: Liquor License. Transfer check.", options: [] },
-        strat_parking_variance: { text: "Strategy: Parking Variance. Zoning relief.", options: [] },
-        strat_heavy_manufacturing: { text: "Strategy: Heavy Mfg. Floor load.", options: [] },
-        strat_ot_avg: { text: "Strategy: OT Averaging. 2 year history.", options: [] },
-        strat_medical_collections: { text: "Strategy: Medical Debt. Ignore.", options: [] },
-        strat_green_marketing: { text: "Strategy: Green Premium. Solar value.", options: [] },
-        strat_virtual_tour: { text: "Strategy: Virtual Tour. Remote buying.", options: [] },
-        strat_jumbo_loan: { text: "Strategy: Jumbo. Portfolio loan.", options: [] },
-        strat_usda_loan: { text: "Strategy: USDA. Rural 0% down.", options: [] },
-        strat_fsbo_conversion: { text: "Strategy: MLS Exposure. Agent reach.", options: [] },
-        strat_expired_relist: { text: "Strategy: Refresh. New look.", options: [] },
+        strat_student_housing: { text: "Strategy: Student. Bed rent.", options: [] },
+        strat_storage_invest: { text: "Strategy: Storage. Climate.", options: [] },
+        strat_phase_2_env: { text: "Strategy: Phase 2. Drill.", options: [] },
+        strat_liquor_license: { text: "Strategy: Liquor Lic. Transfer.", options: [] },
+        strat_parking_variance: { text: "Strategy: Parking Var. Zoning.", options: [] },
+        strat_heavy_manufacturing: { text: "Strategy: Heavy Mfg. Load.", options: [] },
+        strat_ot_avg: { text: "Strategy: OT Avg. 2yr.", options: [] },
+        strat_medical_collections: { text: "Strategy: Med Debt. Ignore.", options: [] },
+        strat_green_marketing: { text: "Strategy: Green. Solar value.", options: [] },
+        strat_virtual_tour: { text: "Strategy: Virtual. Remote.", options: [] },
+        strat_jumbo_loan: { text: "Strategy: Jumbo. Portfolio.", options: [] },
+        strat_usda_loan: { text: "Strategy: USDA. 0% down.", options: [] },
+        strat_fsbo_conversion: { text: "Strategy: MLS. Agent exposure.", options: [] },
+        strat_expired_relist: { text: "Strategy: Refresh. New photos.", options: [] },
         strat_cap_gains_calc: { text: "Strategy: Tax Calc. Capital gains.", options: [] },
-        strat_private_showings: { text: "Strategy: Private Showings. Vetted buyers.", options: [] },
-        strat_str_self: { text: "Strategy: Self-Manage. High effort.", options: [] },
-        strat_str_managed: { text: "Strategy: Managed STR. Passive.", options: [] },
+        strat_private_showings: { text: "Strategy: Private. Vetted.", options: [] },
+        strat_str_self: { text: "Strategy: Self-Manage. High rev.", options: [] },
+        strat_str_managed: { text: "Strategy: Managed. Passive.", options: [] },
         strat_land_build: { text: "Strategy: Const Loan. Build.", options: [] },
-        strat_zoning_attorney: { text: "Strategy: Zoning Attorney. Variance.", options: [] },
+        strat_zoning_attorney: { text: "Strategy: Zoning. Variance.", options: [] },
         strat_biz_opp: { text: "Strategy: Biz Opp. Asset sale.", options: [] },
-        strat_bank_statement: { text: "Strategy: Bank Stmt. 12mo deps.", options: [] },
-        strat_physician_loan: { text: "Strategy: Physician Loan. Student loan ignore.", options: [] },
-        strat_manual_underwriting: { text: "Strategy: Manual UW. Non-traditional.", options: [] },
+        strat_bank_statement: { text: "Strategy: Bank Stmt. 12mo.", options: [] },
+        strat_physician_loan: { text: "Strategy: Physician. Student loans.", options: [] },
+        strat_manual_underwriting: { text: "Strategy: Manual UW. Credit.", options: [] },
         strat_hard_money_buy: { text: "Strategy: Hard Money. Bridge.", options: [] },
         strat_new_construction: { text: "Strategy: Builder Rep. Upgrades.", options: [] },
         strat_builder_reg: { text: "Strategy: Builder Reg. Protect.", options: [] },
-        strat_divorce_neutral: { text: "Strategy: Neutral Sale. Unbiased.", options: [] },
-        strat_senior_transition: { text: "Strategy: Rightsizing. Estate sale.", options: [] },
-        strat_luxury_private: { text: "Strategy: Private Placement. Off market.", options: [] },
-        strat_eviction_sale: { text: "Strategy: Cash for Keys. Vacate.", options: [] },
-        strat_probate_conflict: { text: "Strategy: Mediator. Transparency.", options: [] },
-        strat_house_hack_invest: { text: "Strategy: House Hack. FHA MF.", options: [] },
-        strat_multifamily_commercial: { text: "Strategy: DSCR. Income loan.", options: [] },
-        strat_restaurant_buy: { text: "Strategy: 2nd Gen. Equipment.", options: [] },
-        strat_medical_office: { text: "Strategy: TI $. Buildout.", options: [] },
-        strat_flex_space: { text: "Strategy: Flex. Office/Warehouse.", options: [] },
+        strat_divorce_neutral: { text: "Strategy: Neutral. Unbiased.", options: [] },
+        strat_senior_transition: { text: "Strategy: Rightsizing. Estate.", options: [] },
+        strat_luxury_private: { text: "Strategy: Private. Off-market.", options: [] },
+        strat_eviction_sale: { text: "Strategy: Cash/Keys. Vacate.", options: [] },
+        strat_probate_conflict: { text: "Strategy: Mediator. Transp.", options: [] },
+        strat_house_hack_invest: { text: "Strategy: House Hack. MF.", options: [] },
+        strat_multifamily_commercial: { text: "Strategy: DSCR. Income.", options: [] },
+        strat_restaurant_buy: { text: "Strategy: 2nd Gen. Equip.", options: [] },
+        strat_medical_office: { text: "Strategy: TI. Buildout.", options: [] },
+        strat_flex_space: { text: "Strategy: Flex. Whse/Off.", options: [] },
         strat_commuter_hub: { text: "Strategy: Transit. Train.", options: [] },
         strat_school_zone: { text: "Strategy: District. Schools.", options: [] },
-        strat_va_loan: { text: "Strategy: VA Loan. 0% down.", options: [] },
+        strat_va_loan: { text: "Strategy: VA. 0% down.", options: [] },
         strat_203k_rehab: { text: "Strategy: 203k. Reno.", options: [] },
         res_grant: { text: "Strategy: DPA. Grants.", options: [] },
-        res_fha_standard: { text: "Strategy: FHA. 3.5% down.", options: [] },
-        res_credit_repair: { text: "Strategy: Credit Repair. Fix score.", options: [] },
+        res_fha_standard: { text: "Strategy: FHA. 3.5%.", options: [] },
+        res_credit_repair: { text: "Strategy: Credit. Repair.", options: [] },
         strat_concurrent: { text: "Strategy: Concurrent. Same day.", options: [] },
         strat_bridge: { text: "Strategy: Bridge. Buy first.", options: [] },
-        strat_sell_first: { text: "Strategy: Sell First. Contingency.", options: [] },
+        strat_sell_first: { text: "Strategy: Contingency. Sell first.", options: [] },
         strat_vacation: { text: "Strategy: Vacation. ROI.", options: [] },
         strat_leaseback: { text: "Strategy: Rent Back. Stay.", options: [] },
         strat_luxury_listing: { text: "Strategy: Luxury. Global.", options: [] },
-        strat_tenant_sale: { text: "Strategy: Investor Sale. Tenant stays.", options: [] },
+        strat_tenant_sale: { text: "Strategy: Investor Sale. Tenant.", options: [] },
         strat_concierge: { text: "Strategy: Concierge. Prep.", options: [] },
         strat_instant: { text: "Strategy: Instant. Speed.", options: [] },
         strat_hold_rent: { text: "Strategy: Hold. Rent.", options: [] },
-        strat_short_sale: { text: "Strategy: Short Sale. Forgive.", options: [] },
+        strat_short_sale: { text: "Strategy: Short Sale. Bank.", options: [] },
         strat_deed_lieu: { text: "Strategy: Deed Lieu. Surrender.", options: [] },
         strat_probate_easy: { text: "Strategy: Probate. Easy.", options: [] },
-        strat_probate_court: { text: "Strategy: Court Probate. Slow.", options: [] },
+        strat_probate_court: { text: "Strategy: Court. Slow.", options: [] },
         strat_probate_bond: { text: "Strategy: Bond. Fast.", options: [] },
         strat_turnkey: { text: "Strategy: Turnkey. Done.", options: [] },
         strat_dst: { text: "Strategy: DST. Passive.", options: [] },
@@ -1118,7 +1192,7 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_brrrr: { text: "Strategy: BRRRR. Refi.", options: [] },
         strat_buy_hold: { text: "Strategy: Hold. Cash flow.", options: [] },
         strat_syndication: { text: "Strategy: Syndication. Group.", options: [] },
-        strat_reit: { text: "Strategy: REIT. Stocks.", options: [] },
+        strat_reit: { text: "Strategy: REIT. Stock.", options: [] },
         strat_hold_refi: { text: "Strategy: Cash Out. Equity.", options: [] },
         strat_1031: { text: "Strategy: 1031. Defer.", options: [] },
         strat_sba_504: { text: "Strategy: SBA. 10%.", options: [] },
@@ -1126,95 +1200,63 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_lease_base_year: { text: "Strategy: Base Year. Cap.", options: [] },
         strat_industrial_logistics: { text: "Strategy: Logistics. Doors.", options: [] },
         res_conventional_check: { text: "Strategy: Conventional. Standard.", options: [] },
-        strat_streamline_refi: { text: "Strategy: Streamline. No appraisal.", options: [] },
-        strat_rate_term_refi: { text: "Strategy: Rate Term. Lower rate.", options: [] },
-        strat_debt_consolidation: { text: "Strategy: Debt Consolidation. Payoff.", options: [] },
+        strat_streamline_refi: { text: "Strategy: Streamline. Refi.", options: [] },
+        strat_rate_term_refi: { text: "Strategy: Rate Term. Lower.", options: [] },
+        strat_debt_consolidation: { text: "Strategy: Debt Consol. Payoff.", options: [] },
         strat_renovation_heloc: { text: "Strategy: HELOC. Reno.", options: [] },
         strat_cash_out_invest: { text: "Strategy: Invest. Cash out.", options: [] },
         strat_pmi_removal: { text: "Strategy: PMI. Remove.", options: [] },
         strat_appraisal_gap: { text: "Strategy: Appraisal. Value.", options: [] },
-        strat_fha_ibr: { text: "Strategy: FHA IBR. Student loans.", options: [] },
+        strat_fha_ibr: { text: "Strategy: FHA IBR. Student.", options: [] },
         strat_conventional_1percent: { text: "Strategy: Conv Student. 1%.", options: [] },
         strat_cosigner_fha: { text: "Strategy: Co-Signer. Blend.", options: [] },
         strat_condo_warrantable: { text: "Strategy: Warrantable. Healthy.", options: [] },
-        strat_non_warrantable: { text: "Strategy: Non-Warrantable. Litigation.", options: [] },
-        strat_multigen_search: { text: "Strategy: Multi-Gen. In-law.", options: [] },
+        strat_non_warrantable: { text: "Strategy: Non-Warrantable. Portfolio.", options: [] },
+        strat_multigen_search: { text: "Strategy: Multi Gen. In-law.", options: [] },
+        strat_solar_check: { text: "Strategy: Solar. Lease.", options: [] },
         strat_remove_disputes: { text: "Strategy: Disputes. Remove.", options: [] },
         strat_gift_letter: { text: "Strategy: Gift Letter. Funds.", options: [] },
-        strat_trust_sale: { text: "Strategy: Trust. Certificate.", options: [] },
+        strat_trust_sale: { text: "Strategy: Trust. Cert.", options: [] },
         strat_retro_permit: { text: "Strategy: Retro Permit. Fix.", options: [] },
         strat_title_clearance: { text: "Strategy: Title. Clear.", options: [] },
         strat_reverse_mortgage_sale: { text: "Strategy: HECM. Payoff.", options: [] },
         strat_land_feasibility: { text: "Strategy: Land. Perc.", options: [] },
         strat_cash_out_refi: { text: "Strategy: Cash Out. Full.", options: [] },
         strat_land_hold: { text: "Strategy: Land. Banking.", options: [] },
-        strat_gap_employment: { text: "Strategy: Gap Explanation. Explain gap.", options: [] },
-        strat_cash_only_manu: { text: "Strategy: Cash Sale. No financing available.", options: [] },
-        strat_log_cabin: { text: "Strategy: Log Home Finance. Unique comp requirements.", options: [] },
-        strat_str_urban_reg: { text: "Strategy: Urban STR. Check city ban list.", options: [] },
-        strat_str_vacation: { text: "Strategy: Vacation Rental. High season revenue.", options: [] },
-        strat_401k_loan: { text: "Strategy: 401k Loan. Self-loan.", options: [] },
-        strat_2_1_buydown: { text: "Strategy: 2-1 Buydown. Lower rate start.", options: [] },
-        strat_lease_exclusion: { text: "Strategy: Lease Exclusion. <10 payments.", options: [] },
-        strat_exclude_support: { text: "Strategy: Support Exclusion. <10 payments.", options: [] },
-        strat_alimony_income: { text: "Strategy: Alimony Income. 6mo proof.", options: [] },
-        strat_gift_of_equity: { text: "Strategy: Gift of Equity. Family sale.", options: [] },
-        strat_radon_mitigation: { text: "Strategy: Radon System. Seller pays.", options: [] },
-        strat_crawl_encapsulation: { text: "Strategy: Crawl Space. Vapor barrier.", options: [] },
-        strat_plumbing_scope: { text: "Strategy: Plumbing Scope. Slab leaks.", options: [] },
-        strat_debt_paydown: { text: "Strategy: Closing Paydown. Fix DTI.", options: [] },
-        strat_termite_inspection: { text: "Strategy: WDI. Termite check.", options: [] },
-        strat_pre_show_security: { text: "Strategy: Pre-Show. Secure valuables.", options: [] },
-        strat_restricted_hours: { text: "Strategy: Blocked Showings. Manage schedule.", options: [] },
-        strat_loi_commercial: { text: "Strategy: LOI. Non-binding offer.", options: [] },
-        strat_high_conflict_listing: { text: "Strategy: High-Conflict Listing. Neutral showing management.", options: [] },
-        strat_squatter_ejectment: { text: "Strategy: Ejectment. Civil removal.", options: [] },
-        strat_meth_remediation: { text: "Strategy: Meth Remediation. Certified cleaning.", options: [] },
-        strat_sheriff_cash: { text: "Strategy: Sheriff Sale. 100% cash.", options: [] },
-        strat_auction_tech_fee: { text: "Strategy: Auction Fee. Buyer premium.", options: [] },
-        strat_rental_arbitrage: { text: "Strategy: Arbitrage. Rent to rent.", options: [] },
-        strat_vet_zoning: { text: "Strategy: Vet Zoning. Noise permit.", options: [] },
-        strat_daycare_licensing: { text: "Strategy: DCFS License. Playground reg.", options: [] },
-        strat_daycare_variance: { text: "Strategy: Daycare Variance. Park use.", options: [] },
-        strat_gym_noise: { text: "Strategy: Gym Noise. Impact mitigation.", options: [] },
-        strat_timber_cruise: { text: "Strategy: Timber Cruise. Tree value.", options: [] },
-        strat_mineral_rights: { text: "Strategy: Mineral Rights. Subsurface.", options: [] },
-        strat_water_rights: { text: "Strategy: Water Rights. Adjudication.", options: [] },
-        strat_mine_subsidence: { text: "Strategy: Mine Insurance. Subsidence cover.", options: [] },
-        strat_padsplit: { text: "Strategy: PadSplit. Per room rent.", options: [] },
-        strat_bond_over_lien: { text: "Strategy: Bond Lien. Escrow holdback.", options: [] },
-        strat_probation_letter: { text: "Strategy: Probation Letter. Verify income.", options: [] },
-        strat_fair_housing_risk: { text: "Strategy: Love Letter Risk. Avoid bias.", options: [] },
-        strat_mhp_lagoon: { text: "Strategy: MHP Lagoon. Enviro check.", options: [] },
-        strat_flood_elevation: { text: "Strategy: Elevation Cert. Lower insurance.", options: [] },
-        strat_fair_plan_ins: { text: "Strategy: FAIR Plan. Wildfire ins.", options: [] },
-        strat_wetland_mitigation: { text: "Strategy: Wetland Credits. Army Corps.", options: [] },
-        strat_mold_remediation: { text: "Strategy: Mold Remediate. Air test.", options: [] },
-        strat_asbestos_abatement: { text: "Strategy: Asbestos. Encapsulate.", options: [] },
-        strat_oil_tank_removal: { text: "Strategy: Tank Pull. EPA letter.", options: [] },
-        strat_shared_well_agreement: { text: "Strategy: Shared Well. Recorded easement.", options: [] },
-        strat_well_water_test: { text: "Strategy: Well Test. Bacteria/Nitrate.", options: [] },
-        strat_fha_203k_limited: { text: "Strategy: 203k Limited. <$35k.", options: [] },
-        strat_fha_203k_standard: { text: "Strategy: 203k Standard. Structural.", options: [] },
-        strat_tax_lien_invest: { text: "Strategy: Tax Liens. Interest yield.", options: [] },
-        strat_non_qm_foreclosure: { text: "Strategy: Recent Foreclosure. High rate.", options: [] },
-        strat_alf_invest: { text: "Strategy: ALF. Senior housing.", options: [] },
-        strat_billboard_lease: { text: "Strategy: Billboard. Easement buy.", options: [] },
-        strat_performing_note: { text: "Strategy: Perf Note. Cash flow.", options: [] },
-        strat_non_performing_note: { text: "Strategy: Non-Perf Note. Workout.", options: [] },
-        strat_opportunity_zone: { text: "Strategy: Opp Zone. Tax free.", options: [] },
-        strat_blind_trust: { text: "Strategy: Blind Trust. Anonymity.", options: [] },
-        strat_dscr_llc: { text: "Strategy: DSCR LLC. Biz loan.", options: [] },
-        strat_trust_purchase: { text: "Strategy: Trust Buy. Estate plan.", options: [] },
-        strat_system_upgrade_credit: { text: "Strategy: System Credit. Update electric.", options: [] },
-        strat_riparian_rights: { text: "Strategy: Riparian. River access.", options: [] },
-        strat_littoral_rights: { text: "Strategy: Littoral. Lake access.", options: [] },
-        strat_limited_review_condo: { text: "Strategy: Ltd Review. 25% down.", options: [] },
-        strat_no_ratio_loan: { text: "Strategy: No Ratio. Equity based.", options: [] },
-        strat_1031_reverse: { text: "Strategy: Rev 1031. Buy first.", options: [] },
-        strat_base_year_audit: { text: "Strategy: Base Year. Lease audit.", options: [] },
-        strat_firpta_withholding: { text: "Strategy: FIRPTA. Foreign tax.", options: [] },
-        strat_blanket_mortgage: { text: "Strategy: Blanket Loan. Portfolio.", options: [] }
+        strat_gap_employment: { text: "Strategy: Gap. Explain.", options: [] },
+        strat_cash_only_manu: { text: "Strategy: Cash. Manu.", options: [] },
+        strat_log_cabin: { text: "Strategy: Log Cabin. Comps.", options: [] },
+        strat_str_urban_reg: { text: "Strategy: Urban STR. Regs.", options: [] },
+        strat_str_vacation: { text: "Strategy: Vacation. Rev.", options: [] },
+        strat_401k_loan: { text: "Strategy: 401k. Self loan.", options: [] },
+        strat_2_1_buydown: { text: "Strategy: 2-1 Buydown. Rate.", options: [] },
+        strat_lease_exclusion: { text: "Strategy: Lease Excl. DTI.", options: [] },
+        strat_exclude_support: { text: "Strategy: Support Excl. DTI.", options: [] },
+        strat_alimony_income: { text: "Strategy: Alimony Inc. 6mo.", options: [] },
+        strat_gift_of_equity: { text: "Strategy: Gift Equity. Family.", options: [] },
+        strat_radon_mitigation: { text: "Strategy: Radon. Mitigation.", options: [] },
+        strat_crawl_encapsulation: { text: "Strategy: Crawl. Encap.", options: [] },
+        strat_plumbing_scope: { text: "Strategy: Scope. Slab.", options: [] },
+        strat_debt_paydown: { text: "Strategy: Paydown. DTI.", options: [] },
+        strat_termite_inspection: { text: "Strategy: WDI. Termite.", options: [] },
+        strat_pre_show_security: { text: "Strategy: Security. Valuables.", options: [] },
+        strat_restricted_hours: { text: "Strategy: Showing Block. Time.", options: [] },
+        strat_loi_commercial: { text: "Strategy: LOI. Offer.", options: [] },
+        strat_high_conflict_listing: { text: "Strategy: Conflict. Neutral.", options: [] },
+        strat_squatter_ejectment: { text: "Strategy: Ejectment. Civil.", options: [] },
+        strat_meth_remediation: { text: "Strategy: Meth. Clean.", options: [] },
+        strat_sheriff_cash: { text: "Strategy: Sheriff. Cash.", options: [] },
+        strat_auction_tech_fee: { text: "Strategy: Auction Fee. Premium.", options: [] },
+        strat_rental_arbitrage: { text: "Strategy: Arbitrage. Rent.", options: [] },
+        strat_vet_zoning: { text: "Strategy: Vet. Zoning.", options: [] },
+        strat_daycare_licensing: { text: "Strategy: Daycare. License.", options: [] },
+        strat_daycare_variance: { text: "Strategy: Daycare Var. Zoning.", options: [] },
+        strat_gym_noise: { text: "Strategy: Gym Noise. Impact.", options: [] },
+        strat_timber_cruise: { text: "Strategy: Timber. Value.", options: [] },
+        strat_mineral_rights: { text: "Strategy: Minerals. Rights.", options: [] },
+        strat_water_rights: { text: "Strategy: Water. Rights.", options: [] },
+        strat_mine_subsidence: { text: "Strategy: Mine. Ins.", options: [] },
+        strat_padsplit: { text: "Strategy: PadSplit. Rooms.", options: [] }
     };
 
     let currentNode = 'start';
