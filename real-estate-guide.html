@@ -3,86 +3,115 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Infinity Strategy Engine 3.0</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Advanced Real Estate Strategy Engine">
+    <title>Pavlo Rospopa Website</title>
+    <meta name="viewport" content="width=device-width">
+    <meta name="description" content="pavlo@rospopa.com">
     
     <link rel="canonical" href="http://rospopa.github.io/">
-    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo="> <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/css/favicons/unnamed-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/css/favicons/unnamed-32x32.png">
+    <link rel="icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/css/favicons/unnamed-192x192.png">
+    <link rel="icon" type="image/png" sizes="231x231" href="/css/favicons/unnamed-231x231.png">
+    <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
+      
+    <link rel="stylesheet" href="css/format.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
-        /* --- CORE / RESET --- */
+        /* --- SECURITY / DISABLE SELECTION START --- */
         body {
-            -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background-color: #f8fafc; margin: 0; color: #1e293b;
+            -webkit-user-select: none; /* Safari */
+            -moz-user-select: none; /* Firefox */
+            -ms-user-select: none; /* IE10+/Edge */
+            user-select: none; /* Standard */
         }
-        input, textarea, select { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+         
+        /* Re-enable selection for inputs */
+        input, textarea, select {
+            -webkit-user-select: text;
+            -moz-user-select: text;
+            -ms-user-select: text;
+            user-select: text;
+        }
 
-        /* --- VISUALS --- */
-        #canvas1 { position: absolute; top: 0; left: 0; width: 100%; z-index: 99; pointer-events: none; }
+        /* --- CANVAS CSS --- */
+        #canvas1 {
+            position: absolute; 
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 99; 
+            pointer-events: none; 
+            image-rendering: pixelated; 
+        }
 
-        /* --- CONTAINER --- */
+        /* --- STRATEGY ENGINE STYLES --- */
         #real-estate-guide-container {
-            margin: 60px auto; padding: 50px; border: 0; border-radius: 24px;
-            background-color: #ffffff; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); 
-            position: relative; z-index: 101; max-width: 850px;
+            margin: 40px auto; 
+            padding: 30px; 
+            border: 1px solid #e0e0e0; 
+            border-radius: 12px;
+            background-color: #ffffff; 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+            position: relative; 
+            z-index: 101;
+            max-width: 950px;
         }
         
-        /* --- UI ELEMENTS --- */
+        /* Button Style */
         .tree-option-btn {
-            padding: 20px 24px; background-color: #fff; color: #334155; border: 1px solid #e2e8f0;
-            border-radius: 16px; cursor: pointer; font-size: 1.05rem; text-align: left;
-            transition: all 0.2s ease; font-weight: 500; width: 100%; margin-bottom: 12px; display: block;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative;
+            padding: 12px 16px; 
+            background-color: #f8f9fa; 
+            color: #333; 
+            border: 2px solid #eef0f2;
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 0.95rem; 
+            text-align: left;
+            transition: all 0.2s; 
+            font-weight: 500; 
+            width: 100%; 
+            margin-bottom: 6px; 
+            display: block;
         }
-        .tree-option-btn:hover { 
-            border-color: #3b82f6; color: #1d4ed8; transform: translateY(-2px); 
-            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1); 
-        }
+        .tree-option-btn:hover { border-color: #4285F4; color: #4285F4; transform: translateX(4px); }
         
+        /* Input & Select Styles */
         .tree-input, .tree-select {
-            width: 100%; padding: 18px; margin-bottom: 25px; border: 2px solid #cbd5e1;
-            border-radius: 12px; font-size: 1.1rem; box-sizing: border-box; transition: 0.2s;
-            background-color: #f8fafc;
+            width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #ddd;
+            border-radius: 8px; font-size: 1rem; box-sizing: border-box;
         }
-        .tree-input:focus, .tree-select:focus { border-color: #3b82f6; background-color: #fff; outline: none; }
+        .tree-input:focus, .tree-select:focus { border-color: #4285F4; outline: none; }
         
         .next-btn {
-            background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 18px 36px;
-            border-radius: 12px; cursor: pointer; font-weight: 700; width: 100%; font-size: 1.15rem;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); transition: 0.2s;
+            background-color: #4285F4; color: white; border: none; padding: 12px 24px;
+            border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1rem;
         }
-        .next-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
+        .next-btn:hover { background-color: #3367d6; }
 
-        .result-card { 
-            background: #eff6ff; border-left: 8px solid #3b82f6; padding: 40px; 
-            border-radius: 16px; color: #1e3a8a; line-height: 1.8; margin-bottom: 30px; 
+        .result-card { background: #f4f7ff; border-left: 6px solid #4285F4; padding: 25px; border-radius: 8px; color: #334155; line-height: 1.7; margin-bottom: 20px; }
+
+        /* --- CONTACT FORM STYLES --- */
+        #contact-form-container { 
+            margin: 40px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; 
         }
-        .result-title { font-weight: 800; font-size: 1.5rem; display: block; margin-bottom: 15px; color: #1e40af; }
-
-        /* --- CONTACT FORM --- */
-        #contact-form-container { margin-top: 50px; padding-top: 30px; border-top: 1px solid #e2e8f0; }
-        #contact-form { display: flex; flex-direction: column; gap: 20px; }
+        #contact-form { display: flex; flex-direction: column; gap: 15px; }
         #contact-form input, #contact-form textarea { 
-            padding: 16px; border: 1px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; font-family: inherit; font-size: 1rem;
+            padding: 12px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; font-family: inherit;
         }
         #contact-form button { 
-            padding: 18px 36px; background-color: #0f172a; color: white; border: none; border-radius: 12px; cursor: pointer; align-self: flex-start; font-weight: 700; font-size: 1.1rem;
+            padding: 12px 24px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; align-self: flex-start; font-weight: bold; 
         }
-        #contact-form button:hover { background-color: #334155; }
+        #contact-form button:hover { background-color: #555; }
+        #contact-form button:disabled { background-color: #999; cursor: not-allowed; }
         
-        .progress-container { width: 100%; height: 8px; background: #e2e8f0; border-radius: 99px; margin: 30px 0; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); transition: width 0.5s ease; }
+        .progress-container { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin: 15px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #4285F4, #34a853); transition: width 0.3s ease; }
 
-        #form-status { margin-top: 15px; font-weight: 600; }
-        .g-recaptcha { margin-bottom: 10px; }
-        
-        /* Header/Footer */
-        .site-header { background: #fff; padding: 25px 0; border-bottom: 1px solid #f1f5f9; position: relative; z-index: 100; }
-        .site-header .wrap { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; }
-        .site-title { font-weight: 800; color: #0f172a; font-size: 1.4rem; letter-spacing: -0.5px; }
-        footer { background: #fff; padding: 60px 0; margin-top: 100px; border-top: 1px solid #f1f5f9; position: relative; z-index: 100; color: #94a3b8; }
+        #form-status { margin-top: 10px; font-weight: 500; }
+        .g-recaptcha { margin-bottom: 5px; }
     </style>
 </head>
      
@@ -96,24 +125,29 @@
 
 <header class="site-header">
     <div class="wrap">
-        <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa</a>
+        <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
         <nav class="site-nav">
-            <a style="text-decoration: none; font-weight: 600; color: #2563eb;" href="/login">Client Portal</a>
+            <div class="trigger">
+                <a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">pavlo@rospopa.com</a>
+            </div>
+            <div class="trigger2">
+                <a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">@</a>
+            </div>
         </nav>
     </div>
 </header>
 
 <main>
     <div class="page-content">
-        <div class="wrap" style="max-width: 1000px; margin: 0 auto; padding: 0 20px;">
+        <div class="wrap">
             
-            <div id="particle-anchor" style="width: 100%; height: 180px; margin-top: 20px;"></div>
+            <div id="particle-anchor" style="width: 100%; height: 150px; margin-top: 20px; margin-bottom: 20px;"></div>
 
             <div id="real-estate-guide-container">
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <button id="back-btn" style="background:none; border:none; color:#64748b; cursor:pointer; font-weight:700; font-size: 1rem; display:none; align-items:center; gap:8px;">&larr; Go Back</button>
-                    <span id="step-counter" style="color:#cbd5e1; font-size:0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">Start</span>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <button id="back-btn" style="background:none; border:none; color:#4285F4; cursor:pointer; font-weight:bold; display:none;">← Back</button>
+                    <span id="step-counter" style="color:#888; font-size:0.9rem;">Start</span>
                 </div>
                 
                 <div class="progress-container">
@@ -121,24 +155,22 @@
                 </div>
 
                 <div id="tree-content">
-                    <h2 id="question-text" style="margin-bottom: 40px; font-size: 1.8rem; color: #0f172a; font-weight: 800; line-height: 1.3;">System Initializing...</h2>
+                    <h2 id="question-text" style="margin-bottom: 25px; font-size: 1.4rem; color: #222; font-weight: 700;">Loading Logic...</h2>
                     <div id="options-container"></div>
                 </div>
 
                 <div id="contact-form-container" style="display: none;">
-                    <h3 style="margin-top:0; color: #0f172a; font-size: 1.6rem; margin-bottom: 10px;">Strategy Generated</h3>
-                    <p style="font-size: 1.05rem; color: #475569; margin-bottom: 30px; line-height: 1.6;">We have computed the optimal execution path based on your inputs. Please verify your identity to access the full blueprint.</p>
+                    <h3 style="margin-top:0;">Request This Strategy</h3>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Based on your inputs, this is the most efficient path forward.</p>
                     <form id="contact-form">
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                            <input type="text" name="name" placeholder="Full Name" required />
-                            <input type="email" name="email" placeholder="Email Address" required />
-                        </div>
-                        <input type="tel" name="phone" placeholder="Phone Number (Optional - for priority access)" />
-                        <textarea id="message-field" name="message" rows="5" required></textarea>
+                        <input type="text" name="name" placeholder="Your Name" required />
+                        <input type="email" name="email" placeholder="Your Email" required />
+                        <input type="tel" name="phone" placeholder="Phone Number (Optional)" />
+                        <textarea id="message-field" name="message" rows="8" required></textarea>
                         
                         <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
                         
-                        <button type="submit" id="submit-btn">Unlock Blueprint</button>
+                        <button type="submit" id="submit-btn">Send Request</button>
                         <p id="form-status"></p>
                     </form>
                 </div>
@@ -149,107 +181,229 @@
 
 <footer>
     <section class="d-flex flex-row justify-content-center" style="width: 100%;">
-        <div class="container" style="text-align: center;">
-             <p class="mb-0">&copy; <span id="currentYear"></span> Pavlo Rospopa. All Rights Reserved.</p>
+        <div class="container" style="margin-right: 0px;margin-left: 0px;padding-right: 0px;padding-left: 0px;width: 100%;max-width: 100%;">
+            <div class="row" style="margin-right: 0px;margin-left: 0px;max-width: 100%;padding-top: 20px;padding-bottom: 20px;">
+                <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
+                    <div class="text-center" style="text-align:center">
+                        <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
+                    </div>
+                    <script>
+                        document.getElementById('currentYear').textContent = new Date().getFullYear();
+                    </script>
+                </div>
+            </div>
         </div>
     </section>
 </footer>
 
 <script>
-    document.getElementById('currentYear').textContent = new Date().getFullYear();
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
     const anchor = document.getElementById('particle-anchor');
-    const CONFIG = { particleSize: 3, returnSpeed: 0.08 };
+
+    const CONFIG = {
+        particleSize: 3,           
+        returnSpeed: 0.15        
+    };
+
     let particlesArray = [];
-    const mouse = { x: null, y: null, radius: 120 }
+
+    const mouse = {
+        x: null,
+        y: null,
+        radius: 120
+    }
+
     let isTouch = false;
 
-    window.addEventListener('mousemove', function(event){ if (isTouch) return; mouse.x = event.pageX; mouse.y = event.pageY; });
-    const handleTouch = (event) => { isTouch = true; if(event.touches.length > 0) { mouse.x = event.touches[0].pageX; mouse.y = event.touches[0].pageY; } };
+    window.addEventListener('mousemove', function(event){
+        if (isTouch) return; 
+        mouse.x = event.pageX; 
+        mouse.y = event.pageY;
+    });
+      
+    const handleTouch = (event) => {
+        isTouch = true;
+        if(event.touches.length > 0) {
+            mouse.x = event.touches[0].pageX;
+            mouse.y = event.touches[0].pageY;
+        }
+    };
+
     window.addEventListener('touchstart', handleTouch, {passive: true});
     window.addEventListener('touchmove', handleTouch, {passive: true});
-    const clearTouch = () => { mouse.x = undefined; mouse.y = undefined; setTimeout(() => { isTouch = false; }, 500); };
+
+    const clearTouch = () => {
+        mouse.x = undefined;
+        mouse.y = undefined;
+        setTimeout(() => {
+            isTouch = false;
+        }, 500);
+    };
+
     window.addEventListener('touchend', clearTouch);
     window.addEventListener('touchcancel', clearTouch);
-    window.addEventListener('mouseout', function(){ if (!isTouch) { mouse.x = undefined; mouse.y = undefined; } });
+      
+    window.addEventListener('mouseout', function(){
+        if (!isTouch) {
+            mouse.x = undefined;
+            mouse.y = undefined;
+        }
+    });
 
     class Particle {
         constructor(xOffset, yOffset, color, size){
-            this.xOffset = xOffset; this.yOffset = yOffset; 
-            this.color = color; this.size = size;
-            this.density = (Math.random() * 30) + 5; this.dx = 0; this.dy = 0; 
+            this.xOffset = xOffset; 
+            this.yOffset = yOffset; 
+            this.color = color;
+            this.size = size;
+            this.density = (Math.random() * 30) + 5;
+            this.dx = 0; 
+            this.dy = 0; 
         }
+        
         draw(anchorX, anchorY){
-            let drawX = anchorX + this.xOffset + this.dx; let drawY = anchorY + this.yOffset + this.dy;
-            ctx.fillStyle = this.color; ctx.beginPath(); ctx.fillRect(drawX, drawY, this.size, this.size); ctx.closePath();
+            let drawX = anchorX + this.xOffset + this.dx;
+            let drawY = anchorY + this.yOffset + this.dy;
+
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.fillRect(drawX, drawY, this.size, this.size);
+            ctx.closePath();
         }
+        
         update(anchorX, anchorY){
-            let currentX = anchorX + this.xOffset + this.dx; let currentY = anchorY + this.yOffset + this.dy;
-            let distMouseX = mouse.x - currentX; let distMouseY = mouse.y - currentY;
+            let currentX = anchorX + this.xOffset + this.dx;
+            let currentY = anchorY + this.yOffset + this.dy;
+
+            let distMouseX = mouse.x - currentX;
+            let distMouseY = mouse.y - currentY;
+             
             if (mouse.x == null || mouse.y == null) {
-                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed; else this.dx = 0;
-                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed; else this.dy = 0;
+                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
+                else this.dx = 0;
+                
+                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
+                else this.dy = 0;
                 return;
             }
+
             let distance = Math.sqrt(distMouseX * distMouseX + distMouseY * distMouseY);
+             
             if (distance < mouse.radius) {
-                let force = (mouse.radius - distance) / mouse.radius;
-                let directionX = (distMouseX / distance) * force * this.density;
-                let directionY = (distMouseY / distance) * force * this.density;
-                this.dx -= directionX; this.dy -= directionY;
+                let forceDirectionX = distMouseX / distance;
+                let forceDirectionY = distMouseY / distance;
+                let maxDistance = mouse.radius;
+                let force = (maxDistance - distance) / maxDistance;
+                let directionX = forceDirectionX * force * this.density;
+                let directionY = forceDirectionY * force * this.density;
+                
+                this.dx -= directionX;
+                this.dy -= directionY;
             } else {
-                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed; else this.dx = 0;
-                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed; else this.dy = 0;
+                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
+                else this.dx = 0;
+                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
+                else this.dy = 0;
             }
         }
     }
 
     function init() {
         particlesArray = [];
+        
         let isMobile = window.innerWidth < 600;
         let step = isMobile ? 4 : 3; 
+        
         let contentWidth = Math.min(window.innerWidth - 40, 600); 
-        let fontSize = Math.floor(contentWidth * 0.14);
-        if (fontSize < 40) fontSize = 40; if (fontSize > 160) fontSize = 160;
+        let fontSize = Math.floor(contentWidth * 0.16);
+        
+        if (fontSize < 40) fontSize = 40;
+        if (fontSize > 180) fontSize = 180;
+
         CONFIG.particleSize = step;
+        
         let anchorTop = anchor.offsetTop; 
-        canvas.width = window.innerWidth; canvas.style.width = window.innerWidth + 'px';
-        let safeHeight = anchorTop + 500; 
-        canvas.height = safeHeight; canvas.style.height = safeHeight + 'px';
+
+        canvas.width = window.innerWidth;
+        canvas.style.width = window.innerWidth + 'px';
+
+        let safeHeight = anchorTop + 600; 
+        canvas.height = safeHeight;
+        canvas.style.height = safeHeight + 'px';
 
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        let centerX = canvas.width / 2; let centerY = anchorTop + (180 / 2); 
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        
+        let centerX = canvas.width / 2;
+        let centerY = anchorTop + (150 / 2); 
+        // Changed text to match the content
         let text = 'Strategy'; 
+
         let metrics = ctx.measureText(text);
-        let startX = centerX - (metrics.width / 2); let endX = centerX + (metrics.width / 2);
+        let textWidth = metrics.width;
+        let startX = centerX - (textWidth / 2);
+        let endX = centerX + (textWidth / 2);
+
         let gradient = ctx.createLinearGradient(startX, 0, endX, 0);
-        gradient.addColorStop(0, '#3b82f6'); gradient.addColorStop(0.5, '#6366f1'); gradient.addColorStop(1, '#a855f7'); 
-        ctx.fillStyle = gradient; ctx.clearRect(0,0, canvas.width, canvas.height); ctx.fillText(text, centerX, centerY);
+        gradient.addColorStop(0, '#4285F4'); 
+        gradient.addColorStop(0.5, '#a855f7'); 
+        gradient.addColorStop(1, '#ec4899'); 
+
+        ctx.fillStyle = gradient;
+        ctx.clearRect(0,0, canvas.width, canvas.height);
+        ctx.fillText(text, centerX, centerY);
+        
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
-        for (let y = 0; y < textCoordinates.height; y += step){
-            for (let x = 0; x < textCoordinates.width; x += step){
+        for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
+            for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
                 let index = (y * 4 * textCoordinates.width) + (x * 4);
+                
                 if (textCoordinates.data[index + 3] > 128){
-                    let r = textCoordinates.data[index]; let g = textCoordinates.data[index + 1]; let b = textCoordinates.data[index + 2];
-                    let xOffset = x - centerX; let yOffset = y - centerY;
-                    particlesArray.push(new Particle(xOffset, yOffset, 'rgb('+r+','+g+','+b+')', CONFIG.particleSize));
+                    let r = textCoordinates.data[index];
+                    let g = textCoordinates.data[index + 1];
+                    let b = textCoordinates.data[index + 2];
+                    let color = 'rgb(' + r + ',' + g + ',' + b + ')';
+                    
+                    let xOffset = x - centerX;
+                    let yOffset = y - centerY;
+                    
+                    particlesArray.push(new Particle(xOffset, yOffset, color, CONFIG.particleSize));
                 }
             }
         }
         ctx.clearRect(0,0, canvas.width, canvas.height);
+        
+        if(anchor) anchor.style.height = (fontSize + 60) + "px";
     }
+
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        let centerX = canvas.width / 2; let centerY = anchor.offsetTop + (anchor.offsetHeight / 2);
-        for (let i = 0; i < particlesArray.length; i++){ particlesArray[i].update(centerX, centerY); particlesArray[i].draw(centerX, centerY); }
+        
+        let centerX = canvas.width / 2;
+        let centerY = anchor.offsetTop + (anchor.offsetHeight / 2);
+
+        for (let i = 0; i < particlesArray.length; i++){
+            particlesArray[i].update(centerX, centerY);
+            particlesArray[i].draw(centerX, centerY);
+        }
         requestAnimationFrame(animate);
     }
-    window.addEventListener('load', function() { setTimeout(init, 100); animate(); });
+
+    window.addEventListener('load', function() {
+        setTimeout(init, 100); 
+        animate();
+    });
+
     let lastWidth = window.innerWidth;
-    window.addEventListener('resize', function(){ if (Math.abs(window.innerWidth - lastWidth) > 50) { lastWidth = window.innerWidth; init(); } });
+    window.addEventListener('resize', function(){
+        if (Math.abs(window.innerWidth - lastWidth) > 50) {
+            lastWidth = window.innerWidth;
+            init();
+        }
+    });
 </script>
 
 <script>
@@ -822,5 +976,6 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 </script>
+<script src="js/github-update.js"></script>
 </body>
 </html>
