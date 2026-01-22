@@ -8,7 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "📈 Investing for Wealth", next: "invest_path" }
             ]
         },
-        // --- BUYING PATHS ---
+        // BUYING
         buy_path: {
             text: "What is your current buying status?",
             options: [
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "No, I am ready to buy", next: "buy_finance" }
             ]
         },
-        // --- SELLING PATHS ---
+        // SELLING
         sell_path: {
             text: "What best describes your selling situation?",
             options: [
@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "1031 Tax-Deferred Exchange", next: "res_1031" }
             ]
         },
-        // --- INVESTING PATHS ---
+        // INVESTING
         invest_path: {
             text: "What is your target investment strategy?",
             options: [
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "House Hacking", next: "res_house_hack" }
             ]
         },
-        // --- TERMINAL NODES (All trigger the form) ---
+        // FINAL RESULTS (Dead Ends)
         res_finance: { text: "Action: Get Pre-Approved. In a competitive market, a lender's letter is your most powerful tool.", options: [] },
         res_cash: { text: "Action: Prepare Proof of Funds. Cash allows for aggressive negotiation and fast closings.", options: [] },
         res_standard_sell: { text: "Action: Comparative Market Analysis. We need to price your home accurately to capture peak interest.", options: [] },
@@ -71,6 +71,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const contactFormContainer = document.getElementById('contact-form-container');
     const messageField = document.getElementById('message-field');
 
+    function createRipple(e, button) {
+        const ripple = document.createElement('span');
+        ripple.classList.add('ripple');
+        const rect = button.getBoundingClientRect();
+        const size = Math.max(rect.width, rect.height);
+        const x = e.clientX - rect.left - size / 2;
+        const y = e.clientY - rect.top - size / 2;
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = x + 'px';
+        ripple.style.top = y + 'px';
+        button.appendChild(ripple);
+        setTimeout(() => ripple.remove(), 700);
+    }
+
     function renderNode() {
         const node = tree[currentNode];
         if (!node) return;
@@ -78,35 +92,31 @@ document.addEventListener('DOMContentLoaded', () => {
         questionEl.innerText = node.text;
         optionsContainer.innerHTML = '';
         
-        // Update Steps: history.length + 1
         const currentStep = history.length + 1;
-        stepCounter.innerText = (node.options.length === 0) ? 'FINISH' : `Step ${currentStep}`;
+        stepCounter.innerText = (node.options.length === 0) ? 'Complete' : `Step ${currentStep}`;
         
-        // Update Progress: 33% per step, max 100%
         const progressPercentage = Math.min(currentStep * 33, 100);
         progressFill.style.width = (node.options.length === 0) ? '100%' : `${progressPercentage}%`;
 
-        // Back button visibility
         backBtn.style.display = (history.length > 0) ? 'block' : 'none';
 
         if (node.options.length === 0) {
-            // Result Node: Show Result Card and Form
             questionEl.className = 'result-card';
             contactFormContainer.style.display = 'block';
             
             if (messageField) {
-                messageField.value = `Hello Pavlo,\n\nI just completed the Real Estate Guide.\nPath Taken: ${pathLabels.join(" > ")}\nRecommendation: ${node.text}`;
+                messageField.value = `Hello,\n\nI completed the Real Estate Guide.\n\nPath: ${pathLabels.join(" → ")}\n\nRecommendation: ${node.text}\n\nLooking forward to discussing next steps.`;
             }
 
-            // Restart Button
             const restartBtn = document.createElement('button');
             restartBtn.innerText = "Start Over";
-            restartBtn.className = "tree-option-btn";
-            restartBtn.style.cssText = "margin-top: 20px; text-align: center; background-color: #333; color: #fff;";
-            restartBtn.onclick = () => resetGuide();
+            restartBtn.className = "tree-option-btn restart";
+            restartBtn.onclick = (e) => {
+                createRipple(e, restartBtn);
+                setTimeout(() => resetGuide(), 200);
+            };
             optionsContainer.appendChild(restartBtn);
         } else {
-            // Question Node: Reset UI and hide form
             questionEl.className = '';
             contactFormContainer.style.display = 'none';
 
@@ -114,11 +124,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 const btn = document.createElement('button');
                 btn.innerText = opt.label;
                 btn.className = "tree-option-btn";
-                btn.onclick = () => {
-                    history.push(currentNode);
-                    pathLabels.push(opt.label);
-                    currentNode = opt.next;
-                    renderNode();
+                btn.onclick = (e) => {
+                    createRipple(e, btn);
+                    setTimeout(() => {
+                        history.push(currentNode);
+                        pathLabels.push(opt.label);
+                        currentNode = opt.next;
+                        renderNode();
+                    }, 180);
                 };
                 optionsContainer.appendChild(btn);
             });
