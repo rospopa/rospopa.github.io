@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // BRANCH 1: BUYING (MEGA EXPANSION)
+        // BRANCH 1: BUYING
         // ==========================================
         buy_node_1: {
             text: "Are you a US Citizen or Permanent Resident?",
@@ -117,11 +117,11 @@ document.addEventListener('DOMContentLoaded', function() {
         buy_loc_status: {
             text: "Buying Locally or Relocating?",
             options: [
-                { label: "Buying Locally", next: "buy_entity_check" }, // UPDATED
+                { label: "Buying Locally", next: "buy_entity_check" },
                 { label: "Relocating", next: "buy_relo_timeline" }
             ]
         },
-        buy_entity_check: { // NEW
+        buy_entity_check: {
             text: "Are you buying as an Individual or an Entity?",
             options: [
                 { label: "Individual / Couple", next: "buy_co_buy_check" },
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Family Trust", next: "strat_trust_purchase" }
             ]
         },
-        buy_llc_purpose: { // NEW
+        buy_llc_purpose: {
             text: "Is the LLC for Investment or Privacy?",
             options: [
                 { label: "Investment (Rental)", next: "strat_dscr_llc" },
@@ -155,7 +155,8 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [
                 { label: "Just me / Spouse", next: "buy_history_check" },
                 { label: "Unmarried Partner / Friend", next: "strat_co_buy_agreement" },
-                { label: "Parent / Co-Signer", next: "strat_cosigner_fha" }
+                { label: "Parent / Co-Signer", next: "strat_cosigner_fha" },
+                { label: "Buying from Family", next: "strat_identity_interest" }
             ]
         },
         buy_history_check: {
@@ -166,45 +167,54 @@ document.addEventListener('DOMContentLoaded', function() {
             ]
         },
         
-        // --- FTHB PATH ---
+        // --- FINANCING TRIAGE ---
         buy_fthb_triage: {
             text: "What is your biggest hurdle right now?",
             options: [
                 { label: "Down Payment", next: "buy_down_source" },
                 { label: "Credit Score", next: "buy_credit_deep" },
-                { label: "Income / Debt", next: "buy_income_check" },
+                { label: "Income Type", next: "buy_income_check" },
                 { label: "Inventory / Condition", next: "buy_inventory_triage" }
             ]
         },
-        // --- INCOME & DEBT ---
+        
+        // --- INCOME EXPANSION ---
         buy_income_check: {
-            text: "Do you have significant Student Loan debt?",
-            options: [
-                { label: "Yes, Student Loans", next: "buy_student_loan_calc" },
-                { label: "No, other debt/income issues", next: "buy_income_type" }
-            ]
-        },
-        buy_student_loan_calc: {
-            text: "Are you on an Income-Based Repayment (IBR) plan?",
-            options: [
-                { label: "Yes, IBR Plan", next: "strat_fha_ibr" },
-                { label: "No, Standard Plan", next: "strat_conventional_1percent" }
-            ]
-        },
-        buy_income_type: {
-            text: "How is your income derived?",
+            text: "Income Source?",
             options: [
                 { label: "W-2 Salary", next: "buy_overtime_check" },
-                { label: "Self-Employed", next: "buy_self_emp_years" },
+                { label: "Self-Employed", next: "buy_se_type" },
                 { label: "Commission/Bonus", next: "buy_variable_income" },
-                { label: "Tip Income", next: "buy_tip_income" }
+                { label: "Fixed (SS/Pension)", next: "strat_fixed_income_gross_up" }
             ]
         },
-        buy_tip_income: {
-            text: "Do you report all your tips to the IRS?",
+        buy_se_type: {
+            text: "How do you file taxes?",
             options: [
-                { label: "Yes, fully reported", next: "res_fha_standard" },
-                { label: "No, mostly cash", next: "strat_bank_statement" }
+                { label: "Sole Proprietor (Sched C)", next: "buy_se_writeoffs" },
+                { label: "S-Corp / K-1", next: "buy_scorp_income" }
+            ]
+        },
+        buy_se_writeoffs: {
+            text: "Do you write off most expenses?",
+            options: [
+                { label: "Yes, low net income", next: "buy_bank_statement_check" },
+                { label: "No, high net income", next: "res_conventional_check" }
+            ]
+        },
+        buy_bank_statement_check: {
+            text: "Do you have 12 months of business bank statements?",
+            options: [
+                { label: "Yes, consistent deposits", next: "strat_bank_statement" },
+                { label: "No, mostly cash", next: "strat_1099_only_loan" }
+            ]
+        },
+        buy_scorp_income: {
+            text: "How many years in business?",
+            options: [
+                { label: "5+ Years", next: "strat_1yr_tax_return" },
+                { label: "2-4 Years", next: "res_conventional_check" },
+                { label: "<2 Years", next: "strat_manual_underwriting" }
             ]
         },
         buy_overtime_check: {
@@ -221,71 +231,90 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "No, it varies", next: "strat_base_income_only" }
             ]
         },
-        buy_self_emp_years: {
-            text: "Do your tax returns show strong net income?",
-            options: [
-                { label: "Yes, I show profit", next: "res_conventional_check" },
-                { label: "No, high write-offs", next: "strat_bank_statement" }
-            ]
-        },
-        // --- CREDIT ---
+        
+        // --- CREDIT EXPANSION ---
         buy_credit_deep: {
-            text: "Approximate Credit Score?",
+            text: "Score Range?",
             options: [
-                { label: "Excellent (720+)", next: "res_conventional_check" },
-                { label: "Good (620-719)", next: "res_fha_standard" },
-                { label: "Fair (580-619)", next: "buy_credit_issues" },
-                { label: "Poor (<580)", next: "res_credit_repair" }
+                { label: "720+", next: "res_conventional_check" },
+                { label: "620-719", next: "res_fha_standard" },
+                { label: "580-619", next: "buy_credit_issues" },
+                { label: "<580", next: "res_credit_repair" }
             ]
         },
         buy_credit_issues: {
-            text: "Any open disputes or collections?",
+            text: "Specific Issue?",
             options: [
-                { label: "Yes, Disputes", next: "strat_remove_disputes" },
-                { label: "Bankruptcy <2 years", next: "strat_hard_money_buy" },
-                { label: "Medical Collections", next: "strat_medical_collections" }
+                { label: "Bankruptcy", next: "buy_bk_type" },
+                { label: "Foreclosure", next: "buy_foreclosure_date" },
+                { label: "Collections", next: "strat_medical_collections" }
             ]
         },
-        // --- DOWN PAYMENT ---
-        buy_down_source: {
-            text: "Are you a Veteran?",
-            options: [ { label: "Yes", next: "buy_va_check" }, { label: "No", next: "buy_rural_check" } ]
+        buy_bk_type: {
+            text: "Chapter 7 or 13?",
+            options: [
+                { label: "Chapter 7", next: "buy_bk7_date" },
+                { label: "Chapter 13", next: "strat_bk13_manual" }
+            ]
         },
-        buy_va_check: {
-            text: "Do you have full entitlement available?",
-            options: [ { label: "Yes / First Use", next: "buy_va_disability" }, { label: "No / Subsequent Use", next: "strat_va_bonus_entitlement" } ]
+        buy_bk7_date: {
+            text: "Discharge Date?",
+            options: [
+                { label: "<2 Years ago", next: "strat_hard_money_buy" },
+                { label: "2-4 Years ago", next: "res_fha_standard" },
+                { label: "4+ Years ago", next: "res_conventional_check" }
+            ]
         },
-        buy_va_disability: {
-            text: "Do you have a service-connected disability rating?",
-            options: [ { label: "Yes (10%+)", next: "strat_va_fee_waiver" }, { label: "No", next: "strat_va_loan" } ]
+        buy_foreclosure_date: {
+            text: "Foreclosure Date?",
+            options: [
+                { label: "<3 Years ago", next: "strat_non_qm_foreclosure" }, // NEW
+                { label: "3-7 Years ago", next: "res_fha_standard" },
+                { label: "7+ Years ago", next: "res_conventional_check" }
+            ]
         },
-        buy_rural_check: {
-            text: "Willing to buy Rural?",
-            options: [ { label: "Yes", next: "strat_usda_loan" }, { label: "No", next: "buy_gift_check" } ]
-        },
-        buy_gift_check: {
-            text: "Do you have gift funds?",
-            options: [ { label: "Yes", next: "buy_gift_seasoning" }, { label: "No", next: "res_grant" } ]
-        },
-        buy_gift_seasoning: {
-            text: "Are the funds currently in your bank account?",
-            options: [ { label: "Yes, >60 days", next: "res_conventional_check" }, { label: "No, wiring later", next: "strat_gift_letter" } ]
-        },
-        // --- INVENTORY & OFFER STRATEGY ---
+
+        // --- PROPERTY TYPE EXPANSION ---
         buy_inventory_triage: {
-            text: "Property Type preference?",
+            text: "Property Type?",
             options: [
-                { label: "Single Family", next: "buy_sfh_features" },
-                { label: "Condo/Townhome", next: "buy_condo_check" },
-                { label: "Multi-Unit", next: "strat_house_hack_invest" },
-                { label: "New Construction", next: "buy_new_build_check" }
+                { label: "Standard SFH", next: "buy_sfh_features" },
+                { label: "Condo/Co-Op", next: "buy_condo_type" },
+                { label: "Niche/Unique", next: "buy_niche_prop" },
+                { label: "Manufactured", next: "buy_manu_type" }
             ]
         },
-        buy_new_build_check: {
-            text: "Custom or Tract Home?",
+        buy_condo_type: {
+            text: "Condo or Co-Op?",
             options: [
-                { label: "Tract (Subdivision)", next: "strat_builder_reg" },
-                { label: "Custom (My Lot)", next: "strat_construction_loan" }
+                { label: "Condo", next: "buy_condo_check" },
+                { label: "Co-Op", next: "strat_coop_board" }
+            ]
+        },
+        buy_condo_check: {
+            text: "Is the HOA healthy?",
+            options: [ { label: "Yes/Unknown", next: "strat_condo_warrantable" }, { label: "No (Litigation)", next: "strat_non_warrantable" } ]
+        },
+        buy_manu_type: {
+            text: "Do you own the land?",
+            options: [
+                { label: "Yes (Real Property)", next: "buy_manu_foundation" },
+                { label: "No (Leased Land)", next: "strat_chattel_loan" }
+            ]
+        },
+        buy_manu_foundation: {
+            text: "Is it on a permanent foundation?",
+            options: [
+                { label: "Yes, HUD Tags present", next: "strat_fha_manufactured" },
+                { label: "No / Pre-1976", next: "strat_cash_only_manu" }
+            ]
+        },
+        buy_niche_prop: {
+            text: "Specific Style?",
+            options: [
+                { label: "Barndominium", next: "strat_barndominium" },
+                { label: "Log Cabin", next: "strat_log_cabin" },
+                { label: "Geodesic Dome / Earth", next: "strat_unique_appraisal" }
             ]
         },
         buy_sfh_features: {
@@ -321,27 +350,63 @@ document.addEventListener('DOMContentLoaded', function() {
         buy_age_check: {
             text: "Are you looking at homes built before 1978?",
             options: [
-                { label: "Yes (Vintage)", next: "buy_vintage_risk" }, // Updated
+                { label: "Yes (Vintage)", next: "buy_vintage_risk" },
                 { label: "No (Modern)", next: "buy_system_check" }
             ]
         },
-        buy_vintage_risk: { // NEW
+        buy_vintage_risk: {
             text: "Are you concerned about lead or asbestos?",
             options: [
                 { label: "Yes, Safety First", next: "strat_lead_paint" },
-                { label: "No, I will rehab", next: "strat_203k_rehab" }
+                { label: "No, I will rehab", next: "buy_rehab_loan" } // NEW
+            ]
+        },
+        buy_rehab_loan: { // NEW
+            text: "Scope of Rehab?",
+            options: [
+                { label: "Cosmetic (Paint/Floors)", next: "strat_fha_203k_limited" },
+                { label: "Structural (Additions)", next: "strat_fha_203k_standard" }
             ]
         },
         buy_system_check: {
             text: "Water/Sewer Source?",
             options: [
                 { label: "Public/City", next: "strat_sewer_scope" },
-                { label: "Private Well/Septic", next: "strat_septic_inspection" }
+                { label: "Private Well/Septic", next: "buy_well_type" } // NEW
             ]
         },
-        buy_condo_check: {
-            text: "Is the HOA healthy?",
-            options: [ { label: "Yes/Unknown", next: "strat_condo_warrantable" }, { label: "No (Litigation)", next: "strat_non_warrantable" } ]
+        buy_well_type: { // NEW
+            text: "Type of Well?",
+            options: [
+                { label: "Private on Property", next: "strat_well_water_test" },
+                { label: "Shared Well", next: "strat_shared_well_agreement" }
+            ]
+        },
+        
+        // --- DOWN PAYMENT ---
+        buy_down_source: {
+            text: "Are you a Veteran?",
+            options: [ { label: "Yes", next: "buy_va_check" }, { label: "No", next: "buy_rural_check" } ]
+        },
+        buy_va_check: {
+            text: "Do you have full entitlement available?",
+            options: [ { label: "Yes / First Use", next: "buy_va_disability" }, { label: "No / Subsequent Use", next: "strat_va_bonus_entitlement" } ]
+        },
+        buy_va_disability: {
+            text: "Do you have a service-connected disability rating?",
+            options: [ { label: "Yes (10%+)", next: "strat_va_fee_waiver" }, { label: "No", next: "strat_va_loan" } ]
+        },
+        buy_rural_check: {
+            text: "Willing to buy Rural?",
+            options: [ { label: "Yes", next: "strat_usda_loan" }, { label: "No", next: "buy_gift_check" } ]
+        },
+        buy_gift_check: {
+            text: "Do you have gift funds?",
+            options: [ { label: "Yes", next: "buy_gift_seasoning" }, { label: "No", next: "res_grant" } ]
+        },
+        buy_gift_seasoning: {
+            text: "Are the funds currently in your bank account?",
+            options: [ { label: "Yes, >60 days", next: "res_conventional_check" }, { label: "No, wiring later", next: "strat_gift_letter" } ]
         },
 
         // --- REPEAT BUYER ---
@@ -421,12 +486,20 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Any known defects?",
             options: [
                 { label: "Structural/Foundation", next: "strat_structural_eng" },
-                { label: "Electrical/Plumbing", next: "sell_systems_age" }, // NEW
+                { label: "Electrical/Plumbing", next: "sell_systems_age" },
                 { label: "Unpermitted Work", next: "strat_retro_permit" },
-                { label: "Good Condition", next: "sell_solar_check" }
+                { label: "Environmental", next: "sell_enviro_defect" } // NEW
             ]
         },
-        sell_systems_age: { // NEW
+        sell_enviro_defect: { // NEW
+            text: "Specific Issue?",
+            options: [
+                { label: "Mold", next: "strat_mold_remediation" },
+                { label: "Asbestos", next: "strat_asbestos_abatement" },
+                { label: "Underground Oil Tank", next: "strat_oil_tank_removal" }
+            ]
+        },
+        sell_systems_age: {
             text: "Type of Wiring/Plumbing?",
             options: [
                 { label: "Knob & Tube / Galv", next: "strat_system_upgrade_credit" },
@@ -580,14 +653,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Airbnb", next: "inv_airbnb_check" },
                 { label: "Niche Assets", next: "inv_niche_check" },
                 { label: "Raw Land", next: "inv_land_check" },
-                { label: "Notes / Debt", next: "inv_note_type" } // NEW
-            ]
-        },
-        inv_note_type: { // NEW
-            text: "Note Type?",
-            options: [
-                { label: "Performing (Cash Flow)", next: "strat_performing_note" },
-                { label: "Non-Performing (Foreclosure)", next: "strat_non_performing_note" }
+                { label: "Tax Liens", next: "strat_tax_lien_invest" } // NEW
             ]
         },
         inv_niche_check: {
@@ -597,8 +663,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Mobile Home Parks", next: "strat_mhp_invest" },
                 { label: "Storage Units", next: "strat_storage_invest" },
                 { label: "Laundromat / Car Wash", next: "strat_operational_asset" },
-                { label: "Assisted Living", next: "strat_alf_invest" }, // NEW
-                { label: "Billboards / Cell Towers", next: "strat_billboard_lease" } // NEW
+                { label: "Assisted Living", next: "strat_alf_invest" },
+                { label: "Billboards / Cell Towers", next: "strat_billboard_lease" }
             ]
         },
         inv_airbnb_check: {
@@ -627,7 +693,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         inv_syndication_type: {
             text: "Strategy Preference?",
-            options: [ { label: "Value Add", next: "strat_syndication" }, { label: "Cost Segregation Focus", next: "strat_cost_seg" }, { label: "Opportunity Zone", next: "strat_opportunity_zone" } ] // NEW
+            options: [ { label: "Value Add", next: "strat_syndication" }, { label: "Cost Segregation Focus", next: "strat_cost_seg" }, { label: "Opportunity Zone", next: "strat_opportunity_zone" } ]
         },
         inv_1031_window: {
             text: "Sold <45 days ago?",
@@ -727,6 +793,15 @@ document.addEventListener('DOMContentLoaded', function() {
         // ==========================================
         
         // --- NEW OUTCOMES (Total >200) ---
+        strat_mold_remediation: { text: "Strategy: Professional Remediation. Surface bleach doesn't work. We need a certified remediation crew to remove drywall and treat studs. We must demand a clean air test clearance certificate before closing.", options: [] },
+        strat_asbestos_abatement: { text: "Strategy: Encapsulation vs Abatement. If pipe wrap/tiles are intact, we encapsulate (seal). If friable (crumbling), we must abatement. Do not disturb asbestos without pros.", options: [] },
+        strat_oil_tank_removal: { text: "Strategy: Tank Sweep & Removal. An underground tank is a major liability. We need a tank sweep. If found, seller must remove it and provide a 'No Further Action' letter from the state EPA.", options: [] },
+        strat_shared_well_agreement: { text: "Strategy: Shared Well Agreement. Sharing water with a neighbor requires a recorded easement detailing maintenance costs. FHA/VA have strict distance/testing requirements for shared wells.", options: [] },
+        strat_well_water_test: { text: "Strategy: Water Quality Contingency. We test for Coliform, Nitrates, and Lead. If it fails, the seller must shock the well or install a UV filtration system.", options: [] },
+        strat_fha_203k_limited: { text: "Strategy: FHA 203k Limited. For cosmetic repairs under $35k (no structural). Less paperwork than the Standard 203k. Good for paint, floors, and appliances.", options: [] },
+        strat_fha_203k_standard: { text: "Strategy: FHA 203k Standard. For major structural repairs (additions, moving walls). Requires a HUD consultant. You finance the purchase + construction into one loan.", options: [] },
+        strat_tax_lien_invest: { text: "Strategy: Tax Lien Certificates. You pay the delinquent taxes and earn high interest (up to 18-36%). If they don't pay, you can eventually foreclose for pennies on the dollar.", options: [] },
+        strat_non_qm_foreclosure: { text: "Strategy: Non-QM 'Recent Event' Loan. Standard waiting period is 3-7 years. Non-QM lenders allow buying 1 day after foreclosure if you have a 20-30% down payment and higher interest rate.", options: [] },
         strat_alf_invest: { text: "Strategy: Assisted Living Conversion. We target single-level homes (4+ beds) with wide hallways. High cash flow potential, but requires strict state licensing and fire suppression systems.", options: [] },
         strat_billboard_lease: { text: "Strategy: Easement/Lease Buyout. You can buy the land under a cell tower or billboard. These are 'Triple Net' investments with zero landlord responsibilities and long-term contracts.", options: [] },
         strat_performing_note: { text: "Strategy: Performing Note Investing. You act as the bank. You buy the mortgage debt, not the property. You collect monthly P&I checks without fixing toilets.", options: [] },
@@ -816,7 +891,7 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_green_marketing: { text: "Strategy: Green Premium. Appraisal addendum for solar.", options: [] },
         strat_virtual_tour: { text: "Strategy: Virtual Relocation. Video tours + rescission period.", options: [] },
         strat_jumbo_loan: { text: "Strategy: Jumbo Financing. Portfolio lenders.", options: [] },
-        strat_usda_loan: { text: "Strategy: USDA Rural. 0% down in eligible zones.", options: [] },
+        strat_usda_loan: { text: "Strategy: USDA Rural. 0% down in eligible areas.", options: [] },
         strat_fsbo_conversion: { text: "Strategy: MLS Exposure. Unlock 97% of buyers.", options: [] },
         strat_expired_relist: { text: "Strategy: Market Refresh. New photos and price.", options: [] },
         strat_cap_gains_calc: { text: "Strategy: Tax Analysis. 1031 vs Capital Gains.", options: [] },
@@ -860,7 +935,7 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_instant: { text: "Strategy: Instant Offer. Speed focus.", options: [] },
         strat_hold_rent: { text: "Strategy: Rent & Hold. Wait for equity.", options: [] },
         strat_short_sale: { text: "Strategy: Short Sale. Bank negotiation.", options: [] },
-        strat_deed_lieu: { text: "Strategy: Deed in Lieu. Voluntray surrender.", options: [] },
+        strat_deed_lieu: { text: "Strategy: Deed in Lieu. Avoid foreclosure.", options: [] },
         strat_probate_easy: { text: "Strategy: Independent Admin. Fast probate.", options: [] },
         strat_probate_court: { text: "Strategy: Court Approval. Slow probate.", options: [] },
         strat_probate_bond: { text: "Strategy: Bond in Lieu. Sell early.", options: [] },
@@ -904,8 +979,7 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_cash_only_manu: { text: "Strategy: Cash Sale. No financing available.", options: [] },
         strat_log_cabin: { text: "Strategy: Log Home Finance. Unique comp requirements.", options: [] },
         strat_str_urban_reg: { text: "Strategy: Urban STR. Check city ban list.", options: [] },
-        strat_str_vacation: { text: "Strategy: Vacation Rental. High season revenue.", options: [] },
-        strat_str_glamping: { text: "Strategy: Glamping Permit. Zoning check.", options: [] }
+        strat_str_vacation: { text: "Strategy: Vacation Rental. High season revenue.", options: [] }
     };
 
     let currentNode = 'start';
