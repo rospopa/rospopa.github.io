@@ -79,7 +79,7 @@
 
         .result-card { background: #f4f7ff; border-left: 6px solid #4285F4; padding: 25px; border-radius: 8px; color: #334155; line-height: 1.7; margin-bottom: 20px; }
 
-        /* --- CONTACT FORM STYLES (Merged) --- */
+        /* --- CONTACT FORM STYLES --- */
         #contact-form-container { 
             margin: 40px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; 
         }
@@ -400,16 +400,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const tree = {
         // --- ROOT ---
+        // Refactored: Split slash items into distinct buttons
         start: {
             text: "What is your primary Real Estate Goal?",
             type: 'button',
             options: [
                 { label: "Residential: Buying", next: "buy_node_1" },
                 { label: "Residential: Selling", next: "sell_node_1" },
-                { label: "Refinancing / Mortgage", next: "refi_node_1" },
+                { label: "Refinancing Existing Loan", next: "refi_node_1" },
+                { label: "Mortgage Qualification", next: "mortgage_qual_node" },
                 { label: "Wealth: Investing", next: "invest_node_1" },
-                { label: "Commercial / Business", next: "comm_node_1" },
-                { label: "Land / Development", next: "land_node_1" }
+                { label: "Commercial Real Estate", next: "comm_node_1" },
+                { label: "Business Acquisition", next: "comm_node_1" }, 
+                { label: "Raw Land", next: "land_node_1" },
+                { label: "Development Project", next: "land_node_1" }
             ]
         },
 
@@ -421,7 +425,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             options: [
                 { label: "Yes", next: "buy_loc_status" },
-                { label: "No (Visa/Foreign National)", next: "buy_visa_status" }
+                { label: "No", next: "buy_visa_status" }
             ]
         },
         buy_visa_status: { 
@@ -434,32 +438,34 @@ document.addEventListener('DOMContentLoaded', function() {
             ]
         },
         buy_loc_status: {
-            text: "Buying Locally, Relocating, or Auction?",
+            text: "How do you plan to purchase?",
             type: 'button',
             options: [
                 { label: "Buying Locally", next: "buy_timeframe_select" },
-                { label: "Relocating", next: "buy_timeframe_select" },
-                { label: "Online Auction/Foreclosure", next: "buy_auction_type" },
+                { label: "Relocating Here", next: "buy_timeframe_select" },
+                { label: "Online Auction", next: "buy_auction_type" },
+                { label: "Foreclosure / Bank Owned", next: "strat_sheriff_cash" },
                 { label: "New Construction", next: "buy_new_const_path" }
             ]
         },
 
-        // --- NEW: Timeframe Selector ---
+        // --- Timeframe Selector ---
         buy_timeframe_select: {
             text: "What is your desired timeframe to close?",
             type: 'select',
             variable: 'Timeline',
             choices: [
-                "ASAP / Immediately",
+                "ASAP",
                 "Within 30 Days",
                 "1 - 3 Months",
                 "3 - 6 Months",
-                "6+ Months / Just Browsing"
+                "6+ Months",
+                "Just Browsing"
             ],
             next: "buy_location_input"
         },
 
-        // --- NEW: Location Text Input ---
+        // --- Location Text Input ---
         buy_location_input: {
             text: "What City, Neighborhood, or Zip Code are you looking in?",
             type: 'text',
@@ -468,32 +474,45 @@ document.addEventListener('DOMContentLoaded', function() {
             next: "buy_inventory_triage"
         },
 
-        // --- PROPERTY TYPE & BED/BATH ---
+        // --- PROPERTY TYPE (Refactored) ---
         buy_inventory_triage: {
             text: "Property Type Preference?",
             type: 'button',
             options: [
                 { label: "Single Family Home", next: "buy_bed_count" },
-                { label: "Condo/Co-Op", next: "buy_condo_floor_pref" }, // Redirects to floor pref first
+                { label: "Condo", next: "buy_condo_floor_pref" },
+                { label: "Co-Op", next: "buy_coop_path" },
                 { label: "Multi-Unit (2-4)", next: "buy_bed_count" },
-                { label: "Manufactured/Mobile", next: "buy_manu_type" }
+                { label: "Manufactured Home", next: "buy_manu_foundation" },
+                { label: "Mobile Home (Park)", next: "strat_chattel_loan" }
             ]
         },
 
-        // --- NEW: Condo Specific Question ---
+        // --- Condo Specific ---
         buy_condo_floor_pref: {
             text: "Floor Level Preference?",
             type: 'button',
             variable: 'Floor Preference',
             options: [
-                { label: "Ground Floor (No Stairs)", next: "buy_bed_count" },
-                { label: "Top Floor (Penthouse)", next: "buy_bed_count" },
-                { label: "Middle / Elevator Building", next: "buy_bed_count" },
+                { label: "Ground Floor", next: "buy_bed_count" },
+                { label: "Top Floor", next: "buy_bed_count" },
+                { label: "Mid-Rise", next: "buy_bed_count" },
+                { label: "High-Rise", next: "buy_bed_count" },
                 { label: "Walk-up OK", next: "buy_bed_count" }
             ]
         },
+        
+        // --- Co-Op Specific (New Node) ---
+        buy_coop_path: {
+            text: "Are you prepared for a Board Interview?",
+            type: 'button',
+            options: [
+                { label: "Yes, finances are ready", next: "strat_coop_board_pack" },
+                { label: "Unsure what that entails", next: "strat_coop_board_pack" }
+            ]
+        },
 
-        // --- NEW: Numeric Inputs for Bed/Bath ---
+        // --- Numeric Inputs ---
         buy_bed_count: {
             text: "Minimum Bedrooms required?",
             type: 'number',
@@ -509,15 +528,16 @@ document.addEventListener('DOMContentLoaded', function() {
             next: "buy_garage_pref"
         },
 
-        // --- NEW: Garage & Amenities ---
+        // --- Garage (Refactored) ---
         buy_garage_pref: {
             text: "Parking / Garage Requirement?",
             type: 'button',
             variable: 'Garage',
             options: [
-                { label: "Attached Garage Essential", next: "buy_school_pref" },
-                { label: "Detached / Carport OK", next: "buy_school_pref" },
-                { label: "Street Parking / None OK", next: "buy_school_pref" },
+                { label: "Attached Garage", next: "buy_school_pref" },
+                { label: "Detached Garage", next: "buy_school_pref" },
+                { label: "Carport", next: "buy_school_pref" },
+                { label: "Street Parking OK", next: "buy_school_pref" },
                 { label: "RV / Boat Parking Needed", next: "buy_school_pref" }
             ]
         },
@@ -526,8 +546,8 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             variable: 'School Importance',
             options: [
-                { label: "Critical (Top Rated Only)", next: "buy_nature_pref" },
-                { label: "Important but flexible", next: "buy_nature_pref" },
+                { label: "Critical", next: "buy_nature_pref" },
+                { label: "Important", next: "buy_nature_pref" },
                 { label: "Not a factor", next: "buy_nature_pref" }
             ]
         },
@@ -536,9 +556,10 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             variable: 'Lifestyle',
             options: [
-                { label: "Near Parks / Nature", next: "buy_sfh_features" },
-                { label: "Near Water / Lake", next: "buy_waterfront_check" },
-                { label: "Near Transit / Metro", next: "buy_sfh_features" },
+                { label: "Near Parks", next: "buy_sfh_features" },
+                { label: "Lakefront", next: "strat_littoral_rights" },
+                { label: "Oceanfront", next: "strat_coastal_construction_line" },
+                { label: "Near Transit", next: "buy_sfh_features" },
                 { label: "No Preference", next: "buy_sfh_features" }
             ]
         },
@@ -547,15 +568,15 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Any other specific needs?",
             type: 'button',
             options: [
-                { label: "Multi-Generational (In-Law)", next: "strat_multigen_search" },
-                { label: "Pool", next: "strat_pool_inspection" },
-                { label: "Basement/Foundation Issues", next: "buy_foundation_check" },
-                { label: "Historic/Vintage", next: "buy_vintage_risk" },
+                { label: "Multi-Generational Suite", next: "strat_multigen_search" },
+                { label: "Swimming Pool", next: "strat_pool_inspection" },
+                { label: "Basement Issues", next: "buy_foundation_check" },
+                { label: "Historic Home", next: "buy_vintage_risk" },
                 { label: "None / Standard", next: "buy_fthb_triage" }
             ]
         },
 
-        // --- FINANCING TRIAGE (Retained Logic) ---
+        // --- FINANCING TRIAGE ---
         buy_fthb_triage: {
             text: "What is your biggest hurdle right now?",
             type: 'button',
@@ -563,7 +584,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Down Payment", next: "buy_down_source" },
                 { label: "Credit Score", next: "buy_credit_deep" },
                 { label: "Income Type", next: "buy_income_check" },
-                { label: "None / Cash Ready", next: "buy_offer_market" }
+                { label: "No Hurdles", next: "buy_offer_market" }
             ]
         },
 
@@ -573,7 +594,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             options: [
                 { label: "Custom Build (Own Lot)", next: "buy_custom_build_lot" },
-                { label: "Production/Tract Builder", next: "buy_production_rep" },
+                { label: "Production Builder", next: "buy_production_rep" },
                 { label: "Spec Home (Already Built)", next: "strat_new_home_warranty" }
             ]
         },
@@ -603,16 +624,17 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         buy_auction_type: {
-            text: "Auction Platform?",
+            text: "Which Auction Platform?",
             type: 'button',
             options: [
-                { label: "Hubzu / Xome / Auction.com", next: "strat_auction_tech_fee" },
-                { label: "Sheriff's Sale (Courthouse)", next: "strat_sheriff_cash" }
+                { label: "Hubzu", next: "strat_auction_tech_fee" },
+                { label: "Xome", next: "strat_auction_tech_fee" },
+                { label: "Auction.com", next: "strat_auction_tech_fee" }
             ]
         },
         
         buy_vintage_risk: {
-            text: "Concerned about lead/asbestos?",
+            text: "Concerned about lead or asbestos?",
             type: 'button',
             options: [
                 { label: "Yes, Safety First", next: "strat_lead_paint" },
@@ -636,23 +658,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Slab", next: "strat_plumbing_scope" }
             ]
         },
-        buy_waterfront_check: {
-            text: "Does it have water rights?",
-            type: 'button',
-            options: [
-                { label: "Riparian (River)", next: "strat_riparian_rights" },
-                { label: "Littoral (Lake)", next: "strat_littoral_rights" },
-                { label: "Ocean / Gulf", next: "strat_coastal_construction_line" }
-            ]
-        },
-        buy_manu_type: {
-            text: "Do you own the land?",
-            type: 'button',
-            options: [
-                { label: "Yes (Real Property)", next: "buy_manu_foundation" },
-                { label: "No (Leased Land)", next: "strat_chattel_loan" }
-            ]
-        },
+        
         buy_manu_foundation: {
             text: "Is it on a permanent foundation?",
             type: 'button',
@@ -668,7 +674,8 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             options: [
                 { label: "Bidding Wars", next: "buy_aggressive_offer" },
-                { label: "Balanced/Slow", next: "buy_inspection_pref" }
+                { label: "Balanced", next: "buy_inspection_pref" },
+                { label: "Slow", next: "buy_inspection_pref" }
             ]
         },
         buy_aggressive_offer: {
@@ -705,7 +712,7 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [
                 { label: "720+", next: "buy_offer_market" },
                 { label: "580-619", next: "res_credit_repair" },
-                { label: "<580", next: "res_credit_repair" }
+                { label: "Under 580", next: "res_credit_repair" }
             ]
         },
         buy_income_check: {
@@ -714,7 +721,8 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [
                 { label: "W-2 Salary", next: "buy_offer_market" },
                 { label: "Self-Employed", next: "strat_bank_statement" },
-                { label: "Commission/Bonus", next: "strat_2yr_avg" }
+                { label: "Commission", next: "strat_2yr_avg" },
+                { label: "Bonus", next: "strat_2yr_avg" }
             ]
         },
 
@@ -761,7 +769,8 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Selling Motivation?",
             type: 'button',
             options: [
-                { label: "Move Up/Down", next: "sell_taxes_check" },
+                { label: "Move Up", next: "sell_taxes_check" },
+                { label: "Downsizing", next: "sell_taxes_check" },
                 { label: "Financial Distress", next: "sell_distress" },
                 { label: "Divorce", next: "sell_divorce_status" },
                 { label: "Inheritance", next: "sell_probate" }
@@ -790,7 +799,8 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             options: [
                 { label: "Smart Home Tech", next: "strat_tech_transfer" },
-                { label: "Art/Wine Cellar", next: "strat_valuable_inclusions" },
+                { label: "Art Collection", next: "strat_valuable_inclusions" },
+                { label: "Wine Cellar", next: "strat_valuable_inclusions" },
                 { label: "Privacy Required", next: "sell_privacy_check" }
             ]
         },
@@ -806,8 +816,9 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Condition of the home?",
             type: 'button',
             options: [
-                { label: "Turnkey / Retail", next: "sell_marketing_media" },
-                { label: "Dated / Needs Work", next: "strat_as_is_pricing" },
+                { label: "Turnkey", next: "sell_marketing_media" },
+                { label: "Retail Ready", next: "sell_marketing_media" },
+                { label: "Dated", next: "strat_as_is_pricing" },
                 { label: "Major Repairs Needed", next: "strat_cash_offer_network" }
             ]
         },
@@ -844,10 +855,10 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // BRANCH 3-6 (Refi, Invest, Commercial, Land) - Simplified for brevity
+        // BRANCH 3-6 (Refi, Invest, Commercial, Land)
         // ==========================================
         refi_node_1: {
-            text: "Primary Goal?",
+            text: "Refinance Goal?",
             type: 'button',
             options: [
                 { label: "Lower Payment", next: "strat_rate_term_refi" },
@@ -855,12 +866,21 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Remove PMI", next: "strat_pmi_removal" }
             ]
         },
+        mortgage_qual_node: {
+            text: "Qualification Status?",
+            type: 'button',
+            options: [
+                { label: "Pre-Approval", next: "buy_income_check" },
+                { label: "Refinancing", next: "refi_node_1" }
+            ]
+        },
         invest_node_1: {
             text: "Investment Strategy?",
             type: 'button',
             options: [
                 { label: "Long Term Rental", next: "strat_buy_hold" },
-                { label: "Short Term / Airbnb", next: "strat_str_self" },
+                { label: "Short Term Rental", next: "strat_str_self" },
+                { label: "Airbnb / VRBO", next: "strat_str_self" },
                 { label: "Fix & Flip", next: "strat_fix_flip" }
             ]
         },
@@ -877,7 +897,7 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Land Type?",
             type: 'button',
             options: [
-                { label: "Infill / Residential", next: "strat_infill_development" },
+                { label: "Infill Residential", next: "strat_infill_development" },
                 { label: "Raw Acreage", next: "strat_land_hold" }
             ]
         },
@@ -910,6 +930,7 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_fha_203k_limited: { text: "Strategy: FHA 203k Limited. Financing up to $35k in repairs (kitchen/bath updates) into your mortgage.", options: [] },
         strat_fha_203k_standard: { text: "Strategy: FHA 203k Standard. For major structural repairs or additions. Requires a HUD consultant to manage the project.", options: [] },
         strat_condo_warrantable: { text: "Strategy: Warrantable Condo. Easy financing. Fannie Mae guidelines are met.", options: [] },
+        strat_coop_board_pack: { text: "Strategy: Co-Op Board Packet. We must prepare a financial resume and reference letters before making an offer.", options: [] },
         strat_limited_review_condo: { text: "Strategy: Limited Review Condo. Put 25% down to bypass the strict HOA questionnaire requirements.", options: [] },
         strat_non_warrantable: { text: "Strategy: Non-Warrantable Loan. Portfolio lender required. Interest rates will be higher.", options: [] },
         strat_riparian_rights: { text: "Strategy: Riparian Rights. You own to the center of the river (usually). Check flood insurance costs immediately.", options: [] },
