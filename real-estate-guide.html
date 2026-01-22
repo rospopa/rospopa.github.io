@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Pavlo Rospopa Advanced Strategy Engine</title>
+    <title>Pavlo Rospopa Real Estate Strategy Engine</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/format.css">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
@@ -31,7 +31,6 @@
         #contact-form button { padding: 12px 24px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; align-self: flex-start; font-weight: bold; }
         #contact-form button:hover { background-color: #555; }
         
-        /* Progress Bar Upgrade */
         .progress-container { width: 100%; height: 8px; background: #eee; border-radius: 4px; margin: 15px 0; overflow: hidden; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #4285F4, #34a853); transition: width 0.3s ease; }
     </style>
@@ -115,7 +114,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Finding the Right House", next: "buy_inventory_triage" }
             ]
         },
-        // Income Logic (New)
+        // Income Logic
         buy_income_check: {
             text: "How is your income primarily derived?",
             options: [
@@ -138,7 +137,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "No, I write everything off", next: "strat_bank_statement" }
             ]
         },
-        // Credit Deep Dive (New)
+        // Credit Deep Dive
         buy_credit_deep: {
             text: "Do you know your approximate credit score?",
             options: [
@@ -155,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "No, just high utilization", next: "res_credit_repair" }
             ]
         },
-        // Down Payment Logic (Expanded)
+        // Down Payment Logic
         buy_down_source: {
             text: "Are you (or your spouse) a Military Veteran?",
             options: [
@@ -170,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "No, I need a grant", next: "res_grant" }
             ]
         },
-        // Inventory Logic (New Construction)
+        // Inventory Logic
         buy_inventory_triage: {
             text: "What type of home are you looking for?",
             options: [
@@ -250,7 +249,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Inheritance / Probate", next: "sell_probate" }
             ]
         },
-        // Divorce Path (New)
+        // Divorce Path
         sell_divorce_status: {
             text: "Is the separation amicable or contested?",
             options: [
@@ -474,10 +473,10 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // OUTCOMES (Total: 40+)
+        // OUTCOMES
         // ==========================================
         
-        // --- NEW OUTCOMES ---
+        // --- NEW & SPECIALIZED ---
         strat_bank_statement: { text: "Strategy: Bank Statement Loan. Since you are self-employed with high write-offs, we will use a Non-QM lender who qualifies you based on 12-24 months of bank deposits rather than taxable income. Rates are slightly higher, but you get approved.", options: [] },
         strat_physician_loan: { text: "Strategy: Physician Loan. Lenders offer special products for Medical Residents/Doctors with student loans. They exclude student debt from DTI calculations and often allow 0-5% down with no PMI.", options: [] },
         strat_manual_underwriting: { text: "Strategy: Manual Underwriting. Due to employment gaps or lack of credit score, we must use a lender who manually reviews your file (rent history, utility payments) rather than relying on automated algorithms.", options: [] },
@@ -498,7 +497,7 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_commuter_hub: { text: "Strategy: Transit-Oriented Purchase. We will map your search specifically to Metra/Train lines (e.g., Union Pacific West), prioritizing homes within a 10-minute walk of the station to protect resale value.", options: [] },
         strat_school_zone: { text: "Strategy: District-First Search. We will filter properties strictly by school rating boundaries (e.g., District 88 or 45), as these boundaries drive property value retention more than the house itself.", options: [] },
 
-        // --- EXISTING OUTCOMES (Retained) ---
+        // --- CORE OUTCOMES ---
         strat_va_loan: { text: "Strategy: VA Loan (0% Down). Since you served, we will utilize the VA loan benefit. This offers 0% down payment and no mortgage insurance. We must ensure the property meets VA 'Minimum Property Requirements' (MPR).", options: [] },
         strat_203k_rehab: { text: "Strategy: FHA 203k Loan. Since you want to renovate but lack cash, we will wrap the renovation costs into the mortgage. You buy the house + the repairs in one loan with 3.5% down.", options: [] },
         strat_condo_warrantable: { text: "Strategy: Warrantable Condo. We must verify the condo association is 'Warrantable' (no litigation, >50% owner occupied) to ensure you can get standard financing rates.", options: [] },
