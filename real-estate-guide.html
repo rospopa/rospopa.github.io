@@ -9,10 +9,14 @@
 
     <style>
         /* SECURITY / DISABLE SELECTION */
-        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; font-family: sans-serif; background-color: #fcfcfc; }
+        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; font-family: sans-serif; margin: 0; padding: 0; background-color: #fff; color: #333; }
         input, textarea { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
 
-        .wrap { max-width: 800px; margin: 0 auto; padding: 20px; }
+        /* HEADER & FOOTER STYLES */
+        .site-header { border-bottom: 1px solid #e0e0e0; padding: 20px 0; }
+        .wrap { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+        .site-title { font-size: 1.2rem; font-weight: bold; color: #333; text-decoration: none; }
+        .site-nav { float: right; }
         
         /* GUIDE UI STYLES */
         #real-estate-guide-container {
@@ -39,6 +43,8 @@
         #contact-form input, #contact-form textarea { padding: 12px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; font-size: 1rem; }
         #contact-form button { padding: 12px 24px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
 
+        footer { border-top: 1px solid #e0e0e0; margin-top: 40px; padding: 20px 0; text-align: center; font-size: 0.9rem; color: #666; }
+
         /* ANIMATIONS */
         .ripple { position: absolute; background: rgba(66, 133, 244, 0.2); border-radius: 50%; transform: scale(0); animation: ripple-effect 0.7s linear; pointer-events: none; }
         @keyframes ripple-effect { to { transform: scale(4); opacity: 0; } }
@@ -46,7 +52,16 @@
 </head>
 <body>
 
-<div class="wrap">
+<header class="site-header">
+    <div class="wrap">
+        <a class="site-title" href="https://rospopa.com">Pavlo Rospopa Website</a>
+        <nav class="site-nav">
+            <a style="text-decoration: none; color: #4285F4;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">pavlo@rospopa.com</a>
+        </nav>
+    </div>
+</header>
+
+<main class="wrap">
     <div id="real-estate-guide-container">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
             <span id="back-btn" style="cursor: pointer; font-size: 0.9rem; color: #4285F4; font-weight: 600; display: none;">← Back</span>
@@ -57,7 +72,7 @@
         </div>
 
         <div id="tree-content">
-            <h2 id="question-text" style="margin-bottom: 25px; font-size: 1.4rem; color: #222; min-height: 1.5em;">Loading guide...</h2>
+            <h2 id="question-text" style="margin-bottom: 25px; font-size: 1.4rem; color: #222;">Preparing your guide...</h2>
             <div id="options-container"></div>
         </div>
 
@@ -66,17 +81,24 @@
             <form id="contact-form">
                 <input type="text" name="name" placeholder="Your Name" required />
                 <input type="email" name="email" placeholder="Your Email" required />
-                <textarea id="message-field" name="message" rows="4" placeholder="How can I help?" required></textarea>
+                <textarea id="message-field" name="message" rows="4" required></textarea>
                 <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
                 <button type="submit" id="submit-btn">Send My Strategy</button>
             </form>
         </div>
     </div>
-</div>
+</main>
+
+<footer>
+    <div class="wrap">
+        <p>Copyright © <span id="currentYear"></span> Pavlo Rospopa. All Rights Reserved.</p>
+    </div>
+</footer>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // 1. DATA STRUCTURE
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
     const tree = {
         start: {
             text: "What is your primary focus in Real Estate today?",
@@ -123,7 +145,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "House Hacking", next: "res_house_hack" }
             ]
         },
-        // Results (Terminal Nodes)
         res_finance: { text: "Action: Get Pre-Approved. In a competitive market, a lender's letter is your most powerful tool.", options: [] },
         res_cash: { text: "Action: Prepare Proof of Funds. Cash allows for aggressive negotiation and fast closings.", options: [] },
         res_standard_sell: { text: "Action: Comparative Market Analysis. We need to price your home accurately to capture peak interest.", options: [] },
@@ -134,7 +155,6 @@ document.addEventListener('DOMContentLoaded', function() {
         res_house_hack: { text: "Action: Seek 2-4 unit properties. You can live in one unit while others pay your mortgage.", options: [] }
     };
 
-    // 2. STATE
     let currentNode = 'start';
     let history = []; 
     let pathLabels = []; 
@@ -149,34 +169,29 @@ document.addEventListener('DOMContentLoaded', function() {
         message: document.getElementById('message-field')
     };
 
-    // 3. CORE FUNCTIONS
     function renderNode() {
         const node = tree[currentNode];
-        if (!node) return;
-
         elements.question.innerText = node.text;
         elements.options.innerHTML = '';
         
         const stepNum = history.length + 1;
         elements.step.innerText = (node.options.length === 0) ? 'Complete' : `Step ${stepNum}`;
-        elements.progress.style.width = (node.options.length === 0) ? '100%' : (stepNum * 25) + '%';
+        elements.progress.style.width = (node.options.length === 0) ? '100%' : (stepNum * 33) + '%';
         elements.backBtn.style.display = (history.length > 0) ? 'block' : 'none';
 
         if (node.options.length === 0) {
-            // RESULT STATE
             elements.question.classList.add('result-card');
             elements.formContainer.style.display = 'block';
-            elements.message.value = "Selected Path: " + pathLabels.join(" > ") + "\nRecommendation: " + node.text;
+            elements.message.value = "User Path: " + pathLabels.join(" > ") + "\n\nRecommendation: " + node.text;
 
             const restartBtn = document.createElement('button');
             restartBtn.innerText = "Start Over";
             restartBtn.className = "tree-option-btn";
             restartBtn.style.textAlign = "center";
             restartBtn.style.marginTop = "20px";
-            restartBtn.onclick = resetGuide;
+            restartBtn.onclick = () => { history = []; pathLabels = []; currentNode = 'start'; renderNode(); };
             elements.options.appendChild(restartBtn);
         } else {
-            // QUESTION STATE
             elements.question.classList.remove('result-card');
             elements.formContainer.style.display = 'none';
 
@@ -184,7 +199,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const btn = document.createElement('button');
                 btn.innerText = opt.label;
                 btn.className = "tree-option-btn";
-                btn.onclick = (e) => {
+                btn.onclick = () => {
                     history.push(currentNode);
                     pathLabels.push(opt.label);
                     currentNode = opt.next;
@@ -195,11 +210,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function resetGuide() {
-        history = []; pathLabels = []; currentNode = 'start';
-        renderNode();
-    }
-
     elements.backBtn.onclick = () => {
         if (history.length > 0) {
             currentNode = history.pop();
@@ -208,10 +218,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // INIT
     renderNode();
 });
 </script>
-
 </body>
 </html>
