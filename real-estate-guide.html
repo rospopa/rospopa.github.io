@@ -17,6 +17,7 @@
     <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
       
     <link rel="stylesheet" href="css/format.css">
+    
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
@@ -28,6 +29,7 @@
             user-select: none; /* Standard */
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
             background-color: #f4f7f9;
+            margin: 0;
         }
          
         /* Re-enable selection for inputs */
@@ -98,6 +100,15 @@
 
         #form-status { margin-top: 10px; font-weight: 500; }
         .g-recaptcha { margin-bottom: 5px; }
+        
+        /* Basic Header Styling (in case css/format.css is missing) */
+        .site-header { background: #fff; padding: 15px 0; border-bottom: 1px solid #eee; position: relative; z-index: 100; }
+        .site-header .wrap { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; }
+        .site-title { font-weight: bold; color: #333; font-size: 1.2rem; }
+        .site-nav a { margin-left: 20px; color: #666; font-size: 0.9rem; }
+        
+        /* Footer Styling */
+        footer { background: #fff; padding: 20px 0; margin-top: 50px; border-top: 1px solid #eee; position: relative; z-index: 100; }
     </style>
 </head>
      
@@ -116,16 +127,13 @@
             <div class="trigger">
                 <a style="text-decoration: none;" href="/login">Login</a>
             </div>
-            <div class="trigger2">
-                <a style="text-decoration: none;" href="/login">Login</a>
-            </div>
         </nav>
     </div>
 </header>
 
 <main>
     <div class="page-content">
-        <div class="wrap">
+        <div class="wrap" style="max-width: 1000px; margin: 0 auto; padding: 0 20px;">
             
             <div id="particle-anchor" style="width: 100%; height: 150px; margin-top: 20px; margin-bottom: 20px;"></div>
 
@@ -167,28 +175,22 @@
 
 <footer>
     <section class="d-flex flex-row justify-content-center" style="width: 100%;">
-        <div class="container" style="margin-right: 0px;margin-left: 0px;padding-right: 0px;padding-left: 0px;width: 100%;max-width: 100%;">
-            <div class="row" style="margin-right: 0px;margin-left: 0px;max-width: 100%;padding-top: 20px;padding-bottom: 20px;">
-                <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
-                    <div class="text-center" style="text-align:center">
-                        <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
-                    </div>
-                    <script>
-                        document.getElementById('currentYear').textContent = new Date().getFullYear();
-                    </script>
-                </div>
-            </div>
+        <div class="container" style="text-align: center;">
+             <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
         </div>
     </section>
 </footer>
 
 <script>
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    // --- PARTICLE ANIMATION SCRIPT ---
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
     const anchor = document.getElementById('particle-anchor');
 
     const CONFIG = {
-        particleSize: 3,          
+        particleSize: 3,           
         returnSpeed: 0.15        
     };
 
@@ -400,7 +402,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const tree = {
         // --- ROOT ---
-        // Refactored: Split slash items into distinct buttons
         start: {
             text: "What is your primary Real Estate Goal?",
             type: 'button',
@@ -988,6 +989,7 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_land_hold: { text: "Strategy: Land Banking. Buy in the path of progress. Low carrying costs (ag exemption) while value appreciates.", options: [] }
     };
 
+    // --- STATE MANAGEMENT VARIABLES ---
     let currentNode = 'start';
     let history = []; 
     let pathLabels = []; 
@@ -1002,8 +1004,62 @@ document.addEventListener('DOMContentLoaded', function() {
         message: document.getElementById('message-field')
     };
 
-    function renderNode() {
+    // --- 1. INITIALIZE BROWSER HISTORY ---
+    // This tells the browser: "We are at the start, and this is the data for this step."
+    const initialState = { 
+        node: 'start', 
+        internalHistory: [], 
+        pathLabels: [], 
+        answers: {} 
+    };
+    window.history.replaceState(initialState, "", "");
+
+    // --- 2. LISTEN FOR BROWSER BACK BUTTON ---
+    window.addEventListener('popstate', (event) => {
+        if (event.state) {
+            // Restore the app to the state of the previous step
+            currentNode = event.state.node;
+            history = event.state.internalHistory || [];
+            pathLabels = event.state.pathLabels || [];
+            userAnswers = event.state.answers || {};
+            
+            // Re-render the screen (pass false to say "don't push state again")
+            renderNode(false);
+        }
+    });
+
+    // --- 3. HELPER TO SAVE STATE WHEN MOVING FORWARD ---
+    function navigateTo(nextNode, labelToAdd, variableKey, variableValue) {
+        // Save answer if needed
+        if (variableKey) {
+            userAnswers[variableKey] = variableValue;
+        }
+
+        // Create the NEW history arrays
+        const newHistory = [...history, currentNode];
+        const newLabels = [...pathLabels, labelToAdd];
+        
+        // Push to Browser History
+        window.history.pushState({
+            node: nextNode,
+            internalHistory: newHistory,
+            pathLabels: newLabels,
+            answers: {...userAnswers} // Copy current answers
+        }, "", "");
+
+        // Update Global Variables
+        history = newHistory;
+        pathLabels = newLabels;
+        currentNode = nextNode;
+
+        renderNode(false);
+    }
+
+    // --- 4. RENDER FUNCTION (UPDATED) ---
+    function renderNode(shouldPushState = false) {
         const node = tree[currentNode];
+        
+        // Error Check
         if(!node) {
             console.error("Node not found:", currentNode);
             elements.question.innerText = "Error: Logic path end reached unexpectedly.";
@@ -1018,6 +1074,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         elements.step.innerText = isResult ? 'Strategy Found' : `Step ${stepCount}`;
         elements.progress.style.width = isResult ? '100%' : Math.min(stepCount * 5, 95) + '%';
+        
+        // Only show back button if we have history
         elements.backBtn.style.display = (history.length > 0) ? 'block' : 'none';
 
         // === HANDLING DIFFERENT INPUT TYPES ===
@@ -1027,7 +1085,6 @@ document.addEventListener('DOMContentLoaded', function() {
             elements.question.classList.add('result-card');
             elements.formContainer.style.display = 'block';
             
-            // Generate the final message string based on stored user answers
             let answersString = "";
             for (const [key, value] of Object.entries(userAnswers)) {
                 answersString += `- ${key}: ${value}\n`;
@@ -1042,12 +1099,17 @@ document.addEventListener('DOMContentLoaded', function() {
             restartBtn.style.marginTop = "20px";
             restartBtn.style.background = "#fff";
             restartBtn.onclick = () => { 
+                // Reset everything
                 history = []; 
                 pathLabels = []; 
-                userAnswers = {}; // Clear data
+                userAnswers = {}; 
                 currentNode = 'start'; 
                 elements.question.classList.remove('result-card'); 
-                renderNode(); 
+                
+                // Clear browser history for the user by replacing current state
+                window.history.pushState(initialState, "", "");
+                
+                renderNode(false); 
             };
             elements.options.appendChild(restartBtn);
 
@@ -1059,7 +1121,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const select = document.createElement('select');
             select.className = "tree-select";
             
-            // Add Default Option
             const defaultOpt = document.createElement('option');
             defaultOpt.text = "Please Select...";
             defaultOpt.value = "";
@@ -1080,14 +1141,8 @@ document.addEventListener('DOMContentLoaded', function() {
             nextBtn.className = "next-btn";
             nextBtn.onclick = () => {
                 if(select.value === "") { alert("Please make a selection."); return; }
-                
-                // Save data
-                if(node.variable) userAnswers[node.variable] = select.value;
-                
-                history.push(currentNode);
-                pathLabels.push(select.value); // Add selected val to path history
-                currentNode = node.next;
-                renderNode();
+                // Use helper to Navigate
+                navigateTo(node.next, select.value, node.variable, select.value);
             };
             elements.options.appendChild(nextBtn);
 
@@ -1097,9 +1152,13 @@ document.addEventListener('DOMContentLoaded', function() {
             elements.question.classList.remove('result-card');
 
             const input = document.createElement('input');
-            input.type = node.type; // 'text' or 'number'
+            input.type = node.type; 
             input.className = "tree-input";
             input.placeholder = node.placeholder || "";
+            // Pre-fill if we have an answer already (useful when going back)
+            if (node.variable && userAnswers[node.variable]) {
+                input.value = userAnswers[node.variable];
+            }
             elements.options.appendChild(input);
 
             const nextBtn = document.createElement('button');
@@ -1107,19 +1166,13 @@ document.addEventListener('DOMContentLoaded', function() {
             nextBtn.className = "next-btn";
             nextBtn.onclick = () => {
                 if(input.value.trim() === "") { alert("Please enter a value."); return; }
-                
-                // Save data
-                if(node.variable) userAnswers[node.variable] = input.value;
-
-                history.push(currentNode);
-                pathLabels.push(`${node.variable}: ${input.value}`); 
-                currentNode = node.next;
-                renderNode();
+                // Use helper to Navigate
+                navigateTo(node.next, `${node.variable}: ${input.value}`, node.variable, input.value);
             };
             elements.options.appendChild(nextBtn);
 
         } else {
-            // === STANDARD BUTTONS (DEFAULT) ===
+            // === STANDARD BUTTONS ===
             elements.formContainer.style.display = 'none';
             elements.question.classList.remove('result-card');
             
@@ -1128,28 +1181,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 btn.innerText = opt.label;
                 btn.className = "tree-option-btn";
                 btn.onclick = () => {
-                    // Save data if variable exists (rare for buttons but possible)
-                    if(node.variable) userAnswers[node.variable] = opt.label;
-
-                    history.push(currentNode);
-                    pathLabels.push(opt.label);
-                    currentNode = opt.next;
-                    renderNode();
+                    // Use helper to Navigate
+                    navigateTo(opt.next, opt.label, node.variable, opt.label);
                 };
                 elements.options.appendChild(btn);
             });
         }
     }
 
+    // === 5. UPDATE BACK BUTTON LOGIC ===
+    // Instead of manual logic, we just tell the browser to go back.
+    // This triggers the 'popstate' listener we wrote above.
     elements.backBtn.onclick = () => {
-        if (history.length > 0) {
-            currentNode = history.pop();
-            pathLabels.pop();
-            renderNode();
-        }
+        window.history.back();
     };
 
-    renderNode();
+    renderNode(false);
 });
 </script>
 
@@ -1195,20 +1242,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 captchaToken: captchaResponse
             };
 
+            // Setup Abort Controller for timeout (10 seconds)
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 10000);
+
             try {
                 await fetch(SCRIPT_URL, {
                     method: 'POST',
                     mode: 'no-cors', 
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    body: JSON.stringify(data),
+                    signal: controller.signal
                 });
-                statusMsg.innerText = "Message sent successfully!";
+                
+                clearTimeout(timeoutId);
+                statusMsg.innerText = "Request Sent Successfully! We'll be in touch.";
                 statusMsg.style.color = "green";
                 form.reset();
                 grecaptcha.reset(); 
             } catch (error) {
                 console.error('Error:', error);
-                statusMsg.innerText = "Something went wrong. Please try again.";
+                if (error.name === 'AbortError') {
+                     statusMsg.innerText = "Request timed out. Please check your connection.";
+                } else {
+                     statusMsg.innerText = "Something went wrong. Please try again.";
+                }
                 statusMsg.style.color = "red";
             } finally {
                 btn.disabled = false;
