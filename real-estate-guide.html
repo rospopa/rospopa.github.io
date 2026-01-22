@@ -1,146 +1,59 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Pavlo Rospopa Website</title>
-    <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" href="css/format.css">
-    <script src="[https://www.google.com/recaptcha/api.js](https://www.google.com/recaptcha/api.js)" async defer></script>
-
-    <style>
-        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
-        input, textarea { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
-
-        #real-estate-guide-container {
-            margin: 20px 0 40px 0; padding: 30px; border: 1px solid #e0e0e0; border-radius: 12px;
-            background-color: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; z-index: 101;
-        }
-       .tree-option-btn {
-            padding: 16px 20px; background-color: #f8f9fa; color: #333; border: 2px solid #eef0f2;
-            border-radius: 8px; cursor: pointer; font-size: 1.05rem; text-align: left;
-            transition: all 0.2s; font-weight: 500; width: 100%; margin-bottom: 10px; display: block;
-        }
-       .tree-option-btn:hover { border-color: #4285F4; color: #4285F4; transform: translateY(-2px); }
-       .result-card { background: #f4f7ff; border-left: 6px solid #4285F4; padding: 25px; border-radius: 8px; color: #334155; line-height: 1.7; margin-bottom: 20px; }
-
-        #contact-form-container { margin: 40px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; }
-        #contact-form { display: flex; flex-direction: column; gap: 15px; }
-        #contact-form input, #contact-form textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
-        #contact-form button { padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; align-self: flex-start; }
-
-        #canvas1 { position: absolute; top: 0; left: 0; width: 100%; z-index: 99; pointer-events: none; image-rendering: pixelated; }
-    </style>
-</head>
-     
-<body>
-<canvas id="canvas1"></canvas>
-
-<header class="site-header">
-    <div class="wrap">
-        <a class="site-title" style="text-decoration: none;" href="[https://rospopa.com](https://rospopa.com)">Pavlo Rospopa Website</a>
-        <nav class="site-nav">
-            <div class="trigger">
-                <a style="text-decoration: none;" href="/login">Login</a>
-            </div>
-            <div class="trigger2">
-                <a style="text-decoration: none;" href="/login">Login</a>
-            </div>
-        </nav>
-    </div>
-</header>
-
-<main>
-    <div class="page-content">
-        <div class="wrap">
-            <div class="home">
-                 
-                <div id="real-estate-guide-container">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; min-height: 30px;">
-                        <div style="width: 80px;">
-                            <span id="back-btn" style="cursor: pointer; font-size: 0.9rem; color: #4285F4; font-weight: 600; display: none;">← Back</span>
-                        </div>
-                        <div style="flex-grow: 1; height: 6px; background: #eee; margin: 0 10px; border-radius: 10px; overflow: hidden;">
-                            <div id="progress-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #4285F4, #a855f7); border-radius: 10px; transition: width 0.4s ease;"></div>
-                        </div>
-                        <div style="width: 80px; text-align: right;">
-                            <span id="step-counter" style="font-size: 0.8rem; color: #999; font-weight: bold;">Step 1</span>
-                        </div>
-                    </div>
-
-                    <div id="tree-content">
-                        <h2 id="question-text" style="margin-bottom: 25px; font-size: 1.5rem; color: #222; font-weight: 800;">Loading...</h2>
-                        <div id="options-container"></div>
-                    </div>
-                </div>
-
-                <div id="particle-anchor" style="width: 100%; height: 50px; margin: 20px 0;"></div>
-
-                <div id="contact-form-container" style="display: none;">
-                    <form id="contact-form">
-                        <input type="text" name="name" placeholder="Your Name" required />
-                        <input type="email" name="email" placeholder="Your Email" required />
-                        <textarea id="message-field" name="message" rows="5" required></textarea>
-                        <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
-                        <button type="submit" id="submit-btn">Get Detailed Strategy</button>
-                        <p id="form-status"></p>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-</main>
-
-<footer>
-    <section class="d-flex flex-row justify-content-center" style="width: 100%;">
-        <div class="container" style="margin: 0 auto; width: 100%; max-width: 100%;">
-            <div class="row" style="margin: 0; padding: 20px 0;">
-                <div class="col" style="width: 100%;">
-                    <div class="text-center" style="text-align:center">
-                        <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
-                    </div>
-                    <script>document.getElementById('currentYear').textContent = new Date().getFullYear();</script>
-                </div>
-            </div>
-        </div>
-    </section>
-</footer>
+<script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // REVISED LOGIC TREE BASED ON RESEARCH BLUEPRINT
     const tree = {
-        // --- ROOT NODE ---
         start: {
             text: "What is your primary Real Estate Goal?",
-            options:
+            options: [
+                { label: "Buy a Home", next: "buy_node_1" },
+                { label: "Sell a Property", next: "sell_node_1" },
+                { label: "Invest/Wealth Building", next: "invest_node_1" },
+                { label: "Commercial/Business", next: "comm_node_1" }
+            ]
         },
 
-        // --- BRANCH B: RESIDENTIAL BUYING ---
         buy_node_1: {
             text: "Have you owned a home in the last 3 years?",
-            options:
-        },
-        // FTHB Sub-Branch
-        buy_fthb_triage: {
-            text: "What is your biggest hurdle right now?",
-            options:
-        },
-        // Repeat Buyer Sub-Branch
-        buy_repeat_triage: {
-            text: "Do you need to sell your current home to buy the new one?",
-            options:
-        },
-        buy_contingency: {
-            text: "Is your current home currently on the market?",
-            options:
-        },
-        buy_2nd_home: {
-            text: "What is the primary use of this new property?",
-            options:
+            options: [
+                { label: "Yes", next: "buy_repeat_triage" },
+                { label: "No (First Time Buyer)", next: "buy_fthb_triage" }
+            ]
         },
 
-        // --- BRANCH C: SELLING PROPERTY ---
+        buy_fthb_triage: {
+            text: "What is your biggest hurdle right now?",
+            options: [
+                { label: "Down Payment", next: "res_grant" },
+                { label: "Credit Score", next: "res_credit" },
+                { label: "Income/Monthly Payment", next: "res_househack" }
+            ]
+        },
+
+        buy_repeat_triage: {
+            text: "Do you need to sell your current home to buy the new one?",
+            options: [
+                { label: "Yes, I need the cash", next: "buy_contingency" },
+                { label: "No, I can carry both", next: "buy_2nd_home" }
+            ]
+        },
+
+        buy_contingency: {
+            text: "Is your current home currently on the market?",
+            options: [
+                { label: "Yes", next: "strat_concurrent" },
+                { label: "Not yet", next: "strat_sell_first" }
+            ]
+        },
+
+        buy_2nd_home: {
+            text: "What is the primary use of this new property?",
+            options: [
+                { label: "Vacation/Second Home", next: "strat_vacation" },
+                { label: "Primary Residence", next: "strat_bridge" }
+            ]
+        },
+
         sell_node_1: {
             text: "What is the financial status of the property?",
             options: [
@@ -149,27 +62,40 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Probate / Inherited", next: "sell_probate" }
             ]
         },
-        // Retail Sale (High Equity)
+
         sell_retail: {
             text: "What is your main priority for this sale?",
-            options:
-        },
-        // Distress Sale (Low Equity)
-        sell_distress: {
-            text: "Are you currently behind on mortgage payments?",
-            options:
-        },
-        sell_hardship: {
-            text: "Do you have other significant assets (stocks, 2nd home)?",
-            options:
-        },
-        // Probate
-        sell_probate: {
-            text: "Do you have 'Letters of Office' from the court?",
-            options:
+            options: [
+                { label: "Maximum Profit", next: "strat_concierge" },
+                { label: "Speed of Sale", next: "strat_instant" }
+            ]
         },
 
-        // --- BRANCH D: WEALTH INVESTMENT ---
+        sell_distress: {
+            text: "Are you currently behind on mortgage payments?",
+            options: [
+                { label: "Yes", next: "sell_hardship" },
+                { label: "No", next: "strat_hold_rent" }
+            ]
+        },
+
+        sell_hardship: {
+            text: "Do you have other significant assets (stocks, 2nd home)?",
+            options: [
+                { label: "Yes", next: "strat_short_sale" },
+                { label: "No", next: "strat_deed_lieu" }
+            ]
+        },
+
+        sell_probate: {
+            text: "Do you have 'Letters of Office' from the court?",
+            options: [
+                { label: "Yes, fully authorized", next: "strat_probate_easy" },
+                { label: "No, still in process", next: "strat_probate_court" },
+                { label: "What is that?", next: "strat_probate_bond" }
+            ]
+        },
+
         invest_node_1: {
             text: "What is your preferred involvement level?",
             options: [
@@ -178,74 +104,88 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Analyze Existing Asset", next: "inv_analyze" }
             ]
         },
+
         inv_active_risk: {
             text: "What is your risk tolerance?",
-            options:
+            options: [
+                { label: "High (Flips)", next: "strat_fix_flip" },
+                { label: "Moderate (BRRRR)", next: "strat_brrrr" },
+                { label: "Low (Rental)", next: "strat_buy_hold" }
+            ]
         },
+
         inv_passive_check: {
             text: "Are you an Accredited Investor ($200k+ income / $1M+ net worth)?",
-            options:
+            options: [
+                { label: "Yes", next: "strat_syndication" },
+                { label: "No", next: "strat_reit" }
+            ]
         },
+
         inv_analyze: {
             text: "Does the asset's ROE (Return on Equity) exceed 7%?",
-            options:
+            options: [
+                { label: "Yes, it's performing", next: "strat_hold_refi" },
+                { label: "No, it's lazy equity", next: "strat_1031" }
+            ]
         },
 
-        // --- BRANCH E: COMMERCIAL / BUSINESS ---
         comm_node_1: {
             text: "What is the property type?",
-            options:
+            options: [
+                { label: "Retail/Office", next: "comm_retail_node" },
+                { label: "Industrial/Flex", next: "strat_industrial" }
+            ]
         },
+
         comm_retail_node: {
             text: "Are you looking to Lease or Own?",
-            options:
+            options: [
+                { label: "Own (Owner-User)", next: "strat_sba_504" },
+                { label: "Lease", next: "comm_lease_type" }
+            ]
         },
+
         comm_lease_type: {
             text: "What lease structure is proposed?",
-            options:
+            options: [
+                { label: "Triple Net (NNN)", next: "strat_lease_audit" },
+                { label: "Modified Gross", next: "strat_lease_base_year" }
+            ]
         },
 
-        // --- OUTCOME NODES (STRATEGIES) ---
-        // Residential Outcomes
-        res_grant: { text: "Strategy: IHDA Grant Pairing. We will leverage Illinois Housing Development Authority programs to secure up to $10,000 in down payment assistance. Focus on lenders who can layer these grants without high rate bumps.", options: },
-        res_credit: { text: "Strategy: Credit Repair Roadmap. You need a 6-month buffer. We will pause the search to focus on debt-to-income ratios. FHA financing is possible at 580, but targeting 620+ saves you thousands in MIP.", options: },
-        res_househack: { text: "Strategy: House Hacking. Buy a 2-4 unit property using an FHA 3.5% down loan. Live in one unit, rent the others. 75% of the projected rental income can be used to qualify for the loan.", options: },
-        
-        strat_sell_first: { text: "Strategy: Listing Preparation. To buy your next home, we must list your current one first. We will use a 'Home of Choice' contingency clause to protect you from being homeless if you can't find a new buy.", options: },
-        strat_concurrent: { text: "Strategy: Concurrent Closing. Your sale is safe. We will line up the closings for the same day (Sale in AM, Buy in PM) so proceeds transfer directly at the title company.", options: },
-        strat_bridge: { text: "Strategy: Bridge Loan / HELOC. Since you have equity but no offers, we will tap into a HELOC or Bridge Loan on your current home to fund the down payment for the new one immediately.", options: },
-        strat_vacation: { text: "Strategy: Vacation Rental Analysis. We must verify local short-term rental laws (AirBnB rules). Income potential is high, but we need to calculate the specific tax implications for 2nd home usage.", options: },
-
-        // Seller Outcomes
-        strat_concierge: { text: "Strategy: Concierge Listing. We prioritize Price. Implementation of staging, pre-listing inspection (to prevent repair negotiations), and high-end drone photography. Timeline: 14-30 days to market.", options: },
-        strat_instant: { text: "Strategy: Aggressive Pricing / iBuyer. We prioritize Speed. We will price slightly below comps to induce a bidding war or solicit cash offers from institutional investors. Timeline: 10-14 days.", options: },
-        strat_hold_rent: { text: "Strategy: Rent & Hold. You have low equity but aren't distressed. Selling now means bringing cash to close. It is financially better to rent the unit until equity recovers.", options: },
-        strat_short_sale: { text: "Strategy: Negotiated Short Sale. Since you have assets, the bank may pursue a deficiency judgment. We must negotiate a 'Waiver of Deficiency' as part of the sale. This protects your other assets.", options: },
-        strat_deed_lieu: { text: "Strategy: Deed in Lieu. If you are insolvent with only one lien, we offer the deed to the bank. This 'Cash for Keys' approach avoids the stigma of foreclosure and resolves the debt faster.", options: },
-        
-        strat_probate_easy: { text: "Strategy: Standard Estate Sale. Independent Administration allows you to sell without court approval. We proceed as a standard listing, ensuring the title company receives the death certificate and letters of office.", options: },
-        strat_probate_court: { text: "Strategy: Court-Approved Sale. We must include a 'Court Approval Contingency' in any contract. Expect a 45-60 day closing window to allow for the judge's sign-off.", options: },
-        strat_probate_bond: { text: "Strategy: Bond in Lieu of Probate. To speed this up, we can work with a title company to issue a 'Bond in Lieu', allowing us to sell before the lengthy probate court process is finished.", options: },
-
-        // Investment Outcomes
-        strat_fix_flip: { text: "Strategy: Fix & Flip (70% Rule). We only buy if (Purchase + Repairs) < 70% of After Repair Value. We will focus on distressed Class C properties in Class B neighborhoods.", options: },
-        strat_brrrr: { text: "Strategy: BRRRR Method. Buy, Rehab, Rent, Refinance, Repeat. The key is the Refinance—we must ensure the property DSCR (Debt Service Coverage Ratio) will support a cash-out refi in 6 months.", options: },
-        strat_buy_hold: { text: "Strategy: Cash Flow Focus. We target multi-family units where the Cap Rate exceeds 6-8%. Focus on stable tenant history and low vacancy zones rather than high appreciation.", options: },
-        strat_syndication: { text: "Strategy: Syndication LP. You provide capital to a General Partner for a large commercial deal. Totally passive. We look for 'Value-Add' offerings with a preferred return of 7-8%.", options: },
-        strat_reit: { text: "Strategy: Public REITs. Since you are not accredited, we focus on publicly traded Real Estate Investment Trusts. High liquidity, moderate dividends, zero management.", options: },
-        strat_hold_refi: { text: "Strategy: Hold & Refinance. Your equity is working hard. We should look at a Cash-Out Refinance to pull tax-free capital out and buy another asset, increasing your total ROE.", options: },
-        strat_1031: { text: "Strategy: 1031 Exchange. Your equity is 'lazy' (<7% return). We should sell this asset and defer all capital gains taxes by rolling the proceeds into a higher-performing property within 180 days.", options: },
-
-        // Commercial Outcomes
-        strat_sba_504: { text: "Strategy: SBA 504 Loan. As an owner-user, you can buy a building with only 10% down. This locks in your occupancy costs and builds wealth through principal paydown instead of rent.", options: },
-        strat_lease_audit: { text: "Strategy: NNN Lease Audit. In a Triple Net lease, you pay taxes/maintenance. We must audit the landlord's 'CAM' (Common Area Maintenance) charges to ensure you aren't overpaying for capital improvements.", options: },
-        strat_lease_base_year: { text: "Strategy: Base Year Stop. We negotiate a 'Gross' lease where you only pay for tax/expense increases *above* a base year. This protects you from sudden spikes in building costs.", options: },
-        strat_industrial: { text: "Strategy: Logistics/Flex Focus. Demand is high for 2000sqft bays with 14ft doors. We focus on 'Last Mile' locations near highways. Check zoning for heavy vs light industrial usage.", options: }
+        // --- OUTCOME NODES ---
+        res_grant: { text: "Strategy: IHDA Grant Pairing. We will leverage Illinois Housing Development Authority programs to secure up to $10,000 in down payment assistance.", options: [] },
+        res_credit: { text: "Strategy: Credit Repair Roadmap. You need a 6-month buffer to target 620+ and save thousands in MIP.", options: [] },
+        res_househack: { text: "Strategy: House Hacking. Buy a 2-4 unit property using an FHA 3.5% down loan.", options: [] },
+        strat_sell_first: { text: "Strategy: Listing Preparation. We will use a 'Home of Choice' contingency clause to protect you.", options: [] },
+        strat_concurrent: { text: "Strategy: Concurrent Closing. We will line up the closings for the same day.", options: [] },
+        strat_bridge: { text: "Strategy: Bridge Loan / HELOC. Tap into a HELOC on your current home to fund the down payment.", options: [] },
+        strat_vacation: { text: "Strategy: Vacation Rental Analysis. We must verify local short-term rental laws.", options: [] },
+        strat_concierge: { text: "Strategy: Concierge Listing. Implementation of staging and high-end photography.", options: [] },
+        strat_instant: { text: "Strategy: Aggressive Pricing / iBuyer. Price slightly below comps to induce a bidding war.", options: [] },
+        strat_hold_rent: { text: "Strategy: Rent & Hold. It is financially better to rent the unit until equity recovers.", options: [] },
+        strat_short_sale: { text: "Strategy: Negotiated Short Sale. We must negotiate a 'Waiver of Deficiency'.", options: [] },
+        strat_deed_lieu: { text: "Strategy: Deed in Lieu. Avoids the stigma of foreclosure and resolves debt faster.", options: [] },
+        strat_probate_easy: { text: "Strategy: Standard Estate Sale. Independent Administration allows you to sell without court approval.", options: [] },
+        strat_probate_court: { text: "Strategy: Court-Approved Sale. Expect a 45-60 day closing window.", options: [] },
+        strat_probate_bond: { text: "Strategy: Bond in Lieu of Probate. Speed up the process by working with a title company.", options: [] },
+        strat_fix_flip: { text: "Strategy: Fix & Flip (70% Rule). Purchase + Repairs < 70% of After Repair Value.", options: [] },
+        strat_brrrr: { text: "Strategy: BRRRR Method. Buy, Rehab, Rent, Refinance, Repeat.", options: [] },
+        strat_buy_hold: { text: "Strategy: Cash Flow Focus. Target multi-family units where Cap Rate exceeds 6-8%.", options: [] },
+        strat_syndication: { text: "Strategy: Syndication LP. Provide capital to a General Partner for a large commercial deal.", options: [] },
+        strat_reit: { text: "Strategy: Public REITs. Focus on publicly traded Real Estate Investment Trusts.", options: [] },
+        strat_hold_refi: { text: "Strategy: Hold & Refinance. Look at a Cash-Out Refinance to buy another asset.", options: [] },
+        strat_1031: { text: "Strategy: 1031 Exchange. Defer capital gains taxes by rolling proceeds into a higher-performing property.", options: [] },
+        strat_sba_504: { text: "Strategy: SBA 504 Loan. Buy a building with only 10% down as an owner-user.", options: [] },
+        strat_lease_audit: { text: "Strategy: NNN Lease Audit. Audit the landlord's 'CAM' charges to ensure you aren't overpaying.", options: [] },
+        strat_lease_base_year: { text: "Strategy: Base Year Stop. Negotiate a 'Gross' lease where you only pay increases above a base year.", options: [] },
+        strat_industrial: { text: "Strategy: Logistics/Flex Focus. Focus on 'Last Mile' locations near highways.", options: [] }
     };
 
     let currentNode = 'start';
-    let history =; 
-    let pathLabels =; 
+    let history = []; 
+    let pathLabels = []; 
 
     const elements = {
         question: document.getElementById('question-text'),
@@ -259,23 +199,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function renderNode() {
         const node = tree[currentNode];
+        if (!node) return;
+
         elements.question.innerText = node.text;
         elements.options.innerHTML = '';
         const stepNum = history.length + 1;
         
-        // Dynamic progress calculation
         elements.step.innerText = (node.options.length === 0)? 'Complete' : `Step ${stepNum}`;
         elements.progress.style.width = (node.options.length === 0)? '100%' : Math.min(stepNum * 15, 95) + '%';
         elements.backBtn.style.display = (history.length > 0)? 'inline' : 'none';
 
         if (node.options.length === 0) {
-            // Result State
             elements.question.classList.add('result-card');
             elements.formContainer.style.display = 'block';
             
-            // Villa Park / Compliance Note Injection
             let complianceNote = "\n\n*Local Compliance Note (Villa Park/IL):* \n- Transfer Stamps: $0 (Villa Park), but Inspection Required ($50).\n- Mandatory Disclosures: IL Radon, Lead-Based Paint (Pre-1978).";
-            
             elements.message.value = "User Path: " + pathLabels.join(" > ") + "\n\nProposed Strategy: " + node.text + complianceNote;
             
             const restartBtn = document.createElement('button');
@@ -283,10 +221,9 @@ document.addEventListener('DOMContentLoaded', function() {
             restartBtn.className = "tree-option-btn";
             restartBtn.style.textAlign = "center";
             restartBtn.style.marginTop = "20px";
-            restartBtn.onclick = () => { history =; pathLabels =; currentNode = 'start'; renderNode(); };
+            restartBtn.onclick = () => { history = []; pathLabels = []; currentNode = 'start'; renderNode(); };
             elements.options.appendChild(restartBtn);
         } else {
-            // Question State
             elements.question.classList.remove('result-card');
             elements.formContainer.style.display = 'none';
             node.options.forEach(opt => {
@@ -315,5 +252,3 @@ document.addEventListener('DOMContentLoaded', function() {
     renderNode();
 });
 </script>
-</body>
-</html>
