@@ -10,7 +10,7 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
-        /* --- EXACT ORIGINAL SECURITY STYLES --- */
+        /* --- SECURITY STYLES --- */
         body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
         input, textarea { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
 
@@ -27,23 +27,17 @@
         .tree-option-btn:hover { border-color: #4285F4; color: #4285F4; transform: translateY(-2px); }
         .result-card { background: #f4f7ff; border-left: 6px solid #4285F4; padding: 25px; border-radius: 8px; color: #334155; line-height: 1.7; margin-bottom: 20px; }
 
-        /* --- EXACT ORIGINAL FORM STYLES --- */
+        /* --- FORM STYLES --- */
         #contact-form-container { margin: 40px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; }
         #contact-form { display: flex; flex-direction: column; gap: 15px; }
         #contact-form input, #contact-form textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
         #contact-form button { padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; align-self: flex-start; }
 
-        /* --- CANVAS STYLES --- */
         #canvas1 { position: absolute; top: 0; left: 0; width: 100%; z-index: 99; pointer-events: none; image-rendering: pixelated; }
     </style>
 </head>
      
 <body>
-<script>
-    document.addEventListener('contextmenu', event => event.preventDefault());
-    document.addEventListener('dragstart', event => event.preventDefault());
-</script>
-
 <canvas id="canvas1"></canvas>
 
 <header class="site-header">
@@ -67,15 +61,21 @@
                 
                 <div id="real-estate-guide-container">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; min-height: 30px;">
-                        <span id="back-btn" style="cursor: pointer; font-size: 0.9rem; color: #4285F4; font-weight: 600; display: none; width: 60px;">← Back</span>
-                        <div style="flex-grow: 1; height: 6px; background: #eee; margin: 0 15px; border-radius: 10px; overflow: hidden;">
+                        <div style="width: 80px;">
+                            <span id="back-btn" style="cursor: pointer; font-size: 0.9rem; color: #4285F4; font-weight: 600; display: none;">← Back</span>
+                        </div>
+                        
+                        <div style="flex-grow: 1; height: 6px; background: #eee; margin: 0 10px; border-radius: 10px; overflow: hidden;">
                             <div id="progress-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #4285F4, #a855f7); border-radius: 10px; transition: width 0.4s ease;"></div>
                         </div>
-                        <span id="step-counter" style="font-size: 0.8rem; color: #999; font-weight: bold; width: 60px; text-align: right;">Step 1</span>
+
+                        <div style="width: 80px; text-align: right;">
+                            <span id="step-counter" style="font-size: 0.8rem; color: #999; font-weight: bold;">Step 1</span>
+                        </div>
                     </div>
 
                     <div id="tree-content">
-                        <h2 id="question-text" style="margin-bottom: 25px; font-size: 1.5rem; color: #222;">Determining your path...</h2>
+                        <h2 id="question-text" style="margin-bottom: 25px; font-size: 1.5rem; color: #222; font-weight: 800;">Loading Guide...</h2>
                         <div id="options-container"></div>
                     </div>
                 </div>
@@ -95,7 +95,6 @@
 
                 <p>Go to <a href="https://www.linkedin.com/in/prospopa">LinkedIn</a>.</p>
                 <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
-                <p>Return to <a href="#top">Top of This Page</a>.</p>
             </div>
         </div>
     </div>
@@ -103,9 +102,9 @@
 
 <footer>
     <section class="d-flex flex-row justify-content-center" style="width: 100%;">
-        <div class="container" style="margin-right: 0px;margin-left: 0px;padding-right: 0px;padding-left: 0px;width: 100%;max-width: 100%;">
-            <div class="row" style="margin-right: 0px;margin-left: 0px;max-width: 100%;padding-top: 20px;padding-bottom: 20px;">
-                <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
+        <div class="container" style="margin: 0 auto; width: 100%; max-width: 100%;">
+            <div class="row" style="margin: 0; padding: 20px 0;">
+                <div class="col" style="width: 100%;">
                     <div class="text-center" style="text-align:center">
                         <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
                     </div>
@@ -117,7 +116,7 @@
 </footer>
 
 <script>
-    // --- PASTE YOUR EXACT ORIGINAL CANVAS SCRIPT HERE ---
+    // --- PASTE YOUR CANVAS SCRIPT FROM HOME PAGE HERE ---
 </script>
 
 <script>
@@ -197,14 +196,15 @@ document.addEventListener('DOMContentLoaded', function() {
         elements.question.innerText = node.text;
         elements.options.innerHTML = '';
         const stepNum = history.length + 1;
-        elements.step.innerText = (node.options.length === 0) ? 'Complete' : `Step ${stepNum}`;
+        
+        elements.step.innerText = (node.options.length === 0) ? 'Done' : `Step ${stepNum}`;
         elements.progress.style.width = (node.options.length === 0) ? '100%' : (stepNum * 25) + '%';
-        elements.backBtn.style.display = (history.length > 0) ? 'block' : 'none';
+        elements.backBtn.style.display = (history.length > 0) ? 'inline' : 'none';
 
         if (node.options.length === 0) {
             elements.question.classList.add('result-card');
             elements.formContainer.style.display = 'block';
-            elements.message.value = "User Path: " + pathLabels.join(" > ") + "\n\nRecommendation: " + node.text;
+            elements.message.value = "User Path: " + pathLabels.join(" > ") + "\n\nResult: " + node.text;
             
             const restartBtn = document.createElement('button');
             restartBtn.innerText = "Start Over";
