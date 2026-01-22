@@ -1,4 +1,8 @@
-document.addEventListener('DOMContentLoaded', () => {
+/**
+ * Real Estate Guide - Optimized for Cross-Browser & Mobile Compatibility
+ */
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. DATA STRUCTURE
     const tree = {
         start: {
             text: "What is your primary focus in Real Estate today?",
@@ -8,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "📈 Investing for Wealth", next: "invest_path" }
             ]
         },
-        // BUYING
         buy_path: {
             text: "What is your current buying status?",
             options: [
@@ -30,7 +33,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "No, I am ready to buy", next: "buy_finance" }
             ]
         },
-        // SELLING
         sell_path: {
             text: "What best describes your selling situation?",
             options: [
@@ -39,7 +41,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "1031 Tax-Deferred Exchange", next: "res_1031" }
             ]
         },
-        // INVESTING
         invest_path: {
             text: "What is your target investment strategy?",
             options: [
@@ -48,7 +49,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 { label: "House Hacking", next: "res_house_hack" }
             ]
         },
-        // FINAL RESULTS (Dead Ends)
+        // Terminal Nodes (Results)
         res_finance: { text: "Action: Get Pre-Approved. In a competitive market, a lender's letter is your most powerful tool.", options: [] },
         res_cash: { text: "Action: Prepare Proof of Funds. Cash allows for aggressive negotiation and fast closings.", options: [] },
         res_standard_sell: { text: "Action: Comparative Market Analysis. We need to price your home accurately to capture peak interest.", options: [] },
@@ -59,99 +60,114 @@ document.addEventListener('DOMContentLoaded', () => {
         res_house_hack: { text: "Action: Seek 2-4 unit properties. You can live in one unit while others pay your mortgage.", options: [] }
     };
 
+    // 2. STATE MANAGEMENT
     let currentNode = 'start';
     let history = []; 
     let pathLabels = []; 
 
-    const questionEl = document.getElementById('question-text');
-    const optionsContainer = document.getElementById('options-container');
-    const backBtn = document.getElementById('back-btn');
-    const progressFill = document.getElementById('progress-bar-fill');
-    const stepCounter = document.getElementById('step-counter');
-    const contactFormContainer = document.getElementById('contact-form-container');
-    const messageField = document.getElementById('message-field');
+    // 3. DOM ELEMENTS
+    const elements = {
+        question: document.getElementById('question-text'),
+        options: document.getElementById('options-container'),
+        backBtn: document.getElementById('back-btn'),
+        progress: document.getElementById('progress-bar-fill'),
+        step: document.getElementById('step-counter'),
+        formContainer: document.getElementById('contact-form-container'),
+        message: document.getElementById('message-field')
+    };
 
+    // 4. MOBILE-FRIENDLY RIPPLE EFFECT
     function createRipple(e, button) {
         const ripple = document.createElement('span');
         ripple.classList.add('ripple');
         const rect = button.getBoundingClientRect();
+        
+        // Support for both Mouse and Touch coordinates
+        const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+        const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
         const size = Math.max(rect.width, rect.height);
-        const x = e.clientX - rect.left - size / 2;
-        const y = e.clientY - rect.top - size / 2;
         ripple.style.width = ripple.style.height = size + 'px';
-        ripple.style.left = x + 'px';
-        ripple.style.top = y + 'px';
+        ripple.style.left = (clientX - rect.left - size/2) + 'px';
+        ripple.style.top = (clientY - rect.top - size/2) + 'px';
+        
         button.appendChild(ripple);
         setTimeout(() => ripple.remove(), 700);
     }
 
+    // 5. CORE RENDER ENGINE
     function renderNode() {
         const node = tree[currentNode];
         if (!node) return;
 
-        questionEl.innerText = node.text;
-        optionsContainer.innerHTML = '';
+        // Reset Styles & Content
+        elements.question.innerText = node.text;
+        elements.options.innerHTML = '';
         
-        const currentStep = history.length + 1;
-        stepCounter.innerText = (node.options.length === 0) ? 'Complete' : `Step ${currentStep}`;
+        // Progress Logic
+        const stepNum = history.length + 1;
+        elements.step.innerText = (node.options.length === 0) ? 'Complete' : `Step ${stepNum}`;
+        elements.progress.style.width = (node.options.length === 0) ? '100%' : (stepNum * 33) + '%';
         
-        const progressPercentage = Math.min(currentStep * 33, 100);
-        progressFill.style.width = (node.options.length === 0) ? '100%' : `${progressPercentage}%`;
-
-        backBtn.style.display = (history.length > 0) ? 'block' : 'none';
+        // Back Button Visibility
+        elements.backBtn.style.display = (history.length > 0) ? 'block' : 'none';
 
         if (node.options.length === 0) {
-            questionEl.className = 'result-card';
-            contactFormContainer.style.display = 'block';
-            
-            if (messageField) {
-                messageField.value = `Hello,\n\nI completed the Real Estate Guide.\n\nPath: ${pathLabels.join(" → ")}\n\nRecommendation: ${node.text}\n\nLooking forward to discussing next steps.`;
+            // Result Node
+            elements.question.classList.add('result-card');
+            elements.formContainer.style.display = 'block';
+            if (elements.message) {
+                elements.message.value = "Path: " + pathLabels.join(" > ") + "\nRecommendation: " + node.text;
             }
 
             const restartBtn = document.createElement('button');
             restartBtn.innerText = "Start Over";
             restartBtn.className = "tree-option-btn restart";
-            restartBtn.onclick = (e) => {
+            restartBtn.style.textAlign = "center";
+            restartBtn.addEventListener('click', function(e) {
                 createRipple(e, restartBtn);
-                setTimeout(() => resetGuide(), 200);
-            };
-            optionsContainer.appendChild(restartBtn);
+                setTimeout(resetGuide, 200);
+            }, { passive: true });
+            elements.options.appendChild(restartBtn);
         } else {
-            questionEl.className = '';
-            contactFormContainer.style.display = 'none';
+            // Question Node
+            elements.question.classList.remove('result-card');
+            elements.formContainer.style.display = 'none';
 
             node.options.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.innerText = opt.label;
                 btn.className = "tree-option-btn";
-                btn.onclick = (e) => {
+                // Use passive listener for better mobile scroll performance
+                btn.addEventListener('click', function(e) {
                     createRipple(e, btn);
                     setTimeout(() => {
                         history.push(currentNode);
                         pathLabels.push(opt.label);
                         currentNode = opt.next;
                         renderNode();
+                        window.scrollTo({ top: elements.question.offsetTop - 100, behavior: 'smooth' });
                     }, 180);
-                };
-                optionsContainer.appendChild(btn);
+                }, { passive: true });
+                elements.options.appendChild(btn);
             });
         }
     }
 
     function resetGuide() {
-        history = [];
-        pathLabels = [];
-        currentNode = 'start';
+        history = []; pathLabels = []; currentNode = 'start';
         renderNode();
     }
 
-    backBtn.onclick = () => {
+    // 6. GLOBAL EVENT HANDLERS
+    elements.backBtn.addEventListener('click', function() {
         if (history.length > 0) {
             currentNode = history.pop();
             pathLabels.pop();
-            renderNode(); 
+            renderNode();
         }
-    };
+    }, { passive: true });
 
+    // 7. INITIALIZE
     renderNode();
 });
