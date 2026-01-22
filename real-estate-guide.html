@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Pavlo Rospopa Real Estate Strategy Engine</title>
+    <title>Pavlo Rospopa Expert Strategy Engine</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/format.css">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
@@ -89,27 +89,50 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [
                 { label: "Residential: Buying", next: "buy_node_1" },
                 { label: "Residential: Selling", next: "sell_node_1" },
-                { label: "Refinancing / Mortgage", next: "refi_node_1" }, // NEW BRANCH
+                { label: "Refinancing / Mortgage", next: "refi_node_1" },
                 { label: "Wealth: Investing", next: "invest_node_1" },
                 { label: "Commercial / Business", next: "comm_node_1" }
             ]
         },
 
         // ==========================================
-        // BRANCH 1: BUYING (Expanded)
+        // BRANCH 1: BUYING
         // ==========================================
         buy_node_1: {
+            text: "Are you a US Citizen or Permanent Resident?",
+            options: [
+                { label: "Yes", next: "buy_loc_status" },
+                { label: "No (Visa/Foreign National)", next: "buy_visa_status" } // NEW
+            ]
+        },
+        buy_visa_status: { // NEW
+            text: "Do you have a valid Work Visa or ITIN?",
+            options: [
+                { label: "Work Visa (H1B, etc)", next: "buy_loc_status" },
+                { label: "ITIN Number only", next: "strat_itin_loan" },
+                { label: "Foreign National (No US Credit)", next: "strat_foreign_national" }
+            ]
+        },
+        buy_loc_status: {
             text: "Are you buying locally or relocating?",
             options: [
-                { label: "Buying Locally", next: "buy_history_check" },
-                { label: "Relocating from Out of State", next: "buy_relo_timeline" }
+                { label: "Buying Locally", next: "buy_co_buy_check" },
+                { label: "Relocating", next: "buy_relo_timeline" }
+            ]
+        },
+        buy_co_buy_check: { // NEW
+            text: "Who are you buying with?",
+            options: [
+                { label: "Just me / Spouse", next: "buy_history_check" },
+                { label: "Unmarried Partner / Friend", next: "strat_co_buy_agreement" },
+                { label: "Parent / Co-Signer", next: "strat_cosigner_fha" }
             ]
         },
         buy_relo_timeline: {
-            text: "When do you need to be in the new home?",
+            text: "Is this a Corporate Move or Self-Move?",
             options: [
-                { label: "ASAP (Job Starting)", next: "strat_virtual_tour" },
-                { label: "3+ Months (Flexible)", next: "buy_history_check" }
+                { label: "Corporate Package", next: "strat_corp_relo" }, // NEW
+                { label: "Self-Move / Job Change", next: "buy_history_check" }
             ]
         },
         buy_history_check: {
@@ -119,20 +142,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Yes (Repeat Buyer)", next: "buy_repeat_triage" }
             ]
         },
+        
+        // --- FTHB PATH ---
         buy_fthb_triage: {
             text: "What is your biggest hurdle right now?",
             options: [
                 { label: "Down Payment", next: "buy_down_source" },
                 { label: "Credit Score", next: "buy_credit_deep" },
-                { label: "Income / Debt", next: "buy_income_check" }, // UPDATED
-                { label: "Finding a House", next: "buy_inventory_triage" }
+                { label: "Income / Debt", next: "buy_income_check" },
+                { label: "Inventory / Condition", next: "buy_inventory_triage" }
             ]
         },
-        // --- INCOME & DEBT (NEW DEEP DIVE) ---
+        // --- INCOME & DEBT ---
         buy_income_check: {
             text: "Do you have significant Student Loan debt?",
             options: [
-                { label: "Yes, Student Loans", next: "buy_student_loan_calc" }, // NEW
+                { label: "Yes, Student Loans", next: "buy_student_loan_calc" },
                 { label: "No, other debt/income issues", next: "buy_income_type" }
             ]
         },
@@ -146,23 +171,24 @@ document.addEventListener('DOMContentLoaded', function() {
         buy_income_type: {
             text: "How is your income derived?",
             options: [
-                { label: "W-2 Salary", next: "buy_co_signer_check" },
+                { label: "W-2 Salary", next: "buy_overtime_check" },
                 { label: "Self-Employed", next: "buy_self_emp_years" },
-                { label: "Commission/Bonus", next: "buy_variable_income" }
+                { label: "Commission/Bonus", next: "buy_variable_income" },
+                { label: "Tip Income (Service)", next: "buy_tip_income" } // NEW
             ]
         },
-        buy_co_signer_check: {
-            text: "is your Debt-to-Income ratio tight? Do you have a Co-Signer?",
+        buy_tip_income: { // NEW
+            text: "Do you report all your tips to the IRS?",
             options: [
-                { label: "Yes, I have a Co-Signer", next: "strat_cosigner_fha" }, // NEW
-                { label: "No, buying solo", next: "buy_career_grant" }
+                { label: "Yes, fully reported", next: "res_fha_standard" },
+                { label: "No, mostly cash", next: "strat_bank_statement" }
             ]
         },
-        buy_career_grant: { // NEW
-            text: "Are you a Teacher, Firefighter, or Police Officer?",
+        buy_overtime_check: { // NEW
+            text: "Do you rely on Overtime pay to qualify?",
             options: [
-                { label: "Yes", next: "strat_good_neighbor" },
-                { label: "No", next: "res_fha_standard" }
+                { label: "Yes, need OT income", next: "strat_ot_avg" },
+                { label: "No, Base Salary is enough", next: "res_fha_standard" }
             ]
         },
         buy_variable_income: {
@@ -194,7 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [
                 { label: "Yes, Disputes", next: "strat_remove_disputes" },
                 { label: "Bankruptcy <2 years", next: "strat_hard_money_buy" },
-                { label: "Just high utilization", next: "res_credit_repair" }
+                { label: "Medical Collections", next: "strat_medical_collections" } // NEW
             ]
         },
         // --- DOWN PAYMENT ---
@@ -208,7 +234,11 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         buy_gift_check: {
             text: "Do you have gift funds?",
-            options: [ { label: "Yes", next: "strat_gift_letter" }, { label: "No", next: "res_grant" } ]
+            options: [ { label: "Yes", next: "buy_gift_seasoning" }, { label: "No", next: "res_grant" } ]
+        },
+        buy_gift_seasoning: {
+            text: "Are the funds currently in your bank account?",
+            options: [ { label: "Yes, >60 days", next: "res_conventional_check" }, { label: "No, wiring later", next: "strat_gift_letter" } ]
         },
         // --- INVENTORY ---
         buy_inventory_triage: {
@@ -216,7 +246,8 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [
                 { label: "Single Family", next: "buy_sfh_features" },
                 { label: "Condo/Townhome", next: "buy_condo_check" },
-                { label: "Multi-Unit", next: "strat_house_hack_invest" }
+                { label: "Multi-Unit", next: "strat_house_hack_invest" },
+                { label: "Tiny Home / ADU", next: "strat_tiny_home" } // NEW
             ]
         },
         buy_sfh_features: {
@@ -224,12 +255,13 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [
                 { label: "Multi-Generational", next: "strat_multigen_search" },
                 { label: "Green/Solar", next: "strat_solar_check" },
+                { label: "Eco/LEED Certified", next: "strat_green_mortgage" }, // NEW
                 { label: "Standard", next: "strat_school_zone" }
             ]
         },
         buy_condo_check: {
             text: "Is the HOA healthy?",
-            options: [ { label: "Yes/Unknown", next: "strat_condo_warrantable" }, { label: "No (Litigation)", next: "strat_non_warrantable" } ] // NEW
+            options: [ { label: "Yes/Unknown", next: "strat_condo_warrantable" }, { label: "No (Litigation)", next: "strat_non_warrantable" } ]
         },
 
         // --- REPEAT BUYER ---
@@ -254,27 +286,35 @@ document.addEventListener('DOMContentLoaded', function() {
         // BRANCH 2: SELLING
         // ==========================================
         sell_node_1: {
-            text: "Have you tried selling recently?",
-            options: [ { label: "Yes (Expired/FSBO)", next: "sell_fsbo_check" }, { label: "No", next: "sell_reason_check" } ]
+            text: "Is the property currently Occupied or Vacant?",
+            options: [
+                { label: "Occupied by Me", next: "sell_reason_check" },
+                { label: "Occupied by Tenant", next: "sell_tenant_lease" },
+                { label: "Vacant", next: "sell_vacant_issues" }, // NEW
+                { label: "Hoarder Situation", next: "strat_hoarder_cleanout" } // NEW
+            ]
         },
-        sell_fsbo_check: {
-            text: "Agent or FSBO?",
-            options: [ { label: "FSBO", next: "strat_fsbo_conversion" }, { label: "Agent", next: "strat_expired_relist" } ]
+        sell_vacant_issues: { // NEW
+            text: "Is the property winterized and insured as vacant?",
+            options: [
+                { label: "Yes, fully secured", next: "strat_vacant_staging" },
+                { label: "No, utilities are off", next: "strat_utility_activation" }
+            ]
         },
         sell_reason_check: {
-            text: "Reason for selling?",
+            text: "Primary reason for selling?",
             options: [
-                { label: "Move/Upgrade", next: "sell_taxes_check" },
-                { label: "Distress/Debt", next: "sell_distress" },
-                { label: "Divorce", next: "sell_divorce_status" },
-                { label: "Probate/Inherited", next: "sell_probate" }
+                { label: "Upgrading / Downsizing", next: "sell_taxes_check" },
+                { label: "Financial Distress / Debt", next: "sell_distress" },
+                { label: "Divorce / Separation", next: "sell_divorce_status" },
+                { label: "Inheritance / Probate", next: "sell_probate" }
             ]
         },
         sell_taxes_check: {
             text: "Lived there 2 of last 5 years?",
             options: [ { label: "Yes", next: "sell_title_check" }, { label: "No", next: "strat_cap_gains_calc" } ]
         },
-        sell_title_check: { // NEW
+        sell_title_check: {
             text: "Is the home in a Trust?",
             options: [ { label: "Yes", next: "strat_trust_sale" }, { label: "No", next: "sell_financial_status" } ]
         },
@@ -287,32 +327,32 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [ { label: "Positive", next: "sell_retail_condition" }, { label: "Negative", next: "sell_distress" } ]
         },
         sell_retail_condition: {
-            text: "Condition of property?",
+            text: "Any known defects?",
             options: [
-                { label: "Major Defects", next: "sell_retail_fix" },
+                { label: "Foundation Issues", next: "strat_structural_eng" }, // NEW
+                { label: "Roof/HVAC Old", next: "strat_home_warranty" }, // NEW
                 { label: "Unpermitted Work", next: "strat_retro_permit" },
-                { label: "Good Condition", next: "sell_occupancy_check" }
+                { label: "Good Condition", next: "sell_solar_check" }
             ]
         },
-        sell_retail_fix: {
-            text: "Cash to fix?",
-            options: [ { label: "Yes", next: "strat_concierge" }, { label: "No", next: "strat_instant" } ]
-        },
-        sell_occupancy_check: {
-            text: "Occupant?",
+        sell_solar_check: { // NEW
+            text: "Do you have Solar Panels?",
             options: [
-                { label: "Owner", next: "sell_timeline_urgency" },
-                { label: "Vacant", next: "sell_luxury_check" },
-                { label: "Tenant", next: "sell_tenant_lease" }
+                { label: "Yes, Leased", next: "strat_solar_lease_transfer" },
+                { label: "Yes, Owned", next: "strat_green_marketing" },
+                { label: "No", next: "sell_historic_check" }
+            ]
+        },
+        sell_historic_check: { // NEW
+            text: "Is the home in a Historic District?",
+            options: [
+                { label: "Yes, Historic/Landmark", next: "strat_historic_sale" },
+                { label: "No", next: "sell_luxury_check" }
             ]
         },
         sell_tenant_lease: {
             text: "Lease Type?",
             options: [ { label: "Month-to-Month", next: "strat_concierge" }, { label: "Long Term", next: "strat_tenant_sale" }, { label: "Eviction needed", next: "strat_eviction_sale" } ]
-        },
-        sell_timeline_urgency: {
-            text: "Next home lined up?",
-            options: [ { label: "Yes", next: "strat_concierge" }, { label: "No", next: "strat_leaseback" } ]
         },
         sell_luxury_check: {
             text: "Value > $800k?",
@@ -349,50 +389,51 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // BRANCH 3: REFINANCE (NEW MAIN BRANCH)
+        // BRANCH 3: REFINANCE
         // ==========================================
         refi_node_1: {
-            text: "What is your primary goal for refinancing?",
+            text: "Primary Goal?",
             options: [
-                { label: "Lower Monthly Payment", next: "refi_rate_check" },
-                { label: "Pull Cash Out", next: "refi_cash_reason" },
-                { label: "Remove Mortgage Insurance", next: "refi_pmi_check" }
+                { label: "Lower Payment", next: "refi_rate_check" },
+                { label: "Cash Out", next: "refi_cash_reason" },
+                { label: "Remove PMI", next: "refi_pmi_check" },
+                { label: "Divorce Buyout", next: "strat_divorce_refi" } // NEW
             ]
         },
         refi_rate_check: {
-            text: "What type of loan do you currently have?",
-            options: [
-                { label: "FHA or VA", next: "strat_streamline_refi" }, // NEW
-                { label: "Conventional", next: "refi_credit_check" }
-            ]
+            text: "Loan Type?",
+            options: [ { label: "FHA/VA", next: "strat_streamline_refi" }, { label: "Conventional", next: "refi_credit_check" } ]
         },
         refi_credit_check: {
-            text: "Is your credit score above 720?",
-            options: [
-                { label: "Yes", next: "strat_rate_term_refi" },
-                { label: "No", next: "res_credit_repair" }
-            ]
+            text: "Score > 720?",
+            options: [ { label: "Yes", next: "strat_rate_term_refi" }, { label: "No", next: "res_credit_repair" } ]
         },
         refi_cash_reason: {
-            text: "What is the cash for?",
+            text: "Use of funds?",
             options: [
-                { label: "Debt Consolidation", next: "strat_debt_consolidation" }, // NEW
-                { label: "Home Improvement", next: "strat_renovation_heloc" }, // NEW
-                { label: "Investment Purchase", next: "strat_cash_out_invest" } // NEW
+                { label: "Debt Consolidation", next: "strat_debt_consolidation" },
+                { label: "Home Improvement", next: "strat_renovation_heloc" },
+                { label: "Investment", next: "strat_cash_out_invest" },
+                { label: "Buy 2nd Home", next: "strat_reverse_purchase" } // NEW
             ]
         },
         refi_pmi_check: {
-            text: "Do you believe you have 20% equity now?",
-            options: [
-                { label: "Yes", next: "strat_pmi_removal" }, // NEW
-                { label: "Not sure", next: "strat_appraisal_gap" }
-            ]
+            text: "Equity > 20%?",
+            options: [ { label: "Yes", next: "strat_pmi_removal" }, { label: "Not sure", next: "strat_appraisal_gap" } ]
         },
 
         // ==========================================
         // BRANCH 4: INVESTING
         // ==========================================
         invest_node_1: {
+            text: "Funding Source?",
+            options: [
+                { label: "Cash / Conventional", next: "inv_involvement" },
+                { label: "Retirement Funds", next: "strat_sdir_custodian" }, // NEW
+                { label: "1031 Exchange", next: "inv_1031_window" }
+            ]
+        },
+        inv_involvement: {
             text: "Preferred involvement?",
             options: [ { label: "Active", next: "inv_experience" }, { label: "Passive", next: "inv_passive_check" } ]
         },
@@ -410,8 +451,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Flip", next: "strat_fix_flip" },
                 { label: "Long Term Rental", next: "inv_unit_count" },
                 { label: "Airbnb", next: "inv_airbnb_check" },
-                { label: "Mid Term (Nurses)", next: "strat_mid_term_rental" },
-                { label: "Section 8", next: "strat_section_8" },
+                { label: "Wholesaling", next: "strat_wholesaling" }, // NEW
+                { label: "Mobile Home Parks", next: "strat_mhp_invest" }, // NEW
+                { label: "Storage Units", next: "strat_storage_invest" }, // NEW
+                { label: "Student Housing", next: "strat_student_housing" }, // NEW
                 { label: "Raw Land", next: "inv_land_check" }
             ]
         },
@@ -435,6 +478,10 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Accredited?",
             options: [ { label: "Yes", next: "strat_syndication" }, { label: "No", next: "strat_reit" } ]
         },
+        inv_1031_window: {
+            text: "Sold <45 days ago?",
+            options: [ { label: "Yes", next: "strat_dst" }, { label: "No", next: "strat_1031" } ]
+        },
 
         // ==========================================
         // BRANCH 5: COMMERCIAL
@@ -445,35 +492,35 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Retail/Restaurant", next: "comm_retail_node" },
                 { label: "Office/Medical", next: "comm_office_node" },
                 { label: "Industrial", next: "comm_industrial_node" },
-                { label: "Gas Station/Auto", next: "comm_env_check" } // NEW
+                { label: "Gas Station/Auto", next: "comm_env_check" }
             ]
         },
         comm_env_check: {
-            text: "Are there existing environmental reports (Phase 1)?",
+            text: "Phase 1 Report?",
             options: [
-                { label: "Yes, clean", next: "strat_sba_504" },
-                { label: "No / Unknown", next: "strat_phase_1_env" } // NEW
+                { label: "Clean", next: "strat_sba_504" },
+                { label: "Dirty/Unknown", next: "strat_phase_2_env" } // NEW
             ]
         },
         comm_retail_node: {
             text: "Use?",
-            options: [ { label: "Restaurant", next: "strat_restaurant_buy" }, { label: "General Retail", next: "comm_lease_own" } ]
+            options: [ { label: "Restaurant", next: "strat_restaurant_buy" }, { label: "Liquor Store", next: "strat_liquor_license" }, { label: "General", next: "comm_lease_own" } ] // NEW
         },
         comm_office_node: {
             text: "Use?",
-            options: [ { label: "Medical", next: "strat_medical_office" }, { label: "General", next: "comm_lease_own" } ]
+            options: [ { label: "Medical", next: "comm_parking_check" }, { label: "General", next: "comm_lease_own" } ]
+        },
+        comm_parking_check: { // NEW
+            text: "Does it meet 5:1000 Parking Ratio?",
+            options: [ { label: "Yes", next: "strat_medical_office" }, { label: "No", next: "strat_parking_variance" } ]
         },
         comm_industrial_node: {
-            text: "Ceiling Height?",
-            options: [ { label: "<14ft", next: "strat_flex_space" }, { label: ">18ft", next: "comm_zoning_check" } ]
+            text: "Requirement?",
+            options: [ { label: "High Ceilings", next: "comm_crane_check" }, { label: "Loading Docks", next: "strat_industrial_logistics" } ]
         },
-        comm_zoning_check: {
-            text: "Zoning compliant?",
-            options: [ { label: "Yes", next: "comm_power_check" }, { label: "No", next: "strat_zoning_attorney" } ]
-        },
-        comm_power_check: {
-            text: "3-Phase Power needed?",
-            options: [ { label: "Yes", next: "strat_heavy_industrial" }, { label: "No", next: "strat_industrial_logistics" } ]
+        comm_crane_check: { // NEW
+            text: "Need Overhead Cranes?",
+            options: [ { label: "Yes", next: "strat_heavy_manufacturing" }, { label: "No", next: "strat_flex_space" } ]
         },
         comm_lease_own: {
             text: "Strategy?",
@@ -484,41 +531,34 @@ document.addEventListener('DOMContentLoaded', function() {
         // OUTCOMES
         // ==========================================
         
-        // --- REFI OUTCOMES (NEW) ---
-        strat_streamline_refi: { text: "Strategy: FHA/VA Streamline Refinance. This is a low-doc loan. No appraisal, no income verification. If you have an FHA/VA loan and want a lower rate, this is the fastest path.", options: [] },
-        strat_rate_term_refi: { text: "Strategy: Rate & Term Refinance. We simply replace your current mortgage with a new one at a lower rate. This keeps your equity intact but lowers monthly overhead.", options: [] },
-        strat_debt_consolidation: { text: "Strategy: Debt Consolidation Refi. We use your equity to pay off high-interest credit cards (20%+ APR). Your mortgage balance goes up, but your total monthly payments drop significantly.", options: [] },
-        strat_renovation_heloc: { text: "Strategy: HELOC for Renovation. Instead of losing your low rate on your primary mortgage, we open a Home Equity Line of Credit (2nd position) to fund the repairs.", options: [] },
-        strat_cash_out_invest: { text: "Strategy: Cash-Out for Investment. We pull equity to use as a down payment on a rental property. This leverages your 'lazy equity' to build wealth elsewhere.", options: [] },
-        strat_pmi_removal: { text: "Strategy: PMI Removal. We can order a new appraisal. If the value supports 20% equity, we petition the servicer to remove the mortgage insurance without a full refinance.", options: [] },
-        strat_appraisal_gap: { text: "Strategy: Appraisal Gap Analysis. Before spending money on a refi, I will run a comparative market analysis (CMA) to ensure your home will appraise high enough to drop the PMI.", options: [] },
-
-        // --- BUYER OUTCOMES ---
-        strat_fha_ibr: { text: "Strategy: FHA + IBR. FHA loans allow us to use your actual Income-Based Repayment amount (often $0 or low) for DTI calculations, rather than 1% of the loan balance.", options: [] },
-        strat_conventional_1percent: { text: "Strategy: Conventional Student Loan Calc. Conventional loans typically count 1% of the balance or the fully amortized payment. We must ensure your DTI fits this tighter box.", options: [] },
-        strat_cosigner_fha: { text: "Strategy: Non-Occupying Co-Borrower. FHA allows a family member who doesn't live with you to co-sign. We blend their income with yours to boost purchasing power.", options: [] },
-        strat_good_neighbor: { text: "Strategy: Good Neighbor Next Door / Hero Programs. HUD offers 50% off list price on certain homes for teachers/police. Alternatively, we use local 'Hero' grants for down payment assistance.", options: [] },
-        strat_condo_warrantable: { text: "Strategy: Warrantable Condo. The HOA is healthy. We can use standard financing with low rates.", options: [] },
-        strat_non_warrantable: { text: "Strategy: Non-Warrantable Financing. The HOA has issues (litigation/too many renters). We must use a portfolio lender who keeps the loan in-house. Rates will be 1-2% higher.", options: [] },
-        strat_solar_check: { text: "Strategy: Solar Lease Transfer. We must review the solar contract immediately. If the lease payments are high, they affect your DTI. We need the lessor to approve the transfer before closing.", options: [] },
-        strat_multigen_search: { text: "Strategy: Multi-Gen Zoning. We will target homes with first-floor suites. We must verify zoning allows for 'Related Living' to avoid issues with second kitchens.", options: [] },
-        strat_rsu_income: { text: "Strategy: RSU Income Qualification. We need a lender who understands Restricted Stock Units. We must show a vesting schedule and 2-year history to count this income.", options: [] },
-        strat_asset_depletion: { text: "Strategy: Asset Depletion Loan. High assets, low income. We divide your liquid assets by 360 to create a 'phantom income' for qualification.", options: [] },
-        strat_remove_disputes: { text: "Strategy: Credit Dispute Removal. Open disputes block mortgages. We must verify the dispute is removed from the credit report before submitting the application.", options: [] },
-        strat_gift_letter: { text: "Strategy: Formal Gift Letter. The donor must sign a specific letter stating the funds are not a loan. We must track the wire trail perfectly.", options: [] },
-
-        // --- SELLER OUTCOMES ---
-        strat_trust_sale: { text: "Strategy: Trust Sale. We need the 'Certificate of Trust'. The trustee must sign all listing documents. This bypasses probate but requires strict paperwork adherence.", options: [] },
-        strat_retro_permit: { text: "Strategy: Retroactive Permitting. Unpermitted work is a liability. We will ask the municipality for a retroactive inspection or purchase an indemnity policy.", options: [] },
-        strat_title_clearance: { text: "Strategy: Title Clearance. We must pull a prelim title report immediately to see if the liens exceed the equity. If so, this becomes a Short Sale.", options: [] },
-        strat_reverse_mortgage_sale: { text: "Strategy: HECM Payoff. The loan becomes due immediately upon move-out. We must coordinate with the servicer to ensure the payoff doesn't eat all proceeds.", options: [] },
-
-        // --- COMMERCIAL OUTCOMES ---
-        strat_phase_1_env: { text: "Strategy: Phase 1 Environmental. For gas stations or auto shops, banks require a Phase 1 study to check for soil contamination. If it fails, a Phase 2 (drilling) is required.", options: [] },
-        strat_heavy_industrial: { text: "Strategy: Heavy Industrial (3-Phase). We will filter for properties with existing heavy power to avoid the $50k+ cost of upgrading transformers.", options: [] },
-        strat_mid_term_rental: { text: "Strategy: Mid-Term Rental (MTR). We target traveling nurses near hospitals. Higher rent than long-term, less turnover than Airbnb.", options: [] },
-        strat_section_8: { text: "Strategy: Section 8 Guaranteed Rent. We target areas with high voucher payment standards to recession-proof your cash flow.", options: [] },
-        strat_land_feasibility: { text: "Strategy: Feasibility Contingency. Offer is contingent on a Perc Test and Soil Survey. We cannot buy raw land without knowing if it perks for a septic system.", options: [] },
+        // --- NEW OUTCOMES (Total now >90) ---
+        strat_itin_loan: { text: "Strategy: ITIN Financing. For foreign nationals with an ITIN but no SSN. We need 15-20% down. Rates are higher, but qualification is based on ITIN tax returns or bank statements.", options: [] },
+        strat_foreign_national: { text: "Strategy: Foreign National Loan. For non-residents with no US credit. We use a DSCR loan where the property's rental income qualifies the loan. Requires 25-30% down.", options: [] },
+        strat_co_buy_agreement: { text: "Strategy: Co-Buying Agreement. Buying with a friend requires a formal legal agreement. We must title the home as 'Tenants in Common' so you can bequeath your share, unlike Joint Tenancy.", options: [] },
+        strat_corp_relo: { text: "Strategy: Corporate Relocation Rider. Your company likely has a specific addendum. We must have their Relocation Counselor review the contract before you sign to protect your benefits.", options: [] },
+        strat_tiny_home: { text: "Strategy: Tiny Home / ADU Zoning. Most towns forbid these on wheels. We must find land zoned for 'Accessory Dwelling Units' or unincorporated county land with looser restrictions.", options: [] },
+        strat_green_mortgage: { text: "Strategy: Energy Efficient Mortgage (EEM). We can finance energy upgrades (windows, insulation) into the loan. The appraiser will account for the energy savings to boost your qualifying income.", options: [] },
+        strat_hoarder_cleanout: { text: "Strategy: Discrete Cleanout Sale. We won't list photos yet. I will bring in a compassionate cleanout crew to empty the home, then we decide if we sell as-is to an investor or retail.", options: [] },
+        strat_vacant_staging: { text: "Strategy: Virtual Staging. Vacant homes feel small and cold. We will physically stage the main rooms or use high-end Virtual Staging in photos to help buyers visualize the layout.", options: [] },
+        strat_utility_activation: { text: "Strategy: Utility De-Winterization. Inspectors cannot test systems if utilities are off. We must activate water/gas/electric 3 days prior to inspection to avoid deal failure.", options: [] },
+        strat_structural_eng: { text: "Strategy: Structural Engineer Report. Buyers will flee at the sight of cracks. We will pre-inspect with a Structural Engineer. If it's safe, his stamped letter will silence all buyer fears.", options: [] },
+        strat_home_warranty: { text: "Strategy: Seller Coverage Warranty. We will buy a warranty during the listing period. It covers HVAC/Appliances if they break while listed, and transfers to the buyer at closing.", options: [] },
+        strat_solar_lease_transfer: { text: "Strategy: Solar Lease Transfer. The buyer must qualify for both the mortgage AND the solar lease. We need to initiate the transfer paperwork with the solar company immediately.", options: [] },
+        strat_historic_sale: { text: "Strategy: Historic Preservation Tax Freeze. We market the home's history. Illinois offers a Property Tax Assessment Freeze for owner-occupants who rehab historic homes. Huge selling point.", options: [] },
+        strat_divorce_refi: { text: "Strategy: Owelty Lien / Divorce Buyout. We structure the refinance to pay out your ex-spouse's equity directly. This is treated as a Rate/Term refi (better rates) rather than Cash-Out.", options: [] },
+        strat_reverse_purchase: { text: "Strategy: HECM for Purchase. If you are 62+, you can put ~50% down and finance the rest with a Reverse Mortgage. You have no monthly payments for life.", options: [] },
+        strat_sdir_custodian: { text: "Strategy: Self-Directed IRA. You cannot buy this in your name. You must use a Custodian (e.g., Equity Trust). The contract is in the name of the IRA. All expenses/income must flow through the IRA.", options: [] },
+        strat_wholesaling: { text: "Strategy: Wholesaling / Assignment. You are selling the *contract*, not the house. We need an 'And/Or Assigns' clause. We must verify local laws as Illinois requires a broker license for wholesaling.", options: [] },
+        strat_mhp_invest: { text: "Strategy: Mobile Home Park. We analyze 'Pad Rent' vs 'Park Owned Homes'. We want to own the dirt, not the trailers. Focus on city water/sewer connections to reduce CAPEX risk.", options: [] },
+        strat_student_housing: { text: "Strategy: Student Housing. We target properties within 1 mile of campus. Leases must be by the bedroom (Parental Guarantees required). Check city occupancy limits (e.g., 'Brothel Laws').", options: [] },
+        strat_storage_invest: { text: "Strategy: Self-Storage. High margin, low headache. We focus on 'Climate Controlled' units in high-density areas. Automation (Kiosks) can reduce management costs to near zero.", options: [] },
+        strat_phase_2_env: { text: "Strategy: Phase 2 Environmental. The Phase 1 found issues. We must now drill soil samples. If contamination exists, we negotiate a massive price reduction or walk away.", options: [] },
+        strat_liquor_license: { text: "Strategy: Liquor License Transfer. The license is often worth more than the building. We must verify if the municipality allows the transfer or if the moratorium cap has been reached.", options: [] },
+        strat_parking_variance: { text: "Strategy: Parking Variance. Medical use requires 5 spots per 1000sqft. This building has less. We must petition the zoning board for a variance or lease off-site parking nearby.", options: [] },
+        strat_heavy_manufacturing: { text: "Strategy: Heavy Manufacturing. We need to verify floor load capacity for machines and bridge crane tonnage. We also check for 'drive-through' bays for semi-trucks.", options: [] },
+        strat_ot_avg: { text: "Strategy: Overtime Averaging. Lenders average your OT over 2 years. If it is declining, they use the lower current year. We must provide a letter from your employer stating OT is likely to continue.", options: [] },
+        strat_medical_collections: { text: "Strategy: Medical Debt Exclusion. Good news: Lenders treat medical collections differently. Conventional loans often ignore them. FHA may not require them to be paid off if they are under a certain amount.", options: [] },
+        strat_green_marketing: { text: "Strategy: Green Premium Marketing. Owned solar adds value. We must use an appraiser certified in 'Green Addendums' to ensure they give you credit for the $30k+ system value.", options: [] },
 
         // --- RETAINED OUTCOMES ---
         strat_virtual_tour: { text: "Strategy: Virtual Relocation. Live video tours + Sight Unseen rider with 3-day rescission period.", options: [] },
@@ -583,7 +623,35 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_lease_audit: { text: "Strategy: NNN Audit. Check CAM charges.", options: [] },
         strat_lease_base_year: { text: "Strategy: Base Year Stop. Cap expense increases.", options: [] },
         strat_industrial_logistics: { text: "Strategy: Logistics Focus. 14ft doors and highway access.", options: [] },
-        res_conventional_check: { text: "Strategy: Conventional Loan. 3-5% down, PMI drops off.", options: [] }
+        res_conventional_check: { text: "Strategy: Conventional Loan. 3-5% down, PMI drops off.", options: [] },
+        strat_streamline_refi: { text: "Strategy: FHA/VA Streamline. Low doc refi, no appraisal.", options: [] },
+        strat_rate_term_refi: { text: "Strategy: Rate & Term Refi. Lower monthly payment, keep equity.", options: [] },
+        strat_debt_consolidation: { text: "Strategy: Debt Consolidation. Pay off high interest cards.", options: [] },
+        strat_renovation_heloc: { text: "Strategy: HELOC. Renovation funds without touching main rate.", options: [] },
+        strat_cash_out_invest: { text: "Strategy: Cash Out Invest. Use equity for down payment on rental.", options: [] },
+        strat_pmi_removal: { text: "Strategy: PMI Removal. Appraise to prove 20% equity.", options: [] },
+        strat_appraisal_gap: { text: "Strategy: Appraisal Gap Analysis. Verify value before refinancing.", options: [] },
+        strat_fha_ibr: { text: "Strategy: FHA IBR. Use Income Based Repayment for student loans.", options: [] },
+        strat_conventional_1percent: { text: "Strategy: Conventional Student Loan. Count 1% of balance.", options: [] },
+        strat_cosigner_fha: { text: "Strategy: Non-Occupying Co-Borrower. Blend income with relative.", options: [] },
+        strat_good_neighbor: { text: "Strategy: Hero Programs. Grants for Teachers/Fire/Police.", options: [] },
+        strat_condo_warrantable: { text: "Strategy: Warrantable Condo. Standard rates for healthy HOA.", options: [] },
+        strat_non_warrantable: { text: "Strategy: Non-Warrantable. Portfolio loan for litigation condos.", options: [] },
+        strat_solar_check: { text: "Strategy: Solar Lease Check. Verify transferability of panels.", options: [] },
+        strat_multigen_search: { text: "Strategy: Multi-Gen. Target in-law suites and 1st floor beds.", options: [] },
+        strat_rsu_income: { text: "Strategy: RSU Income. Use vesting schedule for tech income.", options: [] },
+        strat_asset_depletion: { text: "Strategy: Asset Depletion. Use assets as phantom income.", options: [] },
+        strat_remove_disputes: { text: "Strategy: Dispute Removal. Clear credit report for mortgage.", options: [] },
+        strat_gift_letter: { text: "Strategy: Gift Letter. Document down payment gift properly.", options: [] },
+        strat_trust_sale: { text: "Strategy: Trust Sale. Certificate of Trust required.", options: [] },
+        strat_retro_permit: { text: "Strategy: Retroactive Permit. Legalize unpermitted work.", options: [] },
+        strat_title_clearance: { text: "Strategy: Title Clearance. Check for liens before listing.", options: [] },
+        strat_reverse_mortgage_sale: { text: "Strategy: HECM Payoff. Coordinate payoff immediately.", options: [] },
+        strat_phase_1_env: { text: "Strategy: Phase 1 Enviro. Check soil for contamination.", options: [] },
+        strat_heavy_industrial: { text: "Strategy: Heavy Power. Find existing 3-Phase electric.", options: [] },
+        strat_mid_term_rental: { text: "Strategy: Mid-Term Rental. Housing for traveling nurses.", options: [] },
+        strat_section_8: { text: "Strategy: Section 8. Guaranteed government rent.", options: [] },
+        strat_land_feasibility: { text: "Strategy: Land Feasibility. Perc test required for septic.", options: [] }
     };
 
     let currentNode = 'start';
@@ -614,7 +682,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const stepCount = history.length + 1;
         
         elements.step.innerText = isResult ? 'Recommendation Found' : `Step ${stepCount}`;
-        elements.progress.style.width = isResult ? '100%' : Math.min(stepCount * 6, 95) + '%';
+        elements.progress.style.width = isResult ? '100%' : Math.min(stepCount * 5, 95) + '%';
         elements.backBtn.style.display = (history.length > 0) ? 'block' : 'none';
 
         if (isResult) {
