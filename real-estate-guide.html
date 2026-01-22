@@ -1,53 +1,5 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Pavlo Rospopa Website</title>
-    <meta name="viewport" content="width=device-width">
-    <link rel="stylesheet" href="css/format.css">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-
-    <style>
-        /* SECURITY / DISABLE SELECTION */
-        body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; }
-        input, textarea { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
-
-        /* GUIDE UI STYLES - DO NOT CHANGE */
-        #real-estate-guide-container {
-            margin: 40px auto; 
-            max-width: 800px; 
-            padding: 30px; 
-            border: 1px solid #e0e0e0; 
-            border-radius: 12px; 
-            background-color: #ffffff; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
-            font-family: sans-serif;
-        }
-        .tree-option-btn {
-            padding: 16px 20px; background-color: #f8f9fa; color: #333; border: 2px solid #eef0f2;
-            border-radius: 8px; cursor: pointer; font-size: 1.05rem; text-align: left;
-            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); font-weight: 500; width: 100%; margin-bottom: 10px;
-            position: relative; overflow: hidden;
-        }
-        .tree-option-btn:hover { background-color: #ffffff; border-color: #4285F4; color: #4285F4; transform: translateY(-2px); }
-        .result-card { background: #f4f7ff; border-left: 6px solid #4285F4; padding: 25px; border-radius: 8px; color: #334155; line-height: 1.7; margin-bottom: 20px; }
-        
-        /* CONTACT FORM STYLES */
-        #contact-form-container { margin: 40px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; }
-        #contact-form { display: flex; flex-direction: column; gap: 15px; }
-        #contact-form input, #contact-form textarea { padding: 10px; border: 1px solid #ccc; border-radius: 4px; width: 100%; box-sizing: border-box; }
-        #contact-form button { padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; align-self: flex-start; }
-
-        /* ANIMATIONS */
-        .ripple { position: absolute; background: rgba(66, 133, 244, 0.2); border-radius: 50%; transform: scale(0); animation: ripple-effect 0.7s linear; pointer-events: none; }
-        @keyframes ripple-effect { to { transform: scale(4); opacity: 0; } }
-    </style>
-</head>
-<body>
-
 <header class="site-header">
-    <div class="wrap">
+    <div class="wrap" style="display: flex; justify-content: space-between; align-items: center;">
         <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
         <nav class="site-nav">
             <div class="trigger">
@@ -57,34 +9,31 @@
     </div>
 </header>
 
-<main>
-    <div class="page-content">
-        <div class="wrap">
-            <div id="real-estate-guide-container">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-                    <span id="back-btn" style="cursor: pointer; font-size: 0.9rem; color: #007bff; font-weight: 600; display: none;">← Back</span>
-                    <div style="flex-grow: 1; height: 6px; background: #eee; margin: 0 20px; border-radius: 10px;">
-                        <div id="progress-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #4285F4, #a855f7); border-radius: 10px; transition: width 0.4s ease;"></div>
-                    </div>
-                    <span id="step-counter" style="font-size: 0.8rem; color: #999; font-weight: bold;">Step 1</span>
-                </div>
-                <div id="tree-content">
-                    <h2 id="question-text" style="margin-bottom: 25px; font-size: 1.5rem; color: #222;">Determining your path...</h2>
-                    <div id="options-container"></div>
-                </div>
+<main class="wrap">
+    <div id="real-estate-guide-container" style="margin: 40px auto; padding: 30px; border: 1px solid #e0e0e0; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); font-family: sans-serif;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+            <span id="back-btn" style="cursor: pointer; font-size: 0.9rem; color: #4285F4; font-weight: 600; display: none;">← Back</span>
+            <div style="flex-grow: 1; height: 6px; background: #eee; margin: 0 20px; border-radius: 10px;">
+                <div id="progress-bar-fill" style="width: 0%; height: 100%; background: linear-gradient(90deg, #4285F4, #a855f7); border-radius: 10px; transition: width 0.4s ease;"></div>
             </div>
-
-            <div id="contact-form-container" style="display: none;">
-                <form id="contact-form">
-                    <input type="text" name="name" placeholder="Your Name" required />
-                    <input type="email" name="email" placeholder="Your Email" required />
-                    <textarea id="message-field" name="message" rows="5" required></textarea>
-                    <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
-                    <button type="submit" id="submit-btn">Send Message</button>
-                    <p id="form-status"></p>
-                </form>
-            </div>
+            <span id="step-counter" style="font-size: 0.8rem; color: #999; font-weight: bold;">Step 1</span>
         </div>
+
+        <div id="tree-content">
+            <h2 id="question-text" style="margin-bottom: 25px; font-size: 1.5rem; color: #222;">Determining your path...</h2>
+            <div id="options-container" style="display: grid; grid-template-columns: 1fr; gap: 12px;"></div>
+        </div>
+    </div>
+
+    <div id="contact-form-container" style="display: none; margin-top: 40px;">
+        <form id="contact-form" style="display: flex; flex-direction: column; gap: 15px;">
+            <input type="text" name="name" placeholder="Your Name" required style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;"/>
+            <input type="email" name="email" placeholder="Your Email" required style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;"/>
+            <textarea id="message-field" name="message" placeholder="Your Message" rows="5" required style="padding: 10px; border: 1px solid #ccc; border-radius: 4px;"></textarea>
+            <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
+            <button type="submit" id="submit-btn" style="padding: 10px 20px; background-color: #333; color: white; border: none; border-radius: 4px; cursor: pointer; align-self: flex-start;">Send Message</button>
+            <p id="form-status"></p>
+        </form>
     </div>
 </main>
 
@@ -98,5 +47,3 @@
 </footer>
 
 <script src="js/real-estate-guide.js"></script>
-</body>
-</html>
