@@ -3,24 +3,19 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Infinity Strategy Engine 2.0</title>
+    <title>Infinity Strategy Engine 3.0</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Advanced Real Estate Strategy Engine">
     
     <link rel="canonical" href="http://rospopa.github.io/">
-    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/css/favicons/unnamed-32x32.png">
-    
-    <link rel="stylesheet" href="css/format.css">
-    
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgo="> <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
         /* --- CORE / RESET --- */
         body {
             -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background-color: #f0f2f5; margin: 0; color: #1c1e21;
+            background-color: #f8fafc; margin: 0; color: #1e293b;
         }
         input, textarea, select { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
 
@@ -29,69 +24,65 @@
 
         /* --- CONTAINER --- */
         #real-estate-guide-container {
-            margin: 40px auto; padding: 40px; border: 0; border-radius: 20px;
-            background-color: #ffffff; box-shadow: 0 20px 60px rgba(0,0,0,0.1); 
-            position: relative; z-index: 101; max-width: 900px;
+            margin: 60px auto; padding: 50px; border: 0; border-radius: 24px;
+            background-color: #ffffff; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); 
+            position: relative; z-index: 101; max-width: 850px;
         }
         
         /* --- UI ELEMENTS --- */
         .tree-option-btn {
-            padding: 18px 24px; background-color: #fff; color: #333; border: 1px solid #e0e0e0;
-            border-radius: 12px; cursor: pointer; font-size: 1rem; text-align: left;
+            padding: 20px 24px; background-color: #fff; color: #334155; border: 1px solid #e2e8f0;
+            border-radius: 16px; cursor: pointer; font-size: 1.05rem; text-align: left;
             transition: all 0.2s ease; font-weight: 500; width: 100%; margin-bottom: 12px; display: block;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.03); position: relative; overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative;
         }
         .tree-option-btn:hover { 
-            border-color: #2563eb; color: #2563eb; transform: translateY(-2px); 
-            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.1); 
+            border-color: #3b82f6; color: #1d4ed8; transform: translateY(-2px); 
+            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.1); 
         }
-        .tree-option-btn::after {
-            content: '→'; position: absolute; right: 20px; opacity: 0; transition: 0.2s;
-        }
-        .tree-option-btn:hover::after { opacity: 1; right: 15px; }
         
         .tree-input, .tree-select {
-            width: 100%; padding: 16px; margin-bottom: 24px; border: 2px solid #e0e0e0;
-            border-radius: 12px; font-size: 1.05rem; box-sizing: border-box; transition: 0.2s;
-            background-color: #fafafa;
+            width: 100%; padding: 18px; margin-bottom: 25px; border: 2px solid #cbd5e1;
+            border-radius: 12px; font-size: 1.1rem; box-sizing: border-box; transition: 0.2s;
+            background-color: #f8fafc;
         }
-        .tree-input:focus, .tree-select:focus { border-color: #2563eb; background-color: #fff; outline: none; }
+        .tree-input:focus, .tree-select:focus { border-color: #3b82f6; background-color: #fff; outline: none; }
         
         .next-btn {
-            background: linear-gradient(135deg, #2563eb, #1e40af); color: white; border: none; padding: 16px 32px;
-            border-radius: 12px; cursor: pointer; font-weight: 700; width: 100%; font-size: 1.1rem;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); transition: 0.2s;
+            background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; border: none; padding: 18px 36px;
+            border-radius: 12px; cursor: pointer; font-weight: 700; width: 100%; font-size: 1.15rem;
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); transition: 0.2s;
         }
-        .next-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4); }
+        .next-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.3); }
 
         .result-card { 
-            background: #f0f9ff; border-left: 6px solid #2563eb; padding: 35px; 
-            border-radius: 16px; color: #1e293b; line-height: 1.7; margin-bottom: 30px; 
+            background: #eff6ff; border-left: 8px solid #3b82f6; padding: 40px; 
+            border-radius: 16px; color: #1e3a8a; line-height: 1.8; margin-bottom: 30px; 
         }
-        .result-title { font-weight: 800; font-size: 1.4rem; display: block; margin-bottom: 12px; color: #1e3a8a; }
+        .result-title { font-weight: 800; font-size: 1.5rem; display: block; margin-bottom: 15px; color: #1e40af; }
 
         /* --- CONTACT FORM --- */
-        #contact-form-container { margin-top: 40px; padding-top: 30px; border-top: 2px solid #f1f5f9; }
-        #contact-form { display: flex; flex-direction: column; gap: 18px; }
+        #contact-form-container { margin-top: 50px; padding-top: 30px; border-top: 1px solid #e2e8f0; }
+        #contact-form { display: flex; flex-direction: column; gap: 20px; }
         #contact-form input, #contact-form textarea { 
             padding: 16px; border: 1px solid #cbd5e1; border-radius: 10px; width: 100%; box-sizing: border-box; font-family: inherit; font-size: 1rem;
         }
         #contact-form button { 
-            padding: 16px 32px; background-color: #0f172a; color: white; border: none; border-radius: 10px; cursor: pointer; align-self: flex-start; font-weight: 700; font-size: 1rem;
+            padding: 18px 36px; background-color: #0f172a; color: white; border: none; border-radius: 12px; cursor: pointer; align-self: flex-start; font-weight: 700; font-size: 1.1rem;
         }
         #contact-form button:hover { background-color: #334155; }
         
-        .progress-container { width: 100%; height: 6px; background: #e2e8f0; border-radius: 10px; margin: 25px 0; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #2563eb, #7c3aed); transition: width 0.4s ease; }
+        .progress-container { width: 100%; height: 8px; background: #e2e8f0; border-radius: 99px; margin: 30px 0; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #3b82f6, #8b5cf6); transition: width 0.5s ease; }
 
-        #form-status { margin-top: 15px; font-weight: 600; font-size: 0.95rem; }
+        #form-status { margin-top: 15px; font-weight: 600; }
         .g-recaptcha { margin-bottom: 10px; }
         
         /* Header/Footer */
-        .site-header { background: #fff; padding: 20px 0; border-bottom: 1px solid #e2e8f0; position: relative; z-index: 100; }
+        .site-header { background: #fff; padding: 25px 0; border-bottom: 1px solid #f1f5f9; position: relative; z-index: 100; }
         .site-header .wrap { max-width: 1000px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 25px; }
-        .site-title { font-weight: 800; color: #0f172a; font-size: 1.5rem; letter-spacing: -0.5px; }
-        footer { background: #fff; padding: 50px 0; margin-top: 80px; border-top: 1px solid #e2e8f0; position: relative; z-index: 100; color: #64748b; }
+        .site-title { font-weight: 800; color: #0f172a; font-size: 1.4rem; letter-spacing: -0.5px; }
+        footer { background: #fff; padding: 60px 0; margin-top: 100px; border-top: 1px solid #f1f5f9; position: relative; z-index: 100; color: #94a3b8; }
     </style>
 </head>
      
@@ -116,13 +107,13 @@
     <div class="page-content">
         <div class="wrap" style="max-width: 1000px; margin: 0 auto; padding: 0 20px;">
             
-            <div id="particle-anchor" style="width: 100%; height: 160px; margin-top: 30px; margin-bottom: 20px;"></div>
+            <div id="particle-anchor" style="width: 100%; height: 180px; margin-top: 20px;"></div>
 
             <div id="real-estate-guide-container">
                 
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-                    <button id="back-btn" style="background:none; border:none; color:#64748b; cursor:pointer; font-weight:600; font-size: 0.95rem; display:none; padding: 5px 0; display:flex; align-items:center; gap:5px;">&larr; Back</button>
-                    <span id="step-counter" style="color:#94a3b8; font-size:0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px;">Start</span>
+                    <button id="back-btn" style="background:none; border:none; color:#64748b; cursor:pointer; font-weight:700; font-size: 1rem; display:none; align-items:center; gap:8px;">&larr; Go Back</button>
+                    <span id="step-counter" style="color:#cbd5e1; font-size:0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1.5px;">Start</span>
                 </div>
                 
                 <div class="progress-container">
@@ -130,15 +121,15 @@
                 </div>
 
                 <div id="tree-content">
-                    <h2 id="question-text" style="margin-bottom: 35px; font-size: 1.6rem; color: #0f172a; font-weight: 800; line-height: 1.3;">System Initializing...</h2>
+                    <h2 id="question-text" style="margin-bottom: 40px; font-size: 1.8rem; color: #0f172a; font-weight: 800; line-height: 1.3;">System Initializing...</h2>
                     <div id="options-container"></div>
                 </div>
 
                 <div id="contact-form-container" style="display: none;">
-                    <h3 style="margin-top:0; color: #0f172a; font-size: 1.5rem;">Execute Strategy</h3>
-                    <p style="font-size: 1rem; color: #475569; margin-bottom: 25px; line-height: 1.6;">We have computed the optimal path based on your inputs. Enter your details to retrieve the full execution blueprint.</p>
+                    <h3 style="margin-top:0; color: #0f172a; font-size: 1.6rem; margin-bottom: 10px;">Strategy Generated</h3>
+                    <p style="font-size: 1.05rem; color: #475569; margin-bottom: 30px; line-height: 1.6;">We have computed the optimal execution path based on your inputs. Please verify your identity to access the full blueprint.</p>
                     <form id="contact-form">
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                             <input type="text" name="name" placeholder="Full Name" required />
                             <input type="email" name="email" placeholder="Email Address" required />
                         </div>
@@ -169,9 +160,9 @@
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
     const anchor = document.getElementById('particle-anchor');
-    const CONFIG = { particleSize: 3, returnSpeed: 0.1 };
+    const CONFIG = { particleSize: 3, returnSpeed: 0.08 };
     let particlesArray = [];
-    const mouse = { x: null, y: null, radius: 100 }
+    const mouse = { x: null, y: null, radius: 120 }
     let isTouch = false;
 
     window.addEventListener('mousemove', function(event){ if (isTouch) return; mouse.x = event.pageX; mouse.y = event.pageY; });
@@ -219,22 +210,22 @@
         let isMobile = window.innerWidth < 600;
         let step = isMobile ? 4 : 3; 
         let contentWidth = Math.min(window.innerWidth - 40, 600); 
-        let fontSize = Math.floor(contentWidth * 0.16);
+        let fontSize = Math.floor(contentWidth * 0.14);
         if (fontSize < 40) fontSize = 40; if (fontSize > 160) fontSize = 160;
         CONFIG.particleSize = step;
         let anchorTop = anchor.offsetTop; 
         canvas.width = window.innerWidth; canvas.style.width = window.innerWidth + 'px';
-        let safeHeight = anchorTop + 450; 
+        let safeHeight = anchorTop + 500; 
         canvas.height = safeHeight; canvas.style.height = safeHeight + 'px';
 
         ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        let centerX = canvas.width / 2; let centerY = anchorTop + (160 / 2); 
+        let centerX = canvas.width / 2; let centerY = anchorTop + (180 / 2); 
         let text = 'Strategy'; 
         let metrics = ctx.measureText(text);
         let startX = centerX - (metrics.width / 2); let endX = centerX + (metrics.width / 2);
         let gradient = ctx.createLinearGradient(startX, 0, endX, 0);
-        gradient.addColorStop(0, '#2563eb'); gradient.addColorStop(0.5, '#4f46e5'); gradient.addColorStop(1, '#9333ea'); 
+        gradient.addColorStop(0, '#3b82f6'); gradient.addColorStop(0.5, '#6366f1'); gradient.addColorStop(1, '#a855f7'); 
         ctx.fillStyle = gradient; ctx.clearRect(0,0, canvas.width, canvas.height); ctx.fillText(text, centerX, centerY);
         const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
         
@@ -274,9 +265,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Buying Residential (Living in it)", next: "buy_00_exp" },
                 { label: "Selling a Property", next: "sell_00_motivation" },
                 { label: "Investing (Wealth Building)", next: "inv_00_type" },
-                { label: "Commercial / Industrial", next: "comm_00_type" },
-                { label: "Raw Land / Development", next: "land_00_type" },
-                { label: "Distress / Legal Help", next: "law_00_type" },
+                { label: "Commercial Real Estate", next: "comm_00_type" },
+                { label: "Industrial Real Estate", next: "comm_00_type" },
+                { label: "Raw Land", next: "land_00_type" },
+                { label: "Development Project", next: "land_00_type" },
+                { label: "Financial Distress", next: "law_00_type" },
+                { label: "Legal Complications", next: "law_00_type" },
                 { label: "Rent vs Buy Analysis", next: "strat_rent_vs_buy" }
             ]
         },
@@ -290,7 +284,7 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [
                 { label: "First Time Home Buyer", next: "buy_01_fthb_prep" },
                 { label: "Repeat Buyer", next: "buy_01_concurrent" },
-                { label: "Buying for Family/Child", next: "strat_kiddie_condo" }
+                { label: "Buying for Family Member", next: "strat_kiddie_condo" }
             ]
         },
         buy_01_concurrent: {
@@ -326,7 +320,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Excellent (740+)", next: "buy_03_downpayment" },
                 { label: "Good (660-739)", next: "buy_03_downpayment" },
                 { label: "Fair (580-659)", next: "buy_03_fha_check" },
-                { label: "Poor / Unsure", next: "strat_credit_repair" }
+                { label: "Poor (<580)", next: "strat_credit_repair" },
+                { label: "I am Unsure", next: "strat_soft_pull_consult" }
             ]
         },
         buy_03_fha_check: {
@@ -343,8 +338,10 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [
                 { label: "Savings", next: "buy_04_employment" },
                 { label: "Gift from Family", next: "strat_gift_funds" },
-                { label: "401k / Stock Sale", next: "strat_asset_liquidation" },
-                { label: "Need Assistance / 0% Down", next: "buy_03_assistance" }
+                { label: "401k Loan", next: "strat_asset_liquidation" },
+                { label: "Stock Liquidation", next: "strat_asset_liquidation" },
+                { label: "Down Payment Assistance", next: "buy_03_assistance" },
+                { label: "Zero Down Programs", next: "buy_03_assistance" }
             ]
         },
         buy_03_assistance: {
@@ -363,7 +360,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "W-2 Employee", next: "buy_05_timeline" },
                 { label: "Self-Employed (2+ Years)", next: "strat_tax_returns" },
                 { label: "Self-Employed (<2 Years)", next: "strat_bank_statement_loan" },
-                { label: "Retired / Pension", next: "strat_fixed_income" }
+                { label: "Retired", next: "strat_fixed_income" },
+                { label: "Pension Income", next: "strat_fixed_income" }
             ]
         },
         buy_05_timeline: {
@@ -377,7 +375,8 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             options: [
                 { label: "Single Family", next: "buy_07_sfh_pref" },
-                { label: "Condo / Townhouse", next: "buy_07_condo_check" },
+                { label: "Condo", next: "buy_07_condo_check" },
+                { label: "Townhouse", next: "buy_07_condo_check" },
                 { label: "Multi-Unit (2-4)", next: "strat_house_hack" }
             ]
         },
@@ -413,7 +412,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "School District", next: "strat_school_boundaries" },
                 { label: "Commute Time", next: "strat_commute_radius" },
                 { label: "Walkability", next: "strat_walk_score" },
-                { label: "Privacy / Land", next: "strat_acreage_search" }
+                { label: "Privacy", next: "strat_acreage_search" },
+                { label: "Acreage", next: "strat_acreage_search" }
             ]
         },
 
@@ -424,7 +424,8 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Main Motivation?",
             type: 'button',
             options: [
-                { label: "Upsizing / Downsizing", next: "sell_01_timeline" },
+                { label: "Upsizing", next: "sell_01_timeline" },
+                { label: "Downsizing", next: "sell_01_timeline" },
                 { label: "Relocation (Job)", next: "strat_relo_package" },
                 { label: "Financial Difficulty", next: "sell_01_distress" },
                 { label: "Inherited Property", next: "sell_01_probate" }
@@ -443,7 +444,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             options: [
                 { label: "Yes, Notice of Default", next: "strat_foreclosure_defense" },
-                { label: "No, just tight budget", next: "strat_equity_access" },
+                { label: "No, budget is just tight", next: "strat_equity_access" },
                 { label: "I owe more than worth", next: "strat_short_sale" }
             ]
         },
@@ -452,7 +453,7 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             options: [
                 { label: "Max Price (Can Wait)", next: "sell_02_condition" },
-                { label: "Fast Sale (Will Discount)", next: "strat_cash_offer" },
+                { label: "Speed & Convenience", next: "strat_cash_offer" },
                 { label: "Balanced", next: "sell_02_condition" }
             ]
         },
@@ -461,7 +462,8 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             options: [
                 { label: "Showroom Ready", next: "sell_03_updates" },
-                { label: "Average / Lived In", next: "sell_03_updates" },
+                { label: "Average Condition", next: "sell_03_updates" },
+                { label: "Lived In", next: "sell_03_updates" },
                 { label: "Needs Work", next: "sell_02_audit_roof" }
             ]
         },
@@ -471,7 +473,8 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [
                 { label: "0-10 Years", next: "sell_02_audit_hvac" },
                 { label: "15-20+ Years", next: "strat_roof_cert" },
-                { label: "Leaking / Damaged", next: "strat_cash_as_is" }
+                { label: "Currently Leaking", next: "strat_cash_as_is" },
+                { label: "Visibly Damaged", next: "strat_cash_as_is" }
             ]
         },
         sell_02_audit_hvac: {
@@ -484,11 +487,12 @@ document.addEventListener('DOMContentLoaded', function() {
             ]
         },
         sell_02_audit_cosmetic: {
-            text: "Kitchen/Bath Status?",
+            text: "Kitchen & Bath Status?",
             type: 'button',
             options: [
                 { label: "Updated recently", next: "sell_03_updates" },
-                { label: "Original / Dated", next: "strat_facelift_roi" }
+                { label: "Original Condition", next: "strat_facelift_roi" },
+                { label: "Dated Finishes", next: "strat_facelift_roi" }
             ]
         },
         sell_03_updates: {
@@ -507,9 +511,9 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Investment Strategy?",
             type: 'button',
             options: [
-                { label: "Buy & Hold (Rental)", next: "inv_01_hold_goal" },
+                { label: "Buy & Hold", next: "inv_01_hold_goal" },
                 { label: "Fix & Flip", next: "inv_01_flip_exp" },
-                { label: "Short Term (Airbnb)", next: "inv_01_str_regulations" },
+                { label: "Short Term Rental (Airbnb)", next: "inv_01_str_regulations" },
                 { label: "Wholesaling", next: "strat_wholesaling" }
             ]
         },
@@ -545,7 +549,8 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             options: [
                 { label: "Yes, it is legal", next: "strat_airbnb_arbitrage" },
-                { label: "No / Unsure", next: "strat_str_zoning_check" }
+                { label: "No", next: "strat_str_zoning_check" },
+                { label: "Unsure", next: "strat_str_zoning_check" }
             ]
         },
 
@@ -557,8 +562,10 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             options: [
                 { label: "Multi-Family (5+ Units)", next: "strat_cap_rate_play" },
-                { label: "Retail / Strip Mall", next: "strat_nnn_lease" },
-                { label: "Industrial / Warehouse", next: "strat_flex_industrial" },
+                { label: "Retail Storefront", next: "strat_nnn_lease" },
+                { label: "Strip Mall", next: "strat_nnn_lease" },
+                { label: "Industrial", next: "strat_flex_industrial" },
+                { label: "Warehouse", next: "strat_flex_industrial" },
                 { label: "Office", next: "strat_office_conversion" }
             ]
         },
@@ -568,7 +575,8 @@ document.addEventListener('DOMContentLoaded', function() {
             options: [
                 { label: "Build Custom Home", next: "strat_construction_permits" },
                 { label: "Subdivide & Develop", next: "strat_zoning_variance" },
-                { label: "Recreational / Hunting", next: "strat_land_loan" }
+                { label: "Recreational Use", next: "strat_land_loan" },
+                { label: "Hunting Land", next: "strat_land_loan" }
             ]
         },
         law_00_type: {
@@ -576,7 +584,8 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'button',
             options: [
                 { label: "Divorce", next: "strat_divorce_valuation" },
-                { label: "Title Dispute / Lien", next: "strat_quiet_title" },
+                { label: "Title Dispute", next: "strat_quiet_title" },
+                { label: "Property Lien", next: "strat_quiet_title" },
                 { label: "Tenant Eviction", next: "strat_cash_for_keys" }
             ]
         },
@@ -589,6 +598,7 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_bridge_contingency: { text: "Strategy: Bridge Loan vs Recast. We can use a Bridge Loan to access your current equity for a down payment, OR buy with 5% down and 'Recast' the loan later once your home sells.", options: [] },
         strat_departing_residence: { text: "Strategy: Departing Residence Income. Lenders can count 75% of the potential rental income of your current home to offset that debt, helping you qualify for two mortgages at once.", options: [] },
         strat_credit_repair: { text: "Strategy: Rapid Rescore. We identify specific debts to pay down (not off). Once paid, we pay the credit bureau to 'Rapid Rescore' you in 72 hours, potentially boosting your score 40+ points.", options: [] },
+        strat_soft_pull_consult: { text: "Strategy: Soft-Pull Consultation. We can have a lender do a 'Soft Pull' that doesn't hurt your credit, just to give us a baseline of where you stand.", options: [] },
         strat_waiting_period: { text: "Strategy: Seasoning Check. Bankruptcy requires 2 years (Ch 13) or 2-4 years (Ch 7) wait for FHA/VA. Conventional is 4-7 years. We can map your specific eligibility date.", options: [] },
         strat_fha_manual: { text: "Strategy: Manual Underwriting. If you have no credit score (not bad, just zero), we can use rent, cell phone, and utility bills to build an 'alternative credit report' for approval.", options: [] },
         strat_gift_funds: { text: "Strategy: Gift Letter Protocol. The donor must sign a letter stating the money is not a loan. We must track the paper trail perfectly to avoid underwriting rejection.", options: [] },
@@ -606,6 +616,8 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_high_rise_lifestyle: { text: "Strategy: Reserve Fund Audit. High-rises are expensive to maintain. We must review the 'Reserve Study' to ensure they have millions in the bank for roof/facade repairs.", options: [] },
         strat_school_boundaries: { text: "Strategy: Boundary Map Search. We don't search by city. We search by specific polygons on the map corresponding to the top-rated elementary school intake area.", options: [] },
         strat_commute_radius: { text: "Strategy: Isochrone Map. We generate a search area based on '30 minutes drive at 8:00 AM' rather than distance, giving you the true commute options.", options: [] },
+        strat_walk_score: { text: "Strategy: Transit-Oriented Development. We focus on properties within 0.5 miles of major rail/transit hubs, which hold value better during downturns.", options: [] },
+        strat_acreage_search: { text: "Strategy: Zoning & Easements. Buying land requires checking 'percolation tests' for septic and easement access rights before making an offer.", options: [] },
         
         // Sellers
         strat_relo_package: { text: "Strategy: Relocation Rider. If your company is paying, we must follow their specific 'ERC' guidelines. Do not sign a listing agreement until we review their benefits package.", options: [] },
@@ -638,7 +650,9 @@ document.addEventListener('DOMContentLoaded', function() {
         strat_cap_rate_play: { text: "Strategy: Value-Add Cap Rate. We buy a complex with below-market rents. We renovate units one by one, raise rents, and force the value of the building up (Forced Appreciation).", options: [] },
         strat_nnn_lease: { text: "Strategy: NNN (Triple Net). You buy the building (e.g., Starbucks). The tenant pays rent, property tax, insurance, and maintenance. True passive income.", options: [] },
         strat_flex_industrial: { text: "Strategy: Flex Space. Small bay warehouses are in high demand by local plumbers/electricians/e-commerce. Low tenant turnover, simple metal buildings.", options: [] },
+        strat_office_conversion: { text: "Strategy: Adaptive Reuse. Office vacancies are high. We analyze the zoning to see if the building can be converted into residential condos or climate-controlled storage.", options: [] },
         strat_construction_permits: { text: "Strategy: Feasibility Period. We write the offer contingent on a 60-day 'Feasibility Study' to ensure we can get septic/well and building permits approved.", options: [] },
+        strat_zoning_variance: { text: "Strategy: Zoning Variance. We check if the lot can be subdivided. A 1-acre lot might become 4 quarter-acre lots, quadrupling the value instantly.", options: [] },
         strat_land_loan: { text: "Strategy: Land Loan Specs. Expect 35-50% down payment and higher interest rates. Land is risky for banks. Seller Financing is often the best route here.", options: [] },
         strat_divorce_valuation: { text: "Strategy: Neutral Valuation. I provide a neutral Broker Price Opinion (BPO) to help attorneys settle on a buyout number without an expensive full appraisal.", options: [] },
         strat_quiet_title: { text: "Strategy: Quiet Title Action. If there are old liens or messy heirs, we hire a lawyer to sue the property 'In Rem' to clear the title so it can be sold with insurance.", options: [] },
@@ -697,7 +711,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const stepCount = history.length + 1;
         
         elements.step.innerText = isResult ? 'Strategy Found' : `Step ${stepCount}`;
-        elements.progress.style.width = isResult ? '100%' : Math.min(stepCount * 8, 95) + '%';
+        elements.progress.style.width = isResult ? '100%' : Math.min(stepCount * 7, 95) + '%';
         elements.backBtn.style.display = (history.length > 0) ? 'flex' : 'none';
 
         if (isResult) {
