@@ -3,26 +3,42 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Pavlo Rospopa Infinity Strategy Engine</title>
+    <title>Infinity Strategy Engine</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/format.css">
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 
     <style>
         body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f9; }
-        input, textarea { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
+        input, textarea, select { -webkit-user-select: text; -moz-user-select: text; -ms-user-select: text; user-select: text; }
 
         #real-estate-guide-container {
             margin: 40px auto; padding: 30px; border: 1px solid #e0e0e0; border-radius: 12px;
             background-color: #ffffff; box-shadow: 0 4px 15px rgba(0,0,0,0.05); position: relative; z-index: 101;
             max-width: 950px;
         }
+        
+        /* Button Style */
         .tree-option-btn {
             padding: 12px 16px; background-color: #f8f9fa; color: #333; border: 2px solid #eef0f2;
             border-radius: 8px; cursor: pointer; font-size: 0.95rem; text-align: left;
             transition: all 0.2s; font-weight: 500; width: 100%; margin-bottom: 6px; display: block;
         }
         .tree-option-btn:hover { border-color: #4285F4; color: #4285F4; transform: translateX(4px); }
+        
+        /* Input & Select Styles */
+        .tree-input, .tree-select {
+            width: 100%; padding: 12px; margin-bottom: 15px; border: 2px solid #ddd;
+            border-radius: 8px; font-size: 1rem; box-sizing: border-box;
+        }
+        .tree-input:focus, .tree-select:focus { border-color: #4285F4; outline: none; }
+        
+        .next-btn {
+            background-color: #4285F4; color: white; border: none; padding: 12px 24px;
+            border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; font-size: 1rem;
+        }
+        .next-btn:hover { background-color: #3367d6; }
+
         .result-card { background: #f4f7ff; border-left: 6px solid #4285F4; padding: 25px; border-radius: 8px; color: #334155; line-height: 1.7; margin-bottom: 20px; }
 
         #contact-form-container { margin: 40px 0; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #f9f9f9; }
@@ -40,7 +56,7 @@
 
 <header class="site-header">
     <div class="wrap" style="text-align: center; padding: 20px 0;">
-        <a class="site-title" style="text-decoration: none; font-size: 2rem; color: #333; font-weight: 800;" href="https://rospopa.com">Pavlo Rospopa Strategy Engine</a>
+        <a class="site-title" style="text-decoration: none; font-size: 2rem; color: #333; font-weight: 800;" href="#">Strategy Engine</a>
     </div>
 </header>
 
@@ -65,12 +81,12 @@
 
                 <div id="contact-form-container" style="display: none;">
                     <h3 style="margin-top:0;">Request This Strategy</h3>
-                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Based on your answers, this is the most efficient path forward.</p>
+                    <p style="font-size: 0.9rem; color: #666; margin-bottom: 15px;">Based on your inputs, this is the most efficient path forward.</p>
                     <form id="contact-form">
                         <input type="text" name="name" placeholder="Your Name" required />
                         <input type="email" name="email" placeholder="Your Email" required />
                         <input type="tel" name="phone" placeholder="Phone Number (Optional)" />
-                        <textarea id="message-field" name="message" rows="5" required></textarea>
+                        <textarea id="message-field" name="message" rows="8" required></textarea>
                         <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
                         <button type="submit" id="submit-btn">Send Request</button>
                     </form>
@@ -82,10 +98,15 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    
+    // Global object to store user answers (e.g., {bedrooms: 3, zip: 90210})
+    let userAnswers = {};
+
     const tree = {
         // --- ROOT ---
         start: {
             text: "What is your primary Real Estate Goal?",
+            type: 'button',
             options: [
                 { label: "Residential: Buying", next: "buy_node_1" },
                 { label: "Residential: Selling", next: "sell_node_1" },
@@ -101,6 +122,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // ==========================================
         buy_node_1: {
             text: "Are you a US Citizen or Permanent Resident?",
+            type: 'button',
             options: [
                 { label: "Yes", next: "buy_loc_status" },
                 { label: "No (Visa/Foreign National)", next: "buy_visa_status" }
@@ -108,6 +130,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         buy_visa_status: { 
             text: "Do you have a valid Work Visa or ITIN?",
+            type: 'button',
             options: [
                 { label: "Work Visa (H1B, etc)", next: "buy_loc_status" },
                 { label: "ITIN Number only", next: "strat_itin_loan" },
@@ -116,338 +139,185 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         buy_loc_status: {
             text: "Buying Locally, Relocating, or Auction?",
+            type: 'button',
             options: [
-                { label: "Buying Locally", next: "buy_entity_check" },
-                { label: "Relocating", next: "buy_relo_timeline" },
-                { label: "Online Auction/Foreclosure", next: "buy_auction_type" }
+                { label: "Buying Locally", next: "buy_timeframe_select" },
+                { label: "Relocating", next: "buy_timeframe_select" },
+                { label: "Online Auction/Foreclosure", next: "buy_auction_type" },
+                { label: "New Construction", next: "buy_new_const_path" }
             ]
         },
+
+        // --- NEW: Timeframe Selector ---
+        buy_timeframe_select: {
+            text: "What is your desired timeframe to close?",
+            type: 'select',
+            variable: 'Timeline',
+            choices: [
+                "ASAP / Immediately",
+                "Within 30 Days",
+                "1 - 3 Months",
+                "3 - 6 Months",
+                "6+ Months / Just Browsing"
+            ],
+            next: "buy_location_input"
+        },
+
+        // --- NEW: Location Text Input ---
+        buy_location_input: {
+            text: "What City, Neighborhood, or Zip Code are you looking in?",
+            type: 'text',
+            variable: 'Target Location',
+            placeholder: "e.g. Downtown, 90210, North Side...",
+            next: "buy_inventory_triage"
+        },
+
+        // --- PROPERTY TYPE & BED/BATH ---
+        buy_inventory_triage: {
+            text: "Property Type Preference?",
+            type: 'button',
+            options: [
+                { label: "Single Family Home", next: "buy_bed_count" },
+                { label: "Condo/Co-Op", next: "buy_condo_floor_pref" }, // Redirects to floor pref first
+                { label: "Multi-Unit (2-4)", next: "buy_bed_count" },
+                { label: "Manufactured/Mobile", next: "buy_manu_type" }
+            ]
+        },
+
+        // --- NEW: Condo Specific Question ---
+        buy_condo_floor_pref: {
+            text: "Floor Level Preference?",
+            type: 'button',
+            variable: 'Floor Preference',
+            options: [
+                { label: "Ground Floor (No Stairs)", next: "buy_bed_count" },
+                { label: "Top Floor (Penthouse)", next: "buy_bed_count" },
+                { label: "Middle / Elevator Building", next: "buy_bed_count" },
+                { label: "Walk-up OK", next: "buy_bed_count" }
+            ]
+        },
+
+        // --- NEW: Numeric Inputs for Bed/Bath ---
+        buy_bed_count: {
+            text: "Minimum Bedrooms required?",
+            type: 'number',
+            variable: 'Min Bedrooms',
+            placeholder: "e.g. 3",
+            next: "buy_bath_count"
+        },
+        buy_bath_count: {
+            text: "Minimum Bathrooms required?",
+            type: 'number',
+            variable: 'Min Bathrooms',
+            placeholder: "e.g. 2",
+            next: "buy_garage_pref"
+        },
+
+        // --- NEW: Garage & Amenities ---
+        buy_garage_pref: {
+            text: "Parking / Garage Requirement?",
+            type: 'button',
+            variable: 'Garage',
+            options: [
+                { label: "Attached Garage Essential", next: "buy_school_pref" },
+                { label: "Detached / Carport OK", next: "buy_school_pref" },
+                { label: "Street Parking / None OK", next: "buy_school_pref" },
+                { label: "RV / Boat Parking Needed", next: "buy_school_pref" }
+            ]
+        },
+        buy_school_pref: {
+            text: "Is School District a priority?",
+            type: 'button',
+            variable: 'School Importance',
+            options: [
+                { label: "Critical (Top Rated Only)", next: "buy_nature_pref" },
+                { label: "Important but flexible", next: "buy_nature_pref" },
+                { label: "Not a factor", next: "buy_nature_pref" }
+            ]
+        },
+        buy_nature_pref: {
+            text: "Lifestyle / Surroundings Preference?",
+            type: 'button',
+            variable: 'Lifestyle',
+            options: [
+                { label: "Near Parks / Nature", next: "buy_sfh_features" },
+                { label: "Near Water / Lake", next: "buy_waterfront_check" },
+                { label: "Near Transit / Metro", next: "buy_sfh_features" },
+                { label: "No Preference", next: "buy_sfh_features" }
+            ]
+        },
+
+        buy_sfh_features: {
+            text: "Any other specific needs?",
+            type: 'button',
+            options: [
+                { label: "Multi-Generational (In-Law)", next: "strat_multigen_search" },
+                { label: "Pool", next: "strat_pool_inspection" },
+                { label: "Basement/Foundation Issues", next: "buy_foundation_check" },
+                { label: "Historic/Vintage", next: "buy_vintage_risk" },
+                { label: "None / Standard", next: "buy_fthb_triage" }
+            ]
+        },
+
+        // --- FINANCING TRIAGE (Retained Logic) ---
+        buy_fthb_triage: {
+            text: "What is your biggest hurdle right now?",
+            type: 'button',
+            options: [
+                { label: "Down Payment", next: "buy_down_source" },
+                { label: "Credit Score", next: "buy_credit_deep" },
+                { label: "Income Type", next: "buy_income_check" },
+                { label: "None / Cash Ready", next: "buy_offer_market" }
+            ]
+        },
+
+        // --- NEW CONSTRUCTION SUB-BRANCH ---
+        buy_new_const_path: {
+            text: "Type of New Construction?",
+            type: 'button',
+            options: [
+                { label: "Custom Build (Own Lot)", next: "buy_custom_build_lot" },
+                { label: "Production/Tract Builder", next: "buy_production_rep" },
+                { label: "Spec Home (Already Built)", next: "strat_new_home_warranty" }
+            ]
+        },
+        buy_custom_build_lot: {
+            text: "Do you already own the lot?",
+            type: 'button',
+            options: [
+                { label: "Yes, Lot Owned", next: "buy_construction_loan" },
+                { label: "No, Need Lot + Build", next: "strat_land_build_package" }
+            ]
+        },
+        buy_construction_loan: {
+            text: "Loan Preference?",
+            type: 'button',
+            options: [
+                { label: "One-Time Close", next: "strat_one_time_close_const" },
+                { label: "Two-Time Close", next: "strat_two_time_close" }
+            ]
+        },
+        buy_production_rep: {
+            text: "Have you visited the sales office yet?",
+            type: 'button',
+            options: [
+                { label: "No, not yet", next: "strat_builder_registration" }, 
+                { label: "Yes, I signed a registry", next: "strat_builder_procurement_risk" }
+            ]
+        },
+
         buy_auction_type: {
             text: "Auction Platform?",
+            type: 'button',
             options: [
                 { label: "Hubzu / Xome / Auction.com", next: "strat_auction_tech_fee" },
                 { label: "Sheriff's Sale (Courthouse)", next: "strat_sheriff_cash" }
             ]
         },
-        buy_entity_check: {
-            text: "Buying as Individual or Entity?",
-            options: [
-                { label: "Individual / Couple", next: "buy_co_buy_check" },
-                { label: "LLC / Corp", next: "buy_llc_purpose" },
-                { label: "Family Trust", next: "strat_trust_purchase" }
-            ]
-        },
-        buy_llc_purpose: {
-            text: "Is the LLC for Investment or Privacy?",
-            options: [
-                { label: "Investment (Rental)", next: "strat_dscr_llc" },
-                { label: "Privacy (High Net Worth)", next: "strat_blind_trust" }
-            ]
-        },
-        buy_relo_timeline: {
-            text: "Is this a Corporate Move or Self-Move?",
-            options: [
-                { label: "Corporate Package", next: "strat_corp_relo" },
-                { label: "Self-Move / Job Change", next: "buy_job_gap_check" }
-            ]
-        },
-        buy_job_gap_check: {
-            text: "Will you have a gap in employment during the move?",
-            options: [
-                { label: "No, immediate start", next: "strat_virtual_tour" },
-                { label: "Yes, >30 days gap", next: "strat_employment_gap_letter" }
-            ]
-        },
-        buy_co_buy_check: {
-            text: "Who are you buying with?",
-            options: [
-                { label: "Just me / Spouse", next: "buy_history_check" },
-                { label: "Unmarried Partner / Friend", next: "strat_co_buy_agreement" },
-                { label: "Parent / Co-Signer", next: "strat_cosigner_fha" },
-                { label: "Buying from Family", next: "strat_identity_interest" }
-            ]
-        },
-        buy_history_check: {
-            text: "Have you owned a home in the last 3 years?",
-            options: [
-                { label: "No (First-Time Buyer)", next: "buy_fthb_triage" },
-                { label: "Yes (Repeat Buyer)", next: "buy_repeat_triage" }
-            ]
-        },
         
-        // --- FINANCING TRIAGE ---
-        buy_fthb_triage: {
-            text: "What is your biggest hurdle right now?",
-            options: [
-                { label: "Down Payment", next: "buy_down_source" },
-                { label: "Credit Score", next: "buy_credit_deep" },
-                { label: "Income Type", next: "buy_income_check" },
-                { label: "Debt Load", next: "buy_debt_check" },
-                { label: "Inventory Strategy", next: "buy_inventory_triage" }
-            ]
-        },
-        // --- DEBT EXPANSION ---
-        buy_debt_check: {
-            text: "What is causing high Debt-to-Income (DTI)?",
-            options: [
-                { label: "Car Payments", next: "strat_lease_exclusion" },
-                { label: "Student Loans", next: "buy_student_loan_calc" },
-                { label: "Credit Cards", next: "strat_debt_paydown" },
-                { label: "Alimony/Child Support", next: "buy_support_term" }
-            ]
-        },
-        buy_support_term: {
-            text: "How many months of payments remain?",
-            options: [
-                { label: "Less than 10 months", next: "strat_exclude_support" },
-                { label: "More than 10 months", next: "strat_manual_underwriting" }
-            ]
-        },
-        // --- INCOME EXPANSION ---
-        buy_income_check: {
-            text: "Income Source?",
-            options: [
-                { label: "W-2 Salary", next: "buy_w2_tenure" },
-                { label: "Self-Employed", next: "buy_se_type" },
-                { label: "Commission/Bonus", next: "buy_var_income" },
-                { label: "Tip Income", next: "buy_tip_income" },
-                { label: "Fixed (SS/Pension)", next: "strat_fixed_income_gross_up" },
-                { label: "Alimony Received", next: "buy_alimony_receipt" }
-            ]
-        },
-        buy_alimony_receipt: {
-            text: "Do you have proof of receipt?",
-            options: [
-                { label: "Yes, 6+ months", next: "strat_alimony_income" },
-                { label: "No, irregular", next: "strat_bank_statement" }
-            ]
-        },
-        buy_w2_tenure: {
-            text: "Time at current job?",
-            options: [
-                { label: "2+ Years", next: "res_fha_standard" },
-                { label: "<6 Months (Probation)", next: "strat_probation_letter" }
-            ]
-        },
-        buy_se_type: {
-            text: "Tax Filing Type?",
-            options: [
-                { label: "Sole Prop (Sched C)", next: "buy_se_writeoffs" },
-                { label: "S-Corp / K-1", next: "buy_scorp_income" }
-            ]
-        },
-        buy_se_writeoffs: {
-            text: "Do you write off most expenses?",
-            options: [
-                { label: "Yes, low net income", next: "buy_bank_statement_check" },
-                { label: "No, high net income", next: "res_conventional_check" }
-            ]
-        },
-        buy_bank_statement_check: {
-            text: "12 months business bank statements?",
-            options: [
-                { label: "Yes, consistent deposits", next: "strat_bank_statement" },
-                { label: "No, mostly cash", next: "strat_1099_only_loan" }
-            ]
-        },
-        buy_scorp_income: {
-            text: "Years in business?",
-            options: [
-                { label: "5+ Years", next: "strat_1yr_tax_return" },
-                { label: "2-4 Years", next: "res_conventional_check" },
-                { label: "<2 Years", next: "strat_manual_underwriting" }
-            ]
-        },
-        buy_student_loan_calc: {
-            text: "Are you on an Income-Based Repayment (IBR) plan?",
-            options: [
-                { label: "Yes, IBR Plan", next: "strat_fha_ibr" },
-                { label: "No, Standard Plan", next: "strat_conventional_1percent" }
-            ]
-        },
-        buy_overtime_check: {
-            text: "Do you rely on Overtime pay to qualify?",
-            options: [
-                { label: "Yes, need OT income", next: "strat_ot_avg" },
-                { label: "No, Base Salary is enough", next: "res_fha_standard" }
-            ]
-        },
-        buy_variable_income: {
-            text: "Do you have a 2-year history of this variable income?",
-            options: [
-                { label: "Yes, consistent", next: "res_conventional_check" },
-                { label: "No, it varies", next: "strat_base_income_only" }
-            ]
-        },
-        buy_tip_income: {
-            text: "Do you report all your tips to the IRS?",
-            options: [
-                { label: "Yes, fully reported", next: "res_fha_standard" },
-                { label: "No, mostly cash", next: "strat_bank_statement" }
-            ]
-        },
-        
-        // --- CREDIT EXPANSION ---
-        buy_credit_deep: {
-            text: "Score Range?",
-            options: [
-                { label: "720+", next: "res_conventional_check" },
-                { label: "620-719", next: "res_fha_standard" },
-                { label: "580-619", next: "buy_credit_issues" },
-                { label: "<580", next: "res_credit_repair" }
-            ]
-        },
-        buy_credit_issues: {
-            text: "Specific Issue?",
-            options: [
-                { label: "Bankruptcy", next: "buy_bk_type" },
-                { label: "Foreclosure", next: "buy_foreclosure_date" },
-                { label: "Collections", next: "strat_medical_collections" }
-            ]
-        },
-        buy_bk_type: {
-            text: "Chapter 7 or 13?",
-            options: [
-                { label: "Chapter 7", next: "buy_bk7_date" },
-                { label: "Chapter 13", next: "strat_bk13_manual" }
-            ]
-        },
-        buy_bk7_date: {
-            text: "Discharge Date?",
-            options: [
-                { label: "<2 Years ago", next: "strat_hard_money_buy" },
-                { label: "2-4 Years ago", next: "res_fha_standard" },
-                { label: "4+ Years ago", next: "res_conventional_check" }
-            ]
-        },
-        buy_foreclosure_date: {
-            text: "Foreclosure Date?",
-            options: [
-                { label: "<3 Years ago", next: "strat_non_qm_foreclosure" },
-                { label: "3-7 Years ago", next: "res_fha_standard" },
-                { label: "7+ Years ago", next: "res_conventional_check" }
-            ]
-        },
-
-        // --- PROPERTY TYPE EXPANSION ---
-        buy_inventory_triage: {
-            text: "Property Type?",
-            options: [
-                { label: "Standard SFH", next: "buy_sfh_features" },
-                { label: "Condo/Co-Op", next: "buy_condo_type" },
-                { label: "Niche/Unique", next: "buy_niche_prop" },
-                { label: "Manufactured", next: "buy_manu_type" }
-            ]
-        },
-        buy_condo_type: {
-            text: "Condo or Co-Op?",
-            options: [
-                { label: "Condo", next: "buy_condo_check" },
-                { label: "Co-Op", next: "strat_coop_board" }
-            ]
-        },
-        buy_condo_check: {
-            text: "Is the HOA healthy?",
-            options: [
-                { label: "Yes/Unknown", next: "buy_condo_reserves" },
-                { label: "No (Litigation)", next: "strat_non_warrantable" }
-            ]
-        },
-        buy_condo_reserves: {
-            text: "Does the HOA transfer 10% to reserves?",
-            options: [
-                { label: "Yes", next: "strat_condo_warrantable" },
-                { label: "No", next: "strat_limited_review_condo" }
-            ]
-        },
-        buy_manu_type: {
-            text: "Do you own the land?",
-            options: [
-                { label: "Yes (Real Property)", next: "buy_manu_foundation" },
-                { label: "No (Leased Land)", next: "strat_chattel_loan" }
-            ]
-        },
-        buy_manu_foundation: {
-            text: "Is it on a permanent foundation?",
-            options: [
-                { label: "Yes, HUD Tags present", next: "strat_fha_manufactured" },
-                { label: "No / Pre-1976", next: "strat_cash_only_manu" }
-            ]
-        },
-        buy_niche_prop: {
-            text: "Specific Style?",
-            options: [
-                { label: "Barndominium", next: "strat_barndominium" },
-                { label: "Log Cabin", next: "strat_log_cabin" },
-                { label: "Geodesic Dome / Earth", next: "strat_unique_appraisal" },
-                { label: "Waterfront", next: "buy_waterfront_check" },
-                { label: "Equestrian / Horse", next: "buy_equestrian_check" }
-            ]
-        },
-        buy_equestrian_check: {
-            text: "Number of Horses?",
-            options: [
-                { label: "Personal (1-3)", next: "strat_equestrian_zoning" },
-                { label: "Boarding Business", next: "strat_commercial_ag_loan" }
-            ]
-        },
-        buy_waterfront_check: {
-            text: "Does it have water rights?",
-            options: [
-                { label: "Riparian (River)", next: "strat_riparian_rights" },
-                { label: "Littoral (Lake)", next: "strat_littoral_rights" },
-                { label: "Ocean / Gulf", next: "strat_coastal_construction_line" }
-            ]
-        },
-        buy_sfh_features: {
-            text: "Any specific needs?",
-            options: [
-                { label: "Multi-Generational", next: "strat_multigen_search" },
-                { label: "Green/Solar", next: "strat_solar_check" },
-                { label: "Pool", next: "strat_pool_inspection" },
-                { label: "Basement/Foundation", next: "buy_foundation_check" },
-                { label: "Elevator", next: "strat_elevator_inspect" }
-            ]
-        },
-        buy_foundation_check: {
-            text: "Foundation Preference?",
-            options: [
-                { label: "Full Basement", next: "strat_radon_mitigation" },
-                { label: "Crawl Space", next: "strat_crawl_encapsulation" },
-                { label: "Slab", next: "strat_plumbing_scope" }
-            ]
-        },
-        buy_offer_market: {
-            text: "How competitive is the market?",
-            options: [
-                { label: "Bidding Wars", next: "buy_aggressive_offer" },
-                { label: "Balanced/Slow", next: "buy_inspection_pref" }
-            ]
-        },
-        buy_aggressive_offer: {
-            text: "Willing to cover Appraisal Gap?",
-            options: [
-                { label: "Yes, I have cash", next: "strat_appraisal_gap_guarantee" },
-                { label: "No, max budget", next: "strat_escalation_clause" },
-                { label: "Love Letter?", next: "strat_fair_housing_risk" }
-            ]
-        },
-        buy_inspection_pref: {
-            text: "Inspection preferences?",
-            options: [
-                { label: "Info Only (Pass/Fail)", next: "strat_info_only_inspection" },
-                { label: "Full Negotiation", next: "buy_age_check" }
-            ]
-        },
-        buy_age_check: {
-            text: "Homes built before 1978?",
-            options: [
-                { label: "Yes (Vintage)", next: "buy_vintage_risk" },
-                { label: "No (Modern)", next: "buy_system_check" }
-            ]
-        },
         buy_vintage_risk: {
             text: "Concerned about lead/asbestos?",
+            type: 'button',
             options: [
                 { label: "Yes, Safety First", next: "strat_lead_paint" },
                 { label: "No, I will rehab", next: "buy_rehab_loan" }
@@ -455,109 +325,120 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         buy_rehab_loan: {
             text: "Scope of Rehab?",
+            type: 'button',
             options: [
                 { label: "Cosmetic (<$35k)", next: "strat_fha_203k_limited" },
                 { label: "Structural (Additions)", next: "strat_fha_203k_standard" }
             ]
         },
-        buy_system_check: {
-            text: "Water/Sewer Source?",
+        buy_foundation_check: {
+            text: "Foundation Preference?",
+            type: 'button',
             options: [
-                { label: "Public/City", next: "strat_sewer_scope" },
-                { label: "Private Well/Septic", next: "buy_well_type" }
+                { label: "Full Basement", next: "strat_radon_mitigation" },
+                { label: "Crawl Space", next: "strat_crawl_encapsulation" },
+                { label: "Slab", next: "strat_plumbing_scope" }
             ]
         },
-        buy_well_type: {
-            text: "Type of Well?",
+        buy_waterfront_check: {
+            text: "Does it have water rights?",
+            type: 'button',
             options: [
-                { label: "Private on Property", next: "buy_well_flow" },
-                { label: "Shared Well", next: "strat_shared_well_agreement" }
+                { label: "Riparian (River)", next: "strat_riparian_rights" },
+                { label: "Littoral (Lake)", next: "strat_littoral_rights" },
+                { label: "Ocean / Gulf", next: "strat_coastal_construction_line" }
             ]
         },
-        buy_well_flow: {
-            text: "Known Flow Rate?",
+        buy_manu_type: {
+            text: "Do you own the land?",
+            type: 'button',
             options: [
-                { label: "Standard (5+ GPM)", next: "strat_well_water_test" },
-                { label: "Low (<3 GPM)", next: "strat_cistern_system" }
+                { label: "Yes (Real Property)", next: "buy_manu_foundation" },
+                { label: "No (Leased Land)", next: "strat_chattel_loan" }
+            ]
+        },
+        buy_manu_foundation: {
+            text: "Is it on a permanent foundation?",
+            type: 'button',
+            options: [
+                { label: "Yes, HUD Tags present", next: "strat_fha_manufactured" },
+                { label: "No / Pre-1976", next: "strat_cash_only_manu" }
             ]
         },
         
-        // --- DOWN PAYMENT ---
+        // --- OFFER STRATEGIES ---
+        buy_offer_market: {
+            text: "How competitive is the market?",
+            type: 'button',
+            options: [
+                { label: "Bidding Wars", next: "buy_aggressive_offer" },
+                { label: "Balanced/Slow", next: "buy_inspection_pref" }
+            ]
+        },
+        buy_aggressive_offer: {
+            text: "Willing to cover Appraisal Gap?",
+            type: 'button',
+            options: [
+                { label: "Yes, I have cash", next: "strat_appraisal_gap_guarantee" },
+                { label: "No, max budget", next: "strat_escalation_clause" }
+            ]
+        },
+        buy_inspection_pref: {
+            text: "Inspection preferences?",
+            type: 'button',
+            options: [
+                { label: "Info Only (Pass/Fail)", next: "strat_info_only_inspection" },
+                { label: "Full Negotiation", next: "buy_vintage_risk" }
+            ]
+        },
+        
+        // --- FINANCING DETAILS ---
         buy_down_source: {
             text: "Are you a Veteran?",
-            options: [ { label: "Yes", next: "buy_va_check" }, { label: "No", next: "buy_rural_check" } ]
-        },
-        buy_va_check: {
-            text: "Do you have full entitlement available?",
-            options: [ { label: "Yes / First Use", next: "buy_va_disability" }, { label: "No / Subsequent Use", next: "strat_va_bonus_entitlement" } ]
-        },
-        buy_va_disability: {
-            text: "Service-connected disability?",
-            options: [ { label: "Yes (10%+)", next: "strat_va_fee_waiver" }, { label: "No", next: "strat_va_loan" } ]
-        },
-        buy_rural_check: {
-            text: "Willing to buy Rural?",
-            options: [
-                { label: "Yes", next: "buy_rural_internet" }, // NEW
-                { label: "No", next: "buy_gift_check" }
-            ]
-        },
-        buy_rural_internet: { // NEW
-            text: "Is High-Speed Internet essential?",
-            options: [
-                { label: "Yes", next: "strat_starlink_check" },
-                { label: "No", next: "strat_usda_loan" }
-            ]
+            type: 'button',
+            options: [ { label: "Yes", next: "strat_va_loan" }, { label: "No", next: "buy_gift_check" } ]
         },
         buy_gift_check: {
             text: "Do you have gift funds?",
-            options: [ { label: "Yes", next: "buy_gift_seasoning" }, { label: "No", next: "buy_401k_check" } ]
+            type: 'button',
+            options: [ { label: "Yes", next: "strat_gift_letter" }, { label: "No", next: "res_grant" } ]
         },
-        buy_401k_check: {
-            text: "Do you have a 401k?",
+        buy_credit_deep: {
+            text: "Score Range?",
+            type: 'button',
             options: [
-                { label: "Yes, I can borrow", next: "strat_401k_loan" },
-                { label: "No, I need a grant", next: "res_grant" }
+                { label: "720+", next: "buy_offer_market" },
+                { label: "580-619", next: "res_credit_repair" },
+                { label: "<580", next: "res_credit_repair" }
             ]
         },
-        buy_gift_seasoning: {
-            text: "Funds currently in bank?",
-            options: [ { label: "Yes, >60 days", next: "res_conventional_check" }, { label: "No, wiring later", next: "strat_gift_letter" } ]
+        buy_income_check: {
+            text: "Income Source?",
+            type: 'button',
+            options: [
+                { label: "W-2 Salary", next: "buy_offer_market" },
+                { label: "Self-Employed", next: "strat_bank_statement" },
+                { label: "Commission/Bonus", next: "strat_2yr_avg" }
+            ]
         },
 
-        // --- REPEAT BUYER ---
-        buy_repeat_triage: {
-            text: "Sell current home first?",
-            options: [ { label: "Yes", next: "buy_contingency" }, { label: "No", next: "buy_2nd_home" } ]
-        },
-        buy_contingency: {
-            text: "Is it listed?",
-            options: [ { label: "Yes", next: "strat_concurrent" }, { label: "No", next: "buy_equity_check" } ]
-        },
-        buy_equity_check: {
-            text: "Equity > 30%?",
-            options: [ { label: "Yes", next: "strat_bridge" }, { label: "No", next: "strat_sell_first" } ]
-        },
-        buy_2nd_home: {
-            text: "Primary use?",
-            options: [ { label: "Vacation", next: "strat_vacation" }, { label: "Investment", next: "strat_buy_hold" } ]
-        },
 
         // ==========================================
-        // BRANCH 2: SELLING (MEGA EXPANSION)
+        // BRANCH 2: SELLING
         // ==========================================
         sell_node_1: {
             text: "Occupancy Status?",
+            type: 'button',
             options: [
                 { label: "Occupied by Me", next: "sell_pets_check" },
                 { label: "Occupied by Tenant", next: "sell_tenant_lease" },
                 { label: "Vacant", next: "sell_vacant_issues" },
-                { label: "Hoarder Situation", next: "strat_hoarder_cleanout" },
-                { label: "Squatters", next: "strat_squatter_ejectment" }
+                { label: "Hoarder Situation", next: "strat_hoarder_cleanout" }
             ]
         },
         sell_pets_check: {
             text: "Do you have pets in the home?",
+            type: 'button',
             options: [
                 { label: "Yes", next: "strat_pet_showing_plan" },
                 { label: "No", next: "sell_reason_check" }
@@ -565,13 +446,24 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         sell_vacant_issues: {
             text: "Is the property winterized?",
+            type: 'button',
             options: [
                 { label: "Yes, secured", next: "strat_vacant_staging" },
                 { label: "No, utilities off", next: "strat_utility_activation" }
             ]
         },
+        sell_tenant_lease: {
+            text: "Lease Type?",
+            type: 'button',
+            options: [
+                { label: "Month-to-Month", next: "strat_cash_keys_coop" },
+                { label: "Long Term", next: "strat_tenant_sale" },
+                { label: "Eviction needed", next: "strat_eviction_sale" }
+            ]
+        },
         sell_reason_check: {
             text: "Selling Motivation?",
+            type: 'button',
             options: [
                 { label: "Move Up/Down", next: "sell_taxes_check" },
                 { label: "Financial Distress", next: "sell_distress" },
@@ -581,753 +473,202 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         sell_taxes_check: {
             text: "Lived in 2 of last 5 years?",
+            type: 'button',
             options: [ { label: "Yes", next: "sell_title_check" }, { label: "No", next: "strat_cap_gains_calc" } ]
         },
         sell_title_check: {
             text: "Is the home in a Trust?",
-            options: [ { label: "Yes", next: "strat_trust_sale" }, { label: "No", next: "sell_foreign_check" } ]
-        },
-        sell_foreign_check: {
-            text: "Are you a Foreign Person (FIRPTA)?",
-            options: [
-                { label: "Yes", next: "strat_firpta_withholding" },
-                { label: "No", next: "sell_financial_status" }
-            ]
-        },
-        sell_divorce_status: {
-            text: "Amicable or Contested?",
-            options: [
-                { label: "Amicable", next: "sell_title_transfer" },
-                { label: "Contested", next: "strat_divorce_neutral" },
-                { label: "Restraining Order", next: "strat_high_conflict_listing" }
-            ]
-        },
-        sell_title_transfer: {
-            text: "Selling or Buyout?",
-            options: [ { label: "Selling", next: "sell_financial_status" }, { label: "Spouse Keeping", next: "strat_quit_claim" } ]
-        },
-        sell_financial_status: {
-            text: "Equity Status?",
-            options: [ { label: "Positive", next: "sell_retail_condition" }, { label: "Negative", next: "sell_distress" } ]
-        },
-        sell_retail_condition: {
-            text: "Any known defects?",
-            options: [
-                { label: "Structural/Foundation", next: "strat_structural_eng" },
-                { label: "Systems (HVAC/Elec)", next: "sell_systems_age" },
-                { label: "Unpermitted Work", next: "strat_retro_permit" },
-                { label: "Environmental", next: "sell_enviro_defect" }
-            ]
-        },
-        sell_enviro_defect: {
-            text: "Specific Issue?",
-            options: [
-                { label: "Mold", next: "strat_mold_remediation" },
-                { label: "Asbestos", next: "strat_asbestos_abatement" },
-                { label: "Underground Oil Tank", next: "strat_oil_tank_removal" },
-                { label: "Meth Lab History", next: "strat_meth_remediation" }
-            ]
-        },
-        sell_systems_age: {
-            text: "Type of Wiring/Plumbing?",
-            options: [
-                { label: "Knob & Tube / Galv", next: "strat_system_upgrade_credit" },
-                { label: "Modern", next: "strat_home_warranty" }
-            ]
-        },
-        sell_solar_check: {
-            text: "Do you have Solar Panels?",
-            options: [
-                { label: "Yes, Leased", next: "strat_solar_lease_transfer" },
-                { label: "Yes, Owned", next: "strat_green_marketing" },
-                { label: "No", next: "sell_historic_check" }
-            ]
-        },
-        sell_historic_check: {
-            text: "Is the home in a Historic District?",
-            options: [
-                { label: "Yes, Historic", next: "strat_historic_sale" },
-                { label: "No", next: "sell_stigma_check" }
-            ]
-        },
-        sell_stigma_check: {
-            text: "Any 'Stigmatized' issues?",
-            options: [
-                { label: "Yes (Death/Crime)", next: "strat_stigma_disclosure" },
-                { label: "No", next: "sell_luxury_check" }
-            ]
-        },
-        sell_tenant_lease: {
-            text: "Lease Type?",
-            options: [
-                { label: "Month-to-Month", next: "strat_cash_keys_coop" },
-                { label: "Long Term", next: "strat_tenant_sale" },
-                { label: "Eviction needed", next: "strat_eviction_sale" }
-            ]
+            type: 'button',
+            options: [ { label: "Yes", next: "strat_trust_sale" }, { label: "No", next: "sell_luxury_check" } ]
         },
         sell_luxury_check: {
-            text: "Value > $800k?",
+            text: "Value > $800k or Unique?",
+            type: 'button',
             options: [
-                { label: "Yes", next: "sell_smart_home" }, // NEW
-                { label: "No", next: "strat_concierge" }
+                { label: "Yes, Luxury", next: "sell_luxury_amenities" },
+                { label: "No, Standard", next: "sell_prep_check" }
             ]
         },
-        sell_smart_home: { // NEW
-            text: "Includes High-End Tech (Control4/Crestron)?",
+        sell_luxury_amenities: {
+            text: "Special Amenities?",
+            type: 'button',
             options: [
-                { label: "Yes", next: "strat_tech_transfer" },
-                { label: "No", next: "sell_privacy_check" }
+                { label: "Smart Home Tech", next: "strat_tech_transfer" },
+                { label: "Art/Wine Cellar", next: "strat_valuable_inclusions" },
+                { label: "Privacy Required", next: "sell_privacy_check" }
             ]
         },
         sell_privacy_check: {
-            text: "Require privacy?",
-            options: [ { label: "Yes", next: "strat_luxury_private" }, { label: "No", next: "strat_luxury_listing" } ]
+            text: "Require privacy from public?",
+            type: 'button',
+            options: [ 
+                { label: "Yes, Public Figure", next: "strat_luxury_private" }, 
+                { label: "No, market widely", next: "strat_luxury_listing" } 
+            ]
         },
-        // --- DISTRESS ---
+        sell_prep_check: {
+            text: "Condition of the home?",
+            type: 'button',
+            options: [
+                { label: "Turnkey / Retail", next: "sell_marketing_media" },
+                { label: "Dated / Needs Work", next: "strat_as_is_pricing" },
+                { label: "Major Repairs Needed", next: "strat_cash_offer_network" }
+            ]
+        },
+        sell_marketing_media: {
+            text: "Marketing Preference?",
+            type: 'button',
+            options: [
+                { label: "Full Media (Drone/Video)", next: "strat_drone_video" },
+                { label: "Standard Photos", next: "strat_fsbo_conversion" }
+            ]
+        },
         sell_distress: {
             text: "Any Liens?",
-            options: [ { label: "Yes", next: "sell_lien_type" }, { label: "No", next: "sell_mortgage_status" } ]
-        },
-        sell_lien_type: {
-            text: "Type of Lien?",
-            options: [
-                { label: "Mechanic's Lien", next: "strat_bond_over_lien" },
-                { label: "IRS / Tax Lien", next: "strat_title_clearance" },
-                { label: "Medicaid Recovery", next: "strat_medicaid_lien" }
-            ]
+            type: 'button',
+            options: [ { label: "Yes", next: "strat_title_clearance" }, { label: "No", next: "sell_mortgage_status" } ]
         },
         sell_mortgage_status: {
             text: "Behind on payments?",
-            options: [ { label: "Yes", next: "sell_hardship" }, { label: "No", next: "strat_hold_rent" } ]
+            type: 'button',
+            options: [ { label: "Yes", next: "strat_short_sale" }, { label: "No", next: "strat_hold_rent" } ]
         },
-        sell_hardship: {
-            text: "Reverse Mortgage?",
-            options: [ { label: "Yes", next: "strat_reverse_mortgage_sale" }, { label: "No", next: "sell_assets_check" } ]
-        },
-        sell_assets_check: {
-            text: "Other Assets?",
-            options: [ { label: "Yes", next: "strat_short_sale" }, { label: "No", next: "strat_deed_lieu" } ]
+        sell_divorce_status: {
+            text: "Amicable or Contested?",
+            type: 'button',
+            options: [
+                { label: "Amicable", next: "strat_divorce_neutral" },
+                { label: "Contested", next: "strat_high_conflict_listing" }
+            ]
         },
         sell_probate: {
             text: "Letters of Office?",
-            options: [ { label: "Yes", next: "sell_probate_type" }, { label: "No", next: "strat_probate_court" }, { label: "Unknown", next: "strat_probate_bond" } ]
-        },
-        sell_probate_type: {
-            text: "Is there a Will?",
-            options: [ { label: "Yes", next: "strat_probate_easy" }, { label: "No (Intestate)", next: "strat_probate_intestate" } ]
+            type: 'button',
+            options: [ { label: "Yes", next: "strat_probate_easy" }, { label: "No", next: "strat_probate_court" } ]
         },
 
         // ==========================================
-        // BRANCH 3: REFINANCE
+        // BRANCH 3-6 (Refi, Invest, Commercial, Land) - Simplified for brevity
         // ==========================================
         refi_node_1: {
             text: "Primary Goal?",
+            type: 'button',
             options: [
-                { label: "Lower Payment", next: "refi_rate_check" },
-                { label: "Cash Out", next: "refi_cash_reason" },
-                { label: "Remove PMI", next: "refi_pmi_check" },
-                { label: "Divorce Buyout", next: "strat_divorce_refi" }
+                { label: "Lower Payment", next: "strat_rate_term_refi" },
+                { label: "Cash Out", next: "strat_cash_out_refi" },
+                { label: "Remove PMI", next: "strat_pmi_removal" }
             ]
         },
-        refi_rate_check: {
-            text: "Loan Type?",
-            options: [ { label: "FHA/VA", next: "strat_streamline_refi" }, { label: "Conventional", next: "refi_credit_check" } ]
-        },
-        refi_credit_check: {
-            text: "Score > 720?",
-            options: [ { label: "Yes", next: "strat_rate_term_refi" }, { label: "No", next: "res_credit_repair" } ]
-        },
-        refi_cash_reason: {
-            text: "Use of funds?",
-            options: [
-                { label: "Debt Consolidation", next: "strat_debt_consolidation" },
-                { label: "Home Improvement", next: "refi_renovation_style" },
-                { label: "Investment", next: "strat_cash_out_invest" },
-                { label: "Buy 2nd Home", next: "strat_reverse_purchase" }
-            ]
-        },
-        refi_renovation_style: {
-            text: "Loan Preference?",
-            options: [
-                { label: "Keep current rate (HELOC)", next: "strat_renovation_heloc" },
-                { label: "Refinance all (Cash-Out)", next: "strat_cash_out_refi" }
-            ]
-        },
-        refi_pmi_check: {
-            text: "Equity > 20%?",
-            options: [ { label: "Yes", next: "strat_pmi_removal" }, { label: "Not sure", next: "strat_appraisal_gap" } ]
-        },
-
-        // ==========================================
-        // BRANCH 4: INVESTING (MASSIVE EXPANSION)
-        // ==========================================
         invest_node_1: {
-            text: "Funding Source?",
+            text: "Investment Strategy?",
+            type: 'button',
             options: [
-                { label: "Cash / Conventional", next: "inv_creative_check" },
-                { label: "Retirement Funds", next: "strat_sdir_custodian" },
-                { label: "1031 Exchange", next: "inv_1031_window" },
-                { label: "Portfolio Loan", next: "strat_blanket_mortgage" }
+                { label: "Long Term Rental", next: "strat_buy_hold" },
+                { label: "Short Term / Airbnb", next: "strat_str_self" },
+                { label: "Fix & Flip", next: "strat_fix_flip" }
             ]
         },
-        inv_creative_check: {
-            text: "Interested in Creative Financing?",
-            options: [
-                { label: "Yes (Sub2 / Seller Fin)", next: "inv_creative_type" },
-                { label: "No, Standard Bank Loan", next: "inv_involvement" }
-            ]
-        },
-        inv_creative_type: {
-            text: "Preferred Method?",
-            options: [
-                { label: "Subject-To", next: "strat_subject_to" },
-                { label: "Seller Financing", next: "strat_seller_finance" },
-                { label: "Lease Option", next: "strat_lease_option" }
-            ]
-        },
-        inv_involvement: {
-            text: "Preferred involvement?",
-            options: [ { label: "Active", next: "inv_experience" }, { label: "Passive", next: "inv_passive_check" } ]
-        },
-        inv_experience: {
-            text: "Experience level?",
-            options: [ { label: "Experienced", next: "inv_active_risk" }, { label: "Beginner", next: "inv_beginner_path" } ]
-        },
-        inv_beginner_path: {
-            text: "Capital available?",
-            options: [ { label: "Under $50k", next: "strat_house_hack_invest" }, { label: "$50k+", next: "strat_turnkey" } ]
-        },
-        inv_active_risk: {
-            text: "Vehicle?",
-            options: [
-                { label: "Flip", next: "strat_fix_flip" },
-                { label: "Long Term Rental", next: "inv_unit_count" },
-                { label: "Airbnb", next: "inv_airbnb_check" },
-                { label: "Niche Assets", next: "inv_niche_check" },
-                { label: "Raw Land", next: "inv_land_check" },
-                { label: "Notes / Debt", next: "inv_note_type" },
-                { label: "Arbitrage", next: "inv_arbitrage_check" }
-            ]
-        },
-        inv_arbitrage_check: {
-            text: "Do you own the property?",
-            options: [
-                { label: "No (Rental Arbitrage)", next: "strat_rental_arbitrage" },
-                { label: "Yes", next: "inv_airbnb_check" }
-            ]
-        },
-        inv_note_type: {
-            text: "Note Type?",
-            options: [
-                { label: "Performing", next: "strat_performing_note" },
-                { label: "Non-Performing", next: "strat_non_performing_note" },
-                { label: "Create a Note", next: "strat_wraparound_mortgage" }
-            ]
-        },
-        inv_niche_check: {
-            text: "Which Niche Asset?",
-            options: [
-                { label: "Wholesaling", next: "strat_wholesaling" },
-                { label: "Mobile Home Parks", next: "inv_mhp_util" },
-                { label: "Storage Units", next: "strat_storage_invest" },
-                { label: "Laundromat / Car Wash", next: "strat_operational_asset" },
-                { label: "Assisted Living", next: "strat_alf_invest" },
-                { label: "Billboards / Cell Towers", next: "strat_billboard_lease" },
-                { label: "PadSplit / Rooming", next: "strat_padsplit" },
-                { label: "Marina / Boat Slips", next: "strat_marina_invest" },
-                { label: "RV Park", next: "inv_rv_park_class" } // NEW
-            ]
-        },
-        inv_rv_park_class: { // NEW
-            text: "Park Class?",
-            options: [
-                { label: "Resort (Concrete Pads)", next: "strat_rv_resort" },
-                { label: "Rustic (Dirt/Gravel)", next: "strat_rv_rustic" }
-            ]
-        },
-        inv_mhp_util: {
-            text: "Utilities Status?",
-            options: [
-                { label: "City Water/Sewer", next: "strat_mhp_invest" },
-                { label: "Private Lagoon/Well", next: "strat_mhp_lagoon" },
-                { label: "Park Owned Homes", next: "strat_park_owned_homes" } // NEW
-            ]
-        },
-        inv_airbnb_check: {
-            text: "Management style?",
-            options: [ { label: "Self-Manage", next: "inv_airbnb_pricing" }, { label: "Property Manager", next: "strat_str_managed" } ]
-        },
-        inv_airbnb_pricing: {
-            text: "Have you analyzed dynamic pricing?",
-            options: [ { label: "Yes", next: "strat_str_self" }, { label: "No", next: "strat_airbnb_dynamic_pricing" } ]
-        },
-        inv_land_check: {
-            text: "Improved or Raw?",
-            options: [ { label: "Improved", next: "strat_land_build" }, { label: "Raw", next: "inv_land_survey" } ]
-        },
-        inv_land_survey: {
-            text: "Perc Test done?",
-            options: [ { label: "Yes", next: "strat_land_hold" }, { label: "No", next: "strat_land_feasibility" } ]
-        },
-        inv_unit_count: {
-            text: "Size?",
-            options: [ { label: "2-4 Units", next: "inv_dscr_ratio" }, { label: "5+ Units", next: "strat_multifamily_commercial" } ]
-        },
-        inv_dscr_ratio: {
-            text: "Is the projected rent > mortgage?",
-            options: [ { label: "Yes (DSCR > 1.0)", next: "strat_buy_hold" }, { label: "No (DSCR < 1.0)", next: "strat_no_ratio_loan" } ]
-        },
-        inv_passive_check: {
-            text: "Accredited?",
-            options: [ { label: "Yes", next: "inv_syndication_type" }, { label: "No", next: "strat_reit" } ]
-        },
-        inv_syndication_type: {
-            text: "Strategy Preference?",
-            options: [ { label: "Value Add", next: "strat_syndication" }, { label: "Cost Segregation Focus", next: "strat_cost_seg" }, { label: "Opportunity Zone", next: "strat_opportunity_zone" } ]
-        },
-        inv_1031_window: {
-            text: "Sold <45 days ago?",
-            options: [ { label: "Yes", next: "inv_1031_boot" }, { label: "No", next: "strat_1031_reverse" } ]
-        },
-        inv_1031_boot: {
-            text: "Are you taking any cash out (Boot)?",
-            options: [ { label: "Yes", next: "strat_1031_boot_tax" }, { label: "No, full reinvestment", next: "strat_dst" } ]
-        },
-
-        // ==========================================
-        // BRANCH 5: COMMERCIAL
-        // ==========================================
         comm_node_1: {
             text: "Asset Class?",
+            type: 'button',
             options: [
-                { label: "Retail", next: "comm_retail_node" },
-                { label: "Office", next: "comm_office_node" },
-                { label: "Industrial", next: "comm_industrial_node" },
-                { label: "Special Purpose", next: "comm_special_purpose" },
-                { label: "Hospitality", next: "comm_hotel_flag" }
+                { label: "Retail", next: "strat_retail_ti_allowance" },
+                { label: "Office", next: "strat_flex_space" },
+                { label: "Industrial", next: "strat_heavy_industrial" }
             ]
         },
-        comm_hotel_flag: {
-            text: "Flagged or Boutique?",
-            options: [
-                { label: "Flagged (Marriott/Hilton)", next: "strat_hotel_pip" },
-                { label: "Independent Boutique", next: "strat_boutique_hotel" }
-            ]
-        },
-        comm_special_purpose: {
-            text: "Specific Use?",
-            options: [
-                { label: "Gas Station", next: "comm_env_check" },
-                { label: "Car Wash", next: "strat_operational_asset" },
-                { label: "Church / Religious", next: "strat_religious_zoning" },
-                { label: "Data Center", next: "strat_data_center" },
-                { label: "Daycare / School", next: "comm_daycare_check" },
-                { label: "Gym / Fitness", next: "strat_gym_noise" }
-            ]
-        },
-        comm_daycare_check: {
-            text: "Outdoor Space?",
-            options: [
-                { label: "Fenced Playground", next: "strat_daycare_licensing" },
-                { label: "None", next: "strat_daycare_variance" }
-            ]
-        },
-        comm_env_check: {
-            text: "Phase 1 Report?",
-            options: [
-                { label: "Clean", next: "strat_sba_504" },
-                { label: "Dirty/Unknown", next: "strat_phase_2_env" }
-            ]
-        },
-        comm_retail_node: {
-            text: "Use?",
-            options: [
-                { label: "Restaurant", next: "comm_restaurant_type" },
-                { label: "Liquor Store", next: "strat_liquor_license" },
-                { label: "General", next: "comm_retail_traffic" }
-            ]
-        },
-        comm_restaurant_type: {
-            text: "Infrastructure?",
-            options: [
-                { label: "2nd Gen (Hood/Grease Trap)", next: "strat_restaurant_buy" },
-                { label: "Cold Shell (Empty)", next: "strat_retail_ti_allowance" }
-            ]
-        },
-        comm_retail_traffic: {
-            text: "Traffic Count needed?",
-            options: [ { label: "High (>20k cars)", next: "comm_retail_signage" }, { label: "Destination (Low)", next: "comm_lease_own" } ]
-        },
-        comm_retail_signage: {
-            text: "Is visibility critical?",
-            options: [ { label: "Yes, need Pylon Sign", next: "strat_pylon_signage" }, { label: "No", next: "comm_lease_own" } ]
-        },
-        comm_office_node: {
-            text: "Use?",
-            options: [ { label: "Medical/Vet", next: "comm_medical_type" }, { label: "General", next: "comm_lease_own" } ]
-        },
-        comm_medical_type: {
-            text: "Specialty?",
-            options: [
-                { label: "Veterinary", next: "strat_vet_zoning" },
-                { label: "Dental/Doctor", next: "comm_parking_check" }
-            ]
-        },
-        comm_parking_check: {
-            text: "Does it meet 5:1000 Parking Ratio?",
-            options: [ { label: "Yes", next: "strat_medical_office" }, { label: "No", next: "strat_parking_variance" } ]
-        },
-        comm_industrial_node: {
-            text: "Requirement?",
-            options: [ { label: "High Ceilings", next: "comm_crane_check" }, { label: "Loading Docks", next: "comm_loading_check" }, { label: "Heavy Power", next: "comm_power_specs" } ] // Updated
-        },
-        comm_power_specs: { // NEW
-            text: "Voltage Requirement?",
-            options: [
-                { label: "3-Phase 480v", next: "strat_heavy_industrial" },
-                { label: "Standard 208v", next: "strat_flex_space" }
-            ]
-        },
-        comm_loading_check: {
-            text: "Dock Height or Drive-In?",
-            options: [
-                { label: "Dock Height", next: "comm_dock_leveler" }, // Updated
-                { label: "Drive-In", next: "strat_flex_space" }
-            ]
-        },
-        comm_dock_leveler: { // NEW
-            text: "Levelers Required?",
-            options: [
-                { label: "Yes, Hydraulic", next: "strat_industrial_logistics" },
-                { label: "No, standard plate", next: "strat_industrial_logistics" }
-            ]
-        },
-        comm_crane_check: {
-            text: "Need Overhead Cranes?",
-            options: [ { label: "Yes", next: "strat_heavy_manufacturing" }, { label: "No", next: "strat_flex_space" } ]
-        },
-        comm_lease_own: {
-            text: "Strategy?",
-            options: [ { label: "Buy", next: "strat_sba_504" }, { label: "Lease", next: "comm_lease_type" }, { label: "Biz Only", next: "strat_biz_opp" } ]
-        },
-        comm_lease_type: {
-            text: "Lease Structure?",
-            options: [
-                { label: "Triple Net (NNN)", next: "comm_lease_guarantee" },
-                { label: "Full Service Gross", next: "strat_base_year_audit" },
-                { label: "Percentage Rent", next: "strat_percentage_rent" }
-            ]
-        },
-        comm_lease_guarantee: {
-            text: "Will you sign a Personal Guarantee?",
-            options: [ { label: "Yes", next: "strat_burn_off_clause" }, { label: "No", next: "strat_lease_audit" } ]
-        },
-
-        // ==========================================
-        // BRANCH 6: LAND / DEVELOPMENT
-        // ==========================================
         land_node_1: {
-            text: "What is the current zoning?",
+            text: "Land Type?",
+            type: 'button',
             options: [
-                { label: "Residential", next: "land_infill_check" },
-                { label: "Agricultural", next: "land_rights_check" },
-                { label: "Commercial", next: "strat_land_hold" },
-                { label: "Disaster/Flood", next: "land_disaster_check" }
-            ]
-        },
-        land_rights_check: {
-            text: "Rights to convey?",
-            options: [
-                { label: "Mineral Rights", next: "strat_mineral_rights" },
-                { label: "Water Rights", next: "strat_water_rights" },
-                { label: "Timber", next: "strat_timber_cruise" },
-                { label: "Standard Surface", next: "strat_ag_zoning" }
-            ]
-        },
-        land_infill_check: {
-            text: "Is this an infill lot (between existing homes)?",
-            options: [
-                { label: "Yes", next: "strat_infill_development" },
-                { label: "No, large tract", next: "strat_subdivision" }
-            ]
-        },
-        land_disaster_check: {
-            text: "Specific Risk?",
-            options: [
-                { label: "Flood Zone AE/VE", next: "strat_flood_elevation" },
-                { label: "Wildfire Zone", next: "strat_fair_plan_ins" },
-                { label: "Wetlands", next: "strat_wetland_mitigation" },
-                { label: "Mine Subsidence", next: "strat_mine_subsidence" }
+                { label: "Infill / Residential", next: "strat_infill_development" },
+                { label: "Raw Acreage", next: "strat_land_hold" }
             ]
         },
 
+
         // ==========================================
-        // OUTCOMES
+        // OUTCOMES (STRATEGIES)
         // ==========================================
         
-        // --- NEW OUTCOMES (Total >350) ---
-        strat_starlink_check: { text: "Strategy: Satellite Internet Viability. In rural areas without fiber, we must verify open sky visibility for Starlink or check 5G tower proximity for home internet.", options: [] },
-        strat_architect_contract: { text: "Strategy: Architect Ownership Rights. You must own the blueprints. If you fire the builder, ensure the contract allows you to keep the plans you paid for.", options: [] },
-        strat_soil_compaction: { text: "Strategy: Soil Compaction Test. Before pouring a foundation, we need a geotechnical report to ensure the soil can support the weight without settling.", options: [] },
-        strat_condo_reserve_study: { text: "Strategy: Reserve Study Analysis. We must review the HOA's 30-year capital plan. If they have <50% funded reserves, a special assessment is likely coming.", options: [] },
-        strat_condo_renter_ratio: { text: "Strategy: Owner-Occupancy Audit. If >50% of units are rented, the building is 'Non-Warrantable' for conventional loans. We need to know this upfront.", options: [] },
-        strat_safe_conveyance: { text: "Strategy: Safe & Vault Inclusions. Heavy safes often convey with the home. We must clarify if the combination/keys are available or if it will be removed (damaging floors).", options: [] },
-        strat_household_staff: { text: "Strategy: Staff Retention. For large estates, retaining the house manager or groundskeeper is valuable. We can negotiate an employment transition contract.", options: [] },
-        strat_alimony_release: { text: "Strategy: Judgment Lien Release. Unpaid alimony creates a lien on the home. We need a 'Satisfaction of Judgment' recorded before title can transfer.", options: [] },
-        strat_brownfield_grant: { text: "Strategy: EPA Brownfield Grants. If the commercial site is contaminated, we can apply for EPA cleanup grants to offset the cost of remediation.", options: [] },
-        strat_rv_dump_station: { text: "Strategy: Dump Station Capacity. RV parks need adequate sewage handling. If septic, is the leach field sized for peak holiday weekends?", options: [] },
-        strat_kiosk_storage: { text: "Strategy: Unmanned Operations. We install an automated kiosk and gate system to run the facility remotely, cutting payroll expenses to near zero.", options: [] },
-        strat_park_owned_homes: { text: "Strategy: POH vs TOH Valuation. 'Park Owned Homes' are maintenance liabilities. We prefer 'Tenant Owned Homes' where we just rent the dirt pad.", options: [] },
-        strat_rv_resort: { text: "Strategy: Resort Amenities. Valued on CAP rate like a hotel. We must audit the pool, clubhouse, and laundry income streams.", options: [] },
-        strat_rv_rustic: { text: "Strategy: Rustic Camp Valuation. Valued more on land value. Less maintenance, but lower nightly rates. Check seasonality risks.", options: [] },
-        strat_tech_transfer: { text: "Strategy: Smart Home Transfer. We need a 'Digital Keys' rider. Seller must factory reset devices and transfer admin rights to Rack/Crestron systems at closing.", options: [] },
-        strat_deep_well: { text: "Strategy: Deep Well Fracking. If a well runs dry, hydro-fracking can restore flow. We should negotiate a credit for this potential future cost.", options: [] },
-        strat_septic_replacement: { text: "Strategy: Aerobic System Upgrade. Old conventional systems fail. An Aerobic system costs $15k+. We need to know if the soil requires this upgrade.", options: [] },
+        // --- NEW CONSTRUCTION STRATEGIES ---
+        strat_builder_registration: { text: "Strategy: Builder Registration. You MUST have your agent register you on your first visit, or the builder will refuse to pay their commission.", options: [] },
+        strat_builder_procurement_risk: { text: "Strategy: Procurement Cause Risk. Since you signed in alone, we must negotiate nicely to get agent representation added retroactively.", options: [] },
+        strat_one_time_close_const: { text: "Strategy: One-Time Close Loan. You lock your rate now, close once, and interest-only payments are made during the build.", options: [] },
+        strat_two_time_close: { text: "Strategy: Two-Time Close. Greater flexibility if you want to switch lenders after the build, but you pay closing costs twice.", options: [] },
+        strat_new_home_warranty: { text: "Strategy: 1-2-10 Warranty. Ensure the builder provides a 1-year workmanship, 2-year systems, and 10-year structural warranty.", options: [] },
+        strat_land_build_package: { text: "Strategy: Land/Build Package. We find a builder who owns the lots to simplify financing into a standard purchase contract.", options: [] },
 
-        // --- RETAINED OUTCOMES ---
-        strat_equestrian_zoning: { text: "Strategy: Equestrian Zoning. 1 acre per horse check.", options: [] },
-        strat_commercial_ag_loan: { text: "Strategy: Ag Loan. Farm Credit lender needed.", options: [] },
-        strat_cistern_system: { text: "Strategy: Cistern Install. Buffer for low flow well.", options: [] },
-        strat_elevator_inspect: { text: "Strategy: Elevator Inspect. Specialized mechanic check.", options: [] },
-        strat_coastal_construction_line: { text: "Strategy: Coastal Line. CCCL setback check.", options: [] },
-        strat_medicaid_lien: { text: "Strategy: Medicaid Recovery. Hardship waiver negotiation.", options: [] },
-        strat_wraparound_mortgage: { text: "Strategy: Wraparound. Arbitrage interest rates.", options: [] },
-        strat_marina_invest: { text: "Strategy: Marina. Slip + Fuel income.", options: [] },
-        strat_hotel_pip: { text: "Strategy: PIP Analysis. Mandatory renovation budget.", options: [] },
-        strat_boutique_hotel: { text: "Strategy: Boutique Ops. Direct booking focus.", options: [] },
-        strat_retail_ti_allowance: { text: "Strategy: TI Negotation. Cold shell buildout.", options: [] },
-        strat_percentage_rent: { text: "Strategy: % Rent. Lower base, share upside.", options: [] },
-        strat_quiet_title: { text: "Strategy: Quiet Title. Clear old liens via court.", options: [] },
-        strat_riparian_rights: { text: "Strategy: Riparian Rights. River ownership.", options: [] },
-        strat_littoral_rights: { text: "Strategy: Littoral Rights. Lake ownership.", options: [] },
-        strat_limited_review_condo: { text: "Strategy: Ltd Review. 25% down condo.", options: [] },
-        strat_no_ratio_loan: { text: "Strategy: No-Ratio. Equity based lending.", options: [] },
-        strat_1031_reverse: { text: "Strategy: Reverse 1031. EAT holds title.", options: [] },
-        strat_base_year_audit: { text: "Strategy: Base Year. Audit OpEx.", options: [] },
-        strat_firpta_withholding: { text: "Strategy: FIRPTA. Foreign tax withholding.", options: [] },
-        strat_blanket_mortgage: { text: "Strategy: Blanket Loan. Portfolio release clause.", options: [] },
-        strat_bond_over_lien: { text: "Strategy: Bond Over Lien. Escrow 150%.", options: [] },
-        strat_probation_letter: { text: "Strategy: Probation Letter. Verify income stability.", options: [] },
-        strat_fair_housing_risk: { text: "Strategy: Love Letter Risk. Avoid bias.", options: [] },
-        strat_mhp_lagoon: { text: "Strategy: MHP Lagoon. Enviro check.", options: [] },
-        strat_flood_elevation: { text: "Strategy: Elevation Cert. Insurance reduction.", options: [] },
-        strat_fair_plan_ins: { text: "Strategy: FAIR Plan. Wildfire coverage.", options: [] },
-        strat_wetland_mitigation: { text: "Strategy: Wetland Credits. Mitigation banking.", options: [] },
-        strat_mold_remediation: { text: "Strategy: Mold Remediate. Certified clearance.", options: [] },
-        strat_asbestos_abatement: { text: "Strategy: Asbestos. Professional removal.", options: [] },
-        strat_oil_tank_removal: { text: "Strategy: Tank Sweep. EPA letter.", options: [] },
-        strat_shared_well_agreement: { text: "Strategy: Shared Well. Recorded easement.", options: [] },
-        strat_well_water_test: { text: "Strategy: Well Test. Bacteria/Nitrate.", options: [] },
-        strat_fha_203k_limited: { text: "Strategy: 203k Limited. Cosmetic only.", options: [] },
-        strat_fha_203k_standard: { text: "Strategy: 203k Standard. Structural.", options: [] },
-        strat_tax_lien_invest: { text: "Strategy: Tax Liens. High yield.", options: [] },
-        strat_non_qm_foreclosure: { text: "Strategy: Recent Foreclosure. High rate.", options: [] },
-        strat_alf_invest: { text: "Strategy: ALF. Licensing check.", options: [] },
-        strat_billboard_lease: { text: "Strategy: Billboard. Easement income.", options: [] },
-        strat_performing_note: { text: "Strategy: Perf Note. Cash flow.", options: [] },
-        strat_non_performing_note: { text: "Strategy: Non-Perf Note. Workout.", options: [] },
-        strat_opportunity_zone: { text: "Strategy: Opp Zone. Tax free gain.", options: [] },
-        strat_blind_trust: { text: "Strategy: Blind Trust. Anonymity.", options: [] },
-        strat_dscr_llc: { text: "Strategy: DSCR LLC. Biz loan.", options: [] },
-        strat_trust_purchase: { text: "Strategy: Trust Buy. Estate plan.", options: [] },
-        strat_system_upgrade_credit: { text: "Strategy: System Credit. Update wiring.", options: [] },
-        strat_construction_loan: { text: "Strategy: Const Loan. One close.", options: [] },
-        strat_pool_inspection: { text: "Strategy: Pool Inspect. Leak check.", options: [] },
-        strat_stigma_disclosure: { text: "Strategy: Stigma. Transparency.", options: [] },
-        strat_operational_asset: { text: "Strategy: Op Asset. EBITDA val.", options: [] },
-        strat_mixed_use: { text: "Strategy: Mixed Use. Commercial loan.", options: [] },
-        strat_ag_zoning: { text: "Strategy: Ag Zoning. Future use.", options: [] },
-        strat_infill_development: { text: "Strategy: Infill. Setbacks.", options: [] },
-        strat_subdivision: { text: "Strategy: Subdivision. Entitlement.", options: [] },
-        strat_employment_gap_letter: { text: "Strategy: Gap Letter. Explanation.", options: [] },
-        strat_offer_letter_loan: { text: "Strategy: Offer Letter. Future income.", options: [] },
-        strat_pool_marketing: { text: "Strategy: Pool Marketing. Seasonal.", options: [] },
-        strat_unique_appraisal: { text: "Strategy: Unique Appraisal. Specialist.", options: [] },
-        strat_data_center: { text: "Strategy: Data Center. Power.", options: [] },
-        strat_str_glamping: { text: "Strategy: Glamping. Zoning.", options: [] },
-        strat_religious_zoning: { text: "Strategy: Religious Zoning. Tax.", options: [] },
-        strat_remote_worker_letter: { text: "Strategy: Remote Letter. HR.", options: [] },
-        strat_transfer_letter: { text: "Strategy: Transfer Letter. Date.", options: [] },
-        strat_fixed_income_gross_up: { text: "Strategy: Gross Up. 125%.", options: [] },
-        strat_cold_storage: { text: "Strategy: Cold Storage. Equip val.", options: [] },
-        strat_drive_thru: { text: "Strategy: Drive Thru. SUP.", options: [] },
-        strat_office_conversion: { text: "Strategy: Office Convert. Plumbing.", options: [] },
-        strat_coop_board: { text: "Strategy: Co-Op Board. Interview.", options: [] },
-        strat_barndominium: { text: "Strategy: Barndo Loan. Portfolio.", options: [] },
-        strat_fha_manufactured: { text: "Strategy: FHA Manu. Perm found.", options: [] },
-        strat_chattel_loan: { text: "Strategy: Chattel Loan. Personal prop.", options: [] },
-        strat_bk13_manual: { text: "Strategy: BK13. Court order.", options: [] },
-        strat_identity_interest: { text: "Strategy: Identity Int. Family.", options: [] },
-        strat_1099_only_loan: { text: "Strategy: 1099 Only. No tax ret.", options: [] },
-        strat_1yr_tax_return: { text: "Strategy: 1 Yr Tax. Strong year.", options: [] },
-        strat_va_fee_waiver: { text: "Strategy: VA Waiver. Disability.", options: [] },
-        strat_va_bonus_entitlement: { text: "Strategy: VA Bonus. 2nd loan.", options: [] },
-        strat_subject_to: { text: "Strategy: Subject-To. Payments.", options: [] },
-        strat_seller_finance: { text: "Strategy: Seller Fin. Direct.", options: [] },
-        strat_lease_option: { text: "Strategy: Lease Option. Rent-to-own.", options: [] },
-        strat_airbnb_dynamic_pricing: { text: "Strategy: Dynamic Pricing. Auto.", options: [] },
-        strat_cost_seg: { text: "Strategy: Cost Seg. Deprec.", options: [] },
-        strat_1031_boot_tax: { text: "Strategy: Boot Tax. Partial.", options: [] },
-        strat_pylon_signage: { text: "Strategy: Pylon Sign. Vis.", options: [] },
-        strat_burn_off_clause: { text: "Strategy: Burn-Off. PG limit.", options: [] },
-        strat_cash_keys_coop: { text: "Strategy: Cash for Keys. Tenant.", options: [] },
-        strat_probate_intestate: { text: "Strategy: Intestate. State law.", options: [] },
-        strat_quit_claim: { text: "Strategy: Quit Claim. Transfer.", options: [] },
-        strat_info_only_inspection: { text: "Strategy: Info-Only. Pass/Fail.", options: [] },
-        strat_appraisal_gap_guarantee: { text: "Strategy: Appraisal Gap. Cash.", options: [] },
-        strat_escalation_clause: { text: "Strategy: Escalation. Beat.", options: [] },
-        strat_lead_paint: { text: "Strategy: Lead Paint. Disclose.", options: [] },
-        strat_sewer_scope: { text: "Strategy: Sewer Scope. Pipe.", options: [] },
-        strat_septic_inspection: { text: "Strategy: Septic Load. Test.", options: [] },
-        strat_pet_showing_plan: { text: "Strategy: Pet Plan. Logistics.", options: [] },
-        strat_green_mortgage: { text: "Strategy: EEM. Energy.", options: [] },
-        strat_itin_loan: { text: "Strategy: ITIN. Non-SSN.", options: [] },
-        strat_foreign_national: { text: "Strategy: Foreign Nat. DSCR.", options: [] },
-        strat_co_buy_agreement: { text: "Strategy: Co-Buy. TIC.", options: [] },
-        strat_corp_relo: { text: "Strategy: Corp Relo. Benefits.", options: [] },
-        strat_tiny_home: { text: "Strategy: Tiny Home. Zoning.", options: [] },
-        strat_hoarder_cleanout: { text: "Strategy: Cleanout. Crew.", options: [] },
-        strat_vacant_staging: { text: "Strategy: Virtual Stage. Digital.", options: [] },
-        strat_utility_activation: { text: "Strategy: Util On. Prep.", options: [] },
-        strat_structural_eng: { text: "Strategy: Struct Eng. Foundation.", options: [] },
-        strat_home_warranty: { text: "Strategy: Warranty. Systems.", options: [] },
-        strat_solar_lease_transfer: { text: "Strategy: Solar Transfer. Lease.", options: [] },
-        strat_historic_sale: { text: "Strategy: Historic Tax. Freeze.", options: [] },
-        strat_divorce_refi: { text: "Strategy: Owelty. Buyout.", options: [] },
-        strat_reverse_purchase: { text: "Strategy: HECM Buy. 50%.", options: [] },
-        strat_sdir_custodian: { text: "Strategy: SDIRA. Custodian.", options: [] },
-        strat_wholesaling: { text: "Strategy: Wholesaling. Assign.", options: [] },
-        strat_mhp_invest: { text: "Strategy: MHP. Pad rent.", options: [] },
-        strat_student_housing: { text: "Strategy: Student. Beds.", options: [] },
-        strat_storage_invest: { text: "Strategy: Storage. Climate.", options: [] },
-        strat_phase_2_env: { text: "Strategy: Phase 2. Drill.", options: [] },
-        strat_liquor_license: { text: "Strategy: Liquor Lic. Transfer.", options: [] },
-        strat_parking_variance: { text: "Strategy: Parking Var. Zoning.", options: [] },
-        strat_heavy_manufacturing: { text: "Strategy: Heavy Mfg. Load.", options: [] },
-        strat_ot_avg: { text: "Strategy: OT Avg. 2yr.", options: [] },
-        strat_medical_collections: { text: "Strategy: Med Debt. Ignore.", options: [] },
-        strat_green_marketing: { text: "Strategy: Green. Solar.", options: [] },
-        strat_virtual_tour: { text: "Strategy: Virtual. Remote.", options: [] },
-        strat_jumbo_loan: { text: "Strategy: Jumbo. Portfolio.", options: [] },
-        strat_usda_loan: { text: "Strategy: USDA. Rural.", options: [] },
-        strat_fsbo_conversion: { text: "Strategy: MLS. Agent.", options: [] },
-        strat_expired_relist: { text: "Strategy: Refresh. New.", options: [] },
-        strat_cap_gains_calc: { text: "Strategy: Tax Calc. Cap gains.", options: [] },
-        strat_private_showings: { text: "Strategy: Private. Vetted.", options: [] },
-        strat_str_self: { text: "Strategy: Self-Manage. High rev.", options: [] },
-        strat_str_managed: { text: "Strategy: Managed. Passive.", options: [] },
-        strat_land_build: { text: "Strategy: Const Loan. Build.", options: [] },
-        strat_zoning_attorney: { text: "Strategy: Zoning. Variance.", options: [] },
-        strat_biz_opp: { text: "Strategy: Biz Opp. Asset.", options: [] },
-        strat_bank_statement: { text: "Strategy: Bank Stmt. 12mo.", options: [] },
-        strat_physician_loan: { text: "Strategy: Physician. Student.", options: [] },
-        strat_manual_underwriting: { text: "Strategy: Manual UW. Credit.", options: [] },
-        strat_hard_money_buy: { text: "Strategy: Hard Money. Bridge.", options: [] },
-        strat_new_construction: { text: "Strategy: Builder Rep. Upgrades.", options: [] },
-        strat_builder_reg: { text: "Strategy: Builder Reg. Protect.", options: [] },
-        strat_divorce_neutral: { text: "Strategy: Neutral. Unbiased.", options: [] },
-        strat_senior_transition: { text: "Strategy: Rightsizing. Estate.", options: [] },
-        strat_luxury_private: { text: "Strategy: Private. Off-market.", options: [] },
-        strat_eviction_sale: { text: "Strategy: Cash/Keys. Vacate.", options: [] },
-        strat_probate_conflict: { text: "Strategy: Mediator. Transp.", options: [] },
-        strat_house_hack_invest: { text: "Strategy: House Hack. MF.", options: [] },
-        strat_multifamily_commercial: { text: "Strategy: DSCR. Income.", options: [] },
-        strat_restaurant_buy: { text: "Strategy: 2nd Gen. Equip.", options: [] },
-        strat_medical_office: { text: "Strategy: TI. Buildout.", options: [] },
-        strat_flex_space: { text: "Strategy: Flex. Whse.", options: [] },
-        strat_commuter_hub: { text: "Strategy: Transit. Train.", options: [] },
-        strat_school_zone: { text: "Strategy: District. Schools.", options: [] },
-        strat_va_loan: { text: "Strategy: VA. 0%.", options: [] },
-        strat_203k_rehab: { text: "Strategy: 203k. Reno.", options: [] },
-        res_grant: { text: "Strategy: DPA. Grants.", options: [] },
-        res_fha_standard: { text: "Strategy: FHA. 3.5%.", options: [] },
-        res_credit_repair: { text: "Strategy: Credit. Repair.", options: [] },
-        strat_concurrent: { text: "Strategy: Concurrent. Same day.", options: [] },
-        strat_bridge: { text: "Strategy: Bridge. Buy first.", options: [] },
-        strat_sell_first: { text: "Strategy: Contingency. Sell first.", options: [] },
-        strat_vacation: { text: "Strategy: Vacation. ROI.", options: [] },
-        strat_leaseback: { text: "Strategy: Rent Back. Stay.", options: [] },
-        strat_luxury_listing: { text: "Strategy: Luxury. Global.", options: [] },
-        strat_tenant_sale: { text: "Strategy: Investor Sale. Tenant.", options: [] },
-        strat_concierge: { text: "Strategy: Concierge. Prep.", options: [] },
-        strat_instant: { text: "Strategy: Instant. Speed.", options: [] },
-        strat_hold_rent: { text: "Strategy: Hold. Rent.", options: [] },
-        strat_short_sale: { text: "Strategy: Short Sale. Forgive.", options: [] },
-        strat_deed_lieu: { text: "Strategy: Deed Lieu. Surrender.", options: [] },
-        strat_probate_easy: { text: "Strategy: Probate. Easy.", options: [] },
-        strat_probate_court: { text: "Strategy: Court. Slow.", options: [] },
-        strat_probate_bond: { text: "Strategy: Bond. Fast.", options: [] },
-        strat_turnkey: { text: "Strategy: Turnkey. Done.", options: [] },
-        strat_dst: { text: "Strategy: DST. Passive.", options: [] },
-        strat_fix_flip: { text: "Strategy: Flip. 70%.", options: [] },
-        strat_brrrr: { text: "Strategy: BRRRR. Refi.", options: [] },
-        strat_buy_hold: { text: "Strategy: Hold. Cash flow.", options: [] },
-        strat_syndication: { text: "Strategy: Syndication. Group.", options: [] },
-        strat_reit: { text: "Strategy: REIT. Stock.", options: [] },
-        strat_hold_refi: { text: "Strategy: Cash Out. Equity.", options: [] },
-        strat_1031: { text: "Strategy: 1031. Defer.", options: [] },
-        strat_sba_504: { text: "Strategy: SBA. 10%.", options: [] },
-        strat_lease_audit: { text: "Strategy: Audit. CAM.", options: [] },
-        strat_lease_base_year: { text: "Strategy: Base Year. Cap.", options: [] },
-        strat_industrial_logistics: { text: "Strategy: Logistics. Doors.", options: [] },
-        res_conventional_check: { text: "Strategy: Conventional. Standard.", options: [] },
-        strat_streamline_refi: { text: "Strategy: Streamline. Refi.", options: [] },
-        strat_rate_term_refi: { text: "Strategy: Rate Term. Lower.", options: [] },
-        strat_debt_consolidation: { text: "Strategy: Debt Consol. Payoff.", options: [] },
-        strat_renovation_heloc: { text: "Strategy: HELOC. Reno.", options: [] },
-        strat_cash_out_invest: { text: "Strategy: Invest. Cash out.", options: [] },
-        strat_pmi_removal: { text: "Strategy: PMI. Remove.", options: [] },
-        strat_appraisal_gap: { text: "Strategy: Appraisal. Value.", options: [] },
-        strat_fha_ibr: { text: "Strategy: FHA IBR. Student.", options: [] },
-        strat_conventional_1percent: { text: "Strategy: Conv Student. 1%.", options: [] },
-        strat_cosigner_fha: { text: "Strategy: Co-Signer. Blend.", options: [] },
-        strat_condo_warrantable: { text: "Strategy: Warrantable. Healthy.", options: [] },
-        strat_non_warrantable: { text: "Strategy: Non-Warrantable. Portfolio.", options: [] },
-        strat_multigen_search: { text: "Strategy: Multi Gen. In-law.", options: [] },
-        strat_solar_check: { text: "Strategy: Solar. Lease.", options: [] },
-        strat_remove_disputes: { text: "Strategy: Disputes. Remove.", options: [] },
-        strat_gift_letter: { text: "Strategy: Gift Letter. Funds.", options: [] },
-        strat_trust_sale: { text: "Strategy: Trust. Cert.", options: [] },
-        strat_retro_permit: { text: "Strategy: Retro Permit. Fix.", options: [] },
-        strat_title_clearance: { text: "Strategy: Title. Clear.", options: [] },
-        strat_reverse_mortgage_sale: { text: "Strategy: HECM. Payoff.", options: [] },
-        strat_land_feasibility: { text: "Strategy: Land. Perc.", options: [] },
-        strat_cash_out_refi: { text: "Strategy: Cash Out. Full.", options: [] },
-        strat_land_hold: { text: "Strategy: Land. Banking.", options: [] },
-        strat_gap_employment: { text: "Strategy: Gap. Explain.", options: [] },
-        strat_cash_only_manu: { text: "Strategy: Cash. Manu.", options: [] },
-        strat_log_cabin: { text: "Strategy: Log Cabin. Comps.", options: [] },
-        strat_str_urban_reg: { text: "Strategy: Urban STR. Regs.", options: [] },
-        strat_str_vacation: { text: "Strategy: Vacation. Rev.", options: [] },
-        strat_401k_loan: { text: "Strategy: 401k. Self loan.", options: [] },
-        strat_2_1_buydown: { text: "Strategy: 2-1 Buydown. Rate.", options: [] },
-        strat_lease_exclusion: { text: "Strategy: Lease Excl. DTI.", options: [] },
-        strat_exclude_support: { text: "Strategy: Support Excl. DTI.", options: [] },
-        strat_alimony_income: { text: "Strategy: Alimony Inc. 6mo.", options: [] },
-        strat_gift_of_equity: { text: "Strategy: Gift Equity. Family.", options: [] },
-        strat_radon_mitigation: { text: "Strategy: Radon. Mitigation.", options: [] },
-        strat_crawl_encapsulation: { text: "Strategy: Crawl. Encap.", options: [] },
-        strat_plumbing_scope: { text: "Strategy: Scope. Slab.", options: [] },
-        strat_debt_paydown: { text: "Strategy: Paydown. DTI.", options: [] },
-        strat_termite_inspection: { text: "Strategy: WDI. Termite.", options: [] },
-        strat_pre_show_security: { text: "Strategy: Security. Valuables.", options: [] },
-        strat_restricted_hours: { text: "Strategy: Showing Block. Time.", options: [] },
-        strat_loi_commercial: { text: "Strategy: LOI. Offer.", options: [] },
-        strat_high_conflict_listing: { text: "Strategy: Conflict. Neutral.", options: [] },
-        strat_squatter_ejectment: { text: "Strategy: Ejectment. Civil.", options: [] },
-        strat_meth_remediation: { text: "Strategy: Meth. Clean.", options: [] },
-        strat_sheriff_cash: { text: "Strategy: Sheriff. Cash.", options: [] },
-        strat_auction_tech_fee: { text: "Strategy: Auction Fee. Premium.", options: [] },
-        strat_rental_arbitrage: { text: "Strategy: Arbitrage. Rent.", options: [] },
-        strat_vet_zoning: { text: "Strategy: Vet. Zoning.", options: [] },
-        strat_daycare_licensing: { text: "Strategy: Daycare. License.", options: [] },
-        strat_daycare_variance: { text: "Strategy: Daycare Var. Zoning.", options: [] },
-        strat_gym_noise: { text: "Strategy: Gym Noise. Impact.", options: [] },
-        strat_timber_cruise: { text: "Strategy: Timber. Value.", options: [] },
-        strat_mineral_rights: { text: "Strategy: Minerals. Rights.", options: [] },
-        strat_water_rights: { text: "Strategy: Water. Rights.", options: [] },
-        strat_mine_subsidence: { text: "Strategy: Mine. Ins.", options: [] },
-        strat_padsplit: { text: "Strategy: PadSplit. Rooms.", options: [] }
+        // --- BUYING STRATEGIES ---
+        strat_itin_loan: { text: "Strategy: ITIN Loan. Expect 15-20% down payment and higher interest rates, but no SSN required.", options: [] },
+        strat_foreign_national: { text: "Strategy: Foreign National Loan. Liquidity verification is key. Funds must be seasoned in a verifiable bank.", options: [] },
+        strat_auction_tech_fee: { text: "Strategy: Buyer's Premium. Calculate the 'Technology Fee' or 'Buyer's Premium' (usually 5%) on top of your bid price.", options: [] },
+        strat_sheriff_cash: { text: "Strategy: Sheriff Sale Cash. You usually need 10% certified funds immediately at the courthouse and the rest within 24 hours.", options: [] },
+        strat_corp_relo: { text: "Strategy: Relocation Rider. We must use the specific addendums required by your relocation company to ensure your benefits apply.", options: [] },
+        strat_solar_check: { text: "Strategy: Solar Lease Transfer. We must review the solar contract. If it's a lease, you have to qualify for that payment debt.", options: [] },
+        strat_pool_inspection: { text: "Strategy: Specialized Pool Inspection. Standard home inspectors miss leaks. Hire a dedicated pool company for a pressure test.", options: [] },
+        strat_radon_mitigation: { text: "Strategy: Radon Mitigation. Common in basements. We negotiate a credit for a mitigation system if levels are high.", options: [] },
+        strat_crawl_encapsulation: { text: "Strategy: Crawl Space Encapsulation. Essential for moisture control. Negotiate a vapor barrier if one is missing.", options: [] },
+        strat_plumbing_scope: { text: "Strategy: Sewer Scope (Slab). With slab foundations, a broken pipe means jackhammering the floor. A camera scope is mandatory.", options: [] },
+        strat_lead_paint: { text: "Strategy: Lead Paint Disclosure. Pre-1978 homes. Don't sand painted surfaces. We can ask for a credit for encapsulation.", options: [] },
+        strat_fha_203k_limited: { text: "Strategy: FHA 203k Limited. Financing up to $35k in repairs (kitchen/bath updates) into your mortgage.", options: [] },
+        strat_fha_203k_standard: { text: "Strategy: FHA 203k Standard. For major structural repairs or additions. Requires a HUD consultant to manage the project.", options: [] },
+        strat_condo_warrantable: { text: "Strategy: Warrantable Condo. Easy financing. Fannie Mae guidelines are met.", options: [] },
+        strat_limited_review_condo: { text: "Strategy: Limited Review Condo. Put 25% down to bypass the strict HOA questionnaire requirements.", options: [] },
+        strat_non_warrantable: { text: "Strategy: Non-Warrantable Loan. Portfolio lender required. Interest rates will be higher.", options: [] },
+        strat_riparian_rights: { text: "Strategy: Riparian Rights. You own to the center of the river (usually). Check flood insurance costs immediately.", options: [] },
+        strat_littoral_rights: { text: "Strategy: Littoral Rights. You own to the high-water mark of the lake. Ensure the dock is permitted.", options: [] },
+        strat_coastal_construction_line: { text: "Strategy: Coastal Setbacks. If you are seaward of the Coastal Construction Line, rebuilding may be restricted.", options: [] },
+        strat_chattel_loan: { text: "Strategy: Chattel Loan. Higher rate personal property loan because you don't own the land.", options: [] },
+        strat_fha_manufactured: { text: "Strategy: FHA Manufactured. Requires structural engineering cert to prove the tie-downs are secure.", options: [] },
+        strat_cash_only_manu: { text: "Strategy: Cash Only (Pre-1976). Homes built before June 1976 are often unfinanceable due to code changes.", options: [] },
+        strat_appraisal_gap_guarantee: { text: "Strategy: Appraisal Gap Guarantee. We agree to pay the difference between the low appraisal and the contract price.", options: [] },
+        strat_escalation_clause: { text: "Strategy: Escalation Clause. We automatically beat competing offers by $1,000 up to your max cap.", options: [] },
+        strat_info_only_inspection: { text: "Strategy: Information Only Inspection. We inspect, but we promise not to ask for small repairs. Pass/Fail only.", options: [] },
+        strat_gift_letter: { text: "Strategy: Gift Letter. If parents help, they must sign a letter stating it is NOT a loan.", options: [] },
+        strat_multigen_search: { text: "Strategy: Multi-Gen Zoning. We need to check zoning laws to ensure that 'In-Law Suite' with a second kitchen is actually legal.", options: [] },
+        strat_va_loan: { text: "Strategy: VA Loan. 0% Down. Sellers can pay all your closing costs and even pay off some of your debt to help you qualify.", options: [] },
+        strat_2yr_avg: { text: "Strategy: 2-Year Average. Lenders will average your last 2 years of commission/bonus income to calculate your buying power.", options: [] },
+        strat_bank_statement: { text: "Strategy: Bank Statement Loan. No Tax Returns required. We qualify you based on the cash deposits into your business account.", options: [] },
+
+        // --- SELLING STRATEGIES ---
+        strat_pet_showing_plan: { text: "Strategy: Pet Logistics. We need a 2-hour notice for showings so you can remove the dog. No litter boxes in listing photos.", options: [] },
+        strat_vacant_staging: { text: "Strategy: Virtual Staging. We leave the home empty but digitally add furniture to the photos to show scale and warmth.", options: [] },
+        strat_utility_activation: { text: "Strategy: De-Winterization. Utilities MUST be on for the inspection. We need to activate water/electric 3 days before inspection.", options: [] },
+        strat_cash_keys_coop: { text: "Strategy: Cash for Keys. Offer the tenant the security deposit + extra cash to vacate early so we can clean and list vacant.", options: [] },
+        strat_tenant_sale: { text: "Strategy: Investor Sale. We market the property 'Tenant Occupied' and sell the lease cash flow to another investor.", options: [] },
+        strat_eviction_sale: { text: "Strategy: Eviction Sale. Sell 'As-Is' with the problem tenant attached. Price will be below market value.", options: [] },
+        strat_cap_gains_calc: { text: "Strategy: Capital Gains Tax. If you haven't lived there 2 years, you may owe tax on the profit.", options: [] },
+        strat_trust_sale: { text: "Strategy: Trust Certificate. The Title company needs the 'Certificate of Trust' to verify who has authority to sign.", options: [] },
+        strat_tech_transfer: { text: "Strategy: Smart Home Transfer. We need a 'Digital Keys' rider. You must factory reset devices and transfer admin rights.", options: [] },
+        strat_valuable_inclusions: { text: "Strategy: Bill of Sale. High-end art or inclusions must be sold on a separate Bill of Sale.", options: [] },
+        strat_luxury_private: { text: "Strategy: Pocket Listing. We market only to top brokers via email and avoid the MLS to maintain your privacy.", options: [] },
+        strat_luxury_listing: { text: "Strategy: Global MLS. We syndicate the listing to international portals to find overseas cash buyers.", options: [] },
+        strat_drone_video: { text: "Strategy: Lifestyle Video. We hire a cinema crew to film actors using the home to sell the lifestyle, not just the walls.", options: [] },
+        strat_fsbo_conversion: { text: "Strategy: Flat Fee MLS. List on MLS for a flat fee but manage the showings yourself.", options: [] },
+        strat_as_is_pricing: { text: "Strategy: As-Is Pricing. We price slightly low and state 'Seller will make no repairs' to attract flippers.", options: [] },
+        strat_cash_offer_network: { text: "Strategy: Institutional Cash Offer. We request offers from investors to give you a baseline, then try to beat it.", options: [] },
+        strat_title_clearance: { text: "Strategy: Title Curative. We hire a specialist to hunt down old payoffs or satisfactions of mortgage that were never recorded.", options: [] },
+        strat_short_sale: { text: "Strategy: Short Sale. The bank agrees to take less than what is owed. Takes 4-6 months.", options: [] },
+        strat_hold_rent: { text: "Strategy: Rent and Hold. If you can't sell, we rent it out. We just need to ensure the rent covers your PITI mortgage payment.", options: [] },
+        strat_hoarder_cleanout: { text: "Strategy: Compassionate Cleanout. We hire a specialized crew to clear the home. We sell 'As-Is' to cash buyers only.", options: [] },
+        strat_divorce_neutral: { text: "Strategy: Neutral Third Party. We communicate equally with both attorneys to ensure fair pricing and asset division.", options: [] },
+        strat_high_conflict_listing: { text: "Strategy: Court Ordered Sale. We follow the strict judge's order for price reductions and showing availability.", options: [] },
+        strat_probate_easy: { text: "Strategy: Independent Administration. With Letters of Office, you can sell without a judge approving every step.", options: [] },
+        strat_probate_court: { text: "Strategy: Court Confirmation. We must accept an offer, then go to court to see if anyone wants to overbid it.", options: [] },
+        
+        // --- OTHER STRATEGIES ---
+        strat_rate_term_refi: { text: "Strategy: Rate & Term Refi. We just change the interest rate. Closing costs are lower than cash-out refis.", options: [] },
+        strat_cash_out_refi: { text: "Strategy: Cash Out Refi. Replace your mortgage with a larger one and pocket the difference for renovations or debt.", options: [] },
+        strat_pmi_removal: { text: "Strategy: PMI Removal. If values have risen, we order a new appraisal to delete the mortgage insurance.", options: [] },
+        strat_buy_hold: { text: "Strategy: Buy & Hold. Focus on Cash on Cash Return. Ensure rents exceed expenses by at least $300/mo.", options: [] },
+        strat_str_self: { text: "Strategy: Short Term Rental. Verify city ordinances first. Use dynamic pricing tools like PriceLabs to maximize revenue.", options: [] },
+        strat_fix_flip: { text: "Strategy: 70% Rule. Buy at 70% of the After Repair Value (ARV) minus repairs. If the numbers don't fit, walk away.", options: [] },
+        strat_retail_ti_allowance: { text: "Strategy: TI Allowance. Ask the landlord for a Tenant Improvement allowance to build out your shell.", options: [] },
+        strat_flex_space: { text: "Strategy: Flex Space. Warehouse back / Office front. The most versatile and safe commercial investment.", options: [] },
+        strat_heavy_industrial: { text: "Strategy: 3-Phase Power. Ensure the building has heavy power (480v) to attract manufacturing tenants.", options: [] },
+        strat_infill_development: { text: "Strategy: Infill Spec. Building in an established neighborhood. Watch out for neighbors fighting your variances.", options: [] },
+        strat_land_hold: { text: "Strategy: Land Banking. Buy in the path of progress. Low carrying costs (ag exemption) while value appreciates.", options: [] }
     };
 
     let currentNode = 'start';
@@ -1348,25 +689,34 @@ document.addEventListener('DOMContentLoaded', function() {
         const node = tree[currentNode];
         if(!node) {
             console.error("Node not found:", currentNode);
+            elements.question.innerText = "Error: Logic path end reached unexpectedly.";
             return;
         }
 
         elements.question.innerText = node.text;
         elements.options.innerHTML = '';
         
-        const isResult = node.options.length === 0;
+        const isResult = (node.options && node.options.length === 0);
         const stepCount = history.length + 1;
         
         elements.step.innerText = isResult ? 'Strategy Found' : `Step ${stepCount}`;
-        elements.progress.style.width = isResult ? '100%' : Math.min(stepCount * 2, 95) + '%';
+        elements.progress.style.width = isResult ? '100%' : Math.min(stepCount * 5, 95) + '%';
         elements.backBtn.style.display = (history.length > 0) ? 'block' : 'none';
 
+        // === HANDLING DIFFERENT INPUT TYPES ===
+
         if (isResult) {
+            // === RESULT SCREEN ===
             elements.question.classList.add('result-card');
             elements.formContainer.style.display = 'block';
             
-            let complianceNote = "\n\n*Local Compliance Note (Villa Park/IL):* \n- Transfer Stamps: $0 (Villa Park), but Inspection Required ($50).\n- Mandatory Disclosures: IL Radon, Lead-Based Paint (Pre-1978).";
-            elements.message.value = "Client Path: " + pathLabels.join(" > ") + "\n\nGenerated Strategy: " + node.text + complianceNote;
+            // Generate the final message string based on stored user answers
+            let answersString = "";
+            for (const [key, value] of Object.entries(userAnswers)) {
+                answersString += `- ${key}: ${value}\n`;
+            }
+
+            elements.message.value = `Client Path:\n${pathLabels.join(" > ")}\n\nSpecific Data:\n${answersString}\n\nGenerated Strategy:\n${node.text}`;
             
             const restartBtn = document.createElement('button');
             restartBtn.innerText = "Start Over / Try Another Scenario";
@@ -1377,18 +727,93 @@ document.addEventListener('DOMContentLoaded', function() {
             restartBtn.onclick = () => { 
                 history = []; 
                 pathLabels = []; 
+                userAnswers = {}; // Clear data
                 currentNode = 'start'; 
+                elements.question.classList.remove('result-card'); 
                 renderNode(); 
             };
             elements.options.appendChild(restartBtn);
-        } else {
-            elements.question.classList.remove('result-card');
+
+        } else if (node.type === 'select') {
+            // === SELECT MENU ===
             elements.formContainer.style.display = 'none';
+            elements.question.classList.remove('result-card');
+
+            const select = document.createElement('select');
+            select.className = "tree-select";
+            
+            // Add Default Option
+            const defaultOpt = document.createElement('option');
+            defaultOpt.text = "Please Select...";
+            defaultOpt.value = "";
+            defaultOpt.disabled = true;
+            defaultOpt.selected = true;
+            select.add(defaultOpt);
+
+            node.choices.forEach(choice => {
+                const opt = document.createElement('option');
+                opt.value = choice;
+                opt.text = choice;
+                select.add(opt);
+            });
+            elements.options.appendChild(select);
+
+            const nextBtn = document.createElement('button');
+            nextBtn.innerText = "Next Step →";
+            nextBtn.className = "next-btn";
+            nextBtn.onclick = () => {
+                if(select.value === "") { alert("Please make a selection."); return; }
+                
+                // Save data
+                if(node.variable) userAnswers[node.variable] = select.value;
+                
+                history.push(currentNode);
+                pathLabels.push(select.value); // Add selected val to path history
+                currentNode = node.next;
+                renderNode();
+            };
+            elements.options.appendChild(nextBtn);
+
+        } else if (node.type === 'text' || node.type === 'number') {
+            // === TEXT / NUMBER INPUT ===
+            elements.formContainer.style.display = 'none';
+            elements.question.classList.remove('result-card');
+
+            const input = document.createElement('input');
+            input.type = node.type; // 'text' or 'number'
+            input.className = "tree-input";
+            input.placeholder = node.placeholder || "";
+            elements.options.appendChild(input);
+
+            const nextBtn = document.createElement('button');
+            nextBtn.innerText = "Next Step →";
+            nextBtn.className = "next-btn";
+            nextBtn.onclick = () => {
+                if(input.value.trim() === "") { alert("Please enter a value."); return; }
+                
+                // Save data
+                if(node.variable) userAnswers[node.variable] = input.value;
+
+                history.push(currentNode);
+                pathLabels.push(`${node.variable}: ${input.value}`); 
+                currentNode = node.next;
+                renderNode();
+            };
+            elements.options.appendChild(nextBtn);
+
+        } else {
+            // === STANDARD BUTTONS (DEFAULT) ===
+            elements.formContainer.style.display = 'none';
+            elements.question.classList.remove('result-card');
+            
             node.options.forEach(opt => {
                 const btn = document.createElement('button');
                 btn.innerText = opt.label;
                 btn.className = "tree-option-btn";
                 btn.onclick = () => {
+                    // Save data if variable exists (rare for buttons but possible)
+                    if(node.variable) userAnswers[node.variable] = opt.label;
+
                     history.push(currentNode);
                     pathLabels.push(opt.label);
                     currentNode = opt.next;
