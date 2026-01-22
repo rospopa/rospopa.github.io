@@ -95,15 +95,30 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // BRANCH 1: BUYING (Deep Dive)
+        // BRANCH 1: BUYING
         // ==========================================
         buy_node_1: {
+            text: "Are you buying locally or relocating?",
+            options: [
+                { label: "Buying Locally", next: "buy_history_check" },
+                { label: "Relocating from Out of State", next: "buy_relo_timeline" }
+            ]
+        },
+        buy_relo_timeline: {
+            text: "When do you need to be in the new home?",
+            options: [
+                { label: "ASAP (Job Starting)", next: "strat_virtual_tour" },
+                { label: "3+ Months (Flexible)", next: "buy_history_check" }
+            ]
+        },
+        buy_history_check: {
             text: "Have you owned a home in the last 3 years?",
             options: [
                 { label: "No (First-Time Buyer)", next: "buy_fthb_triage" },
                 { label: "Yes (Repeat Buyer)", next: "buy_repeat_triage" }
             ]
         },
+        
         // --- FTHB PATH ---
         buy_fthb_triage: {
             text: "What is your biggest hurdle right now?",
@@ -111,7 +126,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 { label: "Down Payment / Cash", next: "buy_down_source" },
                 { label: "Credit Score", next: "buy_credit_deep" },
                 { label: "Income / Employment Type", next: "buy_income_check" },
-                { label: "Finding the Right House", next: "buy_inventory_triage" }
+                { label: "Finding the Right House", next: "buy_price_check" } // NEW
+            ]
+        },
+        buy_price_check: {
+            text: "What is your approximate budget?",
+            options: [
+                { label: "Under $750k", next: "buy_inventory_triage" },
+                { label: "Over $750k (Jumbo)", next: "strat_jumbo_loan" }
             ]
         },
         // Income Logic
@@ -159,7 +181,14 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Are you (or your spouse) a Military Veteran?",
             options: [
                 { label: "Yes", next: "strat_va_loan" },
-                { label: "No", next: "buy_gift_check" }
+                { label: "No", next: "buy_rural_check" } // NEW
+            ]
+        },
+        buy_rural_check: {
+            text: "Are you willing to buy in a rural area (far suburbs)?",
+            options: [
+                { label: "Yes", next: "strat_usda_loan" },
+                { label: "No, Suburban/Urban", next: "buy_gift_check" }
             ]
         },
         buy_gift_check: {
@@ -238,15 +267,37 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // BRANCH 2: SELLING (Deep Dive)
+        // BRANCH 2: SELLING
         // ==========================================
         sell_node_1: {
+            text: "Have you tried selling this property recently?",
+            options: [
+                { label: "Yes, Expired/FSBO", next: "sell_fsbo_check" },
+                { label: "No, first time listing", next: "sell_reason_check" }
+            ]
+        },
+        sell_fsbo_check: {
+            text: "Were you selling on your own (FSBO) or with an agent?",
+            options: [
+                { label: "On my own (FSBO)", next: "strat_fsbo_conversion" },
+                { label: "With an agent (Expired)", next: "strat_expired_relist" }
+            ]
+        },
+        sell_reason_check: {
             text: "What is the primary reason for selling?",
             options: [
-                { label: "Upgrading / Downsizing", next: "sell_financial_status" },
+                { label: "Upgrading / Downsizing", next: "sell_taxes_check" }, // NEW
                 { label: "Financial Distress / Debt", next: "sell_distress" },
                 { label: "Divorce / Separation", next: "sell_divorce_status" },
                 { label: "Inheritance / Probate", next: "sell_probate" }
+            ]
+        },
+        // Capital Gains Check
+        sell_taxes_check: {
+            text: "Have you lived in the home for 2 of the last 5 years?",
+            options: [
+                { label: "Yes", next: "sell_financial_status" }, // Tax free mostly
+                { label: "No", next: "strat_cap_gains_calc" } // Tax implication
             ]
         },
         // Divorce Path
@@ -307,7 +358,14 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "Is the estimated value over $800,000?",
             options: [
                 { label: "Yes, Luxury Market", next: "sell_privacy_check" },
-                { label: "No, Standard Market", next: "sell_retail_priority" }
+                { label: "No, Standard Market", next: "sell_marketing_pref" } // NEW
+            ]
+        },
+        sell_marketing_pref: {
+            text: "How do you feel about Open Houses?",
+            options: [
+                { label: "I want them (Max Exposure)", next: "strat_concierge" },
+                { label: "I hate them (Private Only)", next: "strat_private_showings" }
             ]
         },
         sell_privacy_check: {
@@ -363,7 +421,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // BRANCH 3: INVESTMENT (Deep Dive)
+        // BRANCH 3: INVESTMENT
         // ==========================================
         invest_node_1: {
             text: "What is your preferred involvement level?",
@@ -389,11 +447,26 @@ document.addEventListener('DOMContentLoaded', function() {
             ]
         },
         inv_active_risk: {
-            text: "What is your risk tolerance?",
+            text: "What is your primary investment vehicle?",
             options: [
-                { label: "High (Aggressive Growth)", next: "strat_fix_flip" },
-                { label: "Moderate (Value Add)", next: "strat_brrrr" },
-                { label: "Low (Steady Cash Flow)", next: "inv_unit_count" }
+                { label: "Flipping / Rehab", next: "strat_fix_flip" },
+                { label: "Long Term Rentals", next: "inv_unit_count" },
+                { label: "Short Term (Airbnb)", next: "inv_airbnb_check" }, // NEW
+                { label: "Raw Land", next: "inv_land_check" } // NEW
+            ]
+        },
+        inv_airbnb_check: {
+            text: "Do you plan to manage the cleanings/guest comms?",
+            options: [
+                { label: "Yes, Self-Manage", next: "strat_str_self" },
+                { label: "No, Property Manager", next: "strat_str_managed" }
+            ]
+        },
+        inv_land_check: {
+            text: "Is the land improved (Sewer/Water/Electric)?",
+            options: [
+                { label: "Yes, Improved Lot", next: "strat_land_build" },
+                { label: "No, Raw Land", next: "strat_land_hold" }
             ]
         },
         inv_unit_count: {
@@ -426,7 +499,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
 
         // ==========================================
-        // BRANCH 4: COMMERCIAL (Specifics)
+        // BRANCH 4: COMMERCIAL
         // ==========================================
         comm_node_1: {
             text: "What is the property type?",
@@ -454,14 +527,22 @@ document.addEventListener('DOMContentLoaded', function() {
             text: "What ceiling height do you need?",
             options: [
                 { label: "Under 14ft", next: "strat_flex_space" },
-                { label: "Over 18ft (Trucks)", next: "strat_industrial_logistics" }
+                { label: "Over 18ft (Trucks)", next: "comm_zoning_check" } // NEW
+            ]
+        },
+        comm_zoning_check: {
+            text: "Does the current zoning support your use?",
+            options: [
+                { label: "Yes, by right", next: "strat_industrial_logistics" },
+                { label: "No, needs Special Use", next: "strat_zoning_attorney" }
             ]
         },
         comm_lease_own: {
             text: "Are you looking to Lease or Own?",
             options: [
                 { label: "Buy (Owner-User)", next: "strat_sba_504" },
-                { label: "Lease", next: "comm_lease_type" }
+                { label: "Lease", next: "comm_lease_type" },
+                { label: "Buy Business Only", next: "strat_biz_opp" } // NEW
             ]
         },
         comm_lease_type: {
@@ -476,63 +557,76 @@ document.addEventListener('DOMContentLoaded', function() {
         // OUTCOMES
         // ==========================================
         
-        // --- NEW & SPECIALIZED ---
-        strat_bank_statement: { text: "Strategy: Bank Statement Loan. Since you are self-employed with high write-offs, we will use a Non-QM lender who qualifies you based on 12-24 months of bank deposits rather than taxable income. Rates are slightly higher, but you get approved.", options: [] },
-        strat_physician_loan: { text: "Strategy: Physician Loan. Lenders offer special products for Medical Residents/Doctors with student loans. They exclude student debt from DTI calculations and often allow 0-5% down with no PMI.", options: [] },
-        strat_manual_underwriting: { text: "Strategy: Manual Underwriting. Due to employment gaps or lack of credit score, we must use a lender who manually reviews your file (rent history, utility payments) rather than relying on automated algorithms.", options: [] },
-        strat_hard_money_buy: { text: "Strategy: Hard Money Purchase. Recent bankruptcy prevents standard loans. We will use a private money bridge loan to secure the property now, and refinance into a standard loan in 12-24 months once your seasoning period ends.", options: [] },
-        strat_new_construction: { text: "Strategy: New Construction Representation. The sales rep works for the builder, not you. I will register as your agent to negotiate upgrades and lot premiums, and ensure a pre-drywall inspection is conducted.", options: [] },
-        strat_builder_reg: { text: "Strategy: Builder Intervention. Since you already registered, I may not be able to officially represent you, but I can still review your contract and advise on inspection phases to protect your deposit.", options: [] },
-        strat_divorce_neutral: { text: "Strategy: Neutral Third-Party Sale. In contested divorces, I act as a neutral party. I communicate with both attorneys separately, ensuring the home is sold for market value without emotional sabotage from either side.", options: [] },
-        strat_senior_transition: { text: "Strategy: Senior Transition Service. We focus on 'Rightsizing'. I will coordinate with estate liquidators to handle the belongings you aren't keeping and target 55+ communities that offer maintenance-free living.", options: [] },
-        strat_luxury_private: { text: "Strategy: Private Placement (Pocket Listing). For privacy, we will not list on the MLS. We will market directly to my network of high-net-worth individuals and buyer agents to secure a sale without public photos.", options: [] },
-        strat_eviction_sale: { text: "Strategy: Cash-for-Keys or Eviction Sale. Selling a home with non-paying tenants is hard. We can either offer 'Cash for Keys' to get them out before listing, or sell to an investor who specializes in evictions.", options: [] },
-        strat_probate_conflict: { text: "Strategy: Mediator Sale. When heirs disagree, the court may order a sale. We will focus on strict transparency, ensuring all offers are presented to all heirs simultaneously to prevent disputes.", options: [] },
-        strat_house_hack_invest: { text: "Strategy: FHA House Hack. With low capital, you buy a 2-4 unit building with 3.5% down. You live in one unit and rent the others. This is the highest ROI strategy for beginners.", options: [] },
-        strat_multifamily_commercial: { text: "Strategy: Commercial Multifamily Loan. For 5+ units, residential loans don't apply. We will look at DSCR loans where the building's income qualifies the loan, not your personal income.", options: [] },
-        strat_restaurant_buy: { text: "Strategy: 2nd Gen Restaurant Acquisition. Building a kitchen from scratch is too expensive. We will target '2nd Generation' spaces that already have a black iron hood, grease trap, and walk-in cooler to save you $150k in buildout.", options: [] },
-        strat_medical_office: { text: "Strategy: Medical Buildout. We need a shell with sufficient plumbing stacks for sinks in every exam room. We will negotiate a high 'TI' (Tenant Improvement) allowance from the landlord to cover these costs.", options: [] },
-        strat_flex_space: { text: "Strategy: Flex/Office. You need a mix of warehouse and office. We will target business parks with rear drive-in doors but nice glass fronts for your customers.", options: [] },
-        strat_guaranteed_offer: { text: "Strategy: Guaranteed Sale Program. If you need absolute certainty, I can present a cash offer floor. If the market doesn't beat it within X days, the cash offer stands.", options: [] },
-        strat_commuter_hub: { text: "Strategy: Transit-Oriented Purchase. We will map your search specifically to Metra/Train lines (e.g., Union Pacific West), prioritizing homes within a 10-minute walk of the station to protect resale value.", options: [] },
-        strat_school_zone: { text: "Strategy: District-First Search. We will filter properties strictly by school rating boundaries (e.g., District 88 or 45), as these boundaries drive property value retention more than the house itself.", options: [] },
+        // --- NEW OUTCOMES (Total now >55) ---
+        strat_virtual_tour: { text: "Strategy: Virtual Relocation. Since you are moving ASAP, we will conduct live video tours via FaceTime. We will add a 'Sight Unseen' rider to the contract giving you a 3-day rescission period after you physically visit.", options: [] },
+        strat_jumbo_loan: { text: "Strategy: Jumbo Financing. For loans over $766k, standard guidelines don't apply. We will target portfolio lenders who require 10-20% down but offer competitive rates for high-net-worth borrowers.", options: [] },
+        strat_usda_loan: { text: "Strategy: USDA Rural Development. If you are willing to buy in eligible rural areas, we can secure a 0% down payment loan with lower mortgage insurance rates than FHA.", options: [] },
+        strat_fsbo_conversion: { text: "Strategy: MLS Exposure Plan. Selling on your own limits you to 3% of buyers. By listing on the MLS (even for a flat fee), we open the door to the other 97% of buyers represented by agents.", options: [] },
+        strat_expired_relist: { text: "Strategy: Fresh Market Refresh. The previous listing likely had poor photos or pricing. We will re-list with a new price point and completely new media to trigger 'New Listing' alerts.", options: [] },
+        strat_cap_gains_calc: { text: "Strategy: Tax Deferred Analysis. Since you haven't lived here for 2 years, you face Capital Gains tax. We should calculate if a '1031 Exchange' (if it was a rental) or waiting a few months is worth the savings.", options: [] },
+        strat_private_showings: { text: "Strategy: Appointment-Only Listings. We will block all Open Houses. Serious buyers will book private appointments. This reduces 'Looky Lous' and neighbors snooping in your home.", options: [] },
+        strat_str_self: { text: "Strategy: Self-Managed Airbnb. You keep 100% of revenue but handle 3am calls. We must automate everything: Keyless entry, automated messaging, and a reliable cleaning crew on retainer.", options: [] },
+        strat_str_managed: { text: "Strategy: Managed STR. You pay 20-25% to a manager, but it becomes passive. We will underwrite the deal assuming this expense to ensure it still cash flows positive.", options: [] },
+        strat_land_build: { text: "Strategy: New Construction on Infill Lot. Since utilities are present, we can secure a 'Construction-to-Perm' loan. You close once, build, and it converts to a mortgage automatically.", options: [] },
+        strat_land_hold: { text: "Strategy: Land Banking. Raw land is speculative. Taxes are low, but liquidity is low. We will ensure the path of progress (development) is moving toward this parcel.", options: [] },
+        strat_zoning_attorney: { text: "Strategy: Zoning Contingency. We cannot close until the village approves your use. We will write the offer contingent on 'Special Use Permit' approval and engage a zoning attorney immediately.", options: [] },
+        strat_biz_opp: { text: "Strategy: Business Opportunity Sale. You are buying the cash flow, not just the walls. We need to audit the P&L (Profit and Loss) statements and structure the deal as an Asset Sale vs Stock Sale.", options: [] },
 
-        // --- CORE OUTCOMES ---
-        strat_va_loan: { text: "Strategy: VA Loan (0% Down). Since you served, we will utilize the VA loan benefit. This offers 0% down payment and no mortgage insurance. We must ensure the property meets VA 'Minimum Property Requirements' (MPR).", options: [] },
-        strat_203k_rehab: { text: "Strategy: FHA 203k Loan. Since you want to renovate but lack cash, we will wrap the renovation costs into the mortgage. You buy the house + the repairs in one loan with 3.5% down.", options: [] },
-        strat_condo_warrantable: { text: "Strategy: Warrantable Condo. We must verify the condo association is 'Warrantable' (no litigation, >50% owner occupied) to ensure you can get standard financing rates.", options: [] },
-        res_grant: { text: "Strategy: IHDA Grant Pairing. We will leverage Illinois Housing Development Authority programs to secure up to $10,000 in down payment assistance. Focus on lenders who can layer these grants without high rate bumps.", options: [] },
-        res_fha_standard: { text: "Strategy: Standard FHA 3.5%. With a score over 620, you qualify for the 3.5% down payment with lower MIP costs. We can start shopping immediately.", options: [] },
-        res_credit_repair: { text: "Strategy: Credit Repair Roadmap. You need a 6-month buffer. We will pause the search to focus on debt-to-income ratios. Targeting 620+ saves you thousands in MIP costs.", options: [] },
-        strat_concurrent: { text: "Strategy: Concurrent Closing. Your sale is safe. We will line up the closings for the same day (Sale in AM, Buy in PM) so proceeds transfer directly at the title company.", options: [] },
-        strat_bridge: { text: "Strategy: Bridge Loan / HELOC. Since you have high equity, we will tap into a HELOC or Bridge Loan on your current home to fund the down payment for the new one immediately.", options: [] },
-        strat_sell_first: { text: "Strategy: Listing Preparation. To buy your next home, we must list your current one first. We will use a 'Home of Choice' contingency clause to protect you.", options: [] },
-        strat_vacation: { text: "Strategy: Vacation Rental Analysis. We must verify local short-term rental laws (AirBnB rules). Income potential is high, but we need to calculate the specific tax implications.", options: [] },
-        strat_leaseback: { text: "Strategy: Seller Rent-Back. We will negotiate a leaseback agreement, allowing you to stay in your home for up to 60 days after closing while you shop.", options: [] },
-        strat_luxury_listing: { text: "Strategy: Luxury Portfolio. Properties over $800k require 'Lifestyle Marketing'. We will implement twilight photography, video tours, and international syndication.", options: [] },
-        strat_tenant_sale: { text: "Strategy: Investor-to-Investor Sale. Since tenants are on a long lease, we market the property based on its 'Cap Rate' and cash flow to other investors.", options: [] },
-        strat_concierge: { text: "Strategy: Concierge Listing. We prioritize Price. Implementation of staging, pre-listing inspection, and high-end drone photography.", options: [] },
-        strat_instant: { text: "Strategy: Aggressive Pricing / iBuyer. We prioritize Speed. We will price slightly below comps to induce a bidding war or solicit cash offers.", options: [] },
-        strat_hold_rent: { text: "Strategy: Rent & Hold. You have low equity but aren't distressed. Selling now means bringing cash to close. It is better to rent the unit until equity recovers.", options: [] },
-        strat_short_sale: { text: "Strategy: Negotiated Short Sale. We must negotiate a 'Waiver of Deficiency' as part of the sale. This protects your other assets.", options: [] },
-        strat_deed_lieu: { text: "Strategy: Deed in Lieu. If you are insolvent with only one lien, we offer the deed to the bank. This 'Cash for Keys' approach avoids foreclosure stigma.", options: [] },
-        strat_probate_easy: { text: "Strategy: Standard Estate Sale. Independent Administration allows you to sell without court approval. We proceed as a standard listing.", options: [] },
-        strat_probate_court: { text: "Strategy: Court-Approved Sale. We must include a 'Court Approval Contingency' in any contract. Expect a 45-60 day closing window.", options: [] },
-        strat_probate_bond: { text: "Strategy: Bond in Lieu. To speed this up, we can work with a title company to issue a 'Bond in Lieu', allowing us to sell before probate ends.", options: [] },
-        strat_turnkey: { text: "Strategy: Turnkey Investing. As a beginner, we should look for properties that are already renovated and tenanted. This minimizes risk.", options: [] },
-        strat_dst: { text: "Strategy: Delaware Statutory Trust (DST). Since you are in a time crunch for your 1031 exchange, a DST allows you to park your funds in a passive property immediately.", options: [] },
-        strat_fix_flip: { text: "Strategy: Fix & Flip (70% Rule). We only buy if (Purchase + Repairs) < 70% of After Repair Value. Focus on distressed Class C properties.", options: [] },
-        strat_brrrr: { text: "Strategy: BRRRR Method. Buy, Rehab, Rent, Refinance, Repeat. Focus on DSCR for the cash-out refi.", options: [] },
-        strat_buy_hold: { text: "Strategy: Cash Flow Focus. We target multi-family units where the Cap Rate exceeds 6-8%. Focus on stable tenant history.", options: [] },
-        strat_syndication: { text: "Strategy: Syndication LP. You provide capital to a General Partner for a large commercial deal. Totally passive.", options: [] },
-        strat_reit: { text: "Strategy: Public REITs. Since you are not accredited, we focus on publicly traded Real Estate Investment Trusts.", options: [] },
-        strat_hold_refi: { text: "Strategy: Hold & Refinance. Your equity is working hard. We should look at a Cash-Out Refinance to buy another asset.", options: [] },
-        strat_1031: { text: "Strategy: 1031 Exchange. Your equity is 'lazy'. We should sell this asset and defer taxes by rolling the proceeds into a higher-performing property.", options: [] },
+        // --- PREVIOUS OUTCOMES ---
+        strat_bank_statement: { text: "Strategy: Bank Statement Loan. Since you are self-employed with high write-offs, we will use a Non-QM lender who qualifies you based on 12-24 months of bank deposits rather than taxable income.", options: [] },
+        strat_physician_loan: { text: "Strategy: Physician Loan. Lenders offer special products for Medical Residents/Doctors. They exclude student debt from DTI calculations and often allow 0-5% down with no PMI.", options: [] },
+        strat_manual_underwriting: { text: "Strategy: Manual Underwriting. Due to employment gaps, we must use a lender who manually reviews your file (rent history, utility payments) rather than relying on automated algorithms.", options: [] },
+        strat_hard_money_buy: { text: "Strategy: Hard Money Purchase. Recent bankruptcy prevents standard loans. We will use a private money bridge loan to secure the property now, and refinance later.", options: [] },
+        strat_new_construction: { text: "Strategy: New Construction Representation. The sales rep works for the builder. I will register as your agent to negotiate upgrades and ensure a pre-drywall inspection is conducted.", options: [] },
+        strat_builder_reg: { text: "Strategy: Builder Intervention. I can still review your contract and advise on inspection phases to protect your deposit.", options: [] },
+        strat_divorce_neutral: { text: "Strategy: Neutral Third-Party Sale. In contested divorces, I act as a neutral party to ensure the home is sold for market value without emotional sabotage.", options: [] },
+        strat_senior_transition: { text: "Strategy: Senior Transition Service. We focus on 'Rightsizing'. I will coordinate with estate liquidators to handle belongings and target 55+ communities.", options: [] },
+        strat_luxury_private: { text: "Strategy: Private Placement. We will market directly to my network of high-net-worth individuals and buyer agents to secure a sale without public photos.", options: [] },
+        strat_eviction_sale: { text: "Strategy: Cash-for-Keys. Selling a home with non-paying tenants is hard. We can offer 'Cash for Keys' to get them out before listing.", options: [] },
+        strat_probate_conflict: { text: "Strategy: Mediator Sale. We will focus on strict transparency, ensuring all offers are presented to all heirs simultaneously to prevent disputes.", options: [] },
+        strat_house_hack_invest: { text: "Strategy: FHA House Hack. Buy a 2-4 unit building with 3.5% down. Live in one unit and rent the others.", options: [] },
+        strat_multifamily_commercial: { text: "Strategy: Commercial Multifamily Loan. For 5+ units, we look at DSCR loans where the building's income qualifies the loan.", options: [] },
+        strat_restaurant_buy: { text: "Strategy: 2nd Gen Restaurant Acquisition. We will target spaces that already have a black iron hood and grease trap to save you $150k in buildout.", options: [] },
+        strat_medical_office: { text: "Strategy: Medical Buildout. We will negotiate a high 'TI' (Tenant Improvement) allowance from the landlord to cover plumbing costs.", options: [] },
+        strat_flex_space: { text: "Strategy: Flex/Office. We will target business parks with rear drive-in doors but nice glass fronts for your customers.", options: [] },
+        strat_guaranteed_offer: { text: "Strategy: Guaranteed Sale Program. I can present a cash offer floor. If the market doesn't beat it within X days, the cash offer stands.", options: [] },
+        strat_commuter_hub: { text: "Strategy: Transit-Oriented Purchase. We will map your search specifically to Metra/Train lines.", options: [] },
+        strat_school_zone: { text: "Strategy: District-First Search. We will filter properties strictly by school rating boundaries.", options: [] },
+        strat_va_loan: { text: "Strategy: VA Loan (0% Down). We will utilize the VA loan benefit. This offers 0% down payment and no mortgage insurance.", options: [] },
+        strat_203k_rehab: { text: "Strategy: FHA 203k Loan. We will wrap the renovation costs into the mortgage. You buy the house + the repairs in one loan.", options: [] },
+        strat_condo_warrantable: { text: "Strategy: Warrantable Condo. We must verify the condo association is 'Warrantable' (no litigation, >50% owner occupied).", options: [] },
+        res_grant: { text: "Strategy: IHDA Grant Pairing. We will leverage Illinois Housing Development Authority programs to secure up to $10,000 in down payment assistance.", options: [] },
+        res_fha_standard: { text: "Strategy: Standard FHA 3.5%. With a score over 620, you qualify for the 3.5% down payment with lower MIP costs.", options: [] },
+        res_credit_repair: { text: "Strategy: Credit Repair Roadmap. You need a 6-month buffer. We will pause the search to focus on debt-to-income ratios.", options: [] },
+        strat_concurrent: { text: "Strategy: Concurrent Closing. We will line up the closings for the same day (Sale in AM, Buy in PM).", options: [] },
+        strat_bridge: { text: "Strategy: Bridge Loan / HELOC. Tap into a HELOC on your current home to fund the down payment for the new one immediately.", options: [] },
+        strat_sell_first: { text: "Strategy: Listing Preparation. We will use a 'Home of Choice' contingency clause to protect you.", options: [] },
+        strat_vacation: { text: "Strategy: Vacation Rental Analysis. We must verify local short-term rental laws (AirBnB rules).", options: [] },
+        strat_leaseback: { text: "Strategy: Seller Rent-Back. We will negotiate a leaseback agreement, allowing you to stay in your home for up to 60 days after closing.", options: [] },
+        strat_luxury_listing: { text: "Strategy: Luxury Portfolio. We will implement twilight photography, video tours, and international syndication.", options: [] },
+        strat_tenant_sale: { text: "Strategy: Investor-to-Investor Sale. We market the property based on its 'Cap Rate' and cash flow to other investors.", options: [] },
+        strat_concierge: { text: "Strategy: Concierge Listing. Implementation of staging, pre-listing inspection, and high-end drone photography.", options: [] },
+        strat_instant: { text: "Strategy: Aggressive Pricing / iBuyer. We will price slightly below comps to induce a bidding war or solicit cash offers.", options: [] },
+        strat_hold_rent: { text: "Strategy: Rent & Hold. It is better to rent the unit until equity recovers.", options: [] },
+        strat_short_sale: { text: "Strategy: Negotiated Short Sale. We must negotiate a 'Waiver of Deficiency' as part of the sale.", options: [] },
+        strat_deed_lieu: { text: "Strategy: Deed in Lieu. This 'Cash for Keys' approach avoids foreclosure stigma.", options: [] },
+        strat_probate_easy: { text: "Strategy: Standard Estate Sale. Independent Administration allows you to sell without court approval.", options: [] },
+        strat_probate_court: { text: "Strategy: Court-Approved Sale. Expect a 45-60 day closing window.", options: [] },
+        strat_probate_bond: { text: "Strategy: Bond in Lieu. We work with a title company to issue a 'Bond in Lieu' to sell before probate ends.", options: [] },
+        strat_turnkey: { text: "Strategy: Turnkey Investing. We should look for properties that are already renovated and tenanted.", options: [] },
+        strat_dst: { text: "Strategy: Delaware Statutory Trust (DST). A DST allows you to park your funds in a passive property immediately.", options: [] },
+        strat_fix_flip: { text: "Strategy: Fix & Flip (70% Rule). We only buy if (Purchase + Repairs) < 70% of After Repair Value.", options: [] },
+        strat_brrrr: { text: "Strategy: BRRRR Method. Buy, Rehab, Rent, Refinance, Repeat.", options: [] },
+        strat_buy_hold: { text: "Strategy: Cash Flow Focus. We target multi-family units where the Cap Rate exceeds 6-8%.", options: [] },
+        strat_syndication: { text: "Strategy: Syndication LP. You provide capital to a General Partner for a large commercial deal.", options: [] },
+        strat_reit: { text: "Strategy: Public REITs. We focus on publicly traded Real Estate Investment Trusts.", options: [] },
+        strat_hold_refi: { text: "Strategy: Hold & Refinance. We should look at a Cash-Out Refinance to buy another asset.", options: [] },
+        strat_1031: { text: "Strategy: 1031 Exchange. Sell this asset and defer taxes by rolling the proceeds into a higher-performing property.", options: [] },
         strat_sba_504: { text: "Strategy: SBA 504 Loan. As an owner-user, you can buy a building with only 10% down.", options: [] },
-        strat_lease_audit: { text: "Strategy: NNN Lease Audit. We must audit the landlord's 'CAM' charges to ensure you aren't overpaying.", options: [] },
-        strat_lease_base_year: { text: "Strategy: Base Year Stop. We negotiate a 'Gross' lease where you only pay for tax/expense increases *above* a base year.", options: [] },
-        strat_industrial_logistics: { text: "Strategy: Logistics/Flex Focus. Demand is high for 2000sqft bays with 14ft doors. Focus on 'Last Mile' locations.", options: [] },
-        res_conventional_check: { text: "Strategy: Conventional 3-5% Down. With your excellent credit, we skip FHA. We target Conventional loans with minimal PMI that falls off automatically once you hit 20% equity.", options: [] }
+        strat_lease_audit: { text: "Strategy: NNN Lease Audit. We must audit the landlord's 'CAM' charges.", options: [] },
+        strat_lease_base_year: { text: "Strategy: Base Year Stop. We negotiate a 'Gross' lease where you only pay increases *above* a base year.", options: [] },
+        strat_industrial_logistics: { text: "Strategy: Logistics/Flex Focus. Focus on 'Last Mile' locations with 14ft+ doors.", options: [] },
+        res_conventional_check: { text: "Strategy: Conventional 3-5% Down. We target Conventional loans with minimal PMI that falls off automatically.", options: [] }
     };
 
     let currentNode = 'start';
@@ -563,8 +657,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const stepCount = history.length + 1;
         
         elements.step.innerText = isResult ? 'Recommendation Found' : `Step ${stepCount}`;
-        // Adjusted progress bar math for deeper tree
-        elements.progress.style.width = isResult ? '100%' : Math.min(stepCount * 10, 95) + '%';
+        elements.progress.style.width = isResult ? '100%' : Math.min(stepCount * 8, 95) + '%';
         elements.backBtn.style.display = (history.length > 0) ? 'block' : 'none';
 
         if (isResult) {
