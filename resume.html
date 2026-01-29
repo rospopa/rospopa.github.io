@@ -6,121 +6,117 @@
     <title>Pavlo Rospopa - Executive Resume</title>
     <style>
         :root {
-            --executive-black: #1a1a1a;
-            --subtle-gray: #4a4a4a;
-            --divider: #000000;
-            --background: #ffffff;
-            --highlight-bg: #f9f9f9;
+            --ink-black: #000000;
+            --deep-slate: #2d3748;
+            --paper-white: #ffffff;
+            --accent-gold: #b8860b;
         }
 
         body {
-            font-family: 'Georgia', serif; /* Highly legible serif for long-form reading */
-            line-height: 1.5;
-            color: var(--executive-black);
-            max-width: 900px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+            line-height: 1.6;
+            color: var(--ink-black);
+            max-width: 850px;
             margin: 0 auto;
-            padding: 50px;
-            background-color: var(--background);
+            padding: 60px;
+            background-color: var(--paper-white);
         }
 
         header {
             text-align: center;
-            border-bottom: 3px solid var(--divider);
+            border-bottom: 4px solid var(--ink-black);
             padding-bottom: 20px;
             margin-bottom: 30px;
         }
 
         h1 {
             margin: 0;
-            font-size: 32px;
-            letter-spacing: 1px;
+            font-size: 36px;
+            letter-spacing: 2px;
             text-transform: uppercase;
-            font-weight: 700;
+            font-weight: 900;
         }
 
         .contact-info {
-            font-family: 'Arial', sans-serif;
-            font-size: 15px;
-            margin-top: 10px;
-            color: var(--subtle-gray);
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 16px;
+            margin-top: 12px;
+            font-weight: 500;
             letter-spacing: 0.5px;
         }
 
-        .summary-box {
-            background-color: var(--highlight-bg);
-            padding: 20px;
-            border-left: 5px solid var(--executive-black);
-            margin-bottom: 30px;
+        .professional-summary {
+            font-size: 18px;
+            line-height: 1.5;
+            text-align: center;
+            margin: 30px 0;
+            padding: 0 20px;
             font-style: italic;
-            font-size: 16px;
+            color: var(--deep-slate);
         }
 
         h2 {
-            font-family: 'Arial', sans-serif;
-            font-size: 18px;
+            font-family: 'Helvetica', 'Arial', sans-serif;
+            font-size: 20px;
             text-transform: uppercase;
-            border-bottom: 1px solid var(--divider);
+            border-bottom: 2px solid var(--ink-black);
             margin-top: 40px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             padding-bottom: 5px;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
         }
 
         .entry {
-            margin-bottom: 30px;
+            margin-bottom: 35px;
         }
 
         .entry-header {
             display: flex;
             justify-content: space-between;
             align-items: baseline;
-            font-weight: bold;
-            font-size: 18px;
+            font-weight: 900;
+            font-size: 20px;
         }
 
         .entry-subheader {
             display: flex;
             justify-content: space-between;
             font-style: italic;
-            color: var(--subtle-gray);
-            font-size: 16px;
-            margin-bottom: 10px;
+            font-size: 18px;
+            margin-bottom: 12px;
+            color: var(--deep-slate);
         }
 
         ul {
             margin: 10px 0;
-            padding-left: 25px;
+            padding-left: 20px;
+            list-style-type: disc;
         }
 
         li {
-            margin-bottom: 8px;
+            margin-bottom: 10px;
+            font-size: 17px;
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 15px;
+            font-family: 'Helvetica', 'Arial', sans-serif;
             font-size: 16px;
-            text-align: justify;
+            margin-top: 20px;
         }
 
-        .skills-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            font-family: 'Arial', sans-serif;
-            font-size: 15px;
-        }
-
-        .skill-line {
-            display: flex;
-            border-bottom: 1px solid #eee;
-            padding-bottom: 5px;
-        }
-
-        .skill-label {
+        .skill-title {
             font-weight: bold;
-            width: 150px;
-            flex-shrink: 0;
+            text-transform: uppercase;
+            font-size: 14px;
+            color: var(--deep-slate);
         }
 
         @media print {
-            body { padding: 20px; }
-            .summary-box { border: 1px solid #ddd; }
+            body { padding: 0; }
+            button { display: none; }
         }
     </style>
 </head>
@@ -129,12 +125,14 @@
     <header>
         <h1>Pavlo Rospopa</h1>
         <div class="contact-info">
-            pavlo@rospopa.com | (773) 313-5785 | Elmhurst, Illinois [cite: 2]
+            pavlo@rospopa.com | (773) 313-5785 | Elmhurst, Illinois
         </div>
     </header>
 
-    <div class="summary-box">
-        Strategic Entrepreneur and IT professional with a proven track record of scaling logistics operations to $9M in annual revenue[cite: 8]. Expert in bridging the gap between proprietary software development and high-level business operations[cite: 10, 7]. Seeking to leverage leadership experience and technical expertise in Software Architecture to drive innovation at the executive level[cite: 28].
+    <div class="professional-summary">
+        Executive leader and technologist with a background in founding and scaling logistics enterprises. 
+        Expert in synthesizing Software Architecture with high-level business strategy to drive 
+        operational excellence and revenue growth.
     </div>
 
     <section>
@@ -143,51 +141,51 @@
         <div class="entry">
             <div class="entry-header">
                 <span>Oregon Logistics</span>
-                <span>July 2018 – April 2024 [cite: 5]</span>
+                <span>July 2018 – April 2024</span>
             </div>
             <div class="entry-subheader">
                 <span>Founder & CEO</span>
-                <span>Chicago, IL [cite: 5]</span>
+                <span>Chicago, IL</span>
             </div>
             <ul>
-                <li>Led an American freight brokerage and forwarder providing comprehensive transportation management services[cite: 6].</li>
-                <li>Directed core strategies, product roadmaps, and fundraising initiatives[cite: 7].</li>
-                <li>Successfully scaled the company to over 30,000 loads delivered and $9M in annual revenue[cite: 8].</li>
-                <li>Established a 12-person international customer service center in Lviv, Ukraine[cite: 9].</li>
-                <li>Engineered proprietary TMS, VoIP, and GPS software to streamline logistics.</li>
+                <li>Founded and scaled an American freight brokerage and forwarding firm specializing in transportation management software[cite: 4, 6].</li>
+                <li>Directed core strategies, product roadmaps, marketing, and fundraising initiatives[cite: 7].</li>
+                <li>Generated $9M in annual revenue with over 30,000 loads delivered in the first six years.</li>
+                <li>Established and trained a 12-person customer service operation in Lviv, Ukraine[cite: 9].</li>
+                <li>Architected proprietary software including TMS, Voice over IP, and GPS systems[cite: 10].</li>
             </ul>
         </div>
 
         <div class="entry">
             <div class="entry-header">
                 <span>Global Freight Services</span>
-                <span>April 2024 – December 2025 [cite: 13]</span>
+                <span>April 2024 – December 2025</span>
             </div>
             <div class="entry-subheader">
                 <span>Business Development Partner</span>
-                <span>Chicago, IL [cite: 13]</span>
+                <span>Chicago, IL</span>
             </div>
             <ul>
-                <li>Orchestrated the launch of two multimodal subsidiaries within the North American rail sector[cite: 14].</li>
-                <li>Mitigated operational risk through the implementation of automated software workflows[cite: 15].</li>
-                <li>Standardized operational processes and led one-on-one training for new personnel[cite: 16].</li>
-                <li>Oversaw accounting audits and spearheaded organizational compliance initiatives[cite: 17].</li>
+                <li>Spearheaded the acquisition and launch of two multimodal subsidiaries in North American rail[cite: 12, 14].</li>
+                <li>Implemented workflow automation to reduce operational risk and human error[cite: 15].</li>
+                <li>Standardized operational processes and conducted personnel training to streamline efficiency[cite: 16].</li>
+                <li>Oversaw accounting audits and led compliance and safety initiatives[cite: 17].</li>
             </ul>
         </div>
 
         <div class="entry">
             <div class="entry-header">
                 <span>Century 21 SGR</span>
-                <span>February 2020 – Present [cite: 19]</span>
+                <span>February 2020 – Present</span>
             </div>
             <div class="entry-subheader">
                 <span>REALTOR®</span>
-                <span>Chicago, IL [cite: 19]</span>
+                <span>Chicago, IL</span>
             </div>
             <ul>
-                <li>Manage commercial real estate sites and facilitate investment property transactions[cite: 20].</li>
-                <li>Review complex loan documentation and execute legal contracts[cite: 21].</li>
-                <li>Perform high-level investigations into tax, zoning, and demographic data[cite: 22].</li>
+                <li>Manage commercial real estate site acquisitions and investment property brokerage[cite: 18, 20].</li>
+                <li>Execute contracts, inspections, and comprehensive loan documentation reviews[cite: 21].</li>
+                <li>Lead due diligence investigations into zoning, taxation, and demographic data[cite: 22].</li>
             </ul>
         </div>
     </section>
@@ -198,53 +196,48 @@
         <div class="entry">
             <div class="entry-header">
                 <span>Elmhurst University</span>
-                <span>May 2024 [cite: 26]</span>
+                <span>May 2024</span>
             </div>
             <div class="entry-subheader">
                 <span>B.S. Information Technology</span>
-                <span>Elmhurst, IL [cite: 27]</span>
+                <span>Elmhurst, IL</span>
             </div>
             <ul>
-                <li>Specialized in Software Architecture and System Design for Scalable Web Applications[cite: 28].</li>
-                <li>Academic Standing: 3.6/4.0 GPA[cite: 28].</li>
+                <li>Concentration in Software Architecture and Scalable Web Application Design[cite: 25, 28].</li>
+                <li>Academic standing: 3.6/4.0 GPA.</li>
             </ul>
         </div>
 
         <div class="entry">
             <div class="entry-header">
                 <span>DePaul University</span>
-                <span>March 2020 [cite: 31]</span>
+                <span>March 2020</span>
             </div>
             <div class="entry-subheader">
                 <span>Economics</span>
-                <span>Chicago, IL [cite: 31]</span>
+                <span>Chicago, IL</span>
             </div>
             <ul>
-                <li>Focused on U.S. Monetary Policy and International Food Security[cite: 32].</li>
+                <li>Specialization in U.S. Monetary Policy and International Food Security[cite: 30, 32].</li>
                 <li>Co-founder and Treasurer of the DePaul University Fishing Club[cite: 33].</li>
             </ul>
         </div>
     </section>
 
     <section>
-        <h2>Expertise & Interests</h2>
-        <div class="skills-container">
-            <div class="skill-line">
-                <span class="skill-label">Languages:</span>
-                <span>English, Ukrainian, Russian (Fluent)[cite: 35].</span>
-            </div>
-            <div class="skill-line">
-                <span class="skill-label">Technical:</span>
-                <span>C++, HTML/CSS, AWS, Salesforce, System Design[cite: 35, 11].</span>
-            </div>
-            <div class="skill-line">
-                <span class="skill-label">Management:</span>
-                <span>Risk Management, Strategic Execution, Requirements Documentation[cite: 35, 36].</span>
-            </div>
-            <div class="skill-line">
-                <span class="skill-label">Interests:</span>
-                <span>Speed chess, programming, mountain biking, tennis, and fishing[cite: 37].</span>
-            </div>
+        <h2>Technical Expertise & Interests</h2>
+        <div class="skills-grid">
+            <div class="skill-title">Languages</div>
+            <div>English, Ukrainian, Russian (Fluent).</div>
+            
+            <div class="skill-title">Technical</div>
+            <div>C++, HTML/CSS, AWS, System Design, Flowchart Diagrams[cite: 11, 35].</div>
+            
+            <div class="skill-title">Leadership</div>
+            <div>Strategic Planning, Risk Management, Requirements Specification[cite: 35, 36].</div>
+            
+            <div class="skill-title">Interests</div>
+            <div>Speed chess, programming, mountain biking, tennis, and traveling[cite: 37].</div>
         </div>
     </section>
 
