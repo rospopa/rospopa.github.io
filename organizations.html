@@ -35,14 +35,7 @@
         /* --- 2. ZEBRA STRIPING --- */
         table.results tbody tr.dynamic-grey > td,
         table.results tbody tr.dynamic-grey > th {
-            /* The Color */
             background-color: #f5f5f7 !important;
-            
-            /* REMOVED: Paint Forcers (caused border glitches) */
-            /* will-change: transform; */
-            /* transform: scale(1); */
-            
-            /* The Backup */
             box-shadow: inset 0 0 0 9999px rgba(224, 224, 224, 1) !important;
             -webkit-print-color-adjust: exact;
         }
@@ -51,11 +44,6 @@
         table.results tbody tr.active-hover > td,
         table.results tbody tr.active-hover > th {
             background-color: #ffff99 !important;
-            
-            /* REMOVED: Paint Forcers (caused border glitches) */
-            /* will-change: transform; */
-            /* transform: scale(1); */
-
             box-shadow: inset 0 0 0 9999px rgba(255, 255, 153, 1) !important;
             cursor: pointer;
         }
@@ -64,7 +52,6 @@
             display: none;
         }
         
-        /* Fix for Bootstrap Table Borders interfering with background */
         table.results {
             border-collapse: separate !important; 
             border-spacing: 0;
@@ -189,6 +176,15 @@
     <tr class="summary-row">
         <td colspan="3">A worldwide nonprofit educational organization that empowers individuals to become more effective communicators and leaders.</td>
     </tr>
+
+    <tr>
+        <th scope="row">9</th>
+        <td><a href="https://lincolnparkbuilders.com/" target="_blank">Lincoln Park Builders of Chicago</a></td>
+        <td>Real Estate Professional Development</td>
+    </tr>
+    <tr class="summary-row">
+        <td colspan="3">A premier real estate networking group in Chicago, known for its influential annual forum and commitment to local development.</td>
+    </tr>
 </tbody>
                     </table>
                     
@@ -211,19 +207,14 @@
                                 });
                             }
 
-                            // 1. Initial Apply
                             reapplyStriping();
 
-                            // 2. FORCE REPAINT
                             var table = $('#bookTable');
                             table.hide();
                             setTimeout(function(){
                                 table.show(); 
                             }, 10); 
 
-
-                            // --- NEW: INTELLIGENT HOVER LOGIC ---
-                            // Select all rows except the warning row
                             var allRows = $('.results tbody tr').not('.warning');
 
                             allRows.on('mouseenter', function() {
@@ -236,7 +227,6 @@
                                     partnerRow = currentRow.next('.summary-row');
                                 }
 
-                                // Add hover class to BOTH
                                 currentRow.addClass('active-hover');
                                 if (partnerRow.length) partnerRow.addClass('active-hover');
                             });
@@ -245,8 +235,6 @@
                                 $('.results tbody tr').removeClass('active-hover');
                             });
 
-
-                            // --- SEARCH LOGIC ---
                             $(".search").keyup(function () {
                                 var searchTerm = $(".search").val().toLowerCase();
                                 var noResult = $('.no-result');
@@ -282,7 +270,6 @@
 
                     <br><br><br><br><br>
                     Return to <a href="#top">the top of this page</a>.
-                    <p></p>
                 </div>
             </div>
         </div>
