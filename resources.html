@@ -20,26 +20,22 @@
    
     <style>
         /* --- 1. TYPOGRAPHY --- */
-        /* Bold the Title/Link column */
         table.results tbody tr td:nth-of-type(1) {
             font-weight: bold;
         }
-        /* Normal weight for description */
         table.results tbody tr td:nth-of-type(2) {
             font-weight: normal;
         }
 
-        /* --- 2. ZEBRA STRIPING (Robust Box-Shadow Method) --- */
+        /* --- 2. ZEBRA STRIPING --- */
         table.results tbody tr.dynamic-grey > td,
         table.results tbody tr.dynamic-grey > th {
-            /* The Color */
             background-color: #f5f5f7 !important;
-            /* The Backup for border safety */
             box-shadow: inset 0 0 0 9999px rgba(224, 224, 224, 1) !important;
             -webkit-print-color-adjust: exact;
         }
 
-        /* --- 3. MOUSE HOVER EFFECT (Highlighter Yellow) --- */
+        /* --- 3. MOUSE HOVER EFFECT --- */
         table.results tbody tr.active-hover > td,
         table.results tbody tr.active-hover > th {
             background-color: #ffff99 !important;
@@ -51,13 +47,12 @@
             display: none;
         }
 
-        /* Fix for Bootstrap Table Borders interfering with background */
         table.results {
             border-collapse: separate !important; 
             border-spacing: 0;
         }
 
-        /* --- 4. FORCE SOFT CHARCOAL BORDERS (Universal Visibility) --- */
+        /* --- 4. UNIVERSAL BORDERS --- */
         .table-bordered,
         .table-bordered > thead > tr > th,
         .table-bordered > tbody > tr > th,
@@ -65,7 +60,6 @@
         .table-bordered > thead > tr > td,
         .table-bordered > tbody > tr > td,
         .table-bordered > tfoot > tr > td {
-            /* Charcoal Grey for contrast without harshness */
             border-color: #555555 !important;
         }
     </style>
@@ -76,9 +70,6 @@
     <div class="wrap"><a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
         <nav class="site-nav">
             <div class="trigger">
-                <a style="text-decoration: none;" href="/login">Login</a>
-            </div>
-            <div class="trigger2">
                 <a style="text-decoration: none;" href="/login">Login</a>
             </div>
         </nav>
@@ -102,331 +93,75 @@
         </tr>
     </thead>
 <tbody>
-    <tr>
-      <th scope="row">1</th>
-      <td><a href="https://talosintelligence.com">Talos Intelligence</a></td>
-      <td>Cisco's global threat intelligence and cybersecurity research team.</td>
-    </tr>
-    <tr>
-      <th scope="row">2</th>
-      <td><a href="https://www.virustotal.com">VirusTotal</a></td>
-      <td>Scans files and URLs for malware using multiple antivirus engines.</td>
-    </tr>
-    <tr>
-      <th scope="row">3</th>
-      <td><a href="https://www.browserling.com">Browserling</a></td>
-      <td>Live interactive cross-browser testing for web developers.</td>
-    </tr>
-    <tr>
-      <th scope="row">4</th>
-      <td><a href="https://www.joesandbox.com/">Joe Sandbox</a></td>
-      <td>Deep malware analysis and automated sandboxing.</td>
-    </tr>
-    <tr>
-      <th scope="row">5</th>
-      <td><a href="https://any.run/">Any.Run</a></td>
-      <td>Interactive online malware analysis sandbox.</td>
-    </tr>
-    <tr>
-      <th scope="row">6</th>
-      <td><a href="https://hybrid-analysis.com/">Hybrid Analysis</a></td>
-      <td>Free automated malware analysis service for the community.</td>
-    </tr>
-    <tr>
-      <th scope="row">7</th>
-      <td><a href="https://unlec.com/">Unlec</a></td>
-      <td>Detailed phone number and carrier lookup tool.</td>
-    </tr>
-    <tr>
-      <th scope="row">8</th>
-      <td><a href="https://www.lambdatest.com/">LambdaTest</a></td>
-      <td>Cross-browser testing on cloud infrastructure.</td>
-    </tr>
-    <tr>
-      <th scope="row">9</th>
-      <td><a href="https://otx.alienvault.com/">AlienVault OTX</a></td>
-      <td>Open Threat Exchange for sharing threat intelligence.</td>
-    </tr>
-    <tr>
-      <th scope="row">10</th>
-      <td><a href="https://go.microsoft.com/fwlink/?LinkId=212732">Microsoft Safety Scanner</a></td>
-      <td>On-demand malware scanning and removal tool.</td>
-    </tr>
-    <tr>
-      <th scope="row">11</th>
-      <td><a href="https://www.yubico.com/">Yubico</a></td>
-      <td>Hardware security keys for strong authentication.</td>
-    </tr>
-    <tr>
-      <th scope="row">12</th>
-      <td><a href="https://cloud.google.com/security/products/titan-security-key">Titan Security Key</a></td>
-      <td>Google's hardware two-factor authentication key.</td>
-    </tr>
-    <tr>
-      <th scope="row">13</th>
-      <td><a href="https://www.lastpass.com/">LastPass</a></td>
-      <td>Cloud-based password management and secure vault.</td>
-    </tr>
-    <tr>
-      <th scope="row">14</th>
-      <td><a href="https://bitwarden.com/">Bitwarden</a></td>
-      <td>Open-source secure password manager.</td>
-    </tr>
-    <tr>
-      <th scope="row">15</th>
-      <td><a href="https://keepassxc.org/">KeePassXC</a></td>
-      <td>Offline, open-source password manager.</td>
-    </tr>
-    <tr>
-      <th scope="row">16</th>
-      <td><a href="https://www.autopsy.com/">Autopsy</a></td>
-      <td>Digital forensics platform for disk analysis.</td>
-    </tr>
-    <tr>
-      <th scope="row">17</th>
-      <td><a href="https://brokersnapshot.com/">BrokerSnapshot</a></td>
-      <td>Financial broker regulatory verification and scam detection.</td>
-    </tr>
-    <tr>
-      <th scope="row">18</th>
-      <td><a href="https://www.ghisler.com/">Total Commander</a></td>
-      <td>Advanced file manager replacement for Windows.</td>
-    </tr>
-    <tr>
-      <th scope="row">19</th>
-      <td><a href="https://www.apachefriends.org/">XAMPP</a></td>
-      <td>Open-source web server solution stack package.</td>
-    </tr>
-    <tr>
-      <th scope="row">20</th>
-      <td><a href="https://notepad-plus-plus.org/">Notepad++</a></td>
-      <td>Free source code editor and Notepad replacement.</td>
-    </tr>
-    <tr>
-      <th scope="row">21</th>
-      <td><a href="https://www.wireshark.org/">Wireshark</a></td>
-      <td>Network protocol analyzer for traffic inspection.</td>
-    </tr>
-    <tr>
-      <th scope="row">22</th>
-      <td><a href="https://www.pgadmin.org/">pgAdmin</a></td>
-      <td>Open-source management tool for PostgreSQL databases.</td>
-    </tr>
-    <tr>
-      <th scope="row">23</th>
-      <td><a href="https://www.atlassian.com/software/jira">Jira</a></td>
-      <td>Issue tracking and agile project management tool.</td>
-    </tr>
-    <tr>
-      <th scope="row">24</th>
-      <td><a href="https://bitbucket.org/">Bitbucket</a></td>
-      <td>Git-based source code repository hosting service.</td>
-    </tr>
-    <tr>
-      <th scope="row">25</th>
-      <td><a href="https://aistudio.google.com">Google AI Studio</a></td>
-      <td>Platform for building and prototyping with Gemini models.</td>
-    </tr>
-    <tr>
-      <th scope="row">26</th>
-      <td><a href="https://www.vultr.com/">Vultr</a></td>
-      <td>High-performance cloud infrastructure and hosting.</td>
-    </tr>
-    <tr>
-      <th scope="row">27</th>
-      <td><a href="https://www.twilio.com/en-us">Twilio</a></td>
-      <td>Communication APIs for messaging, voice, and video.</td>
-    </tr>
-    <tr>
-      <th scope="row">28</th>
-      <td><a href="https://zadarma.com">Zadarma</a></td>
-      <td>Cloud PBX and VoIP telecommunications provider.</td>
-    </tr>
-    <tr>
-      <th scope="row">29</th>
-      <td><a href="https://flowroute.com/">Flowroute</a></td>
-      <td>Carrier-grade SIP trunking and telecom services.</td>
-    </tr>
-    <tr>
-      <th scope="row">30</th>
-      <td><a href="https://www.bandwidth.com/">Bandwidth</a></td>
-      <td>Enterprise CPaaS provider for voice and messaging.</td>
-    </tr>
-    <tr>
-      <th scope="row">31</th>
-      <td><a href="https://fusionpbx.com/">FusionPBX</a></td>
-      <td>Multi-tenant GUI for FreeSWITCH.</td>
-    </tr>
-    <tr>
-      <th scope="row">32</th>
-      <td><a href="https://signalwire.com/freeswitch">FreeSWITCH</a></td>
-      <td>Open-source telephony platform maintained by SignalWire.</td>
-    </tr>
-    <tr>
-      <th scope="row">33</th>
-      <td><a href="https://www.ringotel.com/">Ringotel</a></td>
-      <td>Softphone app and unified communication platform.</td>
-    </tr>
-    <tr>
-      <th scope="row">34</th>
-      <td><a href="https://www.t38fax.com/">T38Fax</a></td>
-      <td>SIP trunks optimized for reliable Fax over IP.</td>
-    </tr>
-    <tr>
-      <th scope="row">35</th>
-      <td><a href="https://www.didww.com/">DIDWW</a></td>
-      <td>Global provider of phone numbers and SIP trunking.</td>
-    </tr>
-    <tr>
-      <th scope="row">36</th>
-      <td><a href="https://www.cyberghostvpn.com/">CyberGhost VPN</a></td>
-      <td>Virtual Private Network service for online privacy.</td>
-    </tr>
-    <tr>
-      <th scope="row">37</th>
-      <td><a href="https://n8n.io/">n8n</a></td>
-      <td>Fair-code workflow automation tool for technical people.</td>
-    </tr>
-    <tr>
-      <th scope="row">38</th>
-      <td><a href="https://www.trychroma.com/">Chroma</a></td>
-      <td>Open-source AI-native embedding database.</td>
-    </tr>
-    <tr>
-      <th scope="row">39</th>
-      <td><a href="https://ollama.com/">Ollama</a></td>
-      <td>Tool for running large language models locally.</td>
-    </tr>
-    <tr>
-      <th scope="row">40</th>
-      <td><a href="https://www.windmill.dev/">Windmill</a></td>
-      <td>Open-source developer platform for internal tools and APIs.</td>
-    </tr>
-    <tr>
-      <th scope="row">41</th>
-      <td><a href="https://www.docker.com/">Docker</a></td>
-      <td>Platform for developing, shipping, and running applications in containers.</td>
-    </tr>
-    <tr>
-      <th scope="row">42</th>
-      <td><a href="https://flipper.net/">Flipper</a></td>
-      <td>Portable multi-tool device for penetration testing and hardware hacking.</td>
-    </tr>
-    <tr>
-      <th scope="row">43</th>
-      <td><a href="https://hak5.org/">Hak5</a></td>
-      <td>Security hardware, penetration testing gear, and IT education.</td>
-    </tr>
-    <tr>
-      <th scope="row">44</th>
-      <td><a href="https://powerspec.com">PowerSpec</a></td>
-      <td>Micro Center's house brand of pre-built high-performance computers.</td>
-    </tr>
-    <tr>
-      <th scope="row">45</th>
-      <td><a href="https://www.vantajs.com">Vanta.js</a></td>
-      <td>Lightweight library for creating animated 3D website backgrounds.</td>
-    </tr>
-    <tr>
-      <th scope="row">46</th>
-      <td><a href="https://www.nayax.com/">Nayax</a></td>
-      <td>Cashless payment and telemetry solutions for unattended retail.</td>
-    </tr>
-    <tr>
-      <th scope="row">47</th>
-      <td><a href="https://www.nar.realtor/">National Association of Realtors</a></td>
-      <td>Trade association providing resources for real estate professionals.</td>
-    </tr>
-    <tr>
-      <th scope="row">48</th>
-      <td><a href="https://www.carrier411.com/">Carrier411</a></td>
-      <td>Monitoring and qualification service for checking trucking carrier safety.</td>
-    </tr>
-    <tr>
-      <th scope="row">49</th>
-      <td><a href="https://mred.remine.com/">Remine (MRED)</a></td>
-      <td>Map-based property intelligence and MLS platform for real estate agents.</td>
-    </tr>
-    <tr>
-      <th scope="row">50</th>
-      <td><a href="https://ww2.mredllc.com/">Midwest Real Estate Data (MRED)</a></td>
-      <td>The primary Multiple Listing Service (MLS) for the greater Chicago area.</td>
-    </tr>
-    <tr>
-      <th scope="row">51</th>
-      <td><a href="http://www.identifont.com/">Identifont</a></td>
-      <td>Tool to identify unknown fonts by answering questions about their appearance.</td>
-    </tr>
-    <tr>
-      <th scope="row">52</th>
-      <td><a href="https://svgconverter.online/">SVG Converter</a></td>
-      <td>Online tool to vectorise and convert raster images into SVG format.</td>
-    </tr>
-    <tr>
-      <th scope="row">53</th>
-      <td><a href="https://www.renderhub.com/">RenderHub</a></td>
-      <td>Marketplace for high-quality 3D models, textures, and VR content.</td>
-    </tr>
-    <tr>
-      <th scope="row">54</th>
-      <td><a href="https://www.turbosquid.com/">TurboSquid</a></td>
-      <td>Large professional 3D model marketplace for creative professionals.</td>
-    </tr>
-    <tr>
-      <th scope="row">55</th>
-      <td><a href="https://sketchfab.com/">Sketchfab</a></td>
-      <td>Platform to publish, share, discover, buy and sell 3D, VR and AR content.</td>
-    </tr>
-    <tr>
-      <th scope="row">56</th>
-      <td><a href="https://gltf.report/">glTF Report</a></td>
-      <td>Online viewer and validator to analyze and debug glTF 2.0 files.</td>
-    </tr>
-    <tr>
-      <th scope="row">57</th>
-      <td><a href="https://modelviewer.dev/">Model Viewer</a></td>
-      <td>Web component for easily displaying interactive 3D models on the web.</td>
-    </tr>
-    <tr>
-      <th scope="row">58</th>
-      <td><a href="https://duo.com/">Duo Security</a></td>
-      <td>Cloud-based two-factor authentication (2FA) and zero-trust security.</td>
-    </tr>
-    <tr>
-      <th scope="row">59</th>
-      <td><a href="https://1password.com/">1Password</a></td>
-      <td>Highly secure, multi-platform password manager and digital wallet.</td>
-    </tr>
-    <tr>
-      <th scope="row">60</th>
-      <td><a href="https://github.com/features/copilot">GitHub Copilot</a></td>
-      <td>AI-powered pair programmer for auto-completing and generating code.</td>
-    </tr>
-    <tr>
-      <th scope="row">61</th>
-      <td><a href="https://threejs.org/">Three.js</a></td>
-      <td>JavaScript 3D library which makes WebGL easier to use.</td>
-    </tr>
-    <tr>
-      <th scope="row">62</th>
-      <td><a href="https://www.experianidworks.com/">Experian IdentityWorks</a></td>
-      <td>Identity theft protection and credit monitoring service.</td>
-    </tr>
-    <tr>
-      <th scope="row">63</th>
-      <td><a href="https://siorchicago.org/">SIOR Chicago</a></td>
-      <td>The Chicago Chapter of the Society of Industrial and Office Realtors.</td>
-    </tr>
-    <tr>
-      <th scope="row">64</th>
-      <td><a href="https://github.com/mifi/lossless-cut">LosslessCut</a></td>
-      <td>Cross platform FFmpeg GUI for extremely fast and lossless operations on video, audio, subtitle and other related media files.</td>
-    </tr>
-    <tr>
-      <th scope="row">65</th>
-      <td><a href="https://www.shutterencoder.com/">Shutter Encoder</a></td>
-      <td>A converter designed by video editors. The professional compression tool accessible to all.</td>
-    </tr>
+    <tr><th scope="row">1</th><td><a href="https://talosintelligence.com">Talos Intelligence</a></td><td>Cisco's global threat intelligence and cybersecurity research team.</td></tr>
+    <tr><th scope="row">2</th><td><a href="https://www.virustotal.com">VirusTotal</a></td><td>Scans files and URLs for malware using multiple antivirus engines.</td></tr>
+    <tr><th scope="row">3</th><td><a href="https://www.browserling.com">Browserling</a></td><td>Live interactive cross-browser testing for web developers.</td></tr>
+    <tr><th scope="row">4</th><td><a href="https://www.joesandbox.com/">Joe Sandbox</a></td><td>Deep malware analysis and automated sandboxing.</td></tr>
+    <tr><th scope="row">5</th><td><a href="https://any.run/">Any.Run</a></td><td>Interactive online malware analysis sandbox.</td></tr>
+    <tr><th scope="row">6</th><td><a href="https://hybrid-analysis.com/">Hybrid Analysis</a></td><td>Free automated malware analysis service for the community.</td></tr>
+    <tr><th scope="row">7</th><td><a href="https://unlec.com/">Unlec</a></td><td>Detailed phone number and carrier lookup tool.</td></tr>
+    <tr><th scope="row">8</th><td><a href="https://www.lambdatest.com/">LambdaTest</a></td><td>Cross-browser testing on cloud infrastructure.</td></tr>
+    <tr><th scope="row">9</th><td><a href="https://otx.alienvault.com/">AlienVault OTX</a></td><td>Open Threat Exchange for sharing threat intelligence.</td></tr>
+    <tr><th scope="row">10</th><td><a href="https://go.microsoft.com/fwlink/?LinkId=212732">Microsoft Safety Scanner</a></td><td>On-demand malware scanning and removal tool.</td></tr>
+    <tr><th scope="row">11</th><td><a href="https://www.yubico.com/">Yubico</a></td><td>Hardware security keys for strong authentication.</td></tr>
+    <tr><th scope="row">12</th><td><a href="https://cloud.google.com/security/products/titan-security-key">Titan Security Key</a></td><td>Google's hardware two-factor authentication key.</td></tr>
+    <tr><th scope="row">13</th><td><a href="https://www.lastpass.com/">LastPass</a></td><td>Cloud-based password management and secure vault.</td></tr>
+    <tr><th scope="row">14</th><td><a href="https://bitwarden.com/">Bitwarden</a></td><td>Open-source secure password manager.</td></tr>
+    <tr><th scope="row">15</th><td><a href="https://keepassxc.org/">KeePassXC</a></td><td>Offline, open-source password manager.</td></tr>
+    <tr><th scope="row">16</th><td><a href="https://www.autopsy.com/">Autopsy</a></td><td>Digital forensics platform for disk analysis.</td></tr>
+    <tr><th scope="row">17</th><td><a href="https://brokersnapshot.com/">BrokerSnapshot</a></td><td>Financial broker regulatory verification and scam detection.</td></tr>
+    <tr><th scope="row">18</th><td><a href="https://www.ghisler.com/">Total Commander</a></td><td>Advanced file manager replacement for Windows.</td></tr>
+    <tr><th scope="row">19</th><td><a href="https://www.apachefriends.org/">XAMPP</a></td><td>Open-source web server solution stack package.</td></tr>
+    <tr><th scope="row">20</th><td><a href="https://notepad-plus-plus.org/">Notepad++</a></td><td>Free source code editor and Notepad replacement.</td></tr>
+    <tr><th scope="row">21</th><td><a href="https://www.wireshark.org/">Wireshark</a></td><td>Network protocol analyzer for traffic inspection.</td></tr>
+    <tr><th scope="row">22</th><td><a href="https://www.pgadmin.org/">pgAdmin</a></td><td>Open-source management tool for PostgreSQL databases.</td></tr>
+    <tr><th scope="row">23</th><td><a href="https://www.atlassian.com/software/jira">Jira</a></td><td>Issue tracking and agile project management tool.</td></tr>
+    <tr><th scope="row">24</th><td><a href="https://bitbucket.org/">Bitbucket</a></td><td>Git-based source code repository hosting service.</td></tr>
+    <tr><th scope="row">25</th><td><a href="https://aistudio.google.com">Google AI Studio</a></td><td>Platform for building and prototyping with Gemini models.</td></tr>
+    <tr><th scope="row">26</th><td><a href="https://www.vultr.com/">Vultr</a></td><td>High-performance cloud infrastructure and hosting.</td></tr>
+    <tr><th scope="row">27</th><td><a href="https://www.twilio.com/en-us">Twilio</a></td><td>Communication APIs for messaging, voice, and video.</td></tr>
+    <tr><th scope="row">28</th><td><a href="https://zadarma.com">Zadarma</a></td><td>Cloud PBX and VoIP telecommunications provider.</td></tr>
+    <tr><th scope="row">29</th><td><a href="https://flowroute.com/">Flowroute</a></td><td>Carrier-grade SIP trunking and telecom services.</td></tr>
+    <tr><th scope="row">30</th><td><a href="https://www.bandwidth.com/">Bandwidth</a></td><td>Enterprise CPaaS provider for voice and messaging.</td></tr>
+    <tr><th scope="row">31</th><td><a href="https://fusionpbx.com/">FusionPBX</a></td><td>Multi-tenant GUI for FreeSWITCH.</td></tr>
+    <tr><th scope="row">32</th><td><a href="https://signalwire.com/freeswitch">FreeSWITCH</a></td><td>Open-source telephony platform maintained by SignalWire.</td></tr>
+    <tr><th scope="row">33</th><td><a href="https://www.ringotel.com/">Ringotel</a></td><td>Softphone app and unified communication platform.</td></tr>
+    <tr><th scope="row">34</th><td><a href="https://www.t38fax.com/">T38Fax</a></td><td>SIP trunks optimized for reliable Fax over IP.</td></tr>
+    <tr><th scope="row">35</th><td><a href="https://www.didww.com/">DIDWW</a></td><td>Global provider of phone numbers and SIP trunking.</td></tr>
+    <tr><th scope="row">36</th><td><a href="https://www.cyberghostvpn.com/">CyberGhost VPN</a></td><td>Virtual Private Network service for online privacy.</td></tr>
+    <tr><th scope="row">37</th><td><a href="https://n8n.io/">n8n</a></td><td>Fair-code workflow automation tool for technical people.</td></tr>
+    <tr><th scope="row">38</th><td><a href="https://www.trychroma.com/">Chroma</a></td><td>Open-source AI-native embedding database.</td></tr>
+    <tr><th scope="row">39</th><td><a href="https://ollama.com/">Ollama</a></td><td>Tool for running large language models locally.</td></tr>
+    <tr><th scope="row">40</th><td><a href="https://www.windmill.dev/">Windmill</a></td><td>Open-source developer platform for internal tools and APIs.</td></tr>
+    <tr><th scope="row">41</th><td><a href="https://www.docker.com/">Docker</a></td><td>Platform for developing, shipping, and running applications in containers.</td></tr>
+    <tr><th scope="row">42</th><td><a href="https://flipper.net/">Flipper</a></td><td>Portable multi-tool device for penetration testing and hardware hacking.</td></tr>
+    <tr><th scope="row">43</th><td><a href="https://hak5.org/">Hak5</a></td><td>Security hardware, penetration testing gear, and IT education.</td></tr>
+    <tr><th scope="row">44</th><td><a href="https://powerspec.com">PowerSpec</a></td><td>Micro Center's house brand of pre-built high-performance computers.</td></tr>
+    <tr><th scope="row">45</th><td><a href="https://www.vantajs.com">Vanta.js</a></td><td>Lightweight library for creating animated 3D website backgrounds.</td></tr>
+    <tr><th scope="row">46</th><td><a href="https://www.nayax.com/">Nayax</a></td><td>Cashless payment and telemetry solutions for unattended retail.</td></tr>
+    <tr><th scope="row">47</th><td><a href="https://www.nar.realtor/">National Association of Realtors</a></td><td>Trade association providing resources for real estate professionals.</td></tr>
+    <tr><th scope="row">48</th><td><a href="https://www.carrier411.com/">Carrier411</a></td><td>Monitoring and qualification service for checking trucking carrier safety.</td></tr>
+    <tr><th scope="row">49</th><td><a href="https://mred.remine.com/">Remine (MRED)</a></td><td>Map-based property intelligence and MLS platform for real estate agents.</td></tr>
+    <tr><th scope="row">50</th><td><a href="https://ww2.mredllc.com/">Midwest Real Estate Data (MRED)</a></td><td>The primary Multiple Listing Service (MLS) for the greater Chicago area.</td></tr>
+    <tr><th scope="row">51</th><td><a href="http://www.identifont.com/">Identifont</a></td><td>Tool to identify unknown fonts by answering questions about their appearance.</td></tr>
+    <tr><th scope="row">52</th><td><a href="https://svgconverter.online/">SVG Converter</a></td><td>Online tool to vectorise and convert raster images into SVG format.</td></tr>
+    <tr><th scope="row">53</th><td><a href="https://www.renderhub.com/">RenderHub</a></td><td>Marketplace for high-quality 3D models, textures, and VR content.</td></tr>
+    <tr><th scope="row">54</th><td><a href="https://www.turbosquid.com/">TurboSquid</a></td><td>Large professional 3D model marketplace for creative professionals.</td></tr>
+    <tr><th scope="row">55</th><td><a href="https://sketchfab.com/">Sketchfab</a></td><td>Platform to publish, share, discover, buy and sell 3D, VR and AR content.</td></tr>
+    <tr><th scope="row">56</th><td><a href="https://gltf.report/">glTF Report</a></td><td>Online viewer and validator to analyze and debug glTF 2.0 files.</td></tr>
+    <tr><th scope="row">57</th><td><a href="https://modelviewer.dev/">Model Viewer</a></td><td>Web component for easily displaying interactive 3D models on the web.</td></tr>
+    <tr><th scope="row">58</th><td><a href="https://duo.com/">Duo Security</a></td><td>Cloud-based two-factor authentication (2FA) and zero-trust security.</td></tr>
+    <tr><th scope="row">59</th><td><a href="https://1password.com/">1Password</a></td><td>Highly secure, multi-platform password manager and digital wallet.</td></tr>
+    <tr><th scope="row">60</th><td><a href="https://github.com/features/copilot">GitHub Copilot</a></td><td>AI-powered pair programmer for auto-completing and generating code.</td></tr>
+    <tr><th scope="row">61</th><td><a href="https://threejs.org/">Three.js</a></td><td>JavaScript 3D library which makes WebGL easier to use.</td></tr>
+    <tr><th scope="row">62</th><td><a href="https://www.experianidworks.com/">Experian IdentityWorks</a></td><td>Identity theft protection and credit monitoring service.</td></tr>
+    <tr><th scope="row">63</th><td><a href="https://siorchicago.org/">SIOR Chicago</a></td><td>The Chicago Chapter of the Society of Industrial and Office Realtors.</td></tr>
+    <tr><th scope="row">64</th><td><a href="https://github.com/mifi/lossless-cut">LosslessCut</a></td><td>Cross platform FFmpeg GUI for extremely fast and lossless media operations.</td></tr>
+    <tr><th scope="row">65</th><td><a href="https://www.shutterencoder.com/">Shutter Encoder</a></td><td>A converter designed by video editors for professional compression.</td></tr>
+    <tr><th scope="row">66</th><td><a href="https://www.lexisnexis.com/">LexisNexis</a></td><td>Global provider of legal, regulatory, and business analytics.</td></tr>
+    <tr><th scope="row">67</th><td><a href="https://www.zoominfo.com/">ZoomInfo</a></td><td>B2B database and GTM platform for sales and marketing teams.</td></tr>
+    <tr><th scope="row">68</th><td><a href="https://www.truepeoplesearch.com/">TruePeopleSearch</a></td><td>Free people search tool for finding addresses and contact info.</td></tr>
+    <tr><th scope="row">69</th><td><a href="https://www.gohighlevel.com/">GoHighLevel</a></td><td>All-in-one CRM and marketing platform for agencies and businesses.</td></tr>
 </tbody>
 </table>
 
@@ -437,9 +172,7 @@
         
         function reapplyStriping() {
             $('.results tbody tr').removeClass('dynamic-grey');
-            
             var visibleRows = $('.results tbody tr').not('.warning').filter(':visible');
-
             visibleRows.each(function(index) {
                 if (index % 2 !== 0) {
                     $(this).addClass('dynamic-grey');
@@ -449,14 +182,12 @@
 
         reapplyStriping();
 
-        // FORCE REPAINT to ensure borders render correctly on all browsers
         var table = $('#toolsTable');
         table.hide();
         setTimeout(function(){
             table.show(); 
         }, 10); 
 
-        // Consistent Hover Logic
         $('.results tbody tr').not('.warning').hover(
             function() { $(this).addClass('active-hover'); },
             function() { $(this).removeClass('active-hover'); }
@@ -465,15 +196,12 @@
         $(".search").keyup(function () {
             var searchTerm = $(".search").val().toLowerCase();
             var noResult = $('.no-result');
-            
             noResult.hide();
             var matchCount = 0;
-
             var rows = $('.results tbody tr').not('.warning');
 
             rows.each(function() {
                 var row = $(this);
-                // Simple search in all text within the row
                 if (row.text().toLowerCase().indexOf(searchTerm) === -1) {
                     row.hide();
                 } else {
@@ -485,17 +213,12 @@
             if (matchCount === 0) {
                 noResult.show();
             }
-
             reapplyStriping();
         });
     });
 </script>
         
-<br>
-<br>
-<br>
-<br>
-<br>
+<br><br><br><br><br>
                                 
 Return to <A HREF="#top">the top of this page</a>.<p>
 </main>
