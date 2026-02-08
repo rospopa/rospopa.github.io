@@ -3,1428 +3,961 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Commercial Real Estate APOD Calculator">
     <title>Commercial Real Estate APOD Calculator</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+Inscriptional+Pahlavi&amp;display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.5.5/css/simple-line-icons.min.css">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* Header & Footer Styles */
+        .site-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 1rem 0;
         }
-
-        :root {
-            --primary-blue: #2563eb;
-            --primary-green: #10b981;
-            --primary-red: #dc2626;
-            --border-color: #d1d5db;
-            --input-bg: #f9fafb;
-            --text-dark: #111827;
-            --text-gray: #6b7280;
-            --section-border: #e5e7eb;
+        
+        .wrap {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 15px;
         }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #ffffff;
-            color: var(--text-dark);
-            line-height: 1.5;
-            padding: 0;
-            margin: 0;
+        
+        .site-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #333;
         }
-
-        .top-bar {
-            background: #f8f9fa;
-            border-bottom: 1px solid var(--section-border);
-            padding: 15px 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        
+        .site-nav {
+            float: right;
         }
-
-        .top-bar-left {
+        
+        .site-nav .trigger {
+            display: inline-block;
+        }
+        
+        .site-nav .trigger2 {
+            display: none;
+        }
+        
+        footer {
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
+            margin-top: 3rem;
+            padding: 2rem 0;
+        }
+        
+        footer .home {
+            padding-top: 20px;
+        }
+        
+        footer p {
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Calculator Styles */
+        .page-content {
+            padding: 2rem 0;
+        }
+        
+        #calculator {
+            background: white;
+        }
+        
+        .calcheaderbtn {
+            margin-bottom: 20px;
             display: flex;
             gap: 10px;
         }
-
-        .btn {
-            padding: 10px 24px;
-            border: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .btn-reset {
-            background: var(--primary-red);
-            color: white;
-        }
-
-        .btn-reset:hover {
-            background: #b91c1c;
-            box-shadow: 0 2px 8px rgba(220, 38, 38, 0.3);
-        }
-
-        .btn-pdf {
-            background: var(--primary-blue);
-            color: white;
-        }
-
-        .btn-pdf:hover {
-            background: #1d4ed8;
-            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
-        }
-
-        .btn-email {
-            background: var(--primary-green);
-            color: white;
-        }
-
-        .btn-email:hover {
-            background: #059669;
-            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 30px;
-        }
-
-        .form-section {
-            background: white;
-            border: 1px solid var(--section-border);
-            border-radius: 8px;
-            padding: 30px;
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: var(--text-dark);
-            text-align: center;
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid var(--section-border);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-label {
-            display: flex;
-            align-items: center;
-            font-size: 13px;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 6px;
-        }
-
-        .required-dot {
-            width: 8px;
-            height: 8px;
-            background: var(--primary-blue);
-            border-radius: 50%;
-            margin-right: 6px;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 10px 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            background: var(--input-bg);
-            color: var(--text-dark);
-            transition: all 0.2s ease;
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary-blue);
-            background: white;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .form-input:hover:not(:focus) {
-            border-color: #9ca3af;
-        }
-
-        select.form-input {
-            cursor: pointer;
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 12px center;
-            padding-right: 36px;
-        }
-
-        .input-with-prefix {
-            position: relative;
-        }
-
-        .input-prefix {
-            position: absolute;
-            left: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-gray);
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .input-with-prefix .form-input {
-            padding-left: 28px;
-        }
-
-        .input-suffix {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--text-gray);
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .input-with-suffix .form-input {
-            padding-right: 48px;
-        }
-
-        .tenant-list {
+        
+        .subsection {
             margin-top: 20px;
-        }
-
-        .tenant-item {
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
             padding: 20px;
-            margin-bottom: 15px;
-            position: relative;
-        }
-
-        .tenant-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .tenant-number {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-gray);
-        }
-
-        .btn-remove {
-            background: #fee2e2;
-            color: var(--primary-red);
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .btn-remove:hover {
-            background: #fecaca;
-        }
-
-        .btn-add {
-            width: 100%;
-            padding: 12px;
-            background: #e0f2fe;
-            color: var(--primary-blue);
-            border: 1px dashed var(--primary-blue);
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            margin-top: 10px;
-        }
-
-        .btn-add:hover {
-            background: #bfdbfe;
-        }
-
-        .results-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .result-card {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border: 1px solid #bae6fd;
             border-radius: 8px;
-            padding: 20px;
         }
-
-        .result-card.featured {
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            border: 2px solid var(--primary-blue);
-            grid-column: 1 / -1;
-        }
-
-        .result-label {
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-gray);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .result-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: var(--primary-blue);
-        }
-
-        .result-card.featured .result-value {
-            font-size: 42px;
+        
+        .subsection-heading {
             text-align: center;
-        }
-
-        .result-card.featured .result-label {
-            text-align: center;
-            font-size: 14px;
-        }
-
-        .metric-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            background: white;
-            border: 1px solid var(--section-border);
-            border-radius: 6px;
-            margin-bottom: 10px;
-        }
-
-        .metric-label {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-gray);
-        }
-
-        .metric-value {
-            font-size: 16px;
+            margin-bottom: 15px;
             font-weight: 700;
-            color: var(--text-dark);
         }
-
-        .metric-value.positive {
-            color: var(--primary-green);
-        }
-
-        .metric-value.negative {
-            color: var(--primary-red);
-        }
-
-        .subsection-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-dark);
-            margin: 25px 0 15px 0;
-            padding-left: 10px;
-            border-left: 4px solid var(--primary-blue);
-        }
-
-        .info-text {
-            font-size: 12px;
-            color: var(--text-gray);
-            font-style: italic;
-            margin-top: 5px;
-        }
-
+        
+        /* Mobile responsive */
         @media (max-width: 768px) {
-            .container {
-                padding: 15px;
+            .site-nav .trigger {
+                display: none;
             }
-
-            .form-row {
-                grid-template-columns: 1fr;
+            
+            .site-nav .trigger2 {
+                display: inline-block;
             }
-
-            .top-bar {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            .top-bar-left {
-                width: 100%;
-            }
-
-            .btn {
-                flex: 1;
-            }
-        }
-
-        input[type="date"].form-input::-webkit-calendar-picker-indicator {
-            cursor: pointer;
         }
     </style>
 </head>
+
 <body>
-    <div class="top-bar">
-        <div class="top-bar-left">
-            <button class="btn btn-reset" onclick="resetForm()">RESET</button>
-            <button class="btn btn-pdf" onclick="generatePDF()">PDF</button>
-        </div>
-        <button class="btn btn-email" onclick="emailReport()">E-MAIL</button>
+<header class="site-header">
+    <div class="wrap">
+        <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Commercial Real Estate APOD Calculator</a>
+        <nav class="site-nav">
+            <div class="trigger">
+                <a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=APOD-Calculator">pavlo@rospopa.com</a>
+            </div>
+            <div class="trigger2">
+                <a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=APOD-Calculator">@</a>
+            </div>
+        </nav>
     </div>
+</header>
 
-    <div class="container">
-        <!-- Property Information -->
-        <div class="form-section">
-            <div class="section-title">Property Information</div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Address
-                    </label>
-                    <input type="text" class="form-input" id="address" placeholder="Enter an address" value="75th St Downers Grove">
+<main>
+    <div class="page-content">
+        <div id="topdf" class="wrap">
+            <div id="calculator">
+                <h2 class="text-center" id="main-title-address"></h2>
+                
+                <!-- Header Buttons -->
+                <div class="calcheaderbtn">
+                    <div class="modal fade" role="dialog" tabindex="-1" id="confirmModal" aria-labelledby="confirmModalLabel">
+                        <div class="modal-dialog modal-sm" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header" style="padding-bottom: 10px;">
+                                    <button class="btn-close" type="button" aria-label="Close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <h2 class="text-center" style="margin-bottom: 0px;margin-top: 5px;">Confirm Reset?</h2>
+                                </div>
+                                <div class="modal-footer justify-content-evenly">
+                                    <button class="btn btn-success" id="btnno" type="button" data-bs-dismiss="modal"><span>NO</span></button>
+                                    <button class="btn btn-secondary" id="resetAll" type="button" data-bs-dismiss="modal"><span>YES</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" id="bt-reset-modal" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button>
+                    <button class="btn btn-primary btn-sm" id="savepdf" type="button"><span>PDF</span></button>
+                    <button class="btn btn-success btn-sm" id="sendtoemail" type="button"><span>E-MAIL</span></button>
                 </div>
-            </div>
 
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Purchase Price
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="purchasePrice" value="5900000" oninput="calculate()">
+                <!-- CALC_MAIN -->
+                <div class="mb-3">
+                    <!-- PROPERTY -->
+                    <div class="row" style="border: 1px dashed #1DA1F2;">
+                        <div class="col-md-12">
+                            <label class="form-label" for="autocomplete">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Address"><i class="icon-question"></i></sup>Address*
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">Address</span>
+                                <input type="text" id="autocomplete" class="form-control" placeholder="Enter an address" value="75th St Downers Grove">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B1">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Purchase Price $"><i class="icon-question"></i></sup>Purchase Price
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="B1" placeholder="0.00" value="5900000" oninput="calculate()">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B4">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Date"><i class="icon-question"></i></sup>Closing Date
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" id="B4" type="date">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="A4">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Days Remain in Year"><i class="icon-question"></i></sup>Remain
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="A4" value="0" readonly>
+                                <span class="input-group-text">days</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="A4_2">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Days Passed in Year"><i class="icon-question"></i></sup>Passed
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="A4_2" value="0" oninput="calculate()">
+                                <span class="input-group-text">days</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="text-center">Loan Profile</h4>
+                    <div class="row" style="border: 1px dashed #1DA1F2;">
+                        <div class="col-md-3">
+                            <label class="form-label" for="B2">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment %"><i class="icon-question"></i></sup>Down Payment
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="B2" placeholder="0" value="100" min="0" max="100" oninput="updateDownPayment()">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B3">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Down Payment $"><i class="icon-question"></i></sup>Down Payment
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="B3" placeholder="0.00" value="5900000" oninput="calculate()">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <label class="form-label" for="Loan-Type">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Type"><i class="icon-question"></i></sup>Loan Type
+                            </label>
+                            <select class="form-select form-control" id="Loan-Type">
+                                <option value="None (All Cash)">None (All Cash)</option>
+                                <option value="Conventional Loan">Conventional Loan</option>
+                                <option value="Commercial Loan">Commercial Loan</option>
+                                <option value="DSCR Loan">DSCR Loan (Debt-Service Coverage Ratio)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B5">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Amount $"><i class="icon-question"></i></sup>Loan Amount
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="B5" placeholder="0.00" value="0" readonly oninput="calculate()">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B7">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Loan Term Period Year(s)"><i class="icon-question"></i></sup>Loan Term Period
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="B7" placeholder="0" value="30" min="0" oninput="calculate()">
+                                <span class="input-group-text">Year(s)</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B8">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Payments per Year"><i class="icon-question"></i></sup>Payments per Year
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="B8" placeholder="12" value="12" min="1" max="12" oninput="calculate()">
+                                <span class="input-group-text">#</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B6">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Interest Rate %"><i class="icon-question"></i></sup>Annual Interest Rate
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="B6" placeholder="0" value="5.79" step="0.01" min="0" oninput="calculate()">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B9">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Total Payments"><i class="icon-question"></i></sup>Total Payments
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="B9" placeholder="0" readonly>
+                                <span class="input-group-text">#</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B10">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Amount per Payment $"><i class="icon-question"></i></sup>Amount per Payment
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="B10" placeholder="0.00" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B12">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Interest Cost $"><i class="icon-question"></i></sup>Interest Cost
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="B12" placeholder="0.00" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B11">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Sum of Payments (Total Cost of Loan) $"><i class="icon-question"></i></sup>Total Loan Cost
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="B11" placeholder="0.00" readonly>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="text-center">Taxes</h4>
+                    <div class="row" style="border: 1px dashed #1DA1F2;">
+                        <div class="col-md-3">
+                            <label class="form-label" for="A5">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Annual Tax Amount $"><i class="icon-question"></i></sup>Annual Tax Amount
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="A5" placeholder="0.00" value="380154" oninput="calculate()">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="A5_2">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Daily Tax Amount $"><i class="icon-question"></i></sup>Daily Tax Amount
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="A5_2" placeholder="0.00" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="A8">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Proration Amount $"><i class="icon-question"></i></sup>Tax Proration Amount
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="A8" placeholder="0.00" readonly>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="A7">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Tax Depreciation $"><i class="icon-question"></i></sup>Tax Depreciation
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="A7" placeholder="0.00" value="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="text-center">Market</h4>
+                    <div class="row" style="border: 1px dashed #1DA1F2;">
+                        <div class="col-md-4">
+                            <label class="form-label" for="A20">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Appreciation/Depreciation %"><i class="icon-question"></i></sup>Appreciation/Depreciation
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="A20" placeholder="0" value="0" step="0.01" min="0">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label class="form-label" for="A21">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Nominal Interest Rate %"><i class="icon-question"></i></sup>Nominal Interest Rate
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="A21" placeholder="0" value="0" step="0.01" min="0">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                            <label class="form-label" for="A22">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Inflation Rate %"><i class="icon-question"></i></sup>Inflation Rate
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="A22" placeholder="0" value="0" step="0.01" min="0">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="text-center">Cash to Close</h4>
+                    <div class="row" style="border: 1px dashed #1DA1F2;">
+                        <div class="col-md-3">
+                            <label class="form-label" for="A10">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Escrow $"><i class="icon-question"></i></sup>Escrow
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="A10" placeholder="0.00" value="0">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="A12">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Allowances $"><i class="icon-question"></i></sup>Allowances
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="A12" placeholder="0.00" value="0">
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B13">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Closing Cost %"><i class="icon-question"></i></sup>Closing Cost
+                            </label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="B13" placeholder="0" value="6" step="0.01" min="0" oninput="calculate()">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-3">
+                            <label class="form-label" for="B14">
+                                <sup data-bs-toggle="tooltip" data-bss-tooltip="" class="mtool" title="Inspection $"><i class="icon-question"></i></sup>Inspection
+                            </label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="B14" placeholder="0.00" value="0">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Closing Date
-                    </label>
-                    <input type="date" class="form-input" id="closingDate">
+                <!-- Rent Roll Section -->
+                <div class="subsection" style="background: #e3f2fd;">
+                    <h4 class="subsection-heading">Rent Roll</h4>
+                    <div id="tenantList" class="mb-3"></div>
+                    <button class="btn btn-primary btn-sm" onclick="addTenant()">+ Add Tenant</button>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Remain
-                    </label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="remainDays" value="0">
-                        <span class="input-suffix">days</span>
+                <!-- Income Section -->
+                <div class="subsection" style="background: #d4edda;">
+                    <h4 class="subsection-heading">Additional Income</h4>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <label class="form-label">Parking Income (Annual)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="parkingIncome" value="0" oninput="calculate()">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Laundry Income (Annual)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="laundryIncome" value="0" oninput="calculate()">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Storage Income (Annual)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="storageIncome" value="0" oninput="calculate()">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">Other Income (Annual)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="otherIncome" value="0" oninput="calculate()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Vacancy Rate</label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="vacancyRate" value="0" step="0.1" oninput="calculate()">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Credit Loss</label>
+                            <div class="input-group">
+                                <input class="form-control" type="number" id="creditLoss" value="0" step="0.1" oninput="calculate()">
+                                <span class="input-group-text">%</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Passed
-                    </label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="passedDays" value="0" oninput="calculate()">
-                        <span class="input-suffix">days</span>
+                <!-- Operating Expenses Section -->
+                <div class="subsection" style="background: rgb(240, 128, 128);">
+                    <h4 class="subsection-heading">Operating Expenses (Annual)</h4>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label class="form-label">Off-Site Management</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="offSiteManagement" value="84047" oninput="calculate()">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Property Insurance</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="propertyInsurance" value="32000" oninput="calculate()">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Repairs & Maintenance</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="repairsMaint" value="242104" oninput="calculate()">
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Property Name</label>
-                    <input type="text" class="form-input" id="propertyName" value="The Grove">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Property Type</label>
-                    <select class="form-input" id="propertyType">
-                        <option>Retail Center</option>
-                        <option>Office Building</option>
-                        <option>Industrial</option>
-                        <option>Mixed Use</option>
-                        <option>Strip Center</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Total Square Feet</label>
-                    <input type="number" class="form-input" id="totalSqFt" value="204312" oninput="calculate()">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Number of Units</label>
-                    <input type="number" class="form-input" id="units" value="21" oninput="calculate()">
-                </div>
-            </div>
-        </div>
-
-        <!-- Loan Profile -->
-        <div class="form-section">
-            <div class="section-title">Loan Profile</div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Down Payment
-                    </label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="downPaymentPct" value="100" min="0" max="100" oninput="updateDownPayment()">
-                        <span class="input-suffix">%</span>
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Utilities (Total)</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="utilities" value="109140" oninput="calculate()">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Lawn/Snow Care</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="lawnSnow" value="81648" oninput="calculate()">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Association Dues</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="assocDues" value="72100" oninput="calculate()">
+                            </div>
+                        </div>
                     </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Down Payment
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="downPayment" value="5900000" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Loan Type
-                    </label>
-                    <select class="form-input" id="loanType">
-                        <option value="none">None (All Cash)</option>
-                        <option value="conventional">Conventional</option>
-                        <option value="fha">FHA</option>
-                        <option value="va">VA</option>
-                        <option value="commercial">Commercial</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Loan Amount
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="loan1Amount" value="0" oninput="calculate()">
+                    <div class="row mt-3">
+                        <div class="col-md-4">
+                            <label class="form-label">Security</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="security" value="22793" oninput="calculate()">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Accounting & Legal</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="accountingLegal" value="39548" oninput="calculate()">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Miscellaneous</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input class="form-control" type="number" id="miscellaneous" value="12842" oninput="calculate()">
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Loan Term Period
-                    </label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="loan1Term" value="30" oninput="calculate()">
-                        <span class="input-suffix">Year(s)</span>
+                <!-- Results Section -->
+                <div class="subsection" style="background: #fff3cd;">
+                    <h4 class="subsection-heading">Financial Analysis Results</h4>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <div class="alert alert-primary text-center" role="alert">
+                                <h3 class="mb-0">Net Operating Income (NOI): <strong id="noiDisplay">$0</strong></h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Metric</th>
+                                    <th class="text-end">Value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Purchase Price</td>
+                                    <td class="text-end" id="purchasePriceDisplay">$0</td>
+                                </tr>
+                                <tr>
+                                    <td>Price Per Square Foot</td>
+                                    <td class="text-end" id="pricePSFDisplay">$0</td>
+                                </tr>
+                                <tr>
+                                    <td>Total Investment</td>
+                                    <td class="text-end" id="totalInvestmentDisplay">$0</td>
+                                </tr>
+                                <tr>
+                                    <td>Scheduled Rental Income</td>
+                                    <td class="text-end text-success" id="scheduledRentalDisplay">$0</td>
+                                </tr>
+                                <tr>
+                                    <td>Reimbursements</td>
+                                    <td class="text-end text-success" id="reimbursementsDisplay">$0</td>
+                                </tr>
+                                <tr>
+                                    <td>Gross Potential Income (GPI)</td>
+                                    <td class="text-end text-success" id="gpiDisplay">$0</td>
+                                </tr>
+                                <tr>
+                                    <td>Vacancy & Credit Losses</td>
+                                    <td class="text-end text-danger" id="vacancyDisplay">($0)</td>
+                                </tr>
+                                <tr>
+                                    <td>Gross Operating Income (GOI)</td>
+                                    <td class="text-end text-success" id="goiDisplay">$0</td>
+                                </tr>
+                                <tr>
+                                    <td>Total Operating Expenses</td>
+                                    <td class="text-end text-danger" id="totalExpensesDisplay">($0)</td>
+                                </tr>
+                                <tr>
+                                    <td>Operating Expense Ratio</td>
+                                    <td class="text-end" id="opexRatioDisplay">0%</td>
+                                </tr>
+                                <tr class="table-primary">
+                                    <td><strong>NOI Per Square Foot</strong></td>
+                                    <td class="text-end" id="noiPSFDisplay"><strong>$0</strong></td>
+                                </tr>
+                                <tr class="table-primary">
+                                    <td><strong>Capitalization Rate (Cap Rate)</strong></td>
+                                    <td class="text-end" id="capRateDisplay"><strong>0%</strong></td>
+                                </tr>
+                                <tr>
+                                    <td>Annual Debt Service</td>
+                                    <td class="text-end text-danger" id="debtServiceDisplay">($0)</td>
+                                </tr>
+                                <tr>
+                                    <td>Debt Coverage Ratio (DCR)</td>
+                                    <td class="text-end" id="dcrDisplay">0.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Cash Flow Before Taxes</td>
+                                    <td class="text-end" id="cashFlowDisplay">$0</td>
+                                </tr>
+                                <tr>
+                                    <td>Cash on Cash Return</td>
+                                    <td class="text-end" id="cocDisplay">0%</td>
+                                </tr>
+                                <tr>
+                                    <td>Occupancy Rate</td>
+                                    <td class="text-end" id="occupancyRateDisplay">0%</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Payments per Year
-                    </label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="paymentsPerYear" value="12" oninput="calculate()">
-                        <span class="input-suffix">#</span>
-                    </div>
-                </div>
+                <!-- Disclaimer -->
+                <section class="mt-4">
+                    <h5 class="font-monospace lh-1 text-center">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br>(It's not a substitute for your calculations.)</h5>
+                </section>
 
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Annual Interest Rate
-                    </label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="loan1Rate" value="5.79" step="0.01" oninput="calculate()">
-                        <span class="input-suffix">%</span>
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Total Payments
-                    </label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="totalPayments" value="0" readonly>
-                        <span class="input-suffix">#</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Amount per Payment
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="amountPerPayment" value="0" readonly>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Interest Cost
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="interestCost" value="0" readonly>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Total Loan Cost
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="totalLoanCost" value="0" readonly>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Taxes -->
-        <div class="form-section">
-            <div class="section-title">Taxes</div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Annual Tax Amount
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="realEstateTaxes" value="380154" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Daily Tax Amount
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="dailyTax" value="0" readonly>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Tax Proration Amount
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="taxProration" value="0" readonly>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Tax Depreciation
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="taxDepreciation" value="0" oninput="calculate()">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Market -->
-        <div class="form-section">
-            <div class="section-title">Market</div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Appreciation/Depreciation
-                    </label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="appreciation" value="0" step="0.1">
-                        <span class="input-suffix">%</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Nominal Interest Rate
-                    </label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="nominalRate" value="0" step="0.1">
-                        <span class="input-suffix">%</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Inflation Rate
-                    </label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="inflationRate" value="0" step="0.1">
-                        <span class="input-suffix">%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Cash to Close -->
-        <div class="form-section">
-            <div class="section-title">Cash to Close</div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Escrow
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="escrow" value="0">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Allowances
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="allowances" value="0">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Closing Cost
-                    </label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="closingCostPct" value="6" step="0.1" oninput="calculate()">
-                        <span class="input-suffix">%</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">
-                        <span class="required-dot"></span>
-                        Inspection
-                    </label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="inspection" value="0">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Rent Roll -->
-        <div class="form-section">
-            <div class="section-title">Rent Roll</div>
-            
-            <div id="tenantList" class="tenant-list"></div>
-            <button class="btn-add" onclick="addTenant()">+ Add Tenant</button>
-        </div>
-
-        <!-- Income -->
-        <div class="form-section">
-            <div class="section-title">Additional Income</div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Parking Income (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="parkingIncome" value="0" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Laundry Income (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="laundryIncome" value="0" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Storage Income (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="storageIncome" value="0" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Other Income (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="otherIncome" value="0" oninput="calculate()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Vacancy Rate</label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="vacancyRate" value="0" step="0.1" oninput="calculate()">
-                        <span class="input-suffix">%</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Credit Loss</label>
-                    <div class="input-with-suffix">
-                        <input type="number" class="form-input" id="creditLoss" value="0" step="0.1" oninput="calculate()">
-                        <span class="input-suffix">%</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Operating Expenses -->
-        <div class="form-section">
-            <div class="section-title">Operating Expenses</div>
-            
-            <div class="subsection-title">Management & Personnel</div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Off-Site Management (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="offSiteManagement" value="84047" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Onsite Personnel / Janitorial (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="onsitePersonnel" value="0" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Benefits (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="benefits" value="0" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Taxes / Workman's Comp (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="taxesWorkComp" value="0" oninput="calculate()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="subsection-title">Maintenance & Utilities</div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Repairs and Maintenance (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="repairsMaint" value="242104" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Fuel (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="fuel" value="52190" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Water / Sewer (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="waterSewer" value="56950" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Electric (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="electric" value="0" oninput="calculate()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Phone & Internet (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="phoneInternet" value="0" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Property Insurance (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="propertyInsurance" value="32000" oninput="calculate()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="subsection-title">Professional Services</div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Accounting and Legal (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="accountingLegal" value="39548" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Leasing Commissions (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="leasingCommissions" value="0" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Advertising / Licenses / Permits (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="advertising" value="0" oninput="calculate()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="subsection-title">Contract Services</div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Lawn / Snow / Rec (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="lawnSnow" value="81648" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Refuse (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="refuse" value="0" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Pest Control (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="pestControl" value="0" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Lot Sweeping (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="lotSweeping" value="0" oninput="calculate()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Security (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="security" value="22793" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Association Dues (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="assocDues" value="72100" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Supplies (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="supplies" value="0" oninput="calculate()">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Miscellaneous (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="miscellaneous" value="12842" oninput="calculate()">
-                    </div>
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label">Reserves (Annual)</label>
-                    <div class="input-with-prefix">
-                        <span class="input-prefix">$</span>
-                        <input type="number" class="form-input" id="reserves" value="0" oninput="calculate()">
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Results -->
-        <div class="form-section">
-            <div class="section-title">Financial Analysis Results</div>
-            
-            <div class="results-grid">
-                <div class="result-card featured">
-                    <div class="result-label">Net Operating Income (NOI)</div>
-                    <div class="result-value" id="noiDisplay">$0</div>
-                </div>
-            </div>
-
-            <div class="subsection-title">Property Metrics</div>
-            <div class="metric-row">
-                <span class="metric-label">Purchase Price</span>
-                <span class="metric-value" id="purchasePriceDisplay">$0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Price Per Square Foot</span>
-                <span class="metric-value" id="pricePSFDisplay">$0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Total Investment</span>
-                <span class="metric-value" id="totalInvestmentDisplay">$0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Down Payment Percentage</span>
-                <span class="metric-value" id="downPaymentPctResultDisplay">0%</span>
-            </div>
-
-            <div class="subsection-title">Income Summary</div>
-            <div class="metric-row">
-                <span class="metric-label">Scheduled Rental Income</span>
-                <span class="metric-value positive" id="scheduledRentalDisplay">$0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Reimbursements</span>
-                <span class="metric-value positive" id="reimbursementsDisplay">$0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Other Income</span>
-                <span class="metric-value positive" id="otherIncomeDisplay">$0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Gross Potential Income (GPI)</span>
-                <span class="metric-value positive" id="gpiDisplay">$0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Vacancy & Credit Losses</span>
-                <span class="metric-value negative" id="vacancyDisplay">($0)</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Gross Operating Income (GOI)</span>
-                <span class="metric-value positive" id="goiDisplay">$0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">GOI Per Square Foot</span>
-                <span class="metric-value" id="goiPSFDisplay">$0</span>
-            </div>
-
-            <div class="subsection-title">Operating Expenses</div>
-            <div class="metric-row">
-                <span class="metric-label">Total Operating Expenses</span>
-                <span class="metric-value negative" id="totalExpensesDisplay">($0)</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Expenses Per Square Foot</span>
-                <span class="metric-value" id="expensesPSFDisplay">$0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Operating Expense Ratio</span>
-                <span class="metric-value" id="opexRatioDisplay">0%</span>
-            </div>
-
-            <div class="subsection-title">Investment Returns</div>
-            <div class="metric-row">
-                <span class="metric-label">NOI Per Square Foot</span>
-                <span class="metric-value" id="noiPSFDisplay">$0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Capitalization Rate (Cap Rate)</span>
-                <span class="metric-value" id="capRateDisplay">0%</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Annual Debt Service</span>
-                <span class="metric-value negative" id="debtServiceDisplay">($0)</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Debt Coverage Ratio (DCR)</span>
-                <span class="metric-value" id="dcrDisplay">0.00</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Cash Flow Before Taxes</span>
-                <span class="metric-value" id="cashFlowDisplay">$0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Cash on Cash Return</span>
-                <span class="metric-value" id="cocDisplay">0%</span>
-            </div>
-
-            <div class="subsection-title">Occupancy</div>
-            <div class="metric-row">
-                <span class="metric-label">Occupied Square Feet</span>
-                <span class="metric-value" id="occupiedSqFtDisplay">0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Vacant Square Feet</span>
-                <span class="metric-value" id="vacantSqFtDisplay">0</span>
-            </div>
-            <div class="metric-row">
-                <span class="metric-label">Occupancy Rate</span>
-                <span class="metric-value" id="occupancyRateDisplay">0%</span>
             </div>
         </div>
     </div>
+</main>
 
-    <script>
-        let tenants = [];
-
-        function updateDownPayment() {
-            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value) || 0;
-            const downPaymentPct = parseFloat(document.getElementById('downPaymentPct').value) || 0;
-            const downPayment = (purchasePrice * downPaymentPct) / 100;
-            document.getElementById('downPayment').value = downPayment.toFixed(0);
-            calculate();
-        }
-
-        function addTenant() {
-            const tenant = {
-                id: Date.now(),
-                name: '',
-                sqFt: 0,
-                monthlyRent: 0,
-                recoveryPSF: 0
-            };
-            tenants.push(tenant);
-            renderTenants();
-            calculate();
-        }
-
-        function removeTenant(id) {
-            tenants = tenants.filter(t => t.id !== id);
-            renderTenants();
-            calculate();
-        }
-
-        function renderTenants() {
-            const container = document.getElementById('tenantList');
-            if (tenants.length === 0) {
-                container.innerHTML = '<p class="info-text">No tenants added yet. Click "Add Tenant" to begin.</p>';
-                return;
-            }
-            
-            container.innerHTML = tenants.map((tenant, index) => `
-                <div class="tenant-item">
-                    <div class="tenant-header">
-                        <span class="tenant-number">Tenant #${index + 1}</span>
-                        <button class="btn-remove" onclick="removeTenant(${tenant.id})">Remove</button>
+<footer>
+    <div class="wrap">
+        <div class="home">
+            <p>Go to <a href="https://www.linkedin.com/in/prospopa/">LinkedIn</a>.</p>
+            <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
+            <p>Return to <a href="#top">Top of This Page</a>.</p>
+            <section class="d-flex flex-row justify-content-center" style="width:100%;">
+                <div class="container" style="margin-right:0px;margin-left:0px;padding-right:0px;padding-left:0px;width:100%;max-width:100%;">
+                    <div class="row" style="margin-right:0px;margin-left:0px;max-width:100%;padding-top:20px;padding-bottom:20px;">
+                        <div class="col" style="width:auto;padding-right:0px;padding-left:0px;max-width:100%;">
+                            <div class="text-center" style="text-align:center;">
+                                <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="form-row">
-                        <div class="form-group">
+                </div>
+            </section>
+        </div>
+    </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Set current year
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+    let tenants = [];
+
+    function updateDownPayment() {
+        const purchasePrice = parseFloat(document.getElementById('B1').value) || 0;
+        const downPaymentPct = parseFloat(document.getElementById('B2').value) || 0;
+        const downPayment = (purchasePrice * downPaymentPct) / 100;
+        document.getElementById('B3').value = downPayment.toFixed(0);
+        
+        const loanAmount = purchasePrice - downPayment;
+        document.getElementById('B5').value = loanAmount.toFixed(0);
+        
+        calculate();
+    }
+
+    function addTenant() {
+        const tenant = {
+            id: Date.now(),
+            name: '',
+            sqFt: 0,
+            monthlyRent: 0,
+            recoveryPSF: 0
+        };
+        tenants.push(tenant);
+        renderTenants();
+        calculate();
+    }
+
+    function removeTenant(id) {
+        tenants = tenants.filter(t => t.id !== id);
+        renderTenants();
+        calculate();
+    }
+
+    function renderTenants() {
+        const container = document.getElementById('tenantList');
+        if (tenants.length === 0) {
+            container.innerHTML = '<p class="text-muted fst-italic">No tenants added yet. Click "Add Tenant" to begin.</p>';
+            return;
+        }
+        
+        container.innerHTML = tenants.map((tenant, index) => `
+            <div class="card mb-2">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h6 class="mb-0">Tenant #${index + 1}</h6>
+                        <button class="btn btn-danger btn-sm" onclick="removeTenant(${tenant.id})">Remove</button>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
                             <label class="form-label">Tenant Name</label>
-                            <input type="text" class="form-input" value="${tenant.name}" 
+                            <input type="text" class="form-control" value="${tenant.name}" 
                                 onchange="updateTenant(${tenant.id}, 'name', this.value)">
                         </div>
-                        <div class="form-group">
+                        <div class="col-md-3">
                             <label class="form-label">Square Feet</label>
-                            <input type="number" class="form-input" value="${tenant.sqFt}" 
+                            <input type="number" class="form-control" value="${tenant.sqFt}" 
                                 oninput="updateTenant(${tenant.id}, 'sqFt', parseFloat(this.value) || 0)">
                         </div>
-                        <div class="form-group">
+                        <div class="col-md-3">
                             <label class="form-label">Monthly Rent</label>
-                            <div class="input-with-prefix">
-                                <span class="input-prefix">$</span>
-                                <input type="number" class="form-input" value="${tenant.monthlyRent}" 
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" value="${tenant.monthlyRent}" 
                                     oninput="updateTenant(${tenant.id}, 'monthlyRent', parseFloat(this.value) || 0)">
                             </div>
                         </div>
-                        <div class="form-group">
+                        <div class="col-md-3">
                             <label class="form-label">Recovery PSF ($/mo)</label>
-                            <div class="input-with-prefix">
-                                <span class="input-prefix">$</span>
-                                <input type="number" class="form-input" value="${tenant.recoveryPSF}" step="0.01"
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" class="form-control" value="${tenant.recoveryPSF}" step="0.01"
                                     oninput="updateTenant(${tenant.id}, 'recoveryPSF', parseFloat(this.value) || 0)">
                             </div>
                         </div>
                     </div>
                 </div>
-            `).join('');
-        }
+            </div>
+        `).join('');
+    }
 
-        function updateTenant(id, field, value) {
-            const tenant = tenants.find(t => t.id === id);
-            if (tenant) {
-                tenant[field] = value;
-                calculate();
-            }
-        }
-
-        function calculateMortgagePayment(principal, annualRate, years) {
-            if (principal === 0 || annualRate === 0) return 0;
-            const monthlyRate = annualRate / 100 / 12;
-            const numPayments = years * 12;
-            const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
-                                   (Math.pow(1 + monthlyRate, numPayments) - 1);
-            return monthlyPayment * 12;
-        }
-
-        function calculate() {
-            const totalSqFt = parseFloat(document.getElementById('totalSqFt').value) || 0;
-            const purchasePrice = parseFloat(document.getElementById('purchasePrice').value) || 0;
-            const downPayment = parseFloat(document.getElementById('downPayment').value) || 0;
-            const closingCostPct = parseFloat(document.getElementById('closingCostPct').value) || 0;
-            const acquisitionAmount = (purchasePrice * closingCostPct) / 100;
-
-            const totalInvestment = purchasePrice + acquisitionAmount;
-            const pricePSF = totalSqFt > 0 ? purchasePrice / totalSqFt : 0;
-            const downPaymentPct = purchasePrice > 0 ? (downPayment / purchasePrice) * 100 : 0;
-
-            let scheduledRental = 0;
-            let reimbursements = 0;
-            let occupiedSqFt = 0;
-
-            tenants.forEach(tenant => {
-                scheduledRental += tenant.monthlyRent * 12;
-                const monthlyRecovery = tenant.sqFt * tenant.recoveryPSF;
-                reimbursements += monthlyRecovery * 12;
-                if (tenant.monthlyRent > 0) {
-                    occupiedSqFt += tenant.sqFt;
-                }
-            });
-
-            const parkingIncome = parseFloat(document.getElementById('parkingIncome').value) || 0;
-            const laundryIncome = parseFloat(document.getElementById('laundryIncome').value) || 0;
-            const storageIncome = parseFloat(document.getElementById('storageIncome').value) || 0;
-            const otherIncome = parseFloat(document.getElementById('otherIncome').value) || 0;
-            const totalOtherIncome = parkingIncome + laundryIncome + storageIncome + otherIncome;
-
-            const gpi = scheduledRental + reimbursements + totalOtherIncome;
-
-            const vacancyRate = parseFloat(document.getElementById('vacancyRate').value) || 0;
-            const creditLoss = parseFloat(document.getElementById('creditLoss').value) || 0;
-            const vacancyAmount = gpi * (vacancyRate + creditLoss) / 100;
-
-            const goi = gpi - vacancyAmount;
-            const goiPSF = totalSqFt > 0 ? goi / totalSqFt : 0;
-
-            const realEstateTaxes = parseFloat(document.getElementById('realEstateTaxes').value) || 0;
-            const propertyInsurance = parseFloat(document.getElementById('propertyInsurance').value) || 0;
-            const offSiteManagement = parseFloat(document.getElementById('offSiteManagement').value) || 0;
-            const onsitePersonnel = parseFloat(document.getElementById('onsitePersonnel').value) || 0;
-            const benefits = parseFloat(document.getElementById('benefits').value) || 0;
-            const taxesWorkComp = parseFloat(document.getElementById('taxesWorkComp').value) || 0;
-            const repairsMaint = parseFloat(document.getElementById('repairsMaint').value) || 0;
-            const fuel = parseFloat(document.getElementById('fuel').value) || 0;
-            const waterSewer = parseFloat(document.getElementById('waterSewer').value) || 0;
-            const electric = parseFloat(document.getElementById('electric').value) || 0;
-            const phoneInternet = parseFloat(document.getElementById('phoneInternet').value) || 0;
-            const accountingLegal = parseFloat(document.getElementById('accountingLegal').value) || 0;
-            const leasingCommissions = parseFloat(document.getElementById('leasingCommissions').value) || 0;
-            const advertising = parseFloat(document.getElementById('advertising').value) || 0;
-            const lawnSnow = parseFloat(document.getElementById('lawnSnow').value) || 0;
-            const refuse = parseFloat(document.getElementById('refuse').value) || 0;
-            const pestControl = parseFloat(document.getElementById('pestControl').value) || 0;
-            const lotSweeping = parseFloat(document.getElementById('lotSweeping').value) || 0;
-            const security = parseFloat(document.getElementById('security').value) || 0;
-            const assocDues = parseFloat(document.getElementById('assocDues').value) || 0;
-            const supplies = parseFloat(document.getElementById('supplies').value) || 0;
-            const miscellaneous = parseFloat(document.getElementById('miscellaneous').value) || 0;
-            const reserves = parseFloat(document.getElementById('reserves').value) || 0;
-
-            const totalExpenses = realEstateTaxes + propertyInsurance + offSiteManagement +
-                                onsitePersonnel + benefits + taxesWorkComp + repairsMaint + fuel + waterSewer +
-                                electric + phoneInternet + accountingLegal + leasingCommissions + advertising +
-                                lawnSnow + refuse + pestControl + lotSweeping + security + assocDues +
-                                supplies + miscellaneous + reserves;
-
-            const expensesPSF = totalSqFt > 0 ? totalExpenses / totalSqFt : 0;
-            const opexRatio = goi > 0 ? (totalExpenses / goi) * 100 : 0;
-
-            const noi = goi - totalExpenses;
-            const noiPSF = totalSqFt > 0 ? noi / totalSqFt : 0;
-            const capRate = purchasePrice > 0 ? (noi / purchasePrice) * 100 : 0;
-
-            const loan1Amount = parseFloat(document.getElementById('loan1Amount').value) || 0;
-            const loan1Rate = parseFloat(document.getElementById('loan1Rate').value) || 0;
-            const loan1Term = parseFloat(document.getElementById('loan1Term').value) || 0;
-
-            const debtService = calculateMortgagePayment(loan1Amount, loan1Rate, loan1Term);
-
-            const dcr = debtService > 0 ? noi / debtService : 0;
-            const cashFlow = noi - debtService;
-            const cashOnCash = downPayment > 0 ? (cashFlow / downPayment) * 100 : 0;
-
-            const vacantSqFt = totalSqFt - occupiedSqFt;
-            const occupancyRate = totalSqFt > 0 ? (occupiedSqFt / totalSqFt) * 100 : 0;
-
-            // Tax calculations
-            const dailyTax = realEstateTaxes / 365;
-            const passedDays = parseFloat(document.getElementById('passedDays').value) || 0;
-            const taxProration = dailyTax * passedDays;
-
-            document.getElementById('dailyTax').value = dailyTax.toFixed(2);
-            document.getElementById('taxProration').value = taxProration.toFixed(2);
-
-            // Loan calculations
-            const paymentsPerYear = parseFloat(document.getElementById('paymentsPerYear').value) || 12;
-            const totalPayments = loan1Term * paymentsPerYear;
-            const amountPerPayment = loan1Amount > 0 ? debtService / paymentsPerYear : 0;
-            const totalLoanCost = amountPerPayment * totalPayments;
-            const interestCost = totalLoanCost - loan1Amount;
-
-            document.getElementById('totalPayments').value = totalPayments;
-            document.getElementById('amountPerPayment').value = amountPerPayment.toFixed(2);
-            document.getElementById('totalLoanCost').value = totalLoanCost.toFixed(2);
-            document.getElementById('interestCost').value = interestCost.toFixed(2);
-
-            // Update displays
-            document.getElementById('purchasePriceDisplay').textContent = formatCurrency(purchasePrice);
-            document.getElementById('pricePSFDisplay').textContent = formatCurrency(pricePSF);
-            document.getElementById('totalInvestmentDisplay').textContent = formatCurrency(totalInvestment);
-            document.getElementById('downPaymentPctResultDisplay').textContent = formatPercent(downPaymentPct);
-
-            document.getElementById('scheduledRentalDisplay').textContent = formatCurrency(scheduledRental);
-            document.getElementById('reimbursementsDisplay').textContent = formatCurrency(reimbursements);
-            document.getElementById('otherIncomeDisplay').textContent = formatCurrency(totalOtherIncome);
-            document.getElementById('gpiDisplay').textContent = formatCurrency(gpi);
-            document.getElementById('vacancyDisplay').textContent = '($' + formatNumber(vacancyAmount) + ')';
-            document.getElementById('goiDisplay').textContent = formatCurrency(goi);
-            document.getElementById('goiPSFDisplay').textContent = formatCurrency(goiPSF);
-
-            document.getElementById('totalExpensesDisplay').textContent = '($' + formatNumber(totalExpenses) + ')';
-            document.getElementById('expensesPSFDisplay').textContent = formatCurrency(expensesPSF);
-            document.getElementById('opexRatioDisplay').textContent = formatPercent(opexRatio);
-
-            document.getElementById('noiDisplay').textContent = formatCurrency(noi);
-            document.getElementById('noiPSFDisplay').textContent = formatCurrency(noiPSF);
-            document.getElementById('capRateDisplay').textContent = formatPercent(capRate);
-            document.getElementById('debtServiceDisplay').textContent = '($' + formatNumber(debtService) + ')';
-            document.getElementById('dcrDisplay').textContent = dcr.toFixed(2);
-            
-            const cashFlowElem = document.getElementById('cashFlowDisplay');
-            cashFlowElem.textContent = formatCurrency(cashFlow);
-            cashFlowElem.className = 'metric-value ' + (cashFlow >= 0 ? 'positive' : 'negative');
-            
-            document.getElementById('cocDisplay').textContent = formatPercent(cashOnCash);
-
-            document.getElementById('occupiedSqFtDisplay').textContent = formatNumber(occupiedSqFt);
-            document.getElementById('vacantSqFtDisplay').textContent = formatNumber(vacantSqFt);
-            document.getElementById('occupancyRateDisplay').textContent = formatPercent(occupancyRate);
-        }
-
-        function formatCurrency(value) {
-            return '$' + formatNumber(value);
-        }
-
-        function formatNumber(value) {
-            return value.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
-        }
-
-        function formatPercent(value) {
-            return value.toFixed(2) + '%';
-        }
-
-        function resetForm() {
-            if (confirm('Are you sure you want to reset all fields? This cannot be undone.')) {
-                location.reload();
-            }
-        }
-
-        function generatePDF() {
-            alert('PDF generation feature coming soon!');
-        }
-
-        function emailReport() {
-            alert('Email feature coming soon!');
-        }
-
-        function loadSampleData() {
-            const sampleTenants = [
-                {id: 1, name: '1530B', sqFt: 1200, monthlyRent: 2317, recoveryPSF: 4.70},
-                {id: 2, name: '1510A', sqFt: 3500, monthlyRent: 3354, recoveryPSF: 6.00},
-                {id: 3, name: '1510B', sqFt: 3000, monthlyRent: 3738, recoveryPSF: 6.08},
-                {id: 4, name: '1510F', sqFt: 6600, monthlyRent: 5352, recoveryPSF: 4.82},
-                {id: 5, name: '1510H', sqFt: 32450, monthlyRent: 14873, recoveryPSF: 3.90},
-                {id: 6, name: '1400B1', sqFt: 975, monthlyRent: 1341, recoveryPSF: 5.85},
-                {id: 7, name: '1400B2', sqFt: 1750, monthlyRent: 2917, recoveryPSF: 3.09},
-                {id: 8, name: '1400E', sqFt: 7800, monthlyRent: 9750, recoveryPSF: 6.15},
-                {id: 9, name: '1480C', sqFt: 14889, monthlyRent: 13028, recoveryPSF: 4.23},
-                {id: 10, name: '1310A', sqFt: 2350, monthlyRent: 3819, recoveryPSF: 5.17},
-                {id: 11, name: '1310C', sqFt: 8800, monthlyRent: 12833, recoveryPSF: 4.22}
-            ];
-            
-            tenants = sampleTenants;
-            renderTenants();
+    function updateTenant(id, field, value) {
+        const tenant = tenants.find(t => t.id === id);
+        if (tenant) {
+            tenant[field] = value;
             calculate();
         }
+    }
 
-        loadSampleData();
-    </script>
+    function calculateMortgagePayment(principal, annualRate, years) {
+        if (principal === 0 || annualRate === 0) return 0;
+        const monthlyRate = annualRate / 100 / 12;
+        const numPayments = years * 12;
+        const monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numPayments)) / 
+                               (Math.pow(1 + monthlyRate, numPayments) - 1);
+        return monthlyPayment * 12;
+    }
+
+    function calculate() {
+        const purchasePrice = parseFloat(document.getElementById('B1').value) || 0;
+        const downPayment = parseFloat(document.getElementById('B3').value) || 0;
+        const closingCostPct = parseFloat(document.getElementById('B13').value) || 0;
+        const acquisitionAmount = (purchasePrice * closingCostPct) / 100;
+        const totalInvestment = purchasePrice + acquisitionAmount;
+
+        // Tenant income
+        let scheduledRental = 0;
+        let reimbursements = 0;
+        let occupiedSqFt = 0;
+
+        tenants.forEach(tenant => {
+            scheduledRental += tenant.monthlyRent * 12;
+            const monthlyRecovery = tenant.sqFt * tenant.recoveryPSF;
+            reimbursements += monthlyRecovery * 12;
+            if (tenant.monthlyRent > 0) {
+                occupiedSqFt += tenant.sqFt;
+            }
+        });
+
+        // Other income
+        const parkingIncome = parseFloat(document.getElementById('parkingIncome').value) || 0;
+        const laundryIncome = parseFloat(document.getElementById('laundryIncome').value) || 0;
+        const storageIncome = parseFloat(document.getElementById('storageIncome').value) || 0;
+        const otherIncome = parseFloat(document.getElementById('otherIncome').value) || 0;
+        const totalOtherIncome = parkingIncome + laundryIncome + storageIncome + otherIncome;
+
+        const gpi = scheduledRental + reimbursements + totalOtherIncome;
+
+        const vacancyRate = parseFloat(document.getElementById('vacancyRate').value) || 0;
+        const creditLoss = parseFloat(document.getElementById('creditLoss').value) || 0;
+        const vacancyAmount = gpi * (vacancyRate + creditLoss) / 100;
+
+        const goi = gpi - vacancyAmount;
+
+        // Operating Expenses
+        const realEstateTaxes = parseFloat(document.getElementById('A5').value) || 0;
+        const propertyInsurance = parseFloat(document.getElementById('propertyInsurance').value) || 0;
+        const offSiteManagement = parseFloat(document.getElementById('offSiteManagement').value) || 0;
+        const repairsMaint = parseFloat(document.getElementById('repairsMaint').value) || 0;
+        const utilities = parseFloat(document.getElementById('utilities').value) || 0;
+        const accountingLegal = parseFloat(document.getElementById('accountingLegal').value) || 0;
+        const lawnSnow = parseFloat(document.getElementById('lawnSnow').value) || 0;
+        const security = parseFloat(document.getElementById('security').value) || 0;
+        const assocDues = parseFloat(document.getElementById('assocDues').value) || 0;
+        const miscellaneous = parseFloat(document.getElementById('miscellaneous').value) || 0;
+
+        const totalExpenses = realEstateTaxes + propertyInsurance + offSiteManagement + repairsMaint + 
+                            utilities + accountingLegal + lawnSnow + security + assocDues + miscellaneous;
+
+        const opexRatio = goi > 0 ? (totalExpenses / goi) * 100 : 0;
+
+        const noi = goi - totalExpenses;
+        const noiPSF = 204312 > 0 ? noi / 204312 : 0;
+        const capRate = purchasePrice > 0 ? (noi / purchasePrice) * 100 : 0;
+
+        // Financing
+        const loan1Amount = parseFloat(document.getElementById('B5').value) || 0;
+        const loan1Rate = parseFloat(document.getElementById('B6').value) || 0;
+        const loan1Term = parseFloat(document.getElementById('B7').value) || 0;
+        const paymentsPerYear = parseFloat(document.getElementById('B8').value) || 12;
+
+        const debtService = calculateMortgagePayment(loan1Amount, loan1Rate, loan1Term);
+        const totalPayments = loan1Term * paymentsPerYear;
+        const amountPerPayment = loan1Amount > 0 ? debtService / paymentsPerYear : 0;
+        const totalLoanCost = amountPerPayment * totalPayments;
+        const interestCost = totalLoanCost - loan1Amount;
+
+        document.getElementById('B9').value = totalPayments;
+        document.getElementById('B10').value = amountPerPayment.toFixed(2);
+        document.getElementById('B11').value = totalLoanCost.toFixed(2);
+        document.getElementById('B12').value = interestCost.toFixed(2);
+
+        const dcr = debtService > 0 ? noi / debtService : 0;
+        const cashFlow = noi - debtService;
+        const cashOnCash = downPayment > 0 ? (cashFlow / downPayment) * 100 : 0;
+
+        const totalSqFt = 204312;
+        const pricePSF = totalSqFt > 0 ? purchasePrice / totalSqFt : 0;
+        const vacantSqFt = totalSqFt - occupiedSqFt;
+        const occupancyRate = totalSqFt > 0 ? (occupiedSqFt / totalSqFt) * 100 : 0;
+
+        // Tax calculations
+        const dailyTax = realEstateTaxes / 365;
+        const passedDays = parseFloat(document.getElementById('A4_2').value) || 0;
+        const taxProration = dailyTax * passedDays;
+
+        document.getElementById('A5_2').value = dailyTax.toFixed(2);
+        document.getElementById('A8').value = taxProration.toFixed(2);
+
+        // Update displays
+        document.getElementById('purchasePriceDisplay').textContent = formatCurrency(purchasePrice);
+        document.getElementById('pricePSFDisplay').textContent = formatCurrency(pricePSF);
+        document.getElementById('totalInvestmentDisplay').textContent = formatCurrency(totalInvestment);
+        document.getElementById('scheduledRentalDisplay').textContent = formatCurrency(scheduledRental);
+        document.getElementById('reimbursementsDisplay').textContent = formatCurrency(reimbursements);
+        document.getElementById('gpiDisplay').textContent = formatCurrency(gpi);
+        document.getElementById('vacancyDisplay').textContent = '($' + formatNumber(vacancyAmount) + ')';
+        document.getElementById('goiDisplay').textContent = formatCurrency(goi);
+        document.getElementById('totalExpensesDisplay').textContent = '($' + formatNumber(totalExpenses) + ')';
+        document.getElementById('opexRatioDisplay').textContent = formatPercent(opexRatio);
+        document.getElementById('noiDisplay').textContent = formatCurrency(noi);
+        document.getElementById('noiPSFDisplay').textContent = formatCurrency(noiPSF);
+        document.getElementById('capRateDisplay').textContent = formatPercent(capRate);
+        document.getElementById('debtServiceDisplay').textContent = '($' + formatNumber(debtService) + ')';
+        document.getElementById('dcrDisplay').textContent = dcr.toFixed(2);
+        document.getElementById('cashFlowDisplay').textContent = formatCurrency(cashFlow);
+        document.getElementById('cocDisplay').textContent = formatPercent(cashOnCash);
+        document.getElementById('occupancyRateDisplay').textContent = formatPercent(occupancyRate);
+    }
+
+    function formatCurrency(value) {
+        return '$' + formatNumber(value);
+    }
+
+    function formatNumber(value) {
+        return value.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+    }
+
+    function formatPercent(value) {
+        return value.toFixed(2) + '%';
+    }
+
+    function loadSampleData() {
+        const sampleTenants = [
+            {id: 1, name: '1530B', sqFt: 1200, monthlyRent: 2317, recoveryPSF: 4.70},
+            {id: 2, name: '1510A', sqFt: 3500, monthlyRent: 3354, recoveryPSF: 6.00},
+            {id: 3, name: '1510B', sqFt: 3000, monthlyRent: 3738, recoveryPSF: 6.08},
+            {id: 4, name: '1510F', sqFt: 6600, monthlyRent: 5352, recoveryPSF: 4.82},
+            {id: 5, name: '1510H', sqFt: 32450, monthlyRent: 14873, recoveryPSF: 3.90},
+            {id: 6, name: '1400B1', sqFt: 975, monthlyRent: 1341, recoveryPSF: 5.85},
+            {id: 7, name: '1400B2', sqFt: 1750, monthlyRent: 2917, recoveryPSF: 3.09},
+            {id: 8, name: '1400E', sqFt: 7800, monthlyRent: 9750, recoveryPSF: 6.15},
+            {id: 9, name: '1480C', sqFt: 14889, monthlyRent: 13028, recoveryPSF: 4.23},
+            {id: 10, name: '1310A', sqFt: 2350, monthlyRent: 3819, recoveryPSF: 5.17},
+            {id: 11, name: '1310C', sqFt: 8800, monthlyRent: 12833, recoveryPSF: 4.22}
+        ];
+        
+        tenants = sampleTenants;
+        renderTenants();
+        calculate();
+    }
+
+    // Reset functionality
+    document.getElementById('resetAll').addEventListener('click', function() {
+        location.reload();
+    });
+
+    // PDF placeholder
+    document.getElementById('savepdf').addEventListener('click', function() {
+        alert('PDF generation feature coming soon!');
+    });
+
+    // Email placeholder
+    document.getElementById('sendtoemail').addEventListener('click', function() {
+        alert('Email feature coming soon!');
+    });
+
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    });
+
+    loadSampleData();
+</script>
+
 </body>
 </html>
