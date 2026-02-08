@@ -11,7 +11,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.5.5/css/simple-line-icons.min.css">
     
     <style>
-        /* CSS 1:1 from Template 2 */
         .site-header { background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 1rem 0; }
         .wrap { max-width: 1400px; margin: 0 auto; padding: 0 15px; }
         .site-title { font-size: 1.5rem; font-weight: 600; color: #333; }
@@ -20,35 +19,29 @@
         footer { background-color: #f8f9fa; border-top: 1px solid #dee2e6; margin-top: 3rem; padding: 2rem 0; }
         .page-content { padding: 2rem 0; }
         .calcheaderbtn { margin-bottom: 20px; display: flex; gap: 10px; }
-        .subsection { margin-top: 20px; padding: 20px; border-radius: 0px; }
-        .subsection-heading { text-align: center; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
-        
-        /* Matching Template 2's specific borders and colors */
-        .section-border { border: 1px dashed #1DA1F2; padding: 15px; margin-bottom: 20px; }
-        .expense-bg { background: rgb(240, 128, 128); }
-        .income-bg { background: #d4edda; }
-        .results-bg { background: #fff3cd; }
-        .rent-roll-bg { background: #e3f2fd; }
-
-        .input-group-text { background-color: #e9ecef; font-size: 0.9rem; }
-        .form-label { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.2rem; }
+        .subsection { margin-top: 20px; padding: 20px; }
+        .subsection-heading { text-align: center; margin-bottom: 15px; font-weight: 700; }
         .mtool { color: #1DA1F2; cursor: help; margin-right: 3px; }
-
+        .input-group-text { background-color: #e9ecef; }
+        
+        /* Mobile responsive header */
         @media (max-width: 768px) {
             .site-nav .trigger { display: none; }
             .site-nav .trigger2 { display: inline-block; }
         }
 
-        /* Rent Roll Specific Table Style */
-        .table-rent-roll input { border: none; background: transparent; width: 100%; }
-        .table-rent-roll input:focus { outline: 1px solid #1DA1F2; background: #fff; }
+        /* Rent Roll Table specific styles */
+        .table input { border: none; background: transparent; width: 100%; height: 100%; padding: 4px; }
+        .table input:focus { outline: 1px solid #1DA1F2; background: white; }
+        .triangle-add { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-bottom: 15px solid #28a745; cursor: pointer; margin-right: 5px; }
+        .triangle-rem { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent; border-top: 15px solid #dc3545; cursor: pointer; }
     </style>
 </head>
 
 <body>
 <header class="site-header">
     <div class="wrap">
-        <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Commercial Real Estate APOD</a>
+        <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
         <nav class="site-nav">
             <div class="trigger">
                 <a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=APOD-Calculator">pavlo@rospopa.com</a>
@@ -64,192 +57,135 @@
     <div class="page-content">
         <div id="topdf" class="wrap">
             <div id="calculator">
+                <h2 class="text-center" id="main-title-address"></h2>
+                
                 <div class="calcheaderbtn">
                     <div class="modal fade" role="dialog" tabindex="-1" id="confirmModal">
                         <div class="modal-dialog modal-sm" role="document">
                             <div class="modal-content">
                                 <div class="modal-header" style="padding-bottom: 10px;">
-                                    <button class="btn-close" type="button" data-bs-dismiss="modal"></button>
+                                    <button class="btn-close" type="button" data-bs-dismiss="modal" style="padding-right: 0px;padding-left: 0px;padding-bottom: 0px;"></button>
                                 </div>
-                                <div class="modal-body text-center">
-                                    <h2 style="margin-bottom: 0px;margin-top: 5px; font-size: 1.5rem;">Confirm Reset?</h2>
+                                <div class="modal-body">
+                                    <h2 class="text-center" style="margin-bottom: 0px;margin-top: 5px;">Confirm Reset?</h2>
                                 </div>
                                 <div class="modal-footer justify-content-evenly">
-                                    <button class="btn btn-success" type="button" data-bs-dismiss="modal">NO</button>
-                                    <button class="btn btn-secondary" id="resetAll" type="button" data-bs-dismiss="modal">YES</button>
+                                    <button class="btn btn-success" type="button" data-bs-dismiss="modal"><span>NO</span></button>
+                                    <button class="btn btn-secondary" id="resetAll" type="button" data-bs-dismiss="modal"><span>YES</span></button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button>
-                    <button class="btn btn-primary btn-sm" id="savepdf"><span>PDF</span></button>
-                    <button class="btn btn-success btn-sm" id="sendtoemail"><span>E-MAIL</span></button>
+                    <button class="btn btn-secondary btn-sm" id="bt-reset-modal" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button>
+                    <button class="btn btn-primary btn-sm" id="savepdf" type="button"><span>PDF</span></button>
+                    <button class="btn btn-success btn-sm" id="sendtoemail" type="button"><span>E-MAIL</span></button>
                 </div>
 
-                <div class="section-border row">
-                    <div class="col-md-12 mb-3">
-                        <label class="form-label" for="autocomplete"><sup class="mtool" title="Address"><i class="icon-question"></i></sup>Address*</label>
-                        <div class="input-group">
-                            <span class="input-group-text">Address</span>
-                            <input type="text" id="autocomplete" class="form-control" placeholder="Enter property address" value="75th St Downers Grove">
-                        </div>
+                <div class="row" style="border: 1px dashed #1DA1F2;">
+                    <div class="col-md-12"><label class="form-label" for="autocomplete"><sup data-bs-toggle="tooltip" title="Address" class="mtool"><i class="icon-question"></i></sup>Address*</label>
+                        <div class="input-group searchbox"><span class="input-group-text">Address</span><input type="text" id="autocomplete" class="form-control" placeholder="Enter an address" value="75th St Downers Grove"></div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label" for="B1"><sup class="mtool" title="Purchase Price $"><i class="icon-question"></i></sup>Purchase Price</label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input class="form-control" type="number" id="B1" value="5900000" oninput="calculate()">
-                        </div>
+                    <div class="col-md-3"><label class="form-label" for="B1"><sup data-bs-toggle="tooltip" title="Purchase Price $" class="mtool"><i class="icon-question"></i></sup>Purchase Price</label>
+                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="number" id="B1" value="5900000" oninput="calculate()"></div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label" for="B4"><sup class="mtool" title="Closing Date"><i class="icon-question"></i></sup>Closing Date</label>
-                        <div class="input-group">
-                            <input class="form-control" id="B4" type="date">
-                        </div>
+                    <div class="col-md-3"><label class="form-label" for="B4"><sup data-bs-toggle="tooltip" title="Closing Date" class="mtool"><i class="icon-question"></i></sup>Closing Date</label>
+                        <div class="input-group"><input class="form-control" id="B4" type="date"></div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label" for="A4"><sup class="mtool" title="Days Remain in Year"><i class="icon-question"></i></sup>Remain</label>
-                        <div class="input-group">
-                            <input class="form-control" type="number" id="A4" value="0" readonly>
-                            <span class="input-group-text">days</span>
-                        </div>
+                    <div class="col-md-3"><label class="form-label" for="A4"><sup data-bs-toggle="tooltip" title="Days Remain in Year" class="mtool"><i class="icon-question"></i></sup>Remain</label>
+                        <div class="input-group"><input class="form-control" type="number" id="A4" value="0" readonly><span class="input-group-text">days</span></div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label" for="A4_2"><sup class="mtool" title="Days Passed in Year"><i class="icon-question"></i></sup>Passed</label>
-                        <div class="input-group">
-                            <input class="form-control" type="number" id="A4_2" value="0" oninput="calculate()">
-                            <span class="input-group-text">days</span>
-                        </div>
+                    <div class="col-md-3"><label class="form-label" for="A4_2"><sup data-bs-toggle="tooltip" title="Days Passed in Year" class="mtool"><i class="icon-question"></i></sup>Passed</label>
+                        <div class="input-group"><input class="form-control" type="number" id="A4_2" value="0" oninput="calculate()"><span class="input-group-text">days</span></div>
                     </div>
                 </div>
 
                 <h4 class="text-center">Loan Profile</h4>
-                <div class="section-border row">
-                    <div class="col-md-3">
-                        <label class="form-label" for="B2"><sup class="mtool" title="Down Payment %"><i class="icon-question"></i></sup>Down Payment %</label>
-                        <div class="input-group">
-                            <input class="form-control" type="number" id="B2" value="100" min="0" max="100" oninput="updateDownPayment()">
-                            <span class="input-group-text">%</span>
-                        </div>
+                <div class="row" style="border: 1px dashed #1DA1F2;">
+                    <div class="col-md-3"><label class="form-label" for="B2"><sup data-bs-toggle="tooltip" title="Down Payment %" class="mtool"><i class="icon-question"></i></sup>Down Payment</label>
+                        <div class="input-group"><input class="form-control" type="number" id="B2" value="100" oninput="updateDownPayment()"><span class="input-group-text">%</span></div>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label" for="B3"><sup class="mtool" title="Down Payment $"><i class="icon-question"></i></sup>Down Payment $</label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input class="form-control" type="number" id="B3" value="5900000" oninput="calculate()">
-                        </div>
+                    <div class="col-md-3"><label class="form-label" for="B3"><sup data-bs-toggle="tooltip" title="Down Payment $" class="mtool"><i class="icon-question"></i></sup>Down Payment</label>
+                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="number" id="B3" value="5900000" oninput="calculate()"></div>
                     </div>
-                    <div class="col-md-6">
-                        <label class="form-label" for="Loan-Type"><sup class="mtool" title="Loan Type"><i class="icon-question"></i></sup>Loan Type</label>
+                    <div class="col-md-6"><label class="form-label" for="Loan-Type"><sup data-bs-toggle="tooltip" title="Loan Type" class="mtool"><i class="icon-question"></i></sup>Loan Type</label>
                         <select class="form-select form-control" id="Loan-Type">
                             <option value="None (All Cash)">None (All Cash)</option>
                             <option value="Conventional Loan">Conventional Loan</option>
-                            <option value="Commercial Loan">Commercial Loan</option>
-                            <option value="DSCR Loan">DSCR Loan (Debt-Service Coverage Ratio)</option>
+                            <option value="DSCR Loan">DSCR Loan</option>
                         </select>
                     </div>
-                    <div class="col-md-3 mt-2">
-                        <label class="form-label" for="B5">Loan Amount</label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input class="form-control" type="number" id="B5" value="0" readonly>
-                        </div>
+                    <div class="col-md-3"><label class="form-label">Loan Amount</label>
+                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="number" id="B5" value="0" readonly></div>
                     </div>
-                    <div class="col-md-3 mt-2">
-                        <label class="form-label" for="B6">Interest Rate %</label>
-                        <div class="input-group">
-                            <input class="form-control" type="number" id="B6" value="5.79" step="0.01" oninput="calculate()">
-                            <span class="input-group-text">%</span>
-                        </div>
+                    <div class="col-md-3"><label class="form-label">Interest Rate</label>
+                        <div class="input-group"><input class="form-control" type="number" id="B6" value="5.79" oninput="calculate()"><span class="input-group-text">%</span></div>
                     </div>
-                    <div class="col-md-3 mt-2">
-                        <label class="form-label" for="B7">Term (Years)</label>
-                        <div class="input-group">
-                            <input class="form-control" type="number" id="B7" value="30" oninput="calculate()">
-                            <span class="input-group-text">Yrs</span>
-                        </div>
+                    <div class="col-md-3"><label class="form-label">Term</label>
+                        <div class="input-group"><input class="form-control" type="number" id="B7" value="30" oninput="calculate()"><span class="input-group-text">Year(s)</span></div>
                     </div>
-                    <div class="col-md-3 mt-2">
-                        <label class="form-label" for="B10">Mo. Payment</label>
-                        <div class="input-group">
-                            <span class="input-group-text">$</span>
-                            <input class="form-control" type="number" id="B10" readonly>
-                        </div>
+                    <div class="col-md-3"><label class="form-label">Mo. Payment</label>
+                        <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="number" id="B10" readonly></div>
                     </div>
                 </div>
 
-                <div class="subsection rent-roll-bg">
+                <div class="subsection" style="background: #e3f2fd;">
                     <h4 class="subsection-heading">Rent Roll</h4>
                     <div class="table-responsive">
-                        <table class="table table-bordered table-hover table-rent-roll bg-white">
-                            <thead class="table-light">
+                        <table class="table table-striped table-hover table-bordered">
+                            <thead>
                                 <tr>
-                                    <th>Tenant Name</th>
+                                    <th>
+                                        <div class="row d-flex align-items-center">
+                                            <div class="col text-nowrap"><sup class="mtool" title="Add Tenant"><i class="icon-question"></i></sup>Tenant</div>
+                                            <div class="col d-flex justify-content-center">
+                                                <div id="addTenantBtn" class="triangle-add" onclick="addTenant()"></div>
+                                            </div>
+                                        </div>
+                                    </th>
                                     <th>Sq Ft</th>
                                     <th>Monthly Rent</th>
                                     <th>Recovery PSF</th>
-                                    <th>Action</th>
+                                    <th>Total</th>
                                 </tr>
                             </thead>
                             <tbody id="tenantList">
                                 </tbody>
                         </table>
                     </div>
-                    <button class="btn btn-primary btn-sm mt-2" onclick="addTenant()">+ Add Tenant</button>
                 </div>
 
-                <div class="subsection expense-bg">
-                    <h4 class="subsection-heading">Operating Expenses (Annual)</h4>
-                    <div class="row g-3">
-                        <div class="col-md-4">
-                            <label class="form-label">Real Estate Taxes</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="number" id="A5" value="380154" oninput="calculate()"></div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Property Insurance</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="number" id="propertyInsurance" value="32000" oninput="calculate()"></div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Off-Site Management</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="number" id="offSiteManagement" value="84047" oninput="calculate()"></div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Repairs & Maintenance</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="number" id="repairsMaint" value="242104" oninput="calculate()"></div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Utilities</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="number" id="utilities" value="109140" oninput="calculate()"></div>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Lawn/Snow Care</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input class="form-control" type="number" id="lawnSnow" value="81648" oninput="calculate()"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="subsection results-bg">
-                    <h4 class="subsection-heading">Financial Summary</h4>
-                    <div class="alert alert-primary text-center">
-                        <h3 class="mb-0">Net Operating Income (NOI): <strong id="noiDisplay">$0</strong></h3>
-                    </div>
+                <div class="subsection" style="background: rgb(240, 128, 128);">
+                    <h4 class="subsection-heading">Annual Expenses</h4>
                     <div class="table-responsive">
-                        <table class="table table-striped table-bordered bg-white">
+                        <table class="table table-hover table-bordered bg-white">
+                            <thead><tr><th>Expense Item</th><th>Amount ($)</th></tr></thead>
                             <tbody>
+                                <tr><td><sup class="mtool" title="Taxes"><i class="icon-question"></i></sup>Property Taxes</td><td><input type="number" id="A5" value="380154" oninput="calculate()"></td></tr>
+                                <tr><td><sup class="mtool" title="Insurance"><i class="icon-question"></i></sup>Property Insurance</td><td><input type="number" id="propertyInsurance" value="32000" oninput="calculate()"></td></tr>
+                                <tr><td><sup class="mtool" title="Mgmt"><i class="icon-question"></i></sup>Off-Site Management</td><td><input type="number" id="offSiteManagement" value="84047" oninput="calculate()"></td></tr>
+                                <tr><td><sup class="mtool" title="Maint"><i class="icon-question"></i></sup>Repairs & Maintenance</td><td><input type="number" id="repairsMaint" value="242104" oninput="calculate()"></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="subsection" style="background: #fff3cd;">
+                    <h4 class="subsection-heading">Financial Summary</h4>
+                    <div class="table-responsive">
+                        <table class="table table-hover table-bordered bg-white">
+                            <tbody>
+                                <tr class="table-primary text-center"><td colspan="2"><h3 class="mb-0">NOI: <strong id="noiDisplay">$0</strong></h3></td></tr>
                                 <tr><td>Scheduled Rental Income</td><td class="text-end text-success" id="scheduledRentalDisplay">$0</td></tr>
-                                <tr><td>Total Operating Expenses</td><td class="text-end text-danger" id="totalExpensesDisplay">($0)</td></tr>
-                                <tr class="table-primary"><td><strong>Cap Rate</strong></td><td class="text-end" id="capRateDisplay"><strong>0%</strong></td></tr>
-                                <tr><td>Annual Debt Service</td><td class="text-end text-danger" id="debtServiceDisplay">($0)</td></tr>
-                                <tr><td>Debt Coverage Ratio (DCR)</td><td class="text-end" id="dcrDisplay">0.00</td></tr>
-                                <tr class="table-success"><td><strong>Cash Flow Before Taxes</strong></td><td class="text-end" id="cashFlowDisplay"><strong>$0</strong></td></tr>
-                                <tr><td>Cash on Cash Return</td><td class="text-end" id="cocDisplay">0%</td></tr>
+                                <tr><td>Cap Rate</td><td class="text-end" id="capRateDisplay">0%</td></tr>
+                                <tr><td>DCR (Debt Coverage)</td><td class="text-end" id="dcrDisplay">0.00</td></tr>
+                                <tr><td>Cash Flow (BT)</td><td class="text-end" id="cashFlowDisplay">$0</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
 
                 <section class="mt-4">
-                    <h5 class="font-monospace lh-1 text-center" style="font-size: 0.8rem; color: #666;">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only.<br>(It's not a substitute for professional calculations.)</h5>
+                    <h5 class="font-monospace lh-1 text-center" style="font-size: 0.8rem; color: #666;">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only.<br>(It's not a substitute for your calculations.)</h5>
                 </section>
             </div>
         </div>
@@ -257,9 +193,21 @@
 </main>
 
 <footer>
-    <div class="wrap text-center">
-        <p>Go to <a href="https://www.linkedin.com/in/prospopa/">LinkedIn</a> | <a href="https://github.com/rospopa">GitHub</a></p>
-        <p class="mt-2">Copyright © <span id="currentYear"></span> Pavlo Rospopa. All Rights Reserved.</p>
+    <div class="wrap">
+        <div class="home">
+            <p>Go to <a href="https://www.linkedin.com/in/prospopa/">LinkedIn</a>.</p>
+            <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
+            <p>Return to <a href="#top">Top of This Page</a>.</p>
+            <section class="d-flex flex-row justify-content-center" style="width:100%;">
+                <div class="container" style="margin:0; padding:0; width:100%;">
+                    <div class="row" style="margin:0; padding:20px 0;">
+                        <div class="col text-center">
+                            <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
     </div>
 </footer>
 
@@ -267,8 +215,7 @@
 
 <script>
     document.getElementById('currentYear').textContent = new Date().getFullYear();
-
-    let tenants = [];
+    let tenants = [{id: Date.now(), name: 'Main Tenant', sqFt: 32000, monthlyRent: 15000, recoveryPSF: 4.50}];
 
     function updateDownPayment() {
         const price = parseFloat(document.getElementById('B1').value) || 0;
@@ -293,76 +240,53 @@
 
     function updateTenant(id, field, value) {
         const tenant = tenants.find(t => t.id === id);
-        if (tenant) {
-            tenant[field] = value;
-            calculate();
-        }
+        if (tenant) { tenant[field] = value; calculate(); }
     }
 
     function renderTenants() {
         const container = document.getElementById('tenantList');
         container.innerHTML = tenants.map((t, i) => `
             <tr>
-                <td><input type="text" value="${t.name}" onchange="updateTenant(${t.id}, 'name', this.value)" placeholder="Tenant ${i+1}"></td>
+                <td><input type="text" value="${t.name}" onchange="updateTenant(${t.id}, 'name', this.value)" placeholder="Tenant name"></td>
                 <td><input type="number" value="${t.sqFt}" oninput="updateTenant(${t.id}, 'sqFt', parseFloat(this.value)||0)"></td>
                 <td><input type="number" value="${t.monthlyRent}" oninput="updateTenant(${t.id}, 'monthlyRent', parseFloat(this.value)||0)"></td>
-                <td><input type="number" value="${t.recoveryPSF}" step="0.01" oninput="updateTenant(${t.id}, 'recoveryPSF', parseFloat(this.value)||0)"></td>
-                <td class="text-center"><button class="btn btn-outline-danger btn-sm" onclick="removeTenant(${t.id})">×</button></td>
+                <td><input type="number" value="${t.recoveryPSF}" oninput="updateTenant(${t.id}, 'recoveryPSF', parseFloat(this.value)||0)"></td>
+                <td><div class="triangle-rem" onclick="removeTenant(${t.id})"></div></td>
             </tr>
         `).join('');
-    }
-
-    function calculateMortgage(p, r, y) {
-        if (p <= 0 || r <= 0) return 0;
-        const i = r / 100 / 12;
-        const n = y * 12;
-        return p * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
     }
 
     function calculate() {
         const price = parseFloat(document.getElementById('B1').value) || 0;
         const down = parseFloat(document.getElementById('B3').value) || 0;
-        
-        let rentalIncome = 0;
-        let recoveryIncome = 0;
-        tenants.forEach(t => {
-            rentalIncome += t.monthlyRent * 12;
-            recoveryIncome += (t.sqFt * t.recoveryPSF) * 12;
+        const loan = price - down;
+        const rate = parseFloat(document.getElementById('B6').value) || 0;
+        const term = parseFloat(document.getElementById('B7').value) || 30;
+
+        let rental = 0, recovery = 0;
+        tenants.forEach(t => { 
+            rental += t.monthlyRent * 12; 
+            recovery += (t.sqFt * t.recoveryPSF) * 12; 
         });
 
-        const totalExpenses = ['A5', 'propertyInsurance', 'offSiteManagement', 'repairsMaint', 'utilities', 'lawnSnow']
-            .reduce((sum, id) => sum + (parseFloat(document.getElementById(id).value) || 0), 0);
+        const expenses = ['A5', 'propertyInsurance', 'offSiteManagement', 'repairsMaint'].reduce((sum, id) => sum + (parseFloat(document.getElementById(id).value) || 0), 0);
+        const noi = (rental + recovery) - expenses;
 
-        const goi = rentalIncome + recoveryIncome;
-        const noi = goi - totalExpenses;
-        const capRate = price > 0 ? (noi / price) * 100 : 0;
-
-        const loanAmount = price - down;
-        const term = parseFloat(document.getElementById('B7').value) || 0;
-        const rate = parseFloat(document.getElementById('B6').value) || 0;
-        const monthlyDebt = calculateMortgage(loanAmount, rate, term);
-        const annualDebt = monthlyDebt * 12;
-
-        document.getElementById('B10').value = monthlyDebt.toFixed(2);
-        document.getElementById('noiDisplay').textContent = formatCurrency(noi);
-        document.getElementById('scheduledRentalDisplay').textContent = formatCurrency(rentalIncome);
-        document.getElementById('totalExpensesDisplay').textContent = `(${formatCurrency(totalExpenses)})`;
-        document.getElementById('capRateDisplay').textContent = capRate.toFixed(2) + '%';
-        document.getElementById('debtServiceDisplay').textContent = `(${formatCurrency(annualDebt)})`;
-        document.getElementById('dcrDisplay').textContent = annualDebt > 0 ? (noi / annualDebt).toFixed(2) : "0.00";
-        document.getElementById('cashFlowDisplay').textContent = formatCurrency(noi - annualDebt);
-        document.getElementById('cocDisplay').textContent = down > 0 ? ((noi - annualDebt) / down * 100).toFixed(2) + '%' : '0%';
+        // Mortgage calc
+        const i = rate / 100 / 12;
+        const n = term * 12;
+        const mPay = loan > 0 && i > 0 ? loan * (i * Math.pow(1+i, n)) / (Math.pow(1+i, n) - 1) : 0;
+        
+        document.getElementById('B10').value = mPay.toFixed(2);
+        document.getElementById('noiDisplay').textContent = '$' + noi.toLocaleString();
+        document.getElementById('scheduledRentalDisplay').textContent = '$' + rental.toLocaleString();
+        document.getElementById('capRateDisplay').textContent = price > 0 ? ((noi/price)*100).toFixed(2) + '%' : '0%';
+        document.getElementById('dcrDisplay').textContent = mPay > 0 ? (noi / (mPay * 12)).toFixed(2) : '0.00';
+        document.getElementById('cashFlowDisplay').textContent = '$' + (noi - (mPay * 12)).toLocaleString();
     }
 
-    function formatCurrency(v) { return '$' + v.toLocaleString('en-US', {maximumFractionDigits:0}); }
-
-    // Init with Sample Data
-    tenants = [{id: 1, name: 'Anchor Store', sqFt: 32000, monthlyRent: 14000, recoveryPSF: 3.50}];
     renderTenants();
     calculate();
-
-    document.getElementById('resetAll').addEventListener('click', () => location.reload());
 </script>
-
 </body>
 </html>
