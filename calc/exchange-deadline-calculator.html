@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
+	<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/css/favicons/unnamed-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/css/favicons/unnamed-32x32.png">
     <link rel="icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
@@ -11,28 +11,14 @@
     <link rel="icon" type="image/png" sizes="231x231" href="/css/favicons/unnamed-231x231.png">
     <title>Exchange Deadline Calculator | Pavlo Rospopa</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+Inscriptional+Pahlavi&amp;display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.5.5/css/simple-line-icons.min.css">
-    <style>
-        .site-header { background-color: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 1rem 0; }
-        .wrap { max-width: 1400px; margin: 0 auto; padding: 0 15px; }
-        .site-title { font-size: 1.5rem; font-weight: 600; color: #333; }
-        .site-nav { float: right; }
-        .site-nav .trigger2 { display: none; }
-        .page-content { padding: 2rem 0; }
-        .calcheaderbtn { margin-bottom: 20px; display: flex; gap: 10px; }
-        .subsection-heading { text-align: center; margin-bottom: 15px; font-weight: 700; text-transform: uppercase; }
-        .mtool { color: #1DA1F2; cursor: help; margin-right: 3px; }
-        .input-row-dashed { border: 1px dashed #1DA1F2; padding: 20px; margin-bottom: 25px; border-radius: 4px; background-color: #fdfdfd; }
-        .subsection.summary { background: #fff3cd; padding: 20px; border-radius: 4px; border: 1px solid #ffeeba; }
-        .table-result-input { border: none !important; background: transparent !important; width: 100%; outline: none; text-align: right; font-weight: bold; font-size: 1.1rem; }
+    <link rel="stylesheet" href="/css/format.css">
+    <link rel="stylesheet" href="/calc/css/calc.css">
 
-        @media (max-width: 768px) {
-            .site-nav .trigger { display: none; }
-            .site-nav .trigger2 { display: inline-block; }
-        }
-    </style>
 </head>
 <body>
+
 <header class="site-header">
     <div class="wrap">
         <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
@@ -46,64 +32,80 @@
         </nav>
     </div>
 </header>
-<main class="page-content">
-    <div class="wrap">
-        <h2 class="text-center mb-4" style="font-weight: 700;">EXCHANGE DEADLINE CALCULATOR</h2>
-        <div class="calcheaderbtn">
-            <button class="btn btn-secondary btn-sm" onclick="location.reload()"><span>RESET</span></button>
-            <button class="btn btn-primary btn-sm"><span>PDF</span></button>
-            <button class="btn btn-success btn-sm"><span>E-MAIL</span></button>
-        </div>
-        <div class="row">
-            <div class="col-lg-5">
-                <div class="p-3 text-muted" style="line-height: 1.6; font-size: 0.95rem;">
-                    <p>Two distinct deadlines drive the 1031 exchange process, the 45-day identification period and the 180-day exchange period. To ensure you stay in compliance use this deadline calculator below.</p>
-                    <p>By utilizing this simple 1031 exchange deadline calculator to count the days you can rest at ease knowing your 1031 exchange is on track.</p>
-                </div>
+
+<main>
+    <div class="page-content">
+        <div id="topdf" class="wrap">
+            <div id="calculator">
+            <h2 class="text-center">EXCHANGE DEADLINE CALCULATOR</h2>
+            <div class="calcheaderbtn">
+                <button class="btn btn-secondary btn-sm" onclick="location.reload()"><span>RESET</span></button>
+                <button class="btn btn-primary btn-sm"><span>PDF</span></button>
+                <button class="btn btn-success btn-sm"><span>E-MAIL</span></button>
             </div>
-            <div class="col-lg-7">
-                <div class="input-row-dashed">
-                    <h5 class="mb-3" style="color: #1f4e79; font-weight: 600;">Enter The Closing Date For The Relinquished Property:</h5>
-                    <form name="deadlineForm">
-                        <div class="row g-3">
-                            <div class="col-md-12"><label class="form-label">Month:</label>
-                                <select class="form-select" name="month">
-                                    <option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option>
-                                </select>
+            <div class="row" style="border: 1px dashed #1DA1F2;">
+                <div class="col-lg-12">
+                    <div class="p-3 text-muted" style="line-height: 1.6; font-size: 0.9rem;">
+                        <p>Two distinct deadlines drive the 1031 exchange process, the 45-day identification period and the 180-day exchange period. To ensure you stay in compliance use this deadline calculator below.</p>
+                        <p>By utilizing this simple 1031 exchange deadline calculator to count the days you can rest at ease knowing your 1031 exchange is on track.</p>
+                    </div>
+                </div>
+                <div class="col-lg-12">
+                    <div class="p-3">
+                        <h5 class="mb-3" style="font-weight: 600;">Enter The Closing Date For The Relinquished Property:</h5>
+                        <form name="deadlineForm">
+                            <div class="row g-3">
+                                <div class="col-md-12"><label class="form-label"><sup class="mtool" title="Closing Month"><i class="icon-question"></i></sup>Month:</label>
+                                    <select class="form-select" name="month">
+                                        <option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6"><label class="form-label"><sup class="mtool" title="Closing Day"><i class="icon-question"></i></sup>Day:</label><select class="form-select" name="day"></select></div>
+                                <div class="col-md-6"><label class="form-label"><sup class="mtool" title="Closing Year"><i class="icon-question"></i></sup>Year:</label><select class="form-select" name="year"></select></div>
                             </div>
-                            <div class="col-md-6"><label class="form-label">Day:</label><select class="form-select" name="day"></select></div>
-                            <div class="col-md-6"><label class="form-label">Year:</label><select class="form-select" name="year"></select></div>
-                        </div>
-                        <button class="btn btn-primary w-100 mt-3 py-2 fw-bold" type="button" onclick="runDeadlineCalc(this.form)" style="background-color:#1f4e79;">CALCULATE</button>
-                        <div class="subsection summary mt-4">
-                            <table class="table table-borderless bg-white mb-0">
-                                <tbody>
-                                    <tr><td><strong>Identification Period (45 days) ends:</strong></td><td><input class="table-result-input" name="period1" readonly placeholder="---"></td></tr>
-                                    <tr><td><strong>Exchange Period (180 days) ends:</strong></td><td><input class="table-result-input text-primary" name="period2" readonly placeholder="---"></td></tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </form>
+                            <button class="btn btn-primary w-100 mt-3 py-2 fw-bold" type="button" onclick="runDeadlineCalc(this.form)">CALCULATE</button>
+                            <div class="subsection summary mt-4" style="background-color:#fff3cd; padding:15px; border-radius:5px;">
+                                <table class="table table-borderless bg-white mb-0">
+                                    <tbody>
+                                        <tr><td><strong>Identification Period Ends:</strong></td><td><input class="table-result-input" name="period1" readonly placeholder="---"></td></tr>
+                                        <tr><td><strong>Exchange Period Ends:</strong></td><td><input class="table-result-input" name="period2" readonly placeholder="---"></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
- <section class="mt-4">
-  <h5 class="font-monospace lh-1 text-center" style="font-size: 0.8rem; color: #666;">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only.<br>(It's not a substitute for your calculations.)</h5>
- </section>
+            <section class="ATTENTION-SECTION">
+                <h5 class="font-monospace lh-1 text-center">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br>(It's not a substitute for your calculations.)</h5>
+            </section><!-- End: DISCLAIMER -->
+        </div>
+    </div>
 </main>
 
-<footer class="site-footer">
+<footer>
     <div class="wrap">
         <div class="home">
+            <style>
+                .home {padding-top:20px;}
+                p {margin-bottom: 0;}
+            </style>
             <p>Go to <a href="https://www.linkedin.com/in/prospopa/">LinkedIn</a>.</p>
             <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
             <p>Return to <a href="#top">Top of This Page</a>.</p>
             <section class="d-flex flex-row justify-content-center" style="width:100%;">
-                <div class="container" style="margin:0; padding:20px 0; width:100%;">
-                    <div class="text-center">
-                        <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
+                <div class="container" style="margin-right:0px;margin-left:0px;padding-right:0px;padding-left:0px;width:100%;max-width:100%;">
+                    <div class="row" style="margin-right:0px;margin-left:0px;max-width:100%;padding-top:20px;padding-bottom:20px;">
+                        <div class="col" style="width:auto;padding-right:0px;padding-left:0px;max-width:100%;">
+                            <div class="text-center" style="text-align:center;">
+                                <p class="mb-0">Copyright&nbsp;©&nbsp;<span id="currentYear"></span> All Rights Reserved.</p>
+                            </div><script>
+                    document.getElementById('currentYear').textContent = new Date().getFullYear();
+                </script>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -111,8 +113,16 @@
     </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/calc/js/bs-init.js"></script>
+<script src="/calc/js/reset-btn.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    window.onload = function() {
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
+        
         const f = document.forms['deadlineForm'];
         for(let i=1; i<=31; i++) { let opt = document.createElement('option'); opt.value = i; opt.text = i; f.day.add(opt); }
         const curY = new Date().getFullYear();
@@ -128,6 +138,4 @@
     }
 </script>
 </body>
-
 </html>
-
