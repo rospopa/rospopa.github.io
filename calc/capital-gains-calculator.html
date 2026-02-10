@@ -60,6 +60,11 @@
         
         .form-label { font-size: 0.85rem; font-weight: 600; color: #444; }
         .table-result-input { border: none !important; background: transparent !important; width: 100%; outline: none; text-align: right; font-weight: bold; }
+
+		@media (max-width: 768px) {
+            .site-nav .trigger { display: none; }
+            .site-nav .trigger2 { display: inline-block; }
+        }
     </style>
 </head>
 
@@ -301,4 +306,5 @@
     window.onload = calculate;
 </script>
 </body>
+
 </html>
