@@ -43,8 +43,8 @@
                 <button class="btn btn-primary btn-sm"><span>PDF</span></button>
                 <button class="btn btn-success btn-sm"><span>E-MAIL</span></button>
             </div>
-            <div class="row input-row-dashed">
-                <h4 class="text-center">Property Parameters</h4>
+				<h4 class="text-center">Property Parameters</h4>
+            <div class="row input-row-dashed" style="border: 1px dashed #1DA1F2; padding-bottom:0.5rem;margin-right:1px;margin-left:1px">
                 <div class="col-md-6"><label class="form-label"><sup class="mtool" title="Residential: 27.5 yrs, Commercial: 39 yrs"><i class="icon-question"></i></sup>Type of Property</label><select id="prop_type" class="form-select" onchange="runCalc()"><option value="None" selected disabled>Select</option><option value="Commercial">Commercial (39 yrs)</option><option value="Residential">Residential (27.5 yrs)</option></select></div>
                 <div class="col-md-6"><label class="form-label"><sup class="mtool" title="How many years the property has been owned"><i class="icon-question"></i></sup>Years Property Owned</label><div class="input-group"><input type="number" id="years_owned" class="form-control" placeholder="7.5" step="0.1" oninput="runCalc()"><span class="input-group-text">years</span></div></div>
                 <div class="col-md-4"><label class="form-label"><sup class="mtool" title="Original Purchase Price"><i class="icon-question"></i></sup>Purchase Price</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="price" class="form-control money-mask" placeholder="200,000"></div></div>
@@ -55,8 +55,8 @@
                 <h4 class="subsection-heading">Depreciation Summary</h4>
                 <table class="table table-bordered mb-0">
                     <tbody>
-                        <tr><td>Annual Depreciation</td><td><input class="form-control" id="res_annual" readonly placeholder="$0"></td></tr>
-                        <tr><td>Total Accumulated Depreciation</td><td><input class="form-control" id="res_total" readonly placeholder="$0"></td></tr>
+                        <tr><td style="padding-left:0.5rem">Annual Depreciation</td><td><input class="form-control" id="res_annual" readonly placeholder="$0"></td></tr>
+                        <tr><td style="padding-left:0.5rem">Total Accumulated Depreciation</td><td><input class="form-control" id="res_total" readonly placeholder="$0"></td></tr>
                     </tbody>
                 </table>
             </div>
@@ -118,6 +118,7 @@
 </script>
 </body>
 </html>
+
 
 
 
