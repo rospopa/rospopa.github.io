@@ -61,7 +61,7 @@
                 <h4 class="subsection-heading">Tax Calculation</h4>
                 <div class="input-row-dashed">
                     <div class="row g-3">
-                        <div class="col-6"><label class="form-label">Federal Rate</label><select id="fedRate" class="form-select" onchange="calculate()"><option value="0.20" selected>20%</option><option value="0.15">15%</option></select></div>
+                        <div class="col-6"><label class="form-label">Federal Rate</label><select id="fedRate" class="form-select" onchange="calculate()"><option value="0.20" selected>20%</option><option value="0.15">15%</option><option value="0.10">10%</option></select></div>
                         <div class="col-6"><label class="form-label">State Tax Rate</label><div class="input-group"><input type="number" id="stateRate" class="form-control" placeholder="5" oninput="calculate()"><span class="input-group-text">%</span></div></div>
                         <div class="col-12"><label class="form-label mt-2">Total Tax Liability</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="totalTaxDisplay" class="form-control bg-light fw-bold text-danger" readonly></div></div>
                     </div>
@@ -136,5 +136,6 @@
 </script>
 </body>
 </html>
+
 
 
