@@ -138,22 +138,82 @@
 <script src="/calc/js/reset-btn.js"></script>
 <script>
     function format(n) { return n.toLocaleString('en-US'); }
-    function clean(s) { return parseFloat(s.toString().replace(/,/g, '')) || 0; }
-    document.querySelectorAll('.money-input, input[type="number"]').forEach(el => el.addEventListener('input', calculate));
+    function clean(s) { return parseFloat(String(s).replace(/,/g, '')) || 0; }
+
+    // Money masking & event listeners
+    document.querySelectorAll('.money-input').forEach(el => {
+        el.addEventListener('input', function() {
+            let val = this.value.replace(/\D/g, "");
+            if (val) this.value = parseInt(val).toLocaleString('en-US');
+            calculate();
+        });
+    });
+
+    document.querySelectorAll('input[type="number"]').forEach(el => {
+        el.addEventListener('input', calculate);
+    });
+
     function calculate() {
-        const rs = clean(document.getElementById('rel_sale').value), rl = clean(document.getElementById('rel_loan').value), rq = rs - rl;
-        document.getElementById('rel_qi').value = format(Math.max(0, rq)); document.getElementById('rel_ltv').value = rs > 0 ? Math.round((rl/rs)*100) : 0; document.getElementById('req_total').value = format(rs);
-        let te = 0, td = 0, tv = 0;
+        // 1. Relinquished Data
+        const relSale = clean(document.getElementById('rel_sale').value);
+        const relLoan = clean(document.getElementById('rel_loan').value);
+        
+        // Net Equity (Funds to QI)
+        const relQI = relSale - relLoan;
+        
+        // Loan to Value
+        const relLTV = relSale > 0 ? (relLoan / relSale) * 100 : 0;
+
+        document.getElementById('rel_qi').value = format(Math.max(0, relQI));
+        document.getElementById('rel_ltv').value = relLTV.toFixed(0);
+        document.getElementById('req_total').value = format(relSale);
+
+        // 2. Replacement Properties Logic
+        let totalEquity = 0;
+        let totalDebt = 0;
+        let totalValueAcquired = 0;
+
         for (let i = 1; i <= 3; i++) {
-            const f = clean(document.getElementById(`p${i}_funds`).value), l = parseFloat(document.getElementById(`p${i}_ltv`).value) || 0;
-            if (f > 0) { const pt = Math.round(f / (1 - (l/100))); const loan = pt - f; document.getElementById(`p${i}_loan`).value = format(loan); document.getElementById(`p${i}_total`).value = format(pt); te += f; td += loan; tv += pt; } else { document.getElementById(`p${i}_loan`).value = ""; document.getElementById(`p${i}_total`).value = ""; }
+            const funds = clean(document.getElementById(`p${i}_funds`).value);
+            const ltv = parseFloat(document.getElementById(`p${i}_ltv`).value) || 0;
+
+            if (funds > 0) {
+                // Formula: Total Value = Cash / (1 - LTV%)
+                const propTotal = Math.round(funds / (1 - (ltv / 100)));
+                const propLoan = propTotal - funds;
+                
+                document.getElementById(`p${i}_loan`).value = format(propLoan);
+                document.getElementById(`p${i}_total`).value = format(propTotal);
+
+                totalEquity += funds;
+                totalDebt += propLoan;
+                totalValueAcquired += propTotal;
+            } else {
+                document.getElementById(`p${i}_loan`).value = "";
+                document.getElementById(`p${i}_total`).value = "";
+            }
         }
-        document.getElementById('tot_equity').value = "$"+format(te); document.getElementById('tot_debt').value = "$"+format(Math.round(td)); document.getElementById('tot_value').value = "$"+format(Math.round(tv));
-        const boot = Math.round(Math.max(0, rs - tv) + Math.max(0, rq - te)); document.getElementById('boot_val').textContent = format(boot);
+
+        // 3. Summary Section
+        document.getElementById('tot_equity').value = "$" + format(totalEquity);
+        document.getElementById('tot_debt').value = "$" + format(Math.round(totalDebt));
+        document.getElementById('tot_value').value = "$" + format(Math.round(totalValueAcquired));
+
+        // 4. Boot Calculation (Accruit Logic)
+        // Boot = (Target Price - Acquired Value) + (Target Equity - Invested Equity)
+        // Each part cannot be less than 0 (no negative tax)
+        
+        let valueBoot = Math.max(0, relSale - totalValueAcquired);
+        let equityBoot = Math.max(0, relQI - totalEquity);
+        
+        const totalBoot = Math.round(valueBoot + equityBoot);
+
+        document.getElementById('boot_val').textContent = format(totalBoot);
     }
 </script>
 </body>
 </html>
+
 
 
 
