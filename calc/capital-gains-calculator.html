@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/css/favicons/unnamed-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/css/favicons/unnamed-32x32.png">
     <link rel="icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
     <link rel="icon" type="image/png" sizes="192x192" href="/css/favicons/unnamed-192x192.png">
     <link rel="icon" type="image/png" sizes="231x231" href="/css/favicons/unnamed-231x231.png">
     <title>Capital Gains Calculator | Pavlo Rospopa</title>
+
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+Inscriptional+Pahlavi&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+Inscriptional+Pahlavi&amp;display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.5.5/css/simple-line-icons.min.css">
     <link rel="stylesheet" href="/css/format.css">
     <link rel="stylesheet" href="/calc/css/calc.css">
@@ -33,55 +34,113 @@
     </div>
 </header>
 
-<main>
-    <div class="page-content">
-        <div id="topdf" class="wrap">
-            <div id="calculator">
-        <div class="calcheaderbtn">
+<main class="page-content">
+    <div id="topdf" class="wrap">
+        <div id="calculator">
+            <div class="calcheaderbtn">
             <button class="btn btn-secondary btn-sm" id="bt-reset-modal" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button>
 			<button class="btn btn-primary btn-sm" id="savepdf" type="button"><span>PDF</span></button>
 			<button class="btn btn-success btn-sm" id="sendtoemail" type="button"><span>E-MAIL</span></button>
         </div>
-        <h2 class="text-center">CAPITAL GAINS CALCULATION</h2>
-        <div class="row">
-            <div class="col-lg-6">
-                <h4 class="subsection-heading">Property Info</h4>
-                <div class="input-row-dashed">
-                    <div class="row g-3">
-                        <div class="col-md-6"><label class="form-label">Original Price</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="originalPrice" class="form-control money-input" placeholder="75,000"></div></div>
-                        <div class="col-md-6"><label class="form-label">Improvements</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="improvements" class="form-control money-input" placeholder="25,000"></div></div>
-                        <div class="col-md-6"><label class="form-label">Selling Expenses</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="sellingExpenses" class="form-control money-input" placeholder="35,000"></div></div>
-                        <div class="col-md-6"><label class="form-label">Sale Price</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="salePrice" class="form-control money-input" placeholder="175,000"></div></div>
-                        <div class="col-md-6"><label class="form-label">Accumulated Depreciation</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="accumDepreciation" class="form-control money-input" placeholder="133,350"></div></div>
-                        <div class="col-md-6"><label class="form-label">Total Capital Gain</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="totalGainDisplay" class="form-control bg-light" readonly></div></div>
+            <h2 class="text-center">CAPITAL GAINS CALCULATION</h2>
+            <div class="row">
+                <div class="col-lg-6">
+                    <h4 class="subsection-heading">Property Info</h4>
+                    <div class="input-row-dashed">
+                        <div class="mb-3">
+                            <label class="form-label">Original Price of Property (cost basis)</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="original_price" class="form-control money-input" placeholder="75,000"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Improvements to Property</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="improvements" class="form-control money-input" placeholder="25,000"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Selling Expenses</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="selling_expenses" class="form-control money-input" placeholder="35,000"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Sale Price of Property</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="sale_price" class="form-control money-input" placeholder="175,000"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label text-primary">Total Capital Gain</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="total_gain_display" class="form-control bg-light fw-bold" readonly placeholder="0"></div>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label">Accumulated Depreciation</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="accum_depreciation" class="form-control money-input" placeholder="133,350"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <h4 class="subsection-heading">Tax Calculation</h4>
+                    <div class="input-row-dashed">
+                        <div class="mb-3">
+                            <label class="form-label">Federal Capital Gains Tax (%)</label>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <select class="form-select" id="fed_rate">
+                                        <option value="20" selected>20</option><option value="15">15</option><option value="10">10</option>
+                                    </select>
+                                </div>
+                                <div class="col-8">
+                                    <div class="input-group"><span class="input-group-text">$</span><input type="text" id="tax_fed_val" class="form-control bg-light" readonly></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Depreciation Recapture (%)</label>
+                            <div class="row g-2">
+                                <div class="col-4"><input type="text" class="form-control bg-light text-center" value="25" readonly></div>
+                                <div class="col-8">
+                                    <div class="input-group"><span class="input-group-text">$</span><input type="text" id="tax_recap_val" class="form-control bg-light" readonly></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">State Tax (%)</label>
+                            <div class="row g-2">
+                                <div class="col-4"><input type="number" id="state_rate" class="form-control" placeholder="5"></div>
+                                <div class="col-8">
+                                    <div class="input-group"><span class="input-group-text">$</span><input type="text" id="tax_state_val" class="form-control bg-light" readonly></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Net Investment Income Tax (%)</label>
+                            <div class="row g-2">
+                                <div class="col-4">
+                                    <select class="form-select" id="niit_rate">
+                                        <option value="3.8" selected>3.8</option><option value="0">0</option>
+                                    </select>
+                                </div>
+                                <div class="col-8">
+                                    <div class="input-group"><span class="input-group-text">$</span><input type="text" id="tax_niit_val" class="form-control bg-light" readonly></div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="mb-0">
+                            <label class="form-label fw-bold">Total Tax Liability</label>
+                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="total_tax_display" class="form-control bg-light fw-bold text-danger" readonly></div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <h4 class="subsection-heading">Tax Calculation</h4>
-                <div class="input-row-dashed">
-                    <div class="row g-3">
-                        <div class="col-6"><label class="form-label">Federal Rate</label><select id="fedRate" class="form-select" onchange="calculate()"><option value="0.20" selected>20%</option><option value="0.15">15%</option><option value="0.10">10%</option></select></div>
-                        <div class="col-6"><label class="form-label">State Tax Rate</label><div class="input-group"><input type="number" id="stateRate" class="form-control" placeholder="5" oninput="calculate()"><span class="input-group-text">%</span></div></div>
-                        <div class="col-12"><label class="form-label mt-2">Total Tax Liability</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="totalTaxDisplay" class="form-control bg-light fw-bold text-danger" readonly></div></div>
-                    </div>
-                </div>
+            <div class="row mt-4 g-4">
+                <div class="col-lg-6"><div class="subsection revenue"><h4 class="subsection-heading">1031 Exchange</h4><table class="table table-bordered bg-white"><tbody><tr><td>Sale Price</td><td class="text-end" id="ex_sale_price">$0</td></tr><tr><td>Selling Expenses</td><td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_sell_exp">0</span></div></td></tr><tr class="table-success"><td><strong>Total to Reinvest</strong></td><td class="text-end"><strong id="ex_total_val">$0</strong></td></tr></tbody></table></div></div>
+                <div class="col-lg-6"><div class="subsection expenses"><h4 class="subsection-heading">Sell Without 1031 Exchange</h4><table class="table table-bordered bg-white"><tbody><tr><td>Sale Price</td><td class="text-end" id="sell_sale_price">$0</td></tr><tr><td>Selling Expenses</td><td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_sell_exp">0</span></div></td></tr><tr><td>Total Tax Liability</td><td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_tax_val">0</span></div></td></tr><tr class="table-danger"><td><strong>Total to Reinvest</strong></td><td class="text-end"><strong id="sell_total_val">$0</strong></td></tr></tbody></table></div></div>
             </div>
-        </div>
-        <div class="row mt-4 g-4">
-            <div class="col-lg-6"><div class="subsection revenue"><h4 class="subsection-heading">1031 Exchange</h4><table class="table table-bordered bg-white"><tbody><tr><td>Sale Price</td><td class="text-end" id="ex_sale">$0</td></tr><tr><td>Selling Expenses</td><td class="text-end"><span class="minus-label">MINUS $</span><span id="ex_exp">0</span></td></tr><tr class="table-success"><td><strong>Total to Reinvest</strong></td><td class="text-end"><strong id="ex_total">$0</strong></td></tr></tbody></table></div></div>
-            <div class="col-lg-6"><div class="subsection expenses"><h4 class="subsection-heading">Sell Without Exchange</h4><table class="table table-bordered bg-white"><tbody><tr><td>Sale Price</td><td class="text-end" id="sell_sale">$0</td></tr><tr><td>Selling Expenses</td><td class="text-end"><span class="minus-label">MINUS $</span><span id="sell_exp">0</span></td></tr><tr><td>Tax Liability</td><td class="text-end"><span class="minus-label">MINUS $</span><span id="sell_tax">0</span></td></tr><tr class="table-danger"><td><strong>Total to Reinvest</strong></td><td class="text-end"><strong id="sell_total">$0</strong></td></tr></tbody></table></div></div>
-        </div>
-        <div class="benefit-box">
-            <h5 class="subsection-heading">Benefit of Exchanging vs. Selling</h5>
-            <span class="benefit-amount">$<span id="benefitDisplay">0</span></span>
-            <p class="text-muted small">of additional equity available to reinvest through a 1031 exchange</p>
-        </div>
-    </div>
-	
-            <section class="ATTENTION-SECTION">
+            <div class="benefit-box">
+                <h5 class="subsection-heading">Benefit of Exchanging vs. Selling</h5>
+                <div class="benefit-amount-container"><div class="d-flex align-items-center"><span class="benefit-amount" style="margin-right: 5px;">$</span><h2 class="benefit-amount" id="benefit_display">0</h2></div></div>
+                <p class="text-muted small">of additional equity available to reinvest through a 1031 exchange</p>
+                <button class="btn btn-primary mt-2 px-5 py-2 fw-bold" style="background-color: #5daaf0; border:none;">START AN EXCHANGE</button>
+            </div>
+			<section class="ATTENTION-SECTION">
                 <h5 class="font-monospace lh-1 text-center">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br>(It's not a substitute for your calculations.)</h5>
-            </section><!-- End: DISCLAIMER -->
+            </section>
         </div>
     </div>
 </main>
@@ -116,27 +175,95 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/calc/js/reset-btn.js"></script>
 <script>
+    // --- Початок виправленого коду ---
+
+    // Функції-помічники для роботи з числами
     function format(n) { return n.toLocaleString('en-US'); }
-    function clean(s) { return parseFloat(s.toString().replace(/,/g, '')) || 0; }
-    document.querySelectorAll('.money-input').forEach(i => { i.addEventListener('input', function() { let v = this.value.replace(/\D/g, ""); if (v) this.value = parseInt(v).toLocaleString(); calculate(); }); });
-    document.querySelectorAll('input[type="number"], select').forEach(el => el.addEventListener('input', calculate));
+    function clean(s) { return parseFloat(String(s).replace(/,/g, '')) || 0; }
+
+    // Додаємо слухачі подій до всіх полів вводу
+    document.querySelectorAll('.money-input, input[type="number"], select').forEach(el => {
+        el.addEventListener('input', function() {
+            // Маска для грошових полів
+            if (this.classList.contains('money-input')) {
+                let val = this.value.replace(/\D/g, "");
+                if (val) this.value = parseInt(val).toLocaleString('en-US');
+            }
+            calculate();
+        });
+    });
+
+    // Основна функція розрахунку
     function calculate() {
-        const op = clean(document.getElementById('originalPrice').value), imp = clean(document.getElementById('improvements').value), se = clean(document.getElementById('sellingExpenses').value), sp = clean(document.getElementById('salePrice').value), ad = clean(document.getElementById('accumDepreciation').value);
-        const tg = sp - (op + imp + se); document.getElementById('totalGainDisplay').value = format(tg);
-        const fr = parseFloat(document.getElementById('fedRate').value), sr = parseFloat(document.getElementById('stateRate').value) / 100 || 0;
-        const tax = Math.round(tg * fr + ad * 0.25 + (tg+ad) * sr + (tg+ad) * 0.038);
-        document.getElementById('totalTaxDisplay').value = format(tax);
-        document.getElementById('ex_sale').textContent = '$' + format(sp); document.getElementById('ex_exp').textContent = format(se); document.getElementById('ex_total').textContent = '$' + format(sp - se);
-        document.getElementById('sell_sale').textContent = '$' + format(sp); document.getElementById('sell_exp').textContent = format(se); document.getElementById('sell_tax').textContent = format(tax); document.getElementById('sell_total').textContent = '$' + format(sp - se - tax);
-        document.getElementById('benefitDisplay').textContent = format(tax);
+        // 1. Отримуємо всі значення з полів
+        const op = clean(document.getElementById('original_price').value);
+        const imp = clean(document.getElementById('improvements').value);
+        const se = clean(document.getElementById('selling_expenses').value);
+        const sp = clean(document.getElementById('sale_price').value);
+        const ad = clean(document.getElementById('accum_depreciation').value);
+
+        // Ставки
+        const fedRate = parseFloat(document.getElementById('fed_rate').value) / 100;
+        const stateRate = parseFloat(document.getElementById('state_rate').value) / 100 || 0;
+        const niitRate = parseFloat(document.getElementById('niit_rate').value) / 100;
+        const recapRate = 0.25; // Стандартна ставка
+
+        // 2. Розрахунок загального прибутку (Total Realized Gain)
+        const totalRealizedGain = sp - (op + imp + se);
+        document.getElementById('total_gain_display').value = format(Math.round(totalRealizedGain));
+        
+        // 3. Розбивка прибутку на дві частини (це ключовий момент)
+        // a. Частина, що підлягає поверненню амортизації (обкладається 25%)
+        const recaptureAmount = Math.min(totalRealizedGain, ad);
+        // b. Залишок, що є приростом капіталу (обкладається федеральною ставкою)
+        const capitalGainAmount = totalRealizedGain - recaptureAmount;
+
+        // 4. Розрахунок кожного податку окремо
+        const taxFed = Math.round(capitalGainAmount * fedRate);
+        const taxRecap = Math.round(recaptureAmount * recapRate);
+        // Податкова база для State Tax та NIIT = загальний прибуток + амортизація
+        const taxState = Math.round((totalRealizedGain + ad) * stateRate);
+        const taxNiit = Math.round((totalRealizedGain + ad) * niitRate);
+
+        // 5. Загальна сума податків
+        const totalTax = taxFed + taxRecap + taxState + taxNiit;
+
+        // 6. Оновлення полів у блоці "Tax Calculation"
+        document.getElementById('tax_fed_val').value = format(taxFed);
+        document.getElementById('tax_recap_val').value = format(taxRecap);
+        document.getElementById('tax_state_val').value = format(taxState);
+        document.getElementById('tax_niit_val').value = format(taxNiit);
+        document.getElementById('total_tax_display').value = format(totalTax);
+
+        // 7. Оновлення таблиць порівняння
+        const netSale = sp - se;
+        document.getElementById('ex_sale_price').textContent = '$' + format(sp);
+        document.getElementById('ex_sell_exp').textContent = format(se);
+        document.getElementById('ex_total_val').textContent = '$' + format(netSale);
+
+        document.getElementById('sell_sale_price').textContent = '$' + format(sp);
+        document.getElementById('sell_sell_exp').textContent = format(se);
+        document.getElementById('sell_tax_val').textContent = format(totalTax);
+        document.getElementById('sell_total_val').textContent = '$' + format(netSale - totalTax);
+
+        // 8. Оновлення блоку вигоди
+        document.getElementById('benefit_display').textContent = format(totalTax);
     }
+    
+    // Встановлюємо рік і запускаємо розрахунок при завантаженні
+    window.onload = function() {
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        // Встановлюємо початкові значення (якщо потрібно) або залишаємо плейсхолдери
+        document.getElementById('original_price').value = '';
+        document.getElementById('improvements').value = '';
+        document.getElementById('selling_expenses').value = '';
+        document.getElementById('sale_price').value = '';
+        document.getElementById('accum_depreciation').value = '';
+        document.getElementById('state_rate').value = '';
+        calculate(); // Запускаємо розрахунок з порожніми полями
+    };
+
+    // --- Кінець виправленого коду ---
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
