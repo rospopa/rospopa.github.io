@@ -92,7 +92,7 @@
                         <div class="mb-3">
                             <label class="form-label">Depreciation Recapture (%)</label>
                             <div class="row g-2">
-                                <div class="col-4"><input type="text" class="form-control bg-light text-center" value="25" readonly></div>
+                                <div class="col-4"><div class="input-group"><input type="text" class="form-control bg-light text-center" value="25" readonly></div></div>
                                 <div class="col-8">
                                     <div class="input-group"><span class="input-group-text">$</span><input type="text" id="tax_recap_val" class="form-control bg-light" readonly></div>
                                 </div>
@@ -101,7 +101,7 @@
                         <div class="mb-3">
                             <label class="form-label">State Tax (%)</label>
                             <div class="row g-2">
-                                <div class="col-4"><input type="number" id="state_rate" class="form-control" placeholder="5"></div>
+                                <div class="col-4"><div class="input-group"><input type="number" id="state_rate" class="form-control" placeholder="5"></div></div>
                                 <div class="col-8">
                                     <div class="input-group"><span class="input-group-text">$</span><input type="text" id="tax_state_val" class="form-control bg-light" readonly></div>
                                 </div>
@@ -132,7 +132,7 @@
                 <div class="col-lg-6"><div class="subsection revenue"><h4 class="subsection-heading">1031 Exchange</h4><table class="table table-bordered bg-white"><tbody><tr><td>Sale Price</td><td class="text-end" id="ex_sale_price">$0</td></tr><tr><td>Selling Expenses</td><td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_sell_exp">0</span></div></td></tr><tr class="table-success"><td><strong>Total to Reinvest</strong></td><td class="text-end"><strong id="ex_total_val">$0</strong></td></tr></tbody></table></div></div>
                 <div class="col-lg-6"><div class="subsection expenses"><h4 class="subsection-heading">Sell Without 1031 Exchange</h4><table class="table table-bordered bg-white"><tbody><tr><td>Sale Price</td><td class="text-end" id="sell_sale_price">$0</td></tr><tr><td>Selling Expenses</td><td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_sell_exp">0</span></div></td></tr><tr><td>Total Tax Liability</td><td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_tax_val">0</span></div></td></tr><tr class="table-danger"><td><strong>Total to Reinvest</strong></td><td class="text-end"><strong id="sell_total_val">$0</strong></td></tr></tbody></table></div></div>
             </div>
-            <div class="benefit-box">
+            <div class="benefit-box justify-center">
                 <h5 class="subsection-heading">Benefit of Exchanging vs. Selling</h5>
                 <div class="benefit-amount-container"><div class="d-flex align-items-center"><span class="benefit-amount" style="margin-right: 5px;">$</span><h2 class="benefit-amount" id="benefit_display">0</h2></div></div>
                 <p class="text-muted small">of additional equity available to reinvest through a 1031 exchange</p>
@@ -175,9 +175,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/calc/js/reset-btn.js"></script>
 <script>
-    // --- Початок виправленого коду ---
-
-    // Функції-помічники для роботи з числами
+// Функції-помічники для роботи з числами
     function format(n) { return n.toLocaleString('en-US'); }
     function clean(s) { return parseFloat(String(s).replace(/,/g, '')) || 0; }
 
@@ -193,9 +191,9 @@
         });
     });
 
-    // Основна функція розрахунку
+    // Основна функція розрахунку (Формули 1:1 з Accruit JS)
     function calculate() {
-        // 1. Отримуємо всі значення з полів
+        // 1. Отримуємо значення
         const op = clean(document.getElementById('original_price').value);
         const imp = clean(document.getElementById('improvements').value);
         const se = clean(document.getElementById('selling_expenses').value);
@@ -206,64 +204,68 @@
         const fedRate = parseFloat(document.getElementById('fed_rate').value) / 100;
         const stateRate = parseFloat(document.getElementById('state_rate').value) / 100 || 0;
         const niitRate = parseFloat(document.getElementById('niit_rate').value) / 100;
-        const recapRate = 0.25; // Стандартна ставка
+        const recapRate = 0.25;
 
-        // 2. Розрахунок загального прибутку (Total Realized Gain)
+        // 2. Розрахунок Total Capital Gain (Appreciation)
+        // Формула Accruit: Sale Price - (Original + Improvements + Expenses)
         const totalRealizedGain = sp - (op + imp + se);
         document.getElementById('total_gain_display').value = format(Math.round(totalRealizedGain));
         
-        // 3. Розбивка прибутку на дві частини (це ключовий момент)
-        // a. Частина, що підлягає поверненню амортизації (обкладається 25%)
-        const recaptureAmount = Math.min(totalRealizedGain, ad);
-        // b. Залишок, що є приростом капіталу (обкладається федеральною ставкою)
-        const capitalGainAmount = totalRealizedGain - recaptureAmount;
+        // 3. Розрахунок податків (Точна логіка Accruit)
+        
+        // Федеральний податок рахується від Total Capital Gain (без віднімання амортизації)
+        const taxFed = Math.round(Math.abs(totalRealizedGain * fedRate));
+        
+        // Повернення амортизації рахується від повної суми амортизації
+        const taxRecap = Math.round(Math.abs(ad * recapRate));
+        
+        // State Tax рахується від суми (Gain + Depreciation)
+        const taxState = Math.round(Math.abs((totalRealizedGain + ad) * stateRate));
+        
+        // NIIT рахується від суми (Gain + Depreciation)
+        const taxNiit = Math.round(Math.abs((totalRealizedGain + ad) * niitRate));
 
-        // 4. Розрахунок кожного податку окремо
-        const taxFed = Math.round(capitalGainAmount * fedRate);
-        const taxRecap = Math.round(recaptureAmount * recapRate);
-        // Податкова база для State Tax та NIIT = загальний прибуток + амортизація
-        const taxState = Math.round((totalRealizedGain + ad) * stateRate);
-        const taxNiit = Math.round((totalRealizedGain + ad) * niitRate);
-
-        // 5. Загальна сума податків
+        // 4. Загальна сума
         const totalTax = taxFed + taxRecap + taxState + taxNiit;
 
-        // 6. Оновлення полів у блоці "Tax Calculation"
+        // 5. Оновлення полів
         document.getElementById('tax_fed_val').value = format(taxFed);
         document.getElementById('tax_recap_val').value = format(taxRecap);
         document.getElementById('tax_state_val').value = format(taxState);
         document.getElementById('tax_niit_val').value = format(taxNiit);
         document.getElementById('total_tax_display').value = format(totalTax);
 
-        // 7. Оновлення таблиць порівняння
-        const netSale = sp - se;
+        // 6. Оновлення таблиць порівняння
+        const netSale = sp - se; // Sale Price - Selling Expenses
+        
+        // 1031 Exchange (Податки = 0)
         document.getElementById('ex_sale_price').textContent = '$' + format(sp);
         document.getElementById('ex_sell_exp').textContent = format(se);
         document.getElementById('ex_total_val').textContent = '$' + format(netSale);
 
+        // Sell Without 1031 (Віднімаємо податки)
         document.getElementById('sell_sale_price').textContent = '$' + format(sp);
         document.getElementById('sell_sell_exp').textContent = format(se);
         document.getElementById('sell_tax_val').textContent = format(totalTax);
         document.getElementById('sell_total_val').textContent = '$' + format(netSale - totalTax);
 
-        // 8. Оновлення блоку вигоди
+        // 7. Benefit (Це сума зекономлених податків)
         document.getElementById('benefit_display').textContent = format(totalTax);
     }
     
-    // Встановлюємо рік і запускаємо розрахунок при завантаженні
+    // Ініціалізація
     window.onload = function() {
         document.getElementById('currentYear').textContent = new Date().getFullYear();
-        // Встановлюємо початкові значення (якщо потрібно) або залишаємо плейсхолдери
+        // Встановлюємо плейсхолдери (пустими значеннями)
         document.getElementById('original_price').value = '';
         document.getElementById('improvements').value = '';
         document.getElementById('selling_expenses').value = '';
         document.getElementById('sale_price').value = '';
         document.getElementById('accum_depreciation').value = '';
         document.getElementById('state_rate').value = '';
-        calculate(); // Запускаємо розрахунок з порожніми полями
+        calculate();
     };
-
-    // --- Кінець виправленого коду ---
 </script>
 </body>
 </html>
+
