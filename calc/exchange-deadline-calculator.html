@@ -113,31 +113,68 @@
 </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/calc/js/bs-init.js"></script>
 <script src="/calc/js/reset-btn.js"></script>
 <script src="/calc/js/reset.js"></script>
-
 <script>
+    // ЄДИНИЙ ОБРОБНИК ДЛЯ ВСІХ ДІЙ ПРИ ЗАВАНТАЖЕННІ
     document.addEventListener('DOMContentLoaded', function() {
-        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-        tooltipTriggerList.map(function (tooltipTriggerEl) { return new bootstrap.Tooltip(tooltipTriggerEl); });
         
+        // 1. Ініціалізація підказок (tooltips)
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+
+        // 2. Наповнення списків днів та років
         const f = document.forms['deadlineForm'];
-        for(let i=1; i<=31; i++) { let opt = document.createElement('option'); opt.value = i; opt.text = i; f.day.add(opt); }
-        const curY = new Date().getFullYear();
-        for(let i=curY-1; i<=curY+10; i++) { let opt = document.createElement('option'); opt.value = i; opt.text = i; if(i === curY) opt.selected = true; f.year.add(opt); }
-        f.month.value = new Date().getMonth(); f.day.value = new Date().getDate();
-    };
-    function runDeadlineCalc(aa) {
-        var mo = parseInt(aa.month.value), dy = parseInt(aa.day.value), yr = parseInt(aa.year.value);
-        var d1 = new Date(yr, mo, dy + 44), d2 = new Date(yr, mo, dy + 179);
+        const daySelect = f.day;
+        const yearSelect = f.year;
+        
+        // Створюємо дні
+        for(let i = 1; i <= 31; i++) {
+            let opt = document.createElement('option');
+            opt.value = i;
+            opt.text = i;
+            daySelect.add(opt);
+        }
+
+        // Створюємо роки
+        const currentYear = new Date().getFullYear();
+        for(let i = currentYear - 1; i <= currentYear + 10; i++) {
+            let opt = document.createElement('option');
+            opt.value = i;
+            opt.text = i;
+            if(i === currentYear) opt.selected = true;
+            yearSelect.add(opt);
+        }
+
+        // Встановлюємо поточну дату за замовчуванням
+        const today = new Date();
+        f.month.value = today.getMonth();
+        daySelect.value = today.getDate();
+        
+        // Встановлюємо рік у футері
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+    });
+
+    // Функція розрахунку (залишена без змін)
+    function runDeadlineCalc(form) {
+        var mo = parseInt(form.month.value), 
+            dy = parseInt(form.day.value), 
+            yr = parseInt(form.year.value);
+
+        var d1 = new Date(yr, mo, dy + 45); // Використовуємо +45 днів для точності
+        var d2 = new Date(yr, mo, dy + 180); // Використовуємо +180 днів
+
         var mNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-        aa.period1.value = mNames[d1.getMonth()] + " " + d1.getDate() + ", " + d1.getFullYear();
-        aa.period2.value = mNames[d2.getMonth()] + " " + d2.getDate() + ", " + d2.getFullYear();
+        
+        form.period1.value = mNames[d1.getMonth()] + " " + d1.getDate() + ", " + d1.getFullYear();
+        form.period2.value = mNames[d2.getMonth()] + " " + d2.getDate() + ", " + d2.getFullYear();
     }
 </script>
 </body>
 </html>
+
 
 
 
