@@ -37,12 +37,12 @@
     <div class="page-content">
         <div id="topdf" class="wrap">
             <div id="calculator">
+				<div class="calcheaderbtn">
+					<button class="btn btn-secondary btn-sm" id="bt-reset-modal" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button>
+					<button class="btn btn-primary btn-sm" id="savepdf" type="button"><span>PDF</span></button>
+					<button class="btn btn-success btn-sm" id="sendtoemail" type="button"><span>E-MAIL</span></button>
+				</div>
             <h2 class="text-center">DEPRECIATION CALCULATOR</h2>
-            <div class="calcheaderbtn">
-                <button class="btn btn-secondary btn-sm" onclick="location.reload()"><span>RESET</span></button>
-                <button class="btn btn-primary btn-sm"><span>PDF</span></button>
-                <button class="btn btn-success btn-sm"><span>E-MAIL</span></button>
-            </div>
 				<h4 class="text-center">Property Parameters</h4>
             <div class="row input-row-dashed" style="border: 1px dashed #1DA1F2; padding-bottom:0.5rem;margin-right:1px;margin-left:1px">
                 <div class="col-md-6"><label class="form-label"><sup class="mtool" title="Residential: 27.5 yrs, Commercial: 39 yrs"><i class="icon-question"></i></sup>Type of Property</label><select id="prop_type" class="form-select" onchange="runCalc()"><option value="None" selected disabled>Select</option><option value="Commercial">Commercial (39 yrs)</option><option value="Residential">Residential (27.5 yrs)</option></select></div>
@@ -116,6 +116,7 @@
 </script>
 </body>
 </html>
+
 
 
 
