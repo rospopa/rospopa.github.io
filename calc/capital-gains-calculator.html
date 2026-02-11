@@ -128,9 +128,84 @@
                 </div>
             </div>
             <div class="row mt-4 g-4">
-                <div class="col-lg-6"><div class="subsection revenue"><h4 class="subsection-heading">1031 Exchange</h4><table class="table table-bordered bg-white"><tbody><tr><td>Sale Price</td><td class="text-end" id="ex_sale_price">$0</td></tr><tr><td>Selling Expenses</td><td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_sell_exp">0</span></div></td></tr><tr class="table-success"><td><strong>Total to Reinvest</strong></td><td class="text-end"><strong id="ex_total_val">$0</strong></td></tr></tbody></table></div></div>
-                <div class="col-lg-6"><div class="subsection expenses"><h4 class="subsection-heading">Sell Without 1031 Exchange</h4><table class="table table-bordered bg-white"><tbody><tr><td>Sale Price</td><td class="text-end" id="sell_sale_price">$0</td></tr><tr><td>Selling Expenses</td><td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_sell_exp">0</span></div></td></tr><tr><td>Total Tax Liability</td><td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_tax_val">0</span></div></td></tr><tr class="table-danger"><td><strong>Total to Reinvest</strong></td><td class="text-end"><strong id="sell_total_val">$0</strong></td></tr></tbody></table></div></div>
-            </div>
+    <!-- 1031 Exchange Side -->
+    <div class="col-lg-6">
+        <div class="subsection revenue">
+            <h4 class="subsection-heading">1031 Exchange</h4>
+            <table class="table table-bordered bg-white mb-0">
+                <tbody>
+                    <tr>
+                        <td>Sale Price of Property</td>
+                        <td class="text-end" id="ex_sale_price">$0</td>
+                    </tr>
+                    <tr>
+                        <td>Selling Expenses</td>
+                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_sell_exp">0</span></div></td>
+                    </tr>
+                    <tr>
+                        <td>Federal Gains Tax</td>
+                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_fed_tax">0</span></div></td>
+                    </tr>
+                    <tr>
+                        <td>Depreciation Recapture</td>
+                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_recap_tax">0</span></div></td>
+                    </tr>
+                    <tr>
+                        <td>State Capital Gains</td>
+                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_state_tax">0</span></div></td>
+                    </tr>
+                    <tr>
+                        <td>Net Investment Income Tax</td>
+                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_niit_tax">0</span></div></td>
+                    </tr>
+                    <tr class="table-success">
+                        <td><strong>Total to Reinvest</strong></td>
+                        <td class="text-end"><strong id="ex_total_val">$0</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Sell Without Exchange Side -->
+    <div class="col-lg-6">
+        <div class="subsection expenses">
+            <h4 class="subsection-heading">Sell Without 1031 Exchange</h4>
+            <table class="table table-bordered bg-white mb-0">
+                <tbody>
+                    <tr>
+                        <td>Sale Price of Property</td>
+                        <td class="text-end" id="sell_sale_price">$0</td>
+                    </tr>
+                    <tr>
+                        <td>Selling Expenses</td>
+                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_sell_exp">0</span></div></td>
+                    </tr>
+                    <tr>
+                        <td>Federal Gains Tax</td>
+                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_fed_tax">0</span></div></td>
+                    </tr>
+                    <tr>
+                        <td>Depreciation Recapture</td>
+                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_recap_tax">0</span></div></td>
+                    </tr>
+                    <tr>
+                        <td>State Capital Gains</td>
+                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_state_tax">0</span></div></td>
+                    </tr>
+                    <tr>
+                        <td>Net Investment Income Tax</td>
+                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_niit_tax">0</span></div></td>
+                    </tr>
+                    <tr class="table-danger">
+                        <td><strong>Total to Reinvest</strong></td>
+                        <td class="text-end"><strong id="sell_total_val">$0</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
             <div class="benefit-box justify-center">
                 <h5 class="subsection-heading">Benefit of Exchanging vs. Selling</h5>
                 <div class="benefit-amount-container"><div class="d-flex align-items-center"><span class="benefit-amount" style="margin-right: 5px;">$</span><h2 class="benefit-amount" id="benefit_display">0</h2></div></div>
@@ -211,44 +286,48 @@
         document.getElementById('total_gain_display').value = format(Math.round(totalRealizedGain));
         
         // 3. Розрахунок податків (Точна логіка Accruit)
-        
-        // Федеральний податок рахується від Total Capital Gain (без віднімання амортизації)
         const taxFed = Math.round(Math.abs(totalRealizedGain * fedRate));
-        
-        // Повернення амортизації рахується від повної суми амортизації
         const taxRecap = Math.round(Math.abs(ad * recapRate));
-        
-        // State Tax рахується від суми (Gain + Depreciation)
         const taxState = Math.round(Math.abs((totalRealizedGain + ad) * stateRate));
-        
-        // NIIT рахується від суми (Gain + Depreciation)
         const taxNiit = Math.round(Math.abs((totalRealizedGain + ad) * niitRate));
 
         // 4. Загальна сума
         const totalTax = taxFed + taxRecap + taxState + taxNiit;
 
-        // 5. Оновлення полів
+        // 5. Оновлення полів Tax Calculation (верхній блок)
         document.getElementById('tax_fed_val').value = format(taxFed);
         document.getElementById('tax_recap_val').value = format(taxRecap);
         document.getElementById('tax_state_val').value = format(taxState);
         document.getElementById('tax_niit_val').value = format(taxNiit);
         document.getElementById('total_tax_display').value = format(totalTax);
 
-        // 6. Оновлення таблиць порівняння
+        // 6. Оновлення таблиць порівняння (НИЖНІЙ БЛОК)
         const netSale = sp - se; // Sale Price - Selling Expenses
         
-        // 1031 Exchange (Податки = 0)
+        // --- 1031 Exchange (Ліва таблиця) ---
+        // Податки тут дорівнюють 0, бо вони відкладені
         document.getElementById('ex_sale_price').textContent = '$' + format(sp);
         document.getElementById('ex_sell_exp').textContent = format(se);
-        document.getElementById('ex_total_val').textContent = '$' + format(netSale);
+        
+        document.getElementById('ex_fed_tax').textContent = "0";
+        document.getElementById('ex_recap_tax').textContent = "0";
+        document.getElementById('ex_state_tax').textContent = "0";
+        document.getElementById('ex_niit_tax').textContent = "0";
+        
+        document.getElementById('ex_total_val').textContent = '$' + format(netSale); // Net Sale - 0 taxes
 
-        // Sell Without 1031 (Віднімаємо податки)
+        // --- Sell Without 1031 (Права таблиця) ---
         document.getElementById('sell_sale_price').textContent = '$' + format(sp);
         document.getElementById('sell_sell_exp').textContent = format(se);
-        document.getElementById('sell_tax_val').textContent = format(totalTax);
+        
+        document.getElementById('sell_fed_tax').textContent = format(taxFed);
+        document.getElementById('sell_recap_tax').textContent = format(taxRecap);
+        document.getElementById('sell_state_tax').textContent = format(taxState);
+        document.getElementById('sell_niit_tax').textContent = format(taxNiit);
+
         document.getElementById('sell_total_val').textContent = '$' + format(netSale - totalTax);
 
-        // 7. Benefit (Це сума зекономлених податків)
+        // 7. Benefit
         document.getElementById('benefit_display').textContent = format(totalTax);
     }
     
@@ -267,5 +346,3 @@
 </script>
 </body>
 </html>
-
-
