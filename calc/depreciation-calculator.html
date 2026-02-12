@@ -15,7 +15,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.5.5/css/simple-line-icons.min.css">
     <link rel="stylesheet" href="/css/format.css">
     <link rel="stylesheet" href="/calc/css/calc.css">
-
+<style>
+@media (min-width: 768px) {
+  #topdf {
+    position: relative;
+	top: -74px;
+  }
+</style>
+	
 </head>
 
 <body>
@@ -35,7 +42,7 @@
 
 <main>
     <div class="page-content" style="min-height:76vh;">
-        <div id="topdf" class="wrap">
+        <div id="topdf" style="position:relative;top:-74px;" class="wrap">
             <div id="calculator">
 				<div class="calcheaderbtn">
 					<button class="btn btn-secondary btn-sm" id="bt-reset-modal" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button>
@@ -116,6 +123,7 @@
 </script>
 </body>
 </html>
+
 
 
 
