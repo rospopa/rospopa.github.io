@@ -106,22 +106,79 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="/calc/js/reset.js"></script>
 <script>
-    function format(n) { return n.toLocaleString('en-US'); }
-    function clean(s) { return parseFloat(String(s).replace(/,/g, '')) || 0; }
-    document.querySelectorAll('.money-mask').forEach(el => { el.addEventListener('input', function() { let val = this.value.replace(/\D/g, ""); if (val) this.value = parseInt(val).toLocaleString('en-US'); runCalc(); }); });
+document.addEventListener('DOMContentLoaded', function() {
+    
+    // 1. Допоміжні функції
+    function format(n) { 
+        return n.toLocaleString('en-US'); 
+    }
+    
+    function clean(s) { 
+        // Видаляємо все, крім цифр і крапки, потім перетворюємо в число
+        return parseFloat(String(s).replace(/,/g, '')) || 0; 
+    }
+
+    // 2. Слухачі для полів з грошима (форматування + розрахунок)
+    document.querySelectorAll('.money-mask').forEach(el => { 
+        el.addEventListener('input', function() { 
+            // Дозволяємо вводити лише цифри
+            let val = this.value.replace(/\D/g, ""); 
+            if (val) {
+                this.value = parseInt(val).toLocaleString('en-US'); 
+            }
+            runCalc(); 
+        }); 
+    });
+
+    // 3. !!! ВИПРАВЛЕННЯ: Слухачі для випадаючого списку та років !!!
+    const propTypeSelect = document.getElementById('prop_type');
+    const yearsInput = document.getElementById('years_owned');
+
+    if (propTypeSelect) {
+        propTypeSelect.addEventListener('change', runCalc);
+    }
+    
+    if (yearsInput) {
+        yearsInput.addEventListener('input', runCalc);
+    }
+
+    // 4. Основна функція розрахунку
     function runCalc() {
-        const type = document.getElementById('prop_type').value; const years = parseFloat(document.getElementById('years_owned').value) || 0;
-        const pVal = clean(document.getElementById('price').value); const lVal = clean(document.getElementById('land').value); const iVal = clean(document.getElementById('improve').value);
-        if (type === "None") return;
+        const type = document.getElementById('prop_type').value; 
+        const years = parseFloat(document.getElementById('years_owned').value) || 0;
+        
+        const pVal = clean(document.getElementById('price').value); 
+        const lVal = clean(document.getElementById('land').value); 
+        const iVal = clean(document.getElementById('improve').value);
+
+        // Якщо тип не вибрано - очищаємо результати і виходимо
+        if (type === "None" || type === "Select") {
+            document.getElementById('res_annual').value = "";
+            document.getElementById('res_total').value = "";
+            return;
+        }
+
+        // Логіка розрахунку
         let rate = (type === "Residential") ? (1 / 27.5) : (1 / 39);
+        
+        // Базис амортизації = (Ціна - Земля) + Покращення
+        // Math.max(0, ...) гарантує, що базис не буде від'ємним
         let basis = Math.max(0, (pVal - lVal) + iVal);
-        let annual = Math.round(basis * rate); let total = Math.round(annual * years);
+        
+        let annual = Math.round(basis * rate); 
+        let total = Math.round(annual * years);
+        
+        // Не дозволяємо накопиченій амортизації перевищити базис
+        if (total > basis) total = basis;
+
         document.getElementById('res_annual').value = "$" + format(annual);
         document.getElementById('res_total').value = "$" + format(total);
     }
+});
 </script>
 </body>
 </html>
+
 
 
 
