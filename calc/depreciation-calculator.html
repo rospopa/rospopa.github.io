@@ -53,7 +53,23 @@
                         <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control money-mask" type="text" id="improve" placeholder="10,000"></div>
                     </div>
                 </div>
-                <div class="total-cashflow-subsection"></div>
+                <div class="total-cashflow-subsection">
+    <h4 class="subsection-heading">Depreciation Summary</h4>
+    <div>
+        <table class="table table-bordered mb-0">
+            <tbody>
+                <tr>
+                    <td style="padding-left: 0.5rem;">Annual Depreciation</td>
+                    <td><input id="res_annual" class="form-control" placeholder="$0" readonly /></td>
+                </tr>
+                <tr>
+                    <td style="padding-left: 0.5rem;">Total Accumulated Depreciation</td>
+                    <td><input id="res_total" class="form-control" placeholder="$0" readonly /></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
             </div><!-- Start: DISCLAIMER -->
             <section class="ATTENTION-SECTION">
                 <h5 class="font-monospace lh-1 text-center mx-2">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br><span> (It's not a substitute for your calculations.)</span></h5>
@@ -106,6 +122,7 @@
 </script>
 </body>
 </html>
+
 
 
 
