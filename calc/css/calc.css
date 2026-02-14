@@ -119,7 +119,7 @@ button#addRowU, button#removeRowU, button#addRowP, button#removeRowP {
   display: flex;
   justify-content: center;
   align-items: center;
-/*min-height: 100vh;*/
+  /*min-height: 100vh;*/
   margin: 0;
 }
 
@@ -626,7 +626,7 @@ footer > div.wrap > div.home {
   padding-top: 20px;
 }
 
-#bt-reset-modal, #savepdf, #sendtoemail {
+#bt-reset-modal, #savepdf, #sendtoemail, #Calculate {
   line-height: normal;
   padding-top: 6px;
   font-weight: bold;
@@ -661,7 +661,15 @@ button#savepdf:hover {
   background-color: #ffffff;
 }
 
+button#Calculate:hover {
+  background-color: #ffffff;
+}
+
 button#savepdf:hover span {
+  color: #0d6efd;
+}
+
+button#Calculate:hover span {
   color: #0d6efd;
 }
 
