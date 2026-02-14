@@ -18,86 +18,77 @@
 </head>
 
 <body>
-<header class="site-header">
-    <div class="wrap">
-        <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
-        <nav class="site-nav">
-            <div class="trigger">
-                <a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=D-Calculator">pavlo@rospopa.com</a>
-            </div>
-            <div class="trigger2">
-                <a style="text-decoration: none;" href="mailto:pavlo@rospopa.com?subject=D-Calculator">@</a>
-            </div>
-        </nav>
-    </div>
-</header>
-
-<main>
-    <div class="page-content" style="min-height:76vh;">
-        <div id="topdf" class="wrap">
-            <div id="calculator">
-				<div class="calcheaderbtn">
-					<button class="btn btn-secondary btn-sm" id="bt-reset-modal" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button>
-					<button class="btn btn-primary btn-sm" id="savepdf" type="button"><span>PDF</span></button>
-					<button class="btn btn-success btn-sm" id="sendtoemail" type="button"><span>E-MAIL</span></button>
-				</div>
-            <h2 class="text-center">DEPRECIATION CALCULATOR</h2>
-				<h4 class="text-center">Property Parameters</h4>
-            <div class="row input-row-dashed" style="border: 1px dashed #1DA1F2; padding-bottom:0.5rem;margin-right:1px;margin-left:1px">
-                <div class="col-md-6"><label class="form-label"><sup class="mtool" title="Residential: 27.5 yrs, Commercial: 39 yrs"><i class="icon-question"></i></sup>Type of Property</label><select id="prop_type" class="form-select" onchange="runCalc()"><option value="None" selected disabled>Select</option><option value="Commercial">Commercial (39 yrs)</option><option value="Residential">Residential (27.5 yrs)</option></select></div>
-                <div class="col-md-6"><label class="form-label"><sup class="mtool" title="How many years the property has been owned"><i class="icon-question"></i></sup>Years Property Owned</label><div class="input-group"><input type="number" id="years_owned" class="form-control" placeholder="7.5" step="0.1" oninput="runCalc()"><span class="input-group-text">years</span></div></div>
-                <div class="col-md-4"><label class="form-label"><sup class="mtool" title="Original Purchase Price"><i class="icon-question"></i></sup>Purchase Price</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="price" class="form-control money-mask" placeholder="200,000"></div></div>
-                <div class="col-md-4"><label class="form-label"><sup class="mtool" title="Value of the land (non-depreciable part)"><i class="icon-question"></i></sup>Land Value</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="land" class="form-control money-mask" placeholder="20,000"></div></div>
-                <div class="col-md-4"><label class="form-label"><sup class="mtool" title="Cost of capital improvements"><i class="icon-question"></i></sup>Improvements</label><div class="input-group"><span class="input-group-text">$</span><input type="text" id="improve" class="form-control money-mask" placeholder="10,000"></div></div>
-            </div>
-            <div class="total-cashflow-subsection">
-                <h4 class="subsection-heading">Depreciation Summary</h4>
-                <table class="table table-bordered mb-0">
-                    <tbody>
-                        <tr><td style="padding-left:0.5rem">Annual Depreciation</td><td><input class="form-control" id="res_annual" readonly placeholder="$0"></td></tr>
-                        <tr><td style="padding-left:0.5rem">Total Accumulated Depreciation</td><td><input class="form-control" id="res_total" readonly placeholder="$0"></td></tr>
-                    </tbody>
-                </table>
-            </div>
+    <header class="site-header">
+        <div class="wrap"><a class="site-title" style="text-decoration:none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
+            <nav class="site-nav">
+                <div class="trigger"><a style="text-decoration:none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">pavlo@rospopa.com</a></div>
+                <div class="trigger2"><a style="text-decoration:none;" href="mailto:pavlo@rospopa.com?subject=rospopa.github.io">@</a></div>
+            </nav>
         </div>
+    </header>
 	
+    <main class="page-content">
+        <div class="align-self-start wrap" id="topdf">
+            <div id="calculator">
+                <!-- Start: Modal-Reset-Cinfirmation -->
+                <div class="d-flex justify-content-center calcheaderbtn"><button class="btn btn-secondary btn-sm" id="resetAllfield" type="button"><span>RESET</span></button></div><!-- End: Modal-Reset-Cinfirmation -->
+                <h2 class="text-center">DEPRECIATION CALCULATOR</h2>
+                <h4 class="text-center">Property Parameters</h4>
+                <div class="row input-row-dashed" style="border:1px dashed #1DA1F2;padding-bottom:0.5rem;margin-right:1px;margin-left:1px;">
+                    <div class="col-md-6"><label class="form-label"><sup class="mtool" title="Residential: 27.5 yrs, Commercial: 39 yrs"><i class="icon-question"></i></sup>Type of Property</label><select class="form-select" id="prop_type">
+                            <option value="None" selected="">Select</option>
+                            <option value="Commercial">Commercial (39 yrs)</option>
+                            <option value="Residential">Residential (27.5 yrs)</option>
+                        </select></div>
+                    <div class="col-md-6"><label class="form-label"><sup class="mtool" title="How many years the property has been owned"><i class="icon-question"></i></sup>Years Property Owned</label>
+                        <div class="input-group"><input class="form-control form-control" type="number" id="years_owned" placeholder="7.5" step="0.1"><span class="input-group-text input-group-text">years</span></div>
+                    </div>
+                    <div class="col-md-4"><label class="form-label"><sup class="mtool" title="Original Purchase Price"><i class="icon-question"></i></sup>Purchase Price</label>
+                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control money-mask" type="text" id="price" placeholder="200,000"></div>
+                    </div>
+                    <div class="col-md-4"><label class="form-label"><sup class="mtool" title="Value of the land (non-depreciable part)"><i class="icon-question"></i></sup>Land Value</label>
+                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control money-mask" type="text" id="land" placeholder="20,000"></div>
+                    </div>
+                    <div class="col-md-4"><label class="form-label"><sup class="mtool" title="Cost of capital improvements"><i class="icon-question"></i></sup>Improvements</label>
+                        <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control money-mask" type="text" id="improve" placeholder="10,000"></div>
+                    </div>
+                </div>
+                <div class="total-cashflow-subsection"></div>
+            </div><!-- Start: DISCLAIMER -->
             <section class="ATTENTION-SECTION">
-                <h5 class="font-monospace lh-1 text-center">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br>(It's not a substitute for your calculations.)</h5>
+                <h5 class="font-monospace lh-1 text-center mx-2">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br><span> (It's not a substitute for your calculations.)</span></h5>
             </section><!-- End: DISCLAIMER -->
         </div>
-    </div>
-</main>
-
-<footer>
-    <div class="wrap">
-        <div class="home">
-            <style>
+    </main>
+	
+    <footer>
+        <div class="wrap">
+            <div class="home"><style>
                 .home {padding-top:20px;}
                 p {margin-bottom: 0;}
             </style>
-            <p>Go to <a href="https://www.linkedin.com/in/prospopa/">LinkedIn</a>.</p>
-            <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
-            <p>Return to <a href="#top">Top of This Page</a>.</p>
-            <section class="d-flex flex-row justify-content-center" style="width:100%;">
-                <div class="container" style="margin-right:0px;margin-left:0px;padding-right:0px;padding-left:0px;width:100%;max-width:100%;">
-                    <div class="row" style="margin-right:0px;margin-left:0px;max-width:100%;padding-top:20px;padding-bottom:20px;">
-                        <div class="col" style="width:auto;padding-right:0px;padding-left:0px;max-width:100%;">
-                            <div class="text-center" style="text-align:center;">
-                                <p class="mb-0">Copyright&nbsp;©&nbsp;<span id="currentYear"></span> All Rights Reserved.</p>
-                            </div><script>
+                <p>Go to <a href="https://www.linkedin.com/in/prospopa/">LinkedIn</a>.</p>
+                <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
+                <p>Return to <a href="#top">Top of This Page</a>.</p>
+                <section class="d-flex flex-row justify-content-center" style="width:100%;">
+                    <div class="container" style="margin-right:0px;margin-left:0px;padding-right:0px;padding-left:0px;width:100%;max-width:100%;">
+                        <div class="row" style="margin-right:0px;margin-left:0px;max-width:100%;padding-top:20px;padding-bottom:20px;">
+                            <div class="col" style="width:auto;padding-right:0px;padding-left:0px;max-width:100%;">
+                                <div class="text-center" style="text-align:center;">
+                                    <p class="mb-0">Copyright&nbsp;©&nbsp;<span id="currentYear"></span> All Rights Reserved.</p>
+                                </div><script>
                     document.getElementById('currentYear').textContent = new Date().getFullYear();
                 </script>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            </div>
         </div>
-    </div>
-</footer>
+    </footer>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="/calc/js/bs-init.js"></script>
-<script src="/calc/js/reset-btn.js"></script>
+<script src="/calc/js/reset.js"></script>
 <script>
     function format(n) { return n.toLocaleString('en-US'); }
     function clean(s) { return parseFloat(String(s).replace(/,/g, '')) || 0; }
@@ -115,6 +106,7 @@
 </script>
 </body>
 </html>
+
 
 
 
