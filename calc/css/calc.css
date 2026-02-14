@@ -162,7 +162,7 @@ input[readonly] {
 .subsection {
   background-color: lightcoral;
   border-radius: 5px;
-  margin-bottom: 20px;
+  margin-bottom: 0px;
 }
 
 .subsection-heading {
@@ -636,6 +636,10 @@ footer > div.wrap > div.home {
   border-radius: 4px;
 }
 
+#btnno, #resetAllfield {
+  border-radius: 4px;
+}
+
 button {
   display: block;
   line-height: 40px;
@@ -690,7 +694,7 @@ button#btnno:hover {
   background: #fc441c;
 }
 
-#resetAll {
+#resetAll, #resetAllfield {
   padding-bottom: 1px;
   background-color: #fc441c;
   border-color: #fc441c;
@@ -700,7 +704,15 @@ button#resetAll:hover span {
   color: #fc441c;
 }
 
+button#resetAllfield:hover span {
+  color: #fc441c;
+}
+
 button#resetAll:hover {
+  background-color: #ffffff;
+}
+
+button#resetAllfield:hover {
   background-color: #ffffff;
 }
 
@@ -866,4 +878,8 @@ sub, sup {
   width: 50%;
   display: inline-flex;
   justify-content: space-around;
+}
+
+.page-content {
+  min-height: 600px;
 }
