@@ -224,7 +224,7 @@ input[readonly] {
 }
 
 .table > :not(caption) > * > * {
-  padding: 1px 1px;
+  padding: 1px 4px;
 }
 
 .form-label {
@@ -706,6 +706,7 @@ button#btnno:hover {
   padding-bottom: 1px;
   background-color: #fc441c;
   border-color: #fc441c;
+  font-weight: bold;
 }
 
 button#resetAll:hover span {
