@@ -35,196 +35,188 @@
 </header>
 
 <main class="page-content">
-    <div id="topdf" class="wrap">
+    <div class="align-self-start wrap" id="topdf">
         <div id="calculator">
-            <div class="calcheaderbtn">
-            <button class="btn btn-secondary btn-sm" id="bt-reset-modal" type="button" data-bs-toggle="modal" data-bs-target="#confirmModal"><span>RESET</span></button>
-			<button class="btn btn-primary btn-sm" id="savepdf" type="button"><span>PDF</span></button>
-			<button class="btn btn-success btn-sm" id="sendtoemail" type="button"><span>E-MAIL</span></button>
-        </div>
+            <!-- Start: Modal-Reset-Cinfirmation -->
+            <div class="d-flex justify-content-center calcheaderbtn"><button class="btn btn-secondary btn-sm" id="resetAllfield" type="button"><span>RESET</span></button></div><!-- End: Modal-Reset-Cinfirmation -->
             <h2 class="text-center">CAPITAL GAINS CALCULATION</h2>
-            <div class="row">
-                <div class="col-lg-6">
+            <div class="row" style="margin-right: -3.4px;margin-left: -3.4px;">
+                <div class="col-lg-6" style="border: 1px dashed #1DA1F2;padding-right: 5px;padding-left: 5px;padding-bottom: 5px;">
                     <h4 class="subsection-heading">Property Info</h4>
                     <div class="input-row-dashed">
-                        <div class="mb-3">
-                            <label class="form-label">Original Price of Property (cost basis)</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="original_price" class="form-control money-input" placeholder="75,000"></div>
+                        <div class="mb-2"><label class="form-label">Original Price of Property (cost basis)</label>
+                            <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control money-input" type="text" id="original_price" placeholder="75,000"></div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Improvements to Property</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="improvements" class="form-control money-input" placeholder="25,000"></div>
+                        <div class="mb-2"><label class="form-label">Improvements to Property</label>
+                            <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control money-input" type="text" id="improvements" placeholder="25,000"></div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Selling Expenses</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="selling_expenses" class="form-control money-input" placeholder="35,000"></div>
+                        <div class="mb-2"><label class="form-label">Selling Expenses</label>
+                            <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control money-input" type="text" id="selling_expenses" placeholder="35,000"></div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Sale Price of Property</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="sale_price" class="form-control money-input" placeholder="175,000"></div>
+                        <div class="mb-2"><label class="form-label">Sale Price of Property</label>
+                            <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control money-input" type="text" id="sale_price" placeholder="175,000"></div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label text-primary">Total Capital Gain</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="total_gain_display" class="form-control bg-light fw-bold" readonly placeholder="0"></div>
+                        <div class="mb-2"><label class="form-label text-primary">Total Capital Gain</label>
+                            <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="bg-light form-control form-control fw-bold" type="text" id="total_gain_display" placeholder="0" readonly=""></div>
                         </div>
-                        <div class="mb-0">
-                            <label class="form-label">Accumulated Depreciation</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="accum_depreciation" class="form-control money-input" placeholder="133,350"></div>
+                        <div class="mb-0"><label class="form-label">Accumulated Depreciation</label>
+                            <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="form-control form-control money-input" type="text" id="accum_depreciation" placeholder="133,350"></div>
                         </div>
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <div class="col-lg-6" style="border: 1px dashed #1DA1F2;padding-right: 5px;padding-left: 5px;padding-bottom: 5px;">
                     <h4 class="subsection-heading">Tax Calculation</h4>
                     <div class="input-row-dashed">
-                        <div class="mb-3">
-                            <label class="form-label">Federal Capital Gains Tax (%)</label>
+                        <div class="mb-2"><label class="form-label">Federal Capital Gains Tax (%)</label>
+                            <div class="row g-2">
+                                <div class="col-4"><select class="form-select" id="fed_rate">
+                                        <option value="20" selected="">20</option>
+                                        <option value="15">15</option>
+                                        <option value="10">10</option>
+                                    </select></div>
+                                <div class="col-8">
+                                    <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="bg-light form-control form-control" type="text" id="tax_fed_val" readonly=""></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-2"><label class="form-label">Depreciation Recapture (%)</label>
                             <div class="row g-2">
                                 <div class="col-4">
-                                    <select class="form-select" id="fed_rate">
-                                        <option value="20" selected>20</option><option value="15">15</option><option value="10">10</option>
-                                    </select>
+                                    <div class="input-group"><input class="bg-light form-control form-control text-center" type="text" readonly="" value="25"></div>
                                 </div>
                                 <div class="col-8">
-                                    <div class="input-group"><span class="input-group-text">$</span><input type="text" id="tax_fed_val" class="form-control bg-light" readonly></div>
+                                    <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="bg-light form-control form-control" type="text" id="tax_recap_val" readonly=""></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Depreciation Recapture (%)</label>
-                            <div class="row g-2">
-                                <div class="col-4"><div class="input-group"><input type="text" class="form-control bg-light text-center" value="25" readonly></div></div>
-                                <div class="col-8">
-                                    <div class="input-group"><span class="input-group-text">$</span><input type="text" id="tax_recap_val" class="form-control bg-light" readonly></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">State Tax (%)</label>
-                            <div class="row g-2">
-                                <div class="col-4"><div class="input-group"><input type="number" id="state_rate" class="form-control" placeholder="5"></div></div>
-                                <div class="col-8">
-                                    <div class="input-group"><span class="input-group-text">$</span><input type="text" id="tax_state_val" class="form-control bg-light" readonly></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Net Investment Income Tax (%)</label>
+                        <div class="mb-2"><label class="form-label">State Tax (%)</label>
                             <div class="row g-2">
                                 <div class="col-4">
-                                    <select class="form-select" id="niit_rate">
-                                        <option value="3.8" selected>3.8</option><option value="0">0</option>
-                                    </select>
+                                    <div class="input-group"><input class="form-control form-control" type="number" id="state_rate" placeholder="5"></div>
                                 </div>
                                 <div class="col-8">
-                                    <div class="input-group"><span class="input-group-text">$</span><input type="text" id="tax_niit_val" class="form-control bg-light" readonly></div>
+                                    <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="bg-light form-control form-control" type="text" id="tax_state_val" readonly=""></div>
                                 </div>
                             </div>
                         </div>
-                        <div class="mb-0">
-                            <label class="form-label fw-bold">Total Tax Liability</label>
-                            <div class="input-group"><span class="input-group-text">$</span><input type="text" id="total_tax_display" class="form-control bg-light fw-bold text-danger" readonly></div>
+                        <div class="mb-2"><label class="form-label">Net Investment Income Tax (%)</label>
+                            <div class="row g-2">
+                                <div class="col-4"><select class="form-select" id="niit_rate">
+                                        <option value="3.8" selected="">3.8</option>
+                                        <option value="0">0</option>
+                                    </select></div>
+                                <div class="col-8">
+                                    <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="bg-light form-control form-control" type="text" id="tax_niit_val" readonly=""></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-2"><label class="form-label fw-bold">Total Tax Liability</label>
+                            <div class="input-group"><span class="input-group-text input-group-text">$</span><input class="bg-light form-control form-control fw-bold text-danger" type="text" id="total_tax_display" readonly=""></div>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="row mt-4 g-4">
-    <!-- 1031 Exchange Side -->
-    <div class="col-lg-6">
-        <div class="subsection revenue">
-            <h4 class="subsection-heading">1031 Exchange</h4>
-            <table class="table table-bordered bg-white mb-0">
-                <tbody>
-                    <tr>
-                        <td>Sale Price of Property</td>
-                        <td class="text-end" id="ex_sale_price">$0</td>
-                    </tr>
-                    <tr>
-                        <td>Selling Expenses</td>
-                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_sell_exp">0</span></div></td>
-                    </tr>
-                    <tr>
-                        <td>Federal Gains Tax</td>
-                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_fed_tax">0</span></div></td>
-                    </tr>
-                    <tr>
-                        <td>Depreciation Recapture</td>
-                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_recap_tax">0</span></div></td>
-                    </tr>
-                    <tr>
-                        <td>State Capital Gains</td>
-                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_state_tax">0</span></div></td>
-                    </tr>
-                    <tr>
-                        <td>Net Investment Income Tax</td>
-                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_niit_tax">0</span></div></td>
-                    </tr>
-                    <tr class="table-success">
-                        <td><strong>Total to Reinvest</strong></td>
-                        <td class="text-end"><strong id="ex_total_val">$0</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- Sell Without Exchange Side -->
-    <div class="col-lg-6">
-        <div class="subsection expenses">
-            <h4 class="subsection-heading">Sell Without 1031 Exchange</h4>
-            <table class="table table-bordered bg-white mb-0">
-                <tbody>
-                    <tr>
-                        <td>Sale Price of Property</td>
-                        <td class="text-end" id="sell_sale_price">$0</td>
-                    </tr>
-                    <tr>
-                        <td>Selling Expenses</td>
-                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_sell_exp">0</span></div></td>
-                    </tr>
-                    <tr>
-                        <td>Federal Gains Tax</td>
-                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_fed_tax">0</span></div></td>
-                    </tr>
-                    <tr>
-                        <td>Depreciation Recapture</td>
-                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_recap_tax">0</span></div></td>
-                    </tr>
-                    <tr>
-                        <td>State Capital Gains</td>
-                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_state_tax">0</span></div></td>
-                    </tr>
-                    <tr>
-                        <td>Net Investment Income Tax</td>
-                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_niit_tax">0</span></div></td>
-                    </tr>
-                    <tr class="table-danger">
-                        <td><strong>Total to Reinvest</strong></td>
-                        <td class="text-end"><strong id="sell_total_val">$0</strong></td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-            <div class="benefit-box justify-center text-center">
-                <h5 class="subsection-heading">Benefit of Exchanging vs. Selling</h5>
-                <div class="benefit-amount-container"><div class="d-flex align-items-center"><span class="benefit-amount" style="margin-right: 5px;">$</span><h2 class="benefit-amount" id="benefit_display">0</h2></div></div>
-                <p class="text-muted small">of additional equity available to reinvest through a 1031 exchange</p>
+                <div class="col-lg-6">
+                    <div class="subsection revenue">
+                        <h4 class="subsection-heading">1031 Exchange</h4>
+                        <div>
+                            <table class="table table-bordered bg-white mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td>Sale Price of Property</td>
+                                        <td class="text-end" id="ex_sale_price">$0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Selling Expenses</td>
+                                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_sell_exp">0</span></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Federal Gains Tax</td>
+                                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_fed_tax">0</span></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Depreciation Recapture</td>
+                                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_recap_tax">0</span></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td>State Capital Gains</td>
+                                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_state_tax">0</span></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Net Investment Income Tax</td>
+                                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="ex_niit_tax">0</span></div></td>
+                                    </tr>
+                                    <tr class="table-success" style="border-color: rgb(222,226,230);">
+                                        <td style="border-color: rgb(222,226,230);"><strong>Total to Reinvest</strong></td>
+                                        <td class="text-end" style="border-color: rgb(222,226,230);"><strong id="ex_total_val">$0</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="subsection expenses">
+                        <h4 class="subsection-heading" style="border-color: rgb(222,226,230);">Sell Without 1031 Exchange</h4>
+                        <div>
+                            <table class="table table-bordered bg-white mb-0">
+                                <tbody>
+                                    <tr>
+                                        <td>Sale Price of Property</td>
+                                        <td class="text-end" id="sell_sale_price">$0</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Selling Expenses</td>
+                                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_sell_exp">0</span></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Federal Gains Tax</td>
+                                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_fed_tax">0</span></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Depreciation Recapture</td>
+                                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_recap_tax">0</span></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td>State Capital Gains</td>
+                                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_state_tax">0</span></div></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Net Investment Income Tax</td>
+                                        <td class="text-end"><div><span class="minus-label">MINUS $</span><span id="sell_niit_tax">0</span></div></td>
+                                    </tr>
+                                    <tr class="table-danger" style="border-color: rgb(222,226,230);">
+                                        <td style="border-color: rgb(222,226,230);"><strong>Total to Reinvest</strong></td>
+                                        <td class="text-end" style="border-color: rgb(222,226,230);"><strong id="sell_total_val">$0</strong></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
-			<section class="ATTENTION-SECTION">
-                <h5 class="font-monospace lh-1 text-center">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br>(It's not a substitute for your calculations.)</h5>
-            </section>
-        </div>
+            <div class="text-center mt-4 pb-1 benefit-box justify-center">
+                <h5 class="subsection-heading">Benefit of Exchanging vs. Selling</h5>
+                <div class="benefit-amount-container">
+                    <div class="d-flex justify-content-center align-items-center"><span class="benefit-amount" style="margin-right: 5px;font-size: 22px;">$</span>
+                        <h2 class="benefit-amount" id="benefit_display" style="margin-bottom: 4px;">0</h2>
+                    </div>
+                </div>
+                <p class="text-muted small" style="margin-bottom: 0;">of additional equity available to reinvest through a 1031 exchange</p>
+            </div>
+        </div><!-- Start: DISCLAIMER -->
+        <section class="ATTENTION-SECTION">
+            <h5 class="font-monospace lh-1 text-center mx-2">Disclaimer.<br>Use this calculator for REVIEW and TESTING purposes only, we do not assume any responsibility for errors in calculations.<br><span> (It's not a substitute for your calculations.)</span></h5>
+        </section><!-- End: DISCLAIMER -->
     </div>
 </main>
-
 <footer>
     <div class="wrap">
-        <div class="home">
-            <style>
-                .home {padding-top:20px;}
-                p {margin-bottom: 0;}
-            </style>
+        <div class="home"><style>
+            .home {padding-top:20px;}
+            p {margin-bottom: 0;}
+        </style>
             <p>Go to <a href="https://www.linkedin.com/in/prospopa/">LinkedIn</a>.</p>
             <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
             <p>Return to <a href="#top">Top of This Page</a>.</p>
@@ -235,8 +227,8 @@
                             <div class="text-center" style="text-align:center;">
                                 <p class="mb-0">Copyright&nbsp;©&nbsp;<span id="currentYear"></span> All Rights Reserved.</p>
                             </div><script>
-                    document.getElementById('currentYear').textContent = new Date().getFullYear();
-                </script>
+                document.getElementById('currentYear').textContent = new Date().getFullYear();
+            </script>
                         </div>
                     </div>
                 </div>
@@ -345,5 +337,3 @@
 </script>
 </body>
 </html>
-
-
