@@ -17,7 +17,7 @@
       
     <link rel="stylesheet" href="css/format.css">
     
-    <script src="https://www.google.com/recaptcha/enterprise.js?render=6Let_E8sAAAAAP948s5QuqjQ-HKYRuoxxLzILZ9p"></script>
+    <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
 
     <style>
         /* --- SECURITY / DISABLE SELECTION START --- */
@@ -87,20 +87,12 @@
           
         /* --- OPTION 2 CANVAS CSS --- */
         #canvas1 {
-            /* ABSOLUTE: It scrolls WITH the page (no drift) */
             position: absolute; 
             top: 0;
             left: 0;
             width: 100%;
-            /* Height is handled in JS to ensure it covers the area */
-             
-            /* Z-INDEX: High number puts it IN FRONT of everything */
             z-index: 99; 
-             
-            /* POINTER-EVENTS: This is critical. It allows you to click "Through" 
-               the canvas to the links below, while still seeing the particles. */
             pointer-events: none; 
-             
             image-rendering: pixelated; 
         }
     </style>
@@ -181,6 +173,8 @@
                         <input type="email" name="email" placeholder="Email" required />
                         <textarea name="message" placeholder="Message" rows="5" required></textarea>
                         
+                        <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoxxLzILZ9p" data-action="submit_lead"></div>
+                          
                         <button type="submit" id="submit-btn">Send Message</button>
                         <p id="form-status"></p>
                     </form>
@@ -233,9 +227,6 @@
 
     let isTouch = false;
 
-    // --- MOUSE COORDINATE FIX ---
-    // Since the canvas is absolute (covering the document), 
-    // we need Page coordinates (relative to document), not Client coordinates (relative to window)
     window.addEventListener('mousemove', function(event){
         if (isTouch) return; 
         mouse.x = event.pageX; 
@@ -296,15 +287,12 @@
             let currentX = anchorX + this.xOffset + this.dx;
             let currentY = anchorY + this.yOffset + this.dy;
 
-            // Distance calculation remains simple because both Mouse and Canvas 
-            // are now using Document coordinates.
             let distMouseX = mouse.x - currentX;
             let distMouseY = mouse.y - currentY;
              
             if (mouse.x == null || mouse.y == null) {
                 if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
                 else this.dx = 0;
-                
                 if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
                 else this.dy = 0;
                 return;
@@ -345,18 +333,9 @@
 
         CONFIG.particleSize = step;
         
-        // --- OPTION 2 SETUP ---
-        // 1. Calculate how far down the "Anchor" div is on the page.
-        //    We use offsetTop to get the distance from the top of the document.
         let anchorTop = anchor.offsetTop; 
-
-        // 2. Set Canvas Width to full window width
         canvas.width = window.innerWidth;
         canvas.style.width = window.innerWidth + 'px';
-
-        // 3. Set Canvas Height.
-        //    We make it tall enough to cover the top of the page + the text + some room for explosion.
-        //    We don't need it to go all the way to the footer (saves memory).
         let safeHeight = anchorTop + 600; 
         canvas.height = safeHeight;
         canvas.style.height = safeHeight + 'px';
@@ -365,11 +344,8 @@
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
         
-        // 4. Position the Text
-        //    CenterX is middle of screen.
-        //    CenterY is the middle of the Anchor div (anchorTop + half height)
         let centerX = canvas.width / 2;
-        let centerY = anchorTop + (150 / 2); // 150 is the anchor div height in HTML
+        let centerY = anchorTop + (150 / 2); 
         let text = 'Hello World';
 
         let metrics = ctx.measureText(text);
@@ -383,7 +359,6 @@
         gradient.addColorStop(1, '#ec4899'); 
 
         ctx.fillStyle = gradient;
-        // Clear specifically around where we are drawing to avoid clearing the whole giant canvas unnecessarily
         ctx.clearRect(0,0, canvas.width, canvas.height);
         ctx.fillText(text, centerX, centerY);
         
@@ -413,9 +388,6 @@
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-        // Calculate the Anchor position ONCE based on document flow
-        // Since canvas is absolute 0,0, the "CenterY" is just the anchor's top offset + half its height
         let centerX = canvas.width / 2;
         let centerY = anchor.offsetTop + (anchor.offsetHeight / 2);
 
@@ -427,7 +399,6 @@
     }
 
     window.addEventListener('load', function() {
-        // Wait a tiny bit for layout to settle so offsetTop is correct
         setTimeout(init, 100); 
         animate();
     });
@@ -443,8 +414,8 @@
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLHWsaJvRo4CPVU1f1umMXBT4Tazy3s1vUTMTTrOv0AVLjw4xs0pEkj5TpocbJdnyMJw/exec";
-    const RECAPTCHA_SITE_KEY = '6Let_E8sAAAAAP948s5QuqjQ-HKYRuoxxLzILZ9p';
-
+    
+    // NOTE: This code is updated for the CHECKBOX key type
     const form = document.getElementById('contact-form');
     const statusMsg = document.getElementById('form-status');
     const btn = document.getElementById('submit-btn');
@@ -467,44 +438,47 @@
                 return;
             }
 
-            // Disable button
+            // 1. Get the response from the Checkbox
+            // Because you have a "Checkbox" key, the user MUST click it, and we get the token here.
+            const token = grecaptcha.enterprise.getResponse();
+
+            if (!token) {
+                statusMsg.innerText = "Please click the reCAPTCHA box.";
+                statusMsg.style.color = "red";
+                return;
+            }
+
             btn.disabled = true;
             btn.innerText = "Sending...";
 
-            // UPDATED: Execute reCAPTCHA Enterprise
-            grecaptcha.enterprise.ready(function() {
-                grecaptcha.enterprise.execute(RECAPTCHA_SITE_KEY, {action: 'submit_lead'}).then(function(token) {
-                    
-                    // Construct data payload matched to your Apps Script
-                    const data = {
-                        name: formData.get('name'),
-                        email: email,
-                        message: formData.get('message'),
-                        recaptchaToken: token, // This is what the new script expects
-                        action: 'submit_lead'
-                    };
+            const data = {
+                name: formData.get('name'),
+                email: email,
+                message: formData.get('message'),
+                recaptchaToken: token, // Send the token we got from the checkbox
+                action: 'submit_lead'
+            };
 
-                    fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors', 
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(data)
-                    })
-                    .then(() => {
-                        statusMsg.innerText = "Message sent successfully!";
-                        statusMsg.style.color = "green";
-                        form.reset();
-                    })
-                    .catch((error) => {
-                        console.error('Error:', error);
-                        statusMsg.innerText = "Something went wrong. Please try again.";
-                        statusMsg.style.color = "red";
-                    })
-                    .finally(() => {
-                        btn.disabled = false;
-                        btn.innerText = "Send Message";
-                    });
-                });
+            fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(() => {
+                statusMsg.innerText = "Message sent successfully!";
+                statusMsg.style.color = "green";
+                form.reset();
+                grecaptcha.enterprise.reset(); // Reset the checkbox
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                statusMsg.innerText = "Something went wrong. Please try again.";
+                statusMsg.style.color = "red";
+            })
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerText = "Send Message";
             });
         });
     }
