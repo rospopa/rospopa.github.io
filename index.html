@@ -16,7 +16,8 @@
     <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
       
     <link rel="stylesheet" href="css/format.css">
-    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    
+    <script src="https://www.google.com/recaptcha/enterprise.js?render=6Let_E8sAAAAAP948s5QuqjQ-HKYRuoxxLzILZ9p"></script>
 
     <style>
         /* --- SECURITY / DISABLE SELECTION START --- */
@@ -26,7 +27,7 @@
             -ms-user-select: none; /* IE10+/Edge */
             user-select: none; /* Standard */
         }
-         
+          
         /* Re-enable selection for the form so people can type! */
         input, textarea {
             -webkit-user-select: text;
@@ -83,7 +84,7 @@
         .g-recaptcha {
             margin-bottom: 5px;
         }
-         
+          
         /* --- OPTION 2 CANVAS CSS --- */
         #canvas1 {
             /* ABSOLUTE: It scrolls WITH the page (no drift) */
@@ -92,19 +93,19 @@
             left: 0;
             width: 100%;
             /* Height is handled in JS to ensure it covers the area */
-            
+             
             /* Z-INDEX: High number puts it IN FRONT of everything */
             z-index: 99; 
-            
+             
             /* POINTER-EVENTS: This is critical. It allows you to click "Through" 
                the canvas to the links below, while still seeing the particles. */
             pointer-events: none; 
-            
+             
             image-rendering: pixelated; 
         }
     </style>
 </head>
-     
+      
 <body>
 <script>
     document.addEventListener('contextmenu', event => event.preventDefault());
@@ -164,7 +165,7 @@
                         <img src="/gif/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6e474d6e447165627a4463666d2f67697068792e676966.gif" width="auto" height="auto"/>
                     </div>
                 </div>
-                 
+                  
                 <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
                       
                     <div id="particle-anchor" style="width: 100%; height: 150px; margin-top: 20px; margin-bottom: 20px;"></div>
@@ -179,9 +180,7 @@
                         <input type="text" name="name" placeholder="Name" required />
                         <input type="email" name="email" placeholder="Email" required />
                         <textarea name="message" placeholder="Message" rows="5" required></textarea>
-                          
-                        <div class="g-recaptcha" data-sitekey="6Let_E8sAAAAAP948s5QuqjQ-HKYRuoXxLzILZ9p"></div>
-                          
+                        
                         <button type="submit" id="submit-btn">Send Message</button>
                         <p id="form-status"></p>
                     </form>
@@ -220,7 +219,7 @@
     const anchor = document.getElementById('particle-anchor');
 
     const CONFIG = {
-        particleSize: 3,         
+        particleSize: 3,          
         returnSpeed: 0.15        
     };
 
@@ -444,6 +443,7 @@
 
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLHWsaJvRo4CPVU1f1umMXBT4Tazy3s1vUTMTTrOv0AVLjw4xs0pEkj5TpocbJdnyMJw/exec";
+    const RECAPTCHA_SITE_KEY = '6Let_E8sAAAAAP948s5QuqjQ-HKYRuoxxLzILZ9p';
 
     const form = document.getElementById('contact-form');
     const statusMsg = document.getElementById('form-status');
@@ -455,7 +455,7 @@
     }
 
     if (form) {
-        form.addEventListener('submit', async (e) => {
+        form.addEventListener('submit', (e) => {
             e.preventDefault();
             statusMsg.innerText = "";
             const formData = new FormData(form);
@@ -467,42 +467,45 @@
                 return;
             }
 
-            const captchaResponse = grecaptcha.getResponse();
-            if (!captchaResponse || captchaResponse.length === 0) {
-                statusMsg.innerText = "Please check the captcha box.";
-                statusMsg.style.color = "red";
-                return;
-            }
-
+            // Disable button
             btn.disabled = true;
             btn.innerText = "Sending...";
 
-            const data = {
-                name: formData.get('name'),
-                email: email,
-                message: formData.get('message'),
-                captchaToken: captchaResponse
-            };
+            // UPDATED: Execute reCAPTCHA Enterprise
+            grecaptcha.enterprise.ready(function() {
+                grecaptcha.enterprise.execute(RECAPTCHA_SITE_KEY, {action: 'submit_lead'}).then(function(token) {
+                    
+                    // Construct data payload matched to your Apps Script
+                    const data = {
+                        name: formData.get('name'),
+                        email: email,
+                        message: formData.get('message'),
+                        recaptchaToken: token, // This is what the new script expects
+                        action: 'submit_lead'
+                    };
 
-            try {
-                await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    mode: 'no-cors', 
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
+                    fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors', 
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(data)
+                    })
+                    .then(() => {
+                        statusMsg.innerText = "Message sent successfully!";
+                        statusMsg.style.color = "green";
+                        form.reset();
+                    })
+                    .catch((error) => {
+                        console.error('Error:', error);
+                        statusMsg.innerText = "Something went wrong. Please try again.";
+                        statusMsg.style.color = "red";
+                    })
+                    .finally(() => {
+                        btn.disabled = false;
+                        btn.innerText = "Send Message";
+                    });
                 });
-                statusMsg.innerText = "Message sent successfully!";
-                statusMsg.style.color = "green";
-                form.reset();
-                grecaptcha.reset(); 
-            } catch (error) {
-                console.error('Error:', error);
-                statusMsg.innerText = "Something went wrong. Please try again.";
-                statusMsg.style.color = "red";
-            } finally {
-                btn.disabled = false;
-                btn.innerText = "Send Message";
-            }
+            });
         });
     }
 </script>
