@@ -10,11 +10,7 @@
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/css/favicons/unnamed-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/css/favicons/unnamed-32x32.png">
-    <link rel="icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/css/favicons/unnamed-192x192.png">
-    <link rel="icon" type="image/png" sizes="231x231" href="/css/favicons/unnamed-231x231.png">
-    <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
-      
+    
     <link rel="stylesheet" href="css/format.css">
     
     <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
@@ -22,13 +18,11 @@
     <style>
         /* --- SECURITY / DISABLE SELECTION START --- */
         body {
-            -webkit-user-select: none; /* Safari */
-            -moz-user-select: none; /* Firefox */
-            -ms-user-select: none; /* IE10+/Edge */
-            user-select: none; /* Standard */
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
-          
-        /* Re-enable selection for the form so people can type! */
         input, textarea {
             -webkit-user-select: text;
             -moz-user-select: text;
@@ -85,7 +79,6 @@
             margin-bottom: 5px;
         }
           
-        /* --- OPTION 2 CANVAS CSS --- */
         #canvas1 {
             position: absolute; 
             top: 0;
@@ -110,12 +103,7 @@
     <div class="wrap">
         <a class="site-title" style="text-decoration: none;" href="https://rospopa.com">Pavlo Rospopa Website</a>
         <nav class="site-nav">
-            <div class="trigger">
-                <a style="text-decoration: none;" href="/login">Login</a>
-            </div>
-            <div class="trigger2">
-                <a style="text-decoration: none;" href="/login">Login</a>
-            </div>
+            <div class="trigger"><a style="text-decoration: none;" href="/login">Login</a></div>
         </nav>
     </div>
 </header>
@@ -128,43 +116,22 @@
                     <li>
                         <a class="post-link" href="/calc/residential-property-calculator">Residential Property Calculator</a>
                         <br>
-                        Determine the financial viability of potential investments with this all-in-one tool. Input property values, loan profiles, and market rates to generate a comprehensive overview of your acquisition costs and long-term equity growth. Gain a clear understanding of your cash flow by tracking recurring costs like taxes, insurance, and utilities while analyzing the income potential of multi-unit properties. This comprehensive calculator provides an instant snapshot of your property's health with automated metrics for Cap Rate, ROI, and Cash on Cash Return, alongside interactive charts for loan amortization and cumulative wealth building.
+                        Analyze property health with metrics for Cap Rate, ROI, and Cash on Cash Return.
                     </li>
                     <li>
                         <a class="post-link" href="/calc/exchange-deadline-calculator">Exchange Deadline Calculator</a>
                         <br>
-                        Two distinct deadlines drive the 1031 exchange process, the 45-day identification period and the 180-day exchange period. Use this deadline calculator to understanding your potential 1031 exchange timeline.
-                    </li>
-                    <li>
-                        <a class="post-link" href="/calc/depreciation-calculator">Depreciation Calculator</a>
-                        <br>
-                        Use this simple depreciation calculator to estimate how much your property may depreciate over time. Just enter a few details to get a quick snapshot of potential tax deductions, value reduction, and accumulated depreciation over the duration of ownership.
-                    </li>
-                    <li>
-                        <a class="post-link" href="/calc/capital-gains-calculator">Capital Gains Calculation</a>
-                        <br>
-                        This capital gains tax calculator will give you a preliminary estimate of the potential tax liability on your real estate transaction and provide a comparison of the figures with and without a 1031 exchange.
-                    </li>
-                    <li>
-                        <a class="post-link" href="/calc/debt-replacement-calculator">Debt Replacement Calculator</a>
-                        <br>
-                        To achieve full tax deferral in a 1031 exchange, a general guideline is that the Exchanger must “trade up or stay even” in value. This calculator is designed to help estimate the total debt replacement needed to meet that requirement when reinvesting in a passive real estate investment.
+                        Calculate your potential 1031 exchange timeline.
                     </li>
                 </ul>
 
                 <div align="center">
-                    <div style="position: relative; margin-bottom: 20px;">
-                        <img src="/gif/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6e474d6e447165627a4463666d2f67697068792e676966.gif" width="auto" height="auto"/>
-                    </div>
+                    <img src="/gif/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6e474d6e447165627a4463666d2f67697068792e676966.gif" width="auto" height="auto"/>
                 </div>
                   
-                <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
-                      
-                    <div id="particle-anchor" style="width: 100%; height: 150px; margin-top: 20px; margin-bottom: 20px;"></div>
-
-                    <p>
-                        The purpose of this website is to share information and host tools.  All of this code is source-available via the <a href="https://github.com/rospopa/rospopa.github.io">repository</a>.  Let's build a better future together.
-                    </p>
+                <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; color: #555;">
+                    <div id="particle-anchor" style="width: 100%; height: 150px; margin: 20px 0;"></div>
+                    <p>Building a better future together. Code available on GitHub.</p>
                 </div>
 
                 <div id="contact-form-container">
@@ -173,315 +140,156 @@
                         <input type="email" name="email" placeholder="Email" required />
                         <textarea name="message" placeholder="Message" rows="5" required></textarea>
                         
-                        <div class="g-recaptcha" data-sitekey="6LfBjXYsAAAAAF2V8_kLArHYKc4eRn0oesJNYuTl" data-action="submit_lead"></div>
+                        <div class="g-recaptcha" 
+                             data-sitekey="6LfBjXYsAAAAAF2V8_kLArHYKc4eRn0oesJNYuTl" 
+                             data-action="submit_lead">
+                        </div>
                           
                         <button type="submit" id="submit-btn">Send Message</button>
                         <p id="form-status"></p>
                     </form>
                 </div>
-                <p>Go to <a href="https://www.linkedin.com/in/prospopa">LinkedIn</a>.</p>
-                <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
-                <p>Go to <a href="https://medium.com/@pavlorospopa">Medium</a>.</p>
-                <p>Return to <a href="#top">Top of This Page</a>.</p>
-                <p>Last Updated: <span id="repo-update-time">Loading...</span></p>
-                <p>Last Commit: <span id="repo-commit-msg">Loading...</span></p>
+
+                <div style="margin-top: 20px;">
+                    <p><a href="https://www.linkedin.com/in/prospopa">LinkedIn</a> | <a href="https://github.com/rospopa">GitHub</a></p>
+                </div>
             </div>
         </div>
     </div>
 </main>
 
-<footer>
-    <section class="d-flex flex-row justify-content-center" style="width: 100%;">
-        <div class="container" style="margin-right: 0px;margin-left: 0px;padding-right: 0px;padding-left: 0px;width: 100%;max-width: 100%;">
-            <div class="row" style="margin-right: 0px;margin-left: 0px;max-width: 100%;padding-top: 20px;padding-bottom: 20px;">
-                <div class="col" style="width: auto;padding-right: 0px;padding-left: 0px;max-width: 100%;">
-                    <div class="text-center" style="text-align:center">
-                        <p class="mb-0">Copyright © <span id="currentYear"></span> All Rights Reserved.</p>
-                    </div>
-                    <script>
-                        document.getElementById('currentYear').textContent = new Date().getFullYear();
-                    </script>
-                </div>
-            </div>
-        </div>
-    </section>
-</footer>
+<script>
+    // Replace this with your newly deployed Web App URL
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLHWsaJvRo4CPVU1f1umMXBT4Tazy3s1vUTMTTrOv0AVLjw4xs0pEkj5TpocbJdnyMJw/exec";
+    
+    const form = document.getElementById('contact-form');
+    const statusMsg = document.getElementById('form-status');
+    const btn = document.getElementById('submit-btn');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        // 1. Validation
+        statusMsg.innerText = "Validating...";
+        statusMsg.style.color = "black";
+
+        const token = grecaptcha.enterprise.getResponse();
+        if (!token) {
+            statusMsg.innerText = "Please click the reCAPTCHA box.";
+            statusMsg.style.color = "red";
+            return;
+        }
+
+        // 2. Prepare Data
+        btn.disabled = true;
+        btn.innerText = "Sending...";
+        
+        const formData = new FormData(form);
+        const data = {
+            name: formData.get('name'),
+            email: formData.get('email'),
+            message: formData.get('message'),
+            recaptchaToken: token
+        };
+
+        // 3. Post to Apps Script
+        try {
+            const response = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success') {
+                statusMsg.innerText = "Message sent successfully!";
+                statusMsg.style.color = "green";
+                form.reset();
+                grecaptcha.enterprise.reset();
+            } else {
+                // Shows exact error from your backend verifyRecaptcha function
+                statusMsg.innerText = "Error: " + (result.message || "Unknown error");
+                statusMsg.style.color = "red";
+            }
+        } catch (error) {
+            console.error('Fetch Error:', error);
+            statusMsg.innerText = "Connection error. Please try again.";
+            statusMsg.style.color = "red";
+        } finally {
+            btn.disabled = false;
+            btn.innerText = "Send Message";
+        }
+    });
+</script>
 
 <script>
     const canvas = document.getElementById('canvas1');
     const ctx = canvas.getContext('2d');
     const anchor = document.getElementById('particle-anchor');
-
-    const CONFIG = {
-        particleSize: 3,          
-        returnSpeed: 0.15        
-    };
-
+    const CONFIG = { particleSize: 3, returnSpeed: 0.15 };
     let particlesArray = [];
+    const mouse = { x: null, y: null, radius: 120 };
 
-    const mouse = {
-        x: null,
-        y: null,
-        radius: 120
-    }
-
-    let isTouch = false;
-
-    window.addEventListener('mousemove', function(event){
-        if (isTouch) return; 
-        mouse.x = event.pageX; 
-        mouse.y = event.pageY;
-    });
-      
-    const handleTouch = (event) => {
-        isTouch = true;
-        if(event.touches.length > 0) {
-            mouse.x = event.touches[0].pageX;
-            mouse.y = event.touches[0].pageY;
-        }
-    };
-
-    window.addEventListener('touchstart', handleTouch, {passive: true});
-    window.addEventListener('touchmove', handleTouch, {passive: true});
-
-    const clearTouch = () => {
-        mouse.x = undefined;
-        mouse.y = undefined;
-        setTimeout(() => {
-            isTouch = false;
-        }, 500);
-    };
-
-    window.addEventListener('touchend', clearTouch);
-    window.addEventListener('touchcancel', clearTouch);
-      
-    window.addEventListener('mouseout', function(){
-        if (!isTouch) {
-            mouse.x = undefined;
-            mouse.y = undefined;
-        }
-    });
+    window.addEventListener('mousemove', (e) => { mouse.x = e.pageX; mouse.y = e.pageY; });
 
     class Particle {
         constructor(xOffset, yOffset, color, size){
-            this.xOffset = xOffset; 
-            this.yOffset = yOffset; 
-            this.color = color;
-            this.size = size;
+            this.xOffset = xOffset; this.yOffset = yOffset;
+            this.color = color; this.size = size;
             this.density = (Math.random() * 30) + 5;
-            this.dx = 0; 
-            this.dy = 0; 
+            this.dx = 0; this.dy = 0;
         }
-        
         draw(anchorX, anchorY){
-            let drawX = anchorX + this.xOffset + this.dx;
-            let drawY = anchorY + this.yOffset + this.dy;
-
             ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.fillRect(drawX, drawY, this.size, this.size);
-            ctx.closePath();
+            ctx.fillRect(anchorX + this.xOffset + this.dx, anchorY + this.yOffset + this.dy, this.size, this.size);
         }
-        
         update(anchorX, anchorY){
-            let currentX = anchorX + this.xOffset + this.dx;
-            let currentY = anchorY + this.yOffset + this.dy;
-
-            let distMouseX = mouse.x - currentX;
-            let distMouseY = mouse.y - currentY;
-             
-            if (mouse.x == null || mouse.y == null) {
-                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
-                else this.dx = 0;
-                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
-                else this.dy = 0;
-                return;
-            }
-
-            let distance = Math.sqrt(distMouseX * distMouseX + distMouseY * distMouseY);
-             
-            if (distance < mouse.radius) {
-                let forceDirectionX = distMouseX / distance;
-                let forceDirectionY = distMouseY / distance;
-                let maxDistance = mouse.radius;
-                let force = (maxDistance - distance) / maxDistance;
-                let directionX = forceDirectionX * force * this.density;
-                let directionY = forceDirectionY * force * this.density;
-                
-                this.dx -= directionX;
-                this.dy -= directionY;
+            let currX = anchorX + this.xOffset + this.dx;
+            let currY = anchorY + this.yOffset + this.dy;
+            let dx = mouse.x - currX; let dy = mouse.y - currY;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < mouse.radius) {
+                let force = (mouse.radius - dist) / mouse.radius;
+                this.dx -= (dx / dist) * force * this.density;
+                this.dy -= (dy / dist) * force * this.density;
             } else {
-                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
-                else this.dx = 0;
-                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
-                else this.dy = 0;
+                this.dx *= (1 - CONFIG.returnSpeed);
+                this.dy *= (1 - CONFIG.returnSpeed);
             }
         }
     }
 
     function init() {
         particlesArray = [];
-        
-        let isMobile = window.innerWidth < 600;
-        let step = isMobile ? 4 : 3; 
-        
-        let contentWidth = Math.min(window.innerWidth - 40, 600); 
-        let fontSize = Math.floor(contentWidth * 0.16);
-        
-        if (fontSize < 40) fontSize = 40;
-        if (fontSize > 180) fontSize = 180;
-
-        CONFIG.particleSize = step;
-        
-        let anchorTop = anchor.offsetTop; 
         canvas.width = window.innerWidth;
-        canvas.style.width = window.innerWidth + 'px';
-        let safeHeight = anchorTop + 600; 
-        canvas.height = safeHeight;
-        canvas.style.height = safeHeight + 'px';
-
-        ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
+        canvas.height = document.documentElement.scrollHeight;
         let centerX = canvas.width / 2;
-        let centerY = anchorTop + (150 / 2); 
-        let text = 'Hello World';
-
-        let metrics = ctx.measureText(text);
-        let textWidth = metrics.width;
-        let startX = centerX - (textWidth / 2);
-        let endX = centerX + (textWidth / 2);
-
-        let gradient = ctx.createLinearGradient(startX, 0, endX, 0);
-        gradient.addColorStop(0, '#4285F4'); 
-        gradient.addColorStop(0.5, '#a855f7'); 
-        gradient.addColorStop(1, '#ec4899'); 
-
-        ctx.fillStyle = gradient;
+        let centerY = anchor.offsetTop + (anchor.offsetHeight / 2);
+        
+        ctx.font = '900 80px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Hello World', centerX, centerY);
+        const data = ctx.getImageData(0, 0, canvas.width, canvas.height);
         ctx.clearRect(0,0, canvas.width, canvas.height);
-        ctx.fillText(text, centerX, centerY);
-        
-        const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        
-        for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
-            for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
-                let index = (y * 4 * textCoordinates.width) + (x * 4);
-                
-                if (textCoordinates.data[index + 3] > 128){
-                    let r = textCoordinates.data[index];
-                    let g = textCoordinates.data[index + 1];
-                    let b = textCoordinates.data[index + 2];
-                    let color = 'rgb(' + r + ',' + g + ',' + b + ')';
-                    
-                    let xOffset = x - centerX;
-                    let yOffset = y - centerY;
-                    
-                    particlesArray.push(new Particle(xOffset, yOffset, color, CONFIG.particleSize));
+
+        for (let y=0; y<data.height; y+=4) {
+            for (let x=0; x<data.width; x+=4) {
+                if (data.data[((y * data.width + x) * 4) + 3] > 128) {
+                    particlesArray.push(new Particle(x - centerX, y - centerY, '#4285F4', 3));
                 }
             }
         }
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-        
-        if(anchor) anchor.style.height = (fontSize + 60) + "px";
     }
 
     function animate(){
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         let centerX = canvas.width / 2;
         let centerY = anchor.offsetTop + (anchor.offsetHeight / 2);
-
-        for (let i = 0; i < particlesArray.length; i++){
-            particlesArray[i].update(centerX, centerY);
-            particlesArray[i].draw(centerX, centerY);
-        }
+        particlesArray.forEach(p => { p.update(centerX, centerY); p.draw(centerX, centerY); });
         requestAnimationFrame(animate);
     }
 
-    window.addEventListener('load', function() {
-        setTimeout(init, 100); 
-        animate();
-    });
-
-    let lastWidth = window.innerWidth;
-    window.addEventListener('resize', function(){
-        if (Math.abs(window.innerWidth - lastWidth) > 50) {
-            lastWidth = window.innerWidth;
-            init();
-        }
-    });
+    window.addEventListener('load', () => { init(); animate(); });
 </script>
-
-<script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLHWsaJvRo4CPVU1f1umMXBT4Tazy3s1vUTMTTrOv0AVLjw4xs0pEkj5TpocbJdnyMJw/exec";
-    
-    // NOTE: This code is updated for the CHECKBOX key type
-    const form = document.getElementById('contact-form');
-    const statusMsg = document.getElementById('form-status');
-    const btn = document.getElementById('submit-btn');
-
-    function isValidEmail(email) {
-        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return regex.test(email);
-    }
-
-    if (form) {
-        form.addEventListener('submit', (e) => {
-            e.preventDefault();
-            statusMsg.innerText = "";
-            const formData = new FormData(form);
-            const email = formData.get('email');
-
-            if (!isValidEmail(email)) {
-                statusMsg.innerText = "Please enter a valid email address.";
-                statusMsg.style.color = "red";
-                return;
-            }
-
-            // 1. Get the response from the Checkbox
-            // Because you have a "Checkbox" key, the user MUST click it, and we get the token here.
-            const token = grecaptcha.enterprise.getResponse();
-
-            if (!token) {
-                statusMsg.innerText = "Please click the reCAPTCHA box.";
-                statusMsg.style.color = "red";
-                return;
-            }
-
-            btn.disabled = true;
-            btn.innerText = "Sending...";
-
-            const data = {
-                name: formData.get('name'),
-                email: email,
-                message: formData.get('message'),
-                recaptchaToken: token, // Send the token we got from the checkbox
-                action: 'submit_lead'
-            };
-
-            fetch(SCRIPT_URL, {
-                method: 'POST', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            })
-            .then(() => {
-                statusMsg.innerText = "Message sent successfully!";
-                statusMsg.style.color = "green";
-                form.reset();
-                grecaptcha.enterprise.reset(); // Reset the checkbox
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                statusMsg.innerText = "Something went wrong. Please try again.";
-                statusMsg.style.color = "red";
-            })
-            .finally(() => {
-                btn.disabled = false;
-                btn.innerText = "Send Message";
-            });
-        });
-    }
-</script>
-<script src="js/github-update.js"></script>
 </body>
 </html>
