@@ -2,42 +2,53 @@ const user = 'rospopa';
 const repo = 'rospopa.github.io';
 const branch = 'master'; 
 
-// Fetch the latest commit details
-fetch(`https://api.github.com/repos/${user}/${repo}/commits/${branch}`)
-  .then(response => response.json())
-  .then(data => {
-    const dateDate = new Date(data.commit.committer.date);
-    const options = { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric', 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      timeZoneName: 'short' 
-    };
+// 1. Determine the current file path
+// If on the root, default to 'index.html', otherwise strip the leading slash
+let filePath = window.location.pathname.substring(1);
+if (filePath === "" || filePath.endsWith("/")) {
+  filePath += "index.html";
+}
 
-    const localDate = dateDate.toLocaleString(undefined, options);
-    document.getElementById('repo-update-time').innerText = localDate;
-  })
-  .catch(error => console.error('Error fetching date:', error));
+// Update the API URLs to include the path parameter
+const commitInfoUrl = `https://api.github.com/repos/${user}/${repo}/commits?path=${filePath}&sha=${branch}&per_page=1`;
 
-// Fetch the total number of commits
-// This uses a trick: setting per_page=1 tells us how many pages (commits) there are in the header
-fetch(`https://api.github.com/repos/${user}/${repo}/commits?per_page=1&sha=${branch}`)
-  .then(response => {
-    // The "Link" header contains the count of the last page
-    const linkHeader = response.headers.get('Link');
-    if (linkHeader) {
-      const match = linkHeader.match(/page=(\d+)>; rel="last"/);
-      if (match) {
-        document.getElementById('repo-commit-msg').innerText = `${match[1]}`;
+/**
+ * Fetches both the latest date and total count for the specific file
+ */
+async function fetchPageStats() {
+  try {
+    const response = await fetch(commitInfoUrl);
+    
+    if (!response.ok) throw new Error("File not found in repository");
+
+    const data = await response.json();
+
+    if (data.length > 0) {
+      // Latest Commit Date for this specific file
+      const dateDate = new Date(data[0].commit.committer.date);
+      const options = { 
+        year: 'numeric', month: 'long', day: 'numeric', 
+        hour: '2-digit', minute: '2-digit', timeZoneName: 'short' 
+      };
+      document.getElementById('repo-update-time').innerText = dateDate.toLocaleString(undefined, options);
+
+      // Total Commits for this specific file
+      const linkHeader = response.headers.get('Link');
+      if (linkHeader) {
+        const match = linkHeader.match(/page=(\d+)>; rel="last"/);
+        document.getElementById('repo-commit-msg').innerText = match ? match[1] : "1";
+      } else {
+        document.getElementById('repo-commit-msg').innerText = "1";
       }
     } else {
-      // If there's only 1 commit, there is no link header
-      document.getElementById('repo-commit-msg').innerText = `Commit #1`;
+      document.getElementById('repo-update-time').innerText = "Unknown";
+      document.getElementById('repo-commit-msg').innerText = "0";
     }
-  })
-  .catch(error => {
-    console.error('Error fetching commit count:', error);
-    document.getElementById('repo-commit-msg').innerText = "Unable to count commits";
-  });
+  } catch (error) {
+    console.error('Error fetching page stats:', error);
+    document.getElementById('repo-update-time').innerText = "Error loading data";
+    document.getElementById('repo-commit-msg').innerText = "N/A";
+  }
+}
+
+fetchPageStats();
