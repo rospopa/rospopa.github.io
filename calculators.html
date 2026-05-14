@@ -8,14 +8,14 @@
     <meta name="description" content="">
     <link rel="canonical" href="http://rospopa.github.io/">
     <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/css/favicons/unnamed-16x16.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/css/favicons/unnamed-32x32.png">
-    <link rel="icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
-    <link rel="icon" type="image/png" sizes="192x192" href="/css/favicons/unnamed-192x192.png">
-    <link rel="icon" type="image/png" sizes="231x231" href="/css/favicons/unnamed-231x231.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../css/favicons/unnamed-16x16.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../css/favicons/unnamed-32x32.png">
+    <link rel="icon" type="image/png" sizes="180x180" href="../css/favicons/unnamed-180x180.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="../css/favicons/unnamed-192x192.png">
+    <link rel="icon" type="image/png" sizes="231x231" href="../css/favicons/unnamed-231x231.png">
     <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Pavlo Rospopa Website" />
       
-    <link rel="stylesheet" href="css/format.css">
+    <link rel="stylesheet" href="../css/format.css">
     
     <script src="https://www.google.com/recaptcha/enterprise.js" async defer></script>
 
@@ -125,33 +125,32 @@
         <div class="wrap">
             <div class="home">
                 <ul id="update-list" class="posts">
+ <li>
+                        <a class="post-link" href="/calculator/residential-property-calculator">Residential Property Calculator</a>
+                        <br>
+                        Determine the financial viability of potential investments with this all-in-one tool. Input property values, loan profiles, and market rates to generate a comprehensive overview of your acquisition costs and long-term equity growth. Gain a clear understanding of your cash flow by tracking recurring costs like taxes, insurance, and utilities while analyzing the income potential of multi-unit properties. This comprehensive calculator provides an instant snapshot of your property's health with automated metrics for Cap Rate, ROI, and Cash on Cash Return, alongside interactive charts for loan amortization and cumulative wealth building.
+                    </li>
                     <li>
-                        <a class="post-link" href="/blog-posts/blog-posts">Blog Posts</a>
+                        <a class="post-link" href="/calculator/exchange-deadline-calculator">Exchange Deadline Calculator</a>
                         <br>
-                        Explore new topics, and discover.
+                        Two distinct deadlines drive the 1031 exchange process, the 45-day identification period and the 180-day exchange period. Use this deadline calculator to understanding your potential 1031 exchange timeline.
                     </li>
-                                        <li>
-                        <a class="post-link" href="/calculators.html">Calculators</a>
+                    <li>
+                        <a class="post-link" href="/calculator/depreciation-calculator">Depreciation Calculator</a>
                         <br>
-                        Utilize free tools.
+                        Use this simple depreciation calculator to estimate how much your property may depreciate over time. Just enter a few details to get a quick snapshot of potential tax deductions, value reduction, and accumulated depreciation over the duration of ownership.
                     </li>
-    
+                    <li>
+                        <a class="post-link" href="/calculator/capital-gains-calculator">Capital Gains Calculation</a>
+                        <br>
+                        This capital gains tax calculator will give you a preliminary estimate of the potential tax liability on your real estate transaction and provide a comparison of the figures with and without a 1031 exchange.
+                    </li>
+                    <li>
+                        <a class="post-link" href="/calculator/debt-replacement-calculator">Debt Replacement Calculator</a>
+                        <br>
+                        To achieve full tax deferral in a 1031 exchange, a general guideline is that the Exchanger must “trade up or stay even” in value. This calculator is designed to help estimate the total debt replacement needed to meet that requirement when reinvesting in a passive real estate investment.
+                    </li>
                 </ul>
-
-                <div align="center">
-                    <div style="position: relative; margin-bottom: 20px;">
-                        <img src="/gif/68747470733a2f2f6d656469612e67697068792e636f6d2f6d656469612f6e474d6e447165627a4463666d2f67697068792e676966.gif" width="auto" height="auto"/>
-                    </div>
-                </div>
-                  
-                <div style="max-width: 600px; margin: 0 auto 30px auto; text-align: center; line-height: 1.6; color: #555555;">
-                      
-                    <div id="particle-anchor" style="width: 100%; height: 150px; margin-top: 20px; margin-bottom: 20px;"></div>
-
-                    <p>
-                        The purpose of this website is to share information and host tools.  All of this code is source-available via the <a href="https://github.com/rospopa/rospopa.github.io">repository</a>.  Let's build a better future together.
-                    </p>
-                </div>
 
                 <div id="contact-form-container">
                     <form id="contact-form">
@@ -165,6 +164,8 @@
                         <p id="form-status"></p>
                     </form>
                 </div>
+
+<br>
                 <p>Go to <a href="https://www.linkedin.com/in/prospopa">LinkedIn</a>.</p>
                 <p>Go to <a href="https://github.com/rospopa">GitHub</a>.</p>
                 <p>Return to <a href="#top">Top of This Page</a>.</p>
@@ -195,210 +196,46 @@
 </footer>
 
 <script>
-    const canvas = document.getElementById('canvas1');
-    const ctx = canvas.getContext('2d');
-    const anchor = document.getElementById('particle-anchor');
+  async function fetchLastCommit() {
+    const owner = "rospopa";
+    const repo = "rospopa.github.io";
+    
+    // This logic ensures that if you are on a directory, 
+    // it looks for the 'index.html' or the specific folder name.
+    let path = window.location.pathname.replace(/^\/|\/$/g, '');
+    if (path.endsWith('blog-posts')) path += '.html'; // Specifically for your structure
 
-    const CONFIG = {
-        particleSize: 3,          
-        returnSpeed: 0.15        
-    };
+    try {
+      // per_page=100 helps ensure we get a more accurate count if the history is long
+      const response = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?path=${path}&per_page=100`);
+      const data = await response.json();
 
-    let particlesArray = [];
+      if (data && data.length > 0) {
+        // 1. Set the Count (matching your "3610" format)
+        document.getElementById('repo-commit-msg').textContent = data.length;
 
-    const mouse = {
-        x: null,
-        y: null,
-        radius: 120
+        // 2. Set the Date
+        const options = { 
+          year: 'numeric', month: 'long', day: 'numeric', 
+          hour: '2-digit', minute: '2-digit', hour12: true, 
+          timeZoneName: 'short' 
+        };
+        const commitDate = new Date(data[0].commit.author.date).toLocaleString('en-US', options);
+        document.getElementById('repo-update-time').textContent = commitDate;
+      } else {
+        // Fallback if no specific file history is found
+        document.getElementById('repo-update-time').textContent = "Recent";
+        document.getElementById('repo-commit-msg').textContent = "1";
+      }
+    } catch (error) {
+      console.error("API Error:", error);
+      document.getElementById('repo-update-time').textContent = "Error loading";
     }
+  }
 
-    let isTouch = false;
-
-    window.addEventListener('mousemove', function(event){
-        if (isTouch) return; 
-        mouse.x = event.pageX; 
-        mouse.y = event.pageY;
-    });
-      
-    const handleTouch = (event) => {
-        isTouch = true;
-        if(event.touches.length > 0) {
-            mouse.x = event.touches[0].pageX;
-            mouse.y = event.touches[0].pageY;
-        }
-    };
-
-    window.addEventListener('touchstart', handleTouch, {passive: true});
-    window.addEventListener('touchmove', handleTouch, {passive: true});
-
-    const clearTouch = () => {
-        mouse.x = undefined;
-        mouse.y = undefined;
-        setTimeout(() => {
-            isTouch = false;
-        }, 500);
-    };
-
-    window.addEventListener('touchend', clearTouch);
-    window.addEventListener('touchcancel', clearTouch);
-      
-    window.addEventListener('mouseout', function(){
-        if (!isTouch) {
-            mouse.x = undefined;
-            mouse.y = undefined;
-        }
-    });
-
-    class Particle {
-        constructor(xOffset, yOffset, color, size){
-            this.xOffset = xOffset; 
-            this.yOffset = yOffset; 
-            this.color = color;
-            this.size = size;
-            this.density = (Math.random() * 30) + 5;
-            this.dx = 0; 
-            this.dy = 0; 
-        }
-        
-        draw(anchorX, anchorY){
-            let drawX = anchorX + this.xOffset + this.dx;
-            let drawY = anchorY + this.yOffset + this.dy;
-
-            ctx.fillStyle = this.color;
-            ctx.beginPath();
-            ctx.fillRect(drawX, drawY, this.size, this.size);
-            ctx.closePath();
-        }
-        
-        update(anchorX, anchorY){
-            let currentX = anchorX + this.xOffset + this.dx;
-            let currentY = anchorY + this.yOffset + this.dy;
-
-            let distMouseX = mouse.x - currentX;
-            let distMouseY = mouse.y - currentY;
-             
-            if (mouse.x == null || mouse.y == null) {
-                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
-                else this.dx = 0;
-                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
-                else this.dy = 0;
-                return;
-            }
-
-            let distance = Math.sqrt(distMouseX * distMouseX + distMouseY * distMouseY);
-             
-            if (distance < mouse.radius) {
-                let forceDirectionX = distMouseX / distance;
-                let forceDirectionY = distMouseY / distance;
-                let maxDistance = mouse.radius;
-                let force = (maxDistance - distance) / maxDistance;
-                let directionX = forceDirectionX * force * this.density;
-                let directionY = forceDirectionY * force * this.density;
-                
-                this.dx -= directionX;
-                this.dy -= directionY;
-            } else {
-                if (Math.abs(this.dx) > 0.1) this.dx -= this.dx * CONFIG.returnSpeed;
-                else this.dx = 0;
-                if (Math.abs(this.dy) > 0.1) this.dy -= this.dy * CONFIG.returnSpeed;
-                else this.dy = 0;
-            }
-        }
-    }
-
-    function init() {
-        particlesArray = [];
-        
-        let isMobile = window.innerWidth < 600;
-        let step = isMobile ? 4 : 3; 
-        
-        let contentWidth = Math.min(window.innerWidth - 40, 600); 
-        let fontSize = Math.floor(contentWidth * 0.16);
-        
-        if (fontSize < 40) fontSize = 40;
-        if (fontSize > 180) fontSize = 180;
-
-        CONFIG.particleSize = step;
-        
-        let anchorTop = anchor.offsetTop; 
-        canvas.width = window.innerWidth;
-        canvas.style.width = window.innerWidth + 'px';
-        let safeHeight = anchorTop + 600; 
-        canvas.height = safeHeight;
-        canvas.style.height = safeHeight + 'px';
-
-        ctx.font = '900 ' + fontSize + 'px "Arial Black", "Verdana", sans-serif'; 
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        
-        let centerX = canvas.width / 2;
-        let centerY = anchorTop + (150 / 2); 
-        let text = 'Hello World';
-
-        let metrics = ctx.measureText(text);
-        let textWidth = metrics.width;
-        let startX = centerX - (textWidth / 2);
-        let endX = centerX + (textWidth / 2);
-
-        let gradient = ctx.createLinearGradient(startX, 0, endX, 0);
-        gradient.addColorStop(0, '#4285F4'); 
-        gradient.addColorStop(0.5, '#a855f7'); 
-        gradient.addColorStop(1, '#ec4899'); 
-
-        ctx.fillStyle = gradient;
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-        ctx.fillText(text, centerX, centerY);
-        
-        const textCoordinates = ctx.getImageData(0, 0, canvas.width, canvas.height);
-        
-        for (let y = 0, y2 = textCoordinates.height; y < y2; y += step){
-            for (let x = 0, x2 = textCoordinates.width; x < x2; x += step){
-                let index = (y * 4 * textCoordinates.width) + (x * 4);
-                
-                if (textCoordinates.data[index + 3] > 128){
-                    let r = textCoordinates.data[index];
-                    let g = textCoordinates.data[index + 1];
-                    let b = textCoordinates.data[index + 2];
-                    let color = 'rgb(' + r + ',' + g + ',' + b + ')';
-                    
-                    let xOffset = x - centerX;
-                    let yOffset = y - centerY;
-                    
-                    particlesArray.push(new Particle(xOffset, yOffset, color, CONFIG.particleSize));
-                }
-            }
-        }
-        ctx.clearRect(0,0, canvas.width, canvas.height);
-        
-        if(anchor) anchor.style.height = (fontSize + 60) + "px";
-    }
-
-    function animate(){
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        let centerX = canvas.width / 2;
-        let centerY = anchor.offsetTop + (anchor.offsetHeight / 2);
-
-        for (let i = 0; i < particlesArray.length; i++){
-            particlesArray[i].update(centerX, centerY);
-            particlesArray[i].draw(centerX, centerY);
-        }
-        requestAnimationFrame(animate);
-    }
-
-    window.addEventListener('load', function() {
-        setTimeout(init, 100); 
-        animate();
-    });
-
-    let lastWidth = window.innerWidth;
-    window.addEventListener('resize', function(){
-        if (Math.abs(window.innerWidth - lastWidth) > 50) {
-            lastWidth = window.innerWidth;
-            init();
-        }
-    });
+  fetchLastCommit();
 </script>
-
+    
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyLHWsaJvRo4CPVU1f1umMXBT4Tazy3s1vUTMTTrOv0AVLjw4xs0pEkj5TpocbJdnyMJw/exec";
     
