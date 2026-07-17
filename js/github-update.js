@@ -35,7 +35,7 @@ document.addEventListener("DOMContentLoaded", function () {
             for (const branch of BRANCHES) {
                 for (const path of candidatePaths()) {
                     const commit = await tryFetch(path, branch);
-                    if (commit) return render(commit);
+                    if (commit) return render(commit, false);
                 }
             }
             // Fallback: latest commit on the repo (any file)
@@ -59,14 +59,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function render(commit, isRepoWide = false) {
         const when = new Date(commit.commit.committer.date);
-        timeEl.innerText = when.toLocaleString(undefined, {
-            year: 'numeric', month: 'long', day: 'numeric',
-            hour: '2-digit', minute: '2-digit', timeZoneName: 'short'
-        });
+        
+        // Helper to pad single digits with a leading zero
+        const pad = (num) => String(num).padStart(2, '0');
+        
+        // Extract localized date parts based on the visitor's runtime timezone
+        const month = pad(when.getMonth() + 1);
+        const day = pad(when.getDate());
+        const year = when.getFullYear();
+        const hours = pad(when.getHours());
+        const minutes = pad(when.getMinutes());
+        
+        // Set the structured MM/DD/YYYY HH:MM time layout
+        timeEl.innerText = `${month}/${day}/${year} ${hours}:${minutes}`;
+
         const firstLine = commit.commit.message.split('\n')[0];
         const sha = commit.sha.substring(0, 7);
+        
+        // Completely fixed the broken link interpolation syntax bug from your layout screenshot
         msgEl.innerHTML =
-            `${commit.html_url}ank" rel="noopener">${sha}</a> — ` +
+            `<a href="${commit.html_url}" target="_blank" rel="noopener">${sha}</a> — ` +
             firstLine.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) +
             (isRepoWide ? ' <em>(repo-wide)</em>' : '');
     }
