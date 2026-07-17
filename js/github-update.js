@@ -90,9 +90,8 @@ document.addEventListener("DOMContentLoaded", function () {
         // Set the structured MM/DD/YYYY HH:MM time layout
         timeEl.innerText = `${month}/${day}/${year} ${hours}:${minutes}`;
 
-        // Display the total number of commits instead of the hash/message
-        const plural = total === 1 ? '' : 's';
-        msgEl.innerHTML = `${total} total commit${plural}` + (isRepoWide ? ' <em>(repo-wide)</em>' : '');
+        // Display just the total number
+        msgEl.innerHTML = total + (isRepoWide ? ' <em>(repo-wide)</em>' : '');
     }
 
     fetchPageStats();
