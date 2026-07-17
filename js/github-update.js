@@ -77,18 +77,22 @@ document.addEventListener("DOMContentLoaded", function () {
         const when = new Date(result.commit.commit.committer.date);
         const total = result.totalCommits;
         
-        // Helper to pad single digits with a leading zero
-        const pad = (num) => String(num).padStart(2, '0');
+        // Format date to: July 14, 2026
+        const dateString = when.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
         
-        // Extract localized date parts based on the visitor's runtime timezone
-        const month = pad(when.getMonth() + 1);
-        const day = pad(when.getDate());
-        const year = when.getFullYear();
-        const hours = pad(when.getHours());
-        const minutes = pad(when.getMinutes());
+        // Format time to: 02:13 PM CDT (Using en-US guarantees 12-hour AM/PM format)
+        const timeString = when.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            timeZoneName: 'short'
+        });
         
-        // Set the structured MM/DD/YYYY HH:MM time layout
-        timeEl.innerText = `${month}/${day}/${year} ${hours}:${minutes}`;
+        // Set formatted output string
+        timeEl.innerText = `${dateString} at ${timeString}`;
 
         // Display just the total number
         msgEl.innerHTML = total + (isRepoWide ? ' <em>(repo-wide)</em>' : '');
