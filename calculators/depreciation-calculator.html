@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
+    <link rel="apple-touch-icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/css/favicons/unnamed-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/css/favicons/unnamed-32x32.png">
     <link rel="icon" type="image/png" sizes="180x180" href="/css/favicons/unnamed-180x180.png">
@@ -11,7 +11,7 @@
     <link rel="icon" type="image/png" sizes="231x231" href="/css/favicons/unnamed-231x231.png">
     <title>Depreciation Calculator | Pavlo Rospopa</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+Inscriptional+Pahlavi&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Sans+Inscriptional+Pahlavi&amp;display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/simple-line-icons/2.5.5/css/simple-line-icons.min.css">
     <link rel="stylesheet" href="/css/format.css">
     <link rel="stylesheet" href="./css/calc.css">
@@ -26,7 +26,7 @@
             </nav>
         </div>
     </header>
-	
+    
 <main class="page-content">
     <div class="align-self-start wrap" id="topdf">
         <div id="calculator">
@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }); 
     });
 
-    // 3. !!! ВИПРАВЛЕННЯ: Слухачі для випадаючого списку та років !!!
+    // 3. Слухачі для випадаючого списку та років
     const propTypeSelect = document.getElementById('prop_type');
     const yearsInput = document.getElementById('years_owned');
 
@@ -142,6 +142,25 @@ document.addEventListener('DOMContentLoaded', function() {
     
     if (yearsInput) {
         yearsInput.addEventListener('input', runCalc);
+    }
+
+    // --- NEW: Reset Button Logic ---
+    const resetBtn = document.getElementById('resetAllfield');
+    if (resetBtn) {
+        resetBtn.addEventListener('click', function() {
+            // Reset dropdown to default
+            document.getElementById('prop_type').value = "None";
+            
+            // Clear all input fields
+            document.getElementById('years_owned').value = "";
+            document.getElementById('price').value = "";
+            document.getElementById('land').value = "";
+            document.getElementById('improve').value = "";
+            
+            // Clear result fields
+            document.getElementById('res_annual').value = "";
+            document.getElementById('res_total').value = "";
+        });
     }
 
     // 4. Основна функція розрахунку
@@ -178,23 +197,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
-	<script src="/js/github-update.js"></script>
+    <script src="/js/github-update.js"></script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
