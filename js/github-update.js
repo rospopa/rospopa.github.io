@@ -26,22 +26,38 @@ document.addEventListener("DOMContentLoaded", function () {
         });
         if (res.status === 403) throw new Error('rate-limited');
         if (!res.ok) return null;
+
+        // GitHub paginates commits. By requesting per_page=1, the 'Link' header 
+        // will tell us exactly how many pages (i.e. total commits) exist.
+        let totalCommits = 1; 
+        const linkHeader = res.headers.get('Link');
+        if (linkHeader) {
+            // Extract the page number from the 'last' rel link
+            const match = linkHeader.match(/[?&]page=(\d+)[^>]*>; rel="last"/);
+            if (match) {
+                totalCommits = parseInt(match[1], 10);
+            }
+        }
+
         const data = await res.json();
-        return (Array.isArray(data) && data.length) ? data[0] : null;
+        if (Array.isArray(data) && data.length) {
+            return { commit: data[0], totalCommits: totalCommits };
+        }
+        return null;
     }
 
     async function fetchPageStats() {
         try {
             for (const branch of BRANCHES) {
                 for (const path of candidatePaths()) {
-                    const commit = await tryFetch(path, branch);
-                    if (commit) return render(commit, false);
+                    const result = await tryFetch(path, branch);
+                    if (result) return render(result, false);
                 }
             }
             // Fallback: latest commit on the repo (any file)
             for (const branch of BRANCHES) {
-                const commit = await tryFetch('', branch);
-                if (commit) return render(commit, true);
+                const result = await tryFetch('', branch);
+                if (result) return render(result, true);
             }
             timeEl.innerText = 'Unknown (file not tracked)';
             msgEl.innerText  = 'N/A';
@@ -57,8 +73,9 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    function render(commit, isRepoWide = false) {
-        const when = new Date(commit.commit.committer.date);
+    function render(result, isRepoWide = false) {
+        const when = new Date(result.commit.commit.committer.date);
+        const total = result.totalCommits;
         
         // Helper to pad single digits with a leading zero
         const pad = (num) => String(num).padStart(2, '0');
@@ -73,14 +90,9 @@ document.addEventListener("DOMContentLoaded", function () {
         // Set the structured MM/DD/YYYY HH:MM time layout
         timeEl.innerText = `${month}/${day}/${year} ${hours}:${minutes}`;
 
-        const firstLine = commit.commit.message.split('\n')[0];
-        const sha = commit.sha.substring(0, 7);
-        
-        // Completely fixed the broken link interpolation syntax bug from your layout screenshot
-        msgEl.innerHTML =
-            `<a href="${commit.html_url}" target="_blank" rel="noopener">${sha}</a> — ` +
-            firstLine.replace(/[<>&]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;'}[c])) +
-            (isRepoWide ? ' <em>(repo-wide)</em>' : '');
+        // Display the total number of commits instead of the hash/message
+        const plural = total === 1 ? '' : 's';
+        msgEl.innerHTML = `${total} total commit${plural}` + (isRepoWide ? ' <em>(repo-wide)</em>' : '');
     }
 
     fetchPageStats();
