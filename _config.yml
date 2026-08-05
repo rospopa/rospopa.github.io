@@ -1,0 +1,6 @@
+exclude:
+  - server
+  - client
+  - .gitignore
+  - tracked_files.txt
+  - DEPLOY.md
