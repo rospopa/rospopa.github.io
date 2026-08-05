@@ -244,18 +244,19 @@ app.post('/api/users/:id/role', async (req, res) => {
 
 app.post('/api/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  let { email, password, role, first_name, last_name, organization, phone_number, buy_box } = req.body || {};
+  let { email, password, role, first_name, last_name, organization, phone_number, buy_box, profile_photo } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
   if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
   if (role && !['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
+  if (!profile_photo) return res.status(400).json({ error: 'profile photo is required' });
 
   try {
     const hashed = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      'INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
-      [email, hashed, role || 'user', first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null]
+      'INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box, profile_photo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
+      [email, hashed, role || 'user', first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null, profile_photo]
     );
     const id = result.rows[0].id;
     try {

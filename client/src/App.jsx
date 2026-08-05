@@ -143,32 +143,62 @@ function AddUserForm({ onCreated }) {
   const [organization, setOrganization] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [buyBox, setBuyBox] = useState('')
+  const [photo, setPhoto] = useState(null)
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
   const [msgType, setMsgType] = useState('success')
 
+  async function handlePhotoChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) { setMsgType('error'); setMsg('Only image files allowed'); return }
+    if (file.size > 5 * 1024 * 1024) { setMsgType('error'); setMsg('Photo must be under 5 MB'); return }
+    const reader = new FileReader()
+    reader.onload = ev => setPhoto(ev.target.result)
+    reader.readAsDataURL(file)
+  }
+
   async function createUser(e) {
     e.preventDefault()
+    if (!photo) { setMsgType('error'); setMsg('Profile photo is required'); return }
     setMsg('')
     setLoading(true)
     try {
       const res = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox })
+        body: JSON.stringify({ email, password, role, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, profile_photo: photo })
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) { setMsgType('error'); setMsg(data.error || 'Create failed'); return }
       setEmail(''); setPassword(''); setRole('user')
-      setFirstName(''); setLastName(''); setOrganization(''); setPhoneNumber(''); setBuyBox('')
+      setFirstName(''); setLastName(''); setOrganization(''); setPhoneNumber(''); setBuyBox(''); setPhoto(null)
       setMsgType('success'); setMsg('User created')
       if (onCreated) onCreated()
     } catch { setMsgType('error'); setMsg('Network error') }
     finally { setLoading(false); setTimeout(() => setMsg(''), 4000) }
   }
 
+  const displayName = [firstName, lastName].filter(Boolean).join(' ') || email || 'New User'
+
   return (
     <form onSubmit={createUser} className="space-y-5">
+      {/* Photo upload — required */}
+      <Field label="Profile Photo" required>
+        <div className="flex items-center gap-5">
+          <div className="relative flex-shrink-0">
+            <Avatar src={photo} name={displayName} size="lg" />
+            <label className="absolute -bottom-1 -right-1 btn btn-xs btn-circle btn-primary cursor-pointer" title="Upload photo">
+              <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+            </label>
+          </div>
+          <p className="text-xs text-base-content/50 leading-relaxed">Upload a square or circular photo.<br />JPG, PNG, or WebP · max 5 MB · required</p>
+        </div>
+      </Field>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <Field label="Email" required>
           <input type="email" placeholder="email@example.com" value={email}
@@ -207,7 +237,7 @@ function AddUserForm({ onCreated }) {
           className="textarea textarea-bordered w-full leading-relaxed" rows={4} />
       </Field>
       {msg && <div className={`alert ${msgType === 'error' ? 'alert-error' : 'alert-success'} text-sm`}>{msg}</div>}
-      <button className="btn btn-primary w-full" type="submit" disabled={loading}>
+      <button className="btn btn-primary w-full" type="submit" disabled={loading || !photo}>
         {loading ? 'Creating…' : 'Create User'}
       </button>
     </form>
@@ -749,6 +779,7 @@ function ProfilePage({ currentUser, onUpdate }) {
 
   async function saveProfile(e) {
     e.preventDefault()
+    if (!photo) { setMsgType('error'); setMsg('Profile photo is required'); return }
     setLoading(true); setMsg('')
     try {
       const res = await fetch(`/api/users/${currentUser.id}`, {
@@ -786,7 +817,13 @@ function ProfilePage({ currentUser, onUpdate }) {
             <div>
               <p className="font-semibold">{displayName}</p>
               <p className="text-sm text-base-content/50">{currentUser.email}</p>
-              <p className="text-xs text-base-content/40 mt-1">Square or circular · JPG, PNG, WebP · max 5 MB</p>
+              <p className="text-xs mt-1">
+                {photo
+                  ? <span className="text-success font-medium">✓ Photo uploaded</span>
+                  : <span className="text-error font-medium">⚠ Profile photo required</span>
+                }
+              </p>
+              <p className="text-xs text-base-content/40 mt-0.5">Square or circular · JPG, PNG, WebP · max 5 MB</p>
             </div>
           </div>
 
@@ -826,7 +863,7 @@ function ProfilePage({ currentUser, onUpdate }) {
             <div className={`alert text-sm ${msgType === 'error' ? 'alert-error' : 'alert-success'}`}>{msg}</div>
           )}
           <div className="pt-2">
-            <button className="btn btn-primary w-full" type="submit" disabled={loading} onClick={saveProfile}>
+            <button className="btn btn-primary w-full" type="submit" disabled={loading || !photo} onClick={saveProfile}>
               {loading ? 'Saving…' : 'Save Profile'}
             </button>
           </div>
