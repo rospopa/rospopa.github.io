@@ -10,6 +10,20 @@ const bcrypt = require('bcryptjs');
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'users.db');
 const PORT = process.env.PORT || 3000;
 
+// If DB_PATH points at a mounted persistent disk and the file doesn't exist there
+// but a local users.db exists in the repository area, copy it once so existing users persist.
+try {
+  const defaultLocal = path.join(__dirname, 'users.db');
+  if (DB_PATH !== defaultLocal && fs.existsSync(defaultLocal) && !fs.existsSync(DB_PATH)) {
+    // copy local DB to persistent path
+    fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
+    fs.copyFileSync(defaultLocal, DB_PATH);
+    console.log(`Copied existing users.db to persistent DB_PATH: ${DB_PATH}`);
+  }
+} catch (e) {
+  console.warn('Could not auto-migrate users.db to DB_PATH:', e && e.message);
+}
+
 const db = new sqlite3.Database(DB_PATH);
 
 // Initialize users table with email column and migrate username->email if needed
@@ -70,9 +84,41 @@ if (process.env.DATABASE_URL) {
 if (!sessionStore && process.env.SESSION_DIR) {
   try {
     const FileStore = require('session-file-store')(session);
-    const sessionsDir = process.env.SESSION_DIR;
-    if (!fs.existsSync(sessionsDir)) fs.mkdirSync(sessionsDir, { recursive: true });
+    let sessionsDir = process.env.SESSION_DIR;
+
+    // Ensure the directory exists and is writable. If not, fall back to a temp dir.
+    try {
+      fs.mkdirSync(sessionsDir, { recursive: true });
+    } catch (e) {
+      console.warn('Could not create SESSION_DIR', sessionsDir, e && e.message);
+      sessionsDir = null;
+    }
+
+    if (sessionsDir) {
+      try {
+        fs.accessSync(sessionsDir, fs.constants.R_OK | fs.constants.W_OK);
+      } catch (e) {
+        console.warn('SESSION_DIR not writable, falling back to tmpdir:', sessionsDir, e && e.message);
+        sessionsDir = null;
+      }
+    }
+
+    if (!sessionsDir) {
+      // Create a dedicated temp sessions directory to avoid ENOENT noise
+      sessionsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sessions-'));
+      console.log('Using temporary sessions dir:', sessionsDir);
+    }
+
     sessionStore = new FileStore({ path: sessionsDir, ttl: 86400 });
+
+    // Log current directory contents for easier debugging on startup
+    try {
+      const files = fs.readdirSync(sessionsDir).slice(0, 20);
+      console.log('Session store directory contents:', sessionsDir, files.length ? files : '(empty)');
+    } catch (e) {
+      console.warn('Could not read SESSION_DIR contents:', e && e.message);
+    }
+
     console.log('Using disk-backed session-file-store at', sessionsDir);
   } catch (e) {
     console.warn('session-file-store setup failed:', e && e.message);
