@@ -86,17 +86,42 @@ db.run(`CREATE TABLE IF NOT EXISTS audit_logs (
 const app = express();
 app.use(express.json());
 
+// Input validation helpers
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+function isValidEmail(email) {
+  return typeof email === 'string' && EMAIL_REGEX.test(email);
+}
+function sanitizeEmail(email) {
+  return String(email || '').trim().toLowerCase();
+}
+function isValidPassword(pw) {
+  return typeof pw === 'string' && pw.length >= 8 && pw.length <= 128;
+}
+
 // Session store selection: prefer Postgres, then disk-backed file store (SESSION_DIR), then MemoryStore.
 let sessionStore;
+let sessionStoreType = 'unknown'; // 'postgres' | 'file' | 'memory' | 'unknown'
 if (process.env.DATABASE_URL) {
   try {
     const { Pool } = require('pg');
     const PgSession = require('connect-pg-simple')(session);
     const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false });
-    // Ensure session table exists (idempotent)
-    pool.query(`CREATE TABLE IF NOT EXISTS "session" (sid VARCHAR PRIMARY KEY, sess JSON NOT NULL, expire TIMESTAMP NOT NULL)`).catch(e => console.warn('Could not ensure session table exists:', e && e.message));
-    sessionStore = new PgSession({ pool });
-    console.log('Using Postgres-backed session store')
+
+    // Attempt to verify connectivity and ensure session table exists before using it
+    pool.connect()
+      .then(client => {
+        return client.query(`CREATE TABLE IF NOT EXISTS "session" (sid VARCHAR PRIMARY KEY, sess JSON NOT NULL, expire TIMESTAMP NOT NULL)`)
+          .then(() => { client.release(); })
+          .catch(e => { client.release(); throw e; });
+      })
+      .then(() => {
+        sessionStore = new (require('connect-pg-simple')(session))({ pool });
+        sessionStoreType = 'postgres';
+        console.log('Using Postgres-backed session store');
+      })
+      .catch(e => {
+        console.warn('Postgres session store setup failed (will try other stores):', e && e.message);
+      });
   } catch (e) {
     console.warn('Postgres session store setup failed:', e && e.message);
   }
@@ -132,6 +157,7 @@ if (!sessionStore && process.env.SESSION_DIR) {
     }
 
     sessionStore = new FileStore({ path: sessionsDir, ttl: 86400 });
+    sessionStoreType = 'file';
 
     // Log current directory contents for easier debugging on startup
     try {
@@ -151,6 +177,7 @@ if (!sessionStore && process.env.SESSION_DIR) {
 if (!sessionStore) {
   console.warn('No persistent session store configured — using MemoryStore (not for production)');
   sessionStore = new session.MemoryStore();
+  sessionStoreType = 'memory';
 }
 
 // Trust reverse proxy (Render) so secure cookies and req.protocol work correctly
@@ -173,24 +200,33 @@ app.use(session({
 
 // Register
 app.post('/api/register', async (req, res) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body || {};
+  email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
-  const hashed = await bcrypt.hash(password, 10);
-  db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [email.toLowerCase(), hashed, 'user'], function(err) {
-    if (err) {
-      if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
-      return res.status(500).json({ error: 'db error' });
-    }
-    req.session.user = { id: this.lastID, email: email.toLowerCase(), role: 'user' };
-    res.json({ id: this.lastID, email: email.toLowerCase(), role: 'user' });
-  });
+  if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
+  if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
+  try {
+    const hashed = await bcrypt.hash(password, 10);
+    db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [email, hashed, 'user'], function(err) {
+      if (err) {
+        if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
+        return res.status(500).json({ error: 'db error' });
+      }
+      req.session.user = { id: this.lastID, email: email, role: 'user' };
+      res.json({ id: this.lastID, email: email, role: 'user' });
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'server error' });
+  }
 });
 
 // Login
 app.post('/api/login', (req, res) => {
-  const { email, password } = req.body;
+  let { email, password } = req.body || {};
+  email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
-  db.get('SELECT id, email, password, role FROM users WHERE email = ?', [email.toLowerCase()], async (err, row) => {
+  if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
+  db.get('SELECT id, email, password, role FROM users WHERE email = ?', [email], async (err, row) => {
     if (err) return res.status(500).json({ error: 'db error' });
     if (!row) return res.status(401).json({ error: 'invalid credentials' });
     const ok = await bcrypt.compare(password, row.password);
@@ -238,7 +274,8 @@ app.post('/api/users/:id/role', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const adminId = req.session.user.id;
   const id = Number(req.params.id);
-  const { role } = req.body;
+  if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
+  const { role } = req.body || {};
   if (!['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
   // Prevent admin from demoting/removing their own admin role accidentally
   if (adminId === id && role !== 'admin') return res.status(400).json({ error: 'cannot change own role' });
@@ -263,12 +300,15 @@ app.post('/api/users/:id/role', (req, res) => {
 // Admin-only: create user
 app.post('/api/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  const { email, password, role } = req.body;
+  let { email, password, role } = req.body || {};
+  email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
+  if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
+  if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
   if (role && !['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
   try {
     const hashed = await bcrypt.hash(password, 10);
-    db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [email.toLowerCase(), hashed, (role || 'user')], function (err) {
+    db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [email, hashed, (role || 'user')], function (err) {
       if (err) {
         if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
         return res.status(500).json({ error: 'db error' });
@@ -276,9 +316,9 @@ app.post('/api/users', async (req, res) => {
       // Log audit
       try {
         const details = JSON.stringify({ created: true, role: role || 'user' });
-        db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [req.session.user.id, `create_user`, this.lastID, email.toLowerCase(), details]);
+        db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [req.session.user.id, `create_user`, this.lastID, email, details]);
       } catch (e) { console.warn('Audit log failed', e && e.message); }
-      res.json({ id: this.lastID, email: email.toLowerCase(), role: role || 'user' });
+      res.json({ id: this.lastID, email: email, role: role || 'user' });
     });
   } catch (e) {
     res.status(500).json({ error: 'server error' });
@@ -353,6 +393,24 @@ if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
     }
   })();
 }
+
+// Serve a favicon route (serve existing PNG or SVG as /favicon.ico)
+app.get('/favicon.ico', (req, res) => {
+  // Prefer an actual favicon.ico if present in public, else serve the 32x32 PNG
+  const publicDir = path.join(__dirname, '..', 'client', 'public');
+  const icoPath = path.join(publicDir, 'favicon.ico');
+  const pngPath = path.join(publicDir, 'favicon-32x32.png');
+  const svgPath = path.join(publicDir, 'favicon.svg');
+  if (fs.existsSync(icoPath)) return res.sendFile(icoPath);
+  if (fs.existsSync(pngPath)) return res.sendFile(pngPath);
+  if (fs.existsSync(svgPath)) return res.sendFile(svgPath);
+  res.status(404).end();
+});
+
+// Lightweight status endpoint to report which session store is active
+app.get('/api/status', (req, res) => {
+  res.json({ sessionStore: sessionStoreType, hasDatabaseUrl: !!process.env.DATABASE_URL });
+});
 
 // Serve client in production
 const clientDist = path.join(__dirname, '..', 'client', 'dist');

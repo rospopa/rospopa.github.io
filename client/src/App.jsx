@@ -297,7 +297,7 @@ export default function App() {
         setLoading(false)
         return
       }
-      setUser({ id: data.id, email: data.email })
+      setUser({ id: data.id, email: data.email, role: data.role || 'user' })
       setForm({ email: '', password: '' })
     } catch (err) {
       setMsg('Network error')
