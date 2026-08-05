@@ -1,6 +1,32 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Component } from 'react'
 
-/* ─── Shared helpers ──────────────────────────────────────────── */
+/* ─── Error Boundary ──────────────────────────────────────────── */
+class ErrorBoundary extends Component {
+  constructor(props) { super(props); this.state = { error: null } }
+  static getDerivedStateFromError(error) { return { error } }
+  componentDidCatch(error, info) { console.error('React error boundary caught:', error, info) }
+  render() {
+    if (this.state.error) {
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-base-200">
+          <div className="card bg-base-100 shadow-xl max-w-md w-full">
+            <div className="card-body items-center text-center gap-4">
+              <h2 className="card-title text-error">Something went wrong</h2>
+              <p className="text-base-content/60 text-sm">{this.state.error.message}</p>
+              <button className="btn btn-primary" onClick={() => { this.setState({ error: null }); window.location.reload() }}>
+                Reload Page
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
+
+export { ErrorBoundary }
+
 
 /** Wrapper around fetch that always sends credentials and throws on non-ok */
 async function apiFetch(url, options = {}) {
@@ -1056,6 +1082,7 @@ export default function App() {
 
       {/* Main content */}
       <main className="container mx-auto px-6 py-10 max-w-6xl">
+        <ErrorBoundary key={page}>
 
         {page === 'dashboard' && (
           <div className="text-center py-16">
@@ -1107,6 +1134,7 @@ export default function App() {
           <ProfilePage currentUser={currentUser} onUpdate={u => setCurrentUser(u)} />
         )}
 
+        </ErrorBoundary>
       </main>
 
       <Modal {...modal} />
