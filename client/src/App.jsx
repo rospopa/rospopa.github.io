@@ -137,7 +137,17 @@ function Logo() {
         <img src="/apple-touch-icon.png" alt="Logo" className="w-9 h-9 object-contain" />
       </div>
       <div className="flex flex-col leading-none">
-        <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: '1rem', letterSpacing: '0.2em', textTransform: 'uppercase', opacity: 0.45 }}>
+        <span style={{
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 700,
+          fontSize: '1.4rem',
+          letterSpacing: '0.25em',
+          textTransform: 'uppercase',
+          background: 'linear-gradient(135deg, #2d6a2d 0%, #4caf50 45%, #a8d5a2 100%)',
+          WebkitBackgroundClip: 'text',
+          WebkitTextFillColor: 'transparent',
+          backgroundClip: 'text',
+        }}>
           Portal
         </span>
       </div>
