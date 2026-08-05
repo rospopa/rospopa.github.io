@@ -136,7 +136,7 @@ function Logo() {
       <div className="w-9 h-9 rounded-sm flex items-center justify-center">
         <img src="/apple-touch-icon.png" alt="Logo" className="w-9 h-9 object-contain" />
       </div>
-      <div className="flex flex-col leading-none">
+      <div className="flex flex-col leading-none gap-0.5">
         <span style={{
           fontFamily: "'Playfair Display', serif",
           fontWeight: 900,
@@ -148,7 +148,17 @@ function Logo() {
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
         }}>
-          CRE
+          Real Estate
+        </span>
+        <span style={{
+          fontFamily: "'Inter', sans-serif",
+          fontWeight: 500,
+          fontSize: '0.65rem',
+          letterSpacing: '0.3em',
+          textTransform: 'uppercase',
+          opacity: 0.45,
+        }}>
+          Portal
         </span>
       </div>
     </div>
