@@ -2,6 +2,16 @@ import { useEffect, useState } from 'react'
 
 /* ─── Shared helpers ──────────────────────────────────────────── */
 
+/** Wrapper around fetch that always sends credentials and throws on non-ok */
+async function apiFetch(url, options = {}) {
+  const res = await fetch(url, { credentials: 'include', ...options })
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}))
+    throw Object.assign(new Error(data.error || `HTTP ${res.status}`), { status: res.status })
+  }
+  return res.json()
+}
+
 /** A labelled form field with consistent top-margin between label and input */
 function Field({ label, required, children }) {
   return (
@@ -164,18 +174,16 @@ function AddUserForm({ onCreated }) {
     setMsg('')
     setLoading(true)
     try {
-      const res = await fetch('/api/users', {
+      const data = await apiFetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password, role, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, profile_photo: photo })
       })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) { setMsgType('error'); setMsg(data.error || 'Create failed'); return }
       setEmail(''); setPassword(''); setRole('user')
       setFirstName(''); setLastName(''); setOrganization(''); setPhoneNumber(''); setBuyBox(''); setPhoto(null)
       setMsgType('success'); setMsg('User created')
       if (onCreated) onCreated()
-    } catch { setMsgType('error'); setMsg('Network error') }
+    } catch (e) { setMsgType('error'); setMsg(e.message || 'Create failed') }
     finally { setLoading(false); setTimeout(() => setMsg(''), 4000) }
   }
 
@@ -257,11 +265,10 @@ function AuditLogs() {
   async function fetchLogs() {
     setLoading(true)
     try {
-      const res = await fetch(`/api/audit-logs?q=${encodeURIComponent(q)}&page=${page}&perPage=${perPage}`)
-      const data = await res.json()
+      const data = await apiFetch(`/api/audit-logs?q=${encodeURIComponent(q)}&page=${page}&perPage=${perPage}`)
       setLogs(data.logs || [])
       setTotal(data.total || 0)
-    } catch (e) { console.error('Fetch logs failed:', e) }
+    } catch (e) { console.error('Fetch logs failed:', e.message) }
     finally { setLoading(false) }
   }
 
@@ -334,10 +341,9 @@ function UsersTable({ users, onReload }) {
   async function fetchUsers() {
     setLoading(true)
     try {
-      const res = await fetch(`/api/users?q=${encodeURIComponent(query)}&perPage=${perPage}&page=${page}`)
-      const data = await res.json()
+      const data = await apiFetch(`/api/users?q=${encodeURIComponent(query)}&perPage=${perPage}&page=${page}`)
       if (data.users) onReload(data.users)
-    } catch (e) { console.error('Fetch failed:', e) }
+    } catch (e) { console.error('Fetch failed:', e.message) }
     finally { setLoading(false) }
   }
 
@@ -450,19 +456,17 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   async function fetchMedia() {
     setMediaLoading(true)
     try {
-      const res = await fetch(`/api/properties/${property.id}/media`)
-      const data = await res.json()
+      const data = await apiFetch(`/api/properties/${property.id}/media`)
       setMedia(data.media || [])
-    } catch { console.error('Failed to fetch media') }
+    } catch (e) { console.error('Failed to fetch media', e.message) }
     finally { setMediaLoading(false) }
   }
 
   async function fetchUsers() {
     try {
-      const res = await fetch(`/api/properties/${property.id}/users`)
-      const data = await res.json()
+      const data = await apiFetch(`/api/properties/${property.id}/users`)
       setAllUsers(data.users || [])
-    } catch { console.error('Failed to fetch users') }
+    } catch (e) { console.error('Failed to fetch users', e.message) }
   }
 
   async function handleSave() {
@@ -481,13 +485,12 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       if (file.size > maxMB * 1024 * 1024) { setUploadError(`${file.name} exceeds ${maxMB}MB limit`); continue }
       const base64Data = await toBase64(file)
       try {
-        const res = await fetch(`/api/properties/${property.id}/media`, {
+        await apiFetch(`/api/properties/${property.id}/media`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ filename: file.name, mediaType: file.type, base64Data })
         })
-        if (!res.ok) { const d = await res.json(); setUploadError(d.error || 'Upload failed') }
-      } catch { setUploadError('Upload failed') }
+      } catch (e) { setUploadError(e.message || 'Upload failed') }
     }
     e.target.value = ''
     fetchMedia()
@@ -503,7 +506,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   }
 
   async function deleteMedia(mediaId) {
-    await fetch(`/api/properties/${property.id}/media/${mediaId}`, { method: 'DELETE' })
+    await apiFetch(`/api/properties/${property.id}/media/${mediaId}`, { method: 'DELETE' })
     fetchMedia()
   }
 
@@ -511,9 +514,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     setAssignLoading(true)
     try {
       if (currentlyAssigned) {
-        await fetch(`/api/properties/${property.id}/assign/${userId}`, { method: 'DELETE' })
+        await apiFetch(`/api/properties/${property.id}/assign/${userId}`, { method: 'DELETE' })
       } else {
-        await fetch(`/api/properties/${property.id}/assign`, {
+        await apiFetch(`/api/properties/${property.id}/assign`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userIds: [userId] })
@@ -664,10 +667,9 @@ function PropertiesPage({ user }) {
     setLoading(true)
     try {
       const endpoint = user.role === 'admin' ? '/api/properties?allProps=true' : '/api/me/properties'
-      const res = await fetch(endpoint)
-      const data = await res.json()
+      const data = await apiFetch(endpoint)
       setProperties(data.properties || [])
-    } catch (e) { console.error('Failed to fetch properties:', e) }
+    } catch (e) { console.error('Failed to fetch properties:', e.message) }
     finally { setLoading(false) }
   }
 
@@ -677,17 +679,17 @@ function PropertiesPage({ user }) {
     try {
       const method = prop.id ? 'PUT' : 'POST'
       const endpoint = prop.id ? `/api/properties/${prop.id}` : '/api/properties'
-      const res = await fetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(prop) })
-      if (res.ok) await fetchProperties()
-    } catch (e) { console.error('Failed to save property:', e) }
+      await apiFetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(prop) })
+      await fetchProperties()
+    } catch (e) { console.error('Failed to save property:', e.message) }
   }
 
   async function deleteProperty(id) {
     if (!confirm('Delete this property?')) return
     try {
-      await fetch(`/api/properties/${id}`, { method: 'DELETE' })
+      await apiFetch(`/api/properties/${id}`, { method: 'DELETE' })
       await fetchProperties()
-    } catch (e) { console.error('Delete failed:', e) }
+    } catch (e) { console.error('Delete failed:', e.message) }
   }
 
   function openProperty(prop) {
@@ -782,16 +784,14 @@ function ProfilePage({ currentUser, onUpdate }) {
     if (!photo) { setMsgType('error'); setMsg('Profile photo is required'); return }
     setLoading(true); setMsg('')
     try {
-      const res = await fetch(`/api/users/${currentUser.id}`, {
+      const data = await apiFetch(`/api/users/${currentUser.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, profile_photo: photo })
       })
-      const data = await res.json().catch(() => ({}))
-      if (!res.ok) { setMsgType('error'); setMsg(data.error || 'Save failed'); return }
       setMsgType('success'); setMsg('Profile saved successfully')
       onUpdate({ ...currentUser, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, profile_photo: photo })
-    } catch { setMsgType('error'); setMsg('Network error') }
+    } catch (e) { setMsgType('error'); setMsg(e.message || 'Save failed') }
     finally { setLoading(false); setTimeout(() => setMsg(''), 4000) }
   }
 
