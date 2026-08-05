@@ -41,12 +41,14 @@ async function initializeSchema() {
   await pool.query(`CREATE TABLE IF NOT EXISTS audit_logs (
     id SERIAL PRIMARY KEY,
     admin_id INTEGER,
+    acted_by_email TEXT,
     action TEXT,
     target_user_id INTEGER,
     target_email TEXT,
     details TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
+  await pool.query(`ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS acted_by_email TEXT`);
 
   await pool.query(`CREATE TABLE IF NOT EXISTS properties (
     id SERIAL PRIMARY KEY,
@@ -105,6 +107,19 @@ function isValidPassword(pw) {
 }
 
 let sessionStoreType = 'unknown';
+
+/** Fire-and-forget audit log helper */
+async function logAudit(actorId, actorEmail, action, details = {}, targetUserId = null, targetEmail = null) {
+  try {
+    await pool.query(
+      `INSERT INTO audit_logs (admin_id, acted_by_email, action, target_user_id, target_email, details)
+       VALUES ($1, $2, $3, $4, $5, $6)`,
+      [actorId, actorEmail, action, targetUserId, targetEmail, JSON.stringify(details)]
+    );
+  } catch (e) {
+    console.warn('Audit log failed:', e.message);
+  }
+}
 
 // Session middleware is initialized async (after DB schema ready) via a proxy
 // When multiple connect.sid cookies exist (stale + new), keep only the last one
@@ -198,6 +213,7 @@ app.post('/api/register', async (req, res) => {
     );
     const id = result.rows[0].id;
     const userObj = { id, email, role: 'user', first_name, last_name, organization, phone_number, buy_box };
+    await logAudit(id, email, 'register', { email, first_name, last_name });
     req.session.user = userObj;
     req.session.save(err => {
       if (err) return res.status(500).json({ error: 'session save failed' });
@@ -293,12 +309,7 @@ app.post('/api/users/:id/role', async (req, res) => {
     const row = existingResult.rows[0];
     const oldRole = row.role || 'user';
     await pool.query('UPDATE users SET role = $1 WHERE id = $2', [role, id]);
-    try {
-      const details = JSON.stringify({ from: oldRole, to: role });
-      await pool.query('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES ($1, $2, $3, $4, $5)', [adminId, 'role_change', id, row.email, details]);
-    } catch (e) {
-      console.warn('Audit log failed', e && e.message);
-    }
+    await logAudit(adminId, req.session.user.email, 'role_change', { from: oldRole, to: role }, id, row.email);
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -322,12 +333,7 @@ app.post('/api/users', async (req, res) => {
       [email, hashed, role || 'user', first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null, profile_photo]
     );
     const id = result.rows[0].id;
-    try {
-      const details = JSON.stringify({ created: true, role: role || 'user' });
-      await pool.query('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES ($1, $2, $3, $4, $5)', [req.session.user.id, 'create_user', id, email, details]);
-    } catch (e) {
-      console.warn('Audit log failed', e && e.message);
-    }
+    await logAudit(req.session.user.id, req.session.user.email, 'create_user', { role: role || 'user' }, id, email);
     res.json({ id, email, role: role || 'user', first_name, last_name, organization, phone_number, buy_box });
   } catch (e) {
     if (e.code === '23505') return res.status(409).json({ error: 'email exists' });
@@ -369,6 +375,8 @@ app.put('/api/users/:id', async (req, res) => {
     const userResult = await pool.query('SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at FROM users WHERE id = $1', [id]);
     if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const row = userResult.rows[0];
+    const changedFields = Object.keys(req.body || {}).filter(k => k !== 'profile_photo');
+    await logAudit(userId, req.session.user.email, 'edit_user', { changed_fields: changedFields }, id, row.email);
     if (userId === id) {
       req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box, profile_photo: row.profile_photo };
     }
@@ -389,12 +397,7 @@ app.delete('/api/users/:id', async (req, res) => {
     if (existingResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const row = existingResult.rows[0];
     await pool.query('DELETE FROM users WHERE id = $1', [id]);
-    try {
-      const details = JSON.stringify({ deleted: true });
-      await pool.query('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES ($1, $2, $3, $4, $5)', [adminId, 'delete_user', id, row.email, details]);
-    } catch (e) {
-      console.warn('Audit log failed', e && e.message);
-    }
+    await logAudit(adminId, req.session.user.email, 'delete_user', {}, id, row.email);
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -419,7 +422,7 @@ app.get('/api/audit-logs', async (req, res) => {
     listParams.push(limit, offset);
     const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM audit_logs ${where}`, countParams);
     const listResult = await pool.query(
-      `SELECT id, admin_id, action, target_user_id, target_email, details, created_at FROM audit_logs ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      `SELECT id, admin_id, acted_by_email, action, target_user_id, target_email, details, created_at FROM audit_logs ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
     );
     res.json({ logs: listResult.rows, total: countResult.rows[0].total });
@@ -443,6 +446,7 @@ app.post('/api/properties/:id/media', async (req, res) => {
       'INSERT INTO property_media (property_id, filename, media_type, file_path, uploaded_by) VALUES ($1, $2, $3, $4, $5) RETURNING id',
       [propId, filename, mediaType, base64Data, req.session.user.id]
     );
+    await logAudit(req.session.user.id, req.session.user.email, 'upload_media', { property_id: propId, filename, mediaType });
     res.json({ id: result.rows[0].id, filename, mediaType });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -500,6 +504,7 @@ app.delete('/api/properties/:id/media/:mediaId', async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM property_media WHERE id = $1 AND property_id = $2', [mediaId, propId]);
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    await logAudit(req.session.user.id, req.session.user.email, 'delete_media', { property_id: propId, media_id: mediaId });
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -518,12 +523,7 @@ app.post('/api/properties', async (req, res) => {
       'INSERT INTO properties (pin, address, county, created_by) VALUES ($1, $2, $3, $4) RETURNING id',
       [pin.trim(), address.trim(), county.trim(), req.session.user.id]
     );
-    try {
-      const details = JSON.stringify({ pin, address, county });
-      await pool.query('INSERT INTO audit_logs (admin_id, action, details) VALUES ($1, $2, $3)', [req.session.user.id, 'create_property', details]);
-    } catch (e) {
-      console.warn('Audit log failed');
-    }
+    await logAudit(req.session.user.id, req.session.user.email, 'create_property', { pin, address, county });
     res.json({ id: result.rows[0].id, pin, address, county });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -586,12 +586,7 @@ app.put('/api/properties/:id', async (req, res) => {
       [pin.trim(), address.trim(), county.trim(), propId]
     );
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
-    try {
-      const details = JSON.stringify({ property_id: propId, pin, address, county });
-      await pool.query('INSERT INTO audit_logs (admin_id, action, details) VALUES ($1, $2, $3)', [req.session.user.id, 'edit_property', details]);
-    } catch (e) {
-      console.warn('Audit log failed');
-    }
+    await logAudit(req.session.user.id, req.session.user.email, 'edit_property', { property_id: propId, pin, address, county });
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -606,12 +601,7 @@ app.delete('/api/properties/:id', async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM properties WHERE id = $1', [propId]);
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
-    try {
-      const details = JSON.stringify({ property_id: propId });
-      await pool.query('INSERT INTO audit_logs (admin_id, action, details) VALUES ($1, $2, $3)', [req.session.user.id, 'delete_property', details]);
-    } catch (e) {
-      console.warn('Audit log failed');
-    }
+    await logAudit(req.session.user.id, req.session.user.email, 'delete_property', { property_id: propId });
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -640,13 +630,7 @@ app.post('/api/properties/:id/assign', async (req, res) => {
       if (result.rowCount > 0) assigned++;
     }
 
-    try {
-      const details = JSON.stringify({ property_id: propId, user_count: assigned });
-      await pool.query('INSERT INTO audit_logs (admin_id, action, details) VALUES ($1, $2, $3)', [req.session.user.id, 'assign_property', details]);
-    } catch (e) {
-      console.warn('Audit log failed');
-    }
-
+    await logAudit(req.session.user.id, req.session.user.email, 'assign_property', { property_id: propId, user_count: assigned, user_ids: userIds });
     res.json({ ok: true, assigned });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -661,6 +645,7 @@ app.delete('/api/properties/:id/assign/:userId', async (req, res) => {
 
   try {
     await pool.query('DELETE FROM property_assignments WHERE property_id = $1 AND user_id = $2', [propId, userId]);
+    await logAudit(req.session.user.id, req.session.user.email, 'unassign_property', { property_id: propId, user_id: userId });
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });

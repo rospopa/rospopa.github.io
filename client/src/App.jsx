@@ -292,65 +292,96 @@ function AddUserForm({ onCreated }) {
 
 /* ─── Audit Logs ──────────────────────────────────────────────── */
 
+const ACTION_LABELS = {
+  register:         (d, t) => `New account registered (${t || d?.email || ''})`,
+  login:            (d, t) => `Signed in`,
+  create_user:      (d, t) => `Created user ${t || ''} with role "${d?.role || 'user'}"`,
+  edit_user:        (d, t) => `Updated profile of ${t || 'user'}${d?.changed_fields?.length ? ` — fields: ${d.changed_fields.join(', ')}` : ''}`,
+  delete_user:      (d, t) => `Deleted user ${t || ''}`,
+  role_change:      (d, t) => `Changed role of ${t || 'user'} from "${d?.from}" to "${d?.to}"`,
+  create_property:  (d)    => `Added property — ${d?.address || ''} (PIN: ${d?.pin || ''}, ${d?.county || ''})`,
+  edit_property:    (d)    => `Edited property — ${d?.address || ''} (PIN: ${d?.pin || ''}, ID: ${d?.property_id || ''})`,
+  delete_property:  (d)    => `Deleted property ID ${d?.property_id || ''}`,
+  assign_property:  (d)    => `Assigned property ID ${d?.property_id || ''} to ${d?.user_count || 0} user(s)`,
+  unassign_property:(d)    => `Removed access to property ID ${d?.property_id || ''} from user ID ${d?.user_id || ''}`,
+  upload_media:     (d)    => `Uploaded media "${d?.filename || ''}" to property ID ${d?.property_id || ''}`,
+  delete_media:     (d)    => `Deleted media ID ${d?.media_id || ''} from property ID ${d?.property_id || ''}`,
+}
+
+function formatLog(log) {
+  let details = {}
+  try { details = JSON.parse(log.details || '{}') } catch {}
+  const fn = ACTION_LABELS[log.action]
+  const text = fn ? fn(details, log.target_email) : log.action
+  return text
+}
+
 function AuditLogs() {
   const [logs, setLogs] = useState([])
   const [q, setQ] = useState('')
   const [page, setPage] = useState(1)
-  const [perPage] = useState(20)
+  const [perPage] = useState(25)
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
 
-  async function fetchLogs() {
+  async function fetchLogs(pg = page) {
     setLoading(true)
     try {
-      const data = await apiFetch(`/api/audit-logs?q=${encodeURIComponent(q)}&page=${page}&perPage=${perPage}`)
+      const data = await apiFetch(`/api/audit-logs?q=${encodeURIComponent(q)}&limit=${perPage}&offset=${(pg - 1) * perPage}`)
       setLogs(data.logs || [])
       setTotal(data.total || 0)
     } catch (e) { console.error('Fetch logs failed:', e.message) }
     finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchLogs() }, [page, perPage])
+  useEffect(() => { fetchLogs() }, [page])
 
   const totalPages = Math.max(1, Math.ceil(total / perPage))
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <div className="flex gap-3">
         <input type="text" placeholder="Search by email or action…" value={q}
           onChange={e => setQ(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && (setPage(1), fetchLogs(1))}
           className="input input-bordered flex-1" />
-        <button className="btn btn-primary" onClick={() => { setPage(1); fetchLogs() }}>Search</button>
+        <button className="btn btn-primary" onClick={() => { setPage(1); fetchLogs(1) }}>Search</button>
       </div>
 
-      <div className="overflow-x-auto rounded border border-base-300">
-        <table className="table table-zebra w-full">
-          <thead>
-            <tr className="text-xs uppercase tracking-widest text-base-content/50">
-              <th className="py-3 px-4">Email</th>
-              <th className="py-3 px-4">Action</th>
-              <th className="py-3 px-4">Timestamp</th>
-            </tr>
-          </thead>
-          <tbody>
-            {logs.length === 0
-              ? <tr><td colSpan={3} className="text-center py-8 text-base-content/40">No logs found</td></tr>
-              : logs.map((log, i) => (
-                <tr key={i}>
-                  <td className="py-3 px-4">{log.email}</td>
-                  <td className="py-3 px-4">{log.action}</td>
-                  <td className="py-3 px-4 text-sm text-base-content/60">{new Date(log.timestamp).toLocaleString()}</td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
-      </div>
+      {loading && <div className="flex justify-center py-6"><span className="loading loading-spinner" /></div>}
 
-      <div className="flex justify-center items-center gap-3">
-        <button className="btn btn-sm btn-ghost" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading}>← Prev</button>
-        <span className="text-sm text-base-content/60">Page {page} of {totalPages}</span>
-        <button className="btn btn-sm btn-ghost" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages || loading}>Next →</button>
+      {!loading && (
+        <div className="space-y-1">
+          {logs.length === 0
+            ? <p className="text-center py-8 text-base-content/40">No activity found</p>
+            : logs.map((log) => {
+                let details = {}
+                try { details = JSON.parse(log.details || '{}') } catch {}
+                const actor = log.acted_by_email || `User #${log.admin_id}`
+                const text = formatLog(log)
+                const ts = new Date(log.created_at).toLocaleString()
+                return (
+                  <div key={log.id} className="flex gap-3 items-start py-2.5 px-4 rounded-lg hover:bg-base-200 border-b border-base-300/50">
+                    <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-sm">{actor}</span>
+                      <span className="text-base-content/70 text-sm"> — {text}</span>
+                    </div>
+                    <span className="text-xs text-base-content/40 flex-shrink-0 mt-0.5">{ts}</span>
+                  </div>
+                )
+              })
+          }
+        </div>
+      )}
+
+      <div className="flex justify-between items-center pt-2">
+        <span className="text-xs text-base-content/40">{total} total events</span>
+        <div className="flex items-center gap-2">
+          <button className="btn btn-xs btn-ghost" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading}>← Prev</button>
+          <span className="text-xs text-base-content/60">Page {page} of {totalPages}</span>
+          <button className="btn btn-xs btn-ghost" onClick={() => setPage(p => { const np = Math.min(totalPages, p + 1); fetchLogs(np); return np })} disabled={page >= totalPages || loading}>Next →</button>
+        </div>
       </div>
     </div>
   )
