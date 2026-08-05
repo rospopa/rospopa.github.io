@@ -16,13 +16,33 @@ body{margin:0;background:#ffffff;color:#000000;-webkit-font-smoothing:antialiase
   /* larger stars that gently twinkle (low contrast on white) */
   content:'';position:absolute;inset:0;background-image:radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 2px);background-size:80px 80px;opacity:0.03;animation:twinkle 10s linear infinite}
 
-/* SVG building background */
-.bg-buildings{position:absolute;left:0;top:0;right:0;bottom:auto;width:120%;height:60vh;z-index:0;pointer-events:none;opacity:0.95;transform:translateY(-4vh)}
+/* Clouds (top) — separate responsive SVG so they never get clipped */
+.bg-clouds{position:absolute;left:0;right:0;top:0;height:28vh;pointer-events:none;z-index:0;opacity:0.98;display:block}
+.bg-clouds path{filter:drop-shadow(0 8px 18px rgba(0,0,0,0.04));}
+
+/* SVG building background (bottom) */
+.bg-buildings{position:absolute;left:0;right:0;bottom:0;height:34vh;pointer-events:none;z-index:0;opacity:0.95}
+/* keep full width but center content */
+.bg-buildings svg{width:100%;height:100%}
 .bg-buildings .layer{transform-origin:center bottom}
 .bg-buildings .layer-3{animation:pan3 30s linear infinite}
 .bg-buildings .layer-2{animation:pan2 22s linear infinite}
 .bg-buildings .layer-1{animation:pan1 16s linear infinite}
 
+/* Responsive adjustments */
+@media (max-width:1200px){
+  .bg-clouds{height:22vh}
+  .bg-buildings{height:30vh}
+}
+@media (max-width:800px){
+  .bg-clouds{height:18vh}
+  .bg-buildings{height:28vh}
+}
+@media (max-width:480px){
+  .bg-clouds{height:14vh}
+  .bg-buildings{height:22vh}
+  .auth-card{max-width:92vw;padding:18px}
+}
 /* Clouds styling (above skyline) */
 .clouds{position:relative;z-index:1}
 .clouds path{filter:drop-shadow(0 6px 10px rgba(0,0,0,0.04));}
