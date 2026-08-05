@@ -76,7 +76,7 @@ input:focus{box-shadow:0 6px 20px rgba(0,0,0,0.08);border-color:#000}
 
 /* Icon sizing inside buttons */
 .btn .icon{display:inline-block;flex:0 0 16px}
-.btn.primary .icon{filter:invert(1)}
+.btn.primary .icon{filter:none}
 
 .error{background:#fff1f1;color:#900;padding:10px;border-radius:8px;border:1px solid #f5c2c2}
 .row{display:flex;gap:12px}
