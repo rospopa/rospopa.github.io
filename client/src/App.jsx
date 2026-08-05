@@ -1052,13 +1052,16 @@ export default function App() {
         </div>
 
         {/* Desktop right side */}
-        <div className="hidden md:flex flex-none items-center gap-3">
+        <div className="hidden md:flex flex-none items-center gap-2">
           <button
-            className={`btn btn-sm ${page === 'profile' ? 'btn-primary' : 'btn-ghost'} flex items-center gap-2 max-w-[220px]`}
+            className={`btn btn-ghost h-auto py-1.5 px-3 flex items-center gap-2.5 rounded-lg ${page === 'profile' ? 'btn-active' : ''}`}
             onClick={() => navigateTo('profile')}
           >
             <Avatar src={currentUser.profile_photo} name={displayName} size="sm" />
-            <span className="truncate">{currentUser.email}</span>
+            <div className="flex flex-col items-start leading-tight">
+              <span className="text-xs text-base-content/50 font-normal">Welcome back,</span>
+              <span className="text-sm font-semibold truncate max-w-[160px]">{currentUser.first_name || currentUser.email.split('@')[0]}</span>
+            </div>
           </button>
           <button className="btn btn-sm btn-outline" onClick={logout}>Sign Out</button>
         </div>
@@ -1100,7 +1103,7 @@ export default function App() {
         {page === 'dashboard' && (
           <div className="text-center py-16">
             <h1 className="text-4xl font-bold mb-3">
-              Welcome back
+              Welcome back, {currentUser.first_name || currentUser.email.split('@')[0]}
             </h1>
             <p className="text-base-content/50 text-lg mb-2">{currentUser.email}</p>
             <span className="badge badge-primary mb-8">{currentUser.role}</span>
