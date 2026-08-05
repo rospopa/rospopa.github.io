@@ -17,8 +17,6 @@ const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
-
-async function initializeSchema() {
   await pool.query(`CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
@@ -84,9 +82,11 @@ async function initializeSchema() {
   )`);
 }
 
-const app = express();
+async function initializeSchema() {
 app.use(express.json({ limit: '60mb' }));
 app.use(express.urlencoded({ limit: '60mb', extended: true }));
+
+app.set('trust proxy', 1);
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function isValidEmail(email) {
@@ -99,36 +99,45 @@ function isValidPassword(pw) {
   return typeof pw === 'string' && pw.length >= 8 && pw.length <= 128;
 }
 
-let sessionStore;
 let sessionStoreType = 'unknown';
-try {
+
+// Session middleware is initialized async (after DB schema ready) via a proxy
+let _sessionMiddleware = (req, res, next) => next(); // placeholder until ready
+app.use((req, res, next) => _sessionMiddleware(req, res, next));
+
+async function initializeSessionMiddleware() {
   const PgSession = require('connect-pg-simple')(session);
-  sessionStore = new PgSession({ pool });
-  sessionStoreType = 'postgres';
-  console.log('Using Postgres-backed session store');
-} catch (e) {
-  console.warn('Postgres session store setup failed:', e && e.message);
-  sessionStore = new session.MemoryStore();
-  sessionStoreType = 'memory';
+  let sessionStore;
+  try {
+    sessionStore = new PgSession({
+      pool,
+      tableName: 'session',
+      createTableIfMissing: true
+    });
+    sessionStoreType = 'postgres';
+    console.log('Using Postgres-backed session store');
+  } catch (e) {
+    console.warn('Postgres session store setup failed, using memory store:', e && e.message);
+    sessionStore = new session.MemoryStore();
+    sessionStoreType = 'memory';
+  }
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  };
+
+  _sessionMiddleware = session({
+    store: sessionStore,
+    secret: process.env.SESSION_SECRET || 'change-this-secret',
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    cookie: cookieOptions
+  });
 }
-
-app.set('trust proxy', 1);
-
-const cookieOptions = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
-};
-
-app.use(session({
-  store: sessionStore,
-  secret: process.env.SESSION_SECRET || 'change-this-secret',
-  resave: false,
-  saveUninitialized: false,
-  rolling: true,
-  cookie: cookieOptions
-}));
 
 app.post('/api/register', async (req, res) => {
   let { email, password, first_name, last_name, organization, phone_number, buy_box } = req.body || {};
@@ -718,7 +727,8 @@ app.use((err, req, res, next) => {
   try {
     await initializeSchema();
     await initializeAdminUser();
-    app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
+    await initializeSessionMiddleware();
+    app.listen(PORT, () => console.log(`Server listening on port ${PORT} [session: ${sessionStoreType}]`));
   } catch (err) {
     console.error('Failed to start server:', err && err.stack ? err.stack : err);
     process.exit(1);
