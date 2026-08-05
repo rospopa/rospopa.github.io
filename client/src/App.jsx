@@ -885,6 +885,7 @@ export default function App() {
   const [isRegister, setIsRegister] = useState(false)
   const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null })
   const [authChecked, setAuthChecked] = useState(false)
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
   function navigateTo(p) { setPage(p); localStorage.setItem('rep_page', p) }
 
@@ -979,8 +980,6 @@ export default function App() {
   }
 
   /* ── Authenticated shell ── */
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-
   const navLinks = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'properties', label: 'Properties' },
