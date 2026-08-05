@@ -152,7 +152,7 @@ async function initializeSessionMiddleware() {
   const isProduction = process.env.NODE_ENV === 'production' || !!process.env.RENDER;
   const cookieOptions = {
     httpOnly: true,
-    secure: isProduction,
+    secure: false, // let express-session detect via req.secure / trust proxy
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
   };
@@ -163,6 +163,7 @@ async function initializeSessionMiddleware() {
     resave: false,
     saveUninitialized: false,
     rolling: true,
+    proxy: true,
     cookie: cookieOptions
   });
 }
@@ -742,7 +743,13 @@ app.get('/site.webmanifest', (req, res) => {
 });
 
 app.get('/api/status', async (req, res) => {
-  res.json({ sessionStore: sessionStoreType, hasDatabaseUrl: !!process.env.DATABASE_URL });
+  res.json({
+    sessionStore: sessionStoreType,
+    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    hasSession: !!req.session?.user,
+    sessionId: req.session?.id || null,
+    cookieHeader: req.headers.cookie || null
+  });
 });
 
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
