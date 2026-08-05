@@ -107,9 +107,8 @@ function PropertyCardCarousel({ propertyId, onClick }) {
 function Logo() {
   return (
     <div className="flex items-center gap-3">
-      <div className="w-9 h-9 rounded-sm flex items-center justify-center bg-primary"
-        style={{ fontFamily: "'Playfair Display', serif" }}>
-        <span className="text-primary-content font-bold text-sm leading-none">RE</span>
+      <div className="w-9 h-9 rounded-sm flex items-center justify-center">
+        <img src="/favicon.svg" alt="Logo" className="w-9 h-9 object-contain" />
       </div>
       <div className="flex flex-col leading-none gap-0.5">
         <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em' }}>
