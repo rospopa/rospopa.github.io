@@ -78,8 +78,8 @@ export default function App() {
 
   return (
     <div className="app-root">
-      <div className="dynamic-bg" aria-hidden="true" style={{ backgroundImage: "url('/assets/designer3-bg.png')" }}>
-        {/* Static background image (designer3-bg.png) */}
+      <div className="dynamic-bg" aria-hidden="true" style={{ backgroundImage: "url('/assets/background-architect.jpg')" }}>
+        {/* Static background image (background-architect.jpg) */}
       </div>
       <div className="auth-column">
         <div className="card auth-card center">
