@@ -107,25 +107,24 @@ function isValidPassword(pw) {
 let sessionStoreType = 'unknown';
 
 // Session middleware is initialized async (after DB schema ready) via a proxy
-let _sessionMiddleware = (req, res, next) => next(); // placeholder until ready
-app.use((req, res, next) => _sessionMiddleware(req, res, next));
-
 // When multiple connect.sid cookies exist (stale + new), keep only the last one
-// so express-session always reads the most recently issued session
+// MUST be registered before the session middleware placeholder
 app.use((req, res, next) => {
   const cookieHeader = req.headers.cookie || '';
   const matches = [...cookieHeader.matchAll(/connect\.sid=([^;]+)/g)];
   if (matches.length > 1) {
-    // Keep only the last connect.sid value
     const last = matches[matches.length - 1][1];
     const otherCookies = cookieHeader
       .split(';')
       .filter(c => !c.trim().startsWith('connect.sid'))
-      .join(';');
+      .join('; ');
     req.headers.cookie = (otherCookies ? otherCookies + '; ' : '') + `connect.sid=${last}`;
   }
   next();
 });
+
+let _sessionMiddleware = (req, res, next) => next(); // placeholder until ready
+app.use((req, res, next) => _sessionMiddleware(req, res, next));
 
 async function initializeSessionMiddleware() {
   // Minimal custom Postgres session store — avoids connect-pg-simple compatibility issues
@@ -155,7 +154,7 @@ async function initializeSessionMiddleware() {
     }
     async touch(sid, sess, cb) {
       try {
-        const exp = new Date(Date.now() + (sess.cookie?.maxAge || 7*24*60*60*1000));
+        const exp = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
         await pool.query('UPDATE session SET expire=$2 WHERE sid=$1', [sid, exp]);
         cb(null);
       } catch(e) { cb(e); }
