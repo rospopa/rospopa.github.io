@@ -21,13 +21,17 @@ body{margin:0;background:#ffffff;color:#000000;-webkit-font-smoothing:antialiase
 .bg-clouds path{filter:drop-shadow(0 8px 18px rgba(0,0,0,0.04));}
 
 /* SVG building background (bottom) */
-.bg-buildings{position:absolute;left:0;right:0;bottom:0;height:34vh;pointer-events:none;z-index:0;opacity:0.95}
+.bg-buildings{position:absolute;left:0;right:0;bottom:0;height:34vh;pointer-events:none;z-index:0;opacity:0.95;overflow:visible}
 /* keep full width but center content */
 .bg-buildings svg{width:100%;height:100%}
 .bg-buildings .layer{transform-origin:center bottom}
 .bg-buildings .layer-3{animation:pan3 30s linear infinite}
 .bg-buildings .layer-2{animation:pan2 22s linear infinite}
 .bg-buildings .layer-1{animation:pan1 16s linear infinite}
+
+/* Scrolling/loop for infinite illusion */
+.bg-buildings-scroller{transform-box:fill-box;transform-origin:0 0;animation:scrollBuildings 80s linear infinite}
+@keyframes scrollBuildings{from{transform:translateX(0)}to{transform:translateX(-1200px)}}
 
 /* Responsive adjustments */
 @media (max-width:1200px){

@@ -139,75 +139,139 @@ export default function App() {
             </filter>
           </defs>
 
-          {/* Distant skyline: more varied silhouettes */}
-          <g className="layer layer-3" fill="#f3f3f3" filter="url(#softShadow)">
-            <path d="M10 240 L10 170 Q80 140 140 160 L140 240 Z" />
-            <path d="M180 240 L180 150 Q260 120 320 150 L320 240 Z" />
-            <path d="M360 240 L360 130 Q460 100 520 130 L520 240 Z" />
-            <path d="M560 240 L560 140 Q640 110 700 140 L700 240 Z" />
-            <path d="M780 240 L780 160 Q860 130 920 160 L920 240 Z" />
-            <path d="M960 240 L960 150 Q1040 120 1100 150 L1100 240 Z" />
+          {/* Scroller that contains two copies of the skyline to create an infinite loop */}
+          <g className="bg-buildings-scroller">
+            <g className="bg-set">
+              {/* Distant skyline: more varied silhouettes */}
+              <g className="layer layer-3" fill="#f3f3f3" filter="url(#softShadow)">
+                <path d="M10 240 L10 170 Q80 140 140 160 L140 240 Z" />
+                <path d="M180 240 L180 150 Q260 120 320 150 L320 240 Z" />
+                <path d="M360 240 L360 130 Q460 100 520 130 L520 240 Z" />
+                <path d="M560 240 L560 140 Q640 110 700 140 L700 240 Z" />
+                <path d="M780 240 L780 160 Q860 130 920 160 L920 240 Z" />
+                <path d="M960 240 L960 150 Q1040 120 1100 150 L1100 240 Z" />
 
-            {/* windows grids */}
-            <g fill="#fff">
-              {Array.from({length:6}).map((_,i)=> (
-                <rect key={'dw-'+i} x={30 + i*120} y="172" width="22" height="14" rx="2" />
-              ))}
+                {/* windows grids */}
+                <g fill="#fff">
+                  {Array.from({length:6}).map((_,i)=> (
+                    <rect key={'dw-'+i} x={30 + i*120} y="172" width="22" height="14" rx="2" />
+                  ))}
+                </g>
+              </g>
+
+              {/* Midground warehouses: added more blocks and detail */}
+              <g className="layer layer-2" fill="#e8e8e8" filter="url(#softShadow)">
+                <rect x="0" y="180" width="180" height="64" rx="6" />
+                <rect x="200" y="174" width="240" height="76" rx="6" />
+                <rect x="460" y="182" width="200" height="64" rx="6" />
+                <rect x="680" y="168" width="260" height="84" rx="6" />
+                <rect x="960" y="176" width="220" height="68" rx="6" />
+
+                {/* additional docks and doors */}
+                <g fill="#d6d6d6">
+                  <rect x="12" y="194" width="34" height="44" rx="3" />
+                  <rect x="52" y="194" width="48" height="44" rx="3" />
+                  <rect x="108" y="194" width="34" height="44" rx="3" />
+
+                  <rect x="220" y="196" width="46" height="48" rx="3" />
+                  <rect x="272" y="196" width="56" height="48" rx="3" />
+                  <rect x="336" y="196" width="70" height="48" rx="3" />
+
+                  <rect x="480" y="196" width="58" height="44" rx="3" />
+                  <rect x="756" y="200" width="40" height="48" rx="3" />
+                  <rect x="804" y="200" width="56" height="48" rx="3" />
+                </g>
+              </g>
+
+              {/* Foreground industrial: more varied blocks, silos and loading ramps */}
+              <g className="layer layer-1" fill="#dedede" filter="url(#softShadow)">
+                <rect x="40" y="210" width="120" height="46" rx="4" />
+                <rect x="180" y="206" width="160" height="50" rx="4" />
+                <rect x="360" y="214" width="240" height="42" rx="4" />
+                <rect x="620" y="210" width="180" height="46" rx="4" />
+                <rect x="820" y="216" width="260" height="38" rx="4" />
+
+                {/* silos / taller elements */}
+                <g fill="#e0e0e0">
+                  <rect x="520" y="160" width="36" height="100" rx="6" />
+                  <rect x="568" y="150" width="44" height="110" rx="8" />
+                  <rect x="644" y="150" width="28" height="110" rx="6" />
+                </g>
+
+                {/* foreground doors/windows */}
+                <g fill="#cfcfcf">
+                  <rect x="52" y="218" width="28" height="30" rx="3" />
+                  <rect x="88" y="218" width="36" height="30" rx="3" />
+                  <rect x="196" y="216" width="30" height="32" rx="3" />
+                  <rect x="234" y="216" width="30" height="32" rx="3" />
+                  {Array.from({length:6}).map((_,i)=> (
+                    <rect key={'pf-'+i} x={372 + i*36} y="222" width={18 + (i%2)*6} height="24" rx="3" />
+                  ))}
+                </g>
+
+                {/* rail line */}
+                <rect x="0" y="256" width="1200" height="6" fill="#cfcfcf" />
+              </g>
             </g>
-          </g>
 
-          {/* Midground warehouses: added more blocks and detail */}
-          <g className="layer layer-2" fill="#e8e8e8" filter="url(#softShadow)">
-            <rect x="0" y="180" width="180" height="64" rx="6" />
-            <rect x="200" y="174" width="240" height="76" rx="6" />
-            <rect x="460" y="182" width="200" height="64" rx="6" />
-            <rect x="680" y="168" width="260" height="84" rx="6" />
-            <rect x="960" y="176" width="220" height="68" rx="6" />
+            {/* duplicate copy positioned to the right for seamless looping */}
+            <g className="bg-set" transform="translate(1200,0)">
+              <g className="layer layer-3" fill="#f3f3f3" filter="url(#softShadow)">
+                <path d="M10 240 L10 170 Q80 140 140 160 L140 240 Z" />
+                <path d="M180 240 L180 150 Q260 120 320 150 L320 240 Z" />
+                <path d="M360 240 L360 130 Q460 100 520 130 L520 240 Z" />
+                <path d="M560 240 L560 140 Q640 110 700 140 L700 240 Z" />
+                <path d="M780 240 L780 160 Q860 130 920 160 L920 240 Z" />
+                <path d="M960 240 L960 150 Q1040 120 1100 150 L1100 240 Z" />
+                <g fill="#fff">
+                  {Array.from({length:6}).map((_,i)=> (
+                    <rect key={'dw2-'+i} x={30 + i*120} y="172" width="22" height="14" rx="2" />
+                  ))}
+                </g>
+              </g>
 
-            {/* additional docks and doors */}
-            <g fill="#d6d6d6">
-              <rect x="12" y="194" width="34" height="44" rx="3" />
-              <rect x="52" y="194" width="48" height="44" rx="3" />
-              <rect x="108" y="194" width="34" height="44" rx="3" />
+              <g className="layer layer-2" fill="#e8e8e8" filter="url(#softShadow)">
+                <rect x="0" y="180" width="180" height="64" rx="6" />
+                <rect x="200" y="174" width="240" height="76" rx="6" />
+                <rect x="460" y="182" width="200" height="64" rx="6" />
+                <rect x="680" y="168" width="260" height="84" rx="6" />
+                <rect x="960" y="176" width="220" height="68" rx="6" />
+                <g fill="#d6d6d6">
+                  <rect x="12" y="194" width="34" height="44" rx="3" />
+                  <rect x="52" y="194" width="48" height="44" rx="3" />
+                  <rect x="108" y="194" width="34" height="44" rx="3" />
+                  <rect x="220" y="196" width="46" height="48" rx="3" />
+                  <rect x="272" y="196" width="56" height="48" rx="3" />
+                  <rect x="336" y="196" width="70" height="48" rx="3" />
+                  <rect x="480" y="196" width="58" height="44" rx="3" />
+                  <rect x="756" y="200" width="40" height="48" rx="3" />
+                  <rect x="804" y="200" width="56" height="48" rx="3" />
+                </g>
+              </g>
 
-              <rect x="220" y="196" width="46" height="48" rx="3" />
-              <rect x="272" y="196" width="56" height="48" rx="3" />
-              <rect x="336" y="196" width="70" height="48" rx="3" />
-
-              <rect x="480" y="196" width="58" height="44" rx="3" />
-              <rect x="756" y="200" width="40" height="48" rx="3" />
-              <rect x="804" y="200" width="56" height="48" rx="3" />
+              <g className="layer layer-1" fill="#dedede" filter="url(#softShadow)">
+                <rect x="40" y="210" width="120" height="46" rx="4" />
+                <rect x="180" y="206" width="160" height="50" rx="4" />
+                <rect x="360" y="214" width="240" height="42" rx="4" />
+                <rect x="620" y="210" width="180" height="46" rx="4" />
+                <rect x="820" y="216" width="260" height="38" rx="4" />
+                <g fill="#e0e0e0">
+                  <rect x="520" y="160" width="36" height="100" rx="6" />
+                  <rect x="568" y="150" width="44" height="110" rx="8" />
+                  <rect x="644" y="150" width="28" height="110" rx="6" />
+                </g>
+                <g fill="#cfcfcf">
+                  <rect x="52" y="218" width="28" height="30" rx="3" />
+                  <rect x="88" y="218" width="36" height="30" rx="3" />
+                  <rect x="196" y="216" width="30" height="32" rx="3" />
+                  <rect x="234" y="216" width="30" height="32" rx="3" />
+                  {Array.from({length:6}).map((_,i)=> (
+                    <rect key={'pf2-'+i} x={372 + i*36} y="222" width={18 + (i%2)*6} height="24" rx="3" />
+                  ))}
+                </g>
+                <rect x="0" y="256" width="1200" height="6" fill="#cfcfcf" />
+              </g>
             </g>
-          </g>
-
-          {/* Foreground industrial: more varied blocks, silos and loading ramps */}
-          <g className="layer layer-1" fill="#dedede" filter="url(#softShadow)">
-            <rect x="40" y="210" width="120" height="46" rx="4" />
-            <rect x="180" y="206" width="160" height="50" rx="4" />
-            <rect x="360" y="214" width="240" height="42" rx="4" />
-            <rect x="620" y="210" width="180" height="46" rx="4" />
-            <rect x="820" y="216" width="260" height="38" rx="4" />
-
-            {/* silos / taller elements */}
-            <g fill="#e0e0e0">
-              <rect x="520" y="160" width="36" height="100" rx="6" />
-              <rect x="568" y="150" width="44" height="110" rx="8" />
-              <rect x="644" y="150" width="28" height="110" rx="6" />
-            </g>
-
-            {/* foreground doors/windows */}
-            <g fill="#cfcfcf">
-              <rect x="52" y="218" width="28" height="30" rx="3" />
-              <rect x="88" y="218" width="36" height="30" rx="3" />
-              <rect x="196" y="216" width="30" height="32" rx="3" />
-              <rect x="234" y="216" width="30" height="32" rx="3" />
-              {Array.from({length:6}).map((_,i)=> (
-                <rect key={'pf-'+i} x={372 + i*36} y="222" width={18 + (i%2)*6} height="24" rx="3" />
-              ))}
-            </g>
-
-            {/* rail line */}
-            <rect x="0" y="256" width="1200" height="6" fill="#cfcfcf" />
           </g>
         </svg>
       </div>
