@@ -82,8 +82,8 @@ app.get('/api/me', (req, res) => {
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
 if (require('fs').existsSync(clientDist)) {
   app.use(express.static(clientDist));
-  // Use '/*' to avoid path-to-regexp '*' parsing errors on newer path-to-regexp versions
-  app.get('/*', (req, res) => res.sendFile(path.join(clientDist, 'index.html')));
+  // Use a RegExp to avoid path-to-regexp parsing issues on some Node/runtime versions
+  app.get(/.*/, (req, res) => res.sendFile(path.join(clientDist, 'index.html')));
 }
 
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
