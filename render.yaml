@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: rospopa-login-server
+    env: node
+    region: oregon
+    plan: free
+    buildCommand: "cd client && npm install && npm run build && cd ../server && npm install"
+    startCommand: "cd server && npm start"
+    autoDeploy: true
+    repo: "rospopa/rospopa.github.io"
+    branch: "rospopa-expert-parakeet"
