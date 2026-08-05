@@ -203,6 +203,42 @@ app.get('/api/me', (req, res) => {
   res.json({ user: req.session.user });
 });
 
+// Admin-only: list users
+app.get('/api/users', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  db.all('SELECT id, email, role FROM users ORDER BY id DESC', [], (err, rows) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    res.json({ users: rows });
+  });
+});
+
+// Admin-only: change role
+app.post('/api/users/:id/role', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const id = Number(req.params.id);
+  const { role } = req.body;
+  if (!['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
+  // Prevent admin from demoting/removing their own admin role accidentally
+  if (req.session.user.id === id && role !== 'admin') return res.status(400).json({ error: 'cannot change own role' });
+  db.run('UPDATE users SET role = ? WHERE id = ?', [role, id], function (err) {
+    if (err) return res.status(500).json({ error: 'db error' });
+    res.json({ ok: true });
+  });
+});
+
+// Admin-only: delete user
+app.delete('/api/users/:id', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const id = Number(req.params.id);
+  // Prevent admin from deleting themselves
+  if (req.session.user.id === id) return res.status(400).json({ error: 'cannot delete self' });
+  db.run('DELETE FROM users WHERE id = ?', [id], function (err) {
+    if (err) return res.status(500).json({ error: 'db error' });
+    res.json({ ok: true });
+  });
+});
+
+
 // If ADMIN_EMAIL and ADMIN_PASSWORD are provided in the environment, create or update the admin user now
 if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
   (async () => {

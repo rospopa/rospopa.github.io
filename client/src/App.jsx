@@ -13,6 +13,72 @@ function Logo() {
   )
 }
 
+function UsersTable({ currentUser }) {
+  const [users, setUsers] = useState([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [error, setError] = useState('');
+
+  async function fetchUsers() {
+    setLoadingUsers(true);
+    setError('');
+    try {
+      const res = await fetch('/api/users');
+      if (!res.ok) {
+        const data = await res.json().catch(()=>({}));
+        setError(data.error || 'Failed to load users');
+        setUsers([]);
+        return;
+      }
+      const data = await res.json();
+      setUsers(data.users || []);
+    } catch (e) {
+      setError('Network error');
+      setUsers([]);
+    } finally {
+      setLoadingUsers(false);
+    }
+  }
+
+  useEffect(() => { fetchUsers(); }, []);
+
+  async function changeRole(id, role) {
+    await fetch(`/api/users/${id}/role`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role }) });
+    await fetchUsers();
+  }
+
+  async function deleteUser(id) {
+    if (!confirm('Delete this user?')) return;
+    await fetch(`/api/users/${id}`, { method: 'DELETE' });
+    await fetchUsers();
+  }
+
+  return (
+    <div>
+      {error && <div className="error">{error}</div>}
+      {loadingUsers ? <div>Loading users...</div> : (
+        <table className="users-table" style={{width:'100%', marginTop:12}}>
+          <thead>
+            <tr><th>Email</th><th>Role</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            {users.map(u => (
+              <tr key={u.id}>
+                <td>{u.email}</td>
+                <td>{u.role}</td>
+                <td>
+                  {u.role !== 'admin' && <button className="btn" onClick={() => changeRole(u.id, 'admin')}>Promote</button>}
+                  {u.role === 'admin' && currentUser && currentUser.id !== u.id && <button className="btn" onClick={() => changeRole(u.id, 'user')}>Demote</button>}
+                  {currentUser && currentUser.id !== u.id && <button className="btn" onClick={() => deleteUser(u.id)}>Delete</button>}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
   const [user, setUser] = useState(null)
   const [mode, setMode] = useState('login')
@@ -89,10 +155,16 @@ export default function App() {
             <h2>{page}</h2>
             <div className="muted small">Signed in as {user.email} ({user.role})</div>
 
-            {/* Placeholder content for pages */}
+                    {/* Pages */}
             {page === 'Dashboard' && <div style={{marginTop:18}}>Welcome to the dashboard. Replace with real widgets.</div>}
             {page === 'Properties' && <div style={{marginTop:18}}>Properties list placeholder.</div>}
-            {page === 'Users' && isAdmin && <div style={{marginTop:18}}>User management placeholder (admin only).</div>}
+
+            {page === 'Users' && isAdmin && (
+              <div style={{marginTop:18, width:'100%'}}>
+                <UsersTable currentUser={user} />
+              </div>
+            )}
+
             {page === 'Account' && <div style={{marginTop:18}}>Account settings placeholder.</div>}
 
             <div style={{marginTop:20}}>
