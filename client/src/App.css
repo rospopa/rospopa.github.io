@@ -42,6 +42,10 @@ body{margin:0;background:#ffffff;color:#000000;-webkit-font-smoothing:antialiase
 
 /* Ensure cards/content sit above the background */
 .card{position:relative;z-index:2}
+/* Subtle dark backdrop behind the card to improve contrast with busy backgrounds */
+.card::after{content:'';position:absolute;inset:-6px;border-radius:12px;background:linear-gradient(rgba(0,0,0,0.28), rgba(0,0,0,0.18));z-index:1}
+/* Ensure card children render above the backdrop */
+.card > *{position:relative;z-index:2}
 .auth-card{position:relative;z-index:2}
 .hero-panel{position:relative;z-index:2}
 
