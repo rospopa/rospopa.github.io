@@ -29,6 +29,101 @@ function Modal({ open, title, message, onConfirm, onCancel }) {
   );
 }
 
+function AddUserForm({ onCreated }) {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [role, setRole] = useState('user');
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  async function createUser(e) {
+    e.preventDefault();
+    setMsg('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, role }) });
+      const data = await res.json().catch(()=>({}));
+      if (!res.ok) {
+        setMsg(data.error || 'Create failed');
+        return;
+      }
+      setEmail(''); setPassword(''); setRole('user');
+      setMsg('User created');
+      if (onCreated) onCreated();
+    } catch (e) {
+      setMsg('Network error');
+    } finally { setLoading(false); setTimeout(()=>setMsg(''),3000); }
+  }
+
+  return (
+    <form onSubmit={createUser} style={{display:'flex',gap:8,alignItems:'center',marginBottom:12}}>
+      <input placeholder="email" value={email} onChange={e=>setEmail(e.target.value)} required />
+      <input placeholder="password" value={password} onChange={e=>setPassword(e.target.value)} type="password" required />
+      <select value={role} onChange={e=>setRole(e.target.value)}>
+        <option value="user">user</option>
+        <option value="admin">admin</option>
+      </select>
+      <button className="btn" type="submit" disabled={loading}>{loading? 'Creating...':'Create user'}</button>
+      {msg && <div className="small muted" style={{marginLeft:8}}>{msg}</div>}
+    </form>
+  );
+}
+
+function AuditLogs() {
+  const [logs, setLogs] = useState([]);
+  const [q, setQ] = useState('');
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  async function fetchLogs() {
+    setLoading(true);
+    try {
+      const offset = (page-1)*perPage;
+      const res = await fetch(`/api/audit-logs?q=${encodeURIComponent(q)}&limit=${perPage}&offset=${offset}`);
+      if (!res.ok) {
+        setLogs([]); setTotal(0); return;
+      }
+      const data = await res.json();
+      setLogs(data.logs||[]); setTotal(data.total||0);
+    } catch (e) {
+      setLogs([]); setTotal(0);
+    } finally { setLoading(false); }
+  }
+
+  useEffect(()=>{ fetchLogs(); }, [page, perPage]);
+
+  return (
+    <div>
+      <div style={{display:'flex',gap:8,alignItems:'center'}}>
+        <input placeholder="Search email or action" value={q} onChange={e=>setQ(e.target.value)} />
+        <button className="btn" onClick={()=>{ setPage(1); fetchLogs(); }}>Search</button>
+      </div>
+      {loading ? <div style={{marginTop:12}}>Loading logs...</div> : (
+        <>
+        <table className="users-table" style={{width:'100%', marginTop:12}}>
+          <thead><tr><th>When</th><th>Admin ID</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+          <tbody>
+            {logs.map(l => (
+              <tr key={l.id}><td>{l.created_at}</td><td>{l.admin_id}</td><td>{l.action}</td><td>{l.target_email} ({l.target_user_id})</td><td style={{maxWidth:360,overflow:'hidden',textOverflow:'ellipsis'}}>{l.details}</td></tr>
+            ))}
+          </tbody>
+        </table>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:12}}>
+          <div className="small muted">Total: {total}</div>
+          <div style={{display:'flex',gap:8,alignItems:'center'}}>
+            <button className="btn" onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1}>Prev</button>
+            <div className="small">Page {page} / {Math.max(1, Math.ceil(total/perPage))}</div>
+            <button className="btn" onClick={() => setPage(p => Math.min(Math.max(1, Math.ceil(total/perPage)), p+1))} disabled={page>=Math.max(1, Math.ceil(total/perPage))}>Next</button>
+          </div>
+        </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function UsersTable({ currentUser }) {
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -249,11 +344,21 @@ export default function App() {
 
             {page === 'Users' && isAdmin && (
               <div style={{marginTop:18, width:'100%'}}>
-                <UsersTable currentUser={user} />
+                <AddUserForm onCreated={() => { /* reload users via UsersTable effect by toggling key */ }} />
+                <UsersTable currentUser={user} key={String(Math.random())} />
+                <div style={{marginTop:12}}>
+                  <button className="btn" onClick={() => setPage('Audit Logs')}>View Audit Logs</button>
+                </div>
               </div>
             )}
 
             {page === 'Account' && <div style={{marginTop:18}}>Account settings placeholder.</div>}
+
+            {page === 'Audit Logs' && isAdmin && (
+              <div style={{marginTop:18, width:'100%'}}>
+                <AuditLogs />
+              </div>
+            )}
 
             <div style={{marginTop:20}}>
               <button className="btn primary" onClick={logout}>Logout</button>

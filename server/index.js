@@ -260,6 +260,31 @@ app.post('/api/users/:id/role', (req, res) => {
   });
 });
 
+// Admin-only: create user
+app.post('/api/users', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const { email, password, role } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'email and password required' });
+  if (role && !['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
+  try {
+    const hashed = await bcrypt.hash(password, 10);
+    db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [email.toLowerCase(), hashed, (role || 'user')], function (err) {
+      if (err) {
+        if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
+        return res.status(500).json({ error: 'db error' });
+      }
+      // Log audit
+      try {
+        const details = JSON.stringify({ created: true, role: role || 'user' });
+        db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [req.session.user.id, `create_user`, this.lastID, email.toLowerCase(), details]);
+      } catch (e) { console.warn('Audit log failed', e && e.message); }
+      res.json({ id: this.lastID, email: email.toLowerCase(), role: role || 'user' });
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'server error' });
+  }
+});
+
 // Admin-only: delete user
 app.delete('/api/users/:id', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
@@ -279,6 +304,23 @@ app.delete('/api/users/:id', (req, res) => {
         db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [adminId, `delete_user`, id, row.email, details]);
       } catch (e) { console.warn('Audit log failed', e && e.message); }
       res.json({ ok: true });
+    });
+  });
+});
+
+// Audit logs viewer
+app.get('/api/audit-logs', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const q = (req.query.q || '').trim().toLowerCase();
+  const limit = Math.min(100, parseInt(req.query.limit || '20', 10) || 20);
+  const offset = Math.max(0, parseInt(req.query.offset || '0', 10) || 0);
+  const where = q ? 'WHERE LOWER(target_email) LIKE ? OR LOWER(action) LIKE ?' : '';
+  const params = q ? [`%${q}%`, `%${q}%`] : [];
+  db.get(`SELECT COUNT(*) as total FROM audit_logs ${where}`, params, (cerr, countRow) => {
+    if (cerr) return res.status(500).json({ error: 'db error' });
+    db.all(`SELECT id, admin_id, action, target_user_id, target_email, details, created_at FROM audit_logs ${where} ORDER BY id DESC LIMIT ? OFFSET ?`, params.concat([limit, offset]), (err, rows) => {
+      if (err) return res.status(500).json({ error: 'db error' });
+      res.json({ logs: rows, total: countRow.total });
     });
   });
 });
