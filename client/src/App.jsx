@@ -979,40 +979,81 @@ export default function App() {
   }
 
   /* ── Authenticated shell ── */
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  const navLinks = [
+    { id: 'dashboard', label: 'Dashboard' },
+    { id: 'properties', label: 'Properties' },
+    ...(currentUser.role === 'admin' ? [{ id: 'users', label: 'Users' }, { id: 'audit', label: 'Audit Logs' }] : []),
+  ]
+
   const navBtn = (id, label) => (
     <button
       key={id}
       className={`btn btn-sm ${page === id ? 'btn-primary' : 'btn-ghost'}`}
-      onClick={() => navigateTo(id)}
+      onClick={() => { navigateTo(id); setMobileMenuOpen(false) }}
     >
       {label}
     </button>
   )
 
+  const displayName = [currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email
+
   return (
     <div className="min-h-screen bg-base-200">
       {/* Navbar */}
-      <nav className="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50 px-6 gap-4">
+      <nav className="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50 px-4 md:px-6 gap-2">
+        {/* Logo */}
         <div className="flex-none">
           <Logo />
         </div>
-        <div className="flex-1 flex gap-1 ml-4">
-          {navBtn('dashboard', 'Dashboard')}
-          {navBtn('properties', 'Properties')}
-          {currentUser.role === 'admin' && navBtn('users', 'Users')}
-          {currentUser.role === 'admin' && navBtn('audit', 'Audit Logs')}
+
+        {/* Desktop nav links */}
+        <div className="hidden md:flex flex-1 gap-1 ml-4">
+          {navLinks.map(({ id, label }) => navBtn(id, label))}
         </div>
-        <div className="flex-none flex items-center gap-3">
+
+        {/* Desktop right side */}
+        <div className="hidden md:flex flex-none items-center gap-3">
           <button
             className={`btn btn-sm ${page === 'profile' ? 'btn-primary' : 'btn-ghost'} flex items-center gap-2 max-w-[220px]`}
             onClick={() => navigateTo('profile')}
           >
-            <Avatar src={currentUser.profile_photo} name={[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email} size="sm" />
+            <Avatar src={currentUser.profile_photo} name={displayName} size="sm" />
             <span className="truncate">{currentUser.email}</span>
           </button>
           <button className="btn btn-sm btn-outline" onClick={logout}>Sign Out</button>
         </div>
+
+        {/* Mobile: avatar + hamburger */}
+        <div className="flex md:hidden flex-1 justify-end items-center gap-2">
+          <button
+            className={`btn btn-sm btn-ghost p-1 ${page === 'profile' ? 'btn-primary' : ''}`}
+            onClick={() => { navigateTo('profile'); setMobileMenuOpen(false) }}
+          >
+            <Avatar src={currentUser.profile_photo} name={displayName} size="sm" />
+          </button>
+          <button
+            className="btn btn-sm btn-ghost"
+            onClick={() => setMobileMenuOpen(o => !o)}
+            aria-label="Menu"
+          >
+            {mobileMenuOpen
+              ? <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              : <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+            }
+          </button>
+        </div>
       </nav>
+
+      {/* Mobile dropdown menu */}
+      {mobileMenuOpen && (
+        <div className="md:hidden bg-base-100 border-b border-base-300 px-4 py-3 flex flex-col gap-1 sticky top-[64px] z-40 shadow-md">
+          {navLinks.map(({ id, label }) => navBtn(id, label))}
+          <div className="divider my-1" />
+          <button className="btn btn-sm btn-outline w-full" onClick={() => { logout(); setMobileMenuOpen(false) }}>Sign Out</button>
+        </div>
+      )}
 
       {/* Main content */}
       <main className="container mx-auto px-6 py-10 max-w-6xl">
