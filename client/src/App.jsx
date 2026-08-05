@@ -262,6 +262,142 @@ function UsersTable({ currentUser }) {
   );
 }
 
+function PropertyDetailModal({ property, isOpen, onClose, isAdmin, onMediaUploaded, onMediaDeleted }) {
+  const [media, setMedia] = useState([]);
+  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
+  const [uploading, setUploading] = useState(false);
+  const [error, setError] = useState('');
+  const [fileInput, setFileInput] = useState(null);
+
+  useEffect(() => {
+    if (isOpen && property) fetchMedia();
+  }, [isOpen, property]);
+
+  async function fetchMedia() {
+    try {
+      const res = await fetch(`/api/properties/${property.id}/media`);
+      if (!res.ok) throw new Error('Failed to load media');
+      const data = await res.json();
+      setMedia(data.media || []);
+      setCurrentMediaIndex(0);
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  async function handleFileSelect(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError('');
+    try {
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const base64Data = reader.result;
+        const res = await fetch(`/api/properties/${property.id}/media`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filename: file.name,
+            mediaType: file.type,
+            base64Data
+          })
+        });
+        if (!res.ok) throw new Error('Upload failed');
+        await fetchMedia();
+        if (onMediaUploaded) onMediaUploaded();
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  async function handleDeleteMedia(mediaId) {
+    if (!window.confirm('Delete this media?')) return;
+    try {
+      const res = await fetch(`/api/properties/${property.id}/media/${mediaId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+      await fetchMedia();
+      if (onMediaDeleted) onMediaDeleted();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
+  if (!isOpen || !property) return null;
+
+  const currentMedia = media[currentMediaIndex];
+
+  return (
+    <div className="modal-backdrop" role="dialog" aria-modal="true">
+      <div className="property-detail-modal">
+        {/* Carousel Section */}
+        <div className="carousel-section">
+          {media.length > 0 ? (
+            <>
+              <div className="carousel">
+                <img 
+                  src={`/api/properties/${property.id}/media/${currentMedia.id}`} 
+                  alt={currentMedia.filename}
+                  style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }}
+                />
+              </div>
+              <div className="carousel-controls">
+                <button onClick={() => setCurrentMediaIndex((i) => (i - 1 + media.length) % media.length)} disabled={media.length <= 1}>◀</button>
+                <span>{currentMediaIndex + 1} / {media.length}</span>
+                <button onClick={() => setCurrentMediaIndex((i) => (i + 1) % media.length)} disabled={media.length <= 1}>▶</button>
+              </div>
+            </>
+          ) : (
+            <div className="carousel no-media">No images or videos yet</div>
+          )}
+        </div>
+
+        {/* Property Details Sections */}
+        <div className="property-detail-section pin-section">{property.pin}</div>
+        <div className="property-detail-section address-section">{property.address}</div>
+        <div className="property-detail-section county-section">{property.county}</div>
+
+        {/* Media Management (Admin only) */}
+        {isAdmin && (
+          <div className="media-management">
+            <button className="btn primary" onClick={() => fileInput?.click()} disabled={uploading}>
+              {uploading ? 'Uploading...' : '+ Add Media'}
+            </button>
+            <input
+              ref={setFileInput}
+              type="file"
+              accept="image/*,video/*"
+              onChange={handleFileSelect}
+              style={{ display: 'none' }}
+            />
+            {media.length > 0 && (
+              <div className="media-list">
+                <h4>Media Files</h4>
+                {media.map((m) => (
+                  <div key={m.id} className="media-item">
+                    <span>{m.filename}</span>
+                    <button className="btn" onClick={() => handleDeleteMedia(m.id)}>Delete</button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {error && <div className="error">{error}</div>}
+
+        <div className="modal-actions">
+          <button className="btn" onClick={onClose}>Close</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function PropertiesPage({ currentUser, isAdmin }) {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -271,6 +407,8 @@ function PropertiesPage({ currentUser, isAdmin }) {
   const [formData, setFormData] = useState({ pin: '', address: '', county: '' });
   const [assignModal, setAssignModal] = useState({ open: false, propertyId: null, users: [] });
   const [assignLoading, setAssignLoading] = useState(false);
+  const [selectedProperty, setSelectedProperty] = useState(null);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   async function fetchProperties() {
     setLoading(true);
@@ -397,16 +535,27 @@ function PropertiesPage({ currentUser, isAdmin }) {
           properties.length === 0 ? (
             <div className="muted small" style={{ marginTop: 12 }}>No properties assigned yet.</div>
           ) : (
-            <div style={{ marginTop: 12 }}>
+            <div className="properties-grid" style={{ marginTop: 12 }}>
               {properties.map(p => (
-                <div key={p.id} className="card" style={{ marginBottom: 12, padding: '12px', background: '#f5f5f5' }}>
-                  <strong>{p.pin}</strong> - {p.address}, {p.county}
-                  <div className="small muted" style={{ marginTop: 4 }}>Assigned {new Date(p.assigned_at).toLocaleDateString()}</div>
+                <div 
+                  key={p.id} 
+                  className="property-card clickable"
+                  onClick={() => { setSelectedProperty(p); setDetailModalOpen(true); }}
+                >
+                  <div className="property-pin">{p.pin}</div>
+                  <div className="property-address">{p.address}</div>
+                  <div className="property-county">{p.county}</div>
                 </div>
               ))}
             </div>
           )
         )}
+        <PropertyDetailModal
+          property={selectedProperty}
+          isOpen={detailModalOpen}
+          onClose={() => { setDetailModalOpen(false); setSelectedProperty(null); }}
+          isAdmin={false}
+        />
       </div>
     );
   }
@@ -441,23 +590,25 @@ function PropertiesPage({ currentUser, isAdmin }) {
       )}
 
       {loading ? <div style={{ marginTop: 12 }}>Loading...</div> : (
-        <table className="users-table" style={{ width: '100%', marginTop: 12 }}>
-          <thead><tr><th>PIN</th><th>Address</th><th>County</th><th>Actions</th></tr></thead>
-          <tbody>
-            {properties.map(p => (
-              <tr key={p.id}>
-                <td>{p.pin}</td>
-                <td>{p.address}</td>
-                <td>{p.county}</td>
-                <td>
-                  <button className="btn" onClick={() => handleEditClick(p)}>Edit</button>
-                  <button className="btn" onClick={() => handleAssignClick(p.id)}>Assign Users</button>
-                  <button className="btn" onClick={() => handleDeleteProperty(p.id)}>Delete</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+        <div className="properties-grid" style={{ marginTop: 12 }}>
+          {properties.map(p => (
+            <div key={p.id} className="property-card">
+              <div 
+                onClick={() => { setSelectedProperty(p); setDetailModalOpen(true); }}
+                style={{ cursor: 'pointer', marginBottom: '8px' }}
+              >
+                <div className="property-pin">{p.pin}</div>
+                <div className="property-address">{p.address}</div>
+                <div className="property-county">{p.county}</div>
+              </div>
+              <div className="property-card-actions" style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
+                <button className="btn btn-sm" onClick={() => handleEditClick(p)}>Edit</button>
+                <button className="btn btn-sm" onClick={() => handleAssignClick(p.id)}>Users</button>
+                <button className="btn btn-sm" onClick={() => handleDeleteProperty(p.id)}>Delete</button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
       {assignModal.open && (
@@ -484,6 +635,15 @@ function PropertiesPage({ currentUser, isAdmin }) {
           </div>
         </div>
       )}
+
+      <PropertyDetailModal
+        property={selectedProperty}
+        isOpen={detailModalOpen}
+        onClose={() => { setDetailModalOpen(false); setSelectedProperty(null); }}
+        isAdmin={isAdmin}
+        onMediaUploaded={fetchProperties}
+        onMediaDeleted={fetchProperties}
+      />
     </div>
   );
 }

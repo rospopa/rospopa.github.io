@@ -106,8 +106,21 @@ db.run(`CREATE TABLE IF NOT EXISTS property_assignments (
   UNIQUE(property_id, user_id)
 )`);
 
+// Create property_media table for images and videos
+db.run(`CREATE TABLE IF NOT EXISTS property_media (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  property_id INTEGER NOT NULL,
+  filename TEXT NOT NULL,
+  media_type TEXT NOT NULL,
+  file_path TEXT NOT NULL,
+  uploaded_by INTEGER,
+  uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
+)`);
+
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // Input validation helpers
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -374,6 +387,73 @@ app.get('/api/audit-logs', (req, res) => {
       if (err) return res.status(500).json({ error: 'db error' });
       res.json({ logs: rows, total: countRow.total });
     });
+  });
+});
+
+
+// ===== PROPERTIES MEDIA ENDPOINTS =====
+
+// Upload media (image/video) to a property
+app.post('/api/properties/:id/media', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
+  const { filename, mediaType, base64Data } = req.body || {};
+  if (!filename || !mediaType || !base64Data) return res.status(400).json({ error: 'filename, mediaType, and base64Data required' });
+  
+  // Allow image and video types
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime'];
+  if (!allowedTypes.includes(mediaType)) return res.status(400).json({ error: 'unsupported media type' });
+  
+  // Store media as base64 in DB for simplicity (or could save to disk)
+  db.run(
+    'INSERT INTO property_media (property_id, filename, media_type, file_path, uploaded_by) VALUES (?, ?, ?, ?, ?)',
+    [propId, filename, mediaType, base64Data, req.session.user.id],
+    function(err) {
+      if (err) return res.status(500).json({ error: 'db error' });
+      res.json({ id: this.lastID, filename, mediaType });
+    }
+  );
+});
+
+// Get media for a property
+app.get('/api/properties/:id/media', (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
+  
+  db.all('SELECT id, filename, media_type, uploaded_at FROM property_media WHERE property_id = ? ORDER BY uploaded_at DESC', [propId], (err, rows) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    res.json({ media: rows || [] });
+  });
+});
+
+// Get single media file
+app.get('/api/properties/:id/media/:mediaId', (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const propId = Number(req.params.id);
+  const mediaId = Number(req.params.mediaId);
+  if (!Number.isFinite(propId) || !Number.isFinite(mediaId)) return res.status(400).json({ error: 'invalid ids' });
+  
+  db.get('SELECT file_path, media_type FROM property_media WHERE id = ? AND property_id = ?', [mediaId, propId], (err, row) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    if (!row) return res.status(404).json({ error: 'not found' });
+    res.set('Content-Type', row.media_type);
+    res.send(row.file_path);
+  });
+});
+
+// Delete media
+app.delete('/api/properties/:id/media/:mediaId', (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  const mediaId = Number(req.params.mediaId);
+  if (!Number.isFinite(propId) || !Number.isFinite(mediaId)) return res.status(400).json({ error: 'invalid ids' });
+  
+  db.run('DELETE FROM property_media WHERE id = ? AND property_id = ?', [mediaId, propId], function(err) {
+    if (err) return res.status(500).json({ error: 'db error' });
+    if (this.changes === 0) return res.status(404).json({ error: 'not found' });
+    res.json({ ok: true });
   });
 });
 
