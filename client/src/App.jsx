@@ -19,23 +19,6 @@ export default function App() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [msg, setMsg] = useState('')
   const [loading, setLoading] = useState(false)
-  const [bgIndex, setBgIndex] = useState(0)
-
-  useEffect(() => {
-    // Background rotator: switch between two images at a randomized interval (3-10s)
-    let mounted = true
-    let timer
-    function scheduleNext() {
-      const delay = 3000 + Math.floor(Math.random() * 7000) // 3000..9999 ms ~ 3-10s
-      timer = setTimeout(() => {
-        if (!mounted) return
-        setBgIndex(i => 1 - i)
-        scheduleNext()
-      }, delay)
-    }
-    scheduleNext()
-    return () => { mounted = false; clearTimeout(timer) }
-  }, [])
 
   useEffect(() => {
     fetch('/api/me')
@@ -95,9 +78,8 @@ export default function App() {
 
   return (
     <div className="app-root">
-      <div className="dynamic-bg" aria-hidden="true">
-        <div className={"bg-img " + (bgIndex === 0 ? 'active' : '')} style={{ backgroundImage: "url('/assets/designer-bg.png')" }} />
-        <div className={"bg-img " + (bgIndex === 1 ? 'active' : '')} style={{ backgroundImage: "url('/assets/designer2-bg.png')" }} />
+      <div className="dynamic-bg" aria-hidden="true" style={{ backgroundImage: "url('/assets/designer3-bg.png')" }}>
+        {/* Static background image (designer3-bg.png) */}
       </div>
       <div className="auth-column">
         <div className="card auth-card center">
