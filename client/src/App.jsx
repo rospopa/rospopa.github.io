@@ -62,14 +62,42 @@ export default function App() {
     setUser(null)
   }
 
+  const [page, setPage] = useState('Dashboard');
+
   if (user) {
+    const isAdmin = user.role === 'admin';
+    const menu = isAdmin ? ['Dashboard', 'Properties', 'Users', 'Account', 'Logout'] : ['Dashboard', 'Properties', 'Account', 'Logout'];
+
+    function handleNav(item) {
+      if (item === 'Logout') return logout();
+      setPage(item);
+    }
+
     return (
       <div className="app-root">
-        <div className="card welcome center">
-          <Logo />
-          <h2>Welcome</h2>
-          <div className="row">
-            <button className="btn primary" onClick={logout}>Logout</button>
+        <div className="top-nav card">
+          <div className="logo" aria-hidden="true"><Logo /></div>
+          <nav className="nav">
+            {menu.map(item => (
+              <button key={item} className={`nav-item ${page === item ? 'active' : ''}`} onClick={() => handleNav(item)}>{item}</button>
+            ))}
+          </nav>
+        </div>
+
+        <div className="content-area">
+          <div className="card center">
+            <h2>{page}</h2>
+            <div className="muted small">Signed in as {user.email} ({user.role})</div>
+
+            {/* Placeholder content for pages */}
+            {page === 'Dashboard' && <div style={{marginTop:18}}>Welcome to the dashboard. Replace with real widgets.</div>}
+            {page === 'Properties' && <div style={{marginTop:18}}>Properties list placeholder.</div>}
+            {page === 'Users' && isAdmin && <div style={{marginTop:18}}>User management placeholder (admin only).</div>}
+            {page === 'Account' && <div style={{marginTop:18}}>Account settings placeholder.</div>}
+
+            <div style={{marginTop:20}}>
+              <button className="btn primary" onClick={logout}>Logout</button>
+            </div>
           </div>
         </div>
       </div>
