@@ -77,11 +77,14 @@ async function initializeSchema() {
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
-  await pool.query(`CREATE TABLE IF NOT EXISTS "session" (
-    sid VARCHAR PRIMARY KEY,
-    sess JSON NOT NULL,
-    expire TIMESTAMP NOT NULL
+  // Drop and recreate session table with correct schema for connect-pg-simple v8
+  await pool.query(`DROP TABLE IF EXISTS "session"`);
+  await pool.query(`CREATE TABLE "session" (
+    sid VARCHAR NOT NULL COLLATE "default" PRIMARY KEY,
+    sess JSONB NOT NULL,
+    expire TIMESTAMP(6) NOT NULL
   )`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire")`);
 }
 
 const app = express();
@@ -114,7 +117,8 @@ async function initializeSessionMiddleware() {
     sessionStore = new PgSession({
       pool,
       tableName: 'session',
-      createTableIfMissing: true
+      createTableIfMissing: false,
+      errorLog: (...args) => console.error('PgSession error:', ...args)
     });
     sessionStoreType = 'postgres';
     console.log('Using Postgres-backed session store');
@@ -186,7 +190,11 @@ app.post('/api/login', async (req, res) => {
     const userObj = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box, profile_photo: row.profile_photo };
     req.session.user = userObj;
     req.session.save(err => {
-      if (err) return res.status(500).json({ error: 'session save failed' });
+      if (err) {
+        console.error('Session save error on login:', err);
+        return res.status(500).json({ error: 'session save failed' });
+      }
+      console.log('Session saved ok, sid:', req.session.id);
       res.json({ user: userObj });
     });
   } catch (e) {
