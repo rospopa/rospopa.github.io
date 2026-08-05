@@ -83,6 +83,29 @@ db.run(`CREATE TABLE IF NOT EXISTS audit_logs (
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 )`);
 
+// Create properties table
+db.run(`CREATE TABLE IF NOT EXISTS properties (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  pin TEXT NOT NULL,
+  address TEXT NOT NULL,
+  county TEXT NOT NULL,
+  created_by INTEGER,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`);
+
+// Create property_assignments table (link properties to users)
+db.run(`CREATE TABLE IF NOT EXISTS property_assignments (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  property_id INTEGER NOT NULL,
+  user_id INTEGER NOT NULL,
+  assigned_by INTEGER,
+  assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  UNIQUE(property_id, user_id)
+)`);
+
 const app = express();
 app.use(express.json());
 
@@ -97,6 +120,18 @@ function sanitizeEmail(email) {
 function isValidPassword(pw) {
   return typeof pw === 'string' && pw.length >= 8 && pw.length <= 128;
 }
+
+// Helper to wrap async route handlers and forward errors to express error handler
+const asyncHandler = (fn) => (req, res, next) => {
+  try {
+    const result = fn(req, res, next);
+    if (result && typeof result.then === 'function') {
+      result.catch(next);
+    }
+  } catch (err) {
+    next(err);
+  }
+};
 
 // Session store selection: prefer Postgres, then disk-backed file store (SESSION_DIR), then MemoryStore.
 let sessionStore;
@@ -188,7 +223,7 @@ app.use(session({
 }));
 
 // Register
-app.post('/api/register', async (req, res) => {
+app.post('/api/register', asyncHandler(async (req, res) => {
   let { email, password } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
@@ -210,7 +245,7 @@ app.post('/api/register', async (req, res) => {
 });
 
 // Login
-app.post('/api/login', (req, res) => {
+app.post('/api/login', asyncHandler((req, res) => {
   let { email, password } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
@@ -226,7 +261,7 @@ app.post('/api/login', (req, res) => {
 });
 
 // Logout
-app.post('/api/logout', (req, res) => {
+app.post('/api/logout', asyncHandler((req, res) => {
   req.session.destroy(err => {
     if (err) return res.status(500).json({ error: 'logout failed' });
     res.json({ ok: true });
@@ -234,13 +269,13 @@ app.post('/api/logout', (req, res) => {
 });
 
 // Current user
-app.get('/api/me', (req, res) => {
+app.get('/api/me', asyncHandler((req, res) => {
   if (!req.session.user) return res.status(401).json({ user: null });
   res.json({ user: req.session.user });
 });
 
 // Admin-only: list users with search & pagination
-app.get('/api/users', (req, res) => {
+app.get('/api/users', asyncHandler((req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const q = (req.query.q || '').trim().toLowerCase();
   const limit = Math.min(100, parseInt(req.query.limit || '10', 10) || 10);
@@ -259,7 +294,7 @@ app.get('/api/users', (req, res) => {
 });
 
 // Admin-only: change role
-app.post('/api/users/:id/role', (req, res) => {
+app.post('/api/users/:id/role', asyncHandler((req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const adminId = req.session.user.id;
   const id = Number(req.params.id);
@@ -287,7 +322,7 @@ app.post('/api/users/:id/role', (req, res) => {
 });
 
 // Admin-only: create user
-app.post('/api/users', async (req, res) => {
+app.post('/api/users', asyncHandler(async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   let { email, password, role } = req.body || {};
   email = sanitizeEmail(email);
@@ -315,7 +350,7 @@ app.post('/api/users', async (req, res) => {
 });
 
 // Admin-only: delete user
-app.delete('/api/users/:id', (req, res) => {
+app.delete('/api/users/:id', asyncHandler((req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const adminId = req.session.user.id;
   const id = Number(req.params.id);
@@ -338,7 +373,7 @@ app.delete('/api/users/:id', (req, res) => {
 });
 
 // Audit logs viewer
-app.get('/api/audit-logs', (req, res) => {
+app.get('/api/audit-logs', asyncHandler((req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const q = (req.query.q || '').trim().toLowerCase();
   const limit = Math.min(100, parseInt(req.query.limit || '20', 10) || 20);
@@ -355,8 +390,202 @@ app.get('/api/audit-logs', (req, res) => {
 });
 
 
+// ===== PROPERTIES ENDPOINTS =====
 
-// If ADMIN_EMAIL and ADMIN_PASSWORD are provided in the environment, create or update the admin user now
+// Admin: create property
+app.post('/api/properties', asyncHandler((req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const { pin, address, county } = req.body || {};
+  if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
+  if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
+  if (!county || !county.trim()) return res.status(400).json({ error: 'county required' });
+  
+  db.run(
+    'INSERT INTO properties (pin, address, county, created_by) VALUES (?, ?, ?, ?)',
+    [pin.trim(), address.trim(), county.trim(), req.session.user.id],
+    function(err) {
+      if (err) return res.status(500).json({ error: 'db error' });
+      try {
+        const details = JSON.stringify({ pin, address, county });
+        db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'create_property', details]);
+      } catch (e) { console.warn('Audit log failed'); }
+      res.json({ id: this.lastID, pin, address, county });
+    }
+  );
+}));
+
+// Admin: list properties
+app.get('/api/properties', asyncHandler((req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const q = (req.query.q || '').trim().toLowerCase();
+  const limit = Math.min(100, parseInt(req.query.limit || '20', 10) || 20);
+  const offset = Math.max(0, parseInt(req.query.offset || '0', 10) || 0);
+  
+  const where = q ? 'WHERE LOWER(pin) LIKE ? OR LOWER(address) LIKE ? OR LOWER(county) LIKE ?' : '';
+  const params = q ? [`%${q}%`, `%${q}%`, `%${q}%`] : [];
+  
+  db.get(`SELECT COUNT(*) as total FROM properties ${where}`, params, (cerr, countRow) => {
+    if (cerr) return res.status(500).json({ error: 'db error' });
+    db.all(
+      `SELECT id, pin, address, county, created_by, created_at, updated_at FROM properties ${where} ORDER BY id DESC LIMIT ? OFFSET ?`,
+      params.concat([limit, offset]),
+      (err, rows) => {
+        if (err) return res.status(500).json({ error: 'db error' });
+        res.json({ properties: rows || [], total: countRow.total });
+      }
+    );
+  });
+}));
+
+// Admin: get single property
+app.get('/api/properties/:id', asyncHandler((req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
+  
+  db.get('SELECT id, pin, address, county, created_by, created_at, updated_at FROM properties WHERE id = ?', [propId], (err, prop) => {
+    if (err) return res.status(500).json({ error: 'db error' });
+    if (!prop) return res.status(404).json({ error: 'not found' });
+    res.json(prop);
+  });
+}));
+
+// Admin: edit property
+app.put('/api/properties/:id', asyncHandler((req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
+  const { pin, address, county } = req.body || {};
+  if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
+  if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
+  if (!county || !county.trim()) return res.status(400).json({ error: 'county required' });
+  
+  db.run(
+    'UPDATE properties SET pin = ?, address = ?, county = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
+    [pin.trim(), address.trim(), county.trim(), propId],
+    function(err) {
+      if (err) return res.status(500).json({ error: 'db error' });
+      if (this.changes === 0) return res.status(404).json({ error: 'not found' });
+      try {
+        const details = JSON.stringify({ property_id: propId, pin, address, county });
+        db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'edit_property', details]);
+      } catch (e) { console.warn('Audit log failed'); }
+      res.json({ ok: true });
+    }
+  );
+}));
+
+// Admin: delete property
+app.delete('/api/properties/:id', asyncHandler((req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
+  
+  db.run('DELETE FROM properties WHERE id = ?', [propId], function(err) {
+    if (err) return res.status(500).json({ error: 'db error' });
+    if (this.changes === 0) return res.status(404).json({ error: 'not found' });
+    try {
+      const details = JSON.stringify({ property_id: propId });
+      db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'delete_property', details]);
+    } catch (e) { console.warn('Audit log failed'); }
+    res.json({ ok: true });
+  });
+}));
+
+// Admin: assign property to user(s)
+app.post('/api/properties/:id/assign', asyncHandler((req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
+  const { userIds } = req.body || {};
+  if (!Array.isArray(userIds) || userIds.length === 0) return res.status(400).json({ error: 'userIds array required' });
+  
+  // Verify property exists
+  db.get('SELECT id FROM properties WHERE id = ?', [propId], (gerr, prop) => {
+    if (gerr) return res.status(500).json({ error: 'db error' });
+    if (!prop) return res.status(404).json({ error: 'property not found' });
+    
+    // Assign to each user (ignore duplicates via UNIQUE constraint)
+    let remaining = userIds.length;
+    let assigned = 0;
+    userIds.forEach(uid => {
+      const userId = Number(uid);
+      if (!Number.isFinite(userId)) {
+        remaining--;
+        return;
+      }
+      db.run(
+        'INSERT OR IGNORE INTO property_assignments (property_id, user_id, assigned_by) VALUES (?, ?, ?)',
+        [propId, userId, req.session.user.id],
+        function(err) {
+          if (!err && this.changes > 0) assigned++;
+          remaining--;
+          if (remaining === 0) {
+            try {
+              const details = JSON.stringify({ property_id: propId, user_count: assigned });
+              db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'assign_property', details]);
+            } catch (e) { console.warn('Audit log failed'); }
+            res.json({ ok: true, assigned });
+          }
+        }
+      );
+    });
+  });
+}));
+
+// Remove property assignment
+app.delete('/api/properties/:id/assign/:userId', asyncHandler((req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  const userId = Number(req.params.userId);
+  if (!Number.isFinite(propId) || !Number.isFinite(userId)) return res.status(400).json({ error: 'invalid ids' });
+  
+  db.run('DELETE FROM property_assignments WHERE property_id = ? AND user_id = ?', [propId, userId], function(err) {
+    if (err) return res.status(500).json({ error: 'db error' });
+    res.json({ ok: true });
+  });
+}));
+
+// User: get assigned properties (read-only)
+app.get('/api/me/properties', asyncHandler((req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const userId = req.session.user.id;
+  
+  db.all(
+    `SELECT p.id, p.pin, p.address, p.county, p.created_at, pa.assigned_at
+     FROM properties p
+     JOIN property_assignments pa ON p.id = pa.property_id
+     WHERE pa.user_id = ?
+     ORDER BY pa.assigned_at DESC`,
+    [userId],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: 'db error' });
+      res.json({ properties: rows || [] });
+    }
+  );
+}));
+
+// Admin: list users for a property (for assignment UI)
+app.get('/api/properties/:id/users', asyncHandler((req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
+  
+  db.all(
+    `SELECT u.id, u.email, 
+            CASE WHEN pa.id IS NOT NULL THEN 1 ELSE 0 END as assigned
+     FROM users u
+     LEFT JOIN property_assignments pa ON u.id = pa.user_id AND pa.property_id = ?
+     ORDER BY u.email`,
+    [propId],
+    (err, rows) => {
+      if (err) return res.status(500).json({ error: 'db error' });
+      res.json({ users: rows || [] });
+    }
+  );
+}));
+
+
 if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
   (async () => {
     try {
@@ -427,4 +656,18 @@ if (require('fs').existsSync(clientDist)) {
   app.use((req, res) => res.sendFile(path.join(clientDist, 'index.html')));
 }
 
+// Generic error handler (must be registered after routes)
+app.use((err, req, res, next) => {
+  console.error('Unhandled error:', err && err.stack ? err.stack : err);
+  // If headers already sent, delegate to default handler
+  if (res.headersSent) return next(err);
+  // Provide helpful JSON error for XHR/API calls, otherwise a plain message
+  if (req.headers['accept'] && req.headers['accept'].includes('application/json')) {
+    res.status(err && err.statusCode ? err.statusCode : 500).json({ error: (err && err.message) || 'internal server error' });
+  } else {
+    res.status(err && err.statusCode ? err.statusCode : 500).send((err && err.message) || 'internal server error');
+  }
+});
+
+// Start server
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));

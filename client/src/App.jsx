@@ -262,6 +262,232 @@ function UsersTable({ currentUser }) {
   );
 }
 
+function PropertiesPage({ currentUser, isAdmin }) {
+  const [properties, setProperties] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [formData, setFormData] = useState({ pin: '', address: '', county: '' });
+  const [assignModal, setAssignModal] = useState({ open: false, propertyId: null, users: [] });
+  const [assignLoading, setAssignLoading] = useState(false);
+
+  async function fetchProperties() {
+    setLoading(true);
+    setError('');
+    try {
+      if (isAdmin) {
+        const res = await fetch('/api/properties?limit=100');
+        if (!res.ok) throw new Error('Failed to load properties');
+        const data = await res.json();
+        setProperties(data.properties || []);
+      } else {
+        const res = await fetch('/api/me/properties');
+        if (!res.ok) throw new Error('Failed to load properties');
+        const data = await res.json();
+        setProperties(data.properties || []);
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchProperties();
+  }, [isAdmin]);
+
+  async function handleSaveProperty(e) {
+    e.preventDefault();
+    if (!formData.pin.trim() || !formData.address.trim() || !formData.county.trim()) {
+      setError('All fields required');
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const url = editingId ? `/api/properties/${editingId}` : '/api/properties';
+      const method = editingId ? 'PUT' : 'POST';
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.error || 'Save failed');
+      }
+      setShowForm(false);
+      setEditingId(null);
+      setFormData({ pin: '', address: '', county: '' });
+      await fetchProperties();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDeleteProperty(id) {
+    if (!window.confirm('Delete this property?')) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`/api/properties/${id}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error('Delete failed');
+      await fetchProperties();
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleEditClick(prop) {
+    setFormData({ pin: prop.pin, address: prop.address, county: prop.county });
+    setEditingId(prop.id);
+    setShowForm(true);
+  }
+
+  async function handleAssignClick(propId) {
+    setAssignLoading(true);
+    try {
+      const res = await fetch(`/api/properties/${propId}/users`);
+      if (!res.ok) throw new Error('Failed to load users');
+      const data = await res.json();
+      setAssignModal({ open: true, propertyId: propId, users: data.users || [] });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setAssignLoading(false);
+    }
+  }
+
+  async function handleToggleAssign(userId, currentAssigned) {
+    setAssignLoading(true);
+    try {
+      if (currentAssigned) {
+        const res = await fetch(`/api/properties/${assignModal.propertyId}/assign/${userId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Unassign failed');
+      } else {
+        const res = await fetch(`/api/properties/${assignModal.propertyId}/assign`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userIds: [userId] })
+        });
+        if (!res.ok) throw new Error('Assign failed');
+      }
+      // Update local state
+      setAssignModal(m => ({
+        ...m,
+        users: m.users.map(u => u.id === userId ? { ...u, assigned: currentAssigned ? 0 : 1 } : u)
+      }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setAssignLoading(false);
+    }
+  }
+
+  if (!isAdmin) {
+    return (
+      <div>
+        {error && <div className="error">{error}</div>}
+        {loading ? <div>Loading properties...</div> : (
+          properties.length === 0 ? (
+            <div className="muted small" style={{ marginTop: 12 }}>No properties assigned yet.</div>
+          ) : (
+            <div style={{ marginTop: 12 }}>
+              {properties.map(p => (
+                <div key={p.id} className="card" style={{ marginBottom: 12, padding: '12px', background: '#f5f5f5' }}>
+                  <strong>{p.pin}</strong> - {p.address}, {p.county}
+                  <div className="small muted" style={{ marginTop: 4 }}>Assigned {new Date(p.assigned_at).toLocaleDateString()}</div>
+                </div>
+              ))}
+            </div>
+          )
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      {error && <div className="error">{error}</div>}
+      <button className="btn primary" onClick={() => { setShowForm(true); setEditingId(null); setFormData({ pin: '', address: '', county: '' }); }} disabled={loading}>
+        {loading ? '...' : '+ New Property'}
+      </button>
+
+      {showForm && (
+        <form onSubmit={handleSaveProperty} style={{ marginTop: 12, padding: 12, border: '1px solid #ddd', borderRadius: 4 }}>
+          <h4>{editingId ? 'Edit Property' : 'New Property'}</h4>
+          <div style={{ marginBottom: 8 }}>
+            <label>PIN<br /></label>
+            <input value={formData.pin} onChange={e => setFormData({...formData, pin: e.target.value})} placeholder="Property Identification Number" required />
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <label>Address<br /></label>
+            <input value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} placeholder="Street address" required />
+          </div>
+          <div style={{ marginBottom: 8 }}>
+            <label>County<br /></label>
+            <input value={formData.county} onChange={e => setFormData({...formData, county: e.target.value})} placeholder="County" required />
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button className="btn" type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save'}</button>
+            <button className="btn" type="button" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</button>
+          </div>
+        </form>
+      )}
+
+      {loading ? <div style={{ marginTop: 12 }}>Loading...</div> : (
+        <table className="users-table" style={{ width: '100%', marginTop: 12 }}>
+          <thead><tr><th>PIN</th><th>Address</th><th>County</th><th>Actions</th></tr></thead>
+          <tbody>
+            {properties.map(p => (
+              <tr key={p.id}>
+                <td>{p.pin}</td>
+                <td>{p.address}</td>
+                <td>{p.county}</td>
+                <td>
+                  <button className="btn" onClick={() => handleEditClick(p)}>Edit</button>
+                  <button className="btn" onClick={() => handleAssignClick(p.id)}>Assign Users</button>
+                  <button className="btn" onClick={() => handleDeleteProperty(p.id)}>Delete</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {assignModal.open && (
+        <div className="modal-backdrop" role="dialog" aria-modal="true">
+          <div className="modal" style={{ maxWidth: 400 }}>
+            <h3>Assign Property to Users</h3>
+            <div style={{ maxHeight: 300, overflowY: 'auto' }}>
+              {assignModal.users.map(u => (
+                <label key={u.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, cursor: 'pointer' }}>
+                  <input
+                    type="checkbox"
+                    checked={u.assigned}
+                    onChange={() => handleToggleAssign(u.id, !!u.assigned)}
+                    disabled={assignLoading}
+                    style={{ marginRight: 8 }}
+                  />
+                  {u.email}
+                </label>
+              ))}
+            </div>
+            <div className="modal-actions">
+              <button className="btn" onClick={() => setAssignModal({...assignModal, open: false})}>Done</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function App() {
   const [user, setUser] = useState(null)
   const [mode, setMode] = useState('login')
@@ -275,6 +501,28 @@ export default function App() {
       .then(data => setUser(data.user || null))
       .catch(() => setUser(null))
   }, [])
+
+  // Global fetch wrapper for simple error handling for client-side calls
+  async function apiFetch(url, opts) {
+    try {
+      const res = await fetch(url, opts);
+      const contentType = res.headers.get('content-type') || '';
+      const isJson = contentType.includes('application/json');
+      let payload;
+      if (isJson) payload = await res.json().catch(()=>({}));
+      if (!res.ok) {
+        const err = new Error(payload && payload.error ? payload.error : 'Request failed');
+        err.status = res.status;
+        err.payload = payload;
+        throw err;
+      }
+      return payload;
+    } catch (err) {
+      // Normalize network errors
+      if (err instanceof TypeError) throw new Error('Network error');
+      throw err;
+    }
+  }
 
   function handleChange(e) {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -342,7 +590,7 @@ export default function App() {
 
                     {/* Pages */}
             {page === 'Dashboard' && <div style={{marginTop:18}}>Welcome to the dashboard. Replace with real widgets.</div>}
-            {page === 'Properties' && <div style={{marginTop:18}}>Properties list placeholder.</div>}
+            {page === 'Properties' && <PropertiesPage currentUser={user} isAdmin={isAdmin} />}
 
             {page === 'Users' && isAdmin && (
               <div style={{marginTop:18, width:'100%'}}>
