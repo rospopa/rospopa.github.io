@@ -59,6 +59,22 @@ body{margin:0;background:#ffffff;color:#000000;-webkit-font-smoothing:antialiase
 .content-area{width:100%;max-width:1126px;margin:18px auto;padding:0 20px}
 .content-area .card{padding:28px}
 
+/* Modal */
+.modal-backdrop{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.5);z-index:9999}
+.modal{background:#fff;padding:20px;border-radius:8px;max-width:420px;width:90%;box-shadow:0 12px 40px rgba(0,0,0,0.25)}
+.modal h3{margin:0 0 8px}
+.modal p{margin:0 0 16px;color:#444}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px}
+
+/* Toast */
+.toast{padding:10px 14px;border-radius:8px;margin-bottom:8px}
+.toast.success{background:#ecfdf5;color:#065f46}
+.toast.error{background:#fff1f0;color:#7f1d1d}
+
+.users-table td, .users-table th{padding:8px 10px;text-align:left;border-bottom:1px solid rgba(0,0,0,0.06)}
+.users-table th{font-weight:700}
+.users-table .btn{margin-right:6px}
+
 
 /* Center auth card vertically/horizontally in its column */
 .auth-column{display:flex;align-items:center;justify-content:center;min-height:100vh}

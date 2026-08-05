@@ -13,10 +13,28 @@ function Logo() {
   )
 }
 
+function Modal({ open, title, message, onConfirm, onCancel }) {
+  if (!open) return null;
+  return (
+    <div className="modal-backdrop" role="dialog" aria-modal="true">
+      <div className="modal">
+        <h3>{title}</h3>
+        <p>{message}</p>
+        <div className="modal-actions">
+          <button className="btn" onClick={onCancel}>Cancel</button>
+          <button className="btn primary" onClick={onConfirm}>Confirm</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function UsersTable({ currentUser }) {
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
   const [error, setError] = useState('');
+  const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null });
+  const [toast, setToast] = useState({ text: '', type: '' });
 
   async function fetchUsers() {
     setLoadingUsers(true);
@@ -41,19 +59,42 @@ function UsersTable({ currentUser }) {
 
   useEffect(() => { fetchUsers(); }, []);
 
-  async function changeRole(id, role) {
-    await fetch(`/api/users/${id}/role`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role }) });
-    await fetchUsers();
+  function showToast(text, type='success') {
+    setToast({ text, type });
+    setTimeout(() => setToast({ text: '', type: '' }), 4000);
   }
 
-  async function deleteUser(id) {
-    if (!confirm('Delete this user?')) return;
-    await fetch(`/api/users/${id}`, { method: 'DELETE' });
-    await fetchUsers();
+  function confirmAction(title, message, fn) {
+    setModal({ open: true, title, message, onConfirm: async () => { setModal(m => ({ ...m, open: false })); await fn(); } });
+  }
+
+  async function doChangeRole(id, role) {
+    try {
+      const res = await fetch(`/api/users/${id}/role`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role }) });
+      const data = await res.json().catch(()=>({}));
+      if (!res.ok) return showToast(data.error || 'Role change failed', 'error');
+      showToast('Role updated');
+      await fetchUsers();
+    } catch (e) {
+      showToast('Network error', 'error');
+    }
+  }
+
+  async function doDeleteUser(id) {
+    try {
+      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
+      const data = await res.json().catch(()=>({}));
+      if (!res.ok) return showToast(data.error || 'Delete failed', 'error');
+      showToast('User deleted');
+      await fetchUsers();
+    } catch (e) {
+      showToast('Network error', 'error');
+    }
   }
 
   return (
     <div>
+      {toast.text && <div className={`toast ${toast.type}`}>{toast.text}</div>}
       {error && <div className="error">{error}</div>}
       {loadingUsers ? <div>Loading users...</div> : (
         <table className="users-table" style={{width:'100%', marginTop:12}}>
@@ -66,15 +107,17 @@ function UsersTable({ currentUser }) {
                 <td>{u.email}</td>
                 <td>{u.role}</td>
                 <td>
-                  {u.role !== 'admin' && <button className="btn" onClick={() => changeRole(u.id, 'admin')}>Promote</button>}
-                  {u.role === 'admin' && currentUser && currentUser.id !== u.id && <button className="btn" onClick={() => changeRole(u.id, 'user')}>Demote</button>}
-                  {currentUser && currentUser.id !== u.id && <button className="btn" onClick={() => deleteUser(u.id)}>Delete</button>}
+                  {u.role !== 'admin' && <button className="btn" onClick={() => confirmAction('Promote user', `Promote ${u.email} to admin?`, () => doChangeRole(u.id, 'admin'))}>Promote</button>}
+                  {u.role === 'admin' && currentUser && currentUser.id !== u.id && <button className="btn" onClick={() => confirmAction('Demote user', `Demote ${u.email} to regular user?`, () => doChangeRole(u.id, 'user'))}>Demote</button>}
+                  {currentUser && currentUser.id !== u.id && <button className="btn" onClick={() => confirmAction('Delete user', `Delete user ${u.email}? This cannot be undone.`, () => doDeleteUser(u.id))}>Delete</button>}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       )}
+
+      <Modal open={modal.open} title={modal.title} message={modal.message} onConfirm={modal.onConfirm} onCancel={() => setModal(m => ({ ...m, open: false }))} />
     </div>
   );
 }
