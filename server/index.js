@@ -1,6 +1,7 @@
 ﻿require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const fs = require('fs');
 const sqlite3 = require('sqlite3').verbose();
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
@@ -23,7 +24,9 @@ db.serialize(() => {
 const app = express();
 app.use(express.json());
 
-const sessionStore = new FileStore({ path: path.join(__dirname, 'sessions'), ttl: 86400 });
+const sessionsDir = path.join(__dirname, 'sessions');
+if (!fs.existsSync(sessionsDir)) fs.mkdirSync(sessionsDir, { recursive: true });
+const sessionStore = new FileStore({ path: sessionsDir, ttl: 86400 });
 app.use(session({
   store: sessionStore,
   secret: process.env.SESSION_SECRET || 'change-this-secret',
