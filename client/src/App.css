@@ -8,7 +8,7 @@ body{margin:0;background:#ffffff;color:#000000;-webkit-font-smoothing:antialiase
 .app-root{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px;gap:0;max-width:100%;background:#fff}
 
 /* Animated subtle 'stars' background (black dots that gently glimmer) */
-.dynamic-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:visible}
+.dynamic-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:visible;background-image:url('/assets/designer-bg.png');background-repeat:no-repeat;background-size:cover;background-position:center top;opacity:0.12}
 .dynamic-bg::before{
   /* fine star field (very subtle) */
   content:'';position:absolute;inset:0;background-image:radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);background-size:22px 22px;opacity:0.08;filter:blur(0.6px)}
