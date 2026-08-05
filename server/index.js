@@ -36,6 +36,7 @@ async function initializeSchema() {
   // Migrate existing users table to add timestamp columns if missing
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT`);
 
   await pool.query(`CREATE TABLE IF NOT EXISTS audit_logs (
     id SERIAL PRIMARY KEY,
@@ -160,14 +161,14 @@ app.post('/api/login', async (req, res) => {
 
   try {
     const result = await pool.query(
-      'SELECT id, email, password, role, first_name, last_name, organization, phone_number, buy_box FROM users WHERE email = $1',
+      'SELECT id, email, password, role, first_name, last_name, organization, phone_number, buy_box, profile_photo FROM users WHERE email = $1',
       [email]
     );
     if (result.rows.length === 0) return res.status(401).json({ error: 'invalid credentials' });
     const row = result.rows[0];
     const ok = await bcrypt.compare(password, row.password);
     if (!ok) return res.status(401).json({ error: 'invalid credentials' });
-    const userObj = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
+    const userObj = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box, profile_photo: row.profile_photo };
     req.session.user = userObj;
     res.json({ user: userObj });
   } catch (e) {
@@ -205,7 +206,7 @@ app.get('/api/users', async (req, res) => {
     listParams.push(limit, offset);
     const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM users ${where}`, countParams);
     const listResult = await pool.query(
-      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, created_at, updated_at FROM users ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at FROM users ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
     );
     res.json({ users: listResult.rows, total: countResult.rows[0].total });
@@ -280,7 +281,7 @@ app.put('/api/users/:id', async (req, res) => {
   if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
   if (userRole !== 'admin' && userId !== id) return res.status(403).json({ error: 'forbidden' });
 
-  const { first_name, last_name, organization, phone_number, buy_box } = req.body || {};
+  const { first_name, last_name, organization, phone_number, buy_box, profile_photo } = req.body || {};
   const updates = [];
   const values = [];
 
@@ -289,6 +290,7 @@ app.put('/api/users/:id', async (req, res) => {
   if (organization !== undefined) { updates.push(`organization = $${updates.length + 1}`); values.push(organization || null); }
   if (phone_number !== undefined) { updates.push(`phone_number = $${updates.length + 1}`); values.push(phone_number || null); }
   if (buy_box !== undefined) { updates.push(`buy_box = $${updates.length + 1}`); values.push(buy_box || null); }
+  if (profile_photo !== undefined) { updates.push(`profile_photo = $${updates.length + 1}`); values.push(profile_photo || null); }
 
   if (updates.length === 0) {
     return res.status(400).json({ error: 'no fields to update' });
@@ -300,11 +302,11 @@ app.put('/api/users/:id', async (req, res) => {
   try {
     const updateResult = await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${values.length}`, values);
     if (updateResult.rowCount === 0) return res.status(404).json({ error: 'not found' });
-    const userResult = await pool.query('SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, created_at, updated_at FROM users WHERE id = $1', [id]);
+    const userResult = await pool.query('SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at FROM users WHERE id = $1', [id]);
     if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const row = userResult.rows[0];
     if (userId === id) {
-      req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
+      req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box, profile_photo: row.profile_photo };
     }
     res.json(row);
   } catch (e) {

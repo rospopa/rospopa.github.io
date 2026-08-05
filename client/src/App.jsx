@@ -283,7 +283,17 @@ function AuditLogs() {
 
 /* ─── Users Table ─────────────────────────────────────────────── */
 
-function UsersTable({ users, onReload }) {
+/* ─── Avatar ──────────────────────────────────────────────────── */
+
+function Avatar({ src, name, size = 'md' }) {
+  const dim = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-20 h-20 text-2xl' : 'w-10 h-10 text-sm'
+  const initials = (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+  return src
+    ? <img src={src} alt={name} className={`${dim} rounded-full object-cover border border-base-300 flex-shrink-0`} />
+    : <div className={`${dim} rounded-full bg-base-300 flex items-center justify-center font-semibold text-base-content/60 flex-shrink-0`}>{initials}</div>
+}
+
+/* ─── Users Table ─────────────────────────────────────────────── */
   const [query, setQuery] = useState('')
   const [perPage, setPerPage] = useState(10)
   const [page, setPage] = useState(1)
@@ -313,9 +323,8 @@ function UsersTable({ users, onReload }) {
         <table className="table table-zebra w-full">
           <thead>
             <tr className="text-xs uppercase tracking-widest text-base-content/50">
-              <th className="py-3 px-4">Email</th>
+              <th className="py-3 px-4">User</th>
               <th className="py-3 px-4">Role</th>
-              <th className="py-3 px-4">Name</th>
               <th className="py-3 px-4">Organization</th>
               <th className="py-3 px-4">Phone</th>
               <th className="py-3 px-4">Created</th>
@@ -324,14 +333,21 @@ function UsersTable({ users, onReload }) {
           </thead>
           <tbody>
             {users.length === 0
-              ? <tr><td colSpan={7} className="text-center py-8 text-base-content/40">No users found</td></tr>
+              ? <tr><td colSpan={6} className="text-center py-8 text-base-content/40">No users found</td></tr>
               : users.map((u, i) => (
                 <tr key={i}>
-                  <td className="py-3 px-4">{u.email}</td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar src={u.profile_photo} name={[u.first_name, u.last_name].filter(Boolean).join(' ') || u.email} size="sm" />
+                      <div>
+                        <p className="font-medium text-sm">{[u.first_name, u.last_name].filter(Boolean).join(' ') || <span className="text-base-content/30">—</span>}</p>
+                        <p className="text-xs text-base-content/50">{u.email}</p>
+                      </div>
+                    </div>
+                  </td>
                   <td className="py-3 px-4">
                     <span className="badge badge-primary badge-sm">{u.role}</span>
                   </td>
-                  <td className="py-3 px-4">{[u.first_name, u.last_name].filter(Boolean).join(' ') || <span className="text-base-content/30">—</span>}</td>
                   <td className="py-3 px-4">{u.organization || <span className="text-base-content/30">—</span>}</td>
                   <td className="py-3 px-4">{u.phone_number || <span className="text-base-content/30">—</span>}</td>
                   <td className="py-3 px-4 text-xs text-base-content/50">{u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
@@ -714,9 +730,20 @@ function ProfilePage({ currentUser, onUpdate }) {
   const [organization, setOrganization] = useState(currentUser.organization || '')
   const [phoneNumber, setPhoneNumber] = useState(currentUser.phone_number || '')
   const [buyBox, setBuyBox] = useState(currentUser.buy_box || '')
+  const [photo, setPhoto] = useState(currentUser.profile_photo || null)
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
   const [msgType, setMsgType] = useState('success')
+
+  async function handlePhotoChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) { setMsgType('error'); setMsg('Only image files allowed'); return }
+    if (file.size > 5 * 1024 * 1024) { setMsgType('error'); setMsg('Photo must be under 5 MB'); return }
+    const reader = new FileReader()
+    reader.onload = ev => setPhoto(ev.target.result)
+    reader.readAsDataURL(file)
+  }
 
   async function saveProfile(e) {
     e.preventDefault()
@@ -725,21 +752,44 @@ function ProfilePage({ currentUser, onUpdate }) {
       const res = await fetch(`/api/users/${currentUser.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox })
+        body: JSON.stringify({ first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, profile_photo: photo })
       })
       const data = await res.json().catch(() => ({}))
       if (!res.ok) { setMsgType('error'); setMsg(data.error || 'Save failed'); return }
       setMsgType('success'); setMsg('Profile saved successfully')
-      onUpdate({ ...currentUser, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox })
+      onUpdate({ ...currentUser, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, profile_photo: photo })
     } catch { setMsgType('error'); setMsg('Network error') }
     finally { setLoading(false); setTimeout(() => setMsg(''), 4000) }
   }
+
+  const displayName = [firstName, lastName].filter(Boolean).join(' ') || currentUser.email
 
   return (
     <div className="max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>My Profile</h2>
       <div className="card bg-base-100 border border-base-300">
         <div className="card-body p-8 space-y-6">
+
+          {/* Photo upload */}
+          <div className="flex items-center gap-6">
+            <div className="relative flex-shrink-0">
+              <Avatar src={photo} name={displayName} size="lg" />
+              <label className="absolute -bottom-1 -right-1 btn btn-xs btn-circle btn-primary cursor-pointer" title="Upload photo">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+              </label>
+            </div>
+            <div>
+              <p className="font-semibold">{displayName}</p>
+              <p className="text-sm text-base-content/50">{currentUser.email}</p>
+              <p className="text-xs text-base-content/40 mt-1">Square or circular · JPG, PNG, WebP · max 5 MB</p>
+            </div>
+          </div>
+
+          <div className="divider my-0" />
+
           <Field label="Email">
             <input type="text" value={currentUser.email} disabled className="input input-bordered w-full bg-base-200 opacity-60" />
           </Field>
@@ -884,10 +934,11 @@ export default function App() {
         </div>
         <div className="flex-none flex items-center gap-3">
           <button
-            className={`btn btn-sm ${page === 'profile' ? 'btn-primary' : 'btn-ghost'} max-w-[200px] truncate`}
+            className={`btn btn-sm ${page === 'profile' ? 'btn-primary' : 'btn-ghost'} flex items-center gap-2 max-w-[220px]`}
             onClick={() => setPage('profile')}
           >
-            {currentUser.email}
+            <Avatar src={currentUser.profile_photo} name={[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email} size="sm" />
+            <span className="truncate">{currentUser.email}</span>
           </button>
           <button className="btn btn-sm btn-outline" onClick={logout}>Sign Out</button>
         </div>
