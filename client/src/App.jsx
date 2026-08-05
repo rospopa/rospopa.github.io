@@ -491,7 +491,9 @@ export default function App() {
 
   if (!currentUser) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundImage: "url('/assets/background-login.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
+        <div className="absolute inset-0 bg-black/50"></div>
+        <div className="relative z-10 w-full flex items-center justify-center">
         <div className="card w-96 bg-base-100 shadow-xl">
           <div className="card-body">
             <h2 className="card-title mb-6 justify-center">
@@ -530,6 +532,7 @@ export default function App() {
               {isRegister ? 'Already have account? Login' : 'Need account? Register'}
             </button>
           </div>
+        </div>
         </div>
       </div>
     );
