@@ -53,7 +53,29 @@ body{margin:0;background:#ffffff;color:#000000;-webkit-font-smoothing:antialiase
 .hero-panel{position:relative;z-index:2}
 
 /* Top navigation for authenticated users */
-.top-nav{position:relative;z-index:3;display:flex;align-items:center;gap:18px;width:100%;max-width:1126px;padding:12px 20px;margin:12px auto;border-radius:10px;background:rgba(255,255,255,0.96);box-shadow:0 8px 24px rgba(0,0,0,0.08);}
+.top-nav{position:sticky;top:0;z-index:1000;display:flex;align-items:center;gap:18px;width:100%;max-width:1126px;padding:12px 20px;margin:12px auto;border-radius:10px;background:rgba(255,255,255,0.95);box-shadow:0 8px 24px rgba(0,0,0,0.08);backdrop-filter:blur(6px);} 
+/* Ensure content doesn't get hidden under sticky nav on small screens */
+.content-area{padding-top:10px}
+
+/* Mobile toggle */
+.mobile-toggle{display:none;background:transparent;border:none;font-size:22px;cursor:pointer;margin-left:auto}
+
+/* Make nav horizontally scrollable on small widths */
+.nav{display:flex;gap:8px;margin-left:8px;flex-wrap:nowrap;overflow:auto}
+
+/* Mobile styles: collapse to a dropdown */
+@media (max-width:800px){
+  .mobile-toggle{display:block}
+  .nav{display:none;position:absolute;top:100%;left:0;right:0;background:rgba(255,255,255,0.98);flex-direction:column;padding:12px;border-radius:8px;margin:0 12px;box-shadow:0 8px 24px rgba(0,0,0,0.12)}
+  .nav.mobile-open{display:flex}
+  .nav.mobile-hidden{display:none}
+  .top-nav{margin:0;padding:10px 12px;border-radius:0}
+}
+
+@media (min-width:801px){
+  .nav.mobile-open, .nav.mobile-hidden{display:flex}
+  .mobile-toggle{display:none}
+}
 .top-nav .logo{margin:0}
 .nav{display:flex;gap:8px;margin-left:8px}
 .nav-item{background:transparent;border:none;padding:8px 12px;border-radius:8px;cursor:pointer;font-weight:600}

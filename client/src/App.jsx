@@ -312,6 +312,7 @@ export default function App() {
   }
 
   const [page, setPage] = useState('Dashboard');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   if (user) {
     const isAdmin = user.role === 'admin';
@@ -326,9 +327,10 @@ export default function App() {
       <div className="app-root">
         <div className="top-nav card">
           <div className="logo" aria-hidden="true"><Logo /></div>
-          <nav className="nav">
+          <button className="mobile-toggle" onClick={() => setMobileNavOpen(o => !o)} aria-expanded={mobileNavOpen} aria-label="Toggle menu">☰</button>
+          <nav className={`nav ${mobileNavOpen ? 'mobile-open' : 'mobile-hidden'}`}>
             {menu.map(item => (
-              <button key={item} className={`nav-item ${page === item ? 'active' : ''}`} onClick={() => handleNav(item)}>{item}</button>
+              <button key={item} className={`nav-item ${page === item ? 'active' : ''}`} onClick={() => { handleNav(item); setMobileNavOpen(false); }}>{item}</button>
             ))}
           </nav>
         </div>
