@@ -357,7 +357,7 @@ function AuditLogs() {
             : logs.map((log) => {
                 let details = {}
                 try { details = JSON.parse(log.details || '{}') } catch {}
-                const actor = log.acted_by_email || `User #${log.admin_id}`
+                const actor = log.acted_by_email || log.target_email || `unknown`
                 const text = formatLog(log)
                 const ts = new Date(log.created_at).toLocaleString()
                 return (
