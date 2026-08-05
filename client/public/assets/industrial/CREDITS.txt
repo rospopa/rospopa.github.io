@@ -1,0 +1,9 @@
+﻿Images in client/public/assets/industrial/ were fetched from Unsplash (source.unsplash.com) using topical queries. These are free-to-use images but attribution to Unsplash and the photographer is recommended when possible.
+
+Source queries used:
+- warehouse
+- cross-dock
+- rail-terminal
+- industrial-warehouse
+
+Replace these images with your own high-resolution assets if required, and update CREDITS with photographer names/links.
