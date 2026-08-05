@@ -82,8 +82,8 @@ app.get('/api/me', (req, res) => {
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
 if (require('fs').existsSync(clientDist)) {
   app.use(express.static(clientDist));
-  // Use a RegExp to avoid path-to-regexp parsing issues on some Node/runtime versions
-  app.get(/.*/, (req, res) => res.sendFile(path.join(clientDist, 'index.html')));
+  // Serve index.html for any unmatched route without registering a path pattern
+  app.use((req, res) => res.sendFile(path.join(clientDist, 'index.html')));
 }
 
 app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
