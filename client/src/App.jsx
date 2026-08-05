@@ -3,12 +3,12 @@ import './App.css'
 
 function Logo() {
   return (
-    <div className="logo">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect width="24" height="24" rx="6" fill="#000" />
-      <path d="M7 13l3 3 7-8" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+    <div className="logo" aria-hidden="true">
+      <svg width="40" height="40" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img">
+      <circle cx="12" cy="12" r="10" fill="#000" />
+      <circle cx="12" cy="12" r="6" fill="#fff" />
+      <circle cx="12" cy="12" r="2" fill="#000" />
       </svg>
-      <span>rospopa</span>
     </div>
   )
 }
@@ -78,6 +78,7 @@ export default function App() {
 
   return (
     <div className="app-root">
+      <div className="dynamic-bg" aria-hidden="true"></div>
       <div className="card auth-card center">
         <Logo />
         <h2>{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
