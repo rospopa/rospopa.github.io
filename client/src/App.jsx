@@ -35,12 +35,22 @@ function UsersTable({ currentUser }) {
   const [error, setError] = useState('');
   const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null });
   const [toast, setToast] = useState({ text: '', type: '' });
+  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  const [total, setTotal] = useState(0);
 
   async function fetchUsers() {
+    if (!currentUser || currentUser.role !== 'admin') {
+      setError('forbidden');
+      setUsers([]);
+      return;
+    }
     setLoadingUsers(true);
     setError('');
     try {
-      const res = await fetch('/api/users');
+      const offset = (page - 1) * perPage;
+      const res = await fetch(`/api/users?q=${encodeURIComponent(query)}&limit=${perPage}&offset=${offset}`);
       if (!res.ok) {
         const data = await res.json().catch(()=>({}));
         setError(data.error || 'Failed to load users');
@@ -49,6 +59,7 @@ function UsersTable({ currentUser }) {
       }
       const data = await res.json();
       setUsers(data.users || []);
+      setTotal(data.total || 0);
     } catch (e) {
       setError('Network error');
       setUsers([]);
@@ -57,7 +68,7 @@ function UsersTable({ currentUser }) {
     }
   }
 
-  useEffect(() => { fetchUsers(); }, []);
+  useEffect(() => { fetchUsers(); }, [page, perPage]);
 
   function showToast(text, type='success') {
     setToast({ text, type });
@@ -86,17 +97,41 @@ function UsersTable({ currentUser }) {
       const data = await res.json().catch(()=>({}));
       if (!res.ok) return showToast(data.error || 'Delete failed', 'error');
       showToast('User deleted');
+      // If deleting last user on page, step back a page
+      const remaining = users.length - 1;
+      const totalPages = Math.max(1, Math.ceil((total - 1) / perPage));
+      if (page > totalPages) setPage(totalPages);
       await fetchUsers();
     } catch (e) {
       showToast('Network error', 'error');
     }
   }
 
+  function onSearch(e) {
+    setQuery(e.target.value);
+    setPage(1);
+  }
+
   return (
     <div>
       {toast.text && <div className={`toast ${toast.type}`}>{toast.text}</div>}
       {error && <div className="error">{error}</div>}
-      {loadingUsers ? <div>Loading users...</div> : (
+
+      <div style={{display:'flex', gap:8, alignItems:'center', marginTop:8}}>
+        <input placeholder="Search email" value={query} onChange={onSearch} />
+        <button className="btn" onClick={() => fetchUsers()}>Search</button>
+        <div style={{marginLeft:'auto', display:'flex', gap:8, alignItems:'center'}}>
+          <label className="small muted">Per page</label>
+          <select value={perPage} onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }}>
+            <option value={5}>5</option>
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+          </select>
+        </div>
+      </div>
+
+      {loadingUsers ? <div style={{marginTop:12}}>Loading users...</div> : (
+        <>
         <table className="users-table" style={{width:'100%', marginTop:12}}>
           <thead>
             <tr><th>Email</th><th>Role</th><th>Actions</th></tr>
@@ -115,6 +150,16 @@ function UsersTable({ currentUser }) {
             ))}
           </tbody>
         </table>
+
+        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:12}}>
+          <div className="small muted">Total: {total}</div>
+          <div style={{display:'flex', gap:8, alignItems:'center'}}>
+            <button className="btn" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</button>
+            <div className="small">Page {page} / {Math.max(1, Math.ceil(total / perPage))}</div>
+            <button className="btn" onClick={() => setPage(p => Math.min(Math.max(1, Math.ceil(total / perPage)), p + 1))} disabled={page >= Math.max(1, Math.ceil(total / perPage))}>Next</button>
+          </div>
+        </div>
+        </>
       )}
 
       <Modal open={modal.open} title={modal.title} message={modal.message} onConfirm={modal.onConfirm} onCancel={() => setModal(m => ({ ...m, open: false }))} />

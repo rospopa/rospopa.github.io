@@ -72,6 +72,17 @@ db.serialize(() => {
   });
 });
 
+// Create audit_logs table for admin action auditing
+db.run(`CREATE TABLE IF NOT EXISTS audit_logs (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  admin_id INTEGER,
+  action TEXT,
+  target_user_id INTEGER,
+  target_email TEXT,
+  details TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+)`);
+
 const app = express();
 app.use(express.json());
 
@@ -203,40 +214,75 @@ app.get('/api/me', (req, res) => {
   res.json({ user: req.session.user });
 });
 
-// Admin-only: list users
+// Admin-only: list users with search & pagination
 app.get('/api/users', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  db.all('SELECT id, email, role FROM users ORDER BY id DESC', [], (err, rows) => {
-    if (err) return res.status(500).json({ error: 'db error' });
-    res.json({ users: rows });
+  const q = (req.query.q || '').trim().toLowerCase();
+  const limit = Math.min(100, parseInt(req.query.limit || '10', 10) || 10);
+  const offset = Math.max(0, parseInt(req.query.offset || '0', 10) || 0);
+
+  const where = q ? 'WHERE LOWER(email) LIKE ?' : '';
+  const params = q ? [`%${q}%`] : [];
+
+  db.get(`SELECT COUNT(*) as total FROM users ${where}`, params, (cerr, countRow) => {
+    if (cerr) return res.status(500).json({ error: 'db error' });
+    db.all(`SELECT id, email, role FROM users ${where} ORDER BY id DESC LIMIT ? OFFSET ?`, params.concat([limit, offset]), (err, rows) => {
+      if (err) return res.status(500).json({ error: 'db error' });
+      res.json({ users: rows, total: countRow.total });
+    });
   });
 });
 
 // Admin-only: change role
 app.post('/api/users/:id/role', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const adminId = req.session.user.id;
   const id = Number(req.params.id);
   const { role } = req.body;
   if (!['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
   // Prevent admin from demoting/removing their own admin role accidentally
-  if (req.session.user.id === id && role !== 'admin') return res.status(400).json({ error: 'cannot change own role' });
-  db.run('UPDATE users SET role = ? WHERE id = ?', [role, id], function (err) {
-    if (err) return res.status(500).json({ error: 'db error' });
-    res.json({ ok: true });
+  if (adminId === id && role !== 'admin') return res.status(400).json({ error: 'cannot change own role' });
+
+  // Fetch existing user to log details
+  db.get('SELECT id, email, role FROM users WHERE id = ?', [id], (gerr, row) => {
+    if (gerr) return res.status(500).json({ error: 'db error' });
+    if (!row) return res.status(404).json({ error: 'not found' });
+    const oldRole = row.role || 'user';
+    db.run('UPDATE users SET role = ? WHERE id = ?', [role, id], function (err) {
+      if (err) return res.status(500).json({ error: 'db error' });
+      // Log audit
+      try {
+        const details = JSON.stringify({ from: oldRole, to: role });
+        db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [adminId, `role_change`, id, row.email, details]);
+      } catch (e) { console.warn('Audit log failed', e && e.message); }
+      res.json({ ok: true });
+    });
   });
 });
 
 // Admin-only: delete user
 app.delete('/api/users/:id', (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const adminId = req.session.user.id;
   const id = Number(req.params.id);
   // Prevent admin from deleting themselves
-  if (req.session.user.id === id) return res.status(400).json({ error: 'cannot delete self' });
-  db.run('DELETE FROM users WHERE id = ?', [id], function (err) {
-    if (err) return res.status(500).json({ error: 'db error' });
-    res.json({ ok: true });
+  if (adminId === id) return res.status(400).json({ error: 'cannot delete self' });
+
+  db.get('SELECT id, email FROM users WHERE id = ?', [id], (gerr, row) => {
+    if (gerr) return res.status(500).json({ error: 'db error' });
+    if (!row) return res.status(404).json({ error: 'not found' });
+    db.run('DELETE FROM users WHERE id = ?', [id], function (err) {
+      if (err) return res.status(500).json({ error: 'db error' });
+      // Log audit
+      try {
+        const details = JSON.stringify({ deleted: true });
+        db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [adminId, `delete_user`, id, row.email, details]);
+      } catch (e) { console.warn('Audit log failed', e && e.message); }
+      res.json({ ok: true });
+    });
   });
 });
+
 
 
 // If ADMIN_EMAIL and ADMIN_PASSWORD are provided in the environment, create or update the admin user now
