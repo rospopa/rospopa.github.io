@@ -12,13 +12,39 @@ const PORT = process.env.PORT || 3000;
 
 const db = new sqlite3.Database(DB_PATH);
 
-// Initialize users table
+// Initialize users table with email column and migrate username->email if needed
 db.serialize(() => {
+  // Create table if it doesn't exist with the desired schema
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL
   )`);
+
+  // Inspect existing columns to detect legacy 'username' column
+  db.all("PRAGMA table_info(users)", (err, cols) => {
+    if (err) return console.error('PRAGMA failed', err);
+    const hasUsername = cols && cols.some(c => c.name === 'username');
+    const hasEmail = cols && cols.some(c => c.name === 'email');
+
+    if (hasUsername && !hasEmail) {
+      // Add email column and copy values from username
+      db.run("ALTER TABLE users ADD COLUMN email TEXT", function (aerr) {
+        if (aerr) return console.warn('Could not add email column:', aerr.message);
+        db.run("UPDATE users SET email = username WHERE email IS NULL", function (uerr) {
+          if (uerr) console.warn('Could not migrate username to email', uerr.message);
+          // Create unique index on email to enforce uniqueness
+          db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)", () => {});
+        });
+      });
+    } else if (!hasEmail) {
+      // No email column and no username — ensure unique index exists if email present
+      db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)", () => {});
+    } else {
+      // Ensure unique index exists
+      db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)", () => {});
+    }
+  });
 });
 
 const app = express();
@@ -48,30 +74,30 @@ app.use(session({
 
 // Register
 app.post('/api/register', async (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'username and password required' });
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   const hashed = await bcrypt.hash(password, 10);
-  db.run('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashed], function(err) {
+  db.run('INSERT INTO users (email, password) VALUES (?, ?)', [email.toLowerCase(), hashed], function(err) {
     if (err) {
-      if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'username exists' });
+      if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
       return res.status(500).json({ error: 'db error' });
     }
-    req.session.user = { id: this.lastID, username };
-    res.json({ id: this.lastID, username });
+    req.session.user = { id: this.lastID, email: email.toLowerCase() };
+    res.json({ id: this.lastID, email: email.toLowerCase() });
   });
 });
 
 // Login
 app.post('/api/login', (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password) return res.status(400).json({ error: 'username and password required' });
-  db.get('SELECT id, username, password FROM users WHERE username = ?', [username], async (err, row) => {
+  const { email, password } = req.body;
+  if (!email || !password) return res.status(400).json({ error: 'email and password required' });
+  db.get('SELECT id, email, password FROM users WHERE email = ?', [email.toLowerCase()], async (err, row) => {
     if (err) return res.status(500).json({ error: 'db error' });
     if (!row) return res.status(401).json({ error: 'invalid credentials' });
     const ok = await bcrypt.compare(password, row.password);
     if (!ok) return res.status(401).json({ error: 'invalid credentials' });
-    req.session.user = { id: row.id, username: row.username };
-    res.json({ id: row.id, username: row.username });
+    req.session.user = { id: row.id, email: row.email };
+    res.json({ id: row.id, email: row.email });
   });
 });
 
