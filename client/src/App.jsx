@@ -294,6 +294,8 @@ function Avatar({ src, name, size = 'md' }) {
 }
 
 /* ─── Users Table ─────────────────────────────────────────────── */
+
+function UsersTable({ users, onReload }) {
   const [query, setQuery] = useState('')
   const [perPage, setPerPage] = useState(10)
   const [page, setPage] = useState(1)
