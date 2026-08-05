@@ -111,22 +111,43 @@ let _sessionMiddleware = (req, res, next) => next(); // placeholder until ready
 app.use((req, res, next) => _sessionMiddleware(req, res, next));
 
 async function initializeSessionMiddleware() {
-  const PgSession = require('connect-pg-simple')(session);
-  let sessionStore;
-  try {
-    sessionStore = new PgSession({
-      pool,
-      tableName: 'session',
-      createTableIfMissing: false,
-      errorLog: (...args) => console.error('PgSession error:', ...args)
-    });
-    sessionStoreType = 'postgres';
-    console.log('Using Postgres-backed session store');
-  } catch (e) {
-    console.warn('Postgres session store setup failed, using memory store:', e && e.message);
-    sessionStore = new session.MemoryStore();
-    sessionStoreType = 'memory';
+  // Minimal custom Postgres session store — avoids connect-pg-simple compatibility issues
+  const Store = require('express-session').Store;
+  class PgStore extends Store {
+    async get(sid, cb) {
+      try {
+        const r = await pool.query('SELECT sess FROM session WHERE sid=$1 AND expire > NOW()', [sid]);
+        cb(null, r.rows.length ? r.rows[0].sess : null);
+      } catch(e) { console.error('Session get error:', e.message); cb(e); }
+    }
+    async set(sid, sess, cb) {
+      try {
+        const exp = new Date(Date.now() + (sess.cookie?.maxAge || 7*24*60*60*1000));
+        await pool.query(`
+          INSERT INTO session(sid, sess, expire) VALUES($1,$2,$3)
+          ON CONFLICT(sid) DO UPDATE SET sess=$2, expire=$3
+        `, [sid, JSON.stringify(sess), exp]);
+        cb(null);
+      } catch(e) { console.error('Session set error:', e.message); cb(e); }
+    }
+    async destroy(sid, cb) {
+      try {
+        await pool.query('DELETE FROM session WHERE sid=$1', [sid]);
+        cb(null);
+      } catch(e) { cb(e); }
+    }
+    async touch(sid, sess, cb) {
+      try {
+        const exp = new Date(Date.now() + (sess.cookie?.maxAge || 7*24*60*60*1000));
+        await pool.query('UPDATE session SET expire=$2 WHERE sid=$1', [sid, exp]);
+        cb(null);
+      } catch(e) { cb(e); }
+    }
   }
+
+  const sessionStore = new PgStore();
+  sessionStoreType = 'postgres-custom';
+  console.log('Using custom Postgres session store');
 
   const isProduction = process.env.NODE_ENV === 'production' || !!process.env.RENDER;
   const cookieOptions = {
@@ -139,7 +160,7 @@ async function initializeSessionMiddleware() {
   _sessionMiddleware = session({
     store: sessionStore,
     secret: process.env.SESSION_SECRET || 'change-this-secret',
-    resave: true,
+    resave: false,
     saveUninitialized: false,
     rolling: true,
     cookie: cookieOptions
