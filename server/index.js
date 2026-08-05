@@ -2,35 +2,25 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'users.db');
 const PORT = process.env.PORT || 3000;
+const DATABASE_URL = process.env.DATABASE_URL;
 
-// If DB_PATH points at a mounted persistent disk and the file doesn't exist there
-// but a local users.db exists in the repository area, copy it once so existing users persist.
-try {
-  const defaultLocal = path.join(__dirname, 'users.db');
-  if (DB_PATH !== defaultLocal && fs.existsSync(defaultLocal) && !fs.existsSync(DB_PATH)) {
-    // copy local DB to persistent path
-    fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-    fs.copyFileSync(defaultLocal, DB_PATH);
-    console.log(`Copied existing users.db to persistent DB_PATH: ${DB_PATH}`);
-  }
-} catch (e) {
-  console.warn('Could not auto-migrate users.db to DB_PATH:', e && e.message);
+if (!DATABASE_URL) {
+  throw new Error('DATABASE_URL is required');
 }
 
-const db = new sqlite3.Database(DB_PATH);
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+});
 
-// Initialize users table with email column and migrate username->email if needed
-db.serialize(() => {
-  // Create table if it doesn't exist with the desired schema (add role column)
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+async function initializeSchema() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
     role TEXT NOT NULL DEFAULT 'user',
@@ -41,125 +31,56 @@ db.serialize(() => {
     buy_box TEXT
   )`);
 
-  // Inspect existing columns to detect legacy 'username' column or missing role
-  db.all("PRAGMA table_info(users)", (err, cols) => {
-    if (err) return console.error('PRAGMA failed', err);
-    const hasUsername = cols && cols.some(c => c.name === 'username');
-    const hasEmail = cols && cols.some(c => c.name === 'email');
-    const hasRole = cols && cols.some(c => c.name === 'role');
-    const hasFirstName = cols && cols.some(c => c.name === 'first_name');
-    const hasLastName = cols && cols.some(c => c.name === 'last_name');
-    const hasOrganization = cols && cols.some(c => c.name === 'organization');
-    const hasPhoneNumber = cols && cols.some(c => c.name === 'phone_number');
-    const hasBuyBox = cols && cols.some(c => c.name === 'buy_box');
+  await pool.query(`CREATE TABLE IF NOT EXISTS audit_logs (
+    id SERIAL PRIMARY KEY,
+    admin_id INTEGER,
+    action TEXT,
+    target_user_id INTEGER,
+    target_email TEXT,
+    details TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
 
-    const ensureEmailIndex = () => db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)", () => {});
+  await pool.query(`CREATE TABLE IF NOT EXISTS properties (
+    id SERIAL PRIMARY KEY,
+    pin TEXT NOT NULL,
+    address TEXT NOT NULL,
+    county TEXT NOT NULL,
+    created_by INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
 
-    if (hasUsername && !hasEmail) {
-      // Add email column and copy values from username
-      db.run("ALTER TABLE users ADD COLUMN email TEXT", function (aerr) {
-        if (aerr) return console.warn('Could not add email column:', aerr.message);
-        db.run("UPDATE users SET email = username WHERE email IS NULL", function (uerr) {
-          if (uerr) console.warn('Could not migrate username to email', uerr.message);
-          ensureEmailIndex();
-        });
-      });
-    } else if (!hasEmail) {
-      // No email column and no username � ensure unique index exists if email present
-      ensureEmailIndex();
-    } else {
-      // Ensure unique index exists
-      ensureEmailIndex();
-    }
+  await pool.query(`CREATE TABLE IF NOT EXISTS property_assignments (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    assigned_by INTEGER,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(property_id, user_id)
+  )`);
 
-    if (!hasRole) {
-      // Add role column with default 'user' for existing rows
-      db.run("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'", function (rerr) {
-        if (rerr) return console.warn('Could not add role column:', rerr.message);
-        db.run("UPDATE users SET role = 'user' WHERE role IS NULL", () => {});
-      });
-    }
+  await pool.query(`CREATE TABLE IF NOT EXISTS property_media (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    media_type TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    uploaded_by INTEGER,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
 
-    // Add profile fields if they don't exist
-    if (!hasFirstName) {
-      db.run("ALTER TABLE users ADD COLUMN first_name TEXT", (err) => {
-        if (err && !err.message.includes('duplicate')) console.warn('Could not add first_name column:', err && err.message);
-      });
-    }
-    if (!hasLastName) {
-      db.run("ALTER TABLE users ADD COLUMN last_name TEXT", (err) => {
-        if (err && !err.message.includes('duplicate')) console.warn('Could not add last_name column:', err && err.message);
-      });
-    }
-    if (!hasOrganization) {
-      db.run("ALTER TABLE users ADD COLUMN organization TEXT", (err) => {
-        if (err && !err.message.includes('duplicate')) console.warn('Could not add organization column:', err && err.message);
-      });
-    }
-    if (!hasPhoneNumber) {
-      db.run("ALTER TABLE users ADD COLUMN phone_number TEXT", (err) => {
-        if (err && !err.message.includes('duplicate')) console.warn('Could not add phone_number column:', err && err.message);
-      });
-    }
-    if (!hasBuyBox) {
-      db.run("ALTER TABLE users ADD COLUMN buy_box TEXT", (err) => {
-        if (err && !err.message.includes('duplicate')) console.warn('Could not add buy_box column:', err && err.message);
-      });
-    }
-  });
-});
-
-// Create audit_logs table for admin action auditing
-db.run(`CREATE TABLE IF NOT EXISTS audit_logs (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  admin_id INTEGER,
-  action TEXT,
-  target_user_id INTEGER,
-  target_email TEXT,
-  details TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)`);
-
-// Create properties table
-db.run(`CREATE TABLE IF NOT EXISTS properties (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  pin TEXT NOT NULL,
-  address TEXT NOT NULL,
-  county TEXT NOT NULL,
-  created_by INTEGER,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)`);
-
-// Create property_assignments table (link properties to users)
-db.run(`CREATE TABLE IF NOT EXISTS property_assignments (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  property_id INTEGER NOT NULL,
-  user_id INTEGER NOT NULL,
-  assigned_by INTEGER,
-  assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  UNIQUE(property_id, user_id)
-)`);
-
-// Create property_media table for images and videos
-db.run(`CREATE TABLE IF NOT EXISTS property_media (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  property_id INTEGER NOT NULL,
-  filename TEXT NOT NULL,
-  media_type TEXT NOT NULL,
-  file_path TEXT NOT NULL,
-  uploaded_by INTEGER,
-  uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE
-)`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS "session" (
+    sid VARCHAR PRIMARY KEY,
+    sess JSON NOT NULL,
+    expire TIMESTAMP NOT NULL
+  )`);
+}
 
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
-// Input validation helpers
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function isValidEmail(email) {
   return typeof email === 'string' && EMAIL_REGEX.test(email);
@@ -171,78 +92,19 @@ function isValidPassword(pw) {
   return typeof pw === 'string' && pw.length >= 8 && pw.length <= 128;
 }
 
-// Session store selection: prefer Postgres, then disk-backed file store (SESSION_DIR), then MemoryStore.
 let sessionStore;
-let sessionStoreType = 'unknown'; // 'postgres' | 'file' | 'memory' | 'unknown'
-if (process.env.DATABASE_URL) {
-  try {
-    const { Pool } = require('pg');
-    const PgSession = require('connect-pg-simple')(session);
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false });
-    // Ensure session table exists (idempotent) but do not block session store creation
-    pool.query(`CREATE TABLE IF NOT EXISTS "session" (sid VARCHAR PRIMARY KEY, sess JSON NOT NULL, expire TIMESTAMP NOT NULL)`).catch(e => console.warn('Could not ensure session table exists:', e && e.message));
-    sessionStore = new PgSession({ pool });
-    sessionStoreType = 'postgres';
-    console.log('Using Postgres-backed session store')
-  } catch (e) {
-    console.warn('Postgres session store setup failed:', e && e.message);
-  }
-}
-
-// If no DATABASE_URL or Postgres setup failed, attempt disk-backed session store using SESSION_DIR
-if (!sessionStore && process.env.SESSION_DIR) {
-  try {
-    const FileStore = require('session-file-store')(session);
-    let sessionsDir = process.env.SESSION_DIR;
-
-    // Ensure the directory exists and is writable. If not, fall back to a temp dir.
-    try {
-      fs.mkdirSync(sessionsDir, { recursive: true });
-    } catch (e) {
-      console.warn('Could not create SESSION_DIR', sessionsDir, e && e.message);
-      sessionsDir = null;
-    }
-
-    if (sessionsDir) {
-      try {
-        fs.accessSync(sessionsDir, fs.constants.R_OK | fs.constants.W_OK);
-      } catch (e) {
-        console.warn('SESSION_DIR not writable, falling back to tmpdir:', sessionsDir, e && e.message);
-        sessionsDir = null;
-      }
-    }
-
-    if (!sessionsDir) {
-      // Create a dedicated temp sessions directory to avoid ENOENT noise
-      sessionsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sessions-'));
-      console.log('Using temporary sessions dir:', sessionsDir);
-    }
-
-    sessionStore = new FileStore({ path: sessionsDir, ttl: 86400 });
-    sessionStoreType = 'file';
-
-    // Log current directory contents for easier debugging on startup
-    try {
-      const files = fs.readdirSync(sessionsDir).slice(0, 20);
-      console.log('Session store directory contents:', sessionsDir, files.length ? files : '(empty)');
-    } catch (e) {
-      console.warn('Could not read SESSION_DIR contents:', e && e.message);
-    }
-
-    console.log('Using disk-backed session-file-store at', sessionsDir);
-  } catch (e) {
-    console.warn('session-file-store setup failed:', e && e.message);
-  }
-}
-
-// Final fallback to MemoryStore (not for production)
-if (!sessionStore) {
-  console.warn('No persistent session store configured � using MemoryStore (not for production)');
+let sessionStoreType = 'unknown';
+try {
+  const PgSession = require('connect-pg-simple')(session);
+  sessionStore = new PgSession({ pool });
+  sessionStoreType = 'postgres';
+  console.log('Using Postgres-backed session store');
+} catch (e) {
+  console.warn('Postgres session store setup failed:', e && e.message);
   sessionStore = new session.MemoryStore();
   sessionStoreType = 'memory';
 }
 
-// Trust reverse proxy (Render) so secure cookies and req.protocol work correctly
 app.set('trust proxy', 1);
 
 const cookieOptions = {
@@ -260,106 +122,116 @@ app.use(session({
   cookie: cookieOptions
 }));
 
-// Register
 app.post('/api/register', async (req, res) => {
   let { email, password, first_name, last_name, organization, phone_number, buy_box } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
   if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
+
   try {
     const hashed = await bcrypt.hash(password, 10);
-    db.run('INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [email, hashed, 'user', first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null], function(err) {
-      if (err) {
-        if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
-        return res.status(500).json({ error: 'db error' });
-      }
-      req.session.user = { id: this.lastID, email: email, role: 'user', first_name, last_name, organization, phone_number, buy_box };
-      res.json({ id: this.lastID, email: email, role: 'user', first_name, last_name, organization, phone_number, buy_box });
-    });
+    const result = await pool.query(
+      'INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+      [email, hashed, 'user', first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null]
+    );
+    const id = result.rows[0].id;
+    req.session.user = { id, email, role: 'user', first_name, last_name, organization, phone_number, buy_box };
+    res.json({ id, email, role: 'user', first_name, last_name, organization, phone_number, buy_box });
   } catch (e) {
+    if (e.code === '23505') return res.status(409).json({ error: 'email exists' });
     res.status(500).json({ error: 'server error' });
   }
 });
 
-// Login
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
   let { email, password } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
-  db.get('SELECT id, email, password, role, first_name, last_name, organization, phone_number, buy_box FROM users WHERE email = ?', [email], async (err, row) => {
-    if (err) return res.status(500).json({ error: 'db error' });
-    if (!row) return res.status(401).json({ error: 'invalid credentials' });
+
+  try {
+    const result = await pool.query(
+      'SELECT id, email, password, role, first_name, last_name, organization, phone_number, buy_box FROM users WHERE email = $1',
+      [email]
+    );
+    if (result.rows.length === 0) return res.status(401).json({ error: 'invalid credentials' });
+    const row = result.rows[0];
     const ok = await bcrypt.compare(password, row.password);
     if (!ok) return res.status(401).json({ error: 'invalid credentials' });
     req.session.user = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
     res.json({ id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box });
-  });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Logout
-app.post('/api/logout', (req, res) => {
+app.post('/api/logout', async (req, res) => {
   req.session.destroy(err => {
     if (err) return res.status(500).json({ error: 'logout failed' });
     res.json({ ok: true });
   });
 });
 
-// Current user
-app.get('/api/me', (req, res) => {
+app.get('/api/me', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ user: null });
   res.json({ user: req.session.user });
 });
 
-// Admin-only: list users with search & pagination
-app.get('/api/users', (req, res) => {
+app.get('/api/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const q = (req.query.q || '').trim().toLowerCase();
   const limit = Math.min(100, parseInt(req.query.limit || '10', 10) || 10);
   const offset = Math.max(0, parseInt(req.query.offset || '0', 10) || 0);
 
-  const where = q ? 'WHERE LOWER(email) LIKE ?' : '';
-  const params = q ? [`%${q}%`] : [];
-
-  db.get(`SELECT COUNT(*) as total FROM users ${where}`, params, (cerr, countRow) => {
-    if (cerr) return res.status(500).json({ error: 'db error' });
-    db.all(`SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box FROM users ${where} ORDER BY id DESC LIMIT ? OFFSET ?`, params.concat([limit, offset]), (err, rows) => {
-      if (err) return res.status(500).json({ error: 'db error' });
-      res.json({ users: rows, total: countRow.total });
-    });
-  });
+  try {
+    const countParams = [];
+    const listParams = [];
+    let where = '';
+    if (q) {
+      where = 'WHERE LOWER(email) LIKE $1';
+      countParams.push(`%${q}%`);
+      listParams.push(`%${q}%`);
+    }
+    listParams.push(limit, offset);
+    const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM users ${where}`, countParams);
+    const listResult = await pool.query(
+      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box FROM users ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      listParams
+    );
+    res.json({ users: listResult.rows, total: countResult.rows[0].total });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin-only: change role
-app.post('/api/users/:id/role', (req, res) => {
+app.post('/api/users/:id/role', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const adminId = req.session.user.id;
   const id = Number(req.params.id);
   if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
   const { role } = req.body || {};
   if (!['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
-  // Prevent admin from demoting/removing their own admin role accidentally
   if (adminId === id && role !== 'admin') return res.status(400).json({ error: 'cannot change own role' });
 
-  // Fetch existing user to log details
-  db.get('SELECT id, email, role FROM users WHERE id = ?', [id], (gerr, row) => {
-    if (gerr) return res.status(500).json({ error: 'db error' });
-    if (!row) return res.status(404).json({ error: 'not found' });
+  try {
+    const existingResult = await pool.query('SELECT id, email, role FROM users WHERE id = $1', [id]);
+    if (existingResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const row = existingResult.rows[0];
     const oldRole = row.role || 'user';
-    db.run('UPDATE users SET role = ? WHERE id = ?', [role, id], function (err) {
-      if (err) return res.status(500).json({ error: 'db error' });
-      // Log audit
-      try {
-        const details = JSON.stringify({ from: oldRole, to: role });
-        db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [adminId, `role_change`, id, row.email, details]);
-      } catch (e) { console.warn('Audit log failed', e && e.message); }
-      res.json({ ok: true });
-    });
-  });
+    await pool.query('UPDATE users SET role = $1 WHERE id = $2', [role, id]);
+    try {
+      const details = JSON.stringify({ from: oldRole, to: role });
+      await pool.query('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES ($1, $2, $3, $4, $5)', [adminId, 'role_change', id, row.email, details]);
+    } catch (e) {
+      console.warn('Audit log failed', e && e.message);
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin-only: create user
 app.post('/api/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   let { email, password, role, first_name, last_name, organization, phone_number, buy_box } = req.body || {};
@@ -368,248 +240,250 @@ app.post('/api/users', async (req, res) => {
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
   if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
   if (role && !['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
+
   try {
     const hashed = await bcrypt.hash(password, 10);
-    db.run('INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [email, hashed, (role || 'user'), first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null], function (err) {
-      if (err) {
-        if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
-        return res.status(500).json({ error: 'db error' });
-      }
-      // Log audit
-      try {
-        const details = JSON.stringify({ created: true, role: role || 'user' });
-        db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [req.session.user.id, `create_user`, this.lastID, email, details]);
-      } catch (e) { console.warn('Audit log failed', e && e.message); }
-      res.json({ id: this.lastID, email: email, role: role || 'user', first_name, last_name, organization, phone_number, buy_box });
-    });
+    const result = await pool.query(
+      'INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
+      [email, hashed, role || 'user', first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null]
+    );
+    const id = result.rows[0].id;
+    try {
+      const details = JSON.stringify({ created: true, role: role || 'user' });
+      await pool.query('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES ($1, $2, $3, $4, $5)', [req.session.user.id, 'create_user', id, email, details]);
+    } catch (e) {
+      console.warn('Audit log failed', e && e.message);
+    }
+    res.json({ id, email, role: role || 'user', first_name, last_name, organization, phone_number, buy_box });
   } catch (e) {
+    if (e.code === '23505') return res.status(409).json({ error: 'email exists' });
     res.status(500).json({ error: 'server error' });
   }
 });
 
-// Update user profile (own or admin-only for others)
-app.put('/api/users/:id', (req, res) => {
+app.put('/api/users/:id', async (req, res) => {
   const userId = req.session.user ? req.session.user.id : null;
   const userRole = req.session.user ? req.session.user.role : null;
-  
+
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
-  
+
   const id = Number(req.params.id);
   if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
-  
-  // Check if user can update: must be admin or updating their own profile
-  if (userRole !== 'admin' && userId !== id) {
-    return res.status(403).json({ error: 'forbidden' });
-  }
+  if (userRole !== 'admin' && userId !== id) return res.status(403).json({ error: 'forbidden' });
 
   const { first_name, last_name, organization, phone_number, buy_box } = req.body || {};
-  
-  // Build dynamic update statement
   const updates = [];
   const values = [];
-  
-  if (first_name !== undefined) { updates.push('first_name = ?'); values.push(first_name || null); }
-  if (last_name !== undefined) { updates.push('last_name = ?'); values.push(last_name || null); }
-  if (organization !== undefined) { updates.push('organization = ?'); values.push(organization || null); }
-  if (phone_number !== undefined) { updates.push('phone_number = ?'); values.push(phone_number || null); }
-  if (buy_box !== undefined) { updates.push('buy_box = ?'); values.push(buy_box || null); }
-  
+
+  if (first_name !== undefined) { updates.push(`first_name = $${updates.length + 1}`); values.push(first_name || null); }
+  if (last_name !== undefined) { updates.push(`last_name = $${updates.length + 1}`); values.push(last_name || null); }
+  if (organization !== undefined) { updates.push(`organization = $${updates.length + 1}`); values.push(organization || null); }
+  if (phone_number !== undefined) { updates.push(`phone_number = $${updates.length + 1}`); values.push(phone_number || null); }
+  if (buy_box !== undefined) { updates.push(`buy_box = $${updates.length + 1}`); values.push(buy_box || null); }
+
   if (updates.length === 0) {
     return res.status(400).json({ error: 'no fields to update' });
   }
 
   values.push(id);
-  const updateQuery = `UPDATE users SET ${updates.join(', ')} WHERE id = ?`;
-  
-  db.run(updateQuery, values, function (err) {
-    if (err) return res.status(500).json({ error: 'db error' });
-    if (this.changes === 0) return res.status(404).json({ error: 'not found' });
-    
-    // Fetch and return updated user
-    db.get('SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box FROM users WHERE id = ?', [id], (err, row) => {
-      if (err) return res.status(500).json({ error: 'db error' });
-      if (!row) return res.status(404).json({ error: 'not found' });
-      
-      // Update session if this is the logged-in user updating their own profile
-      if (userId === id) {
-        req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
-      }
-      
-      res.json(row);
-    });
-  });
+
+  try {
+    const updateResult = await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${values.length}`, values);
+    if (updateResult.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    const userResult = await pool.query('SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box FROM users WHERE id = $1', [id]);
+    if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const row = userResult.rows[0];
+    if (userId === id) {
+      req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
+    }
+    res.json(row);
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin-only: delete user
-app.delete('/api/users/:id', (req, res) => {
+app.delete('/api/users/:id', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const adminId = req.session.user.id;
   const id = Number(req.params.id);
-  // Prevent admin from deleting themselves
   if (adminId === id) return res.status(400).json({ error: 'cannot delete self' });
 
-  db.get('SELECT id, email FROM users WHERE id = ?', [id], (gerr, row) => {
-    if (gerr) return res.status(500).json({ error: 'db error' });
-    if (!row) return res.status(404).json({ error: 'not found' });
-    db.run('DELETE FROM users WHERE id = ?', [id], function (err) {
-      if (err) return res.status(500).json({ error: 'db error' });
-      // Log audit
-      try {
-        const details = JSON.stringify({ deleted: true });
-        db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [adminId, `delete_user`, id, row.email, details]);
-      } catch (e) { console.warn('Audit log failed', e && e.message); }
-      res.json({ ok: true });
-    });
-  });
+  try {
+    const existingResult = await pool.query('SELECT id, email FROM users WHERE id = $1', [id]);
+    if (existingResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const row = existingResult.rows[0];
+    await pool.query('DELETE FROM users WHERE id = $1', [id]);
+    try {
+      const details = JSON.stringify({ deleted: true });
+      await pool.query('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES ($1, $2, $3, $4, $5)', [adminId, 'delete_user', id, row.email, details]);
+    } catch (e) {
+      console.warn('Audit log failed', e && e.message);
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Audit logs viewer
-app.get('/api/audit-logs', (req, res) => {
+app.get('/api/audit-logs', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const q = (req.query.q || '').trim().toLowerCase();
   const limit = Math.min(100, parseInt(req.query.limit || '20', 10) || 20);
   const offset = Math.max(0, parseInt(req.query.offset || '0', 10) || 0);
-  const where = q ? 'WHERE LOWER(target_email) LIKE ? OR LOWER(action) LIKE ?' : '';
-  const params = q ? [`%${q}%`, `%${q}%`] : [];
-  db.get(`SELECT COUNT(*) as total FROM audit_logs ${where}`, params, (cerr, countRow) => {
-    if (cerr) return res.status(500).json({ error: 'db error' });
-    db.all(`SELECT id, admin_id, action, target_user_id, target_email, details, created_at FROM audit_logs ${where} ORDER BY id DESC LIMIT ? OFFSET ?`, params.concat([limit, offset]), (err, rows) => {
-      if (err) return res.status(500).json({ error: 'db error' });
-      res.json({ logs: rows, total: countRow.total });
-    });
-  });
+
+  try {
+    let where = '';
+    const countParams = [];
+    const listParams = [];
+    if (q) {
+      where = 'WHERE LOWER(target_email) LIKE $1 OR LOWER(action) LIKE $2';
+      countParams.push(`%${q}%`, `%${q}%`);
+      listParams.push(`%${q}%`, `%${q}%`);
+    }
+    listParams.push(limit, offset);
+    const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM audit_logs ${where}`, countParams);
+    const listResult = await pool.query(
+      `SELECT id, admin_id, action, target_user_id, target_email, details, created_at FROM audit_logs ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      listParams
+    );
+    res.json({ logs: listResult.rows, total: countResult.rows[0].total });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-
-// ===== PROPERTIES MEDIA ENDPOINTS =====
-
-// Upload media (image/video) to a property
-app.post('/api/properties/:id/media', (req, res) => {
+app.post('/api/properties/:id/media', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
   const { filename, mediaType, base64Data } = req.body || {};
   if (!filename || !mediaType || !base64Data) return res.status(400).json({ error: 'filename, mediaType, and base64Data required' });
-  
-  // Allow image and video types
+
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime'];
   if (!allowedTypes.includes(mediaType)) return res.status(400).json({ error: 'unsupported media type' });
-  
-  // Store media as base64 in DB for simplicity (or could save to disk)
-  db.run(
-    'INSERT INTO property_media (property_id, filename, media_type, file_path, uploaded_by) VALUES (?, ?, ?, ?, ?)',
-    [propId, filename, mediaType, base64Data, req.session.user.id],
-    function(err) {
-      if (err) return res.status(500).json({ error: 'db error' });
-      res.json({ id: this.lastID, filename, mediaType });
-    }
-  );
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO property_media (property_id, filename, media_type, file_path, uploaded_by) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+      [propId, filename, mediaType, base64Data, req.session.user.id]
+    );
+    res.json({ id: result.rows[0].id, filename, mediaType });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Get media for a property
-app.get('/api/properties/:id/media', (req, res) => {
+app.get('/api/properties/:id/media', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
-  
-  db.all('SELECT id, filename, media_type, uploaded_at FROM property_media WHERE property_id = ? ORDER BY uploaded_at DESC', [propId], (err, rows) => {
-    if (err) return res.status(500).json({ error: 'db error' });
-    res.json({ media: rows || [] });
-  });
+
+  try {
+    const result = await pool.query('SELECT id, filename, media_type, uploaded_at FROM property_media WHERE property_id = $1 ORDER BY uploaded_at DESC', [propId]);
+    res.json({ media: result.rows || [] });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Get single media file
-app.get('/api/properties/:id/media/:mediaId', (req, res) => {
+app.get('/api/properties/:id/media/:mediaId', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
   const propId = Number(req.params.id);
   const mediaId = Number(req.params.mediaId);
   if (!Number.isFinite(propId) || !Number.isFinite(mediaId)) return res.status(400).json({ error: 'invalid ids' });
-  
-  db.get('SELECT file_path, media_type FROM property_media WHERE id = ? AND property_id = ?', [mediaId, propId], (err, row) => {
-    if (err) return res.status(500).json({ error: 'db error' });
-    if (!row) return res.status(404).json({ error: 'not found' });
+
+  try {
+    const result = await pool.query('SELECT file_path, media_type FROM property_media WHERE id = $1 AND property_id = $2', [mediaId, propId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const row = result.rows[0];
     res.set('Content-Type', row.media_type);
     res.send(row.file_path);
-  });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Delete media
-app.delete('/api/properties/:id/media/:mediaId', (req, res) => {
+app.delete('/api/properties/:id/media/:mediaId', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   const mediaId = Number(req.params.mediaId);
   if (!Number.isFinite(propId) || !Number.isFinite(mediaId)) return res.status(400).json({ error: 'invalid ids' });
-  
-  db.run('DELETE FROM property_media WHERE id = ? AND property_id = ?', [mediaId, propId], function(err) {
-    if (err) return res.status(500).json({ error: 'db error' });
-    if (this.changes === 0) return res.status(404).json({ error: 'not found' });
+
+  try {
+    const result = await pool.query('DELETE FROM property_media WHERE id = $1 AND property_id = $2', [mediaId, propId]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
     res.json({ ok: true });
-  });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-
-// ===== PROPERTIES ENDPOINTS =====
-
-// Admin: create property
-app.post('/api/properties', (req, res) => {
+app.post('/api/properties', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const { pin, address, county } = req.body || {};
   if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
   if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
   if (!county || !county.trim()) return res.status(400).json({ error: 'county required' });
-  
-  db.run(
-    'INSERT INTO properties (pin, address, county, created_by) VALUES (?, ?, ?, ?)',
-    [pin.trim(), address.trim(), county.trim(), req.session.user.id],
-    function(err) {
-      if (err) return res.status(500).json({ error: 'db error' });
-      try {
-        const details = JSON.stringify({ pin, address, county });
-        db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'create_property', details]);
-      } catch (e) { console.warn('Audit log failed'); }
-      res.json({ id: this.lastID, pin, address, county });
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO properties (pin, address, county, created_by) VALUES ($1, $2, $3, $4) RETURNING id',
+      [pin.trim(), address.trim(), county.trim(), req.session.user.id]
+    );
+    try {
+      const details = JSON.stringify({ pin, address, county });
+      await pool.query('INSERT INTO audit_logs (admin_id, action, details) VALUES ($1, $2, $3)', [req.session.user.id, 'create_property', details]);
+    } catch (e) {
+      console.warn('Audit log failed');
     }
-  );
+    res.json({ id: result.rows[0].id, pin, address, county });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: list properties
-app.get('/api/properties', (req, res) => {
+app.get('/api/properties', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const q = (req.query.q || '').trim().toLowerCase();
   const limit = Math.min(100, parseInt(req.query.limit || '20', 10) || 20);
   const offset = Math.max(0, parseInt(req.query.offset || '0', 10) || 0);
-  
-  const where = q ? 'WHERE LOWER(pin) LIKE ? OR LOWER(address) LIKE ? OR LOWER(county) LIKE ?' : '';
-  const params = q ? [`%${q}%`, `%${q}%`, `%${q}%`] : [];
-  
-  db.get(`SELECT COUNT(*) as total FROM properties ${where}`, params, (cerr, countRow) => {
-    if (cerr) return res.status(500).json({ error: 'db error' });
-    db.all(
-      `SELECT id, pin, address, county, created_by, created_at, updated_at FROM properties ${where} ORDER BY id DESC LIMIT ? OFFSET ?`,
-      params.concat([limit, offset]),
-      (err, rows) => {
-        if (err) return res.status(500).json({ error: 'db error' });
-        res.json({ properties: rows || [], total: countRow.total });
-      }
+
+  try {
+    let where = '';
+    const countParams = [];
+    const listParams = [];
+    if (q) {
+      where = 'WHERE LOWER(pin) LIKE $1 OR LOWER(address) LIKE $2 OR LOWER(county) LIKE $3';
+      countParams.push(`%${q}%`, `%${q}%`, `%${q}%`);
+      listParams.push(`%${q}%`, `%${q}%`, `%${q}%`);
+    }
+    listParams.push(limit, offset);
+    const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM properties ${where}`, countParams);
+    const listResult = await pool.query(
+      `SELECT id, pin, address, county, created_by, created_at, updated_at FROM properties ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      listParams
     );
-  });
+    res.json({ properties: listResult.rows || [], total: countResult.rows[0].total });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: get single property
-app.get('/api/properties/:id', (req, res) => {
+app.get('/api/properties/:id', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
-  
-  db.get('SELECT id, pin, address, county, created_by, created_at, updated_at FROM properties WHERE id = ?', [propId], (err, prop) => {
-    if (err) return res.status(500).json({ error: 'db error' });
-    if (!prop) return res.status(404).json({ error: 'not found' });
-    res.json(prop);
-  });
+
+  try {
+    const result = await pool.query('SELECT id, pin, address, county, created_by, created_at, updated_at FROM properties WHERE id = $1', [propId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    res.json(result.rows[0]);
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: edit property
-app.put('/api/properties/:id', (req, res) => {
+app.put('/api/properties/:id', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
@@ -617,160 +491,155 @@ app.put('/api/properties/:id', (req, res) => {
   if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
   if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
   if (!county || !county.trim()) return res.status(400).json({ error: 'county required' });
-  
-  db.run(
-    'UPDATE properties SET pin = ?, address = ?, county = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-    [pin.trim(), address.trim(), county.trim(), propId],
-    function(err) {
-      if (err) return res.status(500).json({ error: 'db error' });
-      if (this.changes === 0) return res.status(404).json({ error: 'not found' });
-      try {
-        const details = JSON.stringify({ property_id: propId, pin, address, county });
-        db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'edit_property', details]);
-      } catch (e) { console.warn('Audit log failed'); }
-      res.json({ ok: true });
+
+  try {
+    const result = await pool.query(
+      'UPDATE properties SET pin = $1, address = $2, county = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4',
+      [pin.trim(), address.trim(), county.trim(), propId]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    try {
+      const details = JSON.stringify({ property_id: propId, pin, address, county });
+      await pool.query('INSERT INTO audit_logs (admin_id, action, details) VALUES ($1, $2, $3)', [req.session.user.id, 'edit_property', details]);
+    } catch (e) {
+      console.warn('Audit log failed');
     }
-  );
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: delete property
-app.delete('/api/properties/:id', (req, res) => {
+app.delete('/api/properties/:id', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
-  
-  db.run('DELETE FROM properties WHERE id = ?', [propId], function(err) {
-    if (err) return res.status(500).json({ error: 'db error' });
-    if (this.changes === 0) return res.status(404).json({ error: 'not found' });
+
+  try {
+    const result = await pool.query('DELETE FROM properties WHERE id = $1', [propId]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
     try {
       const details = JSON.stringify({ property_id: propId });
-      db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'delete_property', details]);
-    } catch (e) { console.warn('Audit log failed'); }
+      await pool.query('INSERT INTO audit_logs (admin_id, action, details) VALUES ($1, $2, $3)', [req.session.user.id, 'delete_property', details]);
+    } catch (e) {
+      console.warn('Audit log failed');
+    }
     res.json({ ok: true });
-  });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: assign property to user(s)
-app.post('/api/properties/:id/assign', (req, res) => {
+app.post('/api/properties/:id/assign', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
   const { userIds } = req.body || {};
   if (!Array.isArray(userIds) || userIds.length === 0) return res.status(400).json({ error: 'userIds array required' });
-  
-  // Verify property exists
-  db.get('SELECT id FROM properties WHERE id = ?', [propId], (gerr, prop) => {
-    if (gerr) return res.status(500).json({ error: 'db error' });
-    if (!prop) return res.status(404).json({ error: 'property not found' });
-    
-    // Assign to each user (ignore duplicates via UNIQUE constraint)
-    let remaining = userIds.length;
+
+  try {
+    const propertyResult = await pool.query('SELECT id FROM properties WHERE id = $1', [propId]);
+    if (propertyResult.rows.length === 0) return res.status(404).json({ error: 'property not found' });
+
     let assigned = 0;
-    userIds.forEach(uid => {
+    for (const uid of userIds) {
       const userId = Number(uid);
-      if (!Number.isFinite(userId)) {
-        remaining--;
-        return;
-      }
-      db.run(
-        'INSERT OR IGNORE INTO property_assignments (property_id, user_id, assigned_by) VALUES (?, ?, ?)',
-        [propId, userId, req.session.user.id],
-        function(err) {
-          if (!err && this.changes > 0) assigned++;
-          remaining--;
-          if (remaining === 0) {
-            try {
-              const details = JSON.stringify({ property_id: propId, user_count: assigned });
-              db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'assign_property', details]);
-            } catch (e) { console.warn('Audit log failed'); }
-            res.json({ ok: true, assigned });
-          }
-        }
+      if (!Number.isFinite(userId)) continue;
+      const result = await pool.query(
+        'INSERT INTO property_assignments (property_id, user_id, assigned_by) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
+        [propId, userId, req.session.user.id]
       );
-    });
-  });
+      if (result.rowCount > 0) assigned++;
+    }
+
+    try {
+      const details = JSON.stringify({ property_id: propId, user_count: assigned });
+      await pool.query('INSERT INTO audit_logs (admin_id, action, details) VALUES ($1, $2, $3)', [req.session.user.id, 'assign_property', details]);
+    } catch (e) {
+      console.warn('Audit log failed');
+    }
+
+    res.json({ ok: true, assigned });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Remove property assignment
-app.delete('/api/properties/:id/assign/:userId', (req, res) => {
+app.delete('/api/properties/:id/assign/:userId', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   const userId = Number(req.params.userId);
   if (!Number.isFinite(propId) || !Number.isFinite(userId)) return res.status(400).json({ error: 'invalid ids' });
-  
-  db.run('DELETE FROM property_assignments WHERE property_id = ? AND user_id = ?', [propId, userId], function(err) {
-    if (err) return res.status(500).json({ error: 'db error' });
+
+  try {
+    await pool.query('DELETE FROM property_assignments WHERE property_id = $1 AND user_id = $2', [propId, userId]);
     res.json({ ok: true });
-  });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// User: get assigned properties (read-only)
-app.get('/api/me/properties', (req, res) => {
+app.get('/api/me/properties', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
   const userId = req.session.user.id;
-  
-  db.all(
-    `SELECT p.id, p.pin, p.address, p.county, p.created_at, pa.assigned_at
-     FROM properties p
-     JOIN property_assignments pa ON p.id = pa.property_id
-     WHERE pa.user_id = ?
-     ORDER BY pa.assigned_at DESC`,
-    [userId],
-    (err, rows) => {
-      if (err) return res.status(500).json({ error: 'db error' });
-      res.json({ properties: rows || [] });
-    }
-  );
+
+  try {
+    const result = await pool.query(
+      `SELECT p.id, p.pin, p.address, p.county, p.created_at, pa.assigned_at
+       FROM properties p
+       JOIN property_assignments pa ON p.id = pa.property_id
+       WHERE pa.user_id = $1
+       ORDER BY pa.assigned_at DESC`,
+      [userId]
+    );
+    res.json({ properties: result.rows || [] });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: list users for a property (for assignment UI)
-app.get('/api/properties/:id/users', (req, res) => {
+app.get('/api/properties/:id/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
-  
-  db.all(
-    `SELECT u.id, u.email, 
-            CASE WHEN pa.id IS NOT NULL THEN 1 ELSE 0 END as assigned
-     FROM users u
-     LEFT JOIN property_assignments pa ON u.id = pa.user_id AND pa.property_id = ?
-     ORDER BY u.email`,
-    [propId],
-    (err, rows) => {
-      if (err) return res.status(500).json({ error: 'db error' });
-      res.json({ users: rows || [] });
-    }
-  );
+
+  try {
+    const result = await pool.query(
+      `SELECT u.id, u.email,
+              CASE WHEN pa.id IS NOT NULL THEN 1 ELSE 0 END as assigned
+       FROM users u
+       LEFT JOIN property_assignments pa ON u.id = pa.user_id AND pa.property_id = $1
+       ORDER BY u.email`,
+      [propId]
+    );
+    res.json({ users: result.rows || [] });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
+async function initializeAdminUser() {
+  if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
+    return;
+  }
 
-if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
-  (async () => {
-    try {
-      const adminEmail = process.env.ADMIN_EMAIL.toLowerCase();
-      const adminPass = process.env.ADMIN_PASSWORD;
-      const hashed = await bcrypt.hash(adminPass, 10);
-      db.get('SELECT id FROM users WHERE email = ?', [adminEmail], (err, row) => {
-        if (err) return console.warn('Could not query for admin user:', err && err.message);
-        if (row) {
-          db.run('UPDATE users SET password = ?, role = ? WHERE id = ?', [hashed, 'admin', row.id], function (uerr) {
-            if (uerr) return console.warn('Could not update admin user:', uerr && uerr.message);
-            console.log('Updated admin user:', adminEmail);
-          });
-        } else {
-          db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [adminEmail, hashed, 'admin'], function (ierr) {
-            if (ierr) return console.warn('Could not create admin user:', ierr && ierr.message);
-            console.log('Created admin user:', adminEmail);
-          });
-        }
-      });
-    } catch (e) {
-      console.warn('Admin setup failed:', e && e.message);
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL.toLowerCase();
+    const adminPass = process.env.ADMIN_PASSWORD;
+    const hashed = await bcrypt.hash(adminPass, 10);
+    const existingResult = await pool.query('SELECT id FROM users WHERE email = $1', [adminEmail]);
+    if (existingResult.rows.length > 0) {
+      await pool.query('UPDATE users SET password = $1, role = $2 WHERE id = $3', [hashed, 'admin', existingResult.rows[0].id]);
+      console.log('Updated admin user:', adminEmail);
+    } else {
+      await pool.query('INSERT INTO users (email, password, role) VALUES ($1, $2, $3)', [adminEmail, hashed, 'admin']);
+      console.log('Created admin user:', adminEmail);
     }
-  })();
+  } catch (e) {
+    console.warn('Admin setup failed:', e && e.message);
+  }
 }
 
-// Serve a favicon route (prefer client/dist then client/public)
 app.get('/favicon.ico', (req, res) => {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');
   const publicDir = path.join(__dirname, '..', 'client', 'public');
@@ -790,7 +659,6 @@ app.get('/favicon.ico', (req, res) => {
   res.status(404).end();
 });
 
-// Serve site.webmanifest from dist or public
 app.get('/site.webmanifest', (req, res) => {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');
   const publicDir = path.join(__dirname, '..', 'client', 'public');
@@ -801,25 +669,19 @@ app.get('/site.webmanifest', (req, res) => {
   res.status(404).end();
 });
 
-// Lightweight status endpoint to report which session store is active
-app.get('/api/status', (req, res) => {
+app.get('/api/status', async (req, res) => {
   res.json({ sessionStore: sessionStoreType, hasDatabaseUrl: !!process.env.DATABASE_URL });
 });
 
-// Serve client in production
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
 if (require('fs').existsSync(clientDist)) {
   app.use(express.static(clientDist));
-  // Serve index.html for any unmatched route without registering a path pattern
   app.use((req, res) => res.sendFile(path.join(clientDist, 'index.html')));
 }
 
-// Generic error handler (must be registered after routes)
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err && err.stack ? err.stack : err);
-  // If headers already sent, delegate to default handler
   if (res.headersSent) return next(err);
-  // Provide helpful JSON error for XHR/API calls, otherwise a plain message
   if (req.headers['accept'] && req.headers['accept'].includes('application/json')) {
     res.status(err && err.statusCode ? err.statusCode : 500).json({ error: (err && err.message) || 'internal server error' });
   } else {
@@ -827,7 +689,13 @@ app.use((err, req, res, next) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
-
-
+(async () => {
+  try {
+    await initializeSchema();
+    await initializeAdminUser();
+    app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
+  } catch (err) {
+    console.error('Failed to start server:', err && err.stack ? err.stack : err);
+    process.exit(1);
+  }
+})();
