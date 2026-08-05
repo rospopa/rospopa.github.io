@@ -383,16 +383,34 @@ if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
   })();
 }
 
-// Serve a favicon route (serve existing PNG or SVG as /favicon.ico)
+// Serve a favicon route (prefer client/dist then client/public)
 app.get('/favicon.ico', (req, res) => {
-  // Prefer an actual favicon.ico if present in public, else serve the 32x32 PNG
+  const clientDist = path.join(__dirname, '..', 'client', 'dist');
   const publicDir = path.join(__dirname, '..', 'client', 'public');
-  const icoPath = path.join(publicDir, 'favicon.ico');
-  const pngPath = path.join(publicDir, 'favicon-32x32.png');
-  const svgPath = path.join(publicDir, 'favicon.svg');
-  if (fs.existsSync(icoPath)) return res.sendFile(icoPath);
-  if (fs.existsSync(pngPath)) return res.sendFile(pngPath);
-  if (fs.existsSync(svgPath)) return res.sendFile(svgPath);
+  const candidates = [
+    path.join(clientDist, 'favicon.ico'),
+    path.join(clientDist, 'favicon-32x32.png'),
+    path.join(clientDist, 'favicon.svg'),
+    path.join(publicDir, 'favicon.ico'),
+    path.join(publicDir, 'favicon-32x32.png'),
+    path.join(publicDir, 'favicon.svg')
+  ];
+  for (const p of candidates) {
+    if (fs.existsSync(p)) {
+      return res.sendFile(p);
+    }
+  }
+  res.status(404).end();
+});
+
+// Serve site.webmanifest from dist or public
+app.get('/site.webmanifest', (req, res) => {
+  const clientDist = path.join(__dirname, '..', 'client', 'dist');
+  const publicDir = path.join(__dirname, '..', 'client', 'public');
+  const m1 = path.join(clientDist, 'site.webmanifest');
+  const m2 = path.join(publicDir, 'site.webmanifest');
+  if (fs.existsSync(m1)) return res.sendFile(m1);
+  if (fs.existsSync(m2)) return res.sendFile(m2);
   res.status(404).end();
 });
 
