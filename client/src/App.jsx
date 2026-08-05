@@ -79,6 +79,29 @@ export default function App() {
   return (
     <div className="app-root">
       <div className="dynamic-bg" aria-hidden="true">
+        <svg className="bg-clouds" viewBox="0 0 1200 140" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="#ffffff" opacity="0.9" d="M50 60c20-20 80-20 120 0s60 40 120 20 140-40 220 0 140 40 200 20 100-60 160-40v40H50z">
+            <animate attributeName="d" dur="14s" repeatCount="indefinite" values="M50 60c20-20 80-20 120 0s60 40 120 20 140-40 220 0 140 40 200 20 100-60 160-40v40H50z;
+                                                                                             M30 70c30-30 90-10 140 10s40 30 110 10 160-30 200 10 120 40 180 0 120-80 180-40v40H30z;
+                                                                                             M60 50c10-10 70-30 130-10s70 50 140 30 120-30 200 0 160 60 220 20 100-60 160-40v40H60z;
+                                                                                             M50 60c20-20 80-20 120 0s60 40 120 20 140-40 220 0 140 40 200 20 100-60 160-40v40H50z" />
+          </path>
+
+          <path fill="#ffffff" opacity="0.85" d="M600 40c30-12 80-8 120 6s50 30 110 18 100-28 160-4 90 40 150 20v30H600z">
+            <animate attributeName="d" dur="18s" repeatCount="indefinite" values="M600 40c30-12 80-8 120 6s50 30 110 18 100-28 160-4 90 40 150 20v30H600z;
+                                                                                              M580 50c20-20 70-10 110 4s60 34 120 22 90-20 150 0 120 40 160 10v30H580z;
+                                                                                              M620 30c10-6 60-22 110-6s40 36 100 22 120-18 180 6 100 34 140 6v30H620z;
+                                                                                              M600 40c30-12 80-8 120 6s50 30 110 18 100-28 160-4 90 40 150 20v30H600z" />
+          </path>
+
+          <path fill="#ffffff" opacity="0.8" d="M1000 80c-30-20-80-40-140-20s-80 50-140 40-120-20-180 0-120 10-180-10v30h740z">
+            <animate attributeName="d" dur="16s" repeatCount="indefinite" values="M1000 80c-30-20-80-40-140-20s-80 50-140 40-120-20-180 0-120 10-180-10v30h740z;
+                                                                                                 M980 70c-20-10-70-30-120-14s-70 44-130 34-140-16-200 6-100 30-160 10v30h820z;
+                                                                                                 M1020 90c-40-30-90-50-150-30s-90 60-150 50-100-10-160 10-140 14-200-6v30h840z;
+                                                                                                 M1000 80c-30-20-80-40-140-20s-80 50-140 40-120-20-180 0-120 10-180-10v30h740z" />
+          </path>
+        </svg>
+
         <svg className="bg-buildings" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
             <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
@@ -87,7 +110,7 @@ export default function App() {
           </defs>
 
           {/* Morphing clouds (top of background) */}
-          <g className="clouds" aria-hidden="true">
+          <g className="clouds" aria-hidden="true" style={{display: 'none'}}>
             <path fill="#ffffff" opacity="0.9" d="M50 60c20-20 80-20 120 0s60 40 120 20 140-40 220 0 140 40 200 20 100-60 160-40v40H50z">
               <animate attributeName="d" dur="14s" repeatCount="indefinite" values="M50 60c20-20 80-20 120 0s60 40 120 20 140-40 220 0 140 40 200 20 100-60 160-40v40H50z;
                                                                                                M30 70c30-30 90-10 140 10s40 30 110 10 160-30 200 10 120 40 180 0 120-80 180-40v40H30z;
