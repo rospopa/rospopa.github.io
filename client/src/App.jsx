@@ -887,12 +887,19 @@ export default function App() {
   const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null })
   const [authChecked, setAuthChecked] = useState(false)
 
+  function navigateTo(p) { setPage(p); localStorage.setItem('rep_page', p) }
+
   // Restore session on page load/refresh
   useEffect(() => {
     fetch('/api/me', { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
-        if (data.user) { setCurrentUser(data.user); setPage('dashboard') }
+        if (data.user) {
+          setCurrentUser(data.user)
+          const saved = localStorage.getItem('rep_page')
+          const validPages = ['dashboard', 'properties', 'profile', 'users', 'audit']
+          setPage(saved && validPages.includes(saved) ? saved : 'dashboard')
+        }
       })
       .catch(() => {})
       .finally(() => setAuthChecked(true))
@@ -922,6 +929,7 @@ export default function App() {
 
   async function logout() {
     await fetch('/api/logout', { method: 'POST', credentials: 'include' }).catch(() => {})
+    localStorage.removeItem('rep_page')
     setCurrentUser(null); setPage('login'); setEmail(''); setPassword('')
   }
 
@@ -976,7 +984,7 @@ export default function App() {
     <button
       key={id}
       className={`btn btn-sm ${page === id ? 'btn-primary' : 'btn-ghost'}`}
-      onClick={() => setPage(id)}
+      onClick={() => navigateTo(id)}
     >
       {label}
     </button>
@@ -998,7 +1006,7 @@ export default function App() {
         <div className="flex-none flex items-center gap-3">
           <button
             className={`btn btn-sm ${page === 'profile' ? 'btn-primary' : 'btn-ghost'} flex items-center gap-2 max-w-[220px]`}
-            onClick={() => setPage('profile')}
+            onClick={() => navigateTo('profile')}
           >
             <Avatar src={currentUser.profile_photo} name={[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email} size="sm" />
             <span className="truncate">{currentUser.email}</span>
@@ -1018,8 +1026,8 @@ export default function App() {
             <p className="text-base-content/50 text-lg mb-2">{currentUser.email}</p>
             <span className="badge badge-primary mb-8">{currentUser.role}</span>
             <div className="flex justify-center gap-4 mt-6">
-              <button className="btn btn-primary" onClick={() => setPage('properties')}>View Properties</button>
-              {currentUser.role === 'admin' && <button className="btn btn-outline" onClick={() => setPage('users')}>Manage Users</button>}
+              <button className="btn btn-primary" onClick={() => navigateTo('properties')}>View Properties</button>
+              {currentUser.role === 'admin' && <button className="btn btn-outline" onClick={() => navigateTo('users')}>Manage Users</button>}
             </div>
           </div>
         )}
