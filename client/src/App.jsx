@@ -82,7 +82,7 @@ export default function App() {
       <div className="auth-column">
         <div className="card auth-card center">
           <Logo />
-          <h2>{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
+          <h2>{mode === 'login' ? 'Commercial Real Estate Investor Portal' : 'Create account'}</h2>
 
           <form onSubmit={submit} className="form">
           <label className="field">
