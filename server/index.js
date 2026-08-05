@@ -124,17 +124,18 @@ async function initializeSessionMiddleware() {
     sessionStoreType = 'memory';
   }
 
+  const isProduction = process.env.NODE_ENV === 'production' || !!process.env.RENDER;
   const cookieOptions = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+    secure: isProduction,
+    sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
   };
 
   _sessionMiddleware = session({
     store: sessionStore,
     secret: process.env.SESSION_SECRET || 'change-this-secret',
-    resave: false,
+    resave: true,
     saveUninitialized: false,
     rolling: true,
     cookie: cookieOptions
@@ -157,7 +158,10 @@ app.post('/api/register', async (req, res) => {
     const id = result.rows[0].id;
     const userObj = { id, email, role: 'user', first_name, last_name, organization, phone_number, buy_box };
     req.session.user = userObj;
-    res.json({ user: userObj });
+    req.session.save(err => {
+      if (err) return res.status(500).json({ error: 'session save failed' });
+      res.json({ user: userObj });
+    });
   } catch (e) {
     if (e.code === '23505') return res.status(409).json({ error: 'email exists' });
     res.status(500).json({ error: 'server error' });
@@ -181,7 +185,10 @@ app.post('/api/login', async (req, res) => {
     if (!ok) return res.status(401).json({ error: 'invalid credentials' });
     const userObj = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box, profile_photo: row.profile_photo };
     req.session.user = userObj;
-    res.json({ user: userObj });
+    req.session.save(err => {
+      if (err) return res.status(500).json({ error: 'session save failed' });
+      res.json({ user: userObj });
+    });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
   }
