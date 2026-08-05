@@ -136,8 +136,9 @@ app.post('/api/register', async (req, res) => {
       [email, hashed, 'user', first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null]
     );
     const id = result.rows[0].id;
-    req.session.user = { id, email, role: 'user', first_name, last_name, organization, phone_number, buy_box };
-    res.json({ id, email, role: 'user', first_name, last_name, organization, phone_number, buy_box });
+    const userObj = { id, email, role: 'user', first_name, last_name, organization, phone_number, buy_box };
+    req.session.user = userObj;
+    res.json({ user: userObj });
   } catch (e) {
     if (e.code === '23505') return res.status(409).json({ error: 'email exists' });
     res.status(500).json({ error: 'server error' });
@@ -159,8 +160,9 @@ app.post('/api/login', async (req, res) => {
     const row = result.rows[0];
     const ok = await bcrypt.compare(password, row.password);
     if (!ok) return res.status(401).json({ error: 'invalid credentials' });
-    req.session.user = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
-    res.json({ id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box });
+    const userObj = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
+    req.session.user = userObj;
+    res.json({ user: userObj });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
   }
