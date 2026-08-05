@@ -79,7 +79,7 @@ export default function App() {
   return (
     <div className="app-root">
       <div className="dynamic-bg" aria-hidden="true">
-        <svg className="bg-buildings" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg className="bg-buildings" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
             <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
               <feDropShadow dx="0" dy="4" stdDeviation="6" floodColor="#000" floodOpacity="0.08" />

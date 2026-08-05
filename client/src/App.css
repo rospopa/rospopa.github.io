@@ -8,7 +8,7 @@ body{margin:0;background:#ffffff;color:#000000;-webkit-font-smoothing:antialiase
 .app-root{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:40px;gap:0;max-width:100%;background:#fff}
 
 /* Animated subtle 'stars' background (black dots that gently glimmer) */
-.dynamic-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+.dynamic-bg{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:visible}
 .dynamic-bg::before{
   /* fine star field (very subtle) */
   content:'';position:absolute;inset:0;background-image:radial-gradient(circle, rgba(0,0,0,0.04) 1px, transparent 1px);background-size:22px 22px;opacity:0.08;filter:blur(0.6px)}
@@ -17,7 +17,7 @@ body{margin:0;background:#ffffff;color:#000000;-webkit-font-smoothing:antialiase
   content:'';position:absolute;inset:0;background-image:radial-gradient(circle, rgba(0,0,0,0.06) 1px, transparent 2px);background-size:80px 80px;opacity:0.03;animation:twinkle 10s linear infinite}
 
 /* SVG building background */
-.bg-buildings{position:absolute;left:0;right:0;bottom:0;width:120%;height:45vh;z-index:0;pointer-events:none;opacity:0.95}
+.bg-buildings{position:absolute;left:0;top:0;right:0;bottom:auto;width:120%;height:60vh;z-index:0;pointer-events:none;opacity:0.95;transform:translateY(-4vh)}
 .bg-buildings .layer{transform-origin:center bottom}
 .bg-buildings .layer-3{animation:pan3 30s linear infinite}
 .bg-buildings .layer-2{animation:pan2 22s linear infinite}
