@@ -84,7 +84,8 @@ async function initializeSchema() {
 }
 
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: '60mb' }));
+app.use(express.urlencoded({ limit: '60mb', extended: true }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -405,8 +406,20 @@ app.get('/api/properties/:id/media/:mediaId', async (req, res) => {
     const result = await pool.query('SELECT file_path, media_type FROM property_media WHERE id = $1 AND property_id = $2', [mediaId, propId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const row = result.rows[0];
+    // file_path stores a base64 data URL like "data:image/jpeg;base64,/9j/..."
+    // strip the prefix and decode to binary buffer
+    const dataUrl = row.file_path;
+    const base64Index = dataUrl.indexOf(',');
+    if (base64Index === -1) {
+      // fallback: send raw
+      res.set('Content-Type', row.media_type);
+      return res.send(dataUrl);
+    }
+    const base64 = dataUrl.substring(base64Index + 1);
+    const buffer = Buffer.from(base64, 'base64');
     res.set('Content-Type', row.media_type);
-    res.send(row.file_path);
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(buffer);
   } catch (e) {
     res.status(500).json({ error: 'db error' });
   }
