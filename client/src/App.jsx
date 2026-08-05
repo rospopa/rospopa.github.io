@@ -83,7 +83,8 @@ export default function App() {
       </div>
       <div className="auth-column">
         <div className="card auth-card center">
-          <h2>{mode === 'login' ? 'Commercial Real Estate Investor Portal' : 'Create account'}</h2>
+          <h2>{mode === 'login' ? 'Login' : 'Create an account'}</h2>
+          <div className="small muted">Commercial Real Estate Investor Portal</div>
 
           <form onSubmit={submit} className="form">
           <label className="field">
@@ -97,28 +98,26 @@ export default function App() {
           {msg && <div className="error">{msg}</div>}
 
           <div className="actions">
-            <button className={"btn primary" + (mode==='login' ? ' active' : '')} type="submit" disabled={loading} aria-pressed={mode === 'login'}>
+            <button className={"btn primary"} type="submit" disabled={loading} aria-pressed={false}>
               {loading ? 'Working...' : (
                 <>
-                  <svg className="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 6L9 17l-5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  Login
+                  {mode === 'login' ? (
+                    <svg className="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 17l5-5-5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M5 17v-10" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  ) : (
+                    <svg className="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 11a4 4 0 1 0-8 0" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 15v4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 17h-4" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                  )}
+                  {mode === 'login' ? 'Login' : 'Create account'}
                 </>
               )}
             </button>
 
-            <button type="button" className={"btn ghost" + (mode!=='login' ? ' active' : '')} onClick={() => setMode(mode === 'login' ? 'register' : 'login')} aria-pressed={mode !== 'login'}>
+            <div className="toggle">
               {mode === 'login' ? (
-                <>
-                  <svg className="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 5v14M5 12h14" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  Create an account
-                </>
+                <button type="button" className="link-btn" onClick={() => setMode('register')}>Don't have an account? Create one</button>
               ) : (
-                <>
-                  <svg className="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2v12" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/><path d="M19 9h-14" stroke="#000" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  Login
-                </>
+                <button type="button" className="link-btn" onClick={() => setMode('login')}>Already have an account? Login</button>
               )}
-            </button>
+            </div>
           </div>
           </form>
         </div>
