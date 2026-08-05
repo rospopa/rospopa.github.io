@@ -138,12 +138,12 @@ function Logo() {
       </div>
       <div className="flex flex-col leading-none">
         <span style={{
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 700,
-          fontSize: '1.4rem',
-          letterSpacing: '0.25em',
+          fontFamily: "'Playfair Display', serif",
+          fontWeight: 900,
+          fontSize: '1.8rem',
+          letterSpacing: '0.15em',
           textTransform: 'uppercase',
-          background: 'linear-gradient(135deg, #2d6a2d 0%, #4caf50 45%, #a8d5a2 100%)',
+          background: 'linear-gradient(135deg, #1a4d1a 0%, #3a8c3a 45%, #7dc47d 100%)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
