@@ -86,7 +86,6 @@ async function initializeSchema() {
 const app = express();
 app.use(express.json({ limit: '60mb' }));
 app.use(express.urlencoded({ limit: '60mb', extended: true }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function isValidEmail(email) {
@@ -117,8 +116,8 @@ app.set('trust proxy', 1);
 const cookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
-  domain: process.env.COOKIE_DOMAIN || '.rospopa.com'
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
 };
 
 app.use(session({
@@ -126,6 +125,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'change-this-secret',
   resave: false,
   saveUninitialized: false,
+  rolling: true,
   cookie: cookieOptions
 }));
 
