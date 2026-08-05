@@ -540,25 +540,19 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-base-200">
-      <nav className="navbar bg-base-100 shadow-md sticky top-0 z-50">
-        <div className="flex-1">
+      <nav className="navbar bg-base-100 shadow-md sticky top-0 z-50 gap-2">
+        <div className="flex-none">
           <Logo />
         </div>
-        <div className="flex-none">
-          <div className="dropdown dropdown-end">
-            <div className="btn btn-ghost" tabIndex="0">
-              <span className="text-sm">{currentUser.email}</span>
-              <svg className="fill-current" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M7.41,8.58L12,13.17l4.59,-4.59L18,10l-6,6 -6,-6Z"/></svg>
-            </div>
-            <ul className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
-              <li><a onClick={() => setPage(currentUser.role === 'admin' ? 'users' : 'properties')}>Dashboard</a></li>
-              <li><a onClick={() => setPage('profile')}>My Profile</a></li>
-              {currentUser.role === 'admin' && <li><a onClick={() => setPage('users')}>Users</a></li>}
-              {currentUser.role === 'admin' && <li><a onClick={() => setPage('properties')}>Properties</a></li>}
-              {currentUser.role === 'admin' && <li><a onClick={() => setPage('audit')}>Audit Logs</a></li>}
-              <li><a onClick={logout}>Logout</a></li>
-            </ul>
-          </div>
+        <div className="flex-1 flex gap-1">
+          <button className={`btn btn-sm ${page === 'dashboard' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setPage('dashboard')}>Dashboard</button>
+          <button className={`btn btn-sm ${page === 'properties' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setPage('properties')}>Properties</button>
+          {currentUser.role === 'admin' && <button className={`btn btn-sm ${page === 'users' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setPage('users')}>Users</button>}
+          {currentUser.role === 'admin' && <button className={`btn btn-sm ${page === 'audit' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setPage('audit')}>Audit Logs</button>}
+        </div>
+        <div className="flex-none flex items-center gap-2">
+          <button className={`btn btn-sm ${page === 'profile' ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setPage('profile')}>{currentUser.email}</button>
+          <button className="btn btn-sm btn-outline btn-error" onClick={logout}>Logout</button>
         </div>
       </nav>
       <main className="container mx-auto p-4 py-8">
