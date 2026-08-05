@@ -2,12 +2,13 @@ import { useEffect, useState } from 'react'
 
 function Logo() {
   return (
-    <div className="logo" aria-hidden="true">
-      <svg width="40" height="40" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" role="img">
-      <circle cx="12" cy="12" r="10" fill="#000" />
-      <circle cx="12" cy="12" r="6" fill="#fff" />
-      <circle cx="12" cy="12" r="2" fill="#000" />
-      </svg>
+    <div className="flex items-center gap-2">
+      <div className="avatar placeholder">
+        <div className="bg-primary text-white rounded-full w-8">
+          <span className="text-sm">RE</span>
+        </div>
+      </div>
+      <span className="font-bold text-lg">RealEstate Portal</span>
     </div>
   )
 }
@@ -15,15 +16,18 @@ function Logo() {
 function Modal({ open, title, message, onConfirm, onCancel }) {
   if (!open) return null;
   return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="modal">
-        <h3>{title}</h3>
-        <p>{message}</p>
-        <div className="modal-actions">
+    <div className="modal modal-open">
+      <div className="modal-box">
+        <h3 className="font-bold text-lg">{title}</h3>
+        <p className="py-4">{message}</p>
+        <div className="modal-action">
           <button className="btn" onClick={onCancel}>Cancel</button>
-          <button className="btn primary" onClick={onConfirm}>Confirm</button>
+          <button className="btn btn-primary" onClick={onConfirm}>Confirm</button>
         </div>
       </div>
+      <form method="dialog" className="modal-backdrop" onClick={onCancel}>
+        <button>close</button>
+      </form>
     </div>
   );
 }
@@ -40,30 +44,55 @@ function AddUserForm({ onCreated }) {
     setMsg('');
     setLoading(true);
     try {
-      const res = await fetch('/api/users', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, role }) });
-      const data = await res.json().catch(()=>({}));
+      const res = await fetch('/api/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, role })
+      });
+      const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setMsg(data.error || 'Create failed');
         return;
       }
-      setEmail(''); setPassword(''); setRole('user');
+      setEmail('');
+      setPassword('');
+      setRole('user');
       setMsg('User created');
       if (onCreated) onCreated();
     } catch (e) {
       setMsg('Network error');
-    } finally { setLoading(false); setTimeout(()=>setMsg(''),3000); }
+    } finally {
+      setLoading(false);
+      setTimeout(() => setMsg(''), 3000);
+    }
   }
 
   return (
-    <form onSubmit={createUser} style={{display:'flex',gap:8,alignItems:'center',marginBottom:12}}>
-      <input placeholder="email" value={email} onChange={e=>setEmail(e.target.value)} required />
-      <input placeholder="password" value={password} onChange={e=>setPassword(e.target.value)} type="password" required />
-      <select value={role} onChange={e=>setRole(e.target.value)}>
+    <form onSubmit={createUser} className="flex flex-col gap-3 mb-4">
+      <input
+        type="email"
+        placeholder="Email"
+        value={email}
+        onChange={e => setEmail(e.target.value)}
+        className="input input-bordered"
+        required
+      />
+      <input
+        type="password"
+        placeholder="Password"
+        value={password}
+        onChange={e => setPassword(e.target.value)}
+        className="input input-bordered"
+        required
+      />
+      <select value={role} onChange={e => setRole(e.target.value)} className="select select-bordered">
         <option value="user">user</option>
         <option value="admin">admin</option>
       </select>
-      <button className="btn" type="submit" disabled={loading}>{loading? 'Creating...':'Create user'}</button>
-      {msg && <div className="small muted" style={{marginLeft:8}}>{msg}</div>}
+      <button className="btn btn-primary" type="submit" disabled={loading}>
+        {loading ? 'Creating...' : 'Create user'}
+      </button>
+      {msg && <div className="text-sm text-gray-500">{msg}</div>}
     </form>
   );
 }
@@ -79,751 +108,501 @@ function AuditLogs() {
   async function fetchLogs() {
     setLoading(true);
     try {
-      const offset = (page-1)*perPage;
-      const res = await fetch(`/api/audit-logs?q=${encodeURIComponent(q)}&limit=${perPage}&offset=${offset}`);
-      if (!res.ok) {
-        setLogs([]); setTotal(0); return;
-      }
+      const res = await fetch(`/api/audit-logs?q=${encodeURIComponent(q)}&page=${page}&perPage=${perPage}`);
       const data = await res.json();
-      setLogs(data.logs||[]); setTotal(data.total||0);
+      setLogs(data.logs || []);
+      setTotal(data.total || 0);
     } catch (e) {
-      setLogs([]); setTotal(0);
-    } finally { setLoading(false); }
+      console.error('Fetch logs failed:', e);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  useEffect(()=>{ fetchLogs(); }, [page, perPage]);
+  useEffect(() => { fetchLogs(); }, [page, perPage]);
 
   return (
-    <div>
-      <div style={{display:'flex',gap:8,alignItems:'center'}}>
-        <input placeholder="Search email or action" value={q} onChange={e=>setQ(e.target.value)} />
-        <button className="btn" onClick={()=>{ setPage(1); fetchLogs(); }}>Search</button>
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <input
+          type="text"
+          placeholder="Search email or action"
+          value={q}
+          onChange={e => setQ(e.target.value)}
+          className="input input-bordered flex-1"
+        />
+        <button className="btn btn-primary" onClick={() => { setPage(1); fetchLogs(); }}>
+          Search
+        </button>
       </div>
-      {loading ? <div style={{marginTop:12}}>Loading logs...</div> : (
-        <>
-        <table className="users-table" style={{width:'100%', marginTop:12}}>
-          <thead><tr><th>When</th><th>Admin ID</th><th>Action</th><th>Target</th><th>Details</th></tr></thead>
+      <div className="overflow-x-auto">
+        <table className="table table-zebra">
+          <thead>
+            <tr>
+              <th>Email</th>
+              <th>Action</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
           <tbody>
-            {logs.map(l => (
-              <tr key={l.id}><td>{l.created_at}</td><td>{l.admin_id}</td><td>{l.action}</td><td>{l.target_email} ({l.target_user_id})</td><td style={{maxWidth:360,overflow:'hidden',textOverflow:'ellipsis'}}>{l.details}</td></tr>
+            {logs.map((log, i) => (
+              <tr key={i}>
+                <td>{log.email}</td>
+                <td>{log.action}</td>
+                <td>{new Date(log.timestamp).toLocaleString()}</td>
+              </tr>
             ))}
           </tbody>
         </table>
-        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginTop:12}}>
-          <div className="small muted">Total: {total}</div>
-          <div style={{display:'flex',gap:8,alignItems:'center'}}>
-            <button className="btn" onClick={() => setPage(p => Math.max(1,p-1))} disabled={page===1}>Prev</button>
-            <div className="small">Page {page} / {Math.max(1, Math.ceil(total/perPage))}</div>
-            <button className="btn" onClick={() => setPage(p => Math.min(Math.max(1, Math.ceil(total/perPage)), p+1))} disabled={page>=Math.max(1, Math.ceil(total/perPage))}>Next</button>
-          </div>
-        </div>
-        </>
-      )}
+      </div>
+      <div className="flex justify-center gap-2">
+        <button
+          className="btn btn-sm"
+          onClick={() => setPage(p => Math.max(1, p - 1))}
+          disabled={page === 1 || loading}
+        >
+          Prev
+        </button>
+        <span className="flex items-center px-4">Page {page}/{Math.max(1, Math.ceil(total / perPage))}</span>
+        <button
+          className="btn btn-sm"
+          onClick={() => setPage(p => Math.min(Math.max(1, Math.ceil(total / perPage)), p + 1))}
+          disabled={page >= Math.max(1, Math.ceil(total / perPage)) || loading}
+        >
+          Next
+        </button>
+      </div>
     </div>
   );
 }
 
-function UsersTable({ currentUser }) {
-  const [users, setUsers] = useState([]);
-  const [loadingUsers, setLoadingUsers] = useState(false);
-  const [error, setError] = useState('');
-  const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null });
-  const [toast, setToast] = useState({ text: '', type: '' });
+function UsersTable({ users, onEdit, onDelete, onReload }) {
   const [query, setQuery] = useState('');
-  const [page, setPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   async function fetchUsers() {
-    if (!currentUser || currentUser.role !== 'admin') {
-      setError('forbidden');
-      setUsers([]);
-      return;
-    }
-    setLoadingUsers(true);
-    setError('');
+    setLoading(true);
     try {
-      const offset = (page - 1) * perPage;
-      const res = await fetch(`/api/users?q=${encodeURIComponent(query)}&limit=${perPage}&offset=${offset}`);
-      if (!res.ok) {
-        const data = await res.json().catch(()=>({}));
-        setError(data.error || 'Failed to load users');
-        setUsers([]);
-        return;
-      }
+      const res = await fetch(`/api/users?q=${encodeURIComponent(query)}&perPage=${perPage}&page=${page}`);
       const data = await res.json();
-      setUsers(data.users || []);
-      setTotal(data.total || 0);
+      if (data.users) onReload(data.users);
     } catch (e) {
-      setError('Network error');
-      setUsers([]);
+      console.error('Fetch failed:', e);
     } finally {
-      setLoadingUsers(false);
+      setLoading(false);
     }
   }
 
   useEffect(() => { fetchUsers(); }, [page, perPage]);
 
-  function showToast(text, type='success') {
-    setToast({ text, type });
-    setTimeout(() => setToast({ text: '', type: '' }), 4000);
-  }
-
-  function confirmAction(title, message, fn) {
-    setModal({ open: true, title, message, onConfirm: async () => { setModal(m => ({ ...m, open: false })); await fn(); } });
-  }
-
-  async function doChangeRole(id, role) {
-    try {
-      const res = await fetch(`/api/users/${id}/role`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ role }) });
-      const data = await res.json().catch(()=>({}));
-      if (!res.ok) return showToast(data.error || 'Role change failed', 'error');
-      showToast('Role updated');
-      await fetchUsers();
-    } catch (e) {
-      showToast('Network error', 'error');
-    }
-  }
-
-  async function doDeleteUser(id) {
-    try {
-      const res = await fetch(`/api/users/${id}`, { method: 'DELETE' });
-      const data = await res.json().catch(()=>({}));
-      if (!res.ok) return showToast(data.error || 'Delete failed', 'error');
-      showToast('User deleted');
-      // If deleting last user on page, step back a page
-      const remaining = users.length - 1;
-      const totalPages = Math.max(1, Math.ceil((total - 1) / perPage));
-      if (page > totalPages) setPage(totalPages);
-      await fetchUsers();
-    } catch (e) {
-      showToast('Network error', 'error');
-    }
-  }
-
-  function onSearch(e) {
-    setQuery(e.target.value);
-    setPage(1);
-  }
-
   return (
-    <div>
-      {toast.text && <div className={`toast ${toast.type}`}>{toast.text}</div>}
-      {error && <div className="error">{error}</div>}
-
-      <div style={{display:'flex', gap:8, alignItems:'center', marginTop:8}}>
-        <input placeholder="Search email" value={query} onChange={onSearch} />
-        <button className="btn" onClick={() => fetchUsers()}>Search</button>
-        <div style={{marginLeft:'auto', display:'flex', gap:8, alignItems:'center'}}>
-          <label className="small muted">Per page</label>
-          <select value={perPage} onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }}>
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-          </select>
-        </div>
+    <div className="space-y-4">
+      <div className="flex gap-2">
+        <input
+          type="email"
+          placeholder="Search email"
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          className="input input-bordered flex-1"
+        />
+        <button className="btn btn-primary" onClick={() => { setPage(1); fetchUsers(); }}>
+          Search
+        </button>
       </div>
-
-      {loadingUsers ? <div style={{marginTop:12}}>Loading users...</div> : (
-        <>
-        <table className="users-table" style={{width:'100%', marginTop:12}}>
+      <div className="overflow-x-auto">
+        <table className="table table-zebra">
           <thead>
-            <tr><th>Email</th><th>Role</th><th>Actions</th></tr>
+            <tr>
+              <th>Email</th>
+              <th>Role</th>
+              <th>First Name</th>
+              <th>Last Name</th>
+              <th>Organization</th>
+              <th>Phone</th>
+              <th>Actions</th>
+            </tr>
           </thead>
           <tbody>
-            {users.map(u => (
-              <tr key={u.id}>
+            {users.map((u, i) => (
+              <tr key={i}>
                 <td>{u.email}</td>
-                <td>{u.role}</td>
+                <td><div className="badge badge-primary">{u.role}</div></td>
+                <td>{u.first_name || '-'}</td>
+                <td>{u.last_name || '-'}</td>
+                <td>{u.organization || '-'}</td>
+                <td>{u.phone_number || '-'}</td>
                 <td>
-                  {u.role !== 'admin' && <button className="btn" onClick={() => confirmAction('Promote user', `Promote ${u.email} to admin?`, () => doChangeRole(u.id, 'admin'))}>Promote</button>}
-                  {u.role === 'admin' && currentUser && currentUser.id !== u.id && <button className="btn" onClick={() => confirmAction('Demote user', `Demote ${u.email} to regular user?`, () => doChangeRole(u.id, 'user'))}>Demote</button>}
-                  {currentUser && currentUser.id !== u.id && <button className="btn" onClick={() => confirmAction('Delete user', `Delete user ${u.email}? This cannot be undone.`, () => doDeleteUser(u.id))}>Delete</button>}
+                  <div className="flex gap-1">
+                    <button className="btn btn-xs btn-ghost" onClick={() => onEdit(u)}>Edit</button>
+                    <button className="btn btn-xs btn-error" onClick={() => onDelete(u.id, u.email)}>Del</button>
+                  </div>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-
-        <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginTop:12}}>
-          <div className="small muted">Total: {total}</div>
-          <div style={{display:'flex', gap:8, alignItems:'center'}}>
-            <button className="btn" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</button>
-            <div className="small">Page {page} / {Math.max(1, Math.ceil(total / perPage))}</div>
-            <button className="btn" onClick={() => setPage(p => Math.min(Math.max(1, Math.ceil(total / perPage)), p + 1))} disabled={page >= Math.max(1, Math.ceil(total / perPage))}>Next</button>
-          </div>
-        </div>
-        </>
-      )}
-
-      <Modal open={modal.open} title={modal.title} message={modal.message} onConfirm={modal.onConfirm} onCancel={() => setModal(m => ({ ...m, open: false }))} />
-    </div>
-  );
-}
-
-function PropertyDetailModal({ property, isOpen, onClose, isAdmin, onMediaUploaded, onMediaDeleted }) {
-  const [media, setMedia] = useState([]);
-  const [currentMediaIndex, setCurrentMediaIndex] = useState(0);
-  const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState('');
-  const [fileInput, setFileInput] = useState(null);
-
-  useEffect(() => {
-    if (isOpen && property) fetchMedia();
-  }, [isOpen, property]);
-
-  async function fetchMedia() {
-    try {
-      const res = await fetch(`/api/properties/${property.id}/media`);
-      if (!res.ok) throw new Error('Failed to load media');
-      const data = await res.json();
-      setMedia(data.media || []);
-      setCurrentMediaIndex(0);
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
-  async function handleFileSelect(e) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
-    setError('');
-    try {
-      const reader = new FileReader();
-      reader.onload = async () => {
-        const base64Data = reader.result;
-        const res = await fetch(`/api/properties/${property.id}/media`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            filename: file.name,
-            mediaType: file.type,
-            base64Data
-          })
-        });
-        if (!res.ok) throw new Error('Upload failed');
-        await fetchMedia();
-        if (onMediaUploaded) onMediaUploaded();
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function handleDeleteMedia(mediaId) {
-    if (!window.confirm('Delete this media?')) return;
-    try {
-      const res = await fetch(`/api/properties/${property.id}/media/${mediaId}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Delete failed');
-      await fetchMedia();
-      if (onMediaDeleted) onMediaDeleted();
-    } catch (err) {
-      setError(err.message);
-    }
-  }
-
-  if (!isOpen || !property) return null;
-
-  const currentMedia = media[currentMediaIndex];
-
-  return (
-    <div className="modal-backdrop" role="dialog" aria-modal="true">
-      <div className="property-detail-modal">
-        {/* Carousel Section */}
-        <div className="carousel-section">
-          {media.length > 0 ? (
-            <>
-              <div className="carousel">
-                <img 
-                  src={`/api/properties/${property.id}/media/${currentMedia.id}`} 
-                  alt={currentMedia.filename}
-                  style={{ maxWidth: '100%', maxHeight: '300px', objectFit: 'contain' }}
-                />
-              </div>
-              <div className="carousel-controls">
-                <button onClick={() => setCurrentMediaIndex((i) => (i - 1 + media.length) % media.length)} disabled={media.length <= 1}>◀</button>
-                <span>{currentMediaIndex + 1} / {media.length}</span>
-                <button onClick={() => setCurrentMediaIndex((i) => (i + 1) % media.length)} disabled={media.length <= 1}>▶</button>
-              </div>
-            </>
-          ) : (
-            <div className="carousel no-media">No images or videos yet</div>
-          )}
-        </div>
-
-        {/* Property Details Sections */}
-        <div className="property-detail-section pin-section">{property.pin}</div>
-        <div className="property-detail-section address-section">{property.address}</div>
-        <div className="property-detail-section county-section">{property.county}</div>
-
-        {/* Media Management (Admin only) */}
-        {isAdmin && (
-          <div className="media-management">
-            <button className="btn primary" onClick={() => fileInput?.click()} disabled={uploading}>
-              {uploading ? 'Uploading...' : '+ Add Media'}
-            </button>
-            <input
-              ref={setFileInput}
-              type="file"
-              accept="image/*,video/*"
-              onChange={handleFileSelect}
-              style={{ display: 'none' }}
-            />
-            {media.length > 0 && (
-              <div className="media-list">
-                <h4>Media Files</h4>
-                {media.map((m) => (
-                  <div key={m.id} className="media-item">
-                    <span>{m.filename}</span>
-                    <button className="btn" onClick={() => handleDeleteMedia(m.id)}>Delete</button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {error && <div className="error">{error}</div>}
-
-        <div className="modal-actions">
-          <button className="btn" onClick={onClose}>Close</button>
+      </div>
+      <div className="flex justify-between items-center">
+        <select value={perPage} onChange={e => { setPerPage(Number(e.target.value)); setPage(1); }} className="select select-bordered select-sm">
+          <option value={10}>10</option>
+          <option value={25}>25</option>
+          <option value={50}>50</option>
+        </select>
+        <div className="flex gap-2">
+          <button className="btn btn-sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>Prev</button>
+          <button className="btn btn-sm" onClick={() => setPage(p => p + 1)}>Next</button>
         </div>
       </div>
     </div>
   );
 }
 
-function PropertiesPage({ currentUser, isAdmin }) {
+function PropertyDetailModal({ open, property, onClose, onSave }) {
+  const [pin, setPin] = useState(property?.pin || '');
+  const [address, setAddress] = useState(property?.address || '');
+  const [county, setCounty] = useState(property?.county || '');
+
+  useEffect(() => {
+    if (property) {
+      setPin(property.pin || '');
+      setAddress(property.address || '');
+      setCounty(property.county || '');
+    }
+  }, [property]);
+
+  if (!open) return null;
+
+  async function handleSave() {
+    if (!pin.trim() || !address.trim() || !county.trim()) {
+      alert('All fields required');
+      return;
+    }
+    await onSave({ ...property, pin, address, county });
+    onClose();
+  }
+
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box max-w-2xl">
+        <h3 className="font-bold text-lg mb-4">{property?.id ? 'Edit Property' : 'New Property'}</h3>
+        <div className="space-y-3">
+          <div className="form-control">
+            <label className="label"><span className="label-text">PIN(s)</span></label>
+            <input
+              type="text"
+              placeholder="Property ID numbers"
+              value={pin}
+              onChange={e => setPin(e.target.value)}
+              className="input input-bordered"
+            />
+          </div>
+          <div className="form-control">
+            <label className="label"><span className="label-text">Address</span></label>
+            <input
+              type="text"
+              placeholder="Property address"
+              value={address}
+              onChange={e => setAddress(e.target.value)}
+              className="input input-bordered"
+            />
+          </div>
+          <div className="form-control">
+            <label className="label"><span className="label-text">County</span></label>
+            <input
+              type="text"
+              placeholder="County"
+              value={county}
+              onChange={e => setCounty(e.target.value)}
+              className="input input-bordered"
+            />
+          </div>
+        </div>
+        <div className="modal-action">
+          <button className="btn" onClick={onClose}>Cancel</button>
+          <button className="btn btn-primary" onClick={handleSave}>Save</button>
+        </div>
+      </div>
+      <form method="dialog" className="modal-backdrop" onClick={onClose}>
+        <button>close</button>
+      </form>
+    </div>
+  );
+}
+
+function PropertiesPage({ user }) {
   const [properties, setProperties] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [showForm, setShowForm] = useState(false);
-  const [editingId, setEditingId] = useState(null);
-  const [formData, setFormData] = useState({ pin: '', address: '', county: '' });
-  const [assignModal, setAssignModal] = useState({ open: false, propertyId: null, users: [] });
-  const [assignLoading, setAssignLoading] = useState(false);
   const [selectedProperty, setSelectedProperty] = useState(null);
-  const [detailModalOpen, setDetailModalOpen] = useState(false);
+  const [showPropertyModal, setShowPropertyModal] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   async function fetchProperties() {
     setLoading(true);
-    setError('');
     try {
-      if (isAdmin) {
-        const res = await fetch('/api/properties?limit=100');
-        if (!res.ok) throw new Error('Failed to load properties');
-        const data = await res.json();
-        setProperties(data.properties || []);
-      } else {
-        const res = await fetch('/api/me/properties');
-        if (!res.ok) throw new Error('Failed to load properties');
-        const data = await res.json();
-        setProperties(data.properties || []);
-      }
-    } catch (err) {
-      setError(err.message);
+      const res = await fetch(`/api/properties?${user.role === 'admin' ? 'allProps=true' : ''}`);
+      const data = await res.json();
+      setProperties(data.properties || []);
+    } catch (e) {
+      console.error('Failed to fetch properties:', e);
     } finally {
       setLoading(false);
     }
   }
 
-  useEffect(() => {
-    fetchProperties();
-  }, [isAdmin]);
+  useEffect(() => { fetchProperties(); }, [user.role]);
 
-  async function handleSaveProperty(e) {
-    e.preventDefault();
-    if (!formData.pin.trim() || !formData.address.trim() || !formData.county.trim()) {
-      setError('All fields required');
-      return;
-    }
-    
-    setLoading(true);
+  async function saveProperty(prop) {
     try {
-      const url = editingId ? `/api/properties/${editingId}` : '/api/properties';
-      const method = editingId ? 'PUT' : 'POST';
-      const res = await fetch(url, {
+      const method = prop.id ? 'PUT' : 'POST';
+      const endpoint = prop.id ? `/api/properties/${prop.id}` : '/api/properties';
+      const res = await fetch(endpoint, {
         method,
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(prop)
       });
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || 'Save failed');
+      if (res.ok) {
+        await fetchProperties();
       }
-      setShowForm(false);
-      setEditingId(null);
-      setFormData({ pin: '', address: '', county: '' });
+    } catch (e) {
+      console.error('Failed to save property:', e);
+    }
+  }
+
+  async function deleteProperty(id) {
+    try {
+      await fetch(`/api/properties/${id}`, { method: 'DELETE' });
       await fetchProperties();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    } catch (e) {
+      console.error('Delete failed:', e);
     }
-  }
-
-  async function handleDeleteProperty(id) {
-    if (!window.confirm('Delete this property?')) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`/api/properties/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Delete failed');
-      await fetchProperties();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function handleEditClick(prop) {
-    setFormData({ pin: prop.pin, address: prop.address, county: prop.county });
-    setEditingId(prop.id);
-    setShowForm(true);
-  }
-
-  async function handleAssignClick(propId) {
-    setAssignLoading(true);
-    try {
-      const res = await fetch(`/api/properties/${propId}/users`);
-      if (!res.ok) throw new Error('Failed to load users');
-      const data = await res.json();
-      setAssignModal({ open: true, propertyId: propId, users: data.users || [] });
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setAssignLoading(false);
-    }
-  }
-
-  async function handleToggleAssign(userId, currentAssigned) {
-    setAssignLoading(true);
-    try {
-      if (currentAssigned) {
-        const res = await fetch(`/api/properties/${assignModal.propertyId}/assign/${userId}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error('Unassign failed');
-      } else {
-        const res = await fetch(`/api/properties/${assignModal.propertyId}/assign`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ userIds: [userId] })
-        });
-        if (!res.ok) throw new Error('Assign failed');
-      }
-      // Update local state
-      setAssignModal(m => ({
-        ...m,
-        users: m.users.map(u => u.id === userId ? { ...u, assigned: currentAssigned ? 0 : 1 } : u)
-      }));
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setAssignLoading(false);
-    }
-  }
-
-  if (!isAdmin) {
-    return (
-      <div>
-        {error && <div className="error">{error}</div>}
-        {loading ? <div>Loading properties...</div> : (
-          properties.length === 0 ? (
-            <div className="muted small" style={{ marginTop: 12 }}>No properties assigned yet.</div>
-          ) : (
-            <div className="properties-grid" style={{ marginTop: 12 }}>
-              {properties.map(p => (
-                <div 
-                  key={p.id} 
-                  className="property-card clickable"
-                  onClick={() => { setSelectedProperty(p); setDetailModalOpen(true); }}
-                >
-                  <div className="property-pin">{p.pin}</div>
-                  <div className="property-address">{p.address}</div>
-                  <div className="property-county">{p.county}</div>
-                </div>
-              ))}
-            </div>
-          )
-        )}
-        <PropertyDetailModal
-          property={selectedProperty}
-          isOpen={detailModalOpen}
-          onClose={() => { setDetailModalOpen(false); setSelectedProperty(null); }}
-          isAdmin={false}
-        />
-      </div>
-    );
   }
 
   return (
-    <div>
-      {error && <div className="error">{error}</div>}
-      <button className="btn primary" onClick={() => { setShowForm(true); setEditingId(null); setFormData({ pin: '', address: '', county: '' }); }} disabled={loading}>
-        {loading ? '...' : '+ New Property'}
-      </button>
-
-      {showForm && (
-        <form onSubmit={handleSaveProperty} style={{ marginTop: 12, padding: 12, border: '1px solid #ddd', borderRadius: 4 }}>
-          <h4>{editingId ? 'Edit Property' : 'New Property'}</h4>
-          <div style={{ marginBottom: 8 }}>
-            <label>PIN<br /></label>
-            <input value={formData.pin} onChange={e => setFormData({...formData, pin: e.target.value})} placeholder="Property Identification Number" required />
-          </div>
-          <div style={{ marginBottom: 8 }}>
-            <label>Address<br /></label>
-            <input value={formData.address} onChange={e => setFormData({...formData, address: e.target.value})} placeholder="Street address" required />
-          </div>
-          <div style={{ marginBottom: 8 }}>
-            <label>County<br /></label>
-            <input value={formData.county} onChange={e => setFormData({...formData, county: e.target.value})} placeholder="County" required />
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn" type="submit" disabled={loading}>{loading ? 'Saving...' : 'Save'}</button>
-            <button className="btn" type="button" onClick={() => { setShowForm(false); setEditingId(null); }}>Cancel</button>
-          </div>
-        </form>
+    <div className="space-y-6">
+      {user.role === 'admin' && (
+        <button className="btn btn-primary" onClick={() => { setSelectedProperty(null); setShowPropertyModal(true); }}>
+          + New Property
+        </button>
       )}
-
-      {loading ? <div style={{ marginTop: 12 }}>Loading...</div> : (
-        <div className="properties-grid" style={{ marginTop: 12 }}>
-          {properties.map(p => (
-            <div key={p.id} className="property-card">
-              <div 
-                onClick={() => { setSelectedProperty(p); setDetailModalOpen(true); }}
-                style={{ cursor: 'pointer', marginBottom: '8px' }}
-              >
-                <div className="property-pin">{p.pin}</div>
-                <div className="property-address">{p.address}</div>
-                <div className="property-county">{p.county}</div>
-              </div>
-              <div className="property-card-actions" style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
-                <button className="btn btn-sm" onClick={() => handleEditClick(p)}>Edit</button>
-                <button className="btn btn-sm" onClick={() => handleAssignClick(p.id)}>Users</button>
-                <button className="btn btn-sm" onClick={() => handleDeleteProperty(p.id)}>Delete</button>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {assignModal.open && (
-        <div className="modal-backdrop" role="dialog" aria-modal="true">
-          <div className="modal" style={{ maxWidth: 400 }}>
-            <h3>Assign Property to Users</h3>
-            <div style={{ maxHeight: 300, overflowY: 'auto' }}>
-              {assignModal.users.map(u => (
-                <label key={u.id} style={{ display: 'flex', alignItems: 'center', marginBottom: 8, cursor: 'pointer' }}>
-                  <input
-                    type="checkbox"
-                    checked={u.assigned}
-                    onChange={() => handleToggleAssign(u.id, !!u.assigned)}
-                    disabled={assignLoading}
-                    style={{ marginRight: 8 }}
-                  />
-                  {u.email}
-                </label>
-              ))}
-            </div>
-            <div className="modal-actions">
-              <button className="btn" onClick={() => setAssignModal({...assignModal, open: false})}>Done</button>
-            </div>
-          </div>
-        </div>
-      )}
-
       <PropertyDetailModal
+        open={showPropertyModal}
         property={selectedProperty}
-        isOpen={detailModalOpen}
-        onClose={() => { setDetailModalOpen(false); setSelectedProperty(null); }}
-        isAdmin={isAdmin}
-        onMediaUploaded={fetchProperties}
-        onMediaDeleted={fetchProperties}
+        onClose={() => setShowPropertyModal(false)}
+        onSave={async (p) => { await saveProperty(p); }}
       />
+      <div className="grid gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+        {properties.map((prop, i) => (
+          <div key={i} className="card bg-base-100 shadow-md hover:shadow-lg cursor-pointer" onClick={() => {
+            setSelectedProperty(prop);
+            if (user.role === 'admin') setShowPropertyModal(true);
+          }}>
+            <div className="card-body">
+              <h2 className="card-title text-lg">{prop.address}</h2>
+              <p className="text-sm text-gray-600">{prop.county}</p>
+              <p className="text-xs text-gray-500">PIN: {prop.pin}</p>
+              {user.role === 'admin' && (
+                <div className="card-actions">
+                  <button className="btn btn-xs btn-primary" onClick={(e) => { e.stopPropagation(); setSelectedProperty(prop); setShowPropertyModal(true); }}>
+                    Edit
+                  </button>
+                  <button className="btn btn-xs btn-error" onClick={(e) => { e.stopPropagation(); deleteProperty(prop.id); }}>
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
 export default function App() {
-  const [user, setUser] = useState(null)
-  const [mode, setMode] = useState('login')
-  const [form, setForm] = useState({ email: '', password: '' })
-  const [msg, setMsg] = useState('')
-  const [loading, setLoading] = useState(false)
+  const [currentUser, setCurrentUser] = useState(null);
+  const [users, setUsers] = useState([]);
+  const [page, setPage] = useState('login');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [isRegister, setIsRegister] = useState(false);
+  const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null });
 
-  useEffect(() => {
-    fetch('/api/me')
-      .then(r => r.json())
-      .then(data => setUser(data.user || null))
-      .catch(() => setUser(null))
-  }, [])
-
-  // Global fetch wrapper for simple error handling for client-side calls
-  async function apiFetch(url, opts) {
+  async function login(e) {
+    e.preventDefault();
+    setMsg('');
+    setLoading(true);
     try {
-      const res = await fetch(url, opts);
-      const contentType = res.headers.get('content-type') || '';
-      const isJson = contentType.includes('application/json');
-      let payload;
-      if (isJson) payload = await res.json().catch(()=>({}));
-      if (!res.ok) {
-        const err = new Error(payload && payload.error ? payload.error : 'Request failed');
-        err.status = res.status;
-        err.payload = payload;
-        throw err;
-      }
-      return payload;
-    } catch (err) {
-      // Normalize network errors
-      if (err instanceof TypeError) throw new Error('Network error');
-      throw err;
-    }
-  }
-
-  function handleChange(e) {
-    setForm({ ...form, [e.target.name]: e.target.value })
-  }
-
-  async function submit(e) {
-    e.preventDefault()
-    setMsg('')
-    setLoading(true)
-    const url = mode === 'login' ? '/api/login' : '/api/register'
-    try {
-      const res = await fetch(url, {
+      const res = await fetch('/api/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form)
-      })
-      const data = await res.json()
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
       if (!res.ok) {
-        setMsg(data.error || 'Request failed')
-        setLoading(false)
-        return
+        setMsg(data.error || 'Login failed');
+        return;
       }
-      setUser({ id: data.id, email: data.email, role: data.role || 'user' })
-      setForm({ email: '', password: '' })
-    } catch (err) {
-      setMsg('Network error')
+      setCurrentUser(data.user);
+      setPage('dashboard');
+      setEmail('');
+      setPassword('');
+    } catch (e) {
+      setMsg('Network error');
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
-  async function logout() {
-    await fetch('/api/logout', { method: 'POST' })
-    setUser(null)
+  async function register(e) {
+    e.preventDefault();
+    setMsg('');
+    setLoading(true);
+    try {
+      const res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMsg(data.error || 'Register failed');
+        return;
+      }
+      setCurrentUser(data.user);
+      setPage('dashboard');
+      setEmail('');
+      setPassword('');
+    } catch (e) {
+      setMsg('Network error');
+    } finally {
+      setLoading(false);
+    }
   }
 
-  const [page, setPage] = useState('Dashboard');
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  function logout() {
+    setCurrentUser(null);
+    setPage('login');
+    setEmail('');
+    setPassword('');
+  }
 
-  if (user) {
-    const isAdmin = user.role === 'admin';
-    const menu = isAdmin ? ['Dashboard', 'Properties', 'Users', 'Account', 'Logout'] : ['Dashboard', 'Properties', 'Account', 'Logout'];
-
-    function handleNav(item) {
-      if (item === 'Logout') return logout();
-      setPage(item);
-    }
-
+  if (!currentUser) {
     return (
-      <div className="app-root">
-        <div className="top-nav card">
-          <div className="logo" aria-hidden="true"><Logo /></div>
-          <button className="mobile-toggle" onClick={() => setMobileNavOpen(o => !o)} aria-expanded={mobileNavOpen} aria-label="Toggle menu">☰</button>
-          <nav className={`nav ${mobileNavOpen ? 'mobile-open' : 'mobile-hidden'}`}>
-            {menu.map(item => (
-              <button key={item} className={`nav-item ${page === item ? 'active' : ''}`} onClick={() => { handleNav(item); setMobileNavOpen(false); }}>{item}</button>
-            ))}
-          </nav>
-        </div>
-
-        <div className="content-area">
-          <div className="card center">
-            <h2>{page}</h2>
-            <div className="muted small">Signed in as {user.email} ({user.role})</div>
-
-                    {/* Pages */}
-            {page === 'Dashboard' && <div style={{marginTop:18}}>Welcome to the dashboard. Replace with real widgets.</div>}
-            {page === 'Properties' && <PropertiesPage currentUser={user} isAdmin={isAdmin} />}
-
-            {page === 'Users' && isAdmin && (
-              <div style={{marginTop:18, width:'100%'}}>
-                <AddUserForm onCreated={() => { /* reload users via UsersTable effect by toggling key */ }} />
-                <UsersTable currentUser={user} key={String(Math.random())} />
-                <div style={{marginTop:12}}>
-                  <button className="btn" onClick={() => setPage('Audit Logs')}>View Audit Logs</button>
-                </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+        <div className="card w-96 bg-base-100 shadow-xl">
+          <div className="card-body">
+            <h2 className="card-title mb-6 justify-center">
+              <Logo />
+            </h2>
+            <form onSubmit={isRegister ? register : login} className="space-y-4">
+              <div className="form-control">
+                <label className="label"><span className="label-text">Email</span></label>
+                <input
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  className="input input-bordered"
+                  required
+                />
               </div>
-            )}
-
-            {page === 'Account' && <div style={{marginTop:18}}>Account settings placeholder.</div>}
-
-            {page === 'Audit Logs' && isAdmin && (
-              <div style={{marginTop:18, width:'100%'}}>
-                <AuditLogs />
+              <div className="form-control">
+                <label className="label"><span className="label-text">Password</span></label>
+                <input
+                  type="password"
+                  placeholder="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  className="input input-bordered"
+                  required
+                />
               </div>
-            )}
-
-            <div style={{marginTop:20}}>
-              <button className="btn primary" onClick={logout}>Logout</button>
-            </div>
+              {msg && <div className="alert alert-error">{msg}</div>}
+              <button className="btn btn-primary w-full" disabled={loading}>
+                {loading ? 'Processing...' : (isRegister ? 'Register' : 'Login')}
+              </button>
+            </form>
+            <div className="divider"></div>
+            <button className="btn btn-outline" onClick={() => setIsRegister(!isRegister)}>
+              {isRegister ? 'Already have account? Login' : 'Need account? Register'}
+            </button>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
-    <div className="app-root">
-      <div className="dynamic-bg" aria-hidden="true" style={{ backgroundImage: "url('/assets/background-login.jpg')" }}>
-        {/* Static background image (background-architect.jpg) */}
-      </div>
-      <div className="auth-column">
-        <div className="card auth-card center">
-          <h2>{mode === 'login' ? 'Login' : 'Create an account'}</h2>
-          <div className="small muted">Commercial Real Estate Investor Portal</div>
-
-          <form onSubmit={submit} className="form">
-          <label className="field">
-            <input name="email" placeholder="Email" value={form.email} onChange={handleChange} required autoComplete="email" />
-          </label>
-
-          <label className="field">
-            <input name="password" type="password" placeholder="Password" value={form.password} onChange={handleChange} required autoComplete={mode==='login'? 'current-password' : 'new-password'} />
-          </label>
-
-          {msg && <div className="error">{msg}</div>}
-
-          <div className="actions">
-            <button className={"btn primary"} type="submit" disabled={loading} aria-pressed={false}>
-              {loading ? 'Working...' : (
-                <>
-                  {mode === 'login' ? (
-                    <svg className="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 17l5-5-5-5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M5 17v-10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  ) : (
-                    <svg className="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M16 11a4 4 0 1 0-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M12 15v4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/><path d="M14 17h-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                  )}
-                  {mode === 'login' ? 'Login' : 'Create account'}
-                </>
-              )}
-            </button>
-
-            <div className="toggle">
-              {mode === 'login' ? (
-                <button type="button" className="link-btn" onClick={() => setMode('register')}>Don't have an account? Create one</button>
-              ) : (
-                <button type="button" className="link-btn" onClick={() => setMode('login')}>Already have an account? Login</button>
-              )}
+    <div className="min-h-screen bg-base-200">
+      <nav className="navbar bg-base-100 shadow-md sticky top-0 z-50">
+        <div className="flex-1">
+          <Logo />
+        </div>
+        <div className="flex-none">
+          <div className="dropdown dropdown-end">
+            <div className="btn btn-ghost" tabIndex="0">
+              <span className="text-sm">{currentUser.email}</span>
+              <svg className="fill-current" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path d="M7.41,8.58L12,13.17l4.59,-4.59L18,10l-6,6 -6,-6Z"/></svg>
+            </div>
+            <ul className="dropdown-content menu bg-base-100 rounded-box z-[1] w-52 p-2 shadow">
+              <li><a onClick={() => setPage(currentUser.role === 'admin' ? 'users' : 'properties')}>Dashboard</a></li>
+              <li><a onClick={() => setPage('profile')}>My Profile</a></li>
+              {currentUser.role === 'admin' && <li><a onClick={() => setPage('users')}>Users</a></li>}
+              {currentUser.role === 'admin' && <li><a onClick={() => setPage('properties')}>Properties</a></li>}
+              {currentUser.role === 'admin' && <li><a onClick={() => setPage('audit')}>Audit Logs</a></li>}
+              <li><a onClick={logout}>Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+      <main className="container mx-auto p-4 py-8">
+        {page === 'dashboard' && (
+          <div className="text-center">
+            <h1 className="text-4xl font-bold mb-4">Welcome, {currentUser.email}</h1>
+            <p className="text-lg mb-8">You are logged in as a <span className="badge badge-primary">{currentUser.role}</span></p>
+            {currentUser.role === 'admin' && <button className="btn btn-primary" onClick={() => setPage('users')}>Manage Users</button>}
+          </div>
+        )}
+        {page === 'users' && currentUser.role === 'admin' && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Manage Users</h2>
+            <div className="card bg-base-100 shadow-md mb-4">
+              <div className="card-body">
+                <h3 className="card-title">Create New User</h3>
+                <AddUserForm onCreated={() => alert('User created')} />
+              </div>
+            </div>
+            <UsersTable users={users} onEdit={() => {}} onDelete={() => {}} onReload={setUsers} />
+          </div>
+        )}
+        {page === 'properties' && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">{currentUser.role === 'admin' ? 'Manage' : 'My'} Properties</h2>
+            <PropertiesPage user={currentUser} />
+          </div>
+        )}
+        {page === 'audit' && currentUser.role === 'admin' && (
+          <div>
+            <h2 className="text-2xl font-bold mb-4">Audit Logs</h2>
+            <AuditLogs />
+          </div>
+        )}
+        {page === 'profile' && (
+          <div className="card bg-base-100 shadow-md max-w-2xl mx-auto">
+            <div className="card-body">
+              <h2 className="card-title">My Profile</h2>
+              <div className="form-control">
+                <label className="label"><span className="label-text">Email</span></label>
+                <input type="text" value={currentUser.email} disabled className="input input-bordered" />
+              </div>
             </div>
           </div>
-          </form>
-        </div>
-      </div>
+        )}
+      </main>
+      <Modal {...modal} />
     </div>
-  )
+  );
 }

@@ -33,7 +33,12 @@ db.serialize(() => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT UNIQUE NOT NULL,
     password TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'user'
+    role TEXT NOT NULL DEFAULT 'user',
+    first_name TEXT,
+    last_name TEXT,
+    organization TEXT,
+    phone_number TEXT,
+    buy_box TEXT
   )`);
 
   // Inspect existing columns to detect legacy 'username' column or missing role
@@ -42,6 +47,11 @@ db.serialize(() => {
     const hasUsername = cols && cols.some(c => c.name === 'username');
     const hasEmail = cols && cols.some(c => c.name === 'email');
     const hasRole = cols && cols.some(c => c.name === 'role');
+    const hasFirstName = cols && cols.some(c => c.name === 'first_name');
+    const hasLastName = cols && cols.some(c => c.name === 'last_name');
+    const hasOrganization = cols && cols.some(c => c.name === 'organization');
+    const hasPhoneNumber = cols && cols.some(c => c.name === 'phone_number');
+    const hasBuyBox = cols && cols.some(c => c.name === 'buy_box');
 
     const ensureEmailIndex = () => db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)", () => {});
 
@@ -67,6 +77,33 @@ db.serialize(() => {
       db.run("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'", function (rerr) {
         if (rerr) return console.warn('Could not add role column:', rerr.message);
         db.run("UPDATE users SET role = 'user' WHERE role IS NULL", () => {});
+      });
+    }
+
+    // Add profile fields if they don't exist
+    if (!hasFirstName) {
+      db.run("ALTER TABLE users ADD COLUMN first_name TEXT", (err) => {
+        if (err && !err.message.includes('duplicate')) console.warn('Could not add first_name column:', err && err.message);
+      });
+    }
+    if (!hasLastName) {
+      db.run("ALTER TABLE users ADD COLUMN last_name TEXT", (err) => {
+        if (err && !err.message.includes('duplicate')) console.warn('Could not add last_name column:', err && err.message);
+      });
+    }
+    if (!hasOrganization) {
+      db.run("ALTER TABLE users ADD COLUMN organization TEXT", (err) => {
+        if (err && !err.message.includes('duplicate')) console.warn('Could not add organization column:', err && err.message);
+      });
+    }
+    if (!hasPhoneNumber) {
+      db.run("ALTER TABLE users ADD COLUMN phone_number TEXT", (err) => {
+        if (err && !err.message.includes('duplicate')) console.warn('Could not add phone_number column:', err && err.message);
+      });
+    }
+    if (!hasBuyBox) {
+      db.run("ALTER TABLE users ADD COLUMN buy_box TEXT", (err) => {
+        if (err && !err.message.includes('duplicate')) console.warn('Could not add buy_box column:', err && err.message);
       });
     }
   });
@@ -225,20 +262,20 @@ app.use(session({
 
 // Register
 app.post('/api/register', async (req, res) => {
-  let { email, password } = req.body || {};
+  let { email, password, first_name, last_name, organization, phone_number, buy_box } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
   if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
   try {
     const hashed = await bcrypt.hash(password, 10);
-    db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [email, hashed, 'user'], function(err) {
+    db.run('INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [email, hashed, 'user', first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null], function(err) {
       if (err) {
         if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
         return res.status(500).json({ error: 'db error' });
       }
-      req.session.user = { id: this.lastID, email: email, role: 'user' };
-      res.json({ id: this.lastID, email: email, role: 'user' });
+      req.session.user = { id: this.lastID, email: email, role: 'user', first_name, last_name, organization, phone_number, buy_box };
+      res.json({ id: this.lastID, email: email, role: 'user', first_name, last_name, organization, phone_number, buy_box });
     });
   } catch (e) {
     res.status(500).json({ error: 'server error' });
@@ -251,13 +288,13 @@ app.post('/api/login', (req, res) => {
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
-  db.get('SELECT id, email, password, role FROM users WHERE email = ?', [email], async (err, row) => {
+  db.get('SELECT id, email, password, role, first_name, last_name, organization, phone_number, buy_box FROM users WHERE email = ?', [email], async (err, row) => {
     if (err) return res.status(500).json({ error: 'db error' });
     if (!row) return res.status(401).json({ error: 'invalid credentials' });
     const ok = await bcrypt.compare(password, row.password);
     if (!ok) return res.status(401).json({ error: 'invalid credentials' });
-    req.session.user = { id: row.id, email: row.email, role: row.role || 'user' };
-    res.json({ id: row.id, email: row.email, role: row.role || 'user' });
+    req.session.user = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
+    res.json({ id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box });
   });
 });
 
@@ -287,7 +324,7 @@ app.get('/api/users', (req, res) => {
 
   db.get(`SELECT COUNT(*) as total FROM users ${where}`, params, (cerr, countRow) => {
     if (cerr) return res.status(500).json({ error: 'db error' });
-    db.all(`SELECT id, email, role FROM users ${where} ORDER BY id DESC LIMIT ? OFFSET ?`, params.concat([limit, offset]), (err, rows) => {
+    db.all(`SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box FROM users ${where} ORDER BY id DESC LIMIT ? OFFSET ?`, params.concat([limit, offset]), (err, rows) => {
       if (err) return res.status(500).json({ error: 'db error' });
       res.json({ users: rows, total: countRow.total });
     });
@@ -325,7 +362,7 @@ app.post('/api/users/:id/role', (req, res) => {
 // Admin-only: create user
 app.post('/api/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  let { email, password, role } = req.body || {};
+  let { email, password, role, first_name, last_name, organization, phone_number, buy_box } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
@@ -333,7 +370,7 @@ app.post('/api/users', async (req, res) => {
   if (role && !['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
   try {
     const hashed = await bcrypt.hash(password, 10);
-    db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [email, hashed, (role || 'user')], function (err) {
+    db.run('INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box) VALUES (?, ?, ?, ?, ?, ?, ?, ?)', [email, hashed, (role || 'user'), first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null], function (err) {
       if (err) {
         if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
         return res.status(500).json({ error: 'db error' });
@@ -343,11 +380,64 @@ app.post('/api/users', async (req, res) => {
         const details = JSON.stringify({ created: true, role: role || 'user' });
         db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [req.session.user.id, `create_user`, this.lastID, email, details]);
       } catch (e) { console.warn('Audit log failed', e && e.message); }
-      res.json({ id: this.lastID, email: email, role: role || 'user' });
+      res.json({ id: this.lastID, email: email, role: role || 'user', first_name, last_name, organization, phone_number, buy_box });
     });
   } catch (e) {
     res.status(500).json({ error: 'server error' });
   }
+});
+
+// Update user profile (own or admin-only for others)
+app.put('/api/users/:id', (req, res) => {
+  const userId = req.session.user ? req.session.user.id : null;
+  const userRole = req.session.user ? req.session.user.role : null;
+  
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
+  
+  // Check if user can update: must be admin or updating their own profile
+  if (userRole !== 'admin' && userId !== id) {
+    return res.status(403).json({ error: 'forbidden' });
+  }
+
+  const { first_name, last_name, organization, phone_number, buy_box } = req.body || {};
+  
+  // Build dynamic update statement
+  const updates = [];
+  const values = [];
+  
+  if (first_name !== undefined) { updates.push('first_name = ?'); values.push(first_name || null); }
+  if (last_name !== undefined) { updates.push('last_name = ?'); values.push(last_name || null); }
+  if (organization !== undefined) { updates.push('organization = ?'); values.push(organization || null); }
+  if (phone_number !== undefined) { updates.push('phone_number = ?'); values.push(phone_number || null); }
+  if (buy_box !== undefined) { updates.push('buy_box = ?'); values.push(buy_box || null); }
+  
+  if (updates.length === 0) {
+    return res.status(400).json({ error: 'no fields to update' });
+  }
+
+  values.push(id);
+  const updateQuery = `UPDATE users SET ${updates.join(', ')} WHERE id = ?`;
+  
+  db.run(updateQuery, values, function (err) {
+    if (err) return res.status(500).json({ error: 'db error' });
+    if (this.changes === 0) return res.status(404).json({ error: 'not found' });
+    
+    // Fetch and return updated user
+    db.get('SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box FROM users WHERE id = ?', [id], (err, row) => {
+      if (err) return res.status(500).json({ error: 'db error' });
+      if (!row) return res.status(404).json({ error: 'not found' });
+      
+      // Update session if this is the logged-in user updating their own profile
+      if (userId === id) {
+        req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
+      }
+      
+      res.json(row);
+    });
+  });
 });
 
 // Admin-only: delete user
