@@ -110,6 +110,23 @@ let sessionStoreType = 'unknown';
 let _sessionMiddleware = (req, res, next) => next(); // placeholder until ready
 app.use((req, res, next) => _sessionMiddleware(req, res, next));
 
+// When multiple connect.sid cookies exist (stale + new), keep only the last one
+// so express-session always reads the most recently issued session
+app.use((req, res, next) => {
+  const cookieHeader = req.headers.cookie || '';
+  const matches = [...cookieHeader.matchAll(/connect\.sid=([^;]+)/g)];
+  if (matches.length > 1) {
+    // Keep only the last connect.sid value
+    const last = matches[matches.length - 1][1];
+    const otherCookies = cookieHeader
+      .split(';')
+      .filter(c => !c.trim().startsWith('connect.sid'))
+      .join(';');
+    req.headers.cookie = (otherCookies ? otherCookies + '; ' : '') + `connect.sid=${last}`;
+  }
+  next();
+});
+
 async function initializeSessionMiddleware() {
   // Minimal custom Postgres session store — avoids connect-pg-simple compatibility issues
   const Store = require('express-session').Store;
@@ -149,10 +166,9 @@ async function initializeSessionMiddleware() {
   sessionStoreType = 'postgres-custom';
   console.log('Using custom Postgres session store');
 
-  const isProduction = process.env.NODE_ENV === 'production' || !!process.env.RENDER;
   const cookieOptions = {
     httpOnly: true,
-    secure: false, // let express-session detect via req.secure / trust proxy
+    secure: true,
     sameSite: 'lax',
     maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
   };
