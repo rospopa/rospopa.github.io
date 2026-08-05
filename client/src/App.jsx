@@ -36,6 +36,11 @@ function AddUserForm({ onCreated }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [role, setRole] = useState('user');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [organization, setOrganization] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [buyBox, setBuyBox] = useState('');
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState('');
 
@@ -47,16 +52,15 @@ function AddUserForm({ onCreated }) {
       const res = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role })
+        body: JSON.stringify({ email, password, role, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox })
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setMsg(data.error || 'Create failed');
         return;
       }
-      setEmail('');
-      setPassword('');
-      setRole('user');
+      setEmail(''); setPassword(''); setRole('user');
+      setFirstName(''); setLastName(''); setOrganization(''); setPhoneNumber(''); setBuyBox('');
       setMsg('User created');
       if (onCreated) onCreated();
     } catch (e) {
@@ -68,31 +72,48 @@ function AddUserForm({ onCreated }) {
   }
 
   return (
-    <form onSubmit={createUser} className="flex flex-col gap-3 mb-4">
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={e => setEmail(e.target.value)}
-        className="input input-bordered"
-        required
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={e => setPassword(e.target.value)}
-        className="input input-bordered"
-        required
-      />
-      <select value={role} onChange={e => setRole(e.target.value)} className="select select-bordered">
-        <option value="user">user</option>
-        <option value="admin">admin</option>
-      </select>
-      <button className="btn btn-primary" type="submit" disabled={loading}>
-        {loading ? 'Creating...' : 'Create user'}
-      </button>
-      {msg && <div className="text-sm text-gray-500">{msg}</div>}
+    <form onSubmit={createUser} className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+      <div className="form-control">
+        <label className="label"><span className="label-text">Email *</span></label>
+        <input type="email" placeholder="email@example.com" value={email} onChange={e => setEmail(e.target.value)} className="input input-bordered" required />
+      </div>
+      <div className="form-control">
+        <label className="label"><span className="label-text">Password *</span></label>
+        <input type="password" placeholder="Password" value={password} onChange={e => setPassword(e.target.value)} className="input input-bordered" required />
+      </div>
+      <div className="form-control">
+        <label className="label"><span className="label-text">First Name</span></label>
+        <input type="text" placeholder="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} className="input input-bordered" />
+      </div>
+      <div className="form-control">
+        <label className="label"><span className="label-text">Last Name</span></label>
+        <input type="text" placeholder="Last Name" value={lastName} onChange={e => setLastName(e.target.value)} className="input input-bordered" />
+      </div>
+      <div className="form-control">
+        <label className="label"><span className="label-text">Organization</span></label>
+        <input type="text" placeholder="Organization" value={organization} onChange={e => setOrganization(e.target.value)} className="input input-bordered" />
+      </div>
+      <div className="form-control">
+        <label className="label"><span className="label-text">Phone Number</span></label>
+        <input type="tel" placeholder="Phone Number" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} className="input input-bordered" />
+      </div>
+      <div className="form-control">
+        <label className="label"><span className="label-text">Role</span></label>
+        <select value={role} onChange={e => setRole(e.target.value)} className="select select-bordered">
+          <option value="user">user</option>
+          <option value="admin">admin</option>
+        </select>
+      </div>
+      <div className="form-control md:col-span-2">
+        <label className="label"><span className="label-text">Buy Box</span></label>
+        <textarea placeholder="Describe investment criteria..." value={buyBox} onChange={e => setBuyBox(e.target.value)} className="textarea textarea-bordered" rows={3} />
+      </div>
+      <div className="md:col-span-2">
+        <button className="btn btn-primary w-full" type="submit" disabled={loading}>
+          {loading ? 'Creating...' : 'Create user'}
+        </button>
+        {msg && <div className="text-sm text-gray-500 mt-2">{msg}</div>}
+      </div>
     </form>
   );
 }
@@ -419,6 +440,85 @@ function PropertiesPage({ user }) {
   );
 }
 
+function ProfilePage({ currentUser, onUpdate }) {
+  const [firstName, setFirstName] = useState(currentUser.first_name || '');
+  const [lastName, setLastName] = useState(currentUser.last_name || '');
+  const [organization, setOrganization] = useState(currentUser.organization || '');
+  const [phoneNumber, setPhoneNumber] = useState(currentUser.phone_number || '');
+  const [buyBox, setBuyBox] = useState(currentUser.buy_box || '');
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState('');
+  const [msgType, setMsgType] = useState('success');
+
+  async function saveProfile(e) {
+    e.preventDefault();
+    setLoading(true);
+    setMsg('');
+    try {
+      const res = await fetch(`/api/users/${currentUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox })
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setMsgType('error');
+        setMsg(data.error || 'Save failed');
+        return;
+      }
+      setMsgType('success');
+      setMsg('Profile saved');
+      onUpdate({ ...currentUser, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox });
+    } catch {
+      setMsgType('error');
+      setMsg('Network error');
+    } finally {
+      setLoading(false);
+      setTimeout(() => setMsg(''), 3000);
+    }
+  }
+
+  return (
+    <div className="card bg-base-100 shadow-md max-w-2xl mx-auto">
+      <div className="card-body">
+        <h2 className="card-title">My Profile</h2>
+        <form onSubmit={saveProfile} className="space-y-4">
+          <div className="form-control">
+            <label className="label"><span className="label-text">Email</span></label>
+            <input type="text" value={currentUser.email} disabled className="input input-bordered bg-base-200" />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="form-control">
+              <label className="label"><span className="label-text">First Name</span></label>
+              <input type="text" placeholder="First Name" value={firstName} onChange={e => setFirstName(e.target.value)} className="input input-bordered" />
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text">Last Name</span></label>
+              <input type="text" placeholder="Last Name" value={lastName} onChange={e => setLastName(e.target.value)} className="input input-bordered" />
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text">Organization</span></label>
+              <input type="text" placeholder="Organization" value={organization} onChange={e => setOrganization(e.target.value)} className="input input-bordered" />
+            </div>
+            <div className="form-control">
+              <label className="label"><span className="label-text">Phone Number</span></label>
+              <input type="tel" placeholder="Phone Number" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} className="input input-bordered" />
+            </div>
+          </div>
+          <div className="form-control">
+            <label className="label"><span className="label-text">Buy Box</span></label>
+            <textarea placeholder="Describe your investment criteria..." value={buyBox} onChange={e => setBuyBox(e.target.value)} className="textarea textarea-bordered" rows={4} />
+          </div>
+          {msg && <div className={`alert ${msgType === 'error' ? 'alert-error' : 'alert-success'}`}>{msg}</div>}
+          <button className="btn btn-primary w-full" type="submit" disabled={loading}>
+            {loading ? 'Saving...' : 'Save Profile'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [users, setUsers] = useState([]);
@@ -588,15 +688,7 @@ export default function App() {
           </div>
         )}
         {page === 'profile' && (
-          <div className="card bg-base-100 shadow-md max-w-2xl mx-auto">
-            <div className="card-body">
-              <h2 className="card-title">My Profile</h2>
-              <div className="form-control">
-                <label className="label"><span className="label-text">Email</span></label>
-                <input type="text" value={currentUser.email} disabled className="input input-bordered" />
-              </div>
-            </div>
-          </div>
+          <ProfilePage currentUser={currentUser} onUpdate={u => setCurrentUser(u)} />
         )}
       </main>
       <Modal {...modal} />
