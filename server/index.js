@@ -28,8 +28,14 @@ async function initializeSchema() {
     last_name TEXT,
     organization TEXT,
     phone_number TEXT,
-    buy_box TEXT
+    buy_box TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
+
+  // Migrate existing users table to add timestamp columns if missing
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
 
   await pool.query(`CREATE TABLE IF NOT EXISTS audit_logs (
     id SERIAL PRIMARY KEY,
@@ -198,7 +204,7 @@ app.get('/api/users', async (req, res) => {
     listParams.push(limit, offset);
     const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM users ${where}`, countParams);
     const listResult = await pool.query(
-      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box FROM users ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, created_at, updated_at FROM users ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
     );
     res.json({ users: listResult.rows, total: countResult.rows[0].total });
@@ -287,12 +293,13 @@ app.put('/api/users/:id', async (req, res) => {
     return res.status(400).json({ error: 'no fields to update' });
   }
 
+  updates.push(`updated_at = CURRENT_TIMESTAMP`);
   values.push(id);
 
   try {
     const updateResult = await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${values.length}`, values);
     if (updateResult.rowCount === 0) return res.status(404).json({ error: 'not found' });
-    const userResult = await pool.query('SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box FROM users WHERE id = $1', [id]);
+    const userResult = await pool.query('SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, created_at, updated_at FROM users WHERE id = $1', [id]);
     if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const row = userResult.rows[0];
     if (userId === id) {

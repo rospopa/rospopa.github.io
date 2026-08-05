@@ -240,11 +240,13 @@ function UsersTable({ users, onReload }) {
               <th className="py-3 px-4">Name</th>
               <th className="py-3 px-4">Organization</th>
               <th className="py-3 px-4">Phone</th>
+              <th className="py-3 px-4">Created</th>
+              <th className="py-3 px-4">Last Updated</th>
             </tr>
           </thead>
           <tbody>
             {users.length === 0
-              ? <tr><td colSpan={5} className="text-center py-8 text-base-content/40">No users found</td></tr>
+              ? <tr><td colSpan={7} className="text-center py-8 text-base-content/40">No users found</td></tr>
               : users.map((u, i) => (
                 <tr key={i}>
                   <td className="py-3 px-4">{u.email}</td>
@@ -254,6 +256,8 @@ function UsersTable({ users, onReload }) {
                   <td className="py-3 px-4">{[u.first_name, u.last_name].filter(Boolean).join(' ') || <span className="text-base-content/30">—</span>}</td>
                   <td className="py-3 px-4">{u.organization || <span className="text-base-content/30">—</span>}</td>
                   <td className="py-3 px-4">{u.phone_number || <span className="text-base-content/30">—</span>}</td>
+                  <td className="py-3 px-4 text-xs text-base-content/50">{u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
+                  <td className="py-3 px-4 text-xs text-base-content/50">{u.updated_at ? new Date(u.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
                 </tr>
               ))
             }
@@ -601,6 +605,9 @@ function PropertiesPage({ user }) {
               <div className="space-y-1">
                 <p className="text-sm text-base-content/60">{prop.county} County</p>
                 <p className="text-xs text-base-content/40 font-mono">PIN: {prop.pin}</p>
+                {prop.updated_at && (
+                  <p className="text-xs text-base-content/30">Updated {new Date(prop.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                )}
               </div>
               {user.role === 'admin' && (
                 <div className="card-actions pt-2 border-t border-base-200 mt-1">
