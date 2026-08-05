@@ -8,22 +8,22 @@
   default: true;
   color-scheme: light;
   --color-base-100: #ffffff;
-  --color-base-200: #f4f7f4;
-  --color-base-300: #e2ece2;
-  --color-base-content: #1a2e1a;
-  --color-primary: #2d6a2d;
+  --color-base-200: #f5f5f5;
+  --color-base-300: #e8e8e8;
+  --color-base-content: #111111;
+  --color-primary: #111111;
   --color-primary-content: #ffffff;
-  --color-secondary: #3a8c3a;
+  --color-secondary: #444444;
   --color-secondary-content: #ffffff;
-  --color-accent: #7dc47d;
-  --color-accent-content: #1a2e1a;
-  --color-neutral: #2a3d2a;
+  --color-accent: #666666;
+  --color-accent-content: #ffffff;
+  --color-neutral: #222222;
   --color-neutral-content: #ffffff;
   --color-info: #0077cc;
   --color-info-content: #ffffff;
   --color-success: #1a7a1a;
   --color-success-content: #ffffff;
-  --color-warning: #a07800;
+  --color-warning: #888888;
   --color-warning-content: #ffffff;
   --color-error: #cc2200;
   --color-error-content: #ffffff;
@@ -36,14 +36,6 @@
 /* Global font — Segoe UI for all app UI */
 *, *::before, *::after {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-}
-
-/* Green gradient utility for headings */
-.gradient-text {
-  background: linear-gradient(135deg, #1a4d1a 0%, #3a8c3a 45%, #7dc47d 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
 }
 
 /* Ensure inputs and textareas are always interactive */

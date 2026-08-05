@@ -138,23 +138,19 @@ function Logo() {
       </div>
       <div className="flex flex-col leading-none gap-0.5">
         <span style={{
-          fontFamily: "'Playfair Display', serif",
-          fontWeight: 900,
-          fontSize: '1.8rem',
-          letterSpacing: '0.15em',
-          textTransform: 'uppercase',
-          background: 'linear-gradient(135deg, #1a4d1a 0%, #3a8c3a 45%, #7dc47d 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
+          fontFamily: "'Cormorant Garamond', serif",
+          fontWeight: 800,
+          fontSize: '1.1rem',
+          letterSpacing: '0.08em',
+          color: '#111111',
         }}>
-          Real Estate
+          Capitalization Rate
         </span>
         <span style={{
-          fontFamily: "'Inter', sans-serif",
-          fontWeight: 500,
-          fontSize: '0.65rem',
-          letterSpacing: '0.3em',
+          fontFamily: "'Cormorant Garamond', serif",
+          fontWeight: 600,
+          fontSize: '0.7rem',
+          letterSpacing: '0.35em',
           textTransform: 'uppercase',
           opacity: 0.45,
         }}>
@@ -1103,7 +1099,7 @@ export default function App() {
 
         {page === 'dashboard' && (
           <div className="text-center py-16">
-            <h1 className="text-4xl font-bold mb-3 gradient-text">
+            <h1 className="text-4xl font-bold mb-3">
               Welcome back
             </h1>
             <p className="text-base-content/50 text-lg mb-2">{currentUser.email}</p>
@@ -1117,7 +1113,7 @@ export default function App() {
 
         {page === 'users' && currentUser.role === 'admin' && (
           <div className="space-y-10">
-            <h2 className="text-2xl font-bold gradient-text">Manage Users</h2>
+            <h2 className="text-2xl font-bold">Manage Users</h2>
             <div className="card bg-base-100 border border-base-300">
               <div className="card-body p-8">
                 <h3 className="text-base font-semibold uppercase tracking-widest text-base-content/50 mb-6">Create New User</h3>
@@ -1133,7 +1129,7 @@ export default function App() {
 
         {page === 'properties' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold gradient-text">
+            <h2 className="text-2xl font-bold">
               {currentUser.role === 'admin' ? 'Manage Properties' : 'My Properties'}
             </h2>
             <PropertiesPage user={currentUser} />
@@ -1142,7 +1138,7 @@ export default function App() {
 
         {page === 'audit' && currentUser.role === 'admin' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold gradient-text">Audit Logs</h2>
+            <h2 className="text-2xl font-bold">Audit Logs</h2>
             <AuditLogs />
           </div>
         )}
