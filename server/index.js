@@ -28,18 +28,22 @@ const db = new sqlite3.Database(DB_PATH);
 
 // Initialize users table with email column and migrate username->email if needed
 db.serialize(() => {
-  // Create table if it doesn't exist with the desired schema
+  // Create table if it doesn't exist with the desired schema (add role column)
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+    password TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'user'
   )`);
 
-  // Inspect existing columns to detect legacy 'username' column
+  // Inspect existing columns to detect legacy 'username' column or missing role
   db.all("PRAGMA table_info(users)", (err, cols) => {
     if (err) return console.error('PRAGMA failed', err);
     const hasUsername = cols && cols.some(c => c.name === 'username');
     const hasEmail = cols && cols.some(c => c.name === 'email');
+    const hasRole = cols && cols.some(c => c.name === 'role');
+
+    const ensureEmailIndex = () => db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)", () => {});
 
     if (hasUsername && !hasEmail) {
       // Add email column and copy values from username
@@ -47,16 +51,23 @@ db.serialize(() => {
         if (aerr) return console.warn('Could not add email column:', aerr.message);
         db.run("UPDATE users SET email = username WHERE email IS NULL", function (uerr) {
           if (uerr) console.warn('Could not migrate username to email', uerr.message);
-          // Create unique index on email to enforce uniqueness
-          db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)", () => {});
+          ensureEmailIndex();
         });
       });
     } else if (!hasEmail) {
       // No email column and no username — ensure unique index exists if email present
-      db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)", () => {});
+      ensureEmailIndex();
     } else {
       // Ensure unique index exists
-      db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)", () => {});
+      ensureEmailIndex();
+    }
+
+    if (!hasRole) {
+      // Add role column with default 'user' for existing rows
+      db.run("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'", function (rerr) {
+        if (rerr) return console.warn('Could not add role column:', rerr.message);
+        db.run("UPDATE users SET role = 'user' WHERE role IS NULL", () => {});
+      });
     }
   });
 });
@@ -154,13 +165,13 @@ app.post('/api/register', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   const hashed = await bcrypt.hash(password, 10);
-  db.run('INSERT INTO users (email, password) VALUES (?, ?)', [email.toLowerCase(), hashed], function(err) {
+  db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [email.toLowerCase(), hashed, 'user'], function(err) {
     if (err) {
       if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
       return res.status(500).json({ error: 'db error' });
     }
-    req.session.user = { id: this.lastID, email: email.toLowerCase() };
-    res.json({ id: this.lastID, email: email.toLowerCase() });
+    req.session.user = { id: this.lastID, email: email.toLowerCase(), role: 'user' };
+    res.json({ id: this.lastID, email: email.toLowerCase(), role: 'user' });
   });
 });
 
@@ -168,13 +179,13 @@ app.post('/api/register', async (req, res) => {
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
-  db.get('SELECT id, email, password FROM users WHERE email = ?', [email.toLowerCase()], async (err, row) => {
+  db.get('SELECT id, email, password, role FROM users WHERE email = ?', [email.toLowerCase()], async (err, row) => {
     if (err) return res.status(500).json({ error: 'db error' });
     if (!row) return res.status(401).json({ error: 'invalid credentials' });
     const ok = await bcrypt.compare(password, row.password);
     if (!ok) return res.status(401).json({ error: 'invalid credentials' });
-    req.session.user = { id: row.id, email: row.email };
-    res.json({ id: row.id, email: row.email });
+    req.session.user = { id: row.id, email: row.email, role: row.role || 'user' };
+    res.json({ id: row.id, email: row.email, role: row.role || 'user' });
   });
 });
 
@@ -191,6 +202,33 @@ app.get('/api/me', (req, res) => {
   if (!req.session.user) return res.status(401).json({ user: null });
   res.json({ user: req.session.user });
 });
+
+// If ADMIN_EMAIL and ADMIN_PASSWORD are provided in the environment, create or update the admin user now
+if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
+  (async () => {
+    try {
+      const adminEmail = process.env.ADMIN_EMAIL.toLowerCase();
+      const adminPass = process.env.ADMIN_PASSWORD;
+      const hashed = await bcrypt.hash(adminPass, 10);
+      db.get('SELECT id FROM users WHERE email = ?', [adminEmail], (err, row) => {
+        if (err) return console.warn('Could not query for admin user:', err && err.message);
+        if (row) {
+          db.run('UPDATE users SET password = ?, role = ? WHERE id = ?', [hashed, 'admin', row.id], function (uerr) {
+            if (uerr) return console.warn('Could not update admin user:', uerr && uerr.message);
+            console.log('Updated admin user:', adminEmail);
+          });
+        } else {
+          db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [adminEmail, hashed, 'admin'], function (ierr) {
+            if (ierr) return console.warn('Could not create admin user:', ierr && ierr.message);
+            console.log('Created admin user:', adminEmail);
+          });
+        }
+      });
+    } catch (e) {
+      console.warn('Admin setup failed:', e && e.message);
+    }
+  })();
+}
 
 // Serve client in production
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
