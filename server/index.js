@@ -5,7 +5,6 @@ const fs = require('fs');
 const os = require('os');
 const sqlite3 = require('sqlite3').verbose();
 const session = require('express-session');
-const FileStore = require('session-file-store')(session);
 const bcrypt = require('bcryptjs');
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'users.db');
@@ -51,16 +50,25 @@ db.serialize(() => {
 const app = express();
 app.use(express.json());
 
-// Prefer storing session files in a writable temp directory on hosted platforms (Render)
-const sessionsDir = process.env.SESSION_DIR || path.join(os.tmpdir(), 'rospopa-sessions');
-if (!fs.existsSync(sessionsDir)) {
+// Use Postgres-backed session store in production. Fall back to MemoryStore when DATABASE_URL is not provided (not suitable for production).
+let sessionStore;
+if (process.env.DATABASE_URL) {
   try {
-    fs.mkdirSync(sessionsDir, { recursive: true });
-  } catch (err) {
-    console.warn('Could not create sessions directory at', sessionsDir, err && err.message);
+    const { Pool } = require('pg');
+    const PgSession = require('connect-pg-simple')(session);
+    const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false });
+    // Ensure session table exists (idempotent)
+    pool.query(`CREATE TABLE IF NOT EXISTS "session" (sid VARCHAR PRIMARY KEY, sess JSON NOT NULL, expire TIMESTAMP NOT NULL)`).catch(e => console.warn('Could not ensure session table exists:', e && e.message));
+    sessionStore = new PgSession({ pool });
+    console.log('Using Postgres-backed session store')
+  } catch (e) {
+    console.warn('Postgres session store setup failed:', e && e.message);
   }
 }
-const sessionStore = new FileStore({ path: sessionsDir, ttl: 86400 });
+if (!sessionStore) {
+  console.warn('DATABASE_URL not set or Postgres setup failed — using MemoryStore (not for production)');
+  sessionStore = new session.MemoryStore();
+}
 
 // Trust reverse proxy (Render) so secure cookies and req.protocol work correctly
 app.set('trust proxy', 1);
