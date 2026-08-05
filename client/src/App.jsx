@@ -5,8 +5,8 @@ function Logo() {
   return (
     <div className="logo">
       <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect width="24" height="24" rx="6" fill="#0ea5a4" />
-        <path d="M7 13l3 3 7-8" stroke="#fff" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+      <rect width="24" height="24" rx="6" fill="#000" />
+      <path d="M7 13l3 3 7-8" stroke="#fff" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
       </svg>
       <span>rospopa</span>
     </div>
