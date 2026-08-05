@@ -280,56 +280,242 @@ function UsersTable({ users, onReload }) {
   )
 }
 
-/* ─── Property Modal ──────────────────────────────────────────── */
+/* ─── Property Detail Modal (edit + media + assign) ──────────── */
 
-function PropertyDetailModal({ open, property, onClose, onSave }) {
-  const [pin, setPin] = useState(property?.pin || '')
-  const [address, setAddress] = useState(property?.address || '')
-  const [county, setCounty] = useState(property?.county || '')
+function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
+  const [tab, setTab] = useState('details')
+  const [pin, setPin] = useState('')
+  const [address, setAddress] = useState('')
+  const [county, setCounty] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  // Media state
+  const [media, setMedia] = useState([])
+  const [mediaLoading, setMediaLoading] = useState(false)
+  const [uploadError, setUploadError] = useState('')
+
+  // Assignment state
+  const [allUsers, setAllUsers] = useState([])
+  const [assignLoading, setAssignLoading] = useState(false)
 
   useEffect(() => {
-    if (property) {
+    if (open && property) {
       setPin(property.pin || '')
       setAddress(property.address || '')
       setCounty(property.county || '')
-    } else {
+      setTab('details')
+    } else if (open && !property) {
       setPin(''); setAddress(''); setCounty('')
+      setTab('details')
     }
   }, [property, open])
 
-  if (!open) return null
+  useEffect(() => {
+    if (open && property?.id) {
+      fetchMedia()
+      if (isAdmin) fetchUsers()
+    }
+  }, [open, property?.id])
+
+  async function fetchMedia() {
+    setMediaLoading(true)
+    try {
+      const res = await fetch(`/api/properties/${property.id}/media`)
+      const data = await res.json()
+      setMedia(data.media || [])
+    } catch { console.error('Failed to fetch media') }
+    finally { setMediaLoading(false) }
+  }
+
+  async function fetchUsers() {
+    try {
+      const res = await fetch(`/api/properties/${property.id}/users`)
+      const data = await res.json()
+      setAllUsers(data.users || [])
+    } catch { console.error('Failed to fetch users') }
+  }
 
   async function handleSave() {
-    if (!pin.trim() || !address.trim() || !county.trim()) {
-      alert('All fields are required')
-      return
-    }
+    if (!pin.trim() || !address.trim() || !county.trim()) { alert('All fields are required'); return }
+    setSaving(true)
     await onSave({ ...property, pin, address, county })
-    onClose()
+    setSaving(false)
+    if (!property?.id) onClose()
   }
+
+  async function handleFileUpload(e) {
+    const files = Array.from(e.target.files)
+    setUploadError('')
+    for (const file of files) {
+      const maxMB = file.type.startsWith('video/') ? 50 : 10
+      if (file.size > maxMB * 1024 * 1024) { setUploadError(`${file.name} exceeds ${maxMB}MB limit`); continue }
+      const base64Data = await toBase64(file)
+      try {
+        const res = await fetch(`/api/properties/${property.id}/media`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.name, mediaType: file.type, base64Data })
+        })
+        if (!res.ok) { const d = await res.json(); setUploadError(d.error || 'Upload failed') }
+      } catch { setUploadError('Upload failed') }
+    }
+    e.target.value = ''
+    fetchMedia()
+  }
+
+  function toBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader()
+      reader.onload = () => resolve(reader.result)
+      reader.onerror = reject
+      reader.readAsDataURL(file)
+    })
+  }
+
+  async function deleteMedia(mediaId) {
+    await fetch(`/api/properties/${property.id}/media/${mediaId}`, { method: 'DELETE' })
+    fetchMedia()
+  }
+
+  async function toggleAssign(userId, currentlyAssigned) {
+    setAssignLoading(true)
+    try {
+      if (currentlyAssigned) {
+        await fetch(`/api/properties/${property.id}/assign/${userId}`, { method: 'DELETE' })
+      } else {
+        await fetch(`/api/properties/${property.id}/assign`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userIds: [userId] })
+        })
+      }
+      await fetchUsers()
+    } catch { console.error('Assign failed') }
+    finally { setAssignLoading(false) }
+  }
+
+  if (!open) return null
+
+  const tabs = property?.id
+    ? ['details', 'media', ...(isAdmin ? ['assign'] : [])]
+    : ['details']
+
+  const tabLabel = { details: 'Details', media: 'Media', assign: 'Assign Users' }
 
   return (
     <div className="modal modal-open">
-      <div className="modal-box max-w-lg">
-        <h3 className="font-bold text-xl mb-6">{property?.id ? 'Edit Property' : 'New Property'}</h3>
-        <div className="space-y-5">
-          <Field label="PIN(s)" required>
-            <input type="text" placeholder="e.g. 12-34-567-890" value={pin}
-              onChange={e => setPin(e.target.value)} className="input input-bordered w-full" />
-          </Field>
-          <Field label="Address" required>
-            <input type="text" placeholder="123 Main St, Chicago, IL" value={address}
-              onChange={e => setAddress(e.target.value)} className="input input-bordered w-full" />
-          </Field>
-          <Field label="County" required>
-            <input type="text" placeholder="e.g. Cook" value={county}
-              onChange={e => setCounty(e.target.value)} className="input input-bordered w-full" />
-          </Field>
+      <div className="modal-box max-w-2xl w-full">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-bold text-xl" style={{ fontFamily: "'Playfair Display', serif" }}>
+            {property?.id ? property.address : 'New Property'}
+          </h3>
+          <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
         </div>
-        <div className="modal-action mt-8">
-          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary" onClick={handleSave}>Save Property</button>
-        </div>
+
+        {/* Tabs */}
+        {tabs.length > 1 && (
+          <div className="tabs tabs-bordered mb-6">
+            {tabs.map(t => (
+              <button key={t} className={`tab ${tab === t ? 'tab-active font-semibold' : ''}`} onClick={() => setTab(t)}>
+                {tabLabel[t]}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Details tab */}
+        {tab === 'details' && (
+          <div className="space-y-5">
+            <Field label="PIN(s)" required>
+              <input type="text" placeholder="e.g. 12-34-567-890" value={pin}
+                onChange={e => setPin(e.target.value)} className="input input-bordered w-full"
+                disabled={!isAdmin} />
+            </Field>
+            <Field label="Address" required>
+              <input type="text" placeholder="123 Main St, Chicago, IL" value={address}
+                onChange={e => setAddress(e.target.value)} className="input input-bordered w-full"
+                disabled={!isAdmin} />
+            </Field>
+            <Field label="County" required>
+              <input type="text" placeholder="e.g. Cook" value={county}
+                onChange={e => setCounty(e.target.value)} className="input input-bordered w-full"
+                disabled={!isAdmin} />
+            </Field>
+            {isAdmin && (
+              <div className="pt-2">
+                <button className="btn btn-primary w-full" onClick={handleSave} disabled={saving}>
+                  {saving ? 'Saving…' : (property?.id ? 'Save Changes' : 'Create Property')}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Media tab */}
+        {tab === 'media' && (
+          <div className="space-y-5">
+            {isAdmin && (
+              <div className="border-2 border-dashed border-base-300 rounded-lg p-6 text-center">
+                <p className="text-sm text-base-content/50 mb-3">Upload images (JPG, PNG, GIF — max 10MB) or videos (MP4, MOV — max 50MB)</p>
+                <label className="btn btn-primary btn-sm cursor-pointer">
+                  Choose Files
+                  <input type="file" className="hidden" multiple accept="image/*,video/*" onChange={handleFileUpload} />
+                </label>
+                {uploadError && <p className="text-error text-sm mt-2">{uploadError}</p>}
+              </div>
+            )}
+            {mediaLoading
+              ? <p className="text-center text-base-content/40 py-6">Loading…</p>
+              : media.length === 0
+                ? <p className="text-center text-base-content/30 py-8">No media uploaded yet</p>
+                : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {media.map(m => (
+                      <div key={m.id} className="relative group rounded border border-base-300 overflow-hidden bg-base-200">
+                        {m.media_type?.startsWith('video/')
+                          ? <video src={`/api/properties/${property.id}/media/${m.id}`} className="w-full h-28 object-cover" controls />
+                          : <img src={`/api/properties/${property.id}/media/${m.id}`} alt={m.filename} className="w-full h-28 object-cover" />
+                        }
+                        <div className="px-2 py-1 flex items-center justify-between">
+                          <span className="text-xs text-base-content/50 truncate">{m.filename}</span>
+                          {isAdmin && (
+                            <button className="btn btn-xs btn-ghost text-error" onClick={() => deleteMedia(m.id)}>✕</button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+            }
+          </div>
+        )}
+
+        {/* Assign Users tab (admin only) */}
+        {tab === 'assign' && isAdmin && (
+          <div className="space-y-3">
+            <p className="text-sm text-base-content/50 mb-4">Toggle to assign or unassign users. Assigned users can view this property.</p>
+            {allUsers.length === 0
+              ? <p className="text-center text-base-content/30 py-8">No users found</p>
+              : (
+                <div className="divide-y divide-base-200">
+                  {allUsers.map(u => (
+                    <div key={u.id} className="flex items-center justify-between py-3">
+                      <span className="text-sm">{u.email}</span>
+                      <input
+                        type="checkbox"
+                        className="toggle toggle-primary toggle-sm"
+                        checked={!!u.assigned}
+                        disabled={assignLoading}
+                        onChange={() => toggleAssign(u.id, !!u.assigned)}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )
+            }
+          </div>
+        )}
+
       </div>
       <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
     </div>
@@ -347,7 +533,8 @@ function PropertiesPage({ user }) {
   async function fetchProperties() {
     setLoading(true)
     try {
-      const res = await fetch(`/api/properties?${user.role === 'admin' ? 'allProps=true' : ''}`)
+      const endpoint = user.role === 'admin' ? '/api/properties?allProps=true' : '/api/me/properties'
+      const res = await fetch(endpoint)
       const data = await res.json()
       setProperties(data.properties || [])
     } catch (e) { console.error('Failed to fetch properties:', e) }
@@ -366,10 +553,16 @@ function PropertiesPage({ user }) {
   }
 
   async function deleteProperty(id) {
+    if (!confirm('Delete this property?')) return
     try {
       await fetch(`/api/properties/${id}`, { method: 'DELETE' })
       await fetchProperties()
     } catch (e) { console.error('Delete failed:', e) }
+  }
+
+  function openProperty(prop) {
+    setSelectedProperty(prop)
+    setShowPropertyModal(true)
   }
 
   return (
@@ -383,6 +576,7 @@ function PropertiesPage({ user }) {
       <PropertyDetailModal
         open={showPropertyModal}
         property={selectedProperty}
+        isAdmin={user.role === 'admin'}
         onClose={() => setShowPropertyModal(false)}
         onSave={async (p) => { await saveProperty(p) }}
       />
@@ -393,6 +587,7 @@ function PropertiesPage({ user }) {
         <div className="py-16 text-center text-base-content/30">
           <p className="text-lg">No properties yet</p>
           {user.role === 'admin' && <p className="text-sm mt-1">Click &quot;+ New Property&quot; to add one</p>}
+          {user.role !== 'admin' && <p className="text-sm mt-1">Properties assigned to you will appear here</p>}
         </div>
       )}
 
@@ -400,7 +595,7 @@ function PropertiesPage({ user }) {
         {properties.map((prop, i) => (
           <div key={i}
             className="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => { setSelectedProperty(prop); if (user.role === 'admin') setShowPropertyModal(true) }}>
+            onClick={() => openProperty(prop)}>
             <div className="card-body gap-3 p-6">
               <h2 className="text-base font-semibold leading-snug">{prop.address}</h2>
               <div className="space-y-1">
@@ -409,8 +604,13 @@ function PropertiesPage({ user }) {
               </div>
               {user.role === 'admin' && (
                 <div className="card-actions pt-2 border-t border-base-200 mt-1">
-                  <button className="btn btn-xs btn-ghost" onClick={e => { e.stopPropagation(); setSelectedProperty(prop); setShowPropertyModal(true) }}>Edit</button>
+                  <button className="btn btn-xs btn-ghost" onClick={e => { e.stopPropagation(); openProperty(prop) }}>Edit</button>
                   <button className="btn btn-xs btn-ghost text-error" onClick={e => { e.stopPropagation(); deleteProperty(prop.id) }}>Delete</button>
+                </div>
+              )}
+              {user.role !== 'admin' && (
+                <div className="pt-2 border-t border-base-200 mt-1">
+                  <span className="text-xs text-base-content/40">Click to view details &amp; media</span>
                 </div>
               )}
             </div>
