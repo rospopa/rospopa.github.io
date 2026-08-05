@@ -79,11 +79,12 @@ export default function App() {
   return (
     <div className="app-root">
       <div className="dynamic-bg" aria-hidden="true"></div>
-      <div className="card auth-card center">
-        <Logo />
-        <h2>{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
+      <div className="auth-column">
+        <div className="card auth-card center">
+          <Logo />
+          <h2>{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
 
-        <form onSubmit={submit} className="form">
+          <form onSubmit={submit} className="form">
           <label className="field">
             <input name="email" placeholder="Email" value={form.email} onChange={handleChange} required autoComplete="email" />
           </label>
@@ -100,7 +101,8 @@ export default function App() {
               {mode === 'login' ? 'Create account' : 'Sign in'}
             </button>
           </div>
-        </form>
+          </form>
+        </div>
       </div>
     </div>
   )
