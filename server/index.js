@@ -27,12 +27,23 @@ app.use(express.json());
 const sessionsDir = path.join(__dirname, 'sessions');
 if (!fs.existsSync(sessionsDir)) fs.mkdirSync(sessionsDir, { recursive: true });
 const sessionStore = new FileStore({ path: sessionsDir, ttl: 86400 });
+
+// Trust reverse proxy (Render) so secure cookies and req.protocol work correctly
+app.set('trust proxy', 1);
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === 'production',
+  sameSite: 'lax',
+  domain: process.env.COOKIE_DOMAIN || '.rospopa.com'
+};
+
 app.use(session({
   store: sessionStore,
   secret: process.env.SESSION_SECRET || 'change-this-secret',
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, httpOnly: true }
+  cookie: cookieOptions
 }));
 
 // Register
