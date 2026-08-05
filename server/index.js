@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 const sqlite3 = require('sqlite3').verbose();
 const session = require('express-session');
-const SQLiteStore = require('connect-sqlite3')(session);
+const FileStore = require('session-file-store')(session);
 const bcrypt = require('bcryptjs');
 
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'users.db');
@@ -23,8 +23,9 @@ db.serialize(() => {
 const app = express();
 app.use(express.json());
 
+const sessionStore = new FileStore({ path: path.join(__dirname, 'sessions'), ttl: 86400 });
 app.use(session({
-  store: new SQLiteStore({ db: 'sessions.sqlite', dir: __dirname }),
+  store: sessionStore,
   secret: process.env.SESSION_SECRET || 'change-this-secret',
   resave: false,
   saveUninitialized: false,
