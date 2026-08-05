@@ -50,7 +50,7 @@ db.serialize(() => {
 const app = express();
 app.use(express.json());
 
-// Use Postgres-backed session store in production. Fall back to MemoryStore when DATABASE_URL is not provided (not suitable for production).
+// Session store selection: prefer Postgres, then disk-backed file store (SESSION_DIR), then MemoryStore.
 let sessionStore;
 if (process.env.DATABASE_URL) {
   try {
@@ -65,8 +65,23 @@ if (process.env.DATABASE_URL) {
     console.warn('Postgres session store setup failed:', e && e.message);
   }
 }
+
+// If no DATABASE_URL or Postgres setup failed, attempt disk-backed session store using SESSION_DIR
+if (!sessionStore && process.env.SESSION_DIR) {
+  try {
+    const FileStore = require('session-file-store')(session);
+    const sessionsDir = process.env.SESSION_DIR;
+    if (!fs.existsSync(sessionsDir)) fs.mkdirSync(sessionsDir, { recursive: true });
+    sessionStore = new FileStore({ path: sessionsDir, ttl: 86400 });
+    console.log('Using disk-backed session-file-store at', sessionsDir);
+  } catch (e) {
+    console.warn('session-file-store setup failed:', e && e.message);
+  }
+}
+
+// Final fallback to MemoryStore (not for production)
 if (!sessionStore) {
-  console.warn('DATABASE_URL not set or Postgres setup failed — using MemoryStore (not for production)');
+  console.warn('No persistent session store configured — using MemoryStore (not for production)');
   sessionStore = new session.MemoryStore();
 }
 
