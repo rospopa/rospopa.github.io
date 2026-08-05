@@ -136,11 +136,8 @@ function Logo() {
       <div className="w-9 h-9 rounded-sm flex items-center justify-center">
         <img src="/apple-touch-icon.png" alt="Logo" className="w-9 h-9 object-contain" />
       </div>
-      <div className="flex flex-col leading-none gap-0.5">
-        <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '1.05rem', letterSpacing: '0.01em' }}>
-          Real Estate
-        </span>
-        <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', opacity: 0.45 }}>
+      <div className="flex flex-col leading-none">
+        <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: '1rem', letterSpacing: '0.2em', textTransform: 'uppercase', opacity: 0.45 }}>
           Portal
         </span>
       </div>
