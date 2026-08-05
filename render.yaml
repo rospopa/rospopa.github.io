@@ -8,4 +8,4 @@ services:
     startCommand: "cd server && npm start"
     autoDeploy: true
     repo: "rospopa/rospopa.github.io"
-    branch: "rospopa-expert-parakeet"
+    branch: "rospopa-repo-access-check"
