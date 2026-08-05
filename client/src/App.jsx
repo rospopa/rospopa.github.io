@@ -3,12 +3,17 @@ import { useEffect, useState } from 'react'
 function Logo() {
   return (
     <div className="flex items-center gap-2">
-      <div className="avatar placeholder">
-        <div className="bg-primary text-white rounded-full w-8">
-          <span className="text-sm">RE</span>
-        </div>
+      <div className="w-9 h-9 rounded-sm flex items-center justify-center bg-primary shadow-sm" style={{ fontFamily: "'Playfair Display', serif" }}>
+        <span className="text-white font-bold text-base leading-none">RE</span>
       </div>
-      <span className="font-bold text-lg">RealEstate Portal</span>
+      <div className="flex flex-col leading-none">
+        <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: '1.1rem', letterSpacing: '0.02em', lineHeight: 1.1 }}>
+          Real Estate
+        </span>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontWeight: 500, fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase', opacity: 0.6, lineHeight: 1.2 }}>
+          Portal
+        </span>
+      </div>
     </div>
   )
 }
