@@ -14,6 +14,84 @@ function Field({ label, required, children }) {
   )
 }
 
+/* ─── Property Card Carousel ──────────────────────────────────── */
+
+function PropertyCardCarousel({ propertyId, onClick }) {
+  const [media, setMedia] = useState([])
+  const [idx, setIdx] = useState(0)
+  const [loaded, setLoaded] = useState(false)
+
+  useEffect(() => {
+    fetch(`/api/properties/${propertyId}/media`)
+      .then(r => r.json())
+      .then(d => { setMedia(d.media || []); setLoaded(true) })
+      .catch(() => setLoaded(true))
+  }, [propertyId])
+
+  if (!loaded) return (
+    <div className="w-full h-48 bg-base-200 animate-pulse" />
+  )
+
+  if (media.length === 0) return (
+    <div className="w-full h-48 bg-base-200 flex items-center justify-center" onClick={onClick}>
+      <span className="text-xs text-base-content/30 uppercase tracking-widest">No images</span>
+    </div>
+  )
+
+  const current = media[idx]
+  const isVideo = current.media_type?.startsWith('video')
+
+  function prev(e) {
+    e.stopPropagation()
+    setIdx(i => (i - 1 + media.length) % media.length)
+  }
+  function next(e) {
+    e.stopPropagation()
+    setIdx(i => (i + 1) % media.length)
+  }
+
+  return (
+    <div className="relative w-full h-48 overflow-hidden bg-black group" onClick={onClick}>
+      {isVideo
+        ? <video
+            key={current.id}
+            src={`/api/properties/${propertyId}/media/${current.id}`}
+            className="w-full h-full object-cover"
+            muted autoPlay={false}
+          />
+        : <img
+            key={current.id}
+            src={`/api/properties/${propertyId}/media/${current.id}`}
+            alt={current.filename}
+            className="w-full h-full object-cover transition-opacity duration-300"
+          />
+      }
+
+      {media.length > 1 && (
+        <>
+          <button
+            className="absolute left-2 top-1/2 -translate-y-1/2 btn btn-xs btn-circle bg-black/50 border-0 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={prev}
+          >‹</button>
+          <button
+            className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-xs btn-circle bg-black/50 border-0 text-white opacity-0 group-hover:opacity-100 transition-opacity"
+            onClick={next}
+          >›</button>
+          <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1">
+            {media.map((_, i) => (
+              <button
+                key={i}
+                className={`w-1.5 h-1.5 rounded-full transition-colors ${i === idx ? 'bg-white' : 'bg-white/40'}`}
+                onClick={e => { e.stopPropagation(); setIdx(i) }}
+              />
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 /* ─── Logo ────────────────────────────────────────────────────── */
 
 function Logo() {
@@ -598,9 +676,9 @@ function PropertiesPage({ user }) {
       <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {properties.map((prop, i) => (
           <div key={i}
-            className="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow cursor-pointer"
-            onClick={() => openProperty(prop)}>
-            <div className="card-body gap-3 p-6">
+            className="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow cursor-pointer overflow-hidden">
+            <PropertyCardCarousel propertyId={prop.id} onClick={() => openProperty(prop)} />
+            <div className="card-body gap-3 p-6" onClick={() => openProperty(prop)}>
               <h2 className="text-base font-semibold leading-snug">{prop.address}</h2>
               <div className="space-y-1">
                 <p className="text-sm text-base-content/60">{prop.county} County</p>
