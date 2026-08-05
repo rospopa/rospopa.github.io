@@ -80,7 +80,7 @@ export default function App() {
     <div className="app-root">
       <div className="dynamic-bg" aria-hidden="true">
         <svg className="bg-buildings" viewBox="0 0 1200 300" preserveAspectRatio="xMidYMax slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-          <!-- Layer 3: distant skyline -->
+          {/* Layer 3: distant skyline */}
           <g className="layer layer-3" fill="#f3f3f3">
             <rect x="40" y="160" width="140" height="80" rx="4" />
             <rect x="220" y="140" width="180" height="100" rx="4" />
@@ -111,7 +111,6 @@ export default function App() {
       </div>
       <div className="auth-column">
         <div className="card auth-card center">
-          <Logo />
           <h2>{mode === 'login' ? 'Commercial Real Estate Investor Portal' : 'Create account'}</h2>
 
           <form onSubmit={submit} className="form">
