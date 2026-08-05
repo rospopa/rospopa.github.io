@@ -801,7 +801,7 @@ function ProfilePage({ currentUser, onUpdate }) {
     <div className="max-w-2xl mx-auto">
       <h2 className="text-2xl font-bold mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>My Profile</h2>
       <div className="card bg-base-100 border border-base-300">
-        <div className="card-body p-8 space-y-6">
+        <form className="card-body p-8 space-y-6" onSubmit={saveProfile}>
 
           {/* Photo upload */}
           <div className="flex items-center gap-6">
@@ -863,11 +863,11 @@ function ProfilePage({ currentUser, onUpdate }) {
             <div className={`alert text-sm ${msgType === 'error' ? 'alert-error' : 'alert-success'}`}>{msg}</div>
           )}
           <div className="pt-2">
-            <button className="btn btn-primary w-full" type="submit" disabled={loading || !photo} onClick={saveProfile}>
+            <button className="btn btn-primary w-full" type="submit" disabled={loading || !photo}>
               {loading ? 'Saving…' : 'Save Profile'}
             </button>
           </div>
-        </div>
+        </form>
       </div>
     </div>
   )

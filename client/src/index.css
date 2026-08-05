@@ -19,16 +19,26 @@
   --color-accent-content: #ffffff;
   --color-neutral: #222222;
   --color-neutral-content: #ffffff;
-  --color-info: #555555;
+  --color-info: #0077cc;
   --color-info-content: #ffffff;
-  --color-success: #222222;
+  --color-success: #1a7a1a;
   --color-success-content: #ffffff;
   --color-warning: #888888;
   --color-warning-content: #ffffff;
-  --color-error: #111111;
+  --color-error: #cc2200;
   --color-error-content: #ffffff;
   --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
   --radius-box: 0.375rem;
   --border: 1px;
 }
+
+/* Ensure inputs and textareas are always interactive */
+input:not([disabled]),
+textarea:not([disabled]),
+select:not([disabled]) {
+  pointer-events: auto;
+  cursor: text;
+  color: var(--color-base-content);
+}
+select:not([disabled]) { cursor: pointer; }
