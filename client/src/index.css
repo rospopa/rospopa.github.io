@@ -33,6 +33,11 @@
   --border: 1px;
 }
 
+/* Global font — Segoe UI for all app UI */
+*, *::before, *::after {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
+
 /* Green gradient utility for headings */
 .gradient-text {
   background: linear-gradient(135deg, #1a4d1a 0%, #3a8c3a 45%, #7dc47d 100%);

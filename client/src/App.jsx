@@ -581,7 +581,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     <div className="modal modal-open">
       <div className="modal-box max-w-2xl w-full">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-xl" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <h3 className="font-bold text-xl">
             {property?.id ? property.address : 'New Property'}
           </h3>
           <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
@@ -841,7 +841,7 @@ function ProfilePage({ currentUser, onUpdate }) {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold mb-8" style={{ fontFamily: "'Playfair Display', serif" }}>My Profile</h2>
+      <h2 className="text-2xl font-bold mb-8">My Profile</h2>
       <div className="card bg-base-100 border border-base-300">
         <form className="card-body p-8 space-y-6" onSubmit={saveProfile}>
 
@@ -1103,7 +1103,7 @@ export default function App() {
 
         {page === 'dashboard' && (
           <div className="text-center py-16">
-            <h1 className="text-4xl font-bold mb-3 gradient-text" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h1 className="text-4xl font-bold mb-3 gradient-text">
               Welcome back
             </h1>
             <p className="text-base-content/50 text-lg mb-2">{currentUser.email}</p>
@@ -1117,7 +1117,7 @@ export default function App() {
 
         {page === 'users' && currentUser.role === 'admin' && (
           <div className="space-y-10">
-            <h2 className="text-2xl font-bold gradient-text" style={{ fontFamily: "'Playfair Display', serif" }}>Manage Users</h2>
+            <h2 className="text-2xl font-bold gradient-text">Manage Users</h2>
             <div className="card bg-base-100 border border-base-300">
               <div className="card-body p-8">
                 <h3 className="text-base font-semibold uppercase tracking-widest text-base-content/50 mb-6">Create New User</h3>
@@ -1133,7 +1133,7 @@ export default function App() {
 
         {page === 'properties' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold gradient-text" style={{ fontFamily: "'Playfair Display', serif" }}>
+            <h2 className="text-2xl font-bold gradient-text">
               {currentUser.role === 'admin' ? 'Manage Properties' : 'My Properties'}
             </h2>
             <PropertiesPage user={currentUser} />
@@ -1142,7 +1142,7 @@ export default function App() {
 
         {page === 'audit' && currentUser.role === 'admin' && (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold gradient-text" style={{ fontFamily: "'Playfair Display', serif" }}>Audit Logs</h2>
+            <h2 className="text-2xl font-bold gradient-text">Audit Logs</h2>
             <AuditLogs />
           </div>
         )}
