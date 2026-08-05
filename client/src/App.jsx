@@ -148,7 +148,7 @@ function Logo() {
           WebkitTextFillColor: 'transparent',
           backgroundClip: 'text',
         }}>
-          Portal
+          CRE
         </span>
       </div>
     </div>
