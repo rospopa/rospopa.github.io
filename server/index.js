@@ -2,6 +2,7 @@
 const express = require('express');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const sqlite3 = require('sqlite3').verbose();
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
@@ -50,8 +51,15 @@ db.serialize(() => {
 const app = express();
 app.use(express.json());
 
-const sessionsDir = path.join(__dirname, 'sessions');
-if (!fs.existsSync(sessionsDir)) fs.mkdirSync(sessionsDir, { recursive: true });
+// Prefer storing session files in a writable temp directory on hosted platforms (Render)
+const sessionsDir = process.env.SESSION_DIR || path.join(os.tmpdir(), 'rospopa-sessions');
+if (!fs.existsSync(sessionsDir)) {
+  try {
+    fs.mkdirSync(sessionsDir, { recursive: true });
+  } catch (err) {
+    console.warn('Could not create sessions directory at', sessionsDir, err && err.message);
+  }
+}
 const sessionStore = new FileStore({ path: sessionsDir, ttl: 86400 });
 
 // Trust reverse proxy (Render) so secure cookies and req.protocol work correctly
