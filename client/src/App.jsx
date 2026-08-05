@@ -81,8 +81,44 @@ export default function App() {
     <div className="app-root">
       <div className="hero-panel">
         <div className="hero-content">
-          <h1>Welcome to rospopa</h1>
-          <p className="muted">Secure access to your account. Fast, simple, and safe.</p>
+          <h1>rospopa Investments</h1>
+          <p className="muted">A platform for Commercial Real Estate Investments — discover curated deals, analyze portfolio performance, and manage investor relations.</p>
+
+          <div className="features">
+            <div className="feature">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="7" width="18" height="12" rx="2" stroke="#000" strokeWidth="1.2" fill="none" />
+                <path d="M7 11h4M7 14h6" stroke="#000" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+              <div>
+                <strong>Deal Marketplace</strong>
+                <div className="small muted">Browse vetted CRE opportunities with key metrics and docs.</div>
+              </div>
+            </div>
+
+            <div className="feature">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="9" stroke="#000" strokeWidth="1.2" fill="none" />
+                <path d="M8 12h8M12 8v8" stroke="#000" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+              <div>
+                <strong>Portfolio Analytics</strong>
+                <div className="small muted">Real-time cashflow, IRR, and exposure analytics for investments.</div>
+              </div>
+            </div>
+
+            <div className="feature">
+              <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="4" y="4" width="16" height="16" rx="2" stroke="#000" strokeWidth="1.2" fill="none" />
+                <path d="M8 8h8M8 12h8M8 16h5" stroke="#000" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+              <div>
+                <strong>Investor Dashboard</strong>
+                <div className="small muted">Secure investor profiles, docs, and distribution history.</div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
