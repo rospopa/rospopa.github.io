@@ -106,22 +106,11 @@ if (process.env.DATABASE_URL) {
     const { Pool } = require('pg');
     const PgSession = require('connect-pg-simple')(session);
     const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false });
-
-    // Attempt to verify connectivity and ensure session table exists before using it
-    pool.connect()
-      .then(client => {
-        return client.query(`CREATE TABLE IF NOT EXISTS "session" (sid VARCHAR PRIMARY KEY, sess JSON NOT NULL, expire TIMESTAMP NOT NULL)`)
-          .then(() => { client.release(); })
-          .catch(e => { client.release(); throw e; });
-      })
-      .then(() => {
-        sessionStore = new (require('connect-pg-simple')(session))({ pool });
-        sessionStoreType = 'postgres';
-        console.log('Using Postgres-backed session store');
-      })
-      .catch(e => {
-        console.warn('Postgres session store setup failed (will try other stores):', e && e.message);
-      });
+    // Ensure session table exists (idempotent) but do not block session store creation
+    pool.query(`CREATE TABLE IF NOT EXISTS "session" (sid VARCHAR PRIMARY KEY, sess JSON NOT NULL, expire TIMESTAMP NOT NULL)`).catch(e => console.warn('Could not ensure session table exists:', e && e.message));
+    sessionStore = new PgSession({ pool });
+    sessionStoreType = 'postgres';
+    console.log('Using Postgres-backed session store')
   } catch (e) {
     console.warn('Postgres session store setup failed:', e && e.message);
   }
