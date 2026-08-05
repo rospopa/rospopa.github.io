@@ -79,45 +79,56 @@ export default function App() {
   return (
     <div className="app-root">
       <div className="dynamic-bg" aria-hidden="true">
-        <svg className="bg-clouds" viewBox="0 0 1200 160" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <svg className="bg-clouds" viewBox="0 0 1200 180" preserveAspectRatio="xMidYMin slice" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
           <defs>
             <linearGradient id="cloudGrad1" x1="0" x2="1" y1="0" y2="0">
               <stop offset="0%" stopColor="#fff" stopOpacity="0.98" />
               <stop offset="100%" stopColor="#fff" stopOpacity="0.85" />
             </linearGradient>
             <linearGradient id="cloudGrad2" x1="0" x2="1" y1="0" y2="0">
-              <stop offset="0%" stopColor="#fff" stopOpacity="0.9" />
+              <stop offset="0%" stopColor="#fff" stopOpacity="0.92" />
               <stop offset="100%" stopColor="#fff" stopOpacity="0.7" />
             </linearGradient>
-            <filter id="cloudBlur" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="b" />
+            <linearGradient id="cloudGrad3" x1="0" x2="1" y1="0" y2="0">
+              <stop offset="0%" stopColor="#fff" stopOpacity="0.88" />
+              <stop offset="100%" stopColor="#fff" stopOpacity="0.6" />
+            </linearGradient>
+            <filter id="cloudBlur" x="-30%" y="-30%" width="160%" height="160%">
+              <feGaussianBlur stdDeviation="7" result="b" />
               <feMerge><feMergeNode in="b" /></feMerge>
             </filter>
           </defs>
 
-          <!-- three rounded overlapping cloud shapes with soft gradients and morph + opacity animation -->
-          <path fill="url(#cloudGrad1)" filter="url(#cloudBlur)" opacity="0.95" d="M40 80c40-40 120-40 180-10s90 60 170 40 160-60 260-20 160 40 220 10v50H40z">
-            <animate attributeName="d" dur="14s" repeatCount="indefinite" values="M40 80c40-40 120-40 180-10s90 60 170 40 160-60 260-20 160 40 220 10v50H40z;
-                                                                                             M20 90c50-20 110-10 190 10s70 40 150 20 180-50 260-10 120 20 200-10v50H20z;
-                                                                                             M60 70c30-50 140-30 200-6s100 48 180 28 140-48 240-8 180 34 240 6v50H60z;
-                                                                                             M40 80c40-40 120-40 180-10s90 60 170 40 160-60 260-20 160 40 220 10v50H40z" />
-            <animate attributeName="opacity" dur="14s" repeatCount="indefinite" values="0.92;0.6;0.85;0.92" />
+          {/* varied rounded clouds: different sizes, opacities and morph timings */}
+          <path fill="url(#cloudGrad1)" filter="url(#cloudBlur)" opacity="0.95" d="M30 80c40-40 120-40 180-10s90 60 170 40 160-60 260-20 160 40 220 10v60H30z">
+            <animate attributeName="d" dur="16s" repeatCount="indefinite" values="M30 80c40-40 120-40 180-10s90 60 170 40 160-60 260-20 160 40 220 10v60H30z;
+                                                                                             M10 90c60-10 120-10 200 10s80 40 160 20 200-40 280-10 140 30 220-10v60H10z;
+                                                                                             M50 70c30-50 140-30 200-6s100 48 180 28 140-48 240-8 180 34 240 6v60H50z;
+                                                                                             M30 80c40-40 120-40 180-10s90 60 170 40 160-60 260-20 160 40 220 10v60H30z" />
+            <animate attributeName="opacity" dur="16s" repeatCount="indefinite" values="0.95;0.6;0.85;0.95" />
           </path>
 
-          <path fill="url(#cloudGrad2)" filter="url(#cloudBlur)" opacity="0.8" d="M520 50c40-20 100-10 150 10s60 38 120 20 140-36 200-8 120 30 180 12v40H520z">
-            <animate attributeName="d" dur="18s" repeatCount="indefinite" values="M520 50c40-20 100-10 150 10s60 38 120 20 140-36 200-8 120 30 180 12v40H520z;
-                                                                                             M500 60c30-30 120-6 170 14s80 30 140 18 160-24 220-2 100 28 160 8v40H500z;
-                                                                                             M540 40c20-10 90-26 160-4s50 42 110 26 120-20 180 4 140 26 200 6v40H540z;
-                                                                                             M520 50c40-20 100-10 150 10s60 38 120 20 140-36 200-8 120 30 180 12v40H520z" />
-            <animate attributeName="opacity" dur="18s" repeatCount="indefinite" values="0.85;0.55;0.75;0.85" />
+          <path fill="url(#cloudGrad2)" filter="url(#cloudBlur)" opacity="0.9" d="M480 40c50-24 110-12 160 12s70 44 140 24 160-36 220-6 110 34 170 14v48H480z">
+            <animate attributeName="d" dur="20s" repeatCount="indefinite" values="M480 40c50-24 110-12 160 12s70 44 140 24 160-36 220-6 110 34 170 14v48H480z;
+                                                                                              M460 50c40-30 120-8 170 12s80 36 150 16 140-28 200-4 120 30 180 10v48H460z;
+                                                                                              M500 30c30-8 100-28 170-4s60 44 130 26 130-18 190 6 140 26 200 6v48H500z;
+                                                                                              M480 40c50-24 110-12 160 12s70 44 140 24 160-36 220-6 110 34 170 14v48H480z" />
+            <animate attributeName="opacity" dur="20s" repeatCount="indefinite" values="0.9;0.58;0.78;0.9" />
           </path>
 
-          <path fill="#ffffff" filter="url(#cloudBlur)" opacity="0.78" d="M920 90c-50-30-120-50-200-28s-120 56-200 40-140-20-200 0-140 10-200-10v40h920z">
-            <animate attributeName="d" dur="16s" repeatCount="indefinite" values="M920 90c-50-30-120-50-200-28s-120 56-200 40-140-20-200 0-140 10-200-10v40h920z;
-                                                                                             M900 80c-30-10-100-36-170-16s-110 48-190 34-160-14-220 6-100 32-160 12v40h900z;
-                                                                                             M940 100c-60-40-130-60-210-36s-110 64-190 50-120-6-180 14-160 12-220-8v40h940z;
-                                                                                             M920 90c-50-30-120-50-200-28s-120 56-200 40-140-20-200 0-140 10-200-10v40h920z" />
-            <animate attributeName="opacity" dur="16s" repeatCount="indefinite" values="0.78;0.5;0.7;0.78" />
+          <path fill="url(#cloudGrad3)" filter="url(#cloudBlur)" opacity="0.82" d="M880 90c-60-36-140-60-220-34s-140 68-220 48-160-28-220 2-160 24-220-6v44h1000z">
+            <animate attributeName="d" dur="18s" repeatCount="indefinite" values="M880 90c-60-36-140-60-220-34s-140 68-220 48-160-28-220 2-160 24-220-6v44h1000z;
+                                                                                              M860 80c-40-14-120-40-200-14s-130 52-210 36-180-10-240 14-140 28-200 6v44h980z;
+                                                                                              M900 100c-70-40-150-66-230-40s-150 72-230 56-120-2-180 22-160 16-220-12v44h1020z;
+                                                                                              M880 90c-60-36-140-60-220-34s-140 68-220 48-160-28-220 2-160 24-220-6v44h1000z" />
+            <animate attributeName="opacity" dur="18s" repeatCount="indefinite" values="0.82;0.5;0.72;0.82" />
+          </path>
+
+          <path fill="#fff" filter="url(#cloudBlur)" opacity="0.7" d="M240 20c30-10 80-8 120 6s40 24 100 12 120-24 180-2 100 28 160 10v36H240z">
+            <animate attributeName="d" dur="12s" repeatCount="indefinite" values="M240 20c30-10 80-8 120 6s40 24 100 12 120-24 180-2 100 28 160 10v36H240z;
+                                                                                             M220 30c20-20 90-6 130 8s70 28 130 16 120-20 180 0 80 30 140 8v36H220z;
+                                                                                             M260 10c10-6 70-26 120-6s50 36 110 20 140-18 200 4 120 24 180 4v36H260z;
+                                                                                             M240 20c30-10 80-8 120 6s40 24 100 12 120-24 180-2 100 28 160 10v36H240z" />
           </path>
         </svg>
 
@@ -128,132 +139,74 @@ export default function App() {
             </filter>
           </defs>
 
-          {/* Morphing clouds (top of background) */}
-          <g className="clouds" aria-hidden="true" style={{display: 'none'}}>
-            <path fill="#ffffff" opacity="0.9" d="M50 60c20-20 80-20 120 0s60 40 120 20 140-40 220 0 140 40 200 20 100-60 160-40v40H50z">
-              <animate attributeName="d" dur="14s" repeatCount="indefinite" values="M50 60c20-20 80-20 120 0s60 40 120 20 140-40 220 0 140 40 200 20 100-60 160-40v40H50z;
-                                                                                               M30 70c30-30 90-10 140 10s40 30 110 10 160-30 200 10 120 40 180 0 120-80 180-40v40H30z;
-                                                                                               M60 50c10-10 70-30 130-10s70 50 140 30 120-30 200 0 160 60 220 20 100-60 160-40v40H60z;
-                                                                                               M50 60c20-20 80-20 120 0s60 40 120 20 140-40 220 0 140 40 200 20 100-60 160-40v40H50z" />
-            </path>
-
-            <path fill="#ffffff" opacity="0.85" d="M600 40c30-12 80-8 120 6s50 30 110 18 100-28 160-4 90 40 150 20v30H600z">
-              <animate attributeName="d" dur="18s" repeatCount="indefinite" values="M600 40c30-12 80-8 120 6s50 30 110 18 100-28 160-4 90 40 150 20v30H600z;
-                                                                                                 M580 50c20-20 70-10 110 4s60 34 120 22 90-20 150 0 120 40 160 10v30H580z;
-                                                                                                 M620 30c10-6 60-22 110-6s40 36 100 22 120-18 180 6 100 34 140 6v30H620z;
-                                                                                                 M600 40c30-12 80-8 120 6s50 30 110 18 100-28 160-4 90 40 150 20v30H600z" />
-            </path>
-
-            <path fill="#ffffff" opacity="0.8" d="M1000 80c-30-20-80-40-140-20s-80 50-140 40-120-20-180 0-120 10-180-10v30h740z">
-              <animate attributeName="d" dur="16s" repeatCount="indefinite" values="M1000 80c-30-20-80-40-140-20s-80 50-140 40-120-20-180 0-120 10-180-10v30h740z;
-                                                                                                   M980 70c-20-10-70-30-120-14s-70 44-130 34-140-16-200 6-100 30-160 10v30h820z;
-                                                                                                   M1020 90c-40-30-90-50-150-30s-90 60-150 50-100-10-160 10-140 14-200-6v30h840z;
-                                                                                                   M1000 80c-30-20-80-40-140-20s-80 50-140 40-120-20-180 0-120 10-180-10v30h740z" />
-            </path>
-          </g>
-
-          {/* Layer 3: distant skyline (path-based silhouettes + windows) */}
+          {/* Distant skyline: more varied silhouettes */}
           <g className="layer layer-3" fill="#f3f3f3" filter="url(#softShadow)">
-            {/* path silhouette for a more organic rooftop */}
-            <path d="M40 240 L40 160 Q110 140 160 160 L160 240 Z" />
-            {/* windows grid */}
-            <g fill="#fff">
-              {Array.from({length:4}).map((_,i)=> (
-                <rect key={i} x={48 + i*30} y="172" width="18" height="14" rx="2" />
-              ))}
-            </g>
+            <path d="M10 240 L10 170 Q80 140 140 160 L140 240 Z" />
+            <path d="M180 240 L180 150 Q260 120 320 150 L320 240 Z" />
+            <path d="M360 240 L360 130 Q460 100 520 130 L520 240 Z" />
+            <path d="M560 240 L560 140 Q640 110 700 140 L700 240 Z" />
+            <path d="M780 240 L780 160 Q860 130 920 160 L920 240 Z" />
+            <path d="M960 240 L960 150 Q1040 120 1100 150 L1100 240 Z" />
 
-            <path d="M220 240 L220 140 Q310 120 380 140 L380 240 Z" />
-            <g fill="#fff">
-              {Array.from({length:5}).map((_,i)=> (
-                <rect key={'w2-'+i} x={228 + i*34} y="152" width={18 + (i%2)*6} height="14" rx="2" />
-              ))}
-            </g>
-
-            <rect x="460" y="150" width="120" height="90" rx="4" />
-            <g fill="#fff">
-              <rect x="468" y="162" width="18" height="14" rx="2" />
-              <rect x="492" y="162" width="18" height="14" rx="2" />
-            </g>
-
-            <path d="M620 240 L620 130 Q720 110 820 130 L820 240 Z" />
+            {/* windows grids */}
             <g fill="#fff">
               {Array.from({length:6}).map((_,i)=> (
-                <rect key={'w4-'+i} x={628 + i*34} y="142" width="20" height="16" rx="2" />
+                <rect key={'dw-'+i} x={30 + i*120} y="172" width="22" height="14" rx="2" />
               ))}
             </g>
-
-            <rect x="940" y="155" width="160" height="85" rx="4" />
           </g>
 
-          {/* Layer 2: midground warehouses with varied door widths and subtle shadows */}
+          {/* Midground warehouses: added more blocks and detail */}
           <g className="layer layer-2" fill="#e8e8e8" filter="url(#softShadow)">
-            <rect x="0" y="180" width="200" height="60" rx="4" />
-            {/* docking doors (variable widths) */}
-            <g fill="#d6d6d6">
-              <rect x="16" y="190" width="30" height="36" rx="2" />
-              <rect x="54" y="190" width="46" height="36" rx="2" />
-              <rect x="106" y="190" width="54" height="36" rx="2" />
-            </g>
-            {/* bay shadows */}
-            <rect x="0" y="232" width="200" height="6" fill="#e0e0e0" />
+            <rect x="0" y="180" width="180" height="64" rx="6" />
+            <rect x="200" y="174" width="240" height="76" rx="6" />
+            <rect x="460" y="182" width="200" height="64" rx="6" />
+            <rect x="680" y="168" width="260" height="84" rx="6" />
+            <rect x="960" y="176" width="220" height="68" rx="6" />
 
-            <rect x="220" y="170" width="260" height="70" rx="4" />
-            {/* long loading doors (mixed widths) */}
-            <g fill="#dcdcdc">
-              <rect x="236" y="190" width="40" height="40" rx="2" />
-              <rect x="284" y="190" width="56" height="40" rx="2" />
-              <rect x="344" y="190" width="72" height="40" rx="2" />
-            </g>
-            <rect x="520" y="178" width="220" height="62" rx="4" />
-            <g fill="#dcdcdc">
-              <rect x="536" y="190" width="44" height="36" rx="2" />
-            </g>
-            <rect x="760" y="168" width="280" height="72" rx="4" />
+            {/* additional docks and doors */}
             <g fill="#d6d6d6">
-              <rect x="776" y="184" width="40" height="40" rx="2" />
-              <rect x="824" y="184" width="56" height="40" rx="2" />
-              <rect x="884" y="184" width="36" height="40" rx="2" />
+              <rect x="12" y="194" width="34" height="44" rx="3" />
+              <rect x="52" y="194" width="48" height="44" rx="3" />
+              <rect x="108" y="194" width="34" height="44" rx="3" />
+
+              <rect x="220" y="196" width="46" height="48" rx="3" />
+              <rect x="272" y="196" width="56" height="48" rx="3" />
+              <rect x="336" y="196" width="70" height="48" rx="3" />
+
+              <rect x="480" y="196" width="58" height="44" rx="3" />
+              <rect x="756" y="200" width="40" height="48" rx="3" />
+              <rect x="804" y="200" width="56" height="48" rx="3" />
             </g>
           </g>
 
-          {/* Layer 1: foreground industrial elements with facade lines and smaller shadow */}
+          {/* Foreground industrial: more varied blocks, silos and loading ramps */}
           <g className="layer layer-1" fill="#dedede" filter="url(#softShadow)">
-            <rect x="60" y="210" width="100" height="40" rx="3" />
-            {/* dock door lines */}
-            <g fill="#cfcfcf">
-              <rect x="68" y="218" width="24" height="28" rx="2" />
-              <rect x="96" y="218" width="20" height="28" rx="2" />
+            <rect x="40" y="210" width="120" height="46" rx="4" />
+            <rect x="180" y="206" width="160" height="50" rx="4" />
+            <rect x="360" y="214" width="240" height="42" rx="4" />
+            <rect x="620" y="210" width="180" height="46" rx="4" />
+            <rect x="820" y="216" width="260" height="38" rx="4" />
+
+            {/* silos / taller elements */}
+            <g fill="#e0e0e0">
+              <rect x="520" y="160" width="36" height="100" rx="6" />
+              <rect x="568" y="150" width="44" height="110" rx="8" />
+              <rect x="644" y="150" width="28" height="110" rx="6" />
             </g>
 
-            <rect x="180" y="205" width="140" height="45" rx="3" />
+            {/* foreground doors/windows */}
             <g fill="#cfcfcf">
-              <rect x="188" y="213" width="30" height="30" rx="2" />
-              <rect x="222" y="213" width="26" height="30" rx="2" />
-              <rect x="256" y="213" width="34" height="30" rx="2" />
-            </g>
-
-            <rect x="360" y="212" width="220" height="38" rx="3" />
-            <g fill="#cfcfcf">
-              {Array.from({length:5}).map((_,i)=> (
-                <rect key={'f1-'+i} x={372 + i*40} y="220" width={22 + (i%2)*8} height="22" rx="2" />
-              ))}
-            </g>
-
-            <rect x="620" y="208" width="160" height="42" rx="3" />
-            <g fill="#cfcfcf">
-              <rect x="628" y="216" width="36" height="28" rx="2" />
-              <rect x="668" y="216" width="44" height="28" rx="2" />
-            </g>
-
-            <rect x="820" y="214" width="240" height="36" rx="3" />
-            <g fill="#cfcfcf">
+              <rect x="52" y="218" width="28" height="30" rx="3" />
+              <rect x="88" y="218" width="36" height="30" rx="3" />
+              <rect x="196" y="216" width="30" height="32" rx="3" />
+              <rect x="234" y="216" width="30" height="32" rx="3" />
               {Array.from({length:6}).map((_,i)=> (
-                <rect key={'f2-'+i} x={832 + i*36} y="222" width={20 + (i%3)*8} height="22" rx="2" />
+                <rect key={'pf-'+i} x={372 + i*36} y="222" width={18 + (i%2)*6} height="24" rx="3" />
               ))}
             </g>
 
-            {/* subtle rail line */}
+            {/* rail line */}
             <rect x="0" y="256" width="1200" height="6" fill="#cfcfcf" />
           </g>
         </svg>
