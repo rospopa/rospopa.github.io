@@ -885,6 +885,18 @@ export default function App() {
   const [msg, setMsg] = useState('')
   const [isRegister, setIsRegister] = useState(false)
   const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null })
+  const [authChecked, setAuthChecked] = useState(false)
+
+  // Restore session on page load/refresh
+  useEffect(() => {
+    fetch('/api/me', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => {
+        if (data.user) { setCurrentUser(data.user); setPage('dashboard') }
+      })
+      .catch(() => {})
+      .finally(() => setAuthChecked(true))
+  }, [])
 
   async function login(e) {
     e.preventDefault(); setMsg(''); setLoading(true)
@@ -908,7 +920,19 @@ export default function App() {
     finally { setLoading(false) }
   }
 
-  function logout() { setCurrentUser(null); setPage('login'); setEmail(''); setPassword('') }
+  async function logout() {
+    await fetch('/api/logout', { method: 'POST', credentials: 'include' }).catch(() => {})
+    setCurrentUser(null); setPage('login'); setEmail(''); setPassword('')
+  }
+
+  /* ── Auth check in flight ── */
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-base-200">
+        <span className="loading loading-spinner loading-lg" />
+      </div>
+    )
+  }
 
   /* ── Login / Register screen ── */
   if (!currentUser) {
