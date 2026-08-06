@@ -2599,8 +2599,6 @@ export default function App() {
             <h1 className="text-2xl md:text-4xl font-bold mb-3">
               Welcome back, {currentUser.first_name || currentUser.email.split('@')[0]}
             </h1>
-            <p className="text-base-content/50 text-lg mb-2">{currentUser.email}</p>
-            <span className="badge badge-primary mb-8">{currentUser.role}</span>
             <div className="flex flex-wrap justify-center gap-4 mt-6">
               <button className="btn btn-primary" onClick={() => navigateTo('properties')}>View Properties</button>
               {currentUser.role === 'admin' && <button className="btn btn-outline" onClick={() => navigateTo('users')}>Manage Users</button>}
