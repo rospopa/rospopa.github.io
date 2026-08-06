@@ -252,6 +252,23 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
+/** Public endpoint — returns first_name, last_name, profile_photo for a given email.
+ *  Used to personalise the login screen. Never returns sensitive data. */
+app.post('/api/lookup-user', async (req, res) => {
+  let { email } = req.body || {};
+  email = sanitizeEmail(email);
+  if (!email) return res.json({ found: false });
+  try {
+    const result = await pool.query(
+      'SELECT first_name, last_name, profile_photo FROM users WHERE email = $1',
+      [email]
+    );
+    if (result.rows.length === 0) return res.json({ found: false });
+    const { first_name, last_name, profile_photo } = result.rows[0];
+    res.json({ found: true, first_name, last_name, profile_photo });
+  } catch { res.json({ found: false }); }
+});
+
 app.post('/api/login', async (req, res) => {
   let { email, password } = req.body || {};
   email = sanitizeEmail(email);

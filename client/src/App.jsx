@@ -1442,6 +1442,7 @@ export default function App() {
   const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null })
   const [authChecked, setAuthChecked] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [loginPreview, setLoginPreview] = useState(null) // {first_name, last_name, profile_photo} | null
 
   function navigateTo(p) { setPage(p); localStorage.setItem('rep_page', p) }
 
@@ -1460,6 +1461,15 @@ export default function App() {
       .catch(() => {})
       .finally(() => setAuthChecked(true))
   }, [])
+
+  async function lookupEmail(emailVal) {
+    if (!emailVal || !emailVal.includes('@')) { setLoginPreview(null); return }
+    try {
+      const res = await fetch('/api/lookup-user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailVal }) })
+      const data = await res.json()
+      setLoginPreview(data.found ? data : null)
+    } catch { setLoginPreview(null) }
+  }
 
   async function login(e) {
     e.preventDefault(); setMsg(''); setLoading(true)
@@ -1486,7 +1496,7 @@ export default function App() {
   async function logout() {
     await fetch('/api/logout', { method: 'POST', credentials: 'include' }).catch(() => {})
     localStorage.removeItem('rep_page')
-    setCurrentUser(null); setPage('login'); setEmail(''); setPassword('')
+    setCurrentUser(null); setPage('login'); setEmail(''); setPassword(''); setLoginPreview(null)
   }
 
   /* ── Auth check in flight ── */
@@ -1508,12 +1518,28 @@ export default function App() {
           <div className="card w-full max-w-md bg-base-100 shadow-2xl">
             <div className="card-body p-10 space-y-6">
               <div className="flex justify-center mb-2">
-                <Logo />
+                {loginPreview ? (
+                  <div className="flex flex-col items-center gap-3 animate-fade-in">
+                    <Avatar src={loginPreview.profile_photo}
+                      name={[loginPreview.first_name, loginPreview.last_name].filter(Boolean).join(' ') || email}
+                      size="lg" />
+                    <div className="text-center">
+                      <p className="text-xl font-semibold">
+                        {[loginPreview.first_name, loginPreview.last_name].filter(Boolean).join(' ') || email.split('@')[0]}
+                      </p>
+                      <p className="text-sm text-base-content/50">Welcome back</p>
+                    </div>
+                  </div>
+                ) : (
+                  <Logo />
+                )}
               </div>
               <form onSubmit={isRegister ? register : login} className="space-y-5">
                 <Field label="Email" required>
                   <input type="email" placeholder="your@email.com" value={email}
-                    onChange={e => setEmail(e.target.value)} className="input input-bordered w-full" required />
+                    onChange={e => setEmail(e.target.value)}
+                    onBlur={e => lookupEmail(e.target.value)}
+                    className="input input-bordered w-full" required />
                 </Field>
                 <Field label="Password" required>
                   <input type="password" placeholder="Password" value={password}
