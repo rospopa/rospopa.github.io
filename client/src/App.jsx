@@ -2072,37 +2072,37 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Income</div>
                 <Field label="Gross Scheduled Rent ($/yr)">
                   <NumericInput placeholder="e.g. 120000" value={grossScheduledRent} onChange={setGrossScheduledRent}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full border-blue-500 bg-blue-50 focus:border-blue-600" disabled={!isAdmin} />
                 </Field>
                 <Field label="Vacancy / Credit Loss (%)">
                   <NumericInput placeholder="e.g. 5" value={vacancyRate} onChange={setVacancyRate}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full border-blue-500 bg-blue-50 focus:border-blue-600" disabled={!isAdmin} />
                 </Field>
-                {grossScheduledRent !== '' && vacancyRate !== '' && (
-                  <div className="text-xs text-base-content/60 bg-base-200 rounded px-2 py-1">
-                    EGI ≈ <span className="font-medium">${(Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>/yr
-                  </div>
-                )}
+                <Field label="EGI — Effective Gross Income ($/yr)">
+                  <input readOnly
+                    value={grossScheduledRent !== '' && vacancyRate !== '' ? '$' + (Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-sm w-full bg-black text-white border-black font-semibold cursor-default select-all" />
+                </Field>
                 <Field label="Other Income ($/yr)">
                   <NumericInput placeholder="parking, RUBS, storage" value={otherIncome} onChange={setOtherIncome}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full border-blue-500 bg-blue-50 focus:border-blue-600" disabled={!isAdmin} />
                 </Field>
                 <Field label="Operating Expenses ($/yr)">
                   <NumericInput placeholder="e.g. 40000" value={operatingExpenses} onChange={setOperatingExpenses}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full border-blue-500 bg-blue-50 focus:border-blue-600" disabled={!isAdmin} />
                 </Field>
                 <Field label="Reserves / Replacement Capex ($/yr)">
                   <NumericInput placeholder="e.g. 5000" value={reservesCapex} onChange={setReservesCapex}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full border-blue-500 bg-blue-50 focus:border-blue-600" disabled={!isAdmin} />
                 </Field>
-                {grossScheduledRent !== '' && vacancyRate !== '' && operatingExpenses !== '' && (
-                  <div className="text-xs text-base-content/60 bg-base-200 rounded px-2 py-1">
-                    NOI ≈ <span className="font-medium">${(
+                <Field label="NOI — Net Operating Income ($/yr)">
+                  <input readOnly
+                    value={grossScheduledRent !== '' && vacancyRate !== '' && operatingExpenses !== '' ? '$' + (
                       Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) +
                       Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0)
-                    ).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>/yr
-                  </div>
-                )}
+                    ).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-sm w-full bg-black text-white border-black font-semibold cursor-default select-all" />
+                </Field>
               </div>
 
               {/* Debt */}
@@ -2110,7 +2110,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Debt</div>
                 <Field label="Loan Amount ($)">
                   <NumericInput placeholder="e.g. 750000" value={loanAmount} onChange={setLoanAmount}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full border-blue-500 bg-blue-50 focus:border-blue-600" disabled={!isAdmin} />
                 </Field>
                 <Field label="LTV (%)">
                   <NumericInput placeholder="e.g. 75" value={ltv} onChange={setLtv}
@@ -2118,28 +2118,26 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 </Field>
                 <Field label="Interest Rate (%)">
                   <NumericInput placeholder="e.g. 6.5" value={interestRate} onChange={setInterestRate}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full border-blue-500 bg-blue-50 focus:border-blue-600" disabled={!isAdmin} />
                 </Field>
                 <Field label="Amortization Term (yrs)">
                   <NumericInput placeholder="e.g. 25" value={amortizationTerm} onChange={setAmortizationTerm}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full border-blue-500 bg-blue-50 focus:border-blue-600" disabled={!isAdmin} />
                 </Field>
                 <Field label="Interest-Only Period (yrs)">
                   <NumericInput placeholder="e.g. 3" value={interestOnlyPeriod} onChange={setInterestOnlyPeriod}
                     className="input input-bordered input-sm w-full" disabled={!isAdmin} />
                 </Field>
-                {loanAmount !== '' && interestRate !== '' && amortizationTerm !== '' && Number(amortizationTerm) > 0 && (
-                  (() => {
-                    const r = Number(interestRate) / 100 / 12
-                    const n = Number(amortizationTerm) * 12
-                    const pmt = r === 0 ? Number(loanAmount) / n : Number(loanAmount) * r / (1 - Math.pow(1 + r, -n))
-                    return (
-                      <div className="text-xs text-base-content/60 bg-base-200 rounded px-2 py-1">
-                        Annual Debt Service ≈ <span className="font-medium">${(pmt * 12).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>/yr
-                      </div>
-                    )
-                  })()
-                )}
+                <Field label="Annual Debt Service ($/yr)">
+                  <input readOnly
+                    value={loanAmount !== '' && interestRate !== '' && amortizationTerm !== '' && Number(amortizationTerm) > 0 ? (() => {
+                      const r = Number(interestRate) / 100 / 12
+                      const n = Number(amortizationTerm) * 12
+                      const pmt = r === 0 ? Number(loanAmount) / n : Number(loanAmount) * r / (1 - Math.pow(1 + r, -n))
+                      return '$' + (pmt * 12).toLocaleString(undefined, { maximumFractionDigits: 0 })
+                    })() : '—'}
+                    className="input input-sm w-full bg-black text-white border-black font-semibold cursor-default select-all" />
+                </Field>
               </div>
 
               {/* Deal */}
@@ -2181,17 +2179,17 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                   <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Tenant</div>
                   <Field label="Tenant Annual Gross Sales ($)">
                     <NumericInput placeholder="e.g. 1200000" value={tenantGrossSales} onChange={setTenantGrossSales}
-                      className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                      className="input input-bordered input-sm w-full border-blue-500 bg-blue-50 focus:border-blue-600" disabled={!isAdmin} />
                   </Field>
                   <Field label="Tenant Base Rent ($/yr)">
                     <NumericInput placeholder="e.g. 60000" value={tenantBaseRent} onChange={setTenantBaseRent}
-                      className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                      className="input input-bordered input-sm w-full border-blue-500 bg-blue-50 focus:border-blue-600" disabled={!isAdmin} />
                   </Field>
-                  {tenantGrossSales !== '' && tenantBaseRent !== '' && Number(tenantGrossSales) > 0 && (
-                    <div className="text-xs text-base-content/60 bg-base-200 rounded px-2 py-1">
-                      Rent-to-Sales ≈ <span className="font-medium">{(Number(tenantBaseRent) / Number(tenantGrossSales) * 100).toFixed(2)}%</span>
-                    </div>
-                  )}
+                  <Field label="Rent-to-Sales Ratio (%)">
+                    <input readOnly
+                      value={tenantGrossSales !== '' && tenantBaseRent !== '' && Number(tenantGrossSales) > 0 ? (Number(tenantBaseRent) / Number(tenantGrossSales) * 100).toFixed(2) + '%' : '—'}
+                      className="input input-sm w-full bg-black text-white border-black font-semibold cursor-default select-all" />
+                  </Field>
                 </div>
               )}
 
