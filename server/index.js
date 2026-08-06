@@ -306,9 +306,15 @@ app.post('/api/lookup-user', async (req, res) => {
 
 /** Send a 6-digit OTP to the user's email for password reset */
 app.post('/api/forgot-password', async (req, res) => {
-  let { email } = req.body || {};
+  let { email, recaptchaToken } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !isValidEmail(email)) return res.status(400).json({ error: 'valid email required' });
+
+  const captcha = await verifyRecaptcha(recaptchaToken, 'FORGOT_PASSWORD');
+  if (!captcha.ok) {
+    logAudit(null, email, 'recaptcha_failed', { action: 'FORGOT_PASSWORD', reason: captcha.reason, score: captcha.score }, null, email, clientIp(req));
+    return res.status(403).json({ error: 'Security check failed. Please try again.' });
+  }
 
   try {
     const userResult = await pool.query('SELECT id FROM users WHERE email = $1', [email]);

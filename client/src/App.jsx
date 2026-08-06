@@ -1985,6 +1985,22 @@ function ProfilePage({ currentUser, onUpdate }) {
 
 /* ─── Root App ────────────────────────────────────────────────── */
 
+/* ─── Shared reCAPTCHA helper (module-scope) ──────────────────── */
+
+async function getRecaptchaToken(action) {
+  try {
+    await new Promise((resolve, reject) => {
+      if (window.grecaptcha?.enterprise) return resolve()
+      let attempts = 0
+      const interval = setInterval(() => {
+        if (window.grecaptcha?.enterprise) { clearInterval(interval); resolve() }
+        else if (++attempts > 30) { clearInterval(interval); reject(new Error('timeout')) }
+      }, 100)
+    })
+    return await window.grecaptcha.enterprise.execute('6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv', { action })
+  } catch { return null }
+}
+
 /* ─── Forgot / Reset Password Modal ──────────────────────────── */
 
 function ForgotPasswordModal({ onClose, prefillEmail }) {
@@ -1997,14 +2013,26 @@ function ForgotPasswordModal({ onClose, prefillEmail }) {
   const [msg, setMsg] = useState('')
   const [success, setSuccess] = useState(false)
 
+  // Ensure reCAPTCHA script is loaded when modal opens
+  useEffect(() => {
+    if (!document.getElementById('recaptcha-script')) {
+      const s = document.createElement('script')
+      s.id = 'recaptcha-script'
+      s.src = 'https://www.google.com/recaptcha/enterprise.js?render=6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv'
+      s.async = true; s.defer = true
+      document.head.appendChild(s)
+    }
+  }, [])
+
   async function sendCode(e) {
     e.preventDefault()
     setMsg(''); setLoading(true)
     try {
+      const recaptchaToken = await getRecaptchaToken('FORGOT_PASSWORD')
       const res = await fetch('/api/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email })
+        body: JSON.stringify({ email, recaptchaToken })
       })
       const data = await res.json()
       if (!res.ok) return setMsg(data.error || 'Failed to send code.')
@@ -2143,8 +2171,7 @@ export default function App() {
       .finally(() => setAuthChecked(true))
   }, [])
 
-  async function lookupEmail(emailVal) {
-    if (!emailVal || !emailVal.includes('@')) { setLoginPreview(null); return }
+  async function lookupEmail(emailVal) {    if (!emailVal || !emailVal.includes('@')) { setLoginPreview(null); return }
     try {
       const res = await fetch('/api/lookup-user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailVal }) })
       const data = await res.json()
@@ -2162,21 +2189,6 @@ export default function App() {
         setLoginPreview(null)
       }
     } catch { setLoginPreview(null) }
-  }
-
-  async function getRecaptchaToken(action) {
-    try {
-      // Wait up to 3s for grecaptcha to be ready
-      await new Promise((resolve, reject) => {
-        if (window.grecaptcha?.enterprise) return resolve()
-        let attempts = 0
-        const interval = setInterval(() => {
-          if (window.grecaptcha?.enterprise) { clearInterval(interval); resolve() }
-          else if (++attempts > 30) { clearInterval(interval); reject(new Error('timeout')) }
-        }, 100)
-      })
-      return await window.grecaptcha.enterprise.execute('6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv', { action })
-    } catch { return null }
   }
 
   async function login(e) {
