@@ -3830,7 +3830,9 @@ export default function App() {
                       <p className="text-xl font-semibold">
                         {[loginPreview.first_name, loginPreview.last_name].filter(Boolean).join(' ') || email.split('@')[0]}
                       </p>
-                      <p className="text-sm text-base-content/50">Welcome back</p>
+                      <p className="text-sm text-base-content/50">
+                        {loginPreview.login_count > 0 ? 'Welcome back' : 'Welcome'}
+                      </p>
                     </div>
                   </div>
                 ) : (
@@ -3943,8 +3945,12 @@ export default function App() {
           >
             <Avatar src={currentUser.profile_photo} name={displayName} size="sm" />
             <div className="flex flex-col items-start leading-tight">
-              <span className="text-xs text-base-content/50 font-normal">Welcome back,</span>
-              <span className="text-sm font-semibold truncate max-w-[160px]">{currentUser.first_name || currentUser.email.split('@')[0]}</span>
+              <span className="text-xs text-base-content/50 font-normal">
+                {(currentUser.login_count || 0) > 1 ? 'Welcome back,' : 'Welcome,'}
+              </span>
+              <span className="text-sm font-semibold truncate max-w-[160px]">
+                {[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email.split('@')[0]}
+              </span>
             </div>
           </button>
           <button className="btn btn-sm btn-outline" onClick={logout}>Sign Out</button>
@@ -3991,7 +3997,8 @@ export default function App() {
         {page === 'dashboard' && (
           <div className="space-y-6 py-6">
             <h1 className="text-2xl md:text-3xl font-bold">
-              Welcome back, {currentUser.first_name || currentUser.email.split('@')[0]}
+              {(currentUser.login_count || 0) > 1 ? 'Welcome back, ' : 'Welcome, '}
+              {[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email.split('@')[0]}
             </h1>
             <CalendarWidget />
           </div>

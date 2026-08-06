@@ -51,6 +51,7 @@ async function initializeSchema() {
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS login_count INTEGER NOT NULL DEFAULT 0`);
   // Backfill last_login from audit_logs for users who logged in before column existed
   await pool.query(`
     UPDATE users u SET last_login = sub.last_login
@@ -125,6 +126,7 @@ async function initializeSchema() {
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS price_per_acre NUMERIC`);
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS electrical_voltage INTEGER`);
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS electrical_amperage INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS asset_type TEXT`);
 
   await pool.query(`CREATE TABLE IF NOT EXISTS property_assignments (
     id SERIAL PRIMARY KEY,
@@ -367,12 +369,12 @@ app.post('/api/lookup-user', async (req, res) => {
   if (!email) return res.json({ found: false });
   try {
     const result = await pool.query(
-      'SELECT first_name, last_name, profile_photo FROM users WHERE email = $1',
+      'SELECT first_name, last_name, profile_photo, login_count FROM users WHERE email = $1',
       [email]
     );
     if (result.rows.length === 0) return res.json({ found: false });
-    const { first_name, last_name, profile_photo } = result.rows[0];
-    res.json({ found: true, first_name, last_name, profile_photo });
+    const { first_name, last_name, profile_photo, login_count } = result.rows[0];
+    res.json({ found: true, first_name, last_name, profile_photo, login_count: login_count || 0 });
   } catch { res.json({ found: false }); }
 });
 
@@ -498,9 +500,9 @@ app.post('/api/login', async (req, res) => {
       }
       console.log('Session saved ok, sid:', req.session.id);
       onlineUsers.add(row.id);
-      pool.query('UPDATE users SET last_login = NOW() WHERE id = $1', [row.id]).catch(() => {});
+      pool.query('UPDATE users SET last_login = NOW(), login_count = COALESCE(login_count, 0) + 1 WHERE id = $1', [row.id]).catch(() => {});
       logAudit(row.id, row.email, 'login', { ip: clientIp(req) }, null, null, clientIp(req));
-      res.json({ user: userObj });
+      res.json({ user: { ...userObj, login_count: (row.login_count || 0) + 1 } });
     });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -521,9 +523,9 @@ app.get('/api/me', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ user: null });
   onlineUsers.add(req.session.user.id); // re-sync after server restart
   try {
-    const r = await pool.query('SELECT profile_photo FROM users WHERE id=$1', [req.session.user.id]);
-    const profile_photo = r.rows.length ? r.rows[0].profile_photo : null;
-    res.json({ user: { ...req.session.user, profile_photo } });
+    const r = await pool.query('SELECT profile_photo, login_count FROM users WHERE id=$1', [req.session.user.id]);
+    const extra = r.rows.length ? { profile_photo: r.rows[0].profile_photo, login_count: r.rows[0].login_count } : {};
+    res.json({ user: { ...req.session.user, ...extra } });
   } catch {
     res.json({ user: req.session.user });
   }
@@ -1048,7 +1050,8 @@ app.post('/api/properties', async (req, res) => {
     major_interstates, household_income_min, household_income_max, population_density,
     logistics_hubs, landmarks, water_sources, military_bases,
     grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
-    rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage
+    rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+    asset_type
   } = req.body || {};
   if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
   if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
@@ -1062,8 +1065,9 @@ app.post('/api/properties', async (req, res) => {
         major_interstates, household_income_min, household_income_max, population_density,
         logistics_hubs, landmarks, water_sources, military_bases,
         grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
-        rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32) RETURNING id`,
+        rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+        asset_type)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33) RETURNING id`,
       [pin.trim(), address.trim(), county.trim(), req.session.user.id,
        price || null, square_feet || null, lot_size || null, year_built || null,
        on_major_road || false, traffic_vpd || null, on_corner_lot || false,
@@ -1075,7 +1079,8 @@ app.post('/api/properties', async (req, res) => {
        grm || null, cap_rate || null, cash_on_cash || null, irr || null,
        price_per_unit || null, price_per_sqft || null,
        rent_to_sales_ratio || null, num_skus || null, price_per_acre || null,
-       electrical_voltage || null, electrical_amperage || null]
+       electrical_voltage || null, electrical_amperage || null,
+       asset_type || null]
     );
     await logAudit(req.session.user.id, req.session.user.email, 'create_property', { pin, address, county }, null, null, clientIp(req));
     res.json({ id: result.rows[0].id, pin, address, county });
@@ -1108,6 +1113,7 @@ app.get('/api/properties', async (req, res) => {
               logistics_hubs, landmarks, water_sources, military_bases, status,
               grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
               rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+              asset_type,
               created_by, created_at, updated_at
        FROM properties ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
@@ -1131,6 +1137,7 @@ app.get('/api/properties/:id', async (req, res) => {
               logistics_hubs, landmarks, water_sources, military_bases, status,
               grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
               rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+              asset_type,
               created_by, created_at, updated_at
        FROM properties WHERE id = $1`, [propId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
@@ -1163,7 +1170,8 @@ app.put('/api/properties/:id', async (req, res) => {
               major_interstates, household_income_min, household_income_max, population_density,
               logistics_hubs, landmarks, water_sources, military_bases,
               grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
-              rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage
+              rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+              asset_type
        FROM properties WHERE id=$1`, [propId]
     );
     if (oldResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
