@@ -504,6 +504,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [interstates, setInterstates] = useState([]) // [{name, distance}]
   const [logisticsHubs, setLogisticsHubs] = useState([]) // [{type, name, distance}]
   const [landmarksList, setLandmarksList] = useState([]) // [{type, name, distance}]
+  const [waterSources, setWaterSources] = useState([]) // [{name, distance}]
+  const [militaryBases, setMilitaryBases] = useState([]) // [{name, distance}]
   const [incomeMin, setIncomeMin] = useState('')
   const [incomeMax, setIncomeMax] = useState('')
   const [popDensity, setPopDensity] = useState('')
@@ -534,6 +536,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     setInterstates(Array.isArray(p.major_interstates) ? p.major_interstates : [])
     setLogisticsHubs(Array.isArray(p.logistics_hubs) ? p.logistics_hubs : [])
     setLandmarksList(Array.isArray(p.landmarks) ? p.landmarks : [])
+    setWaterSources(Array.isArray(p.water_sources) ? p.water_sources : [])
+    setMilitaryBases(Array.isArray(p.military_bases) ? p.military_bases : [])
     setIncomeMin(p.household_income_min ?? '')
     setIncomeMax(p.household_income_max ?? '')
     setPopDensity(p.population_density ?? '')
@@ -547,7 +551,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       setPin(''); setAddress(''); setCounty(''); setPrice(''); setSqft(''); setLot('')
       setYearBuilt(''); setOnMajorRoad(false); setTrafficVpd(''); setOnCornerLot(false)
       setWaterAccess(false); setNextToPublicLand(false); setInterstates([])
-      setLogisticsHubs([]); setLandmarksList([])
+      setLogisticsHubs([]); setLandmarksList([]); setWaterSources([]); setMilitaryBases([])
       setIncomeMin(''); setIncomeMax(''); setPopDensity('')
       setTab('details')
     }
@@ -593,6 +597,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       major_interstates: interstates,
       logistics_hubs: logisticsHubs,
       landmarks: landmarksList,
+      water_sources: waterSources,
+      military_bases: militaryBases,
       household_income_min: incomeMin !== '' ? Number(incomeMin) : null,
       household_income_max: incomeMax !== '' ? Number(incomeMax) : null,
       population_density: popDensity !== '' ? Number(popDensity) : null,
@@ -618,6 +624,18 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     setLandmarksList(prev => prev.map((item, idx) => idx === i ? { ...item, [field]: val } : item))
   }
   function removeLandmark(i) { setLandmarksList(prev => prev.filter((_, idx) => idx !== i)) }
+
+  function addWaterSource() { setWaterSources(prev => [...prev, { name: '', distance: '' }]) }
+  function updateWaterSource(i, field, val) {
+    setWaterSources(prev => prev.map((item, idx) => idx === i ? { ...item, [field]: val } : item))
+  }
+  function removeWaterSource(i) { setWaterSources(prev => prev.filter((_, idx) => idx !== i)) }
+
+  function addMilitaryBase() { setMilitaryBases(prev => [...prev, { name: '', distance: '' }]) }
+  function updateMilitaryBase(i, field, val) {
+    setMilitaryBases(prev => prev.map((item, idx) => idx === i ? { ...item, [field]: val } : item))
+  }
+  function removeMilitaryBase(i) { setMilitaryBases(prev => prev.filter((_, idx) => idx !== i)) }
 
   async function handleFileUpload(e) {
     const files = Array.from(e.target.files)
@@ -830,6 +848,42 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
               ))}
               {isAdmin && <button className="btn btn-xs btn-outline" onClick={addLandmark}>+ Add Landmark</button>}
               {landmarksList.length === 0 && <p className="text-sm text-base-content/40">No landmarks added</p>}
+            </div>
+
+            <div className="divider text-xs text-base-content/40 my-1">Water Sources</div>
+            <div className="space-y-2">
+              {waterSources.map((item, i) => (
+                <div key={i} className="flex gap-2 items-center flex-wrap">
+                  <input type="text" placeholder="e.g. Lake Michigan" value={item.name}
+                    onChange={e => updateWaterSource(i, 'name', e.target.value)}
+                    className="input input-bordered input-sm flex-1 min-w-[180px]" disabled={!isAdmin} />
+                  <input type="number" placeholder="Miles" value={item.distance}
+                    onChange={e => updateWaterSource(i, 'distance', e.target.value)}
+                    className="input input-bordered input-sm w-24" disabled={!isAdmin} />
+                  <span className="text-sm text-base-content/50">miles</span>
+                  {isAdmin && <button className="btn btn-xs btn-ghost text-error" onClick={() => removeWaterSource(i)}>✕</button>}
+                </div>
+              ))}
+              {isAdmin && <button className="btn btn-xs btn-outline" onClick={addWaterSource}>+ Add Water Source</button>}
+              {waterSources.length === 0 && <p className="text-sm text-base-content/40">No water sources added</p>}
+            </div>
+
+            <div className="divider text-xs text-base-content/40 my-1">Military Bases</div>
+            <div className="space-y-2">
+              {militaryBases.map((item, i) => (
+                <div key={i} className="flex gap-2 items-center flex-wrap">
+                  <input type="text" placeholder="e.g. Naval Station Great Lakes" value={item.name}
+                    onChange={e => updateMilitaryBase(i, 'name', e.target.value)}
+                    className="input input-bordered input-sm flex-1 min-w-[200px]" disabled={!isAdmin} />
+                  <input type="number" placeholder="Miles" value={item.distance}
+                    onChange={e => updateMilitaryBase(i, 'distance', e.target.value)}
+                    className="input input-bordered input-sm w-24" disabled={!isAdmin} />
+                  <span className="text-sm text-base-content/50">miles</span>
+                  {isAdmin && <button className="btn btn-xs btn-ghost text-error" onClick={() => removeMilitaryBase(i)}>✕</button>}
+                </div>
+              ))}
+              {isAdmin && <button className="btn btn-xs btn-outline" onClick={addMilitaryBase}>+ Add Military Base</button>}
+              {militaryBases.length === 0 && <p className="text-sm text-base-content/40">No military bases added</p>}
             </div>
 
             {/* Demographics */}
