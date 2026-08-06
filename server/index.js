@@ -60,6 +60,22 @@ async function initializeSchema() {
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  // New property fields (added incrementally so existing data is preserved)
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS price NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS square_feet NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS lot_size NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS year_built INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS on_major_road BOOLEAN DEFAULT FALSE`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS traffic_vpd INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS on_corner_lot BOOLEAN DEFAULT FALSE`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS direct_water_access BOOLEAN DEFAULT FALSE`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS next_to_public_land BOOLEAN DEFAULT FALSE`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS major_interstates JSONB DEFAULT '[]'`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS household_income_min INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS household_income_max INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS population_density NUMERIC`);
+
+
   await pool.query(`CREATE TABLE IF NOT EXISTS property_assignments (
     id SERIAL PRIMARY KEY,
     property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
@@ -513,15 +529,29 @@ app.delete('/api/properties/:id/media/:mediaId', async (req, res) => {
 
 app.post('/api/properties', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  const { pin, address, county } = req.body || {};
+  const {
+    pin, address, county,
+    price, square_feet, lot_size, year_built,
+    on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+    major_interstates, household_income_min, household_income_max, population_density
+  } = req.body || {};
   if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
   if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
   if (!county || !county.trim()) return res.status(400).json({ error: 'county required' });
 
   try {
     const result = await pool.query(
-      'INSERT INTO properties (pin, address, county, created_by) VALUES ($1, $2, $3, $4) RETURNING id',
-      [pin.trim(), address.trim(), county.trim(), req.session.user.id]
+      `INSERT INTO properties (pin, address, county, created_by,
+        price, square_feet, lot_size, year_built,
+        on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+        major_interstates, household_income_min, household_income_max, population_density)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17) RETURNING id`,
+      [pin.trim(), address.trim(), county.trim(), req.session.user.id,
+       price || null, square_feet || null, lot_size || null, year_built || null,
+       on_major_road || false, traffic_vpd || null, on_corner_lot || false,
+       direct_water_access || false, next_to_public_land || false,
+       JSON.stringify(major_interstates || []),
+       household_income_min || null, household_income_max || null, population_density || null]
     );
     await logAudit(req.session.user.id, req.session.user.email, 'create_property', { pin, address, county });
     res.json({ id: result.rows[0].id, pin, address, county });
@@ -548,7 +578,11 @@ app.get('/api/properties', async (req, res) => {
     listParams.push(limit, offset);
     const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM properties ${where}`, countParams);
     const listResult = await pool.query(
-      `SELECT id, pin, address, county, created_by, created_at, updated_at FROM properties ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      `SELECT id, pin, address, county, price, square_feet, lot_size, year_built,
+              on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+              major_interstates, household_income_min, household_income_max, population_density,
+              created_by, created_at, updated_at
+       FROM properties ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
     );
     res.json({ properties: listResult.rows || [], total: countResult.rows[0].total });
@@ -563,7 +597,12 @@ app.get('/api/properties/:id', async (req, res) => {
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
 
   try {
-    const result = await pool.query('SELECT id, pin, address, county, created_by, created_at, updated_at FROM properties WHERE id = $1', [propId]);
+    const result = await pool.query(
+      `SELECT id, pin, address, county, price, square_feet, lot_size, year_built,
+              on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+              major_interstates, household_income_min, household_income_max, population_density,
+              created_by, created_at, updated_at
+       FROM properties WHERE id = $1`, [propId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
     res.json(result.rows[0]);
   } catch (e) {
@@ -575,15 +614,33 @@ app.put('/api/properties/:id', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
-  const { pin, address, county } = req.body || {};
+  const {
+    pin, address, county,
+    price, square_feet, lot_size, year_built,
+    on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+    major_interstates, household_income_min, household_income_max, population_density
+  } = req.body || {};
   if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
   if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
   if (!county || !county.trim()) return res.status(400).json({ error: 'county required' });
 
   try {
     const result = await pool.query(
-      'UPDATE properties SET pin = $1, address = $2, county = $3, updated_at = CURRENT_TIMESTAMP WHERE id = $4',
-      [pin.trim(), address.trim(), county.trim(), propId]
+      `UPDATE properties SET
+        pin=$1, address=$2, county=$3,
+        price=$4, square_feet=$5, lot_size=$6, year_built=$7,
+        on_major_road=$8, traffic_vpd=$9, on_corner_lot=$10,
+        direct_water_access=$11, next_to_public_land=$12,
+        major_interstates=$13, household_income_min=$14, household_income_max=$15,
+        population_density=$16, updated_at=CURRENT_TIMESTAMP
+       WHERE id=$17`,
+      [pin.trim(), address.trim(), county.trim(),
+       price || null, square_feet || null, lot_size || null, year_built || null,
+       on_major_road || false, traffic_vpd || null, on_corner_lot || false,
+       direct_water_access || false, next_to_public_land || false,
+       JSON.stringify(major_interstates || []),
+       household_income_min || null, household_income_max || null,
+       population_density || null, propId]
     );
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
     await logAudit(req.session.user.id, req.session.user.email, 'edit_property', { property_id: propId, pin, address, county });

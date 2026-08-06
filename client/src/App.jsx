@@ -492,6 +492,19 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [pin, setPin] = useState('')
   const [address, setAddress] = useState('')
   const [county, setCounty] = useState('')
+  const [price, setPrice] = useState('')
+  const [sqft, setSqft] = useState('')
+  const [lot, setLot] = useState('')
+  const [yearBuilt, setYearBuilt] = useState('')
+  const [onMajorRoad, setOnMajorRoad] = useState(false)
+  const [trafficVpd, setTrafficVpd] = useState('')
+  const [onCornerLot, setOnCornerLot] = useState(false)
+  const [waterAccess, setWaterAccess] = useState(false)
+  const [nextToPublicLand, setNextToPublicLand] = useState(false)
+  const [interstates, setInterstates] = useState([]) // [{name, distance}]
+  const [incomeMin, setIncomeMin] = useState('')
+  const [incomeMax, setIncomeMax] = useState('')
+  const [popDensity, setPopDensity] = useState('')
   const [saving, setSaving] = useState(false)
 
   // Media state
@@ -503,14 +516,34 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [allUsers, setAllUsers] = useState([])
   const [assignLoading, setAssignLoading] = useState(false)
 
+  function loadProperty(p) {
+    setPin(p.pin || '')
+    setAddress(p.address || '')
+    setCounty(p.county || '')
+    setPrice(p.price ?? '')
+    setSqft(p.square_feet ?? '')
+    setLot(p.lot_size ?? '')
+    setYearBuilt(p.year_built ?? '')
+    setOnMajorRoad(p.on_major_road || false)
+    setTrafficVpd(p.traffic_vpd ?? '')
+    setOnCornerLot(p.on_corner_lot || false)
+    setWaterAccess(p.direct_water_access || false)
+    setNextToPublicLand(p.next_to_public_land || false)
+    setInterstates(Array.isArray(p.major_interstates) ? p.major_interstates : [])
+    setIncomeMin(p.household_income_min ?? '')
+    setIncomeMax(p.household_income_max ?? '')
+    setPopDensity(p.population_density ?? '')
+  }
+
   useEffect(() => {
     if (open && property) {
-      setPin(property.pin || '')
-      setAddress(property.address || '')
-      setCounty(property.county || '')
+      loadProperty(property)
       setTab('details')
     } else if (open && !property) {
-      setPin(''); setAddress(''); setCounty('')
+      setPin(''); setAddress(''); setCounty(''); setPrice(''); setSqft(''); setLot('')
+      setYearBuilt(''); setOnMajorRoad(false); setTrafficVpd(''); setOnCornerLot(false)
+      setWaterAccess(false); setNextToPublicLand(false); setInterstates([])
+      setIncomeMin(''); setIncomeMax(''); setPopDensity('')
       setTab('details')
     }
   }, [property, open])
@@ -539,12 +572,33 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   }
 
   async function handleSave() {
-    if (!pin.trim() || !address.trim() || !county.trim()) { alert('All fields are required'); return }
+    if (!pin.trim() || !address.trim() || !county.trim()) { alert('PIN, Address and County are required'); return }
     setSaving(true)
-    await onSave({ ...property, pin, address, county })
+    await onSave({
+      ...property, pin, address, county,
+      price: price !== '' ? Number(price) : null,
+      square_feet: sqft !== '' ? Number(sqft) : null,
+      lot_size: lot !== '' ? Number(lot) : null,
+      year_built: yearBuilt !== '' ? Number(yearBuilt) : null,
+      on_major_road: onMajorRoad,
+      traffic_vpd: trafficVpd !== '' ? Number(trafficVpd) : null,
+      on_corner_lot: onCornerLot,
+      direct_water_access: waterAccess,
+      next_to_public_land: nextToPublicLand,
+      major_interstates: interstates,
+      household_income_min: incomeMin !== '' ? Number(incomeMin) : null,
+      household_income_max: incomeMax !== '' ? Number(incomeMax) : null,
+      population_density: popDensity !== '' ? Number(popDensity) : null,
+    })
     setSaving(false)
     if (!property?.id) onClose()
   }
+
+  function addInterstate() { setInterstates(prev => [...prev, { name: '', distance: '' }]) }
+  function updateInterstate(i, field, val) {
+    setInterstates(prev => prev.map((item, idx) => idx === i ? { ...item, [field]: val } : item))
+  }
+  function removeInterstate(i) { setInterstates(prev => prev.filter((_, idx) => idx !== i)) }
 
   async function handleFileUpload(e) {
     const files = Array.from(e.target.files)
@@ -628,21 +682,106 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
         {/* Details tab */}
         {tab === 'details' && (
           <div className="space-y-5">
-            <Field label="PIN(s)" required>
-              <input type="text" placeholder="e.g. 12-34-567-890" value={pin}
-                onChange={e => setPin(e.target.value)} className="input input-bordered w-full"
-                disabled={!isAdmin} />
-            </Field>
+            {/* Core */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="PIN(s)" required>
+                <input type="text" placeholder="e.g. 12-34-567-890" value={pin}
+                  onChange={e => setPin(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="County" required>
+                <input type="text" placeholder="e.g. Cook" value={county}
+                  onChange={e => setCounty(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+            </div>
             <Field label="Address" required>
               <input type="text" placeholder="123 Main St, Chicago, IL" value={address}
-                onChange={e => setAddress(e.target.value)} className="input input-bordered w-full"
-                disabled={!isAdmin} />
+                onChange={e => setAddress(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
             </Field>
-            <Field label="County" required>
-              <input type="text" placeholder="e.g. Cook" value={county}
-                onChange={e => setCounty(e.target.value)} className="input input-bordered w-full"
-                disabled={!isAdmin} />
-            </Field>
+
+            {/* Financials */}
+            <div className="divider text-xs text-base-content/40 my-1">Financials</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Field label="Price ($)">
+                <input type="number" placeholder="0" value={price}
+                  onChange={e => setPrice(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Square Feet">
+                <input type="number" placeholder="0" value={sqft}
+                  onChange={e => setSqft(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Lot Size (acres)">
+                <input type="number" placeholder="0.00" step="0.01" value={lot}
+                  onChange={e => setLot(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Year Built">
+                <input type="number" placeholder="e.g. 1998" value={yearBuilt}
+                  onChange={e => setYearBuilt(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+            </div>
+
+            {/* Location attributes */}
+            <div className="divider text-xs text-base-content/40 my-1">Location Attributes</div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: 'On Major Road', val: onMajorRoad, set: setOnMajorRoad },
+                { label: 'Corner Lot', val: onCornerLot, set: setOnCornerLot },
+                { label: 'Direct Water Access', val: waterAccess, set: setWaterAccess },
+                { label: 'Next to Public Land', val: nextToPublicLand, set: setNextToPublicLand },
+              ].map(({ label, val, set }) => (
+                <label key={label} className="flex items-center gap-2 cursor-pointer select-none">
+                  <input type="checkbox" className="checkbox checkbox-sm" checked={val}
+                    onChange={e => set(e.target.checked)} disabled={!isAdmin} />
+                  <span className="text-sm">{label}</span>
+                </label>
+              ))}
+            </div>
+            {onMajorRoad && (
+              <Field label="Traffic (VPD — vehicles per day)">
+                <input type="number" placeholder="e.g. 25000" value={trafficVpd}
+                  onChange={e => setTrafficVpd(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+            )}
+
+            {/* Interstates */}
+            <div className="divider text-xs text-base-content/40 my-1">Major Interstates</div>
+            <div className="space-y-2">
+              {interstates.map((item, i) => (
+                <div key={i} className="flex gap-2 items-center">
+                  <input type="text" placeholder="e.g. I-80" value={item.name}
+                    onChange={e => updateInterstate(i, 'name', e.target.value)}
+                    className="input input-bordered input-sm w-32" disabled={!isAdmin} />
+                  <input type="number" placeholder="Miles away" value={item.distance}
+                    onChange={e => updateInterstate(i, 'distance', e.target.value)}
+                    className="input input-bordered input-sm w-32" disabled={!isAdmin} />
+                  <span className="text-sm text-base-content/50">miles</span>
+                  {isAdmin && <button className="btn btn-xs btn-ghost text-error" onClick={() => removeInterstate(i)}>✕</button>}
+                </div>
+              ))}
+              {isAdmin && (
+                <button className="btn btn-xs btn-outline" onClick={addInterstate}>+ Add Interstate</button>
+              )}
+              {interstates.length === 0 && <p className="text-sm text-base-content/40">No interstates added</p>}
+            </div>
+
+            {/* Demographics */}
+            <div className="divider text-xs text-base-content/40 my-1">Demographics</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Field label="Household Income Min ($)">
+                <input type="number" placeholder="e.g. 45000" value={incomeMin}
+                  onChange={e => setIncomeMin(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Household Income Max ($)">
+                <input type="number" placeholder="e.g. 120000" value={incomeMax}
+                  onChange={e => setIncomeMax(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Population Density (per sq mi)">
+                <input type="number" placeholder="e.g. 3500" value={popDensity}
+                  onChange={e => setPopDensity(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+            </div>
+
             {isAdmin && (
               <div className="pt-2">
                 <button className="btn btn-primary w-full" onClick={handleSave} disabled={saving}>
