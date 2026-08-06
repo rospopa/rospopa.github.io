@@ -7,6 +7,7 @@ const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const https = require('https');
 const { Resend } = require('resend');
+const { rateLimit } = require('express-rate-limit');
 
 const PORT = process.env.PORT || 3000;
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -142,6 +143,23 @@ app.use(express.json({ limit: '60mb' }));
 app.use(express.urlencoded({ limit: '60mb', extended: true }));
 
 app.set('trust proxy', 1);
+
+// Rate limiters
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,                    // max 5 requests per IP per hour
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many password reset attempts. Please try again in an hour.' }
+});
+
+const resetPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10,                   // max 10 code attempts per IP per hour
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many reset attempts. Please try again in an hour.' }
+});
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function isValidEmail(email) {
@@ -305,7 +323,7 @@ app.post('/api/lookup-user', async (req, res) => {
 });
 
 /** Send a 6-digit OTP to the user's email for password reset */
-app.post('/api/forgot-password', async (req, res) => {
+app.post('/api/forgot-password', forgotPasswordLimiter, async (req, res) => {
   let { email, recaptchaToken } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !isValidEmail(email)) return res.status(400).json({ error: 'valid email required' });
@@ -323,12 +341,13 @@ app.post('/api/forgot-password', async (req, res) => {
     // Invalidate old codes for this email
     await pool.query('UPDATE password_reset_otps SET used = TRUE WHERE email = $1', [email]);
 
-    // Generate 6-digit code
+    // Generate 6-digit code, hash it before storing
     const code = String(Math.floor(100000 + Math.random() * 900000));
+    const codeHash = await bcrypt.hash(code, 10);
     const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 min
     await pool.query(
       'INSERT INTO password_reset_otps (email, code, expires_at) VALUES ($1, $2, $3)',
-      [email, code, expiresAt]
+      [email, codeHash, expiresAt]
     );
 
     await resend.emails.send({
@@ -353,20 +372,25 @@ app.post('/api/forgot-password', async (req, res) => {
 });
 
 /** Verify OTP + set new password */
-app.post('/api/reset-password', async (req, res) => {
+app.post('/api/reset-password', resetPasswordLimiter, async (req, res) => {
   let { email, code, newPassword } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !code || !newPassword) return res.status(400).json({ error: 'email, code and newPassword required' });
   if (!isValidPassword(newPassword)) return res.status(400).json({ error: 'password must be 8-128 characters' });
 
   try {
+    // Fetch the most recent unused, unexpired OTP for this email
     const otpResult = await pool.query(
-      `SELECT id FROM password_reset_otps
-       WHERE email = $1 AND code = $2 AND used = FALSE AND expires_at > NOW()
+      `SELECT id, code FROM password_reset_otps
+       WHERE email = $1 AND used = FALSE AND expires_at > NOW()
        ORDER BY created_at DESC LIMIT 1`,
-      [email, code.trim()]
+      [email]
     );
     if (otpResult.rows.length === 0) return res.status(400).json({ error: 'Invalid or expired code' });
+
+    // Compare submitted code against the stored hash
+    const match = await bcrypt.compare(code.trim(), otpResult.rows[0].code);
+    if (!match) return res.status(400).json({ error: 'Invalid or expired code' });
 
     // Mark used
     await pool.query('UPDATE password_reset_otps SET used = TRUE WHERE id = $1', [otpResult.rows[0].id]);
