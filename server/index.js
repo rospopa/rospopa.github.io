@@ -1374,6 +1374,72 @@ app.get('/api/fomc-meetings', async (req, res) => {
   }
 });
 
+// ─── Economic Indicators Calendar ─────────────────────────────────────────────
+// Hardcoded release schedule for 2026–2027 major economic indicators.
+// Dates are approximate based on historical release cadence (typically 1st–3rd
+// business day of the month for ISM; mid-month for others).
+// Update annually when BEA/Fed/Census publish their release calendars.
+
+const ECON_INDICATORS = [
+  // ── ISM Manufacturing (released 1st business day of month) ──
+  ...['2026-01-02','2026-02-03','2026-03-02','2026-04-01','2026-05-01','2026-06-01',
+      '2026-07-01','2026-08-03','2026-09-01','2026-10-01','2026-11-02','2026-12-01',
+      '2027-01-04','2027-02-01','2027-03-01','2027-04-01','2027-05-03','2027-06-01',
+      '2027-07-01','2027-08-02','2027-09-01','2027-10-01','2027-11-01','2027-12-01',
+  ].map(date => ({ date, label: 'ISM Manufacturing PMI', short_label: 'ISM Mfg', category: 'ism',
+    description: 'Institute for Supply Management Manufacturing PMI report' })),
+
+  // ── ISM Non-Manufacturing / Services (released 3rd business day of month) ──
+  ...['2026-01-07','2026-02-05','2026-03-04','2026-04-06','2026-05-05','2026-06-03',
+      '2026-07-07','2026-08-05','2026-09-03','2026-10-05','2026-11-04','2026-12-03',
+      '2027-01-07','2027-02-04','2027-03-03','2027-04-06','2027-05-05','2027-06-03',
+      '2027-07-07','2027-08-04','2027-09-03','2027-10-05','2027-11-03','2027-12-02',
+  ].map(date => ({ date, label: 'ISM Services PMI', short_label: 'ISM Svc', category: 'ism',
+    description: 'Institute for Supply Management Non-Manufacturing (Services) PMI report' })),
+
+  // ── Advance Retail Sales (released ~mid-month, typically 15th-17th) ──
+  ...['2026-01-15','2026-02-13','2026-03-16','2026-04-15','2026-05-15','2026-06-16',
+      '2026-07-16','2026-08-14','2026-09-15','2026-10-15','2026-11-16','2026-12-15',
+      '2027-01-15','2027-02-12','2027-03-15','2027-04-14','2027-05-14','2027-06-15',
+      '2027-07-15','2027-08-13','2027-09-15','2027-10-15','2027-11-15','2027-12-15',
+  ].map(date => ({ date, label: 'Advance Retail Sales', short_label: 'Retail Sales', category: 'retail',
+    description: 'U.S. Census Bureau Advance Monthly Sales for Retail and Food Services' })),
+
+  // ── International Trade in Goods (Advance, released ~last week of month) ──
+  ...['2026-01-28','2026-02-25','2026-03-25','2026-04-29','2026-05-27','2026-06-24',
+      '2026-07-29','2026-08-26','2026-09-23','2026-10-28','2026-11-25','2026-12-23',
+      '2027-01-27','2027-02-24','2027-03-24','2027-04-28','2027-05-26','2027-06-23',
+      '2027-07-28','2027-08-25','2027-09-22','2027-10-27','2027-11-24','2027-12-22',
+  ].map(date => ({ date, label: 'Intl Trade in Goods (Advance)', short_label: 'Trade Goods', category: 'trade',
+    description: 'U.S. Census Bureau Advance International Trade in Goods report' })),
+
+  // ── NY Fed Global Supply Chain Pressure Index (released monthly, ~1st week) ──
+  ...['2026-01-06','2026-02-04','2026-03-03','2026-04-02','2026-05-05','2026-06-02',
+      '2026-07-02','2026-08-04','2026-09-02','2026-10-02','2026-11-03','2026-12-02',
+      '2027-01-05','2027-02-03','2027-03-02','2027-04-01','2027-05-04','2027-06-01',
+      '2027-07-01','2027-08-03','2027-09-01','2027-10-01','2027-11-02','2027-12-01',
+  ].map(date => ({ date, label: 'NY Fed GSCPI', short_label: 'GSCPI', category: 'gscpi',
+    description: "NY Fed's Global Supply Chain Pressure Index" })),
+
+  // ── Industrial Production & Capacity Utilization (released ~15th-17th) ──
+  ...['2026-01-16','2026-02-17','2026-03-17','2026-04-16','2026-05-15','2026-06-17',
+      '2026-07-17','2026-08-18','2026-09-16','2026-10-16','2026-11-17','2026-12-16',
+      '2027-01-16','2027-02-17','2027-03-16','2027-04-15','2027-05-17','2027-06-16',
+      '2027-07-16','2027-08-17','2027-09-15','2027-10-15','2027-11-16','2027-12-15',
+  ].map(date => ({ date, label: 'Industrial Production & Cap. Utilization', short_label: 'Ind. Production', category: 'ip',
+    description: 'Federal Reserve Industrial Production and Capacity Utilization report (G.17)' })),
+];
+
+app.get('/api/econ-indicators', (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const { year, month } = req.query;
+  const y = parseInt(year, 10) || new Date().getFullYear();
+  const m = parseInt(month, 10) || (new Date().getMonth() + 1);
+  const prefix = `${y}-${String(m).padStart(2,'0')}-`;
+  const indicators = ECON_INDICATORS.filter(e => e.date.startsWith(prefix));
+  res.json({ indicators });
+});
+
 // Keep old /api/calendar-events for any future use but now returns empty
 app.get('/api/calendar-events', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });

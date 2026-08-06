@@ -133,17 +133,22 @@ function CalendarWidget() {
   const today = new Date()
   const [year, setYear]   = useState(today.getFullYear())
   const [month, setMonth] = useState(today.getMonth() + 1)
-  const [meetings, setMeetings] = useState([]) // { decision_date, start_date, end_date, source }
-  const [loading, setLoading]   = useState(true)
-  const [selected, setSelected] = useState(null) // { day, meeting }
+  const [meetings, setMeetings]   = useState([]) // { decision_date, start_date, end_date, source }
+  const [indicators, setIndicators] = useState([]) // { date, label, category }
+  const [loading, setLoading]     = useState(true)
+  const [selected, setSelected]   = useState(null) // { day, meetings, indicators }
 
   useEffect(() => {
     setLoading(true)
     setSelected(null)
-    fetch(`/api/fomc-meetings?year=${year}&month=${month}`, { credentials: 'include' })
-      .then(r => r.json())
-      .then(d => { setMeetings(d.meetings || []); setLoading(false) })
-      .catch(() => setLoading(false))
+    Promise.all([
+      fetch(`/api/fomc-meetings?year=${year}&month=${month}`, { credentials: 'include' }).then(r => r.json()),
+      fetch(`/api/econ-indicators?year=${year}&month=${month}`, { credentials: 'include' }).then(r => r.json()),
+    ]).then(([fomcData, econData]) => {
+      setMeetings(fomcData.meetings || [])
+      setIndicators(econData.indicators || [])
+      setLoading(false)
+    }).catch(() => setLoading(false))
   }, [year, month])
 
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -165,6 +170,24 @@ function CalendarWidget() {
       if (!byDay[d]) byDay[d] = []
       byDay[d].push({ ...m, isDecision, day: d })
     }
+  }
+
+  // Index economic indicators by day number
+  const indicByDay = {}
+  for (const ind of indicators) {
+    const day = parseInt(String(ind.date).slice(8), 10)
+    if (!indicByDay[day]) indicByDay[day] = []
+    indicByDay[day].push(ind)
+  }
+
+  // Color map for indicator categories
+  const INDIC_COLORS = {
+    ism:     'bg-blue-500',
+    retail:  'bg-purple-500',
+    trade:   'bg-teal-500',
+    gscpi:   'bg-green-600',
+    ip:      'bg-orange-500',
+    default: 'bg-indigo-400',
   }
 
   function prevMonth() {
@@ -209,19 +232,15 @@ function CalendarWidget() {
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap gap-4 mb-4 text-xs sm:text-sm">
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-3 h-3 rounded-sm bg-amber-400 flex-shrink-0"/>
-            <span className="text-base-content/70">Meeting days</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-3 h-3 rounded-sm bg-red-500 flex-shrink-0"/>
-            <span className="text-base-content/70">Rate decision day</span>
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="inline-block w-3 h-3 rounded-full bg-primary flex-shrink-0"/>
-            <span className="text-base-content/70">Today</span>
-          </span>
+        <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4 text-xs sm:text-sm">
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-amber-400 flex-shrink-0"/><span className="text-base-content/70">FOMC Meeting</span></span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-red-500 flex-shrink-0"/><span className="text-base-content/70">Rate Decision</span></span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-blue-500 flex-shrink-0"/><span className="text-base-content/70">ISM</span></span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-purple-500 flex-shrink-0"/><span className="text-base-content/70">Retail Sales</span></span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-teal-500 flex-shrink-0"/><span className="text-base-content/70">Trade</span></span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-green-600 flex-shrink-0"/><span className="text-base-content/70">GSCPI</span></span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-orange-500 flex-shrink-0"/><span className="text-base-content/70">Ind. Production</span></span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-full bg-primary flex-shrink-0"/><span className="text-base-content/70">Today</span></span>
         </div>
 
         {/* Day-of-week headers */}
@@ -245,14 +264,17 @@ function CalendarWidget() {
                 <div key={`e${i}`} className="border-b border-r border-base-200 min-h-[56px] sm:min-h-[80px] md:min-h-[100px]
                   [&:nth-child(7n+1)]:border-l bg-base-200/30" />
               )
-              const dayMeetings = byDay[day] || []
-              const isToday     = day === todayKey
-              const isSelected  = selected?.day === day
-              const hasMeeting  = dayMeetings.length > 0
-              const hasDecision = dayMeetings.some(m => m.isDecision)
-              const past        = isPast(day)
+              const dayMeetings  = byDay[day] || []
+              const dayIndicators = indicByDay[day] || []
+              const isToday      = day === todayKey
+              const isSelected   = selected?.day === day
+              const hasMeeting   = dayMeetings.length > 0
+              const hasDecision  = dayMeetings.some(m => m.isDecision)
+              const hasIndicator = dayIndicators.length > 0
+              const hasAny       = hasMeeting || hasIndicator
+              const past         = isPast(day)
 
-              // Cell background color
+              // Cell background — FOMC takes precedence
               let cellBg = ''
               if (hasDecision) cellBg = past ? 'bg-red-100 dark:bg-red-900/20' : 'bg-red-50 dark:bg-red-900/30'
               else if (hasMeeting) cellBg = past ? 'bg-amber-50 dark:bg-amber-900/10' : 'bg-amber-50/80 dark:bg-amber-900/20'
@@ -261,12 +283,12 @@ function CalendarWidget() {
               return (
                 <button
                   key={day}
-                  onClick={() => hasMeeting && setSelected(isSelected ? null : { day, meetings: dayMeetings })}
+                  onClick={() => hasAny && setSelected(isSelected ? null : { day, meetings: dayMeetings, indicators: dayIndicators })}
                   className={`border-b border-r border-base-200 [&:nth-child(7n+1)]:border-l
                     min-h-[56px] sm:min-h-[80px] md:min-h-[100px]
                     flex flex-col items-start p-1 sm:p-2 transition-colors text-left w-full
                     ${cellBg || 'hover:bg-base-100'}
-                    ${hasMeeting ? 'cursor-pointer' : 'cursor-default'}`}
+                    ${hasAny ? 'cursor-pointer' : 'cursor-default'}`}
                 >
                   {/* Day number */}
                   <span className={`text-xs sm:text-sm font-medium rounded-full
@@ -275,22 +297,30 @@ function CalendarWidget() {
                     {day}
                   </span>
 
-                  {/* Mobile: colored dot */}
-                  {hasMeeting && (
-                    <div className="flex gap-0.5 mt-0.5 sm:hidden">
-                      <span className={`w-1.5 h-1.5 rounded-full ${hasDecision ? 'bg-red-500' : 'bg-amber-400'}`}/>
+                  {/* Mobile: colored dots row */}
+                  {hasAny && (
+                    <div className="flex flex-wrap gap-0.5 mt-0.5 sm:hidden">
+                      {hasMeeting && <span className={`w-1.5 h-1.5 rounded-full ${hasDecision ? 'bg-red-500' : 'bg-amber-400'}`}/>}
+                      {dayIndicators.map((ind, j) => (
+                        <span key={j} className={`w-1.5 h-1.5 rounded-full ${INDIC_COLORS[ind.category] || INDIC_COLORS.default}`}/>
+                      ))}
                     </div>
                   )}
 
-                  {/* Tablet+: pill label */}
-                  {hasMeeting && (
+                  {/* Tablet+: pill labels */}
+                  {hasAny && (
                     <div className="hidden sm:flex flex-col gap-0.5 mt-1 w-full overflow-hidden">
-                      <span className={`text-[10px] md:text-xs font-medium rounded px-1.5 py-0.5 truncate leading-tight
-                        ${hasDecision
-                          ? 'bg-red-500 text-white'
-                          : 'bg-amber-400 text-white'}`}>
-                        {hasDecision ? '📊 Rate Decision' : '🏛 FOMC Meeting'}
-                      </span>
+                      {hasMeeting && (
+                        <span className={`text-[10px] md:text-xs font-medium rounded px-1.5 py-0.5 truncate leading-tight
+                          ${hasDecision ? 'bg-red-500 text-white' : 'bg-amber-400 text-white'}`}>
+                          {hasDecision ? '📊 Rate Decision' : '🏛 FOMC Meeting'}
+                        </span>
+                      )}
+                      {dayIndicators.map((ind, j) => (
+                        <span key={j} className={`text-[10px] md:text-xs font-medium rounded px-1.5 py-0.5 truncate leading-tight text-white ${INDIC_COLORS[ind.category] || INDIC_COLORS.default}`}>
+                          {ind.short_label || ind.label}
+                        </span>
+                      ))}
                     </div>
                   )}
                 </button>
@@ -334,12 +364,23 @@ function CalendarWidget() {
                 </div>
               )
             })}
+            {/* Economic indicators for selected day */}
+            {(selected.indicators || []).map((ind, i) => (
+              <div key={`ind-${i}`} className="flex gap-3 items-start mt-2">
+                <span className={`mt-1 w-2.5 h-2.5 rounded-full flex-shrink-0 ${INDIC_COLORS[ind.category] || INDIC_COLORS.default}`}/>
+                <div className="space-y-0.5">
+                  <p className="font-semibold text-sm">{ind.label}</p>
+                  {ind.description && <p className="text-xs text-base-content/50">{ind.description}</p>}
+                  <p className="text-[10px] text-base-content/30">Economic Release · {new Date(String(ind.date).slice(0,10) + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Footer: months with no meetings */}
-        {!loading && meetings.length === 0 && (
-          <p className="mt-4 text-sm text-base-content/40 text-center">No FOMC meetings scheduled this month</p>
+        {/* Footer: months with no events */}
+        {!loading && meetings.length === 0 && indicators.length === 0 && (
+          <p className="mt-4 text-sm text-base-content/40 text-center">No scheduled events this month</p>
         )}
 
         {/* Upcoming meetings summary strip */}
@@ -3008,7 +3049,7 @@ function ContactDetailPage({ contactId, onBack, splitMode = false }) {
 function ContactsPage() {
   const [contacts, setContacts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState('grid')
+  const [view, setView] = useState('split')
   const [selectedContact, setSelectedContact] = useState(null) // notes drawer
   const [detailId, setDetailId] = useState(null)              // full-page detail
   const [splitDetailId, setSplitDetailId] = useState(null)    // split view right panel
