@@ -2565,8 +2565,17 @@ function PhoneLink({ phone }) {
   if (!phone) return <span className="text-base-content/40">—</span>
   const digits = phone.replace(/\D/g, '')
   return (
-    <a href={`tel:+${digits}`} className="text-primary hover:underline whitespace-nowrap font-medium" title={`Call ${phone}`}>
-      📞 {phone}
+    <a href={`tel:+${digits}`} className="text-blue-600 underline underline-offset-2 hover:text-blue-800 whitespace-nowrap">
+      {phone}
+    </a>
+  )
+}
+
+function EmailLink({ email }) {
+  if (!email) return <span className="text-base-content/40">—</span>
+  return (
+    <a href={`mailto:${email}`} className="text-blue-600 underline underline-offset-2 hover:text-blue-800 truncate">
+      {email}
     </a>
   )
 }
@@ -2590,27 +2599,18 @@ function ContactCard({ contact, onViewNotes }) {
           <ContactAvatar contact={contact} size="lg" />
           <div className="flex-1 min-w-0">
             <div className="font-semibold text-base leading-tight">{fullName}</div>
-            <div className="text-xs text-base-content/55 truncate mt-0.5">{contact.email}</div>
+            <EmailLink email={contact.email} />
             <span className={`badge badge-xs mt-1 ${contact.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{contact.role}</span>
           </div>
         </div>
         {/* Details */}
         <div className="space-y-1 text-sm">
           {contact.organization && (
-            <div className="flex items-center gap-1.5 text-base-content/70">
-              <span className="text-base-content/40 text-xs">🏢</span>
-              <span className="truncate">{contact.organization}</span>
-            </div>
+            <div className="text-base-content/70 truncate">{contact.organization}</div>
           )}
-          <div className="flex items-center gap-1.5">
-            <span className="text-base-content/40 text-xs">📞</span>
-            <PhoneLink phone={contact.phone_number} />
-          </div>
+          <div><PhoneLink phone={contact.phone_number} /></div>
           {contact.buy_box && (
-            <div className="flex items-start gap-1.5 text-base-content/60">
-              <span className="text-base-content/40 text-xs mt-0.5">📋</span>
-              <span className="text-xs line-clamp-2">{contact.buy_box}</span>
-            </div>
+            <div className="text-xs text-base-content/60 line-clamp-2">{contact.buy_box}</div>
           )}
         </div>
         {/* Footer */}
@@ -2818,9 +2818,9 @@ function ContactsPage() {
                     <td><ContactAvatar contact={c} size="sm" /></td>
                     <td>
                       <div className="font-medium whitespace-nowrap">{fullName}</div>
-                      <div className="text-xs text-base-content/50 md:hidden truncate max-w-[160px]">{c.email}</div>
+                      <div className="text-xs md:hidden mt-0.5"><EmailLink email={c.email} /></div>
                     </td>
-                    <td className="hidden md:table-cell text-sm text-base-content/70">{c.email}</td>
+                    <td className="hidden md:table-cell text-sm"><EmailLink email={c.email} /></td>
                     <td><span className={`badge badge-sm ${c.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{c.role}</span></td>
                     <td className="hidden lg:table-cell text-sm">{c.organization || <span className="text-base-content/30">—</span>}</td>
                     <td className="text-sm"><PhoneLink phone={c.phone_number} /></td>
@@ -2861,7 +2861,7 @@ function ContactsPage() {
                         </div>
                         {c.organization && (
                           <div className="text-xs text-base-content/60 truncate flex items-center gap-1">
-                            <span className="opacity-50">🏢</span> {c.organization}
+                            <span className="text-base-content/60 truncate">{c.organization}</span>
                           </div>
                         )}
                         {c.phone_number && (
