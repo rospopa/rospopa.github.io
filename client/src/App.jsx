@@ -1537,7 +1537,7 @@ export default function App() {
               <form onSubmit={isRegister ? register : login} className="space-y-5">
                 <Field label="Email" required>
                   <input type="email" placeholder="your@email.com" value={email}
-                    onChange={e => setEmail(e.target.value)}
+                    onChange={e => { setEmail(e.target.value); setLoginPreview(null) }}
                     onBlur={e => lookupEmail(e.target.value)}
                     className="input input-bordered w-full" required />
                 </Field>
