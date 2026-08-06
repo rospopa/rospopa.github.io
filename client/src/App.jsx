@@ -2504,7 +2504,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
         {/* ── Right panel: map ── */}
         <div className="hidden md:flex flex-1 border-l border-base-300" style={{ minHeight: '500px' }}>
           <PropertyMap address={address} />
-        </div>>
+        </div>
 
       </div>
       <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
