@@ -19,6 +19,9 @@ const FROM_EMAIL = 'noreply@rospopa.com';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// In-memory set of currently logged-in user IDs
+const onlineUsers = new Set();
+
 if (!DATABASE_URL) {
   throw new Error('DATABASE_URL is required');
 }
@@ -47,6 +50,7 @@ async function initializeSchema() {
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP`);
 
   await pool.query(`CREATE TABLE IF NOT EXISTS audit_logs (
     id SERIAL PRIMARY KEY,
@@ -462,6 +466,8 @@ app.post('/api/login', async (req, res) => {
         return res.status(500).json({ error: 'session save failed' });
       }
       console.log('Session saved ok, sid:', req.session.id);
+      onlineUsers.add(row.id);
+      pool.query('UPDATE users SET last_login = NOW() WHERE id = $1', [row.id]).catch(() => {});
       logAudit(row.id, row.email, 'login', { ip: clientIp(req) }, null, null, clientIp(req));
       res.json({ user: userObj });
     });
@@ -475,7 +481,7 @@ app.post('/api/logout', async (req, res) => {
   const ip = clientIp(req);
   req.session.destroy(err => {
     if (err) return res.status(500).json({ error: 'logout failed' });
-    if (user) logAudit(user.id, user.email, 'logout', { ip }, null, null, ip);
+    if (user) { onlineUsers.delete(user.id); logAudit(user.id, user.email, 'logout', { ip }, null, null, ip); }
     res.json({ ok: true });
   });
 });
@@ -488,6 +494,18 @@ app.get('/api/me', async (req, res) => {
     res.json({ user: { ...req.session.user, profile_photo } });
   } catch {
     res.json({ user: req.session.user });
+  }
+});
+
+app.get('/api/online-status', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  try {
+    const result = await pool.query(`SELECT id, last_login FROM users ORDER BY id`);
+    const lastLogin = {};
+    result.rows.forEach(r => { lastLogin[r.id] = r.last_login; });
+    res.json({ online: [...onlineUsers], lastLogin });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
   }
 });
 
@@ -509,7 +527,7 @@ app.get('/api/users', async (req, res) => {
     listParams.push(limit, offset);
     const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM users ${where}`, countParams);
     const listResult = await pool.query(
-      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at FROM users ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at, last_login FROM users ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
     );
     res.json({ users: listResult.rows, total: countResult.rows[0].total });
@@ -640,7 +658,7 @@ app.get('/api/contacts', async (req, res) => {
   try {
     const result = await pool.query(`
       SELECT u.id, u.email, u.role, u.first_name, u.last_name, u.organization, u.phone_number,
-             u.buy_box, u.profile_photo, u.created_at, u.updated_at,
+             u.buy_box, u.profile_photo, u.created_at, u.updated_at, u.last_login,
              COUNT(cn.id)::int AS note_count,
              MAX(cn.created_at) AS last_note_at
       FROM users u
@@ -660,7 +678,7 @@ app.get('/api/contacts/:id', async (req, res) => {
   if (!Number.isFinite(userId)) return res.status(400).json({ error: 'invalid id' });
   try {
     const userResult = await pool.query(
-      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at FROM users WHERE id = $1`,
+      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at, last_login FROM users WHERE id = $1`,
       [userId]
     );
     if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });

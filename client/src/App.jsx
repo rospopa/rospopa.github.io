@@ -1045,6 +1045,7 @@ function UsersTable({ users, onReload, onEdit }) {
   const [perPage, setPerPage] = useState(10)
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [onlineStatus, setOnlineStatus] = useState({ online: [], lastLogin: {} })
 
   async function fetchUsers() {
     setLoading(true)
@@ -1054,6 +1055,12 @@ function UsersTable({ users, onReload, onEdit }) {
     } catch (e) { console.error('Fetch failed:', e.message) }
     finally { setLoading(false) }
   }
+
+  useEffect(() => {
+    apiFetch('/api/online-status').then(d => setOnlineStatus(d)).catch(() => {})
+    const t = setInterval(() => apiFetch('/api/online-status').then(d => setOnlineStatus(d)).catch(() => {}), 30000)
+    return () => clearInterval(t)
+  }, [])
 
   useEffect(() => { fetchUsers() }, [page, perPage])
 
@@ -1073,19 +1080,25 @@ function UsersTable({ users, onReload, onEdit }) {
               <th className="py-3 px-4">Role</th>
               <th className="py-3 px-4">Organization</th>
               <th className="py-3 px-4">Phone</th>
+              <th className="py-3 px-4">Last Login</th>
               <th className="py-3 px-4">Created</th>
-              <th className="py-3 px-4">Last Updated</th>
               <th className="py-3 px-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.length === 0
               ? <tr><td colSpan={7} className="text-center py-8 text-base-content/40">No users found</td></tr>
-              : users.map((u, i) => (
+              : users.map((u, i) => {
+                const isOnline = onlineStatus.online.includes(u.id)
+                const lastLogin = onlineStatus.lastLogin[u.id] || u.last_login
+                return (
                 <tr key={i}>
                   <td className="py-3 px-4">
                     <div className="flex items-center gap-3">
-                      <Avatar src={u.profile_photo} name={[u.first_name, u.last_name].filter(Boolean).join(' ') || u.email} size="sm" />
+                      <div className="relative flex-shrink-0">
+                        <Avatar src={u.profile_photo} name={[u.first_name, u.last_name].filter(Boolean).join(' ') || u.email} size="sm" />
+                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} title={isOnline ? 'Online' : 'Offline'} />
+                      </div>
                       <div>
                         <p className="font-medium text-sm">{[u.first_name, u.last_name].filter(Boolean).join(' ') || <span className="text-base-content/30">—</span>}</p>
                         <p className="text-xs text-base-content/50">{u.email}</p>
@@ -1097,13 +1110,18 @@ function UsersTable({ users, onReload, onEdit }) {
                   </td>
                   <td className="py-3 px-4">{u.organization || <span className="text-base-content/30">—</span>}</td>
                   <td className="py-3 px-4">{u.phone_number || <span className="text-base-content/30">—</span>}</td>
+                  <td className="py-3 px-4 text-xs">
+                    <span className={isOnline ? 'text-green-600 font-medium' : 'text-base-content/50'}>
+                      {isOnline ? '● Online' : fmtLastLogin(lastLogin)}
+                    </span>
+                  </td>
                   <td className="py-3 px-4 text-xs text-base-content/50">{u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
-                  <td className="py-3 px-4 text-xs text-base-content/50">{u.updated_at ? new Date(u.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
                   <td className="py-3 px-4 text-right">
                     <button className="btn btn-xs btn-ghost" onClick={() => onEdit?.(u)}>Edit</button>
                   </td>
                 </tr>
-              ))
+                )
+              })
             }
           </tbody>
         </table>
@@ -2582,6 +2600,30 @@ async function downloadAttachment(userId, noteId, attachId, filename) {
   URL.revokeObjectURL(url)
 }
 
+function fmtLastLogin(ts) {
+  if (!ts) return 'Never'
+  const d = new Date(ts)
+  const now = new Date()
+  const diffMs = now - d
+  const diffMin = Math.floor(diffMs / 60000)
+  if (diffMin < 1) return 'Just now'
+  if (diffMin < 60) return `${diffMin}m ago`
+  const diffH = Math.floor(diffMin / 60)
+  if (diffH < 24) return `${diffH}h ago`
+  const diffD = Math.floor(diffH / 24)
+  if (diffD < 7) return `${diffD}d ago`
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: d.getFullYear() !== now.getFullYear() ? 'numeric' : undefined })
+}
+
+function OnlineDot({ online }) {
+  return (
+    <span
+      title={online ? 'Online' : 'Offline'}
+      className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${online ? 'bg-green-500' : 'bg-red-400'}`}
+    />
+  )
+}
+
 function fmtLastNote(ts) {
   if (!ts) return null
   const d = new Date(ts)
@@ -2943,6 +2985,10 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
             <div className="text-xs text-base-content/40 text-right flex-shrink-0 space-y-0.5">
               <div>Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>
               <div>Last updated {new Date(user.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+              <div className="mt-1 flex items-center justify-end gap-1.5">
+                <span className={`w-2 h-2 rounded-full ${user.last_login ? 'bg-red-400' : 'bg-base-300'}`} />
+                <span>Last login: {fmtLastLogin(user.last_login)}</span>
+              </div>
             </div>
           </div>
           {user.buy_box && (
@@ -3081,6 +3127,7 @@ function ContactsPage() {
     return saved ? Number(saved) : null
   })
   const [refreshKey, setRefreshKey] = useState(0)
+  const [onlineStatus, setOnlineStatus] = useState({ online: [], lastLogin: {} })
 
   // Persist view selection
   const changeView = (v) => { setView(v); localStorage.setItem('contacts_view', v) }
@@ -3096,6 +3143,12 @@ function ContactsPage() {
     setLoading(true)
     apiFetch('/api/contacts').then(data => { setContacts(data); setLoading(false) }).catch(() => setLoading(false))
   }, [refreshKey])
+
+  useEffect(() => {
+    apiFetch('/api/online-status').then(d => setOnlineStatus(d)).catch(() => {})
+    const t = setInterval(() => apiFetch('/api/online-status').then(d => setOnlineStatus(d)).catch(() => {}), 30000)
+    return () => clearInterval(t)
+  }, [])
 
   const openNotes = (c) => setSelectedContact(c)
   const closeNotes = () => setSelectedContact(null)
@@ -3166,15 +3219,23 @@ function ContactsPage() {
                 <th className="hidden sm:table-cell">Phone</th>
                 <th className="hidden xl:table-cell">Buy Box</th>
                 <th className="text-center w-14">Notes</th>
+                <th className="hidden sm:table-cell w-24">Last Login</th>
                 <th className="hidden md:table-cell text-center w-20">Last Note</th>
               </tr>
             </thead>
             <tbody>
               {contacts.map(c => {
                 const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
+                const isOnline = onlineStatus.online.includes(c.id)
+                const lastLogin = onlineStatus.lastLogin[c.id] || c.last_login
                 return (
                   <tr key={c.id} className="hover cursor-pointer" onDoubleClick={() => openDetail(c)}>
-                    <td><ContactAvatar contact={c} size="sm" /></td>
+                    <td>
+                      <div className="relative inline-block">
+                        <ContactAvatar contact={c} size="sm" />
+                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} />
+                      </div>
+                    </td>
                     <td>
                       <div className="font-medium whitespace-nowrap">{fullName}</div>
                       <div className="md:hidden mt-0.5"><EmailLink email={c.email} /></div>
@@ -3187,6 +3248,11 @@ function ContactsPage() {
                       <span className="line-clamp-2 text-base-content/60">{c.buy_box || <span className="text-base-content/30">—</span>}</span>
                     </td>
                     <td className="text-center"><span className="badge badge-ghost badge-sm">{c.note_count}</span></td>
+                    <td className="hidden sm:table-cell text-xs whitespace-nowrap">
+                      <span className={isOnline ? 'text-green-600 font-medium' : 'text-base-content/50'}>
+                        {isOnline ? '● Online' : fmtLastLogin(lastLogin)}
+                      </span>
+                    </td>
                     <td className="hidden md:table-cell text-center text-xs text-base-content/50 whitespace-nowrap">
                       {fmtLastNote(c.last_note_at) || <span className="text-base-content/25">—</span>}
                     </td>
@@ -3210,12 +3276,17 @@ function ContactsPage() {
               <div className="space-y-2 overflow-y-auto max-h-[60vh] pr-0.5">
                 {items.map(c => {
                   const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
+                  const isOnline = onlineStatus.online.includes(c.id)
+                  const lastLogin = onlineStatus.lastLogin[c.id] || c.last_login
                   return (
                     <div key={c.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer select-none"
                       onDoubleClick={() => openDetail(c)}>
                       <div className="card-body p-3 gap-2">
                        <div className="flex items-center gap-2">
-                         <ContactAvatar contact={c} size="sm" />
+                         <div className="relative flex-shrink-0">
+                           <ContactAvatar contact={c} size="sm" />
+                           <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} />
+                         </div>
                          <div className="flex-1 min-w-0">
                            <div className="font-medium text-sm truncate">{fullName}</div>
                            <div className="text-xs text-base-content/50 truncate">{c.email}</div>
@@ -3229,8 +3300,11 @@ function ContactsPage() {
                        )}
                        <div className="flex flex-col gap-0.5 pt-1 border-t border-base-200">
                          <span className="badge badge-ghost badge-xs">{c.note_count} {c.note_count === 1 ? 'note' : 'notes'}</span>
+                         <span className={`text-[10px] ${isOnline ? 'text-green-600 font-medium' : 'text-base-content/40'}`}>
+                           {isOnline ? '● Online' : fmtLastLogin(lastLogin)}
+                         </span>
                          {c.last_note_at && (
-                           <span className="text-[10px] text-base-content/40">last: {fmtLastNote(c.last_note_at)}</span>
+                           <span className="text-[10px] text-base-content/40">last note: {fmtLastNote(c.last_note_at)}</span>
                          )}
                        </div>
                       </div>
@@ -3254,6 +3328,8 @@ function ContactsPage() {
               {contacts.map(c => {
                 const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
                 const isActive = splitDetailId === c.id
+                const isOnline = onlineStatus.online.includes(c.id)
+                const lastLogin = onlineStatus.lastLogin[c.id] || c.last_login
                 return (
                   <button
                     key={c.id}
@@ -3261,12 +3337,17 @@ function ContactsPage() {
                     className={`w-full text-left px-3 py-2.5 flex items-center gap-2.5 border-b border-base-200/60 transition-colors
                       ${isActive ? 'bg-primary/10 border-l-2 border-l-primary' : 'hover:bg-base-200/60'}`}
                   >
-                    <ContactAvatar contact={c} size="sm" />
+                    <div className="relative flex-shrink-0">
+                      <ContactAvatar contact={c} size="sm" />
+                      <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} />
+                    </div>
                     <div className="flex-1 min-w-0">
                       <div className={`text-sm font-medium truncate ${isActive ? 'text-primary' : ''}`}>{fullName}</div>
                       <div className="text-xs text-base-content/50 truncate">{c.organization || c.email}</div>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className="text-[10px] text-base-content/40">{c.note_count} {c.note_count === 1 ? 'note' : 'notes'}</span>
+                        <span className={`text-[10px] ${isOnline ? 'text-green-600 font-medium' : 'text-base-content/40'}`}>
+                          {isOnline ? '● Online' : fmtLastLogin(lastLogin)}
+                        </span>
                         {c.last_note_at && <span className="text-[10px] text-base-content/30">· {fmtLastNote(c.last_note_at)}</span>}
                       </div>
                     </div>
