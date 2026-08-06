@@ -1989,40 +1989,40 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
         {tab === 'details' && (
           <div className="hidden md:flex flex-col w-[270px] flex-shrink-0 border-l border-base-300 overflow-y-auto max-h-screen bg-base-50">
             <div className="px-4 pt-5 pb-3 border-b border-base-300">
-              <h4 className="font-semibold text-sm uppercase tracking-wide text-base-content/60">Financials</h4>
+              <h4 className="font-semibold text-base uppercase tracking-wide text-base-content/60">Financials</h4>
             </div>
             <div className="px-4 py-4 space-y-3 flex-1">
 
               {/* Core financials */}
               <div className="space-y-3">
-                <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Property</div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Property</div>
                 <Field label="Price ($)">
                   <NumericInput placeholder="0" value={price} onChange={setPrice}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Square Feet">
                   <NumericInput placeholder="0" value={sqft} onChange={setSqft}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Lot Size (acres)">
                   <input type="number" placeholder="0.00" step="0.01" value={lot}
-                    onChange={e => setLot(e.target.value)} className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    onChange={e => setLot(e.target.value)} className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Year Built">
                   <input type="number" placeholder="e.g. 1998" value={yearBuilt}
-                    onChange={e => setYearBuilt(e.target.value)} className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    onChange={e => setYearBuilt(e.target.value)} className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
               </div>
 
               {/* Investment metrics */}
               <div className="space-y-3 pt-2">
-                <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Investment Metrics</div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Investment Metrics</div>
                 {/* GRM = Price / Gross Scheduled Rent */}
                 <Field label="GRM">
                   <input readOnly
                     value={price !== '' && grossScheduledRent !== '' && Number(grossScheduledRent) > 0
                       ? (Number(price) / Number(grossScheduledRent)).toFixed(2) : '—'}
-                    className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 {/* Cap Rate = NOI / Price */}
                 <Field label="Cap Rate (%)">
@@ -2032,7 +2032,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                       : null
                     const val = noi !== null && price !== '' && Number(price) > 0
                       ? (noi / Number(price) * 100).toFixed(2) + '%' : '—'
-                    return <input readOnly value={val} className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                   })()}
                 </Field>
                 {/* Cash-on-Cash = (NOI - Debt Service) / Equity */}
@@ -2049,85 +2049,85 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                     const equity = price !== '' && loanAmount !== '' ? Number(price) + Number(closingCosts||0) - Number(loanAmount) : null
                     const val = noi !== null && equity !== null && equity > 0
                       ? ((noi - ds) / equity * 100).toFixed(2) + '%' : '—'
-                    return <input readOnly value={val} className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                   })()}
                 </Field>
                 {/* IRR — requires multi-year DCF, manual entry */}
                 <Field label="IRR (%)">
                   <NumericInput placeholder="e.g. 12.0" value={irr} onChange={setIrr}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 {/* Price/Unit = Price / Unit Count */}
                 <Field label="Price / Unit ($)">
                   <input readOnly
                     value={price !== '' && unitCount !== '' && Number(unitCount) > 0
                       ? '$' + (Number(price) / Number(unitCount)).toLocaleString(undefined, {maximumFractionDigits:0}) : '—'}
-                    className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 {/* Price/SqFt = Price / SqFt */}
                 <Field label="Price / Sq Ft ($)">
                   <input readOnly
                     value={price !== '' && sqft !== '' && Number(sqft) > 0
                       ? '$' + (Number(price) / Number(sqft)).toFixed(2) : '—'}
-                    className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Rent-to-Sales (%)">
                   <NumericInput placeholder="e.g. 5.0" value={rentToSales} onChange={setRentToSales}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="# SKUs">
                   <NumericInput placeholder="e.g. 500" value={numSkus} onChange={setNumSkus}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 {/* Price/Acre = Price / Lot Size */}
                 <Field label="Price / Acre ($)">
                   <input readOnly
                     value={price !== '' && lot !== '' && Number(lot) > 0
                       ? '$' + (Number(price) / Number(lot)).toLocaleString(undefined, {maximumFractionDigits:0}) : '—'}
-                    className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
               </div>
 
               {/* Electrical */}
               <div className="space-y-3 pt-2">
-                <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Electrical</div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Electrical</div>
                 <Field label="Voltage (V)">
                   <NumericInput placeholder="e.g. 480" value={elecVoltage} onChange={setElecVoltage}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Amperage (A)">
                   <NumericInput placeholder="e.g. 400" value={elecAmperage} onChange={setElecAmperage}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
               </div>
 
               {/* Income */}
               <div className="space-y-3 pt-2">
-                <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Income</div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Income</div>
                 <Field label="Gross Scheduled Rent ($/yr)">
                   <NumericInput placeholder="e.g. 120000" value={grossScheduledRent} onChange={setGrossScheduledRent}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Vacancy / Credit Loss (%)">
                   <NumericInput placeholder="e.g. 5" value={vacancyRate} onChange={setVacancyRate}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="EGI — Effective Gross Income ($/yr)">
                   <input readOnly
                     value={grossScheduledRent !== '' && vacancyRate !== '' ? '$' + (Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Other Income ($/yr)">
                   <NumericInput placeholder="parking, RUBS, storage" value={otherIncome} onChange={setOtherIncome}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Operating Expenses ($/yr)">
                   <NumericInput placeholder="e.g. 40000" value={operatingExpenses} onChange={setOperatingExpenses}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Reserves / Replacement Capex ($/yr)">
                   <NumericInput placeholder="e.g. 5000" value={reservesCapex} onChange={setReservesCapex}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="NOI — Net Operating Income ($/yr)">
                   <input readOnly
@@ -2135,32 +2135,32 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                       Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) +
                       Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0)
                     ).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
               </div>
 
               {/* Debt */}
               <div className="space-y-3 pt-2">
-                <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Debt</div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Debt</div>
                 <Field label="Loan Amount ($)">
                   <NumericInput placeholder="e.g. 750000" value={loanAmount} onChange={setLoanAmount}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="LTV (%)">
                   <NumericInput placeholder="e.g. 75" value={ltv} onChange={setLtv}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Interest Rate (%)">
                   <NumericInput placeholder="e.g. 6.5" value={interestRate} onChange={setInterestRate}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Amortization Term (yrs)">
                   <NumericInput placeholder="e.g. 25" value={amortizationTerm} onChange={setAmortizationTerm}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Interest-Only Period (yrs)">
                   <NumericInput placeholder="e.g. 3" value={interestOnlyPeriod} onChange={setInterestOnlyPeriod}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Annual Debt Service ($/yr)">
                   <input readOnly
@@ -2170,59 +2170,59 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                       const pmt = r === 0 ? Number(loanAmount) / n : Number(loanAmount) * r / (1 - Math.pow(1 + r, -n))
                       return '$' + (pmt * 12).toLocaleString(undefined, { maximumFractionDigits: 0 })
                     })() : '—'}
-                    className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
               </div>
 
               {/* Deal */}
               <div className="space-y-3 pt-2">
-                <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Deal</div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Deal</div>
                 <Field label="Unit / Bay / Suite Count">
                   <NumericInput placeholder="e.g. 24" value={unitCount} onChange={setUnitCount}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Closing Costs ($)">
                   <NumericInput placeholder="e.g. 25000" value={closingCosts} onChange={setClosingCosts}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Hold Period (yrs)">
                   <NumericInput placeholder="e.g. 7" value={holdPeriod} onChange={setHoldPeriod}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Rent Growth (% / yr)">
                   <NumericInput placeholder="e.g. 3" value={rentGrowth} onChange={setRentGrowth}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Expense Growth (% / yr)">
                   <NumericInput placeholder="e.g. 2" value={expenseGrowth} onChange={setExpenseGrowth}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Exit Cap Rate (%)">
                   <NumericInput placeholder="e.g. 6.5" value={exitCapRate} onChange={setExitCapRate}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Cost of Sale (%)">
                   <NumericInput placeholder="e.g. 2" value={costOfSale} onChange={setCostOfSale}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
               </div>
 
               {/* Tenant — retail / percentage-rent only */}
               {(assetType === 'Retail' || assetType === 'Net Lease' || assetType === '') && (
                 <div className="space-y-3 pt-2">
-                  <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Tenant</div>
+                  <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Tenant</div>
                   <Field label="Tenant Annual Gross Sales ($)">
                     <NumericInput placeholder="e.g. 1200000" value={tenantGrossSales} onChange={setTenantGrossSales}
-                      className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                      className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                   </Field>
                   <Field label="Tenant Base Rent ($/yr)">
                     <NumericInput placeholder="e.g. 60000" value={tenantBaseRent} onChange={setTenantBaseRent}
-                      className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                      className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                   </Field>
                   <Field label="Rent-to-Sales Ratio (%)">
                     <input readOnly
                       value={tenantGrossSales !== '' && tenantBaseRent !== '' && Number(tenantGrossSales) > 0 ? (Number(tenantBaseRent) / Number(tenantGrossSales) * 100).toFixed(2) + '%' : '—'}
-                      className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                      className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                   </Field>
                 </div>
               )}
