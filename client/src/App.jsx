@@ -88,7 +88,7 @@ function PropertyMap({ address }) {
   return (
     <MapContainer center={[coords.lat, coords.lon]} zoom={14}
       style={{ width: '100%', height: '100%' }}
-      scrollWheelZoom={false}
+      scrollWheelZoom={true}
       zoomControl={true}
       attributionControl={true}>
       <TileLayer
