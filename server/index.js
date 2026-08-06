@@ -104,6 +104,16 @@ async function initializeSchema() {
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  await pool.query(`CREATE TABLE IF NOT EXISTS property_documents (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    file_type TEXT NOT NULL,
+    file_data TEXT NOT NULL,
+    uploaded_by INTEGER REFERENCES users(id),
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
   // Drop and recreate session table with correct schema for connect-pg-simple v8
   await pool.query(`DROP TABLE IF EXISTS "session"`);
   await pool.query(`CREATE TABLE "session" (
@@ -610,6 +620,74 @@ app.delete('/api/properties/:id/media/:mediaId', async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: 'db error' });
   }
+});
+
+/* ─── Documents endpoints ─────────────────────────────────────── */
+
+app.post('/api/properties/:id/documents', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
+  const { filename, fileType, fileData } = req.body || {};
+  if (!filename || !fileType || !fileData) return res.status(400).json({ error: 'filename, fileType, and fileData required' });
+  const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif',
+    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain', 'text/csv'];
+  if (!allowed.includes(fileType)) return res.status(400).json({ error: 'unsupported file type' });
+  try {
+    const result = await pool.query(
+      'INSERT INTO property_documents (property_id, filename, file_type, file_data, uploaded_by) VALUES ($1,$2,$3,$4,$5) RETURNING id',
+      [propId, filename, fileType, fileData, req.session.user.id]
+    );
+    await logAudit(req.session.user.id, req.session.user.email, 'upload_document', { property_id: propId, filename, fileType }, null, null, clientIp(req));
+    res.json({ id: result.rows[0].id, filename, fileType });
+  } catch (e) { res.status(500).json({ error: 'db error' }); }
+});
+
+app.get('/api/properties/:id/documents', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
+  try {
+    const result = await pool.query(
+      `SELECT d.id, d.filename, d.file_type, d.uploaded_at, u.email AS uploaded_by_email
+       FROM property_documents d LEFT JOIN users u ON d.uploaded_by = u.id
+       WHERE d.property_id = $1 ORDER BY d.uploaded_at DESC`, [propId]);
+    res.json({ documents: result.rows || [] });
+  } catch (e) { res.status(500).json({ error: 'db error' }); }
+});
+
+app.get('/api/properties/:id/documents/:docId', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const propId = Number(req.params.id);
+  const docId = Number(req.params.docId);
+  if (!Number.isFinite(propId) || !Number.isFinite(docId)) return res.status(400).json({ error: 'invalid ids' });
+  try {
+    const result = await pool.query('SELECT filename, file_type, file_data FROM property_documents WHERE id=$1 AND property_id=$2', [docId, propId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const { filename, file_type, file_data } = result.rows[0];
+    const base64Index = file_data.indexOf(',');
+    const base64 = base64Index !== -1 ? file_data.substring(base64Index + 1) : file_data;
+    const buffer = Buffer.from(base64, 'base64');
+    res.set('Content-Type', file_type);
+    res.set('Content-Disposition', `inline; filename="${encodeURIComponent(filename)}"`);
+    res.set('Cache-Control', 'private, max-age=3600');
+    res.send(buffer);
+  } catch (e) { res.status(500).json({ error: 'db error' }); }
+});
+
+app.delete('/api/properties/:id/documents/:docId', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  const docId = Number(req.params.docId);
+  if (!Number.isFinite(propId) || !Number.isFinite(docId)) return res.status(400).json({ error: 'invalid ids' });
+  try {
+    const result = await pool.query('DELETE FROM property_documents WHERE id=$1 AND property_id=$2', [docId, propId]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    await logAudit(req.session.user.id, req.session.user.email, 'delete_document', { property_id: propId, doc_id: docId }, null, null, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: 'db error' }); }
 });
 
 app.post('/api/properties', async (req, res) => {

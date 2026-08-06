@@ -395,7 +395,8 @@ const ACTION_LABELS = {
   delete_property:  (d)    => `Deleted property ID ${d?.property_id || ''}`,
   assign_property:  (d)    => `Assigned property ID ${d?.property_id || ''} to ${d?.user_count || 0} user(s)`,
   unassign_property:(d)    => `Removed access to property ID ${d?.property_id || ''} from user ID ${d?.user_id || ''}`,
-  upload_media:     (d)    => `Uploaded media "${d?.filename || ''}" to property ID ${d?.property_id || ''}`,
+  upload_document:  (d)    => `Uploaded document "${d?.filename || ''}" to property ID ${d?.property_id || ''}`,
+  delete_document:  (d)    => `Deleted document ID ${d?.doc_id || ''} from property ID ${d?.property_id || ''}`,
   delete_media:     (d)    => `Deleted media ID ${d?.media_id || ''} from property ID ${d?.property_id || ''}`,
 }
 
@@ -610,6 +611,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [mediaLoading, setMediaLoading] = useState(false)
   const [uploadError, setUploadError] = useState('')
 
+  // Documents state
+  const [docs, setDocs] = useState([])
+  const [docsLoading, setDocsLoading] = useState(false)
+  const [docUploadError, setDocUploadError] = useState('')
+
   // Assignment state
   const [allUsers, setAllUsers] = useState([])
   const [assignLoading, setAssignLoading] = useState(false)
@@ -654,6 +660,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   useEffect(() => {
     if (open && property?.id) {
       fetchMedia()
+      fetchDocs()
       if (isAdmin) fetchUsers()
     }
   }, [open, property?.id])
@@ -665,6 +672,44 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       setMedia(data.media || [])
     } catch (e) { console.error('Failed to fetch media', e.message) }
     finally { setMediaLoading(false) }
+  }
+
+  async function fetchDocs() {
+    setDocsLoading(true)
+    try {
+      const data = await apiFetch(`/api/properties/${property.id}/documents`)
+      setDocs(data.documents || [])
+    } catch (e) { console.error('Failed to fetch documents', e.message) }
+    finally { setDocsLoading(false) }
+  }
+
+  async function handleDocUpload(e) {
+    const files = Array.from(e.target.files)
+    setDocUploadError('')
+    const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif',
+      'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+      'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      'text/plain', 'text/csv']
+    for (const file of files) {
+      if (!allowed.includes(file.type)) { setDocUploadError(`${file.name}: unsupported type`); continue }
+      if (file.size > 25 * 1024 * 1024) { setDocUploadError(`${file.name} exceeds 25MB limit`); continue }
+      const fileData = await toBase64(file)
+      try {
+        await apiFetch(`/api/properties/${property.id}/documents`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ filename: file.name, fileType: file.type, fileData })
+        })
+      } catch (err) { setDocUploadError(err.message || 'Upload failed') }
+    }
+    e.target.value = ''
+    fetchDocs()
+  }
+
+  async function deleteDoc(docId) {
+    if (!confirm('Delete this document?')) return
+    await apiFetch(`/api/properties/${property.id}/documents/${docId}`, { method: 'DELETE' })
+    fetchDocs()
   }
 
   async function fetchUsers() {
@@ -784,10 +829,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   if (!open) return null
 
   const tabs = property?.id
-    ? ['details', 'media', ...(isAdmin ? ['assign'] : [])]
+    ? ['details', 'media', 'documents', ...(isAdmin ? ['assign'] : [])]
     : ['details']
 
-  const tabLabel = { details: 'Details', media: 'Media', assign: 'Assign Users' }
+  const tabLabel = { details: 'Details', media: 'Media', documents: 'Documents', assign: 'Assign Users' }
 
   return (
     <div className="modal modal-open">
@@ -1042,6 +1087,68 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                         </div>
                       </div>
                     ))}
+                  </div>
+                )
+            }
+          </div>
+        )}
+
+        {/* Documents tab */}
+        {tab === 'documents' && (
+          <div className="space-y-5">
+            {isAdmin && (
+              <div className="border-2 border-dashed border-base-300 rounded-lg p-6 text-center">
+                <p className="text-sm text-base-content/50 mb-1">PDF, Word, Excel, CSV, images — max 25MB each</p>
+                <p className="text-xs text-base-content/30 mb-3">These are property documents, not visual media</p>
+                <label className="btn btn-primary btn-sm cursor-pointer">
+                  Upload Documents
+                  <input type="file" className="hidden" multiple
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*"
+                    onChange={handleDocUpload} />
+                </label>
+                {docUploadError && <p className="text-error text-sm mt-2">{docUploadError}</p>}
+              </div>
+            )}
+            {docsLoading
+              ? <p className="text-center text-base-content/40 py-6">Loading…</p>
+              : docs.length === 0
+                ? <p className="text-center text-base-content/30 py-8">No documents uploaded yet</p>
+                : (
+                  <div className="space-y-2">
+                    {docs.map(doc => {
+                      const isPdf = doc.file_type === 'application/pdf'
+                      const isImg = doc.file_type?.startsWith('image/')
+                      const icon = isPdf ? '📄' : isImg ? '🖼️' : doc.file_type?.includes('word') ? '📝' : doc.file_type?.includes('excel') || doc.file_type?.includes('sheet') ? '📊' : '📎'
+                      return (
+                        <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg border border-base-300 hover:bg-base-100">
+                          <span className="text-2xl flex-shrink-0">{icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <a
+                              href={`/api/properties/${property.id}/documents/${doc.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-medium hover:underline truncate block"
+                            >
+                              {doc.filename}
+                            </a>
+                            <p className="text-xs text-base-content/40">
+                              {new Date(doc.uploaded_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                              {doc.uploaded_by_email && ` · ${doc.uploaded_by_email}`}
+                            </p>
+                          </div>
+                          <a
+                            href={`/api/properties/${property.id}/documents/${doc.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-xs btn-ghost"
+                            title="Open"
+                          >↗</a>
+                          {isAdmin && (
+                            <button className="btn btn-xs btn-ghost text-error" onClick={() => deleteDoc(doc.id)} title="Delete">✕</button>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                 )
             }
