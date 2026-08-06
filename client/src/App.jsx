@@ -518,7 +518,7 @@ const ACTION_LABELS = {
   delete_user:      (d, t) => `Deleted user ${t || ''}`,
   role_change:      (d, t) => `Changed role of ${t || 'user'} from "${d?.from}" to "${d?.to}"`,
   create_property:  (d)    => `Added property — ${d?.address || ''} (PIN: ${d?.pin || ''}, ${d?.county || ''})`,
-  edit_property:    (d)    => `Edited property — ${d?.address || ''} (PIN: ${d?.pin || ''}, ID: ${d?.property_id || ''})`,
+  edit_property:    (d)    => `Edited property — ${d?.address || `ID ${d?.property_id || ''}`}${d?.changed_fields?.length ? ` — ${d.changed_fields.length} field(s) changed` : ''}`,
   delete_property:  (d)    => `Deleted property ID ${d?.property_id || ''}`,
   assign_property:  (d)    => `Assigned property ID ${d?.property_id || ''} to ${d?.user_count || 0} user(s)`,
   unassign_property:(d)    => `Removed access to property ID ${d?.property_id || ''} from user ID ${d?.user_id || ''}`,
@@ -580,6 +580,9 @@ function AuditLogs() {
                 const text = formatLog(log)
                 const ts = new Date(log.created_at).toLocaleString()
                 const ip = log.ip_address
+                let logDetails = {}
+                try { logDetails = JSON.parse(log.details || '{}') } catch {}
+                const changes = logDetails.changes || null
                 return (
                   <div key={log.id} className="flex gap-3 items-start py-2.5 px-4 rounded-lg hover:bg-base-200 border-b border-base-300/50">
                     <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${log.action === 'login_failed' ? 'bg-error' : log.action === 'login' || log.action === 'logout' ? 'bg-success' : 'bg-primary'}`} />
@@ -588,6 +591,18 @@ function AuditLogs() {
                       <span className="text-base-content/70 text-sm"> — {text}</span>
                       {ip && <span className="text-xs text-base-content/30 ml-1">· {ip}</span>}
                       <div className="text-xs text-base-content/40 mt-0.5 md:hidden">{ts}</div>
+                      {changes && Object.keys(changes).length > 0 && (
+                        <div className="mt-1.5 space-y-0.5">
+                          {Object.entries(changes).map(([field, { from, to }]) => (
+                            <div key={field} className="text-xs font-mono bg-base-300/50 rounded px-2 py-0.5 flex flex-wrap gap-x-2">
+                              <span className="font-semibold text-base-content/70">{field}:</span>
+                              <span className="text-error/80 line-through">{from === null || from === undefined || from === '' ? <em className="not-italic text-base-content/30">empty</em> : String(from)}</span>
+                              <span className="text-base-content/40">→</span>
+                              <span className="text-success/80">{to === null || to === undefined || to === '' ? <em className="not-italic text-base-content/30">empty</em> : String(to)}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <span className="hidden md:block text-xs text-base-content/40 flex-shrink-0 mt-0.5 whitespace-nowrap">{ts}</span>
                   </div>

@@ -892,6 +892,40 @@ app.put('/api/properties/:id', async (req, res) => {
   if (!county || !county.trim()) return res.status(400).json({ error: 'county required' });
 
   try {
+    // Fetch old values before update for diff
+    const oldResult = await pool.query(
+      `SELECT pin, address, county, price, square_feet, lot_size, year_built,
+              on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+              major_interstates, household_income_min, household_income_max, population_density,
+              logistics_hubs, landmarks, water_sources, military_bases
+       FROM properties WHERE id=$1`, [propId]
+    );
+    if (oldResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const old = oldResult.rows[0];
+
+    const newVals = {
+      pin: pin.trim(), address: address.trim(), county: county.trim(),
+      price: price || null, square_feet: square_feet || null, lot_size: lot_size || null, year_built: year_built || null,
+      on_major_road: on_major_road || false, traffic_vpd: traffic_vpd || null,
+      on_corner_lot: on_corner_lot || false, direct_water_access: direct_water_access || false,
+      next_to_public_land: next_to_public_land || false,
+      major_interstates: JSON.stringify(major_interstates || []),
+      household_income_min: household_income_min || null, household_income_max: household_income_max || null,
+      population_density: population_density || null,
+      logistics_hubs: JSON.stringify(logistics_hubs || []), landmarks: JSON.stringify(landmarks || []),
+      water_sources: JSON.stringify(water_sources || []), military_bases: JSON.stringify(military_bases || [])
+    };
+
+    // Build field-level diff
+    const changes = {};
+    for (const key of Object.keys(newVals)) {
+      const oldVal = Array.isArray(old[key]) ? JSON.stringify(old[key]) : (old[key] ?? null);
+      const newVal = newVals[key] ?? null;
+      const oldStr = oldVal === null ? null : String(oldVal);
+      const newStr = newVal === null ? null : String(newVal);
+      if (oldStr !== newStr) changes[key] = { from: oldVal, to: newVals[key] };
+    }
+
     const result = await pool.query(
       `UPDATE properties SET
         pin=$1, address=$2, county=$3,
@@ -903,19 +937,21 @@ app.put('/api/properties/:id', async (req, res) => {
         water_sources=$19, military_bases=$20,
         updated_at=CURRENT_TIMESTAMP
        WHERE id=$21`,
-      [pin.trim(), address.trim(), county.trim(),
-       price || null, square_feet || null, lot_size || null, year_built || null,
-       on_major_road || false, traffic_vpd || null, on_corner_lot || false,
-       direct_water_access || false, next_to_public_land || false,
-       JSON.stringify(major_interstates || []),
-       household_income_min || null, household_income_max || null,
-       population_density || null,
-       JSON.stringify(logistics_hubs || []), JSON.stringify(landmarks || []),
-       JSON.stringify(water_sources || []), JSON.stringify(military_bases || []),
+      [newVals.pin, newVals.address, newVals.county,
+       newVals.price, newVals.square_feet, newVals.lot_size, newVals.year_built,
+       newVals.on_major_road, newVals.traffic_vpd, newVals.on_corner_lot,
+       newVals.direct_water_access, newVals.next_to_public_land,
+       newVals.major_interstates,
+       newVals.household_income_min, newVals.household_income_max,
+       newVals.population_density,
+       newVals.logistics_hubs, newVals.landmarks,
+       newVals.water_sources, newVals.military_bases,
        propId]
     );
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
-    await logAudit(req.session.user.id, req.session.user.email, 'edit_property', { property_id: propId, pin, address, county }, null, null, clientIp(req));
+    await logAudit(req.session.user.id, req.session.user.email, 'edit_property',
+      { property_id: propId, address: newVals.address, changed_fields: Object.keys(changes), changes },
+      null, null, clientIp(req));
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
