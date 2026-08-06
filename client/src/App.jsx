@@ -991,6 +991,7 @@ function PropertiesPage({ user }) {
   const [selectedProperty, setSelectedProperty] = useState(null)
   const [showPropertyModal, setShowPropertyModal] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list' | 'kanban'
 
   async function fetchProperties() {
     setLoading(true)
@@ -1026,13 +1027,50 @@ function PropertiesPage({ user }) {
     setShowPropertyModal(true)
   }
 
+  const fmt = (n) => n != null ? `$${Number(n).toLocaleString()}` : null
+  const kanbanColumns = [
+    { label: 'New', color: 'badge-neutral', filter: p => !p.price && !p.year_built },
+    { label: 'Under Review', color: 'badge-info', filter: p => p.price && !p.year_built },
+    { label: 'Active', color: 'badge-success', filter: p => p.price && p.year_built },
+    { label: 'Other', color: 'badge-warning', filter: p => !p.price && p.year_built },
+  ]
+
   return (
-    <div className="space-y-8">
-      {user.role === 'admin' && (
-        <button className="btn btn-primary" onClick={() => { setSelectedProperty(null); setShowPropertyModal(true) }}>
-          + New Property
-        </button>
-      )}
+    <div className="space-y-6">
+      {/* Toolbar */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        {user.role === 'admin' && (
+          <button className="btn btn-primary btn-sm" onClick={() => { setSelectedProperty(null); setShowPropertyModal(true) }}>
+            + New Property
+          </button>
+        )}
+        {user.role !== 'admin' && <div />}
+
+        {/* View toggle */}
+        <div className="join">
+          <button
+            className={`join-item btn btn-sm ${viewMode === 'list' ? 'btn-neutral' : 'btn-outline'}`}
+            title="List view" onClick={() => setViewMode('list')}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+          </button>
+          <button
+            className={`join-item btn btn-sm ${viewMode === 'grid' ? 'btn-neutral' : 'btn-outline'}`}
+            title="Grid view" onClick={() => setViewMode('grid')}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5h6v6H4zm10 0h6v6h-6zM4 15h6v6H4zm10 0h6v6h-6z" />
+            </svg>
+          </button>
+          <button
+            className={`join-item btn btn-sm ${viewMode === 'kanban' ? 'btn-neutral' : 'btn-outline'}`}
+            title="Kanban view" onClick={() => setViewMode('kanban')}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h4M15 3h4a2 2 0 012 2v8a2 2 0 01-2 2h-4M9 3v18" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
       <PropertyDetailModal
         open={showPropertyModal}
@@ -1052,35 +1090,124 @@ function PropertiesPage({ user }) {
         </div>
       )}
 
-      <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-        {properties.map((prop, i) => (
-          <div key={i}
-            className="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow cursor-pointer overflow-hidden">
-            <PropertyCardCarousel propertyId={prop.id} onClick={() => openProperty(prop)} />
-            <div className="card-body gap-3 p-6" onClick={() => openProperty(prop)}>
-              <h2 className="text-base font-semibold leading-snug">{prop.address}</h2>
-              <div className="space-y-1">
-                <p className="text-sm text-base-content/60">{prop.county} County</p>
-                <p className="text-xs text-base-content/40 font-mono">PIN: {prop.pin}</p>
-                {prop.updated_at && (
-                  <p className="text-xs text-base-content/30">Updated {new Date(prop.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+      {/* ── GRID VIEW ── */}
+      {viewMode === 'grid' && !loading && properties.length > 0 && (
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          {properties.map((prop, i) => (
+            <div key={i}
+              className="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow cursor-pointer overflow-hidden">
+              <PropertyCardCarousel propertyId={prop.id} onClick={() => openProperty(prop)} />
+              <div className="card-body gap-3 p-6" onClick={() => openProperty(prop)}>
+                <h2 className="text-base font-semibold leading-snug">{prop.address}</h2>
+                <div className="space-y-1">
+                  <p className="text-sm text-base-content/60">{prop.county} County</p>
+                  <p className="text-xs text-base-content/40 font-mono">PIN: {prop.pin}</p>
+                  {prop.price && <p className="text-sm font-medium">{fmt(prop.price)}</p>}
+                  {prop.updated_at && (
+                    <p className="text-xs text-base-content/30">Updated {new Date(prop.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                  )}
+                </div>
+                {user.role === 'admin' && (
+                  <div className="card-actions pt-2 border-t border-base-200 mt-1">
+                    <button className="btn btn-xs btn-ghost" onClick={e => { e.stopPropagation(); openProperty(prop) }}>Edit</button>
+                    <button className="btn btn-xs btn-ghost text-error" onClick={e => { e.stopPropagation(); deleteProperty(prop.id) }}>Delete</button>
+                  </div>
+                )}
+                {user.role !== 'admin' && (
+                  <div className="pt-2 border-t border-base-200 mt-1">
+                    <span className="text-xs text-base-content/40">Click to view details &amp; media</span>
+                  </div>
                 )}
               </div>
-              {user.role === 'admin' && (
-                <div className="card-actions pt-2 border-t border-base-200 mt-1">
-                  <button className="btn btn-xs btn-ghost" onClick={e => { e.stopPropagation(); openProperty(prop) }}>Edit</button>
-                  <button className="btn btn-xs btn-ghost text-error" onClick={e => { e.stopPropagation(); deleteProperty(prop.id) }}>Delete</button>
-                </div>
-              )}
-              {user.role !== 'admin' && (
-                <div className="pt-2 border-t border-base-200 mt-1">
-                  <span className="text-xs text-base-content/40">Click to view details &amp; media</span>
-                </div>
-              )}
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── LIST VIEW ── */}
+      {viewMode === 'list' && !loading && properties.length > 0 && (
+        <div className="overflow-x-auto rounded-lg border border-base-300">
+          <table className="table table-zebra w-full">
+            <thead>
+              <tr className="text-xs text-base-content/50 uppercase tracking-wide">
+                <th>Address</th>
+                <th>County</th>
+                <th>PIN</th>
+                <th>Price</th>
+                <th>Sq Ft</th>
+                <th>Year Built</th>
+                <th>Updated</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {properties.map((prop, i) => (
+                <tr key={i} className="hover cursor-pointer" onClick={() => openProperty(prop)}>
+                  <td className="font-medium max-w-xs truncate">{prop.address}</td>
+                  <td className="text-sm text-base-content/60">{prop.county}</td>
+                  <td className="font-mono text-xs text-base-content/50">{prop.pin}</td>
+                  <td className="text-sm">{fmt(prop.price) || <span className="text-base-content/30">—</span>}</td>
+                  <td className="text-sm">{prop.square_feet ? Number(prop.square_feet).toLocaleString() : <span className="text-base-content/30">—</span>}</td>
+                  <td className="text-sm">{prop.year_built || <span className="text-base-content/30">—</span>}</td>
+                  <td className="text-xs text-base-content/40">
+                    {prop.updated_at ? new Date(prop.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
+                  </td>
+                  <td onClick={e => e.stopPropagation()}>
+                    {user.role === 'admin' && (
+                      <div className="flex gap-1">
+                        <button className="btn btn-xs btn-ghost" onClick={() => openProperty(prop)}>Edit</button>
+                        <button className="btn btn-xs btn-ghost text-error" onClick={() => deleteProperty(prop.id)}>Del</button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      {/* ── KANBAN VIEW ── */}
+      {viewMode === 'kanban' && !loading && properties.length > 0 && (
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {kanbanColumns.map(col => {
+            const colProps = properties.filter(col.filter)
+            return (
+              <div key={col.label} className="flex-shrink-0 w-72">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className={`badge badge-sm ${col.color}`}>{col.label}</span>
+                  <span className="text-xs text-base-content/40">{colProps.length}</span>
+                </div>
+                <div className="space-y-3">
+                  {colProps.length === 0 && (
+                    <div className="rounded-lg border border-dashed border-base-300 p-4 text-center text-xs text-base-content/30">
+                      No properties
+                    </div>
+                  )}
+                  {colProps.map((prop, i) => (
+                    <div key={i}
+                      className="card bg-base-100 border border-base-300 hover:shadow-md transition-shadow cursor-pointer"
+                      onClick={() => openProperty(prop)}>
+                      <div className="card-body p-4 gap-2">
+                        <p className="font-medium text-sm leading-snug line-clamp-2">{prop.address}</p>
+                        <p className="text-xs text-base-content/50">{prop.county} County</p>
+                        {prop.price && <p className="text-sm font-semibold">{fmt(prop.price)}</p>}
+                        <p className="text-xs text-base-content/40 font-mono">PIN: {prop.pin}</p>
+                        {user.role === 'admin' && (
+                          <div className="flex gap-1 pt-1 border-t border-base-200" onClick={e => e.stopPropagation()}>
+                            <button className="btn btn-xs btn-ghost" onClick={() => openProperty(prop)}>Edit</button>
+                            <button className="btn btn-xs btn-ghost text-error" onClick={() => deleteProperty(prop.id)}>Delete</button>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
