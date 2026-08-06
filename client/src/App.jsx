@@ -502,6 +502,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [waterAccess, setWaterAccess] = useState(false)
   const [nextToPublicLand, setNextToPublicLand] = useState(false)
   const [interstates, setInterstates] = useState([]) // [{name, distance}]
+  const [logisticsHubs, setLogisticsHubs] = useState([]) // [{type, name, distance}]
+  const [landmarksList, setLandmarksList] = useState([]) // [{type, name, distance}]
   const [incomeMin, setIncomeMin] = useState('')
   const [incomeMax, setIncomeMax] = useState('')
   const [popDensity, setPopDensity] = useState('')
@@ -530,6 +532,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     setWaterAccess(p.direct_water_access || false)
     setNextToPublicLand(p.next_to_public_land || false)
     setInterstates(Array.isArray(p.major_interstates) ? p.major_interstates : [])
+    setLogisticsHubs(Array.isArray(p.logistics_hubs) ? p.logistics_hubs : [])
+    setLandmarksList(Array.isArray(p.landmarks) ? p.landmarks : [])
     setIncomeMin(p.household_income_min ?? '')
     setIncomeMax(p.household_income_max ?? '')
     setPopDensity(p.population_density ?? '')
@@ -543,6 +547,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       setPin(''); setAddress(''); setCounty(''); setPrice(''); setSqft(''); setLot('')
       setYearBuilt(''); setOnMajorRoad(false); setTrafficVpd(''); setOnCornerLot(false)
       setWaterAccess(false); setNextToPublicLand(false); setInterstates([])
+      setLogisticsHubs([]); setLandmarksList([])
       setIncomeMin(''); setIncomeMax(''); setPopDensity('')
       setTab('details')
     }
@@ -586,6 +591,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       direct_water_access: waterAccess,
       next_to_public_land: nextToPublicLand,
       major_interstates: interstates,
+      logistics_hubs: logisticsHubs,
+      landmarks: landmarksList,
       household_income_min: incomeMin !== '' ? Number(incomeMin) : null,
       household_income_max: incomeMax !== '' ? Number(incomeMax) : null,
       population_density: popDensity !== '' ? Number(popDensity) : null,
@@ -599,6 +606,18 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     setInterstates(prev => prev.map((item, idx) => idx === i ? { ...item, [field]: val } : item))
   }
   function removeInterstate(i) { setInterstates(prev => prev.filter((_, idx) => idx !== i)) }
+
+  function addHub() { setLogisticsHubs(prev => [...prev, { type: 'Airport', name: '', distance: '' }]) }
+  function updateHub(i, field, val) {
+    setLogisticsHubs(prev => prev.map((item, idx) => idx === i ? { ...item, [field]: val } : item))
+  }
+  function removeHub(i) { setLogisticsHubs(prev => prev.filter((_, idx) => idx !== i)) }
+
+  function addLandmark() { setLandmarksList(prev => [...prev, { type: 'Major Metro', name: '', distance: '' }]) }
+  function updateLandmark(i, field, val) {
+    setLandmarksList(prev => prev.map((item, idx) => idx === i ? { ...item, [field]: val } : item))
+  }
+  function removeLandmark(i) { setLandmarksList(prev => prev.filter((_, idx) => idx !== i)) }
 
   async function handleFileUpload(e) {
     const files = Array.from(e.target.files)
@@ -763,6 +782,54 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 <button className="btn btn-xs btn-outline" onClick={addInterstate}>+ Add Interstate</button>
               )}
               {interstates.length === 0 && <p className="text-sm text-base-content/40">No interstates added</p>}
+            </div>
+
+            {/* Demographics */}
+            <div className="divider text-xs text-base-content/40 my-1">Logistics Hubs</div>
+            <div className="space-y-2">
+              {logisticsHubs.map((item, i) => (
+                <div key={i} className="flex gap-2 items-center flex-wrap">
+                  <select value={item.type} onChange={e => updateHub(i, 'type', e.target.value)}
+                    className="select select-bordered select-sm w-36" disabled={!isAdmin}>
+                    <option>Airport</option>
+                    <option>Railyard</option>
+                  </select>
+                  <input type="text" placeholder="e.g. O'Hare International Airport" value={item.name}
+                    onChange={e => updateHub(i, 'name', e.target.value)}
+                    className="input input-bordered input-sm flex-1 min-w-[160px]" disabled={!isAdmin} />
+                  <input type="number" placeholder="Miles" value={item.distance}
+                    onChange={e => updateHub(i, 'distance', e.target.value)}
+                    className="input input-bordered input-sm w-24" disabled={!isAdmin} />
+                  <span className="text-sm text-base-content/50">miles</span>
+                  {isAdmin && <button className="btn btn-xs btn-ghost text-error" onClick={() => removeHub(i)}>✕</button>}
+                </div>
+              ))}
+              {isAdmin && <button className="btn btn-xs btn-outline" onClick={addHub}>+ Add Hub</button>}
+              {logisticsHubs.length === 0 && <p className="text-sm text-base-content/40">No logistics hubs added</p>}
+            </div>
+
+            <div className="divider text-xs text-base-content/40 my-1">Landmarks</div>
+            <div className="space-y-2">
+              {landmarksList.map((item, i) => (
+                <div key={i} className="flex gap-2 items-center flex-wrap">
+                  <select value={item.type} onChange={e => updateLandmark(i, 'type', e.target.value)}
+                    className="select select-bordered select-sm w-44" disabled={!isAdmin}>
+                    <option>Major Metro</option>
+                    <option>National Park</option>
+                    <option>Nature Preserve</option>
+                  </select>
+                  <input type="text" placeholder="e.g. Chicago" value={item.name}
+                    onChange={e => updateLandmark(i, 'name', e.target.value)}
+                    className="input input-bordered input-sm flex-1 min-w-[140px]" disabled={!isAdmin} />
+                  <input type="number" placeholder="Miles" value={item.distance}
+                    onChange={e => updateLandmark(i, 'distance', e.target.value)}
+                    className="input input-bordered input-sm w-24" disabled={!isAdmin} />
+                  <span className="text-sm text-base-content/50">miles</span>
+                  {isAdmin && <button className="btn btn-xs btn-ghost text-error" onClick={() => removeLandmark(i)}>✕</button>}
+                </div>
+              ))}
+              {isAdmin && <button className="btn btn-xs btn-outline" onClick={addLandmark}>+ Add Landmark</button>}
+              {landmarksList.length === 0 && <p className="text-sm text-base-content/40">No landmarks added</p>}
             </div>
 
             {/* Demographics */}
