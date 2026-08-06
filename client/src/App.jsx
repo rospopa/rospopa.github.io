@@ -1985,6 +1985,115 @@ function ProfilePage({ currentUser, onUpdate }) {
 
 /* ─── Root App ────────────────────────────────────────────────── */
 
+/* ─── Forgot / Reset Password Modal ──────────────────────────── */
+
+function ForgotPasswordModal({ onClose, prefillEmail }) {
+  const [step, setStep] = useState('email')   // 'email' | 'code'
+  const [email, setEmail] = useState(prefillEmail || '')
+  const [code, setCode] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [msg, setMsg] = useState('')
+  const [success, setSuccess] = useState(false)
+
+  async function sendCode(e) {
+    e.preventDefault()
+    setMsg(''); setLoading(true)
+    try {
+      await fetch('/api/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+      // Always advance to code step (prevents user enumeration)
+      setStep('code')
+    } catch { setMsg('Network error. Please try again.') }
+    finally { setLoading(false) }
+  }
+
+  async function resetPassword(e) {
+    e.preventDefault()
+    setMsg('')
+    if (newPassword !== confirmPassword) return setMsg('Passwords do not match')
+    if (newPassword.length < 8) return setMsg('Password must be at least 8 characters')
+    setLoading(true)
+    try {
+      const res = await fetch('/api/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, code, newPassword })
+      })
+      const data = await res.json()
+      if (!res.ok) return setMsg(data.error || 'Reset failed')
+      setSuccess(true)
+    } catch { setMsg('Network error. Please try again.') }
+    finally { setLoading(false) }
+  }
+
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box w-full max-w-sm">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-bold text-lg">
+            {success ? 'Password Reset' : step === 'email' ? 'Forgot Password' : 'Enter Code'}
+          </h3>
+          <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
+        </div>
+
+        {success ? (
+          <div className="space-y-4 text-center">
+            <div className="text-5xl">✅</div>
+            <p className="font-medium">Your password has been reset.</p>
+            <p className="text-sm text-base-content/50">You can now sign in with your new password.</p>
+            <button className="btn btn-primary w-full" onClick={onClose}>Sign In</button>
+          </div>
+        ) : step === 'email' ? (
+          <form onSubmit={sendCode} className="space-y-4">
+            <p className="text-sm text-base-content/50">Enter your email and we'll send you a 6-digit code.</p>
+            <Field label="Email" required>
+              <input type="email" placeholder="your@email.com" value={email}
+                onChange={e => setEmail(e.target.value)} className="input input-bordered w-full" required />
+            </Field>
+            {msg && <div className="alert alert-error text-sm">{msg}</div>}
+            <button className="btn btn-primary w-full" disabled={loading}>
+              {loading ? 'Sending…' : 'Send Code'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={resetPassword} className="space-y-4">
+            <p className="text-sm text-base-content/50">
+              A 6-digit code was sent to <strong>{email}</strong>. It expires in 15 minutes.
+            </p>
+            <Field label="Code" required>
+              <input type="text" placeholder="000000" value={code} maxLength={6}
+                onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
+                className="input input-bordered w-full text-center tracking-[0.5em] text-xl font-bold" required />
+            </Field>
+            <Field label="New Password" required>
+              <input type="password" placeholder="Min. 8 characters" value={newPassword}
+                onChange={e => setNewPassword(e.target.value)} className="input input-bordered w-full" required />
+            </Field>
+            <Field label="Confirm Password" required>
+              <input type="password" placeholder="Repeat password" value={confirmPassword}
+                onChange={e => setConfirmPassword(e.target.value)} className="input input-bordered w-full" required />
+            </Field>
+            {msg && <div className="alert alert-error text-sm">{msg}</div>}
+            <button className="btn btn-primary w-full" disabled={loading}>
+              {loading ? 'Resetting…' : 'Reset Password'}
+            </button>
+            <button type="button" className="btn btn-ghost btn-sm w-full"
+              onClick={() => { setStep('email'); setMsg('') }}>
+              ← Back
+            </button>
+          </form>
+        )}
+      </div>
+      <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
+    </div>
+  )
+}
+
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [users, setUsers] = useState([])
@@ -1996,10 +2105,11 @@ export default function App() {
   const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null })
   const [authChecked, setAuthChecked] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [loginPreview, setLoginPreview] = useState(null) // {first_name, last_name, profile_photo} | null
-  const [loginStatus, setLoginStatus] = useState(null)   // null | 'verifying' | 'success' | 'denied'
-  const [editingUser, setEditingUser] = useState(null)   // user object or null
+  const [loginPreview, setLoginPreview] = useState(null)
+  const [loginStatus, setLoginStatus] = useState(null)
+  const [editingUser, setEditingUser] = useState(null)
   const [showEditUserModal, setShowEditUserModal] = useState(false)
+  const [showForgot, setShowForgot] = useState(false)
 
   // Show/hide reCAPTCHA badge based on whether user is identified
   useEffect(() => {
@@ -2111,6 +2221,7 @@ export default function App() {
   /* ── Login / Register screen ── */
   if (!currentUser) {
     return (
+      <>
       <div className="min-h-screen flex items-center justify-center"
         style={{ backgroundImage: "url('/assets/background-login.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="absolute inset-0 bg-black/55" />
@@ -2160,13 +2271,19 @@ export default function App() {
               </form>
               <div className="divider text-xs text-base-content/30 my-0" />
               <button className="btn btn-ghost btn-sm w-full text-base-content/60"
-                onClick={() => setMsg('Password reset coming soon — contact your administrator.')}>
+                onClick={() => { setShowForgot(true); setMsg('') }}>
                 Forgot your password?
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* ── Forgot Password Modal ── */}
+      {showForgot && (
+        <ForgotPasswordModal onClose={() => setShowForgot(false)} prefillEmail={email} />
+      )}
+      </>
     )
   }
 

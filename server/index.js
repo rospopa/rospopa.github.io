@@ -6,6 +6,7 @@ const { Pool } = require('pg');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
 const https = require('https');
+const { Resend } = require('resend');
 
 const PORT = process.env.PORT || 3000;
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -13,6 +14,9 @@ const RECAPTCHA_API_KEY = process.env.RECAPTCHA_API_KEY;
 const RECAPTCHA_PROJECT_ID = 'rospopa-recaptcha';
 const RECAPTCHA_SITE_KEY = '6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv';
 const RECAPTCHA_MIN_SCORE = 0.5;
+const FROM_EMAIL = 'noreply@rospopa.com';
+
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 if (!DATABASE_URL) {
   throw new Error('DATABASE_URL is required');
@@ -112,6 +116,15 @@ async function initializeSchema() {
     file_data TEXT NOT NULL,
     uploaded_by INTEGER REFERENCES users(id),
     uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS password_reset_otps (
+    id SERIAL PRIMARY KEY,
+    email TEXT NOT NULL,
+    code TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
   // Drop and recreate session table with correct schema for connect-pg-simple v8
@@ -289,6 +302,80 @@ app.post('/api/lookup-user', async (req, res) => {
     const { first_name, last_name, profile_photo } = result.rows[0];
     res.json({ found: true, first_name, last_name, profile_photo });
   } catch { res.json({ found: false }); }
+});
+
+/** Send a 6-digit OTP to the user's email for password reset */
+app.post('/api/forgot-password', async (req, res) => {
+  let { email } = req.body || {};
+  email = sanitizeEmail(email);
+  if (!email || !isValidEmail(email)) return res.status(400).json({ error: 'valid email required' });
+
+  // Always respond success to prevent user enumeration
+  try {
+    const userResult = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (userResult.rows.length === 0) return res.json({ ok: true });
+
+    // Invalidate old codes for this email
+    await pool.query('UPDATE password_reset_otps SET used = TRUE WHERE email = $1', [email]);
+
+    // Generate 6-digit code
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+    await pool.query(
+      'INSERT INTO password_reset_otps (email, code, expires_at) VALUES ($1, $2, $3)',
+      [email, code, expiresAt]
+    );
+
+    await resend.emails.send({
+      from: `Capitalization Rate Portal <${FROM_EMAIL}>`,
+      to: email,
+      subject: 'Your password reset code',
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
+          <h2 style="margin-bottom:8px">Password Reset</h2>
+          <p style="color:#555">Enter this code in the portal to reset your password. It expires in <strong>15 minutes</strong>.</p>
+          <div style="font-size:40px;font-weight:800;letter-spacing:12px;text-align:center;padding:24px;background:#f4f4f4;border-radius:8px;margin:24px 0">${code}</div>
+          <p style="color:#999;font-size:12px">If you didn't request this, ignore this email. Your password won't change.</p>
+        </div>
+      `
+    });
+
+    logAudit(null, email, 'forgot_password', { email }, null, email, clientIp(req));
+  } catch (e) {
+    console.error('forgot-password error:', e.message);
+  }
+  res.json({ ok: true });
+});
+
+/** Verify OTP + set new password */
+app.post('/api/reset-password', async (req, res) => {
+  let { email, code, newPassword } = req.body || {};
+  email = sanitizeEmail(email);
+  if (!email || !code || !newPassword) return res.status(400).json({ error: 'email, code and newPassword required' });
+  if (!isValidPassword(newPassword)) return res.status(400).json({ error: 'password must be 8-128 characters' });
+
+  try {
+    const otpResult = await pool.query(
+      `SELECT id FROM password_reset_otps
+       WHERE email = $1 AND code = $2 AND used = FALSE AND expires_at > NOW()
+       ORDER BY created_at DESC LIMIT 1`,
+      [email, code.trim()]
+    );
+    if (otpResult.rows.length === 0) return res.status(400).json({ error: 'Invalid or expired code' });
+
+    // Mark used
+    await pool.query('UPDATE password_reset_otps SET used = TRUE WHERE id = $1', [otpResult.rows[0].id]);
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    const upd = await pool.query('UPDATE users SET password = $1, updated_at = NOW() WHERE email = $2 RETURNING id', [hashed, email]);
+    if (upd.rowCount === 0) return res.status(404).json({ error: 'User not found' });
+
+    logAudit(upd.rows[0].id, email, 'password_reset', {}, null, email, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('reset-password error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
 });
 
 app.post('/api/login', async (req, res) => {
