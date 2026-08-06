@@ -129,6 +129,24 @@ async function initializeSchema() {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  await pool.query(`CREATE TABLE IF NOT EXISTS contact_notes (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    admin_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    note_text TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS contact_attachments (
+    id SERIAL PRIMARY KEY,
+    note_id INTEGER NOT NULL REFERENCES contact_notes(id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    file_type TEXT NOT NULL,
+    file_data TEXT NOT NULL,
+    file_size INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
   // Drop and recreate session table with correct schema for connect-pg-simple v8
   await pool.query(`DROP TABLE IF EXISTS "session"`);
   await pool.query(`CREATE TABLE "session" (
@@ -610,6 +628,108 @@ app.delete('/api/users/:id', async (req, res) => {
     await pool.query('DELETE FROM users WHERE id = $1', [id]);
     await logAudit(adminId, req.session.user.email, 'delete_user', {}, id, row.email, clientIp(req));
     res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+/* ─── Contacts API ──────────────────────────────────────────────── */
+
+app.get('/api/contacts', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  try {
+    const result = await pool.query(`
+      SELECT u.id, u.email, u.role, u.first_name, u.last_name, u.organization, u.phone_number,
+             u.buy_box, u.profile_photo, u.created_at, u.updated_at,
+             COUNT(cn.id)::int AS note_count
+      FROM users u
+      LEFT JOIN contact_notes cn ON cn.user_id = u.id
+      GROUP BY u.id
+      ORDER BY u.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.get('/api/contacts/:id/notes', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const userId = Number(req.params.id);
+  try {
+    const notes = await pool.query(
+      `SELECT id, user_id, admin_id, note_text, created_at FROM contact_notes WHERE user_id = $1 ORDER BY created_at DESC`,
+      [userId]
+    );
+    const noteIds = notes.rows.map(n => n.id);
+    let attachments = [];
+    if (noteIds.length > 0) {
+      const attResult = await pool.query(
+        `SELECT id, note_id, filename, file_type, file_size, created_at FROM contact_attachments WHERE note_id = ANY($1)`,
+        [noteIds]
+      );
+      attachments = attResult.rows;
+    }
+    const rows = notes.rows.map(n => ({
+      ...n,
+      attachments: attachments.filter(a => a.note_id === n.id)
+    }));
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.post('/api/contacts/:id/notes', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const userId = Number(req.params.id);
+  const adminId = req.session.user.id;
+  const { note_text, attachments = [] } = req.body;
+  try {
+    const noteResult = await pool.query(
+      `INSERT INTO contact_notes (user_id, admin_id, note_text) VALUES ($1, $2, $3) RETURNING *`,
+      [userId, adminId, note_text || null]
+    );
+    const note = noteResult.rows[0];
+    const insertedAttachments = [];
+    for (const att of attachments) {
+      const ar = await pool.query(
+        `INSERT INTO contact_attachments (note_id, filename, file_type, file_data, file_size) VALUES ($1,$2,$3,$4,$5) RETURNING id, note_id, filename, file_type, file_size, created_at`,
+        [note.id, att.filename, att.file_type, att.file_data, att.file_size || null]
+      );
+      insertedAttachments.push(ar.rows[0]);
+    }
+    await logAudit(adminId, req.session.user.email, 'add_contact_note', { user_id: userId, has_text: !!note_text, attachment_count: attachments.length }, userId, null, clientIp(req));
+    res.json({ ...note, attachments: insertedAttachments });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.delete('/api/contacts/:id/notes/:noteId', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const noteId = Number(req.params.noteId);
+  const adminId = req.session.user.id;
+  try {
+    await pool.query('DELETE FROM contact_notes WHERE id = $1', [noteId]);
+    await logAudit(adminId, req.session.user.email, 'delete_contact_note', { note_id: noteId }, Number(req.params.id), null, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.get('/api/contacts/:id/notes/:noteId/attachments/:attachId', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const attachId = Number(req.params.attachId);
+  try {
+    const result = await pool.query('SELECT filename, file_type, file_data FROM contact_attachments WHERE id = $1', [attachId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const { filename, file_type, file_data } = result.rows[0];
+    const buf = Buffer.from(file_data, 'base64');
+    res.setHeader('Content-Type', file_type);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buf);
   } catch (e) {
     res.status(500).json({ error: 'db error' });
   }
