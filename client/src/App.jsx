@@ -2004,7 +2004,7 @@ async function getRecaptchaToken(action) {
 /* ─── Forgot / Reset Password Modal ──────────────────────────── */
 
 function ForgotPasswordModal({ onClose, prefillEmail }) {
-  const [step, setStep] = useState('email')   // 'email' | 'code'
+  const [step, setStep] = useState('email')
   const [email, setEmail] = useState(prefillEmail || '')
   const [code, setCode] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -2012,8 +2012,8 @@ function ForgotPasswordModal({ onClose, prefillEmail }) {
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
   const [success, setSuccess] = useState(false)
+  const [captchaStatus, setCaptchaStatus] = useState(null) // null | 'verifying' | 'success' | 'denied'
 
-  // Ensure reCAPTCHA script is loaded when modal opens
   useEffect(() => {
     if (!document.getElementById('recaptcha-script')) {
       const s = document.createElement('script')
@@ -2026,7 +2026,7 @@ function ForgotPasswordModal({ onClose, prefillEmail }) {
 
   async function sendCode(e) {
     e.preventDefault()
-    setMsg(''); setLoading(true)
+    setMsg(''); setLoading(true); setCaptchaStatus('verifying')
     try {
       const recaptchaToken = await getRecaptchaToken('FORGOT_PASSWORD')
       const res = await fetch('/api/forgot-password', {
@@ -2035,9 +2035,20 @@ function ForgotPasswordModal({ onClose, prefillEmail }) {
         body: JSON.stringify({ email, recaptchaToken })
       })
       const data = await res.json()
-      if (!res.ok) return setMsg(data.error || 'Failed to send code.')
+      if (!res.ok) {
+        setCaptchaStatus('denied')
+        setTimeout(() => setCaptchaStatus(null), 2500)
+        return setMsg(data.error || 'Failed to send code.')
+      }
+      setCaptchaStatus('success')
+      await new Promise(r => setTimeout(r, 700))
+      setCaptchaStatus(null)
       setStep('code')
-    } catch { setMsg('Network error. Please try again.') }
+    } catch {
+      setCaptchaStatus('denied')
+      setTimeout(() => setCaptchaStatus(null), 2500)
+      setMsg('Network error. Please try again.')
+    }
     finally { setLoading(false) }
   }
 
@@ -2085,8 +2096,13 @@ function ForgotPasswordModal({ onClose, prefillEmail }) {
                 onChange={e => setEmail(e.target.value)} className="input input-bordered w-full" required />
             </Field>
             {msg && <div className="alert alert-error text-sm">{msg}</div>}
+            {captchaStatus && (
+              <div className="flex justify-center">
+                <RecaptchaShield status={captchaStatus} />
+              </div>
+            )}
             <button className="btn btn-primary w-full" disabled={loading}>
-              {loading ? 'Sending…' : 'Send Code'}
+              {loading ? 'Verifying…' : 'Send Code'}
             </button>
           </form>
         ) : (
