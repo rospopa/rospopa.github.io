@@ -413,7 +413,7 @@ function CalendarWidget() {
 
 
 /** Text input that displays numbers with comma formatting; stores raw digits in state */
-function NumericInput({ value, onChange, placeholder, className, disabled, allowDecimal }) {
+function NumericInput({ value, onChange, placeholder, className, disabled, allowDecimal, style }) {
   const [display, setDisplay] = useState('')
 
   useEffect(() => {
@@ -456,6 +456,7 @@ function NumericInput({ value, onChange, placeholder, className, disabled, allow
       onFocus={handleFocus}
       placeholder={placeholder}
       className={className}
+      style={style}
       disabled={disabled}
     />
   )
