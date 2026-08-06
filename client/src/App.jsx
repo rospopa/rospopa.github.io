@@ -1636,7 +1636,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 <option value="">— Select —</option>
                 {['Multifamily','Retail','Net Lease','Office','Industrial',
                   'Hospitality / Golf','Student Housing','Seniors Housing','Self-Storage',
-                  'Medical Office','Affordable Housing','Manufactured Housing','Land & Redevelopment'
+                  'Medical Office','Affordable Housing','Manufactured Housing','Land & Redevelopment','Mixed-Use'
                 ].map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </Field>
