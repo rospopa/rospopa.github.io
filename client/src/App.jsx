@@ -1753,7 +1753,10 @@ export default function App() {
     }
   }, [currentUser, loginPreview])
 
-  function navigateTo(p) { setPage(p); localStorage.setItem('rep_page', p) }
+  function navigateTo(p) {
+    if ((p === 'users' || p === 'audit') && currentUser?.role !== 'admin') return
+    setPage(p); localStorage.setItem('rep_page', p)
+  }
 
   // Restore session on page load/refresh
   useEffect(() => {
@@ -1763,7 +1766,8 @@ export default function App() {
         if (data.user) {
           setCurrentUser(data.user)
           const saved = localStorage.getItem('rep_page')
-          const validPages = ['dashboard', 'properties', 'profile', 'users', 'audit']
+          const adminPages = ['users', 'audit']
+          const validPages = ['dashboard', 'properties', 'profile', ...( data.user.role === 'admin' ? adminPages : [])]
           setPage(saved && validPages.includes(saved) ? saved : 'dashboard')
         }
       })
