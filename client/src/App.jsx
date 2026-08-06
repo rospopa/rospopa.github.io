@@ -151,12 +151,15 @@ function CalendarWidget() {
   const firstDow    = new Date(year, month - 1, 1).getDay()
 
   // Index meetings by each day they span (start..end or just decision day)
+  // Slice to YYYY-MM-DD first — Postgres may return full ISO timestamp strings
   const byDay = {}
   for (const m of meetings) {
-    const decDay  = parseInt(m.decision_date.slice(8), 10)
-    const startDay = m.start_date ? parseInt(m.start_date.slice(8), 10) : decDay
-    const endDay   = m.end_date   ? parseInt(m.end_date.slice(8), 10)   : decDay
-    // Only mark days that belong to this month
+    const dec   = String(m.decision_date).slice(0, 10)
+    const start = m.start_date ? String(m.start_date).slice(0, 10) : dec
+    const end   = m.end_date   ? String(m.end_date).slice(0, 10)   : dec
+    const decDay   = parseInt(dec.slice(8), 10)
+    const startDay = parseInt(start.slice(8), 10)
+    const endDay   = parseInt(end.slice(8), 10)
     for (let d = startDay; d <= endDay; d++) {
       const isDecision = d === decDay
       if (!byDay[d]) byDay[d] = []
@@ -300,9 +303,10 @@ function CalendarWidget() {
         {selected && (
           <div className="mt-4 border-t border-base-300 pt-4">
             {selected.meetings.map((m, i) => {
-              const decDate  = new Date(m.decision_date + 'T12:00:00')
-              const startDate = m.start_date ? new Date(m.start_date + 'T12:00:00') : decDate
-              const endDate   = m.end_date   ? new Date(m.end_date + 'T12:00:00')   : decDate
+              const toDate = (s) => s ? new Date(String(s).slice(0,10) + 'T12:00:00') : null
+              const decDate   = toDate(m.decision_date)
+              const startDate = toDate(m.start_date) || decDate
+              const endDate   = toDate(m.end_date)   || decDate
               const isTwoDay  = m.start_date !== m.end_date
               const future    = decDate >= today
               const source    = m.source || 'fallback'
@@ -344,7 +348,7 @@ function CalendarWidget() {
             <p className="text-xs text-base-content/40 mb-2 font-semibold uppercase tracking-widest">This month</p>
             <div className="flex flex-wrap gap-2">
               {[...new Map(meetings.map(m => [m.decision_date, m])).values()].map((m, i) => {
-                const decDate = new Date(m.decision_date + 'T12:00:00')
+                const decDate = new Date(String(m.decision_date).slice(0,10) + 'T12:00:00')
                 const future  = decDate >= today
                 return (
                   <span key={i} className={`badge badge-sm gap-1 ${future ? 'badge-outline' : 'badge-ghost opacity-60'}`}>
