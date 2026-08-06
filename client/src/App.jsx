@@ -1001,6 +1001,11 @@ function AuditLogs() {
                   expense_growth: 'Expense Growth (%)', exit_cap_rate: 'Exit Cap Rate (%)',
                   cost_of_sale: 'Cost of Sale (%)',
                   tenant_gross_sales: 'Tenant Annual Gross Sales ($)', tenant_base_rent: 'Tenant Base Rent ($)',
+                  management_fee_pct: 'Management Fee (%)', insurance: 'Insurance ($/yr)',
+                  property_taxes: 'Property Taxes ($/yr)', land_value_pct: 'Land Value (%)',
+                  cost_seg_bonus_pct: 'Cost Seg Bonus (%)', effective_tax_rate: 'Effective Tax Rate (%)',
+                  depreciation_recapture_rate: 'Depreciation Recapture Rate (%)',
+                  refi_ltv: 'Refi LTV (%)', refi_rate: 'Refi Interest Rate (%)', refi_year: 'Refi Year',
                 }
                 function fmtVal(v) {
                   if (v === null || v === undefined || v === '') return null
@@ -1345,6 +1350,19 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   // Tenant block
   const [tenantGrossSales, setTenantGrossSales] = useState('')
   const [tenantBaseRent, setTenantBaseRent] = useState('')
+  // Operating block
+  const [managementFeePct, setManagementFeePct] = useState('')
+  const [insurance, setInsurance] = useState('')
+  const [propertyTaxes, setPropertyTaxes] = useState('')
+  // Tax / Cost Seg block
+  const [landValuePct, setLandValuePct] = useState('')
+  const [costSegBonusPct, setCostSegBonusPct] = useState('')
+  const [effectiveTaxRate, setEffectiveTaxRate] = useState('')
+  const [depreciationRecaptureRate, setDepreciationRecaptureRate] = useState('')
+  // Refi block
+  const [refiLtv, setRefiLtv] = useState('')
+  const [refiRate, setRefiRate] = useState('')
+  const [refiYear, setRefiYear] = useState('')
   const [saving, setSaving] = useState(false)
   const [savedSignal, setSavedSignal] = useState(0)
   const [media, setMedia] = useState([])
@@ -1414,6 +1432,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     setCostOfSale(p.cost_of_sale ?? '')
     setTenantGrossSales(p.tenant_gross_sales ?? '')
     setTenantBaseRent(p.tenant_base_rent ?? '')
+    setManagementFeePct(p.management_fee_pct ?? '')
+    setInsurance(p.insurance ?? '')
+    setPropertyTaxes(p.property_taxes ?? '')
+    setLandValuePct(p.land_value_pct ?? '')
+    setCostSegBonusPct(p.cost_seg_bonus_pct ?? '')
+    setEffectiveTaxRate(p.effective_tax_rate ?? '')
+    setDepreciationRecaptureRate(p.depreciation_recapture_rate ?? '')
+    setRefiLtv(p.refi_ltv ?? '')
+    setRefiRate(p.refi_rate ?? '')
+    setRefiYear(p.refi_year ?? '')
   }
 
   useEffect(() => {
@@ -1433,6 +1461,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       setLoanAmount(''); setLtv(''); setInterestRate(''); setAmortizationTerm(''); setInterestOnlyPeriod('')
       setUnitCount(''); setClosingCosts(''); setHoldPeriod(''); setRentGrowth(''); setExpenseGrowth('')
       setExitCapRate(''); setCostOfSale(''); setTenantGrossSales(''); setTenantBaseRent('')
+      setManagementFeePct(''); setInsurance(''); setPropertyTaxes('')
+      setLandValuePct(''); setCostSegBonusPct(''); setEffectiveTaxRate(''); setDepreciationRecaptureRate('')
+      setRefiLtv(''); setRefiRate(''); setRefiYear('')
       setTab('details')
     }
   }, [property, open])
@@ -1553,6 +1584,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       cost_of_sale: costOfSale !== '' ? Number(costOfSale) : null,
       tenant_gross_sales: tenantGrossSales !== '' ? Number(tenantGrossSales) : null,
       tenant_base_rent: tenantBaseRent !== '' ? Number(tenantBaseRent) : null,
+      management_fee_pct: managementFeePct !== '' ? Number(managementFeePct) : null,
+      insurance: insurance !== '' ? Number(insurance) : null,
+      property_taxes: propertyTaxes !== '' ? Number(propertyTaxes) : null,
+      land_value_pct: landValuePct !== '' ? Number(landValuePct) : null,
+      cost_seg_bonus_pct: costSegBonusPct !== '' ? Number(costSegBonusPct) : null,
+      effective_tax_rate: effectiveTaxRate !== '' ? Number(effectiveTaxRate) : null,
+      depreciation_recapture_rate: depreciationRecaptureRate !== '' ? Number(depreciationRecaptureRate) : null,
+      refi_ltv: refiLtv !== '' ? Number(refiLtv) : null,
+      refi_rate: refiRate !== '' ? Number(refiRate) : null,
+      refi_year: refiYear !== '' ? Number(refiYear) : null,
     })
     setSaving(false)
     setSavedSignal(s => s + 1)
@@ -2088,16 +2129,41 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 </Field>
               </div>
 
-              {/* Electrical */}
+              {/* Operating */}
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Electrical</div>
-                <Field label="Voltage (V)">
-                  <NumericInput placeholder="e.g. 480" value={elecVoltage} onChange={setElecVoltage}
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Operating</div>
+                <Field label="Management Fee (%)">
+                  <NumericInput placeholder="e.g. 8" value={managementFeePct} onChange={setManagementFeePct}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Management Fee ($/yr)">
+                  {(() => {
+                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
+                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
+                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : null
+                    return <input readOnly value={mgmtFee !== null ? '$' + mgmtFee.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                      className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
+                </Field>
+                <Field label="Insurance ($/yr)">
+                  <NumericInput placeholder="e.g. 12000" value={insurance} onChange={setInsurance}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Amperage (A)">
-                  <NumericInput placeholder="e.g. 400" value={elecAmperage} onChange={setElecAmperage}
+                <Field label="Property Taxes ($/yr)">
+                  <NumericInput placeholder="e.g. 18000" value={propertyTaxes} onChange={setPropertyTaxes}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+                <Field label="Adjusted NOI ($/yr)">
+                  {(() => {
+                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
+                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
+                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : 0
+                    const noi = egi !== null && operatingExpenses !== ''
+                      ? egi + Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0) : null
+                    const adjNoi = noi !== null ? noi - mgmtFee - Number(insurance || 0) - Number(propertyTaxes || 0) : null
+                    return <input readOnly value={adjNoi !== null ? '$' + adjNoi.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                      className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
                 </Field>
               </div>
 
@@ -2139,6 +2205,34 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 </Field>
               </div>
 
+              {/* Equity / Returns */}
+              <div className="space-y-3 pt-2">
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Equity / Returns</div>
+                <Field label="Equity ($)">
+                  <input readOnly
+                    value={price !== '' && loanAmount !== ''
+                      ? '$' + (Number(price) + Number(closingCosts || 0) - Number(loanAmount)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                </Field>
+                <Field label="DSCR">
+                  {(() => {
+                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
+                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
+                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : 0
+                    const noi = egi !== null && operatingExpenses !== ''
+                      ? egi + Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0) : null
+                    const adjNoi = noi !== null ? noi - mgmtFee - Number(insurance || 0) - Number(propertyTaxes || 0) : null
+                    let ds = 0
+                    if (loanAmount !== '' && interestRate !== '' && amortizationTerm !== '' && Number(amortizationTerm) > 0) {
+                      const r = Number(interestRate) / 100 / 12, n = Number(amortizationTerm) * 12
+                      ds = r === 0 ? Number(loanAmount) / n * 12 : Number(loanAmount) * r / (1 - Math.pow(1 + r, -n)) * 12
+                    }
+                    const val = adjNoi !== null && ds > 0 ? (adjNoi / ds).toFixed(2) : '—'
+                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
+                </Field>
+              </div>
+
               {/* Debt */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Debt</div>
@@ -2174,6 +2268,167 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 </Field>
               </div>
 
+              {/* Tax & Cost Segregation */}
+              <div className="space-y-3 pt-2">
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Tax &amp; Cost Segregation</div>
+                <Field label="Land Value (%)">
+                  <NumericInput placeholder="e.g. 20" value={landValuePct} onChange={setLandValuePct}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Depreciable Basis ($)">
+                  <input readOnly
+                    value={price !== '' && landValuePct !== ''
+                      ? '$' + (Number(price) * (1 - Number(landValuePct) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                </Field>
+                <Field label="Cost Seg Bonus (%)">
+                  <NumericInput placeholder="e.g. 30" value={costSegBonusPct} onChange={setCostSegBonusPct}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Year 1 Bonus Depreciation ($)">
+                  {(() => {
+                    const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : null
+                    const val = depBasis !== null && costSegBonusPct !== ''
+                      ? '$' + (depBasis * Number(costSegBonusPct) / 100).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
+                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
+                </Field>
+                <Field label="Standard Depreciation / 39-yr ($)">
+                  {(() => {
+                    const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : null
+                    const bonus = costSegBonusPct !== '' ? Number(costSegBonusPct) / 100 : 0
+                    const val = depBasis !== null ? '$' + (depBasis * (1 - bonus) / 39).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
+                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
+                </Field>
+                <Field label="Total Year 1 Depreciation ($)">
+                  {(() => {
+                    const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : null
+                    const bonus = costSegBonusPct !== '' ? Number(costSegBonusPct) / 100 : 0
+                    const totalDepr = depBasis !== null ? depBasis * bonus + depBasis * (1 - bonus) / 39 : null
+                    return <input readOnly value={totalDepr !== null ? '$' + totalDepr.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                      className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
+                </Field>
+                <Field label="Effective Tax Rate (%)">
+                  <NumericInput placeholder="e.g. 37" value={effectiveTaxRate} onChange={setEffectiveTaxRate}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Tax Shield Year 1 ($)">
+                  {(() => {
+                    const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : null
+                    const bonus = costSegBonusPct !== '' ? Number(costSegBonusPct) / 100 : 0
+                    const totalDepr = depBasis !== null ? depBasis * bonus + depBasis * (1 - bonus) / 39 : null
+                    const val = totalDepr !== null && effectiveTaxRate !== ''
+                      ? '$' + (totalDepr * Number(effectiveTaxRate) / 100).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
+                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
+                </Field>
+                <Field label="Depreciation Recapture Rate (%)">
+                  <NumericInput placeholder="e.g. 25" value={depreciationRecaptureRate} onChange={setDepreciationRecaptureRate}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Recapture Tax on Exit ($)">
+                  {(() => {
+                    const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : null
+                    const val = depBasis !== null && depreciationRecaptureRate !== ''
+                      ? '$' + (depBasis * Number(depreciationRecaptureRate) / 100).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
+                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
+                </Field>
+              </div>
+
+              {/* Exit / Reversion */}
+              <div className="space-y-3 pt-2">
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Exit / Reversion</div>
+                <Field label="Refi LTV (%)">
+                  <NumericInput placeholder="e.g. 70" value={refiLtv} onChange={setRefiLtv}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Refi Interest Rate (%)">
+                  <NumericInput placeholder="e.g. 6.0" value={refiRate} onChange={setRefiRate}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Refi Year">
+                  <NumericInput placeholder="e.g. 3" value={refiYear} onChange={setRefiYear}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+                <Field label="Exit Value ($)">
+                  {(() => {
+                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
+                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
+                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : 0
+                    const noi = egi !== null && operatingExpenses !== ''
+                      ? egi + Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0) : null
+                    const adjNoi = noi !== null ? noi - mgmtFee - Number(insurance || 0) - Number(propertyTaxes || 0) : null
+                    const exitNoi = adjNoi !== null && rentGrowth !== '' && holdPeriod !== ''
+                      ? adjNoi * Math.pow(1 + Number(rentGrowth) / 100, Number(holdPeriod))
+                      : adjNoi
+                    const val = exitNoi !== null && exitCapRate !== '' && Number(exitCapRate) > 0
+                      ? '$' + (exitNoi / (Number(exitCapRate) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
+                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
+                </Field>
+                <Field label="Net Sale Proceeds ($)">
+                  {(() => {
+                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
+                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
+                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : 0
+                    const noi = egi !== null && operatingExpenses !== ''
+                      ? egi + Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0) : null
+                    const adjNoi = noi !== null ? noi - mgmtFee - Number(insurance || 0) - Number(propertyTaxes || 0) : null
+                    const exitNoi = adjNoi !== null && rentGrowth !== '' && holdPeriod !== ''
+                      ? adjNoi * Math.pow(1 + Number(rentGrowth) / 100, Number(holdPeriod))
+                      : adjNoi
+                    const exitVal = exitNoi !== null && exitCapRate !== '' && Number(exitCapRate) > 0
+                      ? exitNoi / (Number(exitCapRate) / 100) : null
+                    const val = exitVal !== null && costOfSale !== ''
+                      ? '$' + (exitVal * (1 - Number(costOfSale) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
+                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
+                </Field>
+                <Field label="Loan Balance at Exit ($)">
+                  {(() => {
+                    if (loanAmount === '' || interestRate === '' || amortizationTerm === '' || holdPeriod === '' || Number(amortizationTerm) <= 0) return <input readOnly value="—" className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    const r = Number(interestRate) / 100 / 12
+                    const n = Number(amortizationTerm) * 12
+                    const hp = Number(holdPeriod) * 12
+                    const bal = r === 0
+                      ? Number(loanAmount) - (Number(loanAmount) / n * hp)
+                      : Number(loanAmount) * (Math.pow(1 + r, n) - Math.pow(1 + r, hp)) / (Math.pow(1 + r, n) - 1)
+                    return <input readOnly value={'$' + Math.max(0, bal).toLocaleString(undefined, { maximumFractionDigits: 0 })}
+                      className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
+                </Field>
+                <Field label="Net Equity on Exit ($)">
+                  {(() => {
+                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
+                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
+                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : 0
+                    const noi = egi !== null && operatingExpenses !== ''
+                      ? egi + Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0) : null
+                    const adjNoi = noi !== null ? noi - mgmtFee - Number(insurance || 0) - Number(propertyTaxes || 0) : null
+                    const exitNoi = adjNoi !== null && rentGrowth !== '' && holdPeriod !== ''
+                      ? adjNoi * Math.pow(1 + Number(rentGrowth) / 100, Number(holdPeriod))
+                      : adjNoi
+                    const exitVal = exitNoi !== null && exitCapRate !== '' && Number(exitCapRate) > 0
+                      ? exitNoi / (Number(exitCapRate) / 100) : null
+                    const netProceeds = exitVal !== null && costOfSale !== '' ? exitVal * (1 - Number(costOfSale) / 100) : null
+                    let bal = 0
+                    if (loanAmount !== '' && interestRate !== '' && amortizationTerm !== '' && holdPeriod !== '' && Number(amortizationTerm) > 0) {
+                      const r = Number(interestRate) / 100 / 12, n = Number(amortizationTerm) * 12, hp = Number(holdPeriod) * 12
+                      bal = r === 0 ? Number(loanAmount) - (Number(loanAmount) / n * hp)
+                        : Number(loanAmount) * (Math.pow(1 + r, n) - Math.pow(1 + r, hp)) / (Math.pow(1 + r, n) - 1)
+                      bal = Math.max(0, bal)
+                    }
+                    const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : 0
+                    const recapture = depreciationRecaptureRate !== '' ? depBasis * Number(depreciationRecaptureRate) / 100 : 0
+                    const val = netProceeds !== null ? '$' + (netProceeds - bal - recapture).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
+                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
+                </Field>
+              </div>
+
               {/* Deal */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Deal</div>
@@ -2203,6 +2458,19 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 </Field>
                 <Field label="Cost of Sale (%)">
                   <NumericInput placeholder="e.g. 2" value={costOfSale} onChange={setCostOfSale}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+              </div>
+
+              {/* Electrical */}
+              <div className="space-y-3 pt-2">
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Electrical</div>
+                <Field label="Voltage (V)">
+                  <NumericInput placeholder="e.g. 480" value={elecVoltage} onChange={setElecVoltage}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+                <Field label="Amperage (A)">
+                  <NumericInput placeholder="e.g. 400" value={elecAmperage} onChange={setElecAmperage}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
               </div>
