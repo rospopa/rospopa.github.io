@@ -1445,6 +1445,15 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loginPreview, setLoginPreview] = useState(null) // {first_name, last_name, profile_photo} | null
 
+  // Show/hide reCAPTCHA badge based on whether user is identified
+  useEffect(() => {
+    if (currentUser || loginPreview) {
+      document.body.classList.remove('recaptcha-hidden')
+    } else {
+      document.body.classList.add('recaptcha-hidden')
+    }
+  }, [currentUser, loginPreview])
+
   function navigateTo(p) { setPage(p); localStorage.setItem('rep_page', p) }
 
   // Restore session on page load/refresh
@@ -1468,7 +1477,19 @@ export default function App() {
     try {
       const res = await fetch('/api/lookup-user', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: emailVal }) })
       const data = await res.json()
-      setLoginPreview(data.found ? data : null)
+      if (data.found) {
+        setLoginPreview(data)
+        // Lazy-load reCAPTCHA only once user is recognised
+        if (!window.grecaptcha && !document.getElementById('recaptcha-script')) {
+          const s = document.createElement('script')
+          s.id = 'recaptcha-script'
+          s.src = 'https://www.google.com/recaptcha/enterprise.js?render=6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv'
+          s.async = true
+          document.head.appendChild(s)
+        }
+      } else {
+        setLoginPreview(null)
+      }
     } catch { setLoginPreview(null) }
   }
 
