@@ -653,6 +653,34 @@ app.get('/api/contacts', async (req, res) => {
   }
 });
 
+app.get('/api/contacts/:id', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const userId = Number(req.params.id);
+  if (!Number.isFinite(userId)) return res.status(400).json({ error: 'invalid id' });
+  try {
+    const userResult = await pool.query(
+      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at FROM users WHERE id = $1`,
+      [userId]
+    );
+    if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const user = userResult.rows[0];
+
+    // Assigned properties
+    const propsResult = await pool.query(
+      `SELECT p.id, p.pin, p.address, p.county, p.price, p.square_feet, p.status, p.created_at, pa.assigned_at
+       FROM properties p
+       JOIN property_assignments pa ON p.id = pa.property_id
+       WHERE pa.user_id = $1
+       ORDER BY pa.assigned_at DESC`,
+      [userId]
+    );
+
+    res.json({ user, properties: propsResult.rows });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
 app.get('/api/contacts/:id/notes', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const userId = Number(req.params.id);

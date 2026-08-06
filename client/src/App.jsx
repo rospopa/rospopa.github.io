@@ -2753,11 +2753,214 @@ function ContactNotesDrawer({ contact, onClose, onRefreshContacts }) {
   )
 }
 
+function ContactDetailPage({ contactId, onBack, onOpenNotes }) {
+  const [data, setData] = useState(null)
+  const [notes, setNotes] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [notesLoading, setNotesLoading] = useState(true)
+  const [noteText, setNoteText] = useState('')
+  const [files, setFiles] = useState([])
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const fileInputRef = useRef(null)
+
+  useEffect(() => {
+    setLoading(true)
+    apiFetch(`/api/contacts/${contactId}`)
+      .then(d => { setData(d); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [contactId])
+
+  const loadNotes = () => {
+    setNotesLoading(true)
+    apiFetch(`/api/contacts/${contactId}/notes`)
+      .then(d => { setNotes(d); setNotesLoading(false) })
+      .catch(() => setNotesLoading(false))
+  }
+  useEffect(loadNotes, [contactId])
+
+  const handleFileAdd = (e) => {
+    setFiles(prev => [...prev, ...Array.from(e.target.files)])
+    e.target.value = ''
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!noteText.trim() && files.length === 0) { setError('Enter a note or attach a file.'); return }
+    setSaving(true); setError('')
+    try {
+      const attachments = await Promise.all(files.map(f => new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve({ filename: f.name, file_type: f.type, file_data: reader.result.split(',')[1], file_size: f.size })
+        reader.onerror = reject
+        reader.readAsDataURL(f)
+      })))
+      await apiFetch(`/api/contacts/${contactId}/notes`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ note_text: noteText.trim() || null, attachments })
+      })
+      setNoteText(''); setFiles([])
+      loadNotes()
+    } catch (e) { setError(e.message || 'Failed to save') }
+    setSaving(false)
+  }
+
+  const handleDelete = async (noteId) => {
+    if (!confirm('Delete this note?')) return
+    try {
+      await apiFetch(`/api/contacts/${contactId}/notes/${noteId}`, { method: 'DELETE' })
+      loadNotes()
+    } catch { setError('Failed to delete note') }
+  }
+
+  if (loading) return <div className="flex justify-center py-20 text-base-content/40">Loading…</div>
+  if (!data) return <div className="text-center py-20 text-error">Contact not found</div>
+
+  const { user, properties } = data
+  const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email
+  const initials = [user.first_name, user.last_name].filter(Boolean).map(s => s[0]).join('').toUpperCase() || user.email[0].toUpperCase()
+
+  return (
+    <div className="space-y-6">
+      {/* Back button */}
+      <button className="btn btn-ghost btn-sm gap-2" onClick={onBack}>
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+        Back to Contacts
+      </button>
+
+      {/* Profile header */}
+      <div className="card bg-base-100 border border-base-200">
+        <div className="card-body p-5 sm:p-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+            {user.profile_photo
+              ? <img src={user.profile_photo} alt={fullName} className="w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover flex-shrink-0 border-2 border-base-300" />
+              : <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-3xl flex-shrink-0">{initials}</div>
+            }
+            <div className="flex-1 min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h2 className="text-2xl font-bold">{fullName}</h2>
+                <span className={`badge ${user.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{user.role}</span>
+              </div>
+              <EmailLink email={user.email} />
+              {user.phone_number && <div className="text-sm"><PhoneLink phone={user.phone_number} /></div>}
+              {user.organization && <div className="text-sm text-base-content/60">{user.organization}</div>}
+            </div>
+            <div className="text-xs text-base-content/40 text-right flex-shrink-0 space-y-0.5">
+              <div>Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>
+              <div>Last updated {new Date(user.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+            </div>
+          </div>
+          {user.buy_box && (
+            <div className="mt-4 pt-4 border-t border-base-200">
+              <p className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-1">Buy Box</p>
+              <p className="text-sm text-base-content/70 whitespace-pre-wrap">{user.buy_box}</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Two-column: Properties + Notes */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        {/* Properties */}
+        <div className="card bg-base-100 border border-base-200">
+          <div className="card-body p-5">
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50 mb-3">
+              Assigned Properties <span className="badge badge-ghost badge-sm ml-1">{properties.length}</span>
+            </h3>
+            {properties.length === 0 && (
+              <p className="text-sm text-base-content/40 text-center py-6">No properties assigned</p>
+            )}
+            <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
+              {properties.map(p => (
+                <div key={p.id} className="flex items-start justify-between gap-3 p-3 rounded-lg bg-base-200/60 hover:bg-base-200 transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <div className="font-medium text-sm truncate">{p.address}</div>
+                    <div className="text-xs text-base-content/50 mt-0.5">{p.county} · PIN: {p.pin}</div>
+                    {p.price && <div className="text-xs text-base-content/60 mt-0.5">${Number(p.price).toLocaleString()}</div>}
+                  </div>
+                  <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                    <span className="badge badge-xs badge-outline">{p.status}</span>
+                    <span className="text-[10px] text-base-content/40">
+                      Assigned {new Date(p.assigned_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Notes */}
+        <div className="card bg-base-100 border border-base-200 flex flex-col">
+          <div className="card-body p-5 flex flex-col gap-3 min-h-0">
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">
+              Notes <span className="badge badge-ghost badge-sm ml-1">{notes.length}</span>
+            </h3>
+
+            {/* Notes thread */}
+            <div className="flex-1 overflow-y-auto space-y-2 max-h-[280px] pr-1">
+              {notesLoading && <div className="text-center py-4 text-base-content/40 text-sm">Loading…</div>}
+              {!notesLoading && notes.length === 0 && <div className="text-center py-4 text-base-content/40 text-sm">No notes yet</div>}
+              {notes.map(note => (
+                <div key={note.id} className="bg-base-200 rounded-lg p-3 space-y-1.5">
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="text-xs text-base-content/50">{new Date(note.created_at).toLocaleString()}</span>
+                    <button className="btn btn-xs btn-ghost text-error" onClick={() => handleDelete(note.id)}>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                  </div>
+                  {note.note_text && <p className="text-sm whitespace-pre-wrap">{note.note_text}</p>}
+                  {note.attachments?.length > 0 && (
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {note.attachments.map(att => (
+                       <button key={att.id} className="badge badge-outline gap-1 hover:badge-primary text-xs"
+                         onClick={() => downloadAttachment(contactId, note.id, att.id, att.filename)}>
+                         <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                         <span className="max-w-[110px] truncate">{att.filename}</span>
+                       </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {/* Add note form */}
+            <form onSubmit={handleSubmit} className="space-y-2 pt-3 border-t border-base-200">
+              {error && <div className="text-error text-xs">{error}</div>}
+              <textarea className="textarea textarea-bordered w-full text-sm" rows={3} placeholder="Add a note…"
+                value={noteText} onChange={e => setNoteText(e.target.value)} />
+              <div className="flex items-center gap-2 flex-wrap">
+                <button type="button" className="btn btn-sm btn-ghost border border-base-300" onClick={() => fileInputRef.current?.click()}>
+                  📎 Attach
+                </button>
+                <input ref={fileInputRef} type="file" className="hidden" multiple
+                  accept=".pdf,.xlsx,.xls,.csv,.docx,.doc,.mp3,.mp4,.mov,.png,.jpg,.jpeg" onChange={handleFileAdd} />
+                {files.map((f, i) => (
+                  <span key={i} className="badge badge-outline gap-1 text-xs">
+                    <span className="max-w-[90px] truncate">{f.name}</span>
+                    <button type="button" className="text-error" onClick={() => setFiles(p => p.filter((_,j) => j !== i))}>✕</button>
+                  </span>
+                ))}
+              </div>
+              <button type="submit" className="btn btn-primary btn-sm w-full" disabled={saving}>
+                {saving ? 'Saving…' : 'Save Note'}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ContactsPage() {
   const [contacts, setContacts] = useState([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState('grid')
-  const [selectedContact, setSelectedContact] = useState(null)
+  const [selectedContact, setSelectedContact] = useState(null) // notes drawer
+  const [detailId, setDetailId] = useState(null)              // full-page detail
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
@@ -2768,6 +2971,18 @@ function ContactsPage() {
   const openNotes = (c) => setSelectedContact(c)
   const closeNotes = () => setSelectedContact(null)
   const refreshContacts = () => setRefreshKey(k => k + 1)
+  const openDetail = (c) => setDetailId(c.id)
+  const closeDetail = () => setDetailId(null)
+
+  // If a contact detail is open, render full-page view instead
+  if (detailId) {
+    return (
+      <ContactDetailPage
+        contactId={detailId}
+        onBack={closeDetail}
+      />
+    )
+  }
 
   const adminContacts = contacts.filter(c => c.role === 'admin')
   const userContacts = contacts.filter(c => c.role === 'user')
@@ -2776,7 +2991,10 @@ function ContactsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-2xl font-bold">Contacts</h2>
+        <div>
+          <h2 className="text-2xl font-bold">Contacts</h2>
+          <p className="text-xs text-base-content/40 mt-0.5">Double-click any contact to open full profile</p>
+        </div>
         <div className="flex gap-1">
           {['grid','list','kanban'].map(v => (
             <button key={v} className={`btn btn-sm ${view === v ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setView(v)}>
@@ -2790,7 +3008,11 @@ function ContactsPage() {
 
       {!loading && view === 'grid' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {contacts.map(c => <ContactCard key={c.id} contact={c} onViewNotes={openNotes} />)}
+          {contacts.map(c => (
+            <div key={c.id} onDoubleClick={() => openDetail(c)} className="cursor-pointer select-none">
+              <ContactCard contact={c} onViewNotes={openNotes} />
+            </div>
+          ))}
         </div>
       )}
 
@@ -2814,11 +3036,11 @@ function ContactsPage() {
               {contacts.map(c => {
                 const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
                 return (
-                  <tr key={c.id} className="hover">
+                  <tr key={c.id} className="hover cursor-pointer" onDoubleClick={() => openDetail(c)}>
                     <td><ContactAvatar contact={c} size="sm" /></td>
                     <td>
                       <div className="font-medium whitespace-nowrap">{fullName}</div>
-                      <div className="text-xs md:hidden mt-0.5"><EmailLink email={c.email} /></div>
+                      <div className="md:hidden mt-0.5"><EmailLink email={c.email} /></div>
                     </td>
                     <td className="hidden md:table-cell text-sm"><EmailLink email={c.email} /></td>
                     <td><span className={`badge badge-sm ${c.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{c.role}</span></td>
@@ -2828,7 +3050,7 @@ function ContactsPage() {
                       <span className="line-clamp-2 text-base-content/60">{c.buy_box || <span className="text-base-content/30">—</span>}</span>
                     </td>
                     <td className="text-center"><span className="badge badge-ghost badge-sm">{c.note_count}</span></td>
-                    <td className="text-center"><button className="btn btn-xs btn-outline" onClick={() => openNotes(c)}>Notes</button></td>
+                    <td className="text-center"><button className="btn btn-xs btn-outline" onClick={e => { e.stopPropagation(); openNotes(c) }}>Notes</button></td>
                   </tr>
                 )
               })}
@@ -2850,29 +3072,26 @@ function ContactsPage() {
                 {items.map(c => {
                   const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
                   return (
-                    <div key={c.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                    <div key={c.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow cursor-pointer select-none"
+                      onDoubleClick={() => openDetail(c)}>
                       <div className="card-body p-3 gap-2">
-                        <div className="flex items-center gap-2">
-                          <ContactAvatar contact={c} size="sm" />
-                          <div className="flex-1 min-w-0">
-                            <div className="font-medium text-sm truncate">{fullName}</div>
-                            <div className="text-xs text-base-content/50 truncate">{c.email}</div>
-                          </div>
-                        </div>
-                        {c.organization && (
-                          <div className="text-xs text-base-content/60 truncate flex items-center gap-1">
-                            <span className="text-base-content/60 truncate">{c.organization}</span>
-                          </div>
-                        )}
-                        {c.phone_number && (
-                          <div className="text-xs flex items-center gap-1">
-                            <PhoneLink phone={c.phone_number} />
-                          </div>
-                        )}
-                        <div className="flex items-center justify-between pt-1 border-t border-base-200">
-                          <span className="badge badge-ghost badge-xs">{c.note_count} {c.note_count === 1 ? 'note' : 'notes'}</span>
-                          <button className="btn btn-xs btn-outline" onClick={() => openNotes(c)}>Notes</button>
-                        </div>
+                       <div className="flex items-center gap-2">
+                         <ContactAvatar contact={c} size="sm" />
+                         <div className="flex-1 min-w-0">
+                           <div className="font-medium text-sm truncate">{fullName}</div>
+                           <div className="text-xs text-base-content/50 truncate">{c.email}</div>
+                         </div>
+                       </div>
+                       {c.organization && (
+                         <div className="text-xs text-base-content/60 truncate">{c.organization}</div>
+                       )}
+                       {c.phone_number && (
+                         <div className="text-xs"><PhoneLink phone={c.phone_number} /></div>
+                       )}
+                       <div className="flex items-center justify-between pt-1 border-t border-base-200">
+                         <span className="badge badge-ghost badge-xs">{c.note_count} {c.note_count === 1 ? 'note' : 'notes'}</span>
+                         <button className="btn btn-xs btn-outline" onClick={e => { e.stopPropagation(); openNotes(c) }}>Notes</button>
+                       </div>
                       </div>
                     </div>
                   )
