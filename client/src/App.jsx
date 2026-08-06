@@ -992,6 +992,7 @@ function PropertiesPage({ user }) {
   const [showPropertyModal, setShowPropertyModal] = useState(false)
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list' | 'kanban'
+  const isAdmin = user.role === 'admin'
 
   async function fetchProperties() {
     setLoading(true)
@@ -1027,6 +1028,7 @@ function PropertiesPage({ user }) {
     setShowPropertyModal(true)
   }
 
+  const effectiveView = isAdmin ? viewMode : 'grid'
   const fmt = (n) => n != null ? `$${Number(n).toLocaleString()}` : null
   const kanbanColumns = [
     { label: 'New', color: 'badge-neutral', filter: p => !p.price && !p.year_built },
@@ -1046,30 +1048,32 @@ function PropertiesPage({ user }) {
         )}
         {user.role !== 'admin' && <div />}
 
-        {/* View toggle */}
+        {/* View toggle — admin only */}
+        {isAdmin && (
         <div className="join">
           <button
-            className={`join-item btn btn-sm ${viewMode === 'list' ? 'btn-neutral' : 'btn-outline'}`}
+            className={`join-item btn btn-sm ${effectiveView === 'list' ? 'btn-neutral' : 'btn-outline'}`}
             title="List view" onClick={() => setViewMode('list')}>
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
             </svg>
           </button>
           <button
-            className={`join-item btn btn-sm ${viewMode === 'grid' ? 'btn-neutral' : 'btn-outline'}`}
+            className={`join-item btn btn-sm ${effectiveView === 'grid' ? 'btn-neutral' : 'btn-outline'}`}
             title="Grid view" onClick={() => setViewMode('grid')}>
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5h6v6H4zm10 0h6v6h-6zM4 15h6v6H4zm10 0h6v6h-6z" />
             </svg>
           </button>
           <button
-            className={`join-item btn btn-sm ${viewMode === 'kanban' ? 'btn-neutral' : 'btn-outline'}`}
+            className={`join-item btn btn-sm ${effectiveView === 'kanban' ? 'btn-neutral' : 'btn-outline'}`}
             title="Kanban view" onClick={() => setViewMode('kanban')}>
             <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3H5a2 2 0 00-2 2v14a2 2 0 002 2h4M15 3h4a2 2 0 012 2v8a2 2 0 01-2 2h-4M9 3v18" />
             </svg>
           </button>
         </div>
+        )}
       </div>
 
       <PropertyDetailModal
@@ -1091,7 +1095,7 @@ function PropertiesPage({ user }) {
       )}
 
       {/* ── GRID VIEW ── */}
-      {viewMode === 'grid' && !loading && properties.length > 0 && (
+      {effectiveView === 'grid' && !loading && properties.length > 0 && (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
           {properties.map((prop, i) => (
             <div key={i}
@@ -1125,7 +1129,7 @@ function PropertiesPage({ user }) {
       )}
 
       {/* ── LIST VIEW ── */}
-      {viewMode === 'list' && !loading && properties.length > 0 && (
+      {effectiveView === 'list' && !loading && properties.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-base-300">
           <table className="table table-zebra w-full">
             <thead>
@@ -1168,7 +1172,7 @@ function PropertiesPage({ user }) {
       )}
 
       {/* ── KANBAN VIEW ── */}
-      {viewMode === 'kanban' && !loading && properties.length > 0 && (
+      {effectiveView === 'kanban' && !loading && properties.length > 0 && (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {kanbanColumns.map(col => {
             const colProps = properties.filter(col.filter)
