@@ -2795,7 +2795,7 @@ function BuyBoxEditor({ userId, initialValue }) {
   )
 }
 
-function ContactDetailPage({ contactId, onBack }) {
+function ContactDetailPage({ contactId, onBack, splitMode = false }) {
   const [data, setData] = useState(null)
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -2864,11 +2864,13 @@ function ContactDetailPage({ contactId, onBack }) {
 
   return (
     <div className="space-y-6">
-      {/* Back button */}
-      <button className="btn btn-ghost btn-sm gap-2" onClick={onBack}>
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
-        Back to Contacts
-      </button>
+      {/* Back button — hidden in split mode */}
+      {!splitMode && (
+        <button className="btn btn-ghost btn-sm gap-2" onClick={onBack}>
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7"/></svg>
+          Back to Contacts
+        </button>
+      )}
 
       {/* Profile header */}
       <div className="card bg-base-100 border border-base-200">
@@ -3009,6 +3011,7 @@ function ContactsPage() {
   const [view, setView] = useState('grid')
   const [selectedContact, setSelectedContact] = useState(null) // notes drawer
   const [detailId, setDetailId] = useState(null)              // full-page detail
+  const [splitDetailId, setSplitDetailId] = useState(null)    // split view right panel
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
@@ -3041,12 +3044,19 @@ function ContactsPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold">Contacts</h2>
-          <p className="text-xs text-base-content/40 mt-0.5">Double-click any contact to open full profile</p>
+          <p className="text-xs text-base-content/40 mt-0.5">
+            {view === 'split' ? 'Click a contact to view details' : 'Double-click any contact to open full profile'}
+          </p>
         </div>
         <div className="flex gap-1">
-          {['grid','list','kanban'].map(v => (
-            <button key={v} className={`btn btn-sm ${view === v ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setView(v)}>
-              {v.charAt(0).toUpperCase() + v.slice(1)}
+          {[
+            { id: 'grid',   label: 'Grid' },
+            { id: 'list',   label: 'List' },
+            { id: 'kanban', label: 'Kanban' },
+            { id: 'split',  label: '⬛ Split' },
+          ].map(({ id, label }) => (
+            <button key={id} className={`btn btn-sm ${view === id ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setView(id)}>
+              {label}
             </button>
           ))}
         </div>
@@ -3151,6 +3161,63 @@ function ContactsPage() {
               </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {!loading && view === 'split' && (
+        <div className="flex gap-0 border border-base-200 rounded-box overflow-hidden" style={{ height: 'calc(100vh - 180px)', minHeight: '500px' }}>
+          {/* Left: contact list */}
+          <div className="w-72 flex-shrink-0 border-r border-base-200 flex flex-col bg-base-100 overflow-hidden">
+            <div className="px-3 py-2 border-b border-base-200 bg-base-200/40">
+              <span className="text-xs font-semibold uppercase tracking-widest text-base-content/50">{contacts.length} Contacts</span>
+            </div>
+            <div className="flex-1 overflow-y-auto">
+              {contacts.map(c => {
+                const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
+                const isActive = splitDetailId === c.id
+                return (
+                  <button
+                    key={c.id}
+                    onClick={() => setSplitDetailId(c.id)}
+                    className={`w-full text-left px-3 py-2.5 flex items-center gap-2.5 border-b border-base-200/60 transition-colors
+                      ${isActive ? 'bg-primary/10 border-l-2 border-l-primary' : 'hover:bg-base-200/60'}`}
+                  >
+                    <ContactAvatar contact={c} size="sm" />
+                    <div className="flex-1 min-w-0">
+                      <div className={`text-sm font-medium truncate ${isActive ? 'text-primary' : ''}`}>{fullName}</div>
+                      <div className="text-xs text-base-content/50 truncate">{c.organization || c.email}</div>
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        <span className="text-[10px] text-base-content/40">{c.note_count} {c.note_count === 1 ? 'note' : 'notes'}</span>
+                        {c.last_note_at && <span className="text-[10px] text-base-content/30">· {fmtLastNote(c.last_note_at)}</span>}
+                      </div>
+                    </div>
+                    <span className={`badge badge-xs flex-shrink-0 ${c.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{c.role}</span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+
+          {/* Right: detail panel */}
+          <div className="flex-1 overflow-y-auto bg-base-50">
+            {splitDetailId ? (
+              <div className="p-4 md:p-6">
+                <ContactDetailPage
+                  key={splitDetailId}
+                  contactId={splitDetailId}
+                  onBack={() => setSplitDetailId(null)}
+                  splitMode
+                />
+              </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center h-full text-base-content/30 gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                </svg>
+                <p className="text-sm">Select a contact to view details</p>
+              </div>
+            )}
+          </div>
         </div>
       )}
 
