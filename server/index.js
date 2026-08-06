@@ -310,10 +310,9 @@ app.post('/api/forgot-password', async (req, res) => {
   email = sanitizeEmail(email);
   if (!email || !isValidEmail(email)) return res.status(400).json({ error: 'valid email required' });
 
-  // Always respond success to prevent user enumeration
   try {
     const userResult = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
-    if (userResult.rows.length === 0) return res.json({ ok: true });
+    if (userResult.rows.length === 0) return res.status(404).json({ error: 'No account found with that email address.' });
 
     // Invalidate old codes for this email
     await pool.query('UPDATE password_reset_otps SET used = TRUE WHERE email = $1', [email]);

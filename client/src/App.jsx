@@ -2001,12 +2001,13 @@ function ForgotPasswordModal({ onClose, prefillEmail }) {
     e.preventDefault()
     setMsg(''); setLoading(true)
     try {
-      await fetch('/api/forgot-password', {
+      const res = await fetch('/api/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
       })
-      // Always advance to code step (prevents user enumeration)
+      const data = await res.json()
+      if (!res.ok) return setMsg(data.error || 'Failed to send code.')
       setStep('code')
     } catch { setMsg('Network error. Please try again.') }
     finally { setLoading(false) }
