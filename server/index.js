@@ -89,6 +89,7 @@ async function initializeSchema() {
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS landmarks JSONB DEFAULT '[]'`);
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS water_sources JSONB DEFAULT '[]'`);
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS military_bases JSONB DEFAULT '[]'`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'New'`);
 
   await pool.query(`CREATE TABLE IF NOT EXISTS property_assignments (
     id SERIAL PRIMARY KEY,
@@ -847,7 +848,7 @@ app.get('/api/properties', async (req, res) => {
       `SELECT id, pin, address, county, price, square_feet, lot_size, year_built,
               on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
               major_interstates, household_income_min, household_income_max, population_density,
-              logistics_hubs, landmarks, water_sources, military_bases, created_by, created_at, updated_at
+              logistics_hubs, landmarks, water_sources, military_bases, status, created_by, created_at, updated_at
        FROM properties ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
     );
@@ -867,7 +868,7 @@ app.get('/api/properties/:id', async (req, res) => {
       `SELECT id, pin, address, county, price, square_feet, lot_size, year_built,
               on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
               major_interstates, household_income_min, household_income_max, population_density,
-              logistics_hubs, landmarks, water_sources, military_bases, created_by, created_at, updated_at
+              logistics_hubs, landmarks, water_sources, military_bases, status, created_by, created_at, updated_at
        FROM properties WHERE id = $1`, [propId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
     res.json(result.rows[0]);
@@ -913,7 +914,8 @@ app.put('/api/properties/:id', async (req, res) => {
       household_income_min: household_income_min || null, household_income_max: household_income_max || null,
       population_density: population_density || null,
       logistics_hubs: JSON.stringify(logistics_hubs || []), landmarks: JSON.stringify(landmarks || []),
-      water_sources: JSON.stringify(water_sources || []), military_bases: JSON.stringify(military_bases || [])
+      water_sources: JSON.stringify(water_sources || []), military_bases: JSON.stringify(military_bases || []),
+      status: ['New','Under Review','Active','Other'].includes(status) ? status : 'New'
     };
 
     // Build field-level diff — normalize types for accurate comparison
@@ -948,9 +950,9 @@ app.put('/api/properties/:id', async (req, res) => {
         direct_water_access=$11, next_to_public_land=$12,
         major_interstates=$13, household_income_min=$14, household_income_max=$15,
         population_density=$16, logistics_hubs=$17, landmarks=$18,
-        water_sources=$19, military_bases=$20,
+        water_sources=$19, military_bases=$20, status=$21,
         updated_at=CURRENT_TIMESTAMP
-       WHERE id=$21`,
+       WHERE id=$22`,
       [newVals.pin, newVals.address, newVals.county,
        newVals.price, newVals.square_feet, newVals.lot_size, newVals.year_built,
        newVals.on_major_road, newVals.traffic_vpd, newVals.on_corner_lot,
@@ -959,7 +961,7 @@ app.put('/api/properties/:id', async (req, res) => {
        newVals.household_income_min, newVals.household_income_max,
        newVals.population_density,
        newVals.logistics_hubs, newVals.landmarks,
-       newVals.water_sources, newVals.military_bases,
+       newVals.water_sources, newVals.military_bases, newVals.status,
        propId]
     );
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
@@ -981,6 +983,28 @@ app.delete('/api/properties/:id', async (req, res) => {
     const result = await pool.query('DELETE FROM properties WHERE id = $1', [propId]);
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
     await logAudit(req.session.user.id, req.session.user.email, 'delete_property', { property_id: propId }, null, null, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+// Quick status update — used by Kanban move buttons
+app.patch('/api/properties/:id/status', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
+  const { status } = req.body || {};
+  const valid = ['New', 'Under Review', 'Active', 'Other'];
+  if (!valid.includes(status)) return res.status(400).json({ error: 'invalid status' });
+  try {
+    const oldResult = await pool.query('SELECT status, address FROM properties WHERE id=$1', [propId]);
+    if (oldResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const { status: oldStatus, address } = oldResult.rows[0];
+    await pool.query('UPDATE properties SET status=$1, updated_at=CURRENT_TIMESTAMP WHERE id=$2', [status, propId]);
+    await logAudit(req.session.user.id, req.session.user.email, 'edit_property',
+      { property_id: propId, address, changed_fields: ['status'], changes: { status: { from: oldStatus, to: status } } },
+      null, null, clientIp(req));
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });

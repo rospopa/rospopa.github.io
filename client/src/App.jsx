@@ -874,6 +874,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [incomeMin, setIncomeMin] = useState('')
   const [incomeMax, setIncomeMax] = useState('')
   const [popDensity, setPopDensity] = useState('')
+  const [propStatus, setPropStatus] = useState('New')
   const [saving, setSaving] = useState(false)
   const [savedSignal, setSavedSignal] = useState(0)
   const [media, setMedia] = useState([])
@@ -910,6 +911,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     setIncomeMin(p.household_income_min ?? '')
     setIncomeMax(p.household_income_max ?? '')
     setPopDensity(p.population_density ?? '')
+    setPropStatus(p.status || 'New')
   }
 
   useEffect(() => {
@@ -921,7 +923,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       setYearBuilt(''); setOnMajorRoad(false); setTrafficVpd(''); setOnCornerLot(false)
       setWaterAccess(false); setNextToPublicLand(false); setInterstates([])
       setLogisticsHubs([]); setLandmarksList([]); setWaterSources([]); setMilitaryBases([])
-      setIncomeMin(''); setIncomeMax(''); setPopDensity('')
+      setIncomeMin(''); setIncomeMax(''); setPopDensity(''); setPropStatus('New')
       setTab('details')
     }
   }, [property, open])
@@ -1010,6 +1012,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       household_income_min: incomeMin !== '' ? Number(incomeMin) : null,
       household_income_max: incomeMax !== '' ? Number(incomeMax) : null,
       population_density: popDensity !== '' ? Number(popDensity) : null,
+      status: propStatus,
     })
     setSaving(false)
     setSavedSignal(s => s + 1)
@@ -1150,6 +1153,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
             <Field label="Address" required>
               <input type="text" placeholder="123 Main St, Chicago, IL" value={address}
                 onChange={e => setAddress(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+            </Field>
+
+            {/* Status */}
+            <Field label="Status">
+              <select value={propStatus} onChange={e => setPropStatus(e.target.value)}
+                className="select select-bordered w-full" disabled={!isAdmin}>
+                {['New','Under Review','Active','Other'].map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </select>
             </Field>
 
             {/* Financials */}
@@ -1678,10 +1691,10 @@ function PropertiesPage({ user }) {
   const effectiveView = isAdmin ? viewMode : 'grid'
   const fmt = (n) => n != null ? `$${Number(n).toLocaleString()}` : null
   const kanbanColumns = [
-    { label: 'New', color: 'badge-neutral', filter: p => !p.price && !p.year_built },
-    { label: 'Under Review', color: 'badge-info', filter: p => p.price && !p.year_built },
-    { label: 'Active', color: 'badge-success', filter: p => p.price && p.year_built },
-    { label: 'Other', color: 'badge-warning', filter: p => !p.price && p.year_built },
+    { label: 'New',          color: 'badge-neutral', status: 'New' },
+    { label: 'Under Review', color: 'badge-info',    status: 'Under Review' },
+    { label: 'Active',       color: 'badge-success', status: 'Active' },
+    { label: 'Other',        color: 'badge-warning', status: 'Other' },
   ]
 
   return (
@@ -1822,7 +1835,7 @@ function PropertiesPage({ user }) {
       {effectiveView === 'kanban' && !loading && properties.length > 0 && (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {kanbanColumns.map(col => {
-            const colProps = properties.filter(col.filter)
+            const colProps = properties.filter(p => (p.status || 'New') === col.status)
             return (
               <div key={col.label} className="flex-shrink-0 w-72">
                 <div className="flex items-center gap-2 mb-3">
@@ -1844,8 +1857,27 @@ function PropertiesPage({ user }) {
                         <p className="text-xs text-base-content/50">{prop.county} County</p>
                         {prop.price && <p className="text-sm font-semibold">{fmt(prop.price)}</p>}
                         <p className="text-xs text-base-content/40 font-mono">PIN: {prop.pin}</p>
-                        {user.role === 'admin' && (
-                          <div className="flex gap-1 pt-1 border-t border-base-200" onClick={e => e.stopPropagation()}>
+                        {isAdmin && (
+                          <div className="flex gap-1 pt-1 border-t border-base-200 flex-wrap" onClick={e => e.stopPropagation()}>
+                            <select
+                              value={prop.status || 'New'}
+                              onChange={async e => {
+                                const newStatus = e.target.value
+                                try {
+                                  await apiFetch(`/api/properties/${prop.id}/status`, {
+                                    method: 'PATCH',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ status: newStatus })
+                                  })
+                                  fetchProperties()
+                                } catch {}
+                              }}
+                              className="select select-bordered select-xs flex-1 min-w-0"
+                            >
+                              {['New','Under Review','Active','Other'].map(s => (
+                                <option key={s} value={s}>{s}</option>
+                              ))}
+                            </select>
                             <button className="btn btn-xs btn-ghost" onClick={() => openProperty(prop)}>Edit</button>
                             <button className="btn btn-xs btn-ghost text-error" onClick={() => deleteProperty(prop.id)}>Delete</button>
                           </div>
