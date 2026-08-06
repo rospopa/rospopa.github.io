@@ -174,6 +174,53 @@ function NumericInput({ value, onChange, placeholder, className, disabled, allow
   )
 }
 
+/* ─── Save sound ──────────────────────────────────────────────── */
+function playSaveSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)()
+    // Short soft chime: two sine tones fading out
+    const notes = [523.25, 659.25] // C5, E5
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain); gain.connect(ctx.destination)
+      osc.type = 'sine'
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.07)
+      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.07)
+      gain.gain.linearRampToValueAtTime(0.18, ctx.currentTime + i * 0.07 + 0.02)
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.07 + 0.35)
+      osc.start(ctx.currentTime + i * 0.07)
+      osc.stop(ctx.currentTime + i * 0.07 + 0.35)
+    })
+    setTimeout(() => ctx.close(), 800)
+  } catch {}
+}
+
+/** Primary save button that flashes green + plays a chime on success.
+ *  Pass savedSignal (a counter) — increment it after each successful save to trigger the effect. */
+function SaveButton({ onClick, disabled, loading, label = 'Save Changes', loadingLabel = 'Saving…', className = 'w-full', type = 'button', savedSignal = 0 }) {
+  const [saved, setSaved] = useState(false)
+
+  useEffect(() => {
+    if (savedSignal === 0) return
+    setSaved(true)
+    playSaveSound()
+    const t = setTimeout(() => setSaved(false), 1800)
+    return () => clearTimeout(t)
+  }, [savedSignal])
+
+  return (
+    <button
+      type={type}
+      className={`btn ${saved ? 'btn-save-success' : 'btn-primary'} ${className}`}
+      onClick={onClick}
+      disabled={disabled || loading}
+    >
+      {loading ? loadingLabel : saved ? '✓ Saved' : label}
+    </button>
+  )
+}
+
 /* ─── Property Card Carousel ──────────────────────────────────── */
 
 function PropertyCardCarousel({ propertyId, onClick }) {
@@ -828,8 +875,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [incomeMax, setIncomeMax] = useState('')
   const [popDensity, setPopDensity] = useState('')
   const [saving, setSaving] = useState(false)
-
-  // Media state
+  const [savedSignal, setSavedSignal] = useState(0)
   const [media, setMedia] = useState([])
   const [mediaLoading, setMediaLoading] = useState(false)
   const [uploadError, setUploadError] = useState('')
@@ -966,6 +1012,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       population_density: popDensity !== '' ? Number(popDensity) : null,
     })
     setSaving(false)
+    setSavedSignal(s => s + 1)
     if (!property?.id) onClose()
   }
 
@@ -1275,9 +1322,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
 
             {isAdmin && (
               <div className="pt-2">
-                <button className="btn btn-primary w-full" onClick={handleSave} disabled={saving}>
-                  {saving ? 'Saving…' : (property?.id ? 'Save Changes' : 'Create Property')}
-                </button>
+                <SaveButton onClick={handleSave} loading={saving} savedSignal={savedSignal}
+                  label={property?.id ? 'Save Changes' : 'Create Property'} />
               </div>
             )}
           </div>
@@ -1438,6 +1484,7 @@ function EditUserModal({ open, user, onClose, onSave }) {
   const [cropSrc, setCropSrc] = useState(null)
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
+  const [savedSignal, setSavedSignal] = useState(0)
 
   useEffect(() => {
     if (open && user) {
@@ -1477,8 +1524,8 @@ function EditUserModal({ open, user, onClose, onSave }) {
           profile_photo: photo || null
         })
       })
-      onSave()
-      onClose()
+      setSavedSignal(s => s + 1)
+      setTimeout(() => { onSave(); onClose() }, 1200)
     } catch (e) {
       setErr(e.message || 'Save failed')
     } finally {
@@ -1575,9 +1622,7 @@ function EditUserModal({ open, user, onClose, onSave }) {
 
           <div className="flex gap-2 pt-2">
             <button className="btn btn-ghost flex-1" onClick={onClose}>Cancel</button>
-            <button className="btn btn-primary flex-1" onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving…' : 'Save Changes'}
-            </button>
+            <SaveButton onClick={handleSave} loading={saving} savedSignal={savedSignal} className="flex-1" />
           </div>
         </div>
       </div>
@@ -1961,6 +2006,7 @@ function ProfilePage({ currentUser, onUpdate }) {
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
   const [msgType, setMsgType] = useState('success')
+  const [savedSignal, setSavedSignal] = useState(0)
 
   async function handlePhotoChange(e) {
     const file = e.target.files?.[0]
@@ -1984,6 +2030,7 @@ function ProfilePage({ currentUser, onUpdate }) {
         body: JSON.stringify({ first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, profile_photo: photo })
       })
       setMsgType('success'); setMsg('Profile saved successfully')
+      setSavedSignal(s => s + 1)
       onUpdate({ ...currentUser, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, profile_photo: photo })
     } catch (e) { setMsgType('error'); setMsg(e.message || 'Save failed') }
     finally { setLoading(false); setTimeout(() => setMsg(''), 4000) }
@@ -2064,9 +2111,7 @@ function ProfilePage({ currentUser, onUpdate }) {
             <div className={`alert text-sm ${msgType === 'error' ? 'alert-error' : 'alert-success'}`}>{msg}</div>
           )}
           <div className="pt-2">
-            <button className="btn btn-primary w-full" type="submit" disabled={loading || !photo}>
-              {loading ? 'Saving…' : 'Save Profile'}
-            </button>
+            <SaveButton type="submit" loading={loading} disabled={!photo} savedSignal={savedSignal} label="Save Profile" />
           </div>
         </form>
       </div>

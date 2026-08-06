@@ -92,3 +92,17 @@ select:not([disabled]) { cursor: pointer; }
 .animate-fade-in {
   animation: fade-in 0.3s ease-out both;
 }
+
+/* Save success flash */
+@keyframes save-flash {
+  0%   { background: linear-gradient(135deg, #3a7d44 0%, #5aaa5a 50%, #3a7d44 100%); background-size: 200% 200%; background-position: 0% 50%; box-shadow: 0 0 0 0 rgba(74,175,74,0.6); }
+  40%  { background-position: 100% 50%; box-shadow: 0 0 0 6px rgba(74,175,74,0); }
+  100% { background-position: 0% 50%; box-shadow: 0 0 0 0 rgba(74,175,74,0); }
+}
+.btn-save-success {
+  background: linear-gradient(135deg, #3a7d44 0%, #5aaa5a 50%, #3a7d44 100%) !important;
+  background-size: 200% 200% !important;
+  color: #ffffff !important;
+  border-color: transparent !important;
+  animation: save-flash 1.4s ease-out forwards;
+}
