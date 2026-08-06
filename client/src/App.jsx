@@ -1312,7 +1312,137 @@ function PropertiesPage({ user }) {
   )
 }
 
-/* ─── Profile Page ────────────────────────────────────────────── */
+/* ─── Phone formatter ─────────────────────────────────────────── */
+
+function formatPhone(raw) {
+  const digits = raw.replace(/\D/g, '').slice(0, 11)
+  if (digits.length === 0) return ''
+  // Strip leading 1
+  const local = digits.startsWith('1') ? digits.slice(1) : digits
+  const d = local.slice(0, 10)
+  if (d.length <= 3) return `+1 (${d}`
+  if (d.length <= 6) return `+1 (${d.slice(0,3)}) ${d.slice(3)}`
+  return `+1 (${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`
+}
+
+/* ─── Photo Cropper ───────────────────────────────────────────── */
+
+function PhotoCropper({ src, onSave, onCancel }) {
+  const canvasRef = React.useRef(null)
+  const [scale, setScale] = React.useState(1)
+  const [offsetX, setOffsetX] = React.useState(0)
+  const [offsetY, setOffsetY] = React.useState(0)
+  const [dragging, setDragging] = React.useState(false)
+  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 })
+  const imgRef = React.useRef(new Image())
+  const SIZE = 300
+
+  React.useEffect(() => {
+    const img = imgRef.current
+    img.onload = () => {
+      // Auto-fit: scale to fill the square
+      const fit = Math.max(SIZE / img.naturalWidth, SIZE / img.naturalHeight)
+      setScale(fit)
+      setOffsetX(0); setOffsetY(0)
+      draw(img, fit, 0, 0)
+    }
+    img.src = src
+  }, [src])
+
+  function draw(img, s, ox, oy) {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    ctx.clearRect(0, 0, SIZE, SIZE)
+    const w = img.naturalWidth * s
+    const h = img.naturalHeight * s
+    const x = (SIZE - w) / 2 + ox
+    const y = (SIZE - h) / 2 + oy
+    ctx.drawImage(img, x, y, w, h)
+    // Darken outside circle
+    ctx.save()
+    ctx.fillStyle = 'rgba(0,0,0,0.45)'
+    ctx.fillRect(0, 0, SIZE, SIZE)
+    ctx.globalCompositeOperation = 'destination-out'
+    ctx.beginPath(); ctx.arc(SIZE/2, SIZE/2, SIZE/2 - 4, 0, Math.PI*2)
+    ctx.fill()
+    ctx.restore()
+    // Circle border
+    ctx.strokeStyle = 'white'; ctx.lineWidth = 2
+    ctx.beginPath(); ctx.arc(SIZE/2, SIZE/2, SIZE/2 - 4, 0, Math.PI*2); ctx.stroke()
+  }
+
+  React.useEffect(() => { draw(imgRef.current, scale, offsetX, offsetY) }, [scale, offsetX, offsetY])
+
+  function onMouseDown(e) {
+    setDragging(true)
+    setDragStart({ x: e.clientX - offsetX, y: e.clientY - offsetY })
+  }
+  function onMouseMove(e) {
+    if (!dragging) return
+    setOffsetX(e.clientX - dragStart.x)
+    setOffsetY(e.clientY - dragStart.y)
+  }
+  function onMouseUp() { setDragging(false) }
+
+  // Touch support
+  function onTouchStart(e) {
+    const t = e.touches[0]
+    setDragging(true); setDragStart({ x: t.clientX - offsetX, y: t.clientY - offsetY })
+  }
+  function onTouchMove(e) {
+    if (!dragging) return
+    const t = e.touches[0]
+    setOffsetX(t.clientX - dragStart.x); setOffsetY(t.clientY - dragStart.y)
+  }
+
+  function handleSave() {
+    const canvas = canvasRef.current
+    // Draw final clean circle crop
+    const out = document.createElement('canvas')
+    out.width = SIZE; out.height = SIZE
+    const ctx = out.getContext('2d')
+    ctx.beginPath(); ctx.arc(SIZE/2, SIZE/2, SIZE/2, 0, Math.PI*2); ctx.clip()
+    const img = imgRef.current
+    const w = img.naturalWidth * scale
+    const h = img.naturalHeight * scale
+    const x = (SIZE - w) / 2 + offsetX
+    const y = (SIZE - h) / 2 + offsetY
+    ctx.drawImage(img, x, y, w, h)
+    onSave(out.toDataURL('image/jpeg', 0.85))
+  }
+
+  return (
+    <div className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4">
+      <div className="bg-base-100 rounded-2xl p-6 space-y-4 w-full max-w-sm shadow-2xl">
+        <h3 className="font-bold text-lg text-center">Adjust Profile Photo</h3>
+        <p className="text-xs text-base-content/50 text-center">Drag to reposition · Scroll or slider to zoom</p>
+
+        <div className="flex justify-center">
+          <canvas ref={canvasRef} width={SIZE} height={SIZE}
+            className="rounded-full cursor-grab active:cursor-grabbing"
+            style={{ touchAction: 'none' }}
+            onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
+            onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onMouseUp}
+            onWheel={e => { e.preventDefault(); setScale(s => Math.max(0.5, Math.min(5, s - e.deltaY * 0.001))) }}
+          />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <span className="text-xs text-base-content/40">Zoom</span>
+          <input type="range" min="0.5" max="5" step="0.01" value={scale}
+            onChange={e => setScale(Number(e.target.value))}
+            className="range range-xs flex-1" />
+        </div>
+
+        <div className="flex gap-3">
+          <button className="btn btn-outline flex-1" onClick={onCancel}>Cancel</button>
+          <button className="btn btn-primary flex-1" onClick={handleSave}>Use Photo</button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 function ProfilePage({ currentUser, onUpdate }) {
   const [firstName, setFirstName] = useState(currentUser.first_name || '')
@@ -1321,6 +1451,7 @@ function ProfilePage({ currentUser, onUpdate }) {
   const [phoneNumber, setPhoneNumber] = useState(currentUser.phone_number || '')
   const [buyBox, setBuyBox] = useState(currentUser.buy_box || '')
   const [photo, setPhoto] = useState(currentUser.profile_photo || null)
+  const [cropSrc, setCropSrc] = useState(null) // raw image src waiting to be cropped
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
   const [msgType, setMsgType] = useState('success')
@@ -1331,8 +1462,9 @@ function ProfilePage({ currentUser, onUpdate }) {
     if (!file.type.startsWith('image/')) { setMsgType('error'); setMsg('Only image files allowed'); return }
     if (file.size > 5 * 1024 * 1024) { setMsgType('error'); setMsg('Photo must be under 5 MB'); return }
     const reader = new FileReader()
-    reader.onload = ev => setPhoto(ev.target.result)
+    reader.onload = ev => setCropSrc(ev.target.result)
     reader.readAsDataURL(file)
+    e.target.value = ''
   }
 
   async function saveProfile(e) {
@@ -1355,6 +1487,13 @@ function ProfilePage({ currentUser, onUpdate }) {
 
   return (
     <div className="max-w-2xl mx-auto">
+      {cropSrc && (
+        <PhotoCropper
+          src={cropSrc}
+          onSave={dataUrl => { setPhoto(dataUrl); setCropSrc(null) }}
+          onCancel={() => setCropSrc(null)}
+        />
+      )}
       <h2 className="text-2xl font-bold mb-8">My Profile</h2>
       <div className="card bg-base-100 border border-base-300">
         <form className="card-body p-8 space-y-6" onSubmit={saveProfile}>
@@ -1403,7 +1542,7 @@ function ProfilePage({ currentUser, onUpdate }) {
             </Field>
             <Field label="Phone Number">
               <input type="tel" placeholder="+1 (000) 000-0000" value={phoneNumber}
-                onChange={e => setPhoneNumber(e.target.value)} className="input input-bordered w-full" />
+                onChange={e => setPhoneNumber(formatPhone(e.target.value))} className="input input-bordered w-full" />
             </Field>
           </div>
           <Field label="Buy Box">
