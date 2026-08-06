@@ -182,12 +182,14 @@ function CalendarWidget() {
 
   // Color map for indicator categories
   const INDIC_COLORS = {
-    ism:     'bg-blue-500',
-    retail:  'bg-purple-500',
-    trade:   'bg-teal-500',
-    gscpi:   'bg-green-600',
-    ip:      'bg-orange-500',
-    default: 'bg-indigo-400',
+    ism:          'bg-blue-500',
+    retail:       'bg-purple-500',
+    trade:        'bg-teal-500',
+    gscpi:        'bg-green-600',
+    ip:           'bg-orange-500',
+    unemployment: 'bg-yellow-500',
+    inflation:    'bg-pink-500',
+    default:      'bg-indigo-400',
   }
 
   function prevMonth() {
@@ -240,6 +242,8 @@ function CalendarWidget() {
           <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-teal-500 flex-shrink-0"/><span className="text-base-content/70">Trade</span></span>
           <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-green-600 flex-shrink-0"/><span className="text-base-content/70">GSCPI</span></span>
           <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-orange-500 flex-shrink-0"/><span className="text-base-content/70">Ind. Production</span></span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-yellow-500 flex-shrink-0"/><span className="text-base-content/70">Unemployment</span></span>
+          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-pink-500 flex-shrink-0"/><span className="text-base-content/70">Inflation (CPI/PPI/PCE)</span></span>
           <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-full bg-primary flex-shrink-0"/><span className="text-base-content/70">Today</span></span>
         </div>
 

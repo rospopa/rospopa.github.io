@@ -51,6 +51,26 @@ async function initializeSchema() {
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP`);
+  // Backfill last_login from audit_logs for users who logged in before column existed
+  await pool.query(`
+    UPDATE users u SET last_login = sub.last_login
+    FROM (
+      SELECT target_user_id AS uid, MAX(created_at) AS last_login
+      FROM audit_logs WHERE action = 'login' AND target_user_id IS NOT NULL
+      GROUP BY target_user_id
+    ) sub
+    WHERE u.id = sub.uid AND (u.last_login IS NULL OR sub.last_login > u.last_login)
+  `).catch(() => {});
+  // Also backfill using acted_by / admin_id when target_user_id is null (self-login rows)
+  await pool.query(`
+    UPDATE users u SET last_login = sub.last_login
+    FROM (
+      SELECT admin_id AS uid, MAX(created_at) AS last_login
+      FROM audit_logs WHERE action = 'login' AND admin_id IS NOT NULL
+      GROUP BY admin_id
+    ) sub
+    WHERE u.id = sub.uid AND (u.last_login IS NULL OR sub.last_login > u.last_login)
+  `).catch(() => {});
 
   await pool.query(`CREATE TABLE IF NOT EXISTS audit_logs (
     id SERIAL PRIMARY KEY,
@@ -488,6 +508,7 @@ app.post('/api/logout', async (req, res) => {
 
 app.get('/api/me', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ user: null });
+  onlineUsers.add(req.session.user.id); // re-sync after server restart
   try {
     const r = await pool.query('SELECT profile_photo FROM users WHERE id=$1', [req.session.user.id]);
     const profile_photo = r.rows.length ? r.rows[0].profile_photo : null;
@@ -1446,6 +1467,47 @@ const ECON_INDICATORS = [
       '2027-07-16','2027-08-17','2027-09-15','2027-10-15','2027-11-16','2027-12-15',
   ].map(date => ({ date, label: 'Industrial Production & Cap. Utilization', short_label: 'Ind. Production', category: 'ip',
     description: 'Federal Reserve Industrial Production and Capacity Utilization report (G.17)' })),
+
+  // ── Jobs Report / Employment Situation (BLS, 1st Friday of month) ──
+  ...['2026-01-09','2026-02-06','2026-03-06','2026-04-03','2026-05-08','2026-06-05',
+      '2026-07-02','2026-08-07','2026-09-04','2026-10-02','2026-11-06','2026-12-04',
+      '2027-01-08','2027-02-05','2027-03-05','2027-04-02','2027-05-07','2027-06-04',
+      '2027-07-02','2027-08-06','2027-09-03','2027-10-01','2027-11-05','2027-12-03',
+  ].map(date => ({ date, label: 'Jobs Report (Employment Situation)', short_label: 'Jobs Report', category: 'unemployment',
+    description: 'BLS Employment Situation: nonfarm payrolls, unemployment rate, wage growth (released 8:30 AM ET)' })),
+
+  // ── Initial Jobless Claims (BLS, every Thursday) — show monthly totals only to avoid clutter ──
+  // Listing the first Thursday of each month as the representative weekly release
+  ...['2026-01-08','2026-02-05','2026-03-05','2026-04-02','2026-05-07','2026-06-04',
+      '2026-07-02','2026-08-06','2026-09-03','2026-10-01','2026-11-05','2026-12-03',
+      '2027-01-07','2027-02-04','2027-03-04','2027-04-01','2027-05-06','2027-06-03',
+      '2027-07-01','2027-08-05','2027-09-02','2027-10-07','2027-11-04','2027-12-02',
+  ].map(date => ({ date, label: 'Initial Jobless Claims (weekly)', short_label: 'Jobless Claims', category: 'unemployment',
+    description: 'DOL weekly Initial Jobless Claims — leading unemployment indicator (released Thursdays 8:30 AM ET)' })),
+
+  // ── CPI — Consumer Price Index (BLS, ~10th-12th of month) ──
+  ...['2026-01-14','2026-02-11','2026-03-11','2026-04-10','2026-05-12','2026-06-10',
+      '2026-07-14','2026-08-12','2026-09-11','2026-10-13','2026-11-12','2026-12-10',
+      '2027-01-13','2027-02-10','2027-03-10','2027-04-09','2027-05-12','2027-06-10',
+      '2027-07-13','2027-08-11','2027-09-10','2027-10-13','2027-11-10','2027-12-09',
+  ].map(date => ({ date, label: 'CPI — Consumer Price Index', short_label: 'CPI', category: 'inflation',
+    description: 'BLS Consumer Price Index: headline & core inflation (released 8:30 AM ET)' })),
+
+  // ── PPI — Producer Price Index (BLS, ~11th-14th of month) ──
+  ...['2026-01-15','2026-02-12','2026-03-12','2026-04-14','2026-05-13','2026-06-11',
+      '2026-07-15','2026-08-13','2026-09-12','2026-10-14','2026-11-13','2026-12-11',
+      '2027-01-14','2027-02-11','2027-03-11','2027-04-11','2027-05-13','2027-06-11',
+      '2027-07-14','2027-08-12','2027-09-11','2027-10-14','2027-11-11','2027-12-10',
+  ].map(date => ({ date, label: 'PPI — Producer Price Index', short_label: 'PPI', category: 'inflation',
+    description: 'BLS Producer Price Index: upstream inflation pressures (released 8:30 AM ET)' })),
+
+  // ── PCE Price Index (Fed's preferred inflation gauge, released ~last business day of month) ──
+  ...['2026-01-30','2026-02-27','2026-03-27','2026-04-30','2026-05-29','2026-06-26',
+      '2026-07-31','2026-08-28','2026-09-25','2026-10-30','2026-11-25','2026-12-23',
+      '2027-01-29','2027-02-26','2027-03-26','2027-04-30','2027-05-28','2027-06-25',
+      '2027-07-30','2027-08-27','2027-09-24','2027-10-29','2027-11-24','2027-12-22',
+  ].map(date => ({ date, label: 'PCE Price Index (Personal Income & Outlays)', short_label: 'PCE Inflation', category: 'inflation',
+    description: "BEA Personal Consumption Expenditures price index — the Fed's preferred inflation measure (released 8:30 AM ET)" })),
 ];
 
 app.get('/api/econ-indicators', (req, res) => {
