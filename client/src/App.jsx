@@ -1,4 +1,14 @@
-import { useEffect, useState, Component } from 'react'
+import { useEffect, useState, useRef, Component } from 'react'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
+import L from 'leaflet'
+
+// Fix default Leaflet marker icon paths broken by bundlers
+delete L.Icon.Default.prototype._getIconUrl
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+  iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+})
 
 /* ─── Error Boundary ──────────────────────────────────────────── */
 class ErrorBoundary extends Component {
@@ -27,8 +37,73 @@ class ErrorBoundary extends Component {
 
 export { ErrorBoundary }
 
+/* ─── Property Map (OpenStreetMap / Leaflet) ───────────────────── */
 
-/** Wrapper around fetch that always sends credentials and throws on non-ok */
+function MapRecenter({ lat, lon }) {
+  const map = useMap()
+  useEffect(() => { map.setView([lat, lon], 14) }, [lat, lon])
+  return null
+}
+
+function PropertyMap({ address }) {
+  const [coords, setCoords] = useState(null)
+  const [error, setError] = useState(false)
+  const prevAddress = useRef(null)
+
+  useEffect(() => {
+    if (!address || address === prevAddress.current) return
+    prevAddress.current = address
+    setCoords(null); setError(false)
+    const encoded = encodeURIComponent(address)
+    fetch(`https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=1`, {
+      headers: { 'Accept-Language': 'en', 'User-Agent': 'CREPortal/1.0' }
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.length > 0) {
+          setCoords({ lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) })
+        } else {
+          setError(true)
+        }
+      })
+      .catch(() => setError(true))
+  }, [address])
+
+  if (!address) return (
+    <div className="w-full h-full flex items-center justify-center bg-base-200 text-base-content/30 text-sm">
+      Enter an address to see the map
+    </div>
+  )
+  if (error) return (
+    <div className="w-full h-full flex items-center justify-center bg-base-200 text-base-content/30 text-sm">
+      Location not found
+    </div>
+  )
+  if (!coords) return (
+    <div className="w-full h-full flex items-center justify-center bg-base-200">
+      <span className="loading loading-spinner loading-md" />
+    </div>
+  )
+
+  return (
+    <MapContainer center={[coords.lat, coords.lon]} zoom={14}
+      style={{ width: '100%', height: '100%' }}
+      scrollWheelZoom={false}
+      zoomControl={true}
+      attributionControl={true}>
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+      />
+      <MapRecenter lat={coords.lat} lon={coords.lon} />
+      <Marker position={[coords.lat, coords.lon]}>
+        <Popup>{address}</Popup>
+      </Marker>
+    </MapContainer>
+  )
+}
+
+
 async function apiFetch(url, options = {}) {
   const res = await fetch(url, { credentials: 'include', ...options })
   if (!res.ok) {
@@ -893,24 +968,30 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
 
   return (
     <div className="modal modal-open">
-      <div className="modal-box max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <h3 className="font-bold text-xl">
-            {property?.id ? property.address : 'New Property'}
-          </h3>
-          <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
-        </div>
+      {/* Wide container: left form + right map */}
+      <div className="modal-box p-0 max-w-6xl w-full max-h-[92vh] flex flex-col md:flex-row overflow-hidden">
 
-        {/* Tabs */}
-        {tabs.length > 1 && (
-          <div className="tabs tabs-bordered mb-6">
-            {tabs.map(t => (
-              <button key={t} className={`tab ${tab === t ? 'tab-active font-semibold' : ''}`} onClick={() => setTab(t)}>
-                {tabLabel[t]}
-              </button>
-            ))}
+        {/* ── Left panel: form ── */}
+        <div className="flex flex-col w-full md:w-[480px] md:flex-shrink-0 overflow-y-auto max-h-[92vh]">
+          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-base-300">
+            <h3 className="font-bold text-xl">
+              {property?.id ? property.address : 'New Property'}
+            </h3>
+            <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
           </div>
-        )}
+
+          {/* Tabs */}
+          {tabs.length > 1 && (
+            <div className="tabs tabs-bordered px-6 pt-2">
+              {tabs.map(t => (
+                <button key={t} className={`tab ${tab === t ? 'tab-active font-semibold' : ''}`} onClick={() => setTab(t)}>
+                  {tabLabel[t]}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex-1 px-6 py-5 overflow-y-auto">
 
         {/* Details tab */}
         {tab === 'details' && (
@@ -1238,13 +1319,21 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
           </div>
         )}
 
+          </div>{/* end tab content */}
+        </div>{/* end left panel */}
+
+        {/* ── Right panel: map (only when Details tab active and property has address) ── */}
+        {tab === 'details' && (
+          <div className="hidden md:flex flex-1 border-l border-base-300" style={{ minHeight: '500px' }}>
+            <PropertyMap address={address} />
+          </div>
+        )}
+
       </div>
       <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
     </div>
   )
 }
-
-/* ─── Edit User Modal ──────────────────────────────────────────── */
 
 function EditUserModal({ open, user, onClose, onSave }) {
   const [firstName, setFirstName] = useState('')
