@@ -1186,6 +1186,96 @@ function UsersTable({ users, onReload, onEdit }) {
 
 /* ─── Property Detail Modal (edit + media + assign) ──────────── */
 
+function AssignUsersTab({ allUsers, assignLoading, toggleAssign, onViewContact }) {
+  const [assignSearch, setAssignSearch] = useState('')
+  const aq = assignSearch.trim().toLowerCase()
+  const visibleUsers = allUsers.filter(u =>
+    !aq || [u.first_name, u.last_name, u.email, u.organization]
+      .filter(Boolean).some(v => v.toLowerCase().includes(aq))
+  )
+  const assigned = visibleUsers.filter(u => !!u.assigned)
+  const unassigned = visibleUsers.filter(u => !u.assigned)
+
+  function UserRow({ u }) {
+    const displayName = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.email
+    const initials = [u.first_name?.[0], u.last_name?.[0]].filter(Boolean).join('').toUpperCase() || u.email[0].toUpperCase()
+    return (
+      <div className="flex items-center gap-3 py-3">
+        <div className="w-8 h-8 rounded-full bg-base-300 flex-shrink-0 overflow-hidden flex items-center justify-center text-xs font-semibold">
+          {u.profile_photo
+            ? <img src={u.profile_photo} alt={displayName} className="w-full h-full object-cover" />
+            : initials}
+        </div>
+        <div className="flex-1 min-w-0">
+          <button
+            className="text-sm font-medium text-left hover:underline hover:text-primary truncate block w-full"
+            onClick={() => onViewContact(u.id)}
+          >
+            {displayName}
+          </button>
+          {u.organization && <p className="text-xs text-base-content/50 truncate">{u.organization}</p>}
+        </div>
+        <input
+          type="checkbox"
+          className="toggle toggle-primary toggle-sm flex-shrink-0"
+          checked={!!u.assigned}
+          disabled={assignLoading}
+          onChange={() => toggleAssign(u.id, !!u.assigned)}
+        />
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="relative">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search users…"
+          value={assignSearch}
+          onChange={e => setAssignSearch(e.target.value)}
+          className="input input-bordered input-sm pl-8 w-full"
+        />
+        {assignSearch && (
+          <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={() => setAssignSearch('')}>✕</button>
+        )}
+      </div>
+      {allUsers.length === 0
+        ? <p className="text-center text-base-content/30 py-8">No users found</p>
+        : visibleUsers.length === 0
+          ? <p className="text-center text-base-content/30 py-4">No users match &ldquo;{assignSearch}&rdquo;</p>
+          : (
+            <div>
+              {assigned.length > 0 && (
+                <>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200 mb-1">
+                    Assigned ({assigned.length})
+                  </p>
+                  <div className="divide-y divide-base-200">
+                    {assigned.map(u => <UserRow key={u.id} u={u} />)}
+                  </div>
+                </>
+              )}
+              {unassigned.length > 0 && (
+                <>
+                  <p className={`text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200 mb-1 ${assigned.length > 0 ? 'mt-4' : ''}`}>
+                    All Users ({unassigned.length})
+                  </p>
+                  <div className="divide-y divide-base-200">
+                    {unassigned.map(u => <UserRow key={u.id} u={u} />)}
+                  </div>
+                </>
+              )}
+            </div>
+          )
+      }
+    </div>
+  )
+}
+
 function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [tab, setTab] = useState('details')
   const [pin, setPin] = useState('')
@@ -1793,48 +1883,12 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
 
         {/* Assign Users tab (admin only) */}
         {tab === 'assign' && isAdmin && (
-          <div className="space-y-3">
-            <p className="text-sm text-base-content/50 mb-4">Toggle to assign or unassign users. Click a user to view their full contact profile.</p>
-            {allUsers.length === 0
-              ? <p className="text-center text-base-content/30 py-8">No users found</p>
-              : (
-                <div className="divide-y divide-base-200">
-                  {allUsers.map(u => {
-                    const displayName = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.email
-                    const initials = [u.first_name?.[0], u.last_name?.[0]].filter(Boolean).join('').toUpperCase() || u.email[0].toUpperCase()
-                    return (
-                      <div key={u.id} className="flex items-center gap-3 py-3">
-                        {/* Avatar */}
-                        <div className="w-8 h-8 rounded-full bg-base-300 flex-shrink-0 overflow-hidden flex items-center justify-center text-xs font-semibold">
-                          {u.profile_photo
-                            ? <img src={u.profile_photo} alt={displayName} className="w-full h-full object-cover" />
-                            : initials}
-                        </div>
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                          <button
-                            className="text-sm font-medium text-left hover:underline hover:text-primary truncate block w-full"
-                            onClick={() => setViewContactId(u.id)}
-                          >
-                            {displayName}
-                          </button>
-                          {u.organization && <p className="text-xs text-base-content/50 truncate">{u.organization}</p>}
-                        </div>
-                        {/* Toggle */}
-                        <input
-                          type="checkbox"
-                          className="toggle toggle-primary toggle-sm flex-shrink-0"
-                          checked={!!u.assigned}
-                          disabled={assignLoading}
-                          onChange={() => toggleAssign(u.id, !!u.assigned)}
-                        />
-                      </div>
-                    )
-                  })}
-                </div>
-              )
-            }
-          </div>
+          <AssignUsersTab
+            allUsers={allUsers}
+            assignLoading={assignLoading}
+            toggleAssign={toggleAssign}
+            onViewContact={setViewContactId}
+          />
         )}
 
           </div>{/* end tab content */}
@@ -2120,6 +2174,7 @@ function PropertiesPage({ user }) {
   const [showPropertyModal, setShowPropertyModal] = useState(false)
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list' | 'kanban'
+  const [search, setSearch] = useState('')
   const isAdmin = user.role === 'admin'
 
   async function fetchProperties() {
@@ -2158,6 +2213,17 @@ function PropertiesPage({ user }) {
 
   const effectiveView = isAdmin ? viewMode : 'grid'
   const fmt = (n) => n != null ? `$${Number(n).toLocaleString()}` : null
+
+  const q = search.trim().toLowerCase()
+  const filteredProperties = q
+    ? properties.filter(p =>
+        (p.address || '').toLowerCase().includes(q) ||
+        (p.pin || '').toLowerCase().includes(q) ||
+        (p.county || '').toLowerCase().includes(q) ||
+        (p.status || '').toLowerCase().includes(q)
+      )
+    : properties
+
   const kanbanColumns = [
     { label: 'New',          color: 'badge-neutral', status: 'New' },
     { label: 'Under Review', color: 'badge-info',    status: 'Under Review' },
@@ -2169,12 +2235,29 @@ function PropertiesPage({ user }) {
     <div className="space-y-6">
       {/* Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-3">
-        {user.role === 'admin' && (
-          <button className="btn btn-primary btn-sm" onClick={() => { setSelectedProperty(null); setShowPropertyModal(true) }}>
-            + New Property
-          </button>
-        )}
-        {user.role !== 'admin' && <div />}
+        <div className="flex items-center gap-2 flex-wrap">
+          {user.role === 'admin' && (
+            <button className="btn btn-primary btn-sm" onClick={() => { setSelectedProperty(null); setShowPropertyModal(true) }}>
+              + New Property
+            </button>
+          )}
+          {/* Search */}
+          <div className="relative">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search address, PIN, county…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="input input-bordered input-sm pl-8 w-56"
+            />
+            {search && (
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={() => setSearch('')}>✕</button>
+            )}
+          </div>
+        </div>
 
         {/* View toggle — admin only */}
         {isAdmin && (
@@ -2222,10 +2305,17 @@ function PropertiesPage({ user }) {
         </div>
       )}
 
+      {!loading && properties.length > 0 && filteredProperties.length === 0 && (
+        <div className="py-10 text-center text-base-content/30">
+          <p>No properties match &ldquo;{search}&rdquo;</p>
+          <button className="btn btn-xs btn-ghost mt-2" onClick={() => setSearch('')}>Clear search</button>
+        </div>
+      )}
+
       {/* ── GRID VIEW ── */}
-      {effectiveView === 'grid' && !loading && properties.length > 0 && (
+      {effectiveView === 'grid' && !loading && filteredProperties.length > 0 && (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-          {properties.map((prop, i) => (
+          {filteredProperties.map((prop, i) => (
             <div key={i}
               className="card bg-base-100 border border-base-300 hover:shadow-lg transition-shadow cursor-pointer overflow-hidden">
               <PropertyCardCarousel propertyId={prop.id} onClick={() => openProperty(prop)} />
@@ -2257,7 +2347,7 @@ function PropertiesPage({ user }) {
       )}
 
       {/* ── LIST VIEW ── */}
-      {effectiveView === 'list' && !loading && properties.length > 0 && (
+      {effectiveView === 'list' && !loading && filteredProperties.length > 0 && (
         <div className="overflow-x-auto rounded-lg border border-base-300">
           <table className="table table-zebra w-full">
             <thead>
@@ -2273,7 +2363,7 @@ function PropertiesPage({ user }) {
               </tr>
             </thead>
             <tbody>
-              {properties.map((prop, i) => (
+              {filteredProperties.map((prop, i) => (
                 <tr key={i} className="hover cursor-pointer" onClick={() => openProperty(prop)}>
                   <td className="font-medium max-w-xs truncate">{prop.address}</td>
                   <td className="text-sm text-base-content/60">{prop.county}</td>
@@ -2300,10 +2390,10 @@ function PropertiesPage({ user }) {
       )}
 
       {/* ── KANBAN VIEW ── */}
-      {effectiveView === 'kanban' && !loading && properties.length > 0 && (
+      {effectiveView === 'kanban' && !loading && filteredProperties.length > 0 && (
         <div className="flex gap-4 overflow-x-auto pb-4">
           {kanbanColumns.map(col => {
-            const colProps = properties.filter(p => (p.status || 'New') === col.status)
+            const colProps = filteredProperties.filter(p => (p.status || 'New') === col.status)
             return (
               <div key={col.label} className="flex-shrink-0 w-72">
                 <div className="flex items-center gap-2 mb-3">
@@ -3298,14 +3388,15 @@ function ContactsPage() {
   const [contacts, setContacts] = useState([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState(() => localStorage.getItem('contacts_view') || 'split')
-  const [selectedContact, setSelectedContact] = useState(null) // notes drawer
-  const [detailId, setDetailId] = useState(null)              // full-page detail
+  const [selectedContact, setSelectedContact] = useState(null)
+  const [detailId, setDetailId] = useState(null)
   const [splitDetailId, setSplitDetailId] = useState(() => {
     const saved = localStorage.getItem('contacts_split_id')
     return saved ? Number(saved) : null
   })
   const [refreshKey, setRefreshKey] = useState(0)
   const [onlineStatus, setOnlineStatus] = useState({ online: [], lastLogin: {} })
+  const [search, setSearch] = useState('')
 
   // Persist view selection
   const changeView = (v) => { setView(v); localStorage.setItem('contacts_view', v) }
@@ -3349,6 +3440,14 @@ function ContactsPage() {
   const userContacts = contacts.filter(c => c.role === 'user')
   const otherContacts = contacts.filter(c => c.role !== 'admin' && c.role !== 'user')
 
+  const cq = search.trim().toLowerCase()
+  const filteredContacts = cq
+    ? contacts.filter(c =>
+        [c.first_name, c.last_name, c.email, c.organization, c.phone_number]
+          .filter(Boolean).some(v => v.toLowerCase().includes(cq))
+      )
+    : contacts
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -3358,25 +3457,51 @@ function ContactsPage() {
             {view === 'split' ? 'Click a contact to view details' : 'Double-click any contact to open full profile'}
           </p>
         </div>
-        <div className="flex gap-1">
-          {[
-            { id: 'grid',   label: 'Grid' },
-            { id: 'list',   label: 'List' },
-            { id: 'kanban', label: 'Kanban' },
-            { id: 'split',  label: 'Split' },
-          ].map(({ id, label }) => (
-            <button key={id} className={`btn btn-sm ${view === id ? 'btn-primary' : 'btn-ghost'}`} onClick={() => changeView(id)}>
-              {label}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {/* Search */}
+          <div className="relative">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search name, email, org…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              className="input input-bordered input-sm pl-8 w-52"
+            />
+            {search && (
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={() => setSearch('')}>✕</button>
+            )}
+          </div>
+          {/* View toggles */}
+          <div className="flex gap-1">
+            {[
+              { id: 'grid',   label: 'Grid' },
+              { id: 'list',   label: 'List' },
+              { id: 'kanban', label: 'Kanban' },
+              { id: 'split',  label: 'Split' },
+            ].map(({ id, label }) => (
+              <button key={id} className={`btn btn-sm ${view === id ? 'btn-primary' : 'btn-ghost'}`} onClick={() => changeView(id)}>
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {loading && <div className="text-center py-12 text-base-content/50">Loading contacts…</div>}
 
+      {!loading && contacts.length > 0 && filteredContacts.length === 0 && (
+        <div className="py-10 text-center text-base-content/30">
+          <p>No contacts match &ldquo;{search}&rdquo;</p>
+          <button className="btn btn-xs btn-ghost mt-2" onClick={() => setSearch('')}>Clear search</button>
+        </div>
+      )}
+
       {!loading && view === 'grid' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {contacts.map(c => (
+          {filteredContacts.map(c => (
             <div key={c.id} onDoubleClick={() => openDetail(c)} className="cursor-pointer select-none">
               <ContactCard contact={c} onViewNotes={openNotes} />
             </div>
@@ -3402,7 +3527,7 @@ function ContactsPage() {
               </tr>
             </thead>
             <tbody>
-              {contacts.map(c => {
+              {filteredContacts.map(c => {
                 const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
                 const isOnline = onlineStatus.online.includes(c.id)
                 const lastLogin = onlineStatus.lastLogin[c.id] || c.last_login
@@ -3442,9 +3567,13 @@ function ContactsPage() {
         </div>
       )}
 
-      {!loading && view === 'kanban' && (
+      {!loading && view === 'kanban' && (() => {
+        const fAdmin = filteredContacts.filter(c => c.role === 'admin')
+        const fUser = filteredContacts.filter(c => c.role === 'user')
+        const fOther = filteredContacts.filter(c => c.role !== 'admin' && c.role !== 'user')
+        return (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[['Admin', adminContacts, 'badge-error'], ['User', userContacts, 'badge-primary'], ['Archived', otherContacts, 'badge-ghost']].map(([col, items, badgeCls]) => (
+          {[['Admin', fAdmin, 'badge-error'], ['User', fUser, 'badge-primary'], ['Archived', fOther, 'badge-ghost']].map(([col, items, badgeCls]) => (
             <div key={col} className="bg-base-200 rounded-box p-4 flex flex-col gap-3 min-h-[200px]">
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-sm uppercase tracking-widest">{col}</h3>
@@ -3493,17 +3622,20 @@ function ContactsPage() {
             </div>
           ))}
         </div>
-      )}
+        )
+      })()}
 
       {!loading && view === 'split' && (
         <div className="flex gap-0 border border-base-200 rounded-box overflow-hidden" style={{ height: 'calc(100vh - 180px)', minHeight: '500px' }}>
           {/* Left: contact list */}
           <div className="w-72 flex-shrink-0 border-r border-base-200 flex flex-col bg-base-100 overflow-hidden">
             <div className="px-3 py-2 border-b border-base-200 bg-base-200/40">
-              <span className="text-xs font-semibold uppercase tracking-widest text-base-content/50">{contacts.length} Contacts</span>
+              <span className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
+                {filteredContacts.length}{filteredContacts.length !== contacts.length ? `/${contacts.length}` : ''} Contacts
+              </span>
             </div>
             <div className="flex-1 overflow-y-auto">
-              {contacts.map(c => {
+              {filteredContacts.map(c => {
                 const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
                 const isActive = splitDetailId === c.id
                 const isOnline = onlineStatus.online.includes(c.id)
