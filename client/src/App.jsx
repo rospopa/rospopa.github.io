@@ -132,7 +132,6 @@ function PropertyModalCarousel({ propertyId }) {
   const [media, setMedia] = useState([])
   const [idx, setIdx] = useState(0)
   const [loaded, setLoaded] = useState(false)
-  const [lightbox, setLightbox] = useState(false)
 
   useEffect(() => {
     if (!propertyId) return
@@ -168,8 +167,7 @@ function PropertyModalCarousel({ propertyId }) {
           : <img key={current.id}
               src={`/api/properties/${propertyId}/media/${current.id}`}
               alt={current.filename}
-              className="w-full h-full object-contain cursor-zoom-in transition-opacity duration-200"
-              onClick={() => setLightbox(true)}
+              className="w-full h-full object-contain transition-opacity duration-200"
             />
         }
 
@@ -214,29 +212,6 @@ function PropertyModalCarousel({ propertyId }) {
         </div>
       )}
 
-      {/* Lightbox */}
-      {lightbox && !isVideo && (
-        <div
-          className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center"
-          onClick={() => setLightbox(false)}
-        >
-          <button className="absolute top-4 right-4 btn btn-sm btn-circle bg-white/20 border-0 text-white text-lg">✕</button>
-          {media.length > 1 && (
-            <>
-              <button className="absolute left-4 top-1/2 -translate-y-1/2 btn btn-circle bg-white/20 border-0 text-white text-2xl"
-                onClick={e => { e.stopPropagation(); prev() }}>‹</button>
-              <button className="absolute right-4 top-1/2 -translate-y-1/2 btn btn-circle bg-white/20 border-0 text-white text-2xl"
-                onClick={e => { e.stopPropagation(); next() }}>›</button>
-            </>
-          )}
-          <img
-            src={`/api/properties/${propertyId}/media/${current.id}`}
-            alt=""
-            className="max-w-[90vw] max-h-[90vh] object-contain rounded"
-            onClick={e => e.stopPropagation()}
-          />
-        </div>
-      )}
     </>
   )
 }
