@@ -2561,26 +2561,60 @@ async function downloadAttachment(userId, noteId, attachId, filename) {
   URL.revokeObjectURL(url)
 }
 
-function ContactCard({ contact, onViewNotes }) {
+function PhoneLink({ phone }) {
+  if (!phone) return <span className="text-base-content/40">—</span>
+  const digits = phone.replace(/\D/g, '')
+  return (
+    <a href={`tel:+${digits}`} className="text-primary hover:underline whitespace-nowrap font-medium" title={`Call ${phone}`}>
+      📞 {phone}
+    </a>
+  )
+}
+
+function ContactAvatar({ contact, size = 'md' }) {
   const initials = [contact.first_name, contact.last_name].filter(Boolean).map(s => s[0]).join('').toUpperCase() || contact.email[0].toUpperCase()
   const fullName = [contact.first_name, contact.last_name].filter(Boolean).join(' ') || contact.email
+  const sz = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-14 h-14 text-xl' : 'w-11 h-11 text-base'
+  return contact.profile_photo
+    ? <img src={contact.profile_photo} alt={fullName} className={`${sz} rounded-full object-cover flex-shrink-0`} />
+    : <div className={`${sz} rounded-full bg-primary flex items-center justify-center text-primary-content font-bold flex-shrink-0`}>{initials}</div>
+}
+
+function ContactCard({ contact, onViewNotes }) {
+  const fullName = [contact.first_name, contact.last_name].filter(Boolean).join(' ') || contact.email
   return (
-    <div className="card bg-base-100 shadow border border-base-200">
-      <div className="card-body gap-3">
-        <div className="flex items-center gap-3">
-          {contact.profile_photo
-            ? <img src={contact.profile_photo} alt={fullName} className="w-12 h-12 rounded-full object-cover" />
-            : <div className="w-12 h-12 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-lg">{initials}</div>
-          }
+    <div className="card bg-base-100 border border-base-200 hover:shadow-md transition-shadow h-full">
+      <div className="card-body p-4 gap-3">
+        {/* Header row */}
+        <div className="flex items-start gap-3">
+          <ContactAvatar contact={contact} size="lg" />
           <div className="flex-1 min-w-0">
-            <div className="font-semibold truncate">{fullName}</div>
-            <div className="text-xs text-base-content/60 truncate">{contact.email}</div>
+            <div className="font-semibold text-base leading-tight">{fullName}</div>
+            <div className="text-xs text-base-content/55 truncate mt-0.5">{contact.email}</div>
+            <span className={`badge badge-xs mt-1 ${contact.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{contact.role}</span>
           </div>
-          <span className={`badge badge-sm ${contact.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{contact.role}</span>
         </div>
-        {contact.organization && <div className="text-sm text-base-content/70">{contact.organization}</div>}
-        {contact.phone_number && <div className="text-sm text-base-content/70">{contact.phone_number}</div>}
-        <div className="flex items-center justify-between mt-1">
+        {/* Details */}
+        <div className="space-y-1 text-sm">
+          {contact.organization && (
+            <div className="flex items-center gap-1.5 text-base-content/70">
+              <span className="text-base-content/40 text-xs">🏢</span>
+              <span className="truncate">{contact.organization}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-1.5">
+            <span className="text-base-content/40 text-xs">📞</span>
+            <PhoneLink phone={contact.phone_number} />
+          </div>
+          {contact.buy_box && (
+            <div className="flex items-start gap-1.5 text-base-content/60">
+              <span className="text-base-content/40 text-xs mt-0.5">📋</span>
+              <span className="text-xs line-clamp-2">{contact.buy_box}</span>
+            </div>
+          )}
+        </div>
+        {/* Footer */}
+        <div className="flex items-center justify-between pt-1 border-t border-base-200 mt-auto">
           <span className="badge badge-ghost badge-sm">{contact.note_count} {contact.note_count === 1 ? 'note' : 'notes'}</span>
           <button className="btn btn-sm btn-outline" onClick={() => onViewNotes(contact)}>View Notes</button>
         </div>
@@ -2655,9 +2689,12 @@ function ContactNotesDrawer({ contact, onClose, onRefreshContacts }) {
     <div className="fixed inset-0 z-50 flex">
       <div className="flex-1 bg-black/40" onClick={onClose} />
       <div className="w-full max-w-lg bg-base-100 shadow-2xl flex flex-col h-full">
-        <div className="flex items-center justify-between p-4 border-b border-base-200">
-          <h3 className="font-bold text-lg truncate">{fullName} — Notes</h3>
-          <button className="btn btn-sm btn-ghost btn-circle" onClick={onClose}>✕</button>
+        <div className="flex items-center justify-between p-4 border-b border-base-200 gap-2">
+          <div className="min-w-0">
+            <h3 className="font-bold text-lg truncate">{fullName}</h3>
+            {contact.phone_number && <PhoneLink phone={contact.phone_number} />}
+          </div>
+          <button className="btn btn-sm btn-ghost btn-circle flex-shrink-0" onClick={onClose}>✕</button>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
           {loading && <div className="text-center py-8 text-base-content/50">Loading…</div>}
@@ -2759,32 +2796,39 @@ function ContactsPage() {
 
       {!loading && view === 'list' && (
         <div className="overflow-x-auto rounded-box border border-base-200">
-          <table className="table table-zebra w-full">
+          <table className="table table-zebra w-full min-w-[640px]">
             <thead>
-              <tr>
-                <th>Photo</th><th>Name</th><th>Email</th><th>Role</th><th>Organization</th><th>Phone</th><th>Buy Box</th><th>Notes</th><th>Actions</th>
+              <tr className="text-xs uppercase tracking-wider text-base-content/50">
+                <th className="w-10">Photo</th>
+                <th>Name</th>
+                <th className="hidden md:table-cell">Email</th>
+                <th>Role</th>
+                <th className="hidden lg:table-cell">Organization</th>
+                <th>Phone</th>
+                <th className="hidden xl:table-cell">Buy Box</th>
+                <th className="text-center">Notes</th>
+                <th className="text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
               {contacts.map(c => {
-                const initials = [c.first_name, c.last_name].filter(Boolean).map(s => s[0]).join('').toUpperCase() || c.email[0].toUpperCase()
                 const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
                 return (
-                  <tr key={c.id}>
+                  <tr key={c.id} className="hover">
+                    <td><ContactAvatar contact={c} size="sm" /></td>
                     <td>
-                      {c.profile_photo
-                        ? <img src={c.profile_photo} alt={fullName} className="w-8 h-8 rounded-full object-cover" />
-                        : <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-content text-xs font-bold">{initials}</div>
-                      }
+                      <div className="font-medium whitespace-nowrap">{fullName}</div>
+                      <div className="text-xs text-base-content/50 md:hidden truncate max-w-[160px]">{c.email}</div>
                     </td>
-                    <td className="font-medium whitespace-nowrap">{fullName}</td>
-                    <td className="text-sm">{c.email}</td>
+                    <td className="hidden md:table-cell text-sm text-base-content/70">{c.email}</td>
                     <td><span className={`badge badge-sm ${c.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{c.role}</span></td>
-                    <td className="text-sm">{c.organization || '—'}</td>
-                    <td className="text-sm">{c.phone_number || '—'}</td>
-                    <td className="text-sm max-w-[150px] truncate">{c.buy_box || '—'}</td>
-                    <td><span className="badge badge-ghost badge-sm">{c.note_count}</span></td>
-                    <td><button className="btn btn-xs btn-outline" onClick={() => openNotes(c)}>Notes</button></td>
+                    <td className="hidden lg:table-cell text-sm">{c.organization || <span className="text-base-content/30">—</span>}</td>
+                    <td className="text-sm"><PhoneLink phone={c.phone_number} /></td>
+                    <td className="hidden xl:table-cell text-sm max-w-[180px]">
+                      <span className="line-clamp-2 text-base-content/60">{c.buy_box || <span className="text-base-content/30">—</span>}</span>
+                    </td>
+                    <td className="text-center"><span className="badge badge-ghost badge-sm">{c.note_count}</span></td>
+                    <td className="text-center"><button className="btn btn-xs btn-outline" onClick={() => openNotes(c)}>Notes</button></td>
                   </tr>
                 )
               })}
@@ -2794,27 +2838,46 @@ function ContactsPage() {
       )}
 
       {!loading && view === 'kanban' && (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {[['Admin', adminContacts], ['User', userContacts], ['Archived', otherContacts]].map(([col, items]) => (
-            <div key={col} className="bg-base-200 rounded-box p-4 space-y-3">
-              <h3 className="font-bold text-base mb-2">{col} <span className="badge badge-sm badge-ghost ml-1">{items.length}</span></h3>
-              {items.length === 0 && <div className="text-sm text-base-content/40 text-center py-4">Empty</div>}
-              {items.map(c => {
-                const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
-                return (
-                  <div key={c.id} className="card bg-base-100 shadow-sm">
-                    <div className="card-body p-3 gap-1">
-                      <div className="font-medium text-sm truncate">{fullName}</div>
-                      <div className="text-xs text-base-content/60 truncate">{c.email}</div>
-                      {c.organization && <div className="text-xs text-base-content/50">{c.organization}</div>}
-                      <div className="flex items-center justify-between mt-2">
-                        <span className="badge badge-ghost badge-xs">{c.note_count} notes</span>
-                        <button className="btn btn-xs btn-outline" onClick={() => openNotes(c)}>Notes</button>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[['Admin', adminContacts, 'badge-error'], ['User', userContacts, 'badge-primary'], ['Archived', otherContacts, 'badge-ghost']].map(([col, items, badgeCls]) => (
+            <div key={col} className="bg-base-200 rounded-box p-4 flex flex-col gap-3 min-h-[200px]">
+              <div className="flex items-center gap-2">
+                <h3 className="font-bold text-sm uppercase tracking-widest">{col}</h3>
+                <span className={`badge badge-sm ${badgeCls}`}>{items.length}</span>
+              </div>
+              {items.length === 0 && <div className="text-sm text-base-content/40 text-center py-6">Empty</div>}
+              <div className="space-y-2 overflow-y-auto max-h-[60vh] pr-0.5">
+                {items.map(c => {
+                  const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
+                  return (
+                    <div key={c.id} className="card bg-base-100 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="card-body p-3 gap-2">
+                        <div className="flex items-center gap-2">
+                          <ContactAvatar contact={c} size="sm" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">{fullName}</div>
+                            <div className="text-xs text-base-content/50 truncate">{c.email}</div>
+                          </div>
+                        </div>
+                        {c.organization && (
+                          <div className="text-xs text-base-content/60 truncate flex items-center gap-1">
+                            <span className="opacity-50">🏢</span> {c.organization}
+                          </div>
+                        )}
+                        {c.phone_number && (
+                          <div className="text-xs flex items-center gap-1">
+                            <PhoneLink phone={c.phone_number} />
+                          </div>
+                        )}
+                        <div className="flex items-center justify-between pt-1 border-t border-base-200">
+                          <span className="badge badge-ghost badge-xs">{c.note_count} {c.note_count === 1 ? 'note' : 'notes'}</span>
+                          <button className="btn btn-xs btn-outline" onClick={() => openNotes(c)}>Notes</button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )
-              })}
+                  )
+                })}
+              </div>
             </div>
           ))}
         </div>
