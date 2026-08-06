@@ -125,6 +125,55 @@ function Field({ label, required, children }) {
   )
 }
 
+/** Text input that displays numbers with comma formatting; stores raw digits in state */
+function NumericInput({ value, onChange, placeholder, className, disabled, allowDecimal }) {
+  const [display, setDisplay] = useState('')
+
+  useEffect(() => {
+    if (value === '' || value === null || value === undefined) { setDisplay(''); return }
+    const num = allowDecimal ? parseFloat(value) : parseInt(value, 10)
+    if (!isNaN(num)) setDisplay(num.toLocaleString('en-US', allowDecimal ? { maximumFractionDigits: 4 } : {}))
+    else setDisplay(String(value))
+  }, [value])
+
+  function handleChange(e) {
+    const raw = e.target.value.replace(/,/g, '')
+    if (raw === '' || raw === '-') { setDisplay(raw); onChange(''); return }
+    const num = allowDecimal ? parseFloat(raw) : parseInt(raw, 10)
+    if (!isNaN(num)) {
+      setDisplay(raw) // keep raw while typing so cursor stays natural
+      onChange(raw)
+    } else if (/^[\d.]*$/.test(raw)) {
+      setDisplay(raw); onChange(raw)
+    }
+  }
+
+  function handleBlur() {
+    if (value === '' || value === null || value === undefined) { setDisplay(''); return }
+    const num = allowDecimal ? parseFloat(value) : parseInt(value, 10)
+    if (!isNaN(num)) setDisplay(num.toLocaleString('en-US', allowDecimal ? { maximumFractionDigits: 4 } : {}))
+  }
+
+  function handleFocus() {
+    // Show plain number while editing
+    setDisplay(value !== '' && value !== null && value !== undefined ? String(value) : '')
+  }
+
+  return (
+    <input
+      type="text"
+      inputMode={allowDecimal ? 'decimal' : 'numeric'}
+      value={display}
+      onChange={handleChange}
+      onBlur={handleBlur}
+      onFocus={handleFocus}
+      placeholder={placeholder}
+      className={className}
+      disabled={disabled}
+    />
+  )
+}
+
 /* ─── Property Card Carousel ──────────────────────────────────── */
 
 function PropertyCardCarousel({ propertyId, onClick }) {
@@ -1032,12 +1081,12 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
             <div className="divider text-xs text-base-content/40 my-1">Financials</div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Field label="Price ($)">
-                <input type="number" placeholder="0" value={price}
-                  onChange={e => setPrice(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+                <NumericInput placeholder="0" value={price}
+                  onChange={setPrice} className="input input-bordered w-full" disabled={!isAdmin} />
               </Field>
               <Field label="Square Feet">
-                <input type="number" placeholder="0" value={sqft}
-                  onChange={e => setSqft(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+                <NumericInput placeholder="0" value={sqft}
+                  onChange={setSqft} className="input input-bordered w-full" disabled={!isAdmin} />
               </Field>
               <Field label="Lot Size (acres)">
                 <input type="number" placeholder="0.00" step="0.01" value={lot}
@@ -1069,8 +1118,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
             </div>
             {onMajorRoad && (
               <Field label="Traffic (VPD — vehicles per day)">
-                <input type="number" placeholder="e.g. 25000" value={trafficVpd}
-                  onChange={e => setTrafficVpd(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+                <NumericInput placeholder="e.g. 25,000" value={trafficVpd}
+                  onChange={setTrafficVpd} className="input input-bordered w-full" disabled={!isAdmin} />
               </Field>
             )}
 
@@ -1183,16 +1232,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
             <div className="divider text-xs text-base-content/40 my-1">Demographics</div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Field label="Household Income Min ($)">
-                <input type="number" placeholder="e.g. 45000" value={incomeMin}
-                  onChange={e => setIncomeMin(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+                <NumericInput placeholder="e.g. 45,000" value={incomeMin}
+                  onChange={setIncomeMin} className="input input-bordered w-full" disabled={!isAdmin} />
               </Field>
               <Field label="Household Income Max ($)">
-                <input type="number" placeholder="e.g. 120000" value={incomeMax}
-                  onChange={e => setIncomeMax(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+                <NumericInput placeholder="e.g. 120,000" value={incomeMax}
+                  onChange={setIncomeMax} className="input input-bordered w-full" disabled={!isAdmin} />
               </Field>
               <Field label="Population Density (per sq mi)">
-                <input type="number" placeholder="e.g. 3500" value={popDensity}
-                  onChange={e => setPopDensity(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+                <NumericInput placeholder="e.g. 3,500" value={popDensity}
+                  onChange={setPopDensity} className="input input-bordered w-full" disabled={!isAdmin} />
               </Field>
             </div>
 
