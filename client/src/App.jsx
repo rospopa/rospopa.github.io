@@ -632,6 +632,30 @@ function AuditLogs() {
                 let logDetails = {}
                 try { logDetails = JSON.parse(log.details || '{}') } catch {}
                 const changes = logDetails.changes || null
+
+                const FIELD_LABELS = {
+                  pin: 'PIN', address: 'Address', county: 'County',
+                  price: 'Price ($)', square_feet: 'Square Feet', lot_size: 'Lot Size (ac)',
+                  year_built: 'Year Built', on_major_road: 'On Major Road', traffic_vpd: 'Traffic VPD',
+                  on_corner_lot: 'Corner Lot', direct_water_access: 'Direct Water Access',
+                  next_to_public_land: 'Next to Public Land', major_interstates: 'Major Interstates',
+                  household_income_min: 'Income Min ($)', household_income_max: 'Income Max ($)',
+                  population_density: 'Population Density', logistics_hubs: 'Logistics Hubs',
+                  landmarks: 'Landmarks', water_sources: 'Water Sources', military_bases: 'Military Bases',
+                }
+                function fmtVal(v) {
+                  if (v === null || v === undefined || v === '') return null
+                  if (typeof v === 'boolean') return v ? 'Yes' : 'No'
+                  if (Array.isArray(v)) {
+                    if (v.length === 0) return null
+                    return v.map(item => item.name ? `${item.name}${item.distance ? ` (${item.distance}mi)` : ''}` : JSON.stringify(item)).join(', ')
+                  }
+                  const n = Number(v)
+                  if (!isNaN(n) && v !== '' && ['price','square_feet','traffic_vpd','household_income_min','household_income_max','population_density'].some(f => changes && changes[Object.keys(changes).find(k => k === f)] !== undefined))
+                    return n.toLocaleString()
+                  return String(v)
+                }
+
                 return (
                   <div key={log.id} className="flex gap-3 items-start py-2.5 px-4 rounded-lg hover:bg-base-200 border-b border-base-300/50">
                     <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${log.action === 'login_failed' ? 'bg-error' : log.action === 'login' || log.action === 'logout' ? 'bg-success' : 'bg-primary'}`} />
@@ -642,14 +666,18 @@ function AuditLogs() {
                       <div className="text-xs text-base-content/40 mt-0.5 md:hidden">{ts}</div>
                       {changes && Object.keys(changes).length > 0 && (
                         <div className="mt-1.5 space-y-0.5">
-                          {Object.entries(changes).map(([field, { from, to }]) => (
-                            <div key={field} className="text-xs font-mono bg-base-300/50 rounded px-2 py-0.5 flex flex-wrap gap-x-2">
-                              <span className="font-semibold text-base-content/70">{field}:</span>
-                              <span className="text-error/80 line-through">{from === null || from === undefined || from === '' ? <em className="not-italic text-base-content/30">empty</em> : String(from)}</span>
-                              <span className="text-base-content/40">→</span>
-                              <span className="text-success/80">{to === null || to === undefined || to === '' ? <em className="not-italic text-base-content/30">empty</em> : String(to)}</span>
-                            </div>
-                          ))}
+                          {Object.entries(changes).map(([field, { from, to }]) => {
+                            const fromStr = fmtVal(from)
+                            const toStr = fmtVal(to)
+                            return (
+                              <div key={field} className="text-xs font-mono bg-base-300/50 rounded px-2 py-0.5 flex flex-wrap gap-x-2 items-center">
+                                <span className="font-semibold text-base-content/70 not-italic font-sans">{FIELD_LABELS[field] || field}:</span>
+                                {fromStr ? <span className="text-error/80 line-through">{fromStr}</span> : <em className="text-base-content/30">empty</em>}
+                                <span className="text-base-content/40">→</span>
+                                {toStr ? <span className="text-success/80">{toStr}</span> : <em className="text-base-content/30">empty</em>}
+                              </div>
+                            )
+                          })}
                         </div>
                       )}
                     </div>

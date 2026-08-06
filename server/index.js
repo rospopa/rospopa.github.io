@@ -916,14 +916,28 @@ app.put('/api/properties/:id', async (req, res) => {
       water_sources: JSON.stringify(water_sources || []), military_bases: JSON.stringify(military_bases || [])
     };
 
-    // Build field-level diff
+    // Build field-level diff — normalize types for accurate comparison
     const changes = {};
+    const arrayFields = new Set(['major_interstates', 'logistics_hubs', 'landmarks', 'water_sources', 'military_bases']);
     for (const key of Object.keys(newVals)) {
-      const oldVal = Array.isArray(old[key]) ? JSON.stringify(old[key]) : (old[key] ?? null);
-      const newVal = newVals[key] ?? null;
-      const oldStr = oldVal === null ? null : String(oldVal);
-      const newStr = newVal === null ? null : String(newVal);
-      if (oldStr !== newStr) changes[key] = { from: oldVal, to: newVals[key] };
+      let oldNorm, newNorm, oldDisplay, newDisplay;
+      if (arrayFields.has(key)) {
+        // Both sides normalised to JSON string; treat null/undefined DB value as "[]"
+        oldNorm = JSON.stringify(old[key] ?? []);
+        newNorm = newVals[key]; // already JSON.stringify'd
+        oldDisplay = old[key] ?? [];
+        newDisplay = JSON.parse(newNorm);
+      } else {
+        // Scalar: compare as strings, treat null/0/'' consistently
+        const oldRaw = old[key] ?? null;
+        const newRaw = newVals[key] ?? null;
+        // Convert numbers to string for comparison, keep null as null
+        oldNorm = oldRaw === null ? '' : String(oldRaw);
+        newNorm = newRaw === null ? '' : String(newRaw);
+        oldDisplay = oldRaw;
+        newDisplay = newRaw;
+      }
+      if (oldNorm !== newNorm) changes[key] = { from: oldDisplay, to: newDisplay };
     }
 
     const result = await pool.query(
