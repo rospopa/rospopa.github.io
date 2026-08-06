@@ -830,11 +830,6 @@ function AddUserForm({ onCreated }) {
           </select>
         </Field>
       </div>
-      <Field label="Buy Box">
-        <textarea placeholder="Describe investment criteria, preferred asset types, geography, deal size…"
-          value={buyBox} onChange={e => setBuyBox(e.target.value)}
-          className="textarea textarea-bordered w-full leading-relaxed" rows={4} />
-      </Field>
       {msg && <div className={`alert ${msgType === 'error' ? 'alert-error' : 'alert-success'} text-sm`}>{msg}</div>}
       <button className="btn btn-primary w-full" type="submit" disabled={loading || !photo}>
         {loading ? 'Creating…' : 'Create User'}
@@ -1867,12 +1862,6 @@ function EditUserModal({ open, user, onClose, onSave }) {
             </select>
           </Field>
 
-          <Field label="Buy Box">
-            <textarea placeholder="Describe investment criteria, preferred asset types, geography, deal size…"
-              value={buyBox} onChange={e => setBuyBox(e.target.value)}
-              className="textarea textarea-bordered w-full leading-relaxed" rows={4} />
-          </Field>
-
           {err && <div className="alert alert-error text-sm">{err}</div>}
 
           <div className="flex gap-2 pt-2">
@@ -2372,15 +2361,6 @@ function ProfilePage({ currentUser, onUpdate }) {
                 onChange={e => setPhoneNumber(formatPhone(e.target.value))} className="input input-bordered w-full" />
             </Field>
           </div>
-          <Field label="Buy Box">
-            <textarea
-              placeholder="Describe your investment criteria — preferred asset types, geography, deal size, cap rate targets…"
-              value={buyBox}
-              onChange={e => setBuyBox(e.target.value)}
-              className="textarea textarea-bordered w-full leading-relaxed"
-              rows={5}
-            />
-          </Field>
           {msg && (
             <div className={`alert text-sm ${msgType === 'error' ? 'alert-error' : 'alert-success'}`}>{msg}</div>
           )}
@@ -2614,9 +2594,8 @@ function ContactCard({ contact, onViewNotes }) {
           )}
         </div>
         {/* Footer */}
-        <div className="flex items-center justify-between pt-1 border-t border-base-200 mt-auto">
+        <div className="flex items-center pt-1 border-t border-base-200 mt-auto">
           <span className="badge badge-ghost badge-sm">{contact.note_count} {contact.note_count === 1 ? 'note' : 'notes'}</span>
-          <button className="btn btn-sm btn-outline" onClick={() => onViewNotes(contact)}>View Notes</button>
         </div>
       </div>
     </div>
@@ -2753,7 +2732,50 @@ function ContactNotesDrawer({ contact, onClose, onRefreshContacts }) {
   )
 }
 
-function ContactDetailPage({ contactId, onBack, onOpenNotes }) {
+function BuyBoxEditor({ userId, initialValue }) {
+  const [value, setValue] = useState(initialValue || '')
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [savedSignal, setSavedSignal] = useState(0)
+
+  const handleSave = async () => {
+    setSaving(true)
+    try {
+      await apiFetch(`/api/contacts/${userId}/buybox`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ buy_box: value.trim() || null })
+      })
+      setSavedSignal(s => s + 1)
+      setEditing(false)
+    } catch { /* silent */ }
+    setSaving(false)
+  }
+
+  if (!editing) return (
+    <div className="group relative">
+      <p className="text-sm text-base-content/70 whitespace-pre-wrap min-h-[24px]">
+        {value || <span className="text-base-content/30 italic">Not set — click to add</span>}
+      </p>
+      <button className="btn btn-xs btn-ghost mt-1 opacity-60 group-hover:opacity-100" onClick={() => setEditing(true)}>
+        ✏️ Edit
+      </button>
+    </div>
+  )
+
+  return (
+    <div className="space-y-2">
+      <textarea className="textarea textarea-bordered w-full text-sm leading-relaxed" rows={4}
+        placeholder="Describe investment criteria — preferred asset types, geography, deal size, cap rate targets…"
+        value={value} onChange={e => setValue(e.target.value)} autoFocus />
+      <div className="flex gap-2">
+        <SaveButton onClick={handleSave} loading={saving} savedSignal={savedSignal} label="Save" className="btn-sm" />
+        <button className="btn btn-sm btn-ghost" onClick={() => { setValue(initialValue || ''); setEditing(false) }}>Cancel</button>
+      </div>
+    </div>
+  )
+}
+
+function ContactDetailPage({ contactId, onBack }) {
   const [data, setData] = useState(null)
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -2853,7 +2875,13 @@ function ContactDetailPage({ contactId, onBack, onOpenNotes }) {
           {user.buy_box && (
             <div className="mt-4 pt-4 border-t border-base-200">
               <p className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-1">Buy Box</p>
-              <p className="text-sm text-base-content/70 whitespace-pre-wrap">{user.buy_box}</p>
+              <BuyBoxEditor userId={user.id} initialValue={user.buy_box} />
+            </div>
+          )}
+          {!user.buy_box && (
+            <div className="mt-4 pt-4 border-t border-base-200">
+              <p className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-1">Buy Box</p>
+              <BuyBoxEditor userId={user.id} initialValue="" />
             </div>
           )}
         </div>
@@ -3029,7 +3057,6 @@ function ContactsPage() {
                 <th>Phone</th>
                 <th className="hidden xl:table-cell">Buy Box</th>
                 <th className="text-center">Notes</th>
-                <th className="text-center">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -3050,7 +3077,6 @@ function ContactsPage() {
                       <span className="line-clamp-2 text-base-content/60">{c.buy_box || <span className="text-base-content/30">—</span>}</span>
                     </td>
                     <td className="text-center"><span className="badge badge-ghost badge-sm">{c.note_count}</span></td>
-                    <td className="text-center"><button className="btn btn-xs btn-outline" onClick={e => { e.stopPropagation(); openNotes(c) }}>Notes</button></td>
                   </tr>
                 )
               })}
@@ -3088,9 +3114,8 @@ function ContactsPage() {
                        {c.phone_number && (
                          <div className="text-xs"><PhoneLink phone={c.phone_number} /></div>
                        )}
-                       <div className="flex items-center justify-between pt-1 border-t border-base-200">
+                       <div className="flex items-center pt-1 border-t border-base-200">
                          <span className="badge badge-ghost badge-xs">{c.note_count} {c.note_count === 1 ? 'note' : 'notes'}</span>
-                         <button className="btn btn-xs btn-outline" onClick={e => { e.stopPropagation(); openNotes(c) }}>Notes</button>
                        </div>
                       </div>
                     </div>

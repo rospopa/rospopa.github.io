@@ -681,6 +681,20 @@ app.get('/api/contacts/:id', async (req, res) => {
   }
 });
 
+app.patch('/api/contacts/:id/buybox', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const userId = Number(req.params.id);
+  if (!Number.isFinite(userId)) return res.status(400).json({ error: 'invalid id' });
+  const { buy_box } = req.body || {};
+  try {
+    await pool.query('UPDATE users SET buy_box=$1, updated_at=CURRENT_TIMESTAMP WHERE id=$2', [buy_box || null, userId]);
+    await logAudit(req.session.user.id, req.session.user.email, 'edit_user', { changed_fields: ['buy_box'] }, userId, null, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
 app.get('/api/contacts/:id/notes', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const userId = Number(req.params.id);
