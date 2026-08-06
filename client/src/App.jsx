@@ -1998,19 +1998,19 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Property</div>
                 <Field label="Price ($)">
                   <NumericInput placeholder="0" value={price} onChange={setPrice}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Square Feet">
                   <NumericInput placeholder="0" value={sqft} onChange={setSqft}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Lot Size (acres)">
                   <input type="number" placeholder="0.00" step="0.01" value={lot}
-                    onChange={e => setLot(e.target.value)} className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    onChange={e => setLot(e.target.value)} className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Year Built">
                   <input type="number" placeholder="e.g. 1998" value={yearBuilt}
-                    onChange={e => setYearBuilt(e.target.value)} className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    onChange={e => setYearBuilt(e.target.value)} className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
               </div>
 
@@ -2019,39 +2019,39 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Investment Metrics</div>
                 <Field label="GRM">
                   <NumericInput placeholder="e.g. 8.5" value={grm} onChange={setGrm}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} allowDecimal />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Cap Rate (%)">
                   <NumericInput placeholder="e.g. 6.5" value={capRate} onChange={setCapRate}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} allowDecimal />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Cash-on-Cash (%)">
                   <NumericInput placeholder="e.g. 8.0" value={cashOnCash} onChange={setCashOnCash}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} allowDecimal />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="IRR (%)">
                   <NumericInput placeholder="e.g. 12.0" value={irr} onChange={setIrr}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} allowDecimal />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Price / Unit ($)">
                   <NumericInput placeholder="e.g. 150,000" value={pricePerUnit} onChange={setPricePerUnit}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} allowDecimal />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Price / Sq Ft ($)">
                   <NumericInput placeholder="e.g. 125" value={pricePerSqft} onChange={setPricePerSqft}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} allowDecimal />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Rent-to-Sales (%)">
                   <NumericInput placeholder="e.g. 5.0" value={rentToSales} onChange={setRentToSales}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} allowDecimal />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="# SKUs">
                   <NumericInput placeholder="e.g. 500" value={numSkus} onChange={setNumSkus}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Price / Acre ($)">
                   <NumericInput placeholder="e.g. 50,000" value={pricePerAcre} onChange={setPricePerAcre}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} allowDecimal />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
               </div>
 
@@ -2060,11 +2060,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Electrical</div>
                 <Field label="Voltage (V)">
                   <NumericInput placeholder="e.g. 480" value={elecVoltage} onChange={setElecVoltage}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Amperage (A)">
                   <NumericInput placeholder="e.g. 400" value={elecAmperage} onChange={setElecAmperage}
-                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
               </div>
 
