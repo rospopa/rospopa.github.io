@@ -1234,6 +1234,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   // Assignment state
   const [allUsers, setAllUsers] = useState([])
   const [assignLoading, setAssignLoading] = useState(false)
+  const [viewContactId, setViewContactId] = useState(null)
 
   function loadProperty(p) {
     setPin(p.pin || '')
@@ -1793,23 +1794,43 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
         {/* Assign Users tab (admin only) */}
         {tab === 'assign' && isAdmin && (
           <div className="space-y-3">
-            <p className="text-sm text-base-content/50 mb-4">Toggle to assign or unassign users. Assigned users can view this property.</p>
+            <p className="text-sm text-base-content/50 mb-4">Toggle to assign or unassign users. Click a user to view their full contact profile.</p>
             {allUsers.length === 0
               ? <p className="text-center text-base-content/30 py-8">No users found</p>
               : (
                 <div className="divide-y divide-base-200">
-                  {allUsers.map(u => (
-                    <div key={u.id} className="flex items-center justify-between py-3">
-                      <span className="text-sm">{u.email}</span>
-                      <input
-                        type="checkbox"
-                        className="toggle toggle-primary toggle-sm"
-                        checked={!!u.assigned}
-                        disabled={assignLoading}
-                        onChange={() => toggleAssign(u.id, !!u.assigned)}
-                      />
-                    </div>
-                  ))}
+                  {allUsers.map(u => {
+                    const displayName = [u.first_name, u.last_name].filter(Boolean).join(' ') || u.email
+                    const initials = [u.first_name?.[0], u.last_name?.[0]].filter(Boolean).join('').toUpperCase() || u.email[0].toUpperCase()
+                    return (
+                      <div key={u.id} className="flex items-center gap-3 py-3">
+                        {/* Avatar */}
+                        <div className="w-8 h-8 rounded-full bg-base-300 flex-shrink-0 overflow-hidden flex items-center justify-center text-xs font-semibold">
+                          {u.profile_photo
+                            ? <img src={u.profile_photo} alt={displayName} className="w-full h-full object-cover" />
+                            : initials}
+                        </div>
+                        {/* Info */}
+                        <div className="flex-1 min-w-0">
+                          <button
+                            className="text-sm font-medium text-left hover:underline hover:text-primary truncate block w-full"
+                            onClick={() => setViewContactId(u.id)}
+                          >
+                            {displayName}
+                          </button>
+                          {u.organization && <p className="text-xs text-base-content/50 truncate">{u.organization}</p>}
+                        </div>
+                        {/* Toggle */}
+                        <input
+                          type="checkbox"
+                          className="toggle toggle-primary toggle-sm flex-shrink-0"
+                          checked={!!u.assigned}
+                          disabled={assignLoading}
+                          onChange={() => toggleAssign(u.id, !!u.assigned)}
+                        />
+                      </div>
+                    )
+                  })}
                 </div>
               )
             }
@@ -1921,6 +1942,19 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
 
       </div>
       <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
+
+      {/* Contact detail overlay — opened from Assign Users tab */}
+      {viewContactId && (
+        <div className="modal modal-open" style={{ zIndex: 60 }}>
+          <div className="modal-box p-0 w-screen h-screen max-w-none max-h-none rounded-none overflow-y-auto">
+            <ContactDetailPage
+              contactId={viewContactId}
+              onBack={() => setViewContactId(null)}
+              isAdmin={isAdmin}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

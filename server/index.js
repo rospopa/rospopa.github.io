@@ -1612,7 +1612,7 @@ app.get('/api/properties/:id/users', async (req, res) => {
 
   try {
     const result = await pool.query(
-      `SELECT u.id, u.email,
+      `SELECT u.id, u.email, u.first_name, u.last_name, u.organization, u.phone_number, u.profile_photo, u.role,
               CASE WHEN pa.id IS NOT NULL THEN 1 ELSE 0 END as assigned
        FROM users u
        LEFT JOIN property_assignments pa ON u.id = pa.user_id AND pa.property_id = $1
