@@ -986,7 +986,7 @@ function AuditLogs() {
                   landmarks: 'Landmarks', water_sources: 'Water Sources', military_bases: 'Military Bases',
                   first_name: 'First Name', last_name: 'Last Name', organization: 'Organization',
                   phone_number: 'Phone', buy_box: 'Buy Box', role: 'Role',
-                  grm: 'GRM', cap_rate: 'Cap Rate (%)', cash_on_cash: 'Cash-on-Cash (%)',
+                  asset_type: 'Asset Type', grm: 'GRM', cap_rate: 'Cap Rate (%)', cash_on_cash: 'Cash-on-Cash (%)',
                   irr: 'IRR (%)', price_per_unit: 'Price/Unit ($)', price_per_sqft: 'Price/SqFt ($)',
                   rent_to_sales_ratio: 'Rent-to-Sales Ratio (%)', num_skus: '# SKUs',
                   price_per_acre: 'Price/Acre ($)', electrical_voltage: 'Voltage (V)', electrical_amperage: 'Amperage (A)',
@@ -1310,6 +1310,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [pricePerAcre, setPricePerAcre] = useState('')
   const [elecVoltage, setElecVoltage] = useState('')
   const [elecAmperage, setElecAmperage] = useState('')
+  const [assetType, setAssetType] = useState('')
   const [saving, setSaving] = useState(false)
   const [savedSignal, setSavedSignal] = useState(0)
   const [media, setMedia] = useState([])
@@ -1359,6 +1360,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     setPricePerAcre(p.price_per_acre ?? '')
     setElecVoltage(p.electrical_voltage ?? '')
     setElecAmperage(p.electrical_amperage ?? '')
+    setAssetType(p.asset_type || '')
   }
 
   useEffect(() => {
@@ -1373,7 +1375,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       setIncomeMin(''); setIncomeMax(''); setPopDensity(''); setPropStatus('New')
       setGrm(''); setCapRate(''); setCashOnCash(''); setIrr('')
       setPricePerUnit(''); setPricePerSqft(''); setRentToSales(''); setNumSkus('')
-      setPricePerAcre(''); setElecVoltage(''); setElecAmperage('')
+      setPricePerAcre(''); setElecVoltage(''); setElecAmperage(''); setAssetType('')
       setTab('details')
     }
   }, [property, open])
@@ -1474,6 +1476,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       price_per_acre: pricePerAcre !== '' ? Number(pricePerAcre) : null,
       electrical_voltage: elecVoltage !== '' ? Number(elecVoltage) : null,
       electrical_amperage: elecAmperage !== '' ? Number(elecAmperage) : null,
+      asset_type: assetType || null,
     })
     setSaving(false)
     setSavedSignal(s => s + 1)
@@ -1623,6 +1626,18 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                 {['New','Under Review','Active','Other'].map(s => (
                   <option key={s} value={s}>{s}</option>
                 ))}
+              </select>
+            </Field>
+
+            {/* Asset Type */}
+            <Field label="Asset Type">
+              <select value={assetType} onChange={e => setAssetType(e.target.value)}
+                className="select select-bordered w-full" disabled={!isAdmin}>
+                <option value="">— Select —</option>
+                {['Multifamily','Retail','Net Lease','Office','Industrial',
+                  'Hospitality / Golf','Student Housing','Seniors Housing','Self-Storage',
+                  'Medical Office','Affordable Housing','Manufactured Housing','Land & Redevelopment'
+                ].map(t => <option key={t} value={t}>{t}</option>)}
               </select>
             </Field>
 

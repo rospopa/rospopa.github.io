@@ -1156,7 +1156,11 @@ app.put('/api/properties/:id', async (req, res) => {
     price, square_feet, lot_size, year_built,
     on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
     major_interstates, household_income_min, household_income_max, population_density,
-    logistics_hubs, landmarks, water_sources, military_bases
+    logistics_hubs, landmarks, water_sources, military_bases,
+    status,
+    grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+    rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+    asset_type
   } = req.body || {};
   if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
   if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
@@ -1168,7 +1172,7 @@ app.put('/api/properties/:id', async (req, res) => {
       `SELECT pin, address, county, price, square_feet, lot_size, year_built,
               on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
               major_interstates, household_income_min, household_income_max, population_density,
-              logistics_hubs, landmarks, water_sources, military_bases,
+              logistics_hubs, landmarks, water_sources, military_bases, status,
               grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
               rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
               asset_type
@@ -1180,9 +1184,11 @@ app.put('/api/properties/:id', async (req, res) => {
     const newVals = {
       pin: pin.trim(), address: address.trim(), county: county.trim(),
       price: price || null, square_feet: square_feet || null, lot_size: lot_size || null, year_built: year_built || null,
-      on_major_road: on_major_road || false, traffic_vpd: traffic_vpd || null,
-      on_corner_lot: on_corner_lot || false, direct_water_access: direct_water_access || false,
-      next_to_public_land: next_to_public_land || false,
+      on_major_road: on_major_road === true || on_major_road === 'true',
+      traffic_vpd: traffic_vpd || null,
+      on_corner_lot: on_corner_lot === true || on_corner_lot === 'true',
+      direct_water_access: direct_water_access === true || direct_water_access === 'true',
+      next_to_public_land: next_to_public_land === true || next_to_public_land === 'true',
       major_interstates: JSON.stringify(major_interstates || []),
       household_income_min: household_income_min || null, household_income_max: household_income_max || null,
       population_density: population_density || null,
@@ -1193,7 +1199,8 @@ app.put('/api/properties/:id', async (req, res) => {
       price_per_unit: price_per_unit || null, price_per_sqft: price_per_sqft || null,
       rent_to_sales_ratio: rent_to_sales_ratio || null, num_skus: num_skus || null,
       price_per_acre: price_per_acre || null,
-      electrical_voltage: electrical_voltage || null, electrical_amperage: electrical_amperage || null
+      electrical_voltage: electrical_voltage || null, electrical_amperage: electrical_amperage || null,
+      asset_type: asset_type || null
     };
 
     // Build field-level diff — normalize types for accurate comparison
@@ -1233,8 +1240,9 @@ app.put('/api/properties/:id', async (req, res) => {
         price_per_unit=$26, price_per_sqft=$27,
         rent_to_sales_ratio=$28, num_skus=$29, price_per_acre=$30,
         electrical_voltage=$31, electrical_amperage=$32,
+        asset_type=$33,
         updated_at=CURRENT_TIMESTAMP
-       WHERE id=$33`,
+       WHERE id=$34`,
       [newVals.pin, newVals.address, newVals.county,
        newVals.price, newVals.square_feet, newVals.lot_size, newVals.year_built,
        newVals.on_major_road, newVals.traffic_vpd, newVals.on_corner_lot,
@@ -1248,6 +1256,7 @@ app.put('/api/properties/:id', async (req, res) => {
        newVals.price_per_unit, newVals.price_per_sqft,
        newVals.rent_to_sales_ratio, newVals.num_skus, newVals.price_per_acre,
        newVals.electrical_voltage, newVals.electrical_amperage,
+       newVals.asset_type,
        propId]
     );
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
