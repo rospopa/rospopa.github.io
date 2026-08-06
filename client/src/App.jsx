@@ -549,7 +549,7 @@ function Avatar({ src, name, size = 'md' }) {
 
 /* ─── Users Table ─────────────────────────────────────────────── */
 
-function UsersTable({ users, onReload }) {
+function UsersTable({ users, onReload, onEdit }) {
   const [query, setQuery] = useState('')
   const [perPage, setPerPage] = useState(10)
   const [page, setPage] = useState(1)
@@ -584,11 +584,12 @@ function UsersTable({ users, onReload }) {
               <th className="py-3 px-4">Phone</th>
               <th className="py-3 px-4">Created</th>
               <th className="py-3 px-4">Last Updated</th>
+              <th className="py-3 px-4 text-right">Actions</th>
             </tr>
           </thead>
           <tbody>
             {users.length === 0
-              ? <tr><td colSpan={6} className="text-center py-8 text-base-content/40">No users found</td></tr>
+              ? <tr><td colSpan={7} className="text-center py-8 text-base-content/40">No users found</td></tr>
               : users.map((u, i) => (
                 <tr key={i}>
                   <td className="py-3 px-4">
@@ -607,6 +608,9 @@ function UsersTable({ users, onReload }) {
                   <td className="py-3 px-4">{u.phone_number || <span className="text-base-content/30">—</span>}</td>
                   <td className="py-3 px-4 text-xs text-base-content/50">{u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
                   <td className="py-3 px-4 text-xs text-base-content/50">{u.updated_at ? new Date(u.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
+                  <td className="py-3 px-4 text-right">
+                    <button className="btn btn-xs btn-ghost" onClick={() => onEdit?.(u)}>Edit</button>
+                  </td>
                 </tr>
               ))
             }
@@ -1240,6 +1244,96 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   )
 }
 
+/* ─── Edit User Modal ──────────────────────────────────────────── */
+
+function EditUserModal({ open, user, onClose, onSave }) {
+  const [firstName, setFirstName] = useState('')
+  const [lastName, setLastName] = useState('')
+  const [organization, setOrganization] = useState('')
+  const [phoneNumber, setPhoneNumber] = useState('')
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    if (open && user) {
+      setFirstName(user.first_name || '')
+      setLastName(user.last_name || '')
+      setOrganization(user.organization || '')
+      setPhoneNumber(user.phone_number || '')
+    }
+  }, [open, user])
+
+  async function handleSave() {
+    setSaving(true)
+    try {
+      await apiFetch(`/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: firstName || null,
+          last_name: lastName || null,
+          organization: organization || null,
+          phone_number: phoneNumber || null
+        })
+      })
+      onSave()
+      onClose()
+    } catch (e) {
+      console.error('Save failed:', e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  if (!open || !user) return null
+
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box w-full max-w-md">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="font-bold text-lg">Edit User</h3>
+          <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
+        </div>
+
+        <div className="space-y-4">
+          <div className="text-sm text-base-content/50 pb-2">
+            <p className="font-medium">{user.email}</p>
+            <p className="text-xs">ID: {user.id}</p>
+          </div>
+
+          <Field label="First Name">
+            <input type="text" placeholder="First name" value={firstName}
+              onChange={e => setFirstName(e.target.value)} className="input input-bordered w-full" />
+          </Field>
+
+          <Field label="Last Name">
+            <input type="text" placeholder="Last name" value={lastName}
+              onChange={e => setLastName(e.target.value)} className="input input-bordered w-full" />
+          </Field>
+
+          <Field label="Organization">
+            <input type="text" placeholder="Company or firm" value={organization}
+              onChange={e => setOrganization(e.target.value)} className="input input-bordered w-full" />
+          </Field>
+
+          <Field label="Phone Number">
+            <input type="text" placeholder="+1 (000) 000-0000" value={phoneNumber}
+              onChange={e => setPhoneNumber(formatPhone(e.target.value))} className="input input-bordered w-full" />
+          </Field>
+
+          <div className="flex gap-2 pt-4">
+            <button className="btn btn-ghost flex-1" onClick={onClose}>Cancel</button>
+            <button className="btn btn-primary flex-1" onClick={handleSave} disabled={saving}>
+              {saving ? 'Saving…' : 'Save'}
+            </button>
+          </div>
+        </div>
+
+        <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
+      </div>
+    </div>
+  )
+}
+
 /* ─── Properties Page ─────────────────────────────────────────── */
 
 function PropertiesPage({ user }) {
@@ -1744,6 +1838,8 @@ export default function App() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loginPreview, setLoginPreview] = useState(null) // {first_name, last_name, profile_photo} | null
   const [loginStatus, setLoginStatus] = useState(null)   // null | 'verifying' | 'success' | 'denied'
+  const [editingUser, setEditingUser] = useState(null)   // user object or null
+  const [showEditUserModal, setShowEditUserModal] = useState(false)
 
   // Show/hide reCAPTCHA badge based on whether user is identified
   useEffect(() => {
@@ -2032,8 +2128,18 @@ export default function App() {
             </div>
             <div>
               <h3 className="text-base font-semibold uppercase tracking-widest text-base-content/50 mb-4">All Users</h3>
-              <UsersTable users={users} onReload={setUsers} />
+              <UsersTable users={users} onReload={setUsers} onEdit={u => { setEditingUser(u); setShowEditUserModal(true) }} />
             </div>
+
+            <EditUserModal
+              open={showEditUserModal}
+              user={editingUser}
+              onClose={() => setShowEditUserModal(false)}
+              onSave={async () => {
+                const data = await apiFetch('/api/users')
+                setUsers(data.users || [])
+              }}
+            />
           </div>
         )}
 
