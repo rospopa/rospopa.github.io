@@ -218,6 +218,58 @@ function PropertyModalCarousel({ propertyId }) {
 
 /* ─── Logo ────────────────────────────────────────────────────── */
 
+function RecaptchaShield({ status }) {
+  // status: null | 'verifying' | 'success' | 'denied'
+  const r = 22, circ = 2 * Math.PI * r
+  const color = status === 'denied' ? '#ef4444' : '#22c55e'
+  const label = status === 'verifying' ? 'Verifying…' : status === 'success' ? 'Verified' : status === 'denied' ? 'Denied' : 'Protected by reCAPTCHA'
+
+  return (
+    <div className="flex flex-col items-center gap-1 select-none" aria-live="polite">
+      <div className="relative w-14 h-14 flex items-center justify-center">
+        {/* Spinning progress ring */}
+        <svg className="absolute inset-0 w-14 h-14" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
+          <circle cx="28" cy="28" r={r} fill="none" stroke={status ? color + '33' : '#0001'} strokeWidth="3" />
+          {status === 'verifying' && (
+            <circle cx="28" cy="28" r={r} fill="none" stroke={color} strokeWidth="3"
+              strokeDasharray={circ} strokeDashoffset={circ * 0.7}
+              strokeLinecap="round">
+              <animateTransform attributeName="transform" type="rotate" from="0 28 28" to="360 28 28" dur="1s" repeatCount="indefinite" />
+            </circle>
+          )}
+          {(status === 'success' || status === 'denied') && (
+            <circle cx="28" cy="28" r={r} fill="none" stroke={color} strokeWidth="3"
+              strokeDasharray={circ} strokeDashoffset="0" strokeLinecap="round"
+              style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
+          )}
+          {!status && (
+            <circle cx="28" cy="28" r={r} fill="none" stroke="#9ca3af55" strokeWidth="2"
+              strokeDasharray="3 4" />
+          )}
+        </svg>
+
+        {/* Shield icon */}
+        <svg viewBox="0 0 24 24" className="w-7 h-7 relative z-10" fill={status ? color : '#9ca3af'}
+          style={{ transition: 'fill 0.3s ease' }}>
+          {status === 'success' ? (
+            // Shield with checkmark
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 13l-3-3 1.41-1.41L10 11.17l5.59-5.58L17 7l-7 7z" />
+          ) : status === 'denied' ? (
+            // Shield with X
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm3 13l-1.41 1.41L12 14l-1.59 1.41L9 14l1.41-1.41L9 11l1.41-1.41L12 11l1.59-1.41L15 11l-1.41 1.41L15 14z" />
+          ) : (
+            // Plain shield
+            <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" />
+          )}
+        </svg>
+      </div>
+      <span className="text-xs" style={{ color: status ? color : '#9ca3af', transition: 'color 0.3s ease' }}>
+        {label}
+      </span>
+    </div>
+  )
+}
+
 function Logo() {
   return (
     <div className="flex items-center gap-3">
@@ -1690,6 +1742,7 @@ export default function App() {
   const [authChecked, setAuthChecked] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [loginPreview, setLoginPreview] = useState(null) // {first_name, last_name, profile_photo} | null
+  const [loginStatus, setLoginStatus] = useState(null)   // null | 'verifying' | 'success' | 'denied'
 
   // Show/hide reCAPTCHA badge based on whether user is identified
   useEffect(() => {
@@ -1756,13 +1809,26 @@ export default function App() {
 
   async function login(e) {
     e.preventDefault(); setMsg(''); setLoading(true)
+    setLoginStatus('verifying')
     try {
       const recaptchaToken = await getRecaptchaToken('LOGIN')
       const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, recaptchaToken }) })
       const data = await res.json()
-      if (!res.ok) { setMsg(data.error || 'Login failed'); return }
+      if (!res.ok) {
+        setLoginStatus('denied')
+        setMsg(data.error || 'Login failed')
+        setTimeout(() => setLoginStatus(null), 2500)
+        return
+      }
+      setLoginStatus('success')
+      await new Promise(r => setTimeout(r, 900))
       setCurrentUser(data.user); setPage('dashboard'); setEmail(''); setPassword('')
-    } catch { setMsg('Network error') }
+      setLoginStatus(null)
+    } catch {
+      setLoginStatus('denied')
+      setMsg('Network error')
+      setTimeout(() => setLoginStatus(null), 2500)
+    }
     finally { setLoading(false) }
   }
 
@@ -1831,6 +1897,14 @@ export default function App() {
                     onChange={e => setPassword(e.target.value)} className="input input-bordered w-full" required />
                 </Field>
                 {msg && <div className="alert alert-error text-sm">{msg}</div>}
+
+                {/* reCAPTCHA shield indicator — only shown after loginPreview (user recognised) */}
+                {loginPreview && !isRegister && (
+                  <div className="flex justify-center">
+                    <RecaptchaShield status={loginStatus} />
+                  </div>
+                )}
+
                 <button className="btn btn-primary w-full" disabled={loading}>
                   {loading ? 'Processing…' : (isRegister ? 'Create Account' : 'Sign In')}
                 </button>
