@@ -2541,6 +2541,21 @@ async function downloadAttachment(userId, noteId, attachId, filename) {
   URL.revokeObjectURL(url)
 }
 
+function fmtLastNote(ts) {
+  if (!ts) return null
+  const d = new Date(ts)
+  const now = new Date()
+  const diffMs = now - d
+  const diffMin = Math.floor(diffMs / 60000)
+  const diffH   = Math.floor(diffMs / 3600000)
+  const diffD   = Math.floor(diffMs / 86400000)
+  if (diffMin < 1)  return 'just now'
+  if (diffMin < 60) return `${diffMin}m ago`
+  if (diffH < 24)   return `${diffH}h ago`
+  if (diffD < 7)    return `${diffD}d ago`
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: diffD > 365 ? 'numeric' : undefined })
+}
+
 function PhoneLink({ phone }) {
   if (!phone) return <span className="text-base-content/40">—</span>
   const digits = phone.replace(/\D/g, '')
@@ -2594,8 +2609,13 @@ function ContactCard({ contact, onViewNotes }) {
           )}
         </div>
         {/* Footer */}
-        <div className="flex items-center pt-1 border-t border-base-200 mt-auto">
-          <span className="badge badge-ghost badge-sm">{contact.note_count} {contact.note_count === 1 ? 'note' : 'notes'}</span>
+        <div className="flex flex-col gap-1 pt-1 border-t border-base-200 mt-auto">
+          <div className="flex items-center gap-2">
+            <span className="badge badge-ghost badge-sm">{contact.note_count} {contact.note_count === 1 ? 'note' : 'notes'}</span>
+            {contact.last_note_at && (
+              <span className="text-xs text-base-content/40">last: {fmtLastNote(contact.last_note_at)}</span>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -3057,6 +3077,7 @@ function ContactsPage() {
                 <th>Phone</th>
                 <th className="hidden xl:table-cell">Buy Box</th>
                 <th className="text-center">Notes</th>
+                <th className="hidden sm:table-cell text-center">Last Note</th>
               </tr>
             </thead>
             <tbody>
@@ -3077,6 +3098,9 @@ function ContactsPage() {
                       <span className="line-clamp-2 text-base-content/60">{c.buy_box || <span className="text-base-content/30">—</span>}</span>
                     </td>
                     <td className="text-center"><span className="badge badge-ghost badge-sm">{c.note_count}</span></td>
+                    <td className="hidden sm:table-cell text-center text-xs text-base-content/50 whitespace-nowrap">
+                      {fmtLastNote(c.last_note_at) || <span className="text-base-content/25">—</span>}
+                    </td>
                   </tr>
                 )
               })}
@@ -3114,8 +3138,11 @@ function ContactsPage() {
                        {c.phone_number && (
                          <div className="text-xs"><PhoneLink phone={c.phone_number} /></div>
                        )}
-                       <div className="flex items-center pt-1 border-t border-base-200">
+                       <div className="flex flex-col gap-0.5 pt-1 border-t border-base-200">
                          <span className="badge badge-ghost badge-xs">{c.note_count} {c.note_count === 1 ? 'note' : 'notes'}</span>
+                         {c.last_note_at && (
+                           <span className="text-[10px] text-base-content/40">last: {fmtLastNote(c.last_note_at)}</span>
+                         )}
                        </div>
                       </div>
                     </div>

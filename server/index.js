@@ -641,7 +641,8 @@ app.get('/api/contacts', async (req, res) => {
     const result = await pool.query(`
       SELECT u.id, u.email, u.role, u.first_name, u.last_name, u.organization, u.phone_number,
              u.buy_box, u.profile_photo, u.created_at, u.updated_at,
-             COUNT(cn.id)::int AS note_count
+             COUNT(cn.id)::int AS note_count,
+             MAX(cn.created_at) AS last_note_at
       FROM users u
       LEFT JOIN contact_notes cn ON cn.user_id = u.id
       GROUP BY u.id
