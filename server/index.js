@@ -638,13 +638,26 @@ app.put('/api/users/:id', async (req, res) => {
   values.push(id);
 
   try {
+    // Fetch current values before update for before/after diff
+    const preResult = await pool.query('SELECT first_name,last_name,organization,phone_number,buy_box,role,email FROM users WHERE id=$1', [id]);
+    if (preResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const pre = preResult.rows[0];
+
     const updateResult = await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${values.length}`, values);
     if (updateResult.rowCount === 0) return res.status(404).json({ error: 'not found' });
     const userResult = await pool.query('SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at FROM users WHERE id = $1', [id]);
     if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const row = userResult.rows[0];
-    const changedFields = Object.keys(req.body || {}).filter(k => k !== 'profile_photo');
-    await logAudit(userId, req.session.user.email, 'edit_user', { changed_fields: changedFields }, id, row.email, clientIp(req));
+    // Build before/after diff for loggable fields
+    const trackFields = ['first_name','last_name','organization','phone_number','buy_box','role'];
+    const changes = {};
+    for (const f of trackFields) {
+      if (req.body[f] !== undefined && String(req.body[f] ?? '') !== String(pre[f] ?? '')) {
+        changes[f] = { from: pre[f] ?? null, to: row[f] ?? null };
+      }
+    }
+    const changedFields = Object.keys(changes);
+    await logAudit(userId, req.session.user.email, 'edit_user', { changed_fields: changedFields, changes: Object.keys(changes).length ? changes : undefined }, id, row.email, clientIp(req));
     if (userId === id) {
       req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
     }
@@ -768,6 +781,11 @@ app.post('/api/contacts/:id/notes', async (req, res) => {
   const adminId = req.session.user.id;
   const { note_text, attachments = [] } = req.body;
   try {
+    // Fetch contact name for audit log
+    const contactResult = await pool.query('SELECT first_name, last_name, email FROM users WHERE id=$1', [userId]);
+    const contact = contactResult.rows[0] || {};
+    const contactName = [contact.first_name, contact.last_name].filter(Boolean).join(' ') || contact.email || `User #${userId}`;
+
     const noteResult = await pool.query(
       `INSERT INTO contact_notes (user_id, admin_id, note_text) VALUES ($1, $2, $3) RETURNING *`,
       [userId, adminId, note_text || null]
@@ -781,7 +799,13 @@ app.post('/api/contacts/:id/notes', async (req, res) => {
       );
       insertedAttachments.push(ar.rows[0]);
     }
-    await logAudit(adminId, req.session.user.email, 'add_contact_note', { user_id: userId, has_text: !!note_text, attachment_count: attachments.length }, userId, null, clientIp(req));
+    const notePreview = note_text ? (note_text.length > 120 ? note_text.slice(0, 120) + '…' : note_text) : null;
+    const filenames = attachments.map(a => a.filename);
+    await logAudit(adminId, req.session.user.email, 'add_contact_note', {
+      contact_name: contactName, user_id: userId,
+      note_preview: notePreview, attachment_count: attachments.length,
+      filenames: filenames.length ? filenames : undefined,
+    }, userId, contact.email || null, clientIp(req));
     res.json({ ...note, attachments: insertedAttachments });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -791,10 +815,22 @@ app.post('/api/contacts/:id/notes', async (req, res) => {
 app.delete('/api/contacts/:id/notes/:noteId', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const noteId = Number(req.params.noteId);
+  const contactId = Number(req.params.id);
   const adminId = req.session.user.id;
   try {
+    // Fetch note text + contact name before deleting
+    const noteResult = await pool.query(
+      `SELECT cn.note_text, u.first_name, u.last_name, u.email
+       FROM contact_notes cn JOIN users u ON u.id = cn.user_id WHERE cn.id=$1`, [noteId]
+    );
+    const row = noteResult.rows[0] || {};
+    const contactName = [row.first_name, row.last_name].filter(Boolean).join(' ') || row.email || `User #${contactId}`;
+    const notePreview = row.note_text ? (row.note_text.length > 120 ? row.note_text.slice(0, 120) + '…' : row.note_text) : null;
+
     await pool.query('DELETE FROM contact_notes WHERE id = $1', [noteId]);
-    await logAudit(adminId, req.session.user.email, 'delete_contact_note', { note_id: noteId }, Number(req.params.id), null, clientIp(req));
+    await logAudit(adminId, req.session.user.email, 'delete_contact_note', {
+      note_id: noteId, contact_name: contactName, note_preview: notePreview,
+    }, contactId, row.email || null, clientIp(req));
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -1182,9 +1218,12 @@ app.delete('/api/properties/:id', async (req, res) => {
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
 
   try {
+    const propResult = await pool.query('SELECT address, pin, county FROM properties WHERE id=$1', [propId]);
+    if (propResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const { address, pin, county } = propResult.rows[0];
     const result = await pool.query('DELETE FROM properties WHERE id = $1', [propId]);
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
-    await logAudit(req.session.user.id, req.session.user.email, 'delete_property', { property_id: propId }, null, null, clientIp(req));
+    await logAudit(req.session.user.id, req.session.user.email, 'delete_property', { property_id: propId, address, pin, county }, null, null, clientIp(req));
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });

@@ -886,23 +886,34 @@ function AddUserForm({ onCreated }) {
 /* ─── Audit Logs ──────────────────────────────────────────────── */
 
 const ACTION_LABELS = {
-  register:         (d, t) => `New account registered (${t || d?.email || ''})`,
-  login:            (d)    => `Signed in`,
-  login_failed:     (d, t) => `Failed sign-in attempt for ${t || d?.email || 'unknown email'}`,
-  recaptcha_failed: (d)    => `Security check failed (score: ${d?.score ?? '?'}, reason: ${d?.reason || '?'})`,
-  logout:           ()     => `Signed out`,
-  create_user:      (d, t) => `Created user ${t || ''} with role "${d?.role || 'user'}"`,
-  edit_user:        (d, t) => `Updated profile of ${t || 'user'}${d?.changed_fields?.length ? ` — fields: ${d.changed_fields.join(', ')}` : ''}`,
-  delete_user:      (d, t) => `Deleted user ${t || ''}`,
-  role_change:      (d, t) => `Changed role of ${t || 'user'} from "${d?.from}" to "${d?.to}"`,
-  create_property:  (d)    => `Added property — ${d?.address || ''} (PIN: ${d?.pin || ''}, ${d?.county || ''})`,
-  edit_property:    (d)    => `Edited property — ${d?.address || `ID ${d?.property_id || ''}`}${d?.changed_fields?.length ? ` — ${d.changed_fields.length} field(s) changed` : ''}`,
-  delete_property:  (d)    => `Deleted property ID ${d?.property_id || ''}`,
-  assign_property:  (d)    => `Assigned property ID ${d?.property_id || ''} to ${d?.user_count || 0} user(s)`,
-  unassign_property:(d)    => `Removed access to property ID ${d?.property_id || ''} from user ID ${d?.user_id || ''}`,
-  upload_document:  (d)    => `Uploaded document "${d?.filename || ''}" to property ID ${d?.property_id || ''}`,
-  delete_document:  (d)    => `Deleted document ID ${d?.doc_id || ''} from property ID ${d?.property_id || ''}`,
-  delete_media:     (d)    => `Deleted media ID ${d?.media_id || ''} from property ID ${d?.property_id || ''}`,
+  register:           (d, t) => `New account registered (${t || d?.email || ''})`,
+  login:              ()     => `Signed in`,
+  login_failed:       (d, t) => `Failed sign-in attempt for ${t || d?.email || 'unknown email'}`,
+  recaptcha_failed:   (d)    => `Security check failed (score: ${d?.score ?? '?'}, reason: ${d?.reason || '?'})`,
+  logout:             ()     => `Signed out`,
+  forgot_password:    (d, t) => `Password reset requested for ${t || d?.email || ''}`,
+  password_reset:     (d, t) => `Password successfully reset for ${t || d?.email || ''}`,
+  create_user:        (d, t) => `Created user ${t || ''} with role "${d?.role || 'user'}"`,
+  edit_user:          (d, t) => {
+    const fields = d?.changed_fields
+    if (!fields?.length) return `Updated profile of ${t || 'user'}`
+    const USER_FIELD_LABELS = { first_name: 'First Name', last_name: 'Last Name', organization: 'Organization', phone_number: 'Phone', buy_box: 'Buy Box', role: 'Role' }
+    return `Updated profile of ${t || 'user'} — ${fields.map(f => USER_FIELD_LABELS[f] || f).join(', ')}`
+  },
+  delete_user:        (d, t) => `Deleted user ${t || ''}`,
+  role_change:        (d, t) => `Changed role of ${t || 'user'} from "${d?.from}" to "${d?.to}"`,
+  create_property:    (d)    => `Added property — ${d?.address || ''} (PIN: ${d?.pin || ''}, ${d?.county || ''})`,
+  edit_property:      (d)    => `Edited property — ${d?.address || `ID ${d?.property_id || ''}`}${d?.changed_fields?.length ? ` — ${d.changed_fields.length} field(s) changed` : ''}`,
+  delete_property:    (d)    => `Deleted property — ${d?.address || ''} (PIN: ${d?.pin || ''}, ID ${d?.property_id || ''})`,
+  assign_property:    (d)    => `Assigned property ID ${d?.property_id || ''} to ${d?.user_count || 0} user(s)`,
+  unassign_property:  (d)    => `Removed access to property ID ${d?.property_id || ''} from user ID ${d?.user_id || ''}`,
+  upload_media:       (d)    => `Uploaded photo "${d?.filename || ''}" to property ID ${d?.property_id || ''}`,
+  delete_media:       (d)    => `Deleted photo "${d?.media_id || ''}" from property ID ${d?.property_id || ''}`,
+  upload_document:    (d)    => `Uploaded document "${d?.filename || ''}" to property ID ${d?.property_id || ''}`,
+  delete_document:    (d)    => `Deleted document from property ID ${d?.property_id || ''}`,
+  add_contact_note:   (d, t) => `Added note on contact ${d?.contact_name || t || `#${d?.user_id || ''}`}${d?.attachment_count ? ` + ${d.attachment_count} attachment(s)` : ''}`,
+  delete_contact_note:(d, t) => `Deleted note on contact ${d?.contact_name || t || ''}`,
+  edit_user_buybox:   (d, t) => `Updated Buy Box for ${t || `user #${d?.user_id || ''}`}`,
 }
 
 function formatLog(log) {
@@ -961,6 +972,8 @@ function AuditLogs() {
                 let logDetails = {}
                 try { logDetails = JSON.parse(log.details || '{}') } catch {}
                 const changes = logDetails.changes || null
+                const notePreview = logDetails.note_preview || null
+                const filenames = logDetails.filenames || []
 
                 const FIELD_LABELS = {
                   pin: 'PIN', address: 'Address', county: 'County',
@@ -971,6 +984,8 @@ function AuditLogs() {
                   household_income_min: 'Income Min ($)', household_income_max: 'Income Max ($)',
                   population_density: 'Population Density', logistics_hubs: 'Logistics Hubs',
                   landmarks: 'Landmarks', water_sources: 'Water Sources', military_bases: 'Military Bases',
+                  first_name: 'First Name', last_name: 'Last Name', organization: 'Organization',
+                  phone_number: 'Phone', buy_box: 'Buy Box', role: 'Role',
                 }
                 function fmtVal(v) {
                   if (v === null || v === undefined || v === '') return null
@@ -993,6 +1008,21 @@ function AuditLogs() {
                       <span className="text-base-content/70 text-sm"> — {text}</span>
                       {ip && <span className="text-xs text-base-content/30 ml-1">· {ip}</span>}
                       <div className="text-xs text-base-content/40 mt-0.5 md:hidden">{ts}</div>
+                      {/* Note preview */}
+                      {notePreview && (
+                        <div className="mt-1 text-xs bg-base-300/50 rounded px-2 py-1 text-base-content/70 italic">
+                          "{notePreview}"
+                        </div>
+                      )}
+                      {/* Attachment filenames */}
+                      {filenames.length > 0 && (
+                        <div className="mt-0.5 flex flex-wrap gap-1">
+                          {filenames.map((f, i) => (
+                            <span key={i} className="text-[10px] bg-base-300/60 rounded px-1.5 py-0.5 font-mono">{f}</span>
+                          ))}
+                        </div>
+                      )}
+                      {/* Field diff (properties + user fields) */}
                       {changes && Object.keys(changes).length > 0 && (
                         <div className="mt-1.5 space-y-0.5">
                           {Object.entries(changes).map(([field, { from, to }]) => {
