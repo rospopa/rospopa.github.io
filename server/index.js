@@ -434,7 +434,8 @@ app.post('/api/login', async (req, res) => {
       logAudit(row.id, row.email, 'login_failed', { reason: 'wrong password', ip: clientIp(req) }, null, row.email, clientIp(req));
       return res.status(401).json({ error: 'invalid credentials' });
     }
-    const userObj = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box, profile_photo: row.profile_photo };
+    // Note: profile_photo intentionally excluded from session to keep session size small
+    const userObj = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
     req.session.user = userObj;
     req.session.save(err => {
       if (err) {
@@ -462,7 +463,13 @@ app.post('/api/logout', async (req, res) => {
 
 app.get('/api/me', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ user: null });
-  res.json({ user: req.session.user });
+  try {
+    const r = await pool.query('SELECT profile_photo FROM users WHERE id=$1', [req.session.user.id]);
+    const profile_photo = r.rows.length ? r.rows[0].profile_photo : null;
+    res.json({ user: { ...req.session.user, profile_photo } });
+  } catch {
+    res.json({ user: req.session.user });
+  }
 });
 
 app.get('/api/users', async (req, res) => {
@@ -581,7 +588,7 @@ app.put('/api/users/:id', async (req, res) => {
     const changedFields = Object.keys(req.body || {}).filter(k => k !== 'profile_photo');
     await logAudit(userId, req.session.user.email, 'edit_user', { changed_fields: changedFields }, id, row.email, clientIp(req));
     if (userId === id) {
-      req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box, profile_photo: row.profile_photo };
+      req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
     }
     res.json(row);
   } catch (e) {
