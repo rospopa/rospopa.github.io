@@ -407,7 +407,9 @@ function AddUserForm({ onCreated }) {
 
 const ACTION_LABELS = {
   register:         (d, t) => `New account registered (${t || d?.email || ''})`,
-  login:            (d, t) => `Signed in`,
+  login:            (d)    => `Signed in`,
+  login_failed:     (d, t) => `Failed sign-in attempt for ${t || d?.email || 'unknown email'}`,
+  logout:           ()     => `Signed out`,
   create_user:      (d, t) => `Created user ${t || ''} with role "${d?.role || 'user'}"`,
   edit_user:        (d, t) => `Updated profile of ${t || 'user'}${d?.changed_fields?.length ? ` — fields: ${d.changed_fields.join(', ')}` : ''}`,
   delete_user:      (d, t) => `Deleted user ${t || ''}`,
@@ -470,15 +472,17 @@ function AuditLogs() {
             : logs.map((log) => {
                 let details = {}
                 try { details = JSON.parse(log.details || '{}') } catch {}
-                const actor = log.acted_by_email || log.target_email || `unknown`
+                const actor = log.acted_by_email || log.target_email || '(system)'
                 const text = formatLog(log)
                 const ts = new Date(log.created_at).toLocaleString()
+                const ip = log.ip_address
                 return (
                   <div key={log.id} className="flex gap-3 items-start py-2.5 px-4 rounded-lg hover:bg-base-200 border-b border-base-300/50">
-                    <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+                    <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${log.action === 'login_failed' ? 'bg-error' : log.action === 'login' || log.action === 'logout' ? 'bg-success' : 'bg-primary'}`} />
                     <div className="flex-1 min-w-0">
                       <span className="font-semibold text-sm break-all">{actor}</span>
                       <span className="text-base-content/70 text-sm"> — {text}</span>
+                      {ip && <span className="text-xs text-base-content/30 ml-1">· {ip}</span>}
                       <div className="text-xs text-base-content/40 mt-0.5 md:hidden">{ts}</div>
                     </div>
                     <span className="hidden md:block text-xs text-base-content/40 flex-shrink-0 mt-0.5 whitespace-nowrap">{ts}</span>
