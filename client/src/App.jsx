@@ -1743,16 +1743,16 @@ function formatPhone(raw) {
 /* ─── Photo Cropper ───────────────────────────────────────────── */
 
 function PhotoCropper({ src, onSave, onCancel }) {
-  const canvasRef = React.useRef(null)
-  const [scale, setScale] = React.useState(1)
-  const [offsetX, setOffsetX] = React.useState(0)
-  const [offsetY, setOffsetY] = React.useState(0)
-  const [dragging, setDragging] = React.useState(false)
-  const [dragStart, setDragStart] = React.useState({ x: 0, y: 0 })
-  const imgRef = React.useRef(new Image())
+  const canvasRef = useRef(null)
+  const [scale, setScale] = useState(1)
+  const [offsetX, setOffsetX] = useState(0)
+  const [offsetY, setOffsetY] = useState(0)
+  const [dragging, setDragging] = useState(false)
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
+  const imgRef = useRef(new Image())
   const SIZE = 300
 
-  React.useEffect(() => {
+  useEffect(() => {
     const img = imgRef.current
     img.onload = () => {
       // Auto-fit: scale to fill the square
@@ -1787,7 +1787,7 @@ function PhotoCropper({ src, onSave, onCancel }) {
     ctx.beginPath(); ctx.arc(SIZE/2, SIZE/2, SIZE/2 - 4, 0, Math.PI*2); ctx.stroke()
   }
 
-  React.useEffect(() => { draw(imgRef.current, scale, offsetX, offsetY) }, [scale, offsetX, offsetY])
+  useEffect(() => { draw(imgRef.current, scale, offsetX, offsetY) }, [scale, offsetX, offsetY])
 
   function onMouseDown(e) {
     setDragging(true)
