@@ -160,7 +160,6 @@ function CalendarWidget({ role }) {
   const daysInMonth = new Date(year, month, 0).getDate()
   const firstDow    = new Date(year, month - 1, 1).getDay() // 0=Sun
 
-  // Group events by date string YYYY-MM-DD (local)
   const byDay = {}
   for (const ev of events) {
     const d = new Date(ev.date)
@@ -184,62 +183,100 @@ function CalendarWidget({ role }) {
   for (let i = 0; i < firstDow; i++) cells.push(null)
   for (let d = 1; d <= daysInMonth; d++) cells.push(d)
 
+  // Pad to complete last row so grid is always full
+  while (cells.length % 7 !== 0) cells.push(null)
+
   return (
     <div className="card bg-base-100 border border-base-300 w-full">
-      <div className="card-body p-4 md:p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold uppercase tracking-widest text-base-content/50">Calendar</h3>
-          <div className="flex items-center gap-2">
-            <button className="btn btn-xs btn-ghost" onClick={prevMonth}>‹</button>
-            <span className="text-sm font-medium min-w-[130px] text-center">{MONTHS[month-1]} {year}</span>
-            <button className="btn btn-xs btn-ghost" onClick={nextMonth}>›</button>
+      <div className="card-body p-4 sm:p-6 md:p-8">
+
+        {/* Header */}
+        <div className="flex items-center justify-between mb-5">
+          <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">Calendar</h3>
+          <div className="flex items-center gap-3">
+            <button
+              className="btn btn-sm btn-ghost px-3"
+              onClick={prevMonth}
+              aria-label="Previous month"
+            >‹</button>
+            <span className="text-base sm:text-lg font-semibold min-w-[160px] text-center">
+              {MONTHS[month-1]} {year}
+            </span>
+            <button
+              className="btn btn-sm btn-ghost px-3"
+              onClick={nextMonth}
+              aria-label="Next month"
+            >›</button>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap gap-3 mb-3 text-xs">
+        <div className="flex flex-wrap gap-4 mb-5 text-xs sm:text-sm">
           {Object.entries(EVENT_LABELS).map(([type, label]) =>
             (role === 'admin' || type === 'assigned') && (
-              <span key={type} className="flex items-center gap-1">
-                <span className={`inline-block w-2 h-2 rounded-full ${EVENT_COLORS[type]}`}/>
-                {label}
+              <span key={type} className="flex items-center gap-1.5">
+                <span className={`inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 ${EVENT_COLORS[type]}`}/>
+                <span className="text-base-content/70">{label}</span>
               </span>
             )
           )}
         </div>
 
         {/* Day-of-week headers */}
-        <div className="grid grid-cols-7 mb-1">
-          {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
-            <div key={d} className="text-center text-xs font-semibold text-base-content/40 py-1">{d}</div>
+        <div className="grid grid-cols-7 mb-1 border-b border-base-300 pb-2">
+          {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => (
+            <div key={d} className="text-center text-xs sm:text-sm font-semibold text-base-content/40 py-1 hidden sm:block">{d}</div>
+          ))}
+          {['S','M','T','W','T','F','S'].map((d, i) => (
+            <div key={`sm${i}`} className="text-center text-xs font-semibold text-base-content/40 py-1 sm:hidden">{d}</div>
           ))}
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-8 text-base-content/40 text-sm">Loading…</div>
+          <div className="flex justify-center py-16 text-base-content/40 text-sm">Loading…</div>
         ) : (
-          <div className="grid grid-cols-7 gap-0.5">
+          <div className="grid grid-cols-7">
             {cells.map((day, i) => {
-              if (!day) return <div key={`e${i}`}/>
+              if (!day) return (
+                <div key={`e${i}`} className="border-b border-r border-base-200 min-h-[56px] sm:min-h-[80px] md:min-h-[96px]
+                  first:border-l [&:nth-child(7n+1)]:border-l" />
+              )
               const key = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`
               const dayEvents = byDay[key] || []
               const isToday = key === todayKey
               const isSelected = selected?.day === day
-              const dots = [...new Set(dayEvents.map(e => e.type))].slice(0, 3)
+              const dots = [...new Set(dayEvents.map(e => e.type))].slice(0, 4)
               return (
                 <button
                   key={key}
                   onClick={() => setSelected(isSelected ? null : { day, events: dayEvents })}
-                  className={`rounded p-1 flex flex-col items-center transition-colors min-h-[40px]
-                    ${isToday ? 'ring-1 ring-primary' : ''}
+                  className={`relative border-b border-r border-base-200 [&:nth-child(7n+1)]:border-l
+                    min-h-[56px] sm:min-h-[80px] md:min-h-[96px]
+                    flex flex-col items-start p-1 sm:p-2 transition-colors text-left w-full
                     ${isSelected ? 'bg-primary/10' : 'hover:bg-base-200'}
                     ${dayEvents.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
                 >
-                  <span className={`text-xs font-medium ${isToday ? 'text-primary font-bold' : ''}`}>{day}</span>
-                  <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center">
+                  {/* Day number */}
+                  <span className={`text-xs sm:text-sm font-medium rounded-full w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center flex-shrink-0
+                    ${isToday ? 'bg-primary text-primary-content font-bold' : 'text-base-content'}`}>
+                    {day}
+                  </span>
+                  {/* Event dots on mobile */}
+                  <div className="flex gap-0.5 mt-1 flex-wrap sm:hidden">
                     {dots.map(type => (
                       <span key={type} className={`w-1.5 h-1.5 rounded-full ${EVENT_COLORS[type]}`}/>
                     ))}
+                  </div>
+                  {/* Event label pills on sm+ */}
+                  <div className="hidden sm:flex flex-col gap-0.5 mt-1 w-full overflow-hidden">
+                    {dayEvents.slice(0, 3).map((ev, ei) => (
+                      <span key={ei} className={`text-[10px] md:text-xs text-white rounded px-1 py-0.5 truncate leading-tight ${EVENT_COLORS[ev.type]}`}>
+                        {ev.label}
+                      </span>
+                    ))}
+                    {dayEvents.length > 3 && (
+                      <span className="text-[10px] text-base-content/40 pl-1">+{dayEvents.length - 3} more</span>
+                    )}
                   </div>
                 </button>
               )
@@ -249,23 +286,23 @@ function CalendarWidget({ role }) {
 
         {/* Selected day detail panel */}
         {selected && selected.events.length > 0 && (
-          <div className="mt-4 border-t border-base-300 pt-3 space-y-1.5 max-h-48 overflow-y-auto">
-            <p className="text-xs font-semibold text-base-content/50 mb-2">
+          <div className="mt-4 border-t border-base-300 pt-4 space-y-2 max-h-60 overflow-y-auto">
+            <p className="text-sm font-semibold text-base-content/60 mb-2">
               {MONTHS[month-1]} {selected.day}, {year} — {selected.events.length} event{selected.events.length > 1 ? 's' : ''}
             </p>
             {selected.events.map((ev, i) => (
-              <div key={i} className="flex items-start gap-2 text-xs">
-                <span className={`mt-0.5 flex-shrink-0 w-2 h-2 rounded-full ${EVENT_COLORS[ev.type]}`}/>
+              <div key={i} className="flex items-start gap-2 text-sm">
+                <span className={`mt-1 flex-shrink-0 w-2.5 h-2.5 rounded-full ${EVENT_COLORS[ev.type]}`}/>
                 <div>
                   <span className="font-medium capitalize">{ev.label}</span>
-                  {ev.meta?.pin && <span className="text-base-content/50 ml-1">PIN: {ev.meta.pin}</span>}
+                  {ev.meta?.pin && <span className="text-base-content/50 ml-1.5 text-xs">PIN: {ev.meta.pin}</span>}
                 </div>
               </div>
             ))}
           </div>
         )}
         {selected && selected.events.length === 0 && (
-          <p className="mt-3 text-xs text-base-content/40 text-center">No events on this day</p>
+          <p className="mt-3 text-sm text-base-content/40 text-center">No events on this day</p>
         )}
       </div>
     </div>
@@ -2742,19 +2779,11 @@ export default function App() {
         <ErrorBoundary key={page}>
 
         {page === 'dashboard' && (
-          <div className="space-y-8 py-8">
-            <div className="text-center">
-              <h1 className="text-2xl md:text-4xl font-bold mb-3">
-                Welcome back, {currentUser.first_name || currentUser.email.split('@')[0]}
-              </h1>
-              <div className="flex flex-wrap justify-center gap-4 mt-4">
-                <button className="btn btn-primary" onClick={() => navigateTo('properties')}>View Properties</button>
-                {currentUser.role === 'admin' && <button className="btn btn-outline" onClick={() => navigateTo('users')}>Manage Users</button>}
-              </div>
-            </div>
-            <div className="max-w-lg mx-auto">
-              <CalendarWidget role={currentUser.role} />
-            </div>
+          <div className="space-y-6 py-6">
+            <h1 className="text-2xl md:text-3xl font-bold">
+              Welcome back, {currentUser.first_name || currentUser.email.split('@')[0]}
+            </h1>
+            <CalendarWidget role={currentUser.role} />
           </div>
         )}
 
