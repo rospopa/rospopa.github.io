@@ -3094,7 +3094,7 @@ function ContactsPage() {
             { id: 'grid',   label: 'Grid' },
             { id: 'list',   label: 'List' },
             { id: 'kanban', label: 'Kanban' },
-            { id: 'split',  label: '⬛ Split' },
+            { id: 'split',  label: 'Split' },
           ].map(({ id, label }) => (
             <button key={id} className={`btn btn-sm ${view === id ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setView(id)}>
               {label}
@@ -3286,6 +3286,7 @@ export default function App() {
   const [editingUser, setEditingUser] = useState(null)
   const [showEditUserModal, setShowEditUserModal] = useState(false)
   const [showForgot, setShowForgot] = useState(false)
+  const [contactsKey, setContactsKey] = useState(0)
 
   // Show/hide reCAPTCHA badge based on whether user is identified
   useEffect(() => {
@@ -3298,6 +3299,7 @@ export default function App() {
 
   function navigateTo(p) {
     if ((p === 'users' || p === 'audit') && currentUser?.role !== 'admin') return
+    if (p === 'contacts') setContactsKey(k => k + 1) // reset ContactsPage state
     setPage(p); localStorage.setItem('rep_page', p)
   }
 
@@ -3601,7 +3603,7 @@ export default function App() {
         )}
 
         {page === 'contacts' && currentUser.role === 'admin' && (
-          <ContactsPage />
+          <ContactsPage key={contactsKey} />
         )}
 
         {page === 'audit' && currentUser.role === 'admin' && (
