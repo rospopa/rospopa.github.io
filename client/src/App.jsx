@@ -1683,13 +1683,13 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   if (!open) return null
 
   const tabs = property?.id
-    ? ['details', 'media', 'documents', ...(isAdmin ? ['assign'] : [])]
-    : ['details']
+    ? ['details', 'financials', 'media', 'documents', ...(isAdmin ? ['assign'] : [])]
+    : ['details', 'financials']
 
-  const tabLabel = { details: 'Details', media: 'Media', documents: 'Documents', assign: 'Assign Users' }
+  const tabLabel = { details: 'Details', financials: 'Financials', media: 'Media', documents: 'Documents', assign: 'Assign Users' }
 
   return (
-    <div className="modal modal-open">
+    <div className="modal modal-open" style={{zIndex: 30}}>
       {/* Wide container: left form + right map */}
       <div className="modal-box p-0 w-screen h-screen max-w-none max-h-none rounded-none flex flex-col md:flex-row overflow-hidden">
 
@@ -1912,127 +1912,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
           </div>
         )}
 
-        {/* Media tab */}
-        {tab === 'media' && (
-          <div className="space-y-5">
-            {isAdmin && (
-              <div className="border-2 border-dashed border-base-300 rounded-lg p-6 text-center">
-                <p className="text-sm text-base-content/50 mb-3">Upload images (JPG, PNG, GIF — max 10MB) or videos (MP4, MOV — max 50MB)</p>
-                <label className="btn btn-primary btn-sm cursor-pointer">
-                  Choose Files
-                  <input type="file" className="hidden" multiple accept="image/*,video/*" onChange={handleFileUpload} />
-                </label>
-                {uploadError && <p className="text-error text-sm mt-2">{uploadError}</p>}
-              </div>
-            )}
-            {mediaLoading
-              ? <p className="text-center text-base-content/40 py-6">Loading…</p>
-              : media.length === 0
-                ? <p className="text-center text-base-content/30 py-8">No media uploaded yet</p>
-                : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {media.map(m => (
-                      <div key={m.id} className="relative group rounded border border-base-300 overflow-hidden bg-base-200">
-                        {m.media_type?.startsWith('video/')
-                          ? <video src={`/api/properties/${property.id}/media/${m.id}`} className="w-full h-28 object-cover" controls />
-                          : <img src={`/api/properties/${property.id}/media/${m.id}`} alt={m.filename} className="w-full h-28 object-cover" />
-                        }
-                        <div className="px-2 py-1 flex items-center justify-between">
-                          <span className="text-xs text-base-content/50 truncate">{m.filename}</span>
-                          {isAdmin && (
-                            <button className="btn btn-xs btn-ghost text-error" onClick={() => deleteMedia(m.id)}>✕</button>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )
-            }
-          </div>
-        )}
 
-        {/* Documents tab */}
-        {tab === 'documents' && (
-          <div className="space-y-5">
-            {isAdmin && (
-              <div className="border-2 border-dashed border-base-300 rounded-lg p-6 text-center">
-                <p className="text-sm text-base-content/50 mb-1">PDF, Word, Excel, CSV, images — max 25MB each</p>
-                <p className="text-xs text-base-content/30 mb-3">These are property documents, not visual media</p>
-                <label className="btn btn-primary btn-sm cursor-pointer">
-                  Upload Documents
-                  <input type="file" className="hidden" multiple
-                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*"
-                    onChange={handleDocUpload} />
-                </label>
-                {docUploadError && <p className="text-error text-sm mt-2">{docUploadError}</p>}
-              </div>
-            )}
-            {docsLoading
-              ? <p className="text-center text-base-content/40 py-6">Loading…</p>
-              : docs.length === 0
-                ? <p className="text-center text-base-content/30 py-8">No documents uploaded yet</p>
-                : (
-                  <div className="space-y-2">
-                    {docs.map(doc => {
-                      const isPdf = doc.file_type === 'application/pdf'
-                      const isImg = doc.file_type?.startsWith('image/')
-                      const icon = isPdf ? '📄' : isImg ? '🖼️' : doc.file_type?.includes('word') ? '📝' : doc.file_type?.includes('excel') || doc.file_type?.includes('sheet') ? '📊' : '📎'
-                      return (
-                        <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg border border-base-300 hover:bg-base-100">
-                          <span className="text-2xl flex-shrink-0">{icon}</span>
-                          <div className="flex-1 min-w-0">
-                            <a
-                              href={`/api/properties/${property.id}/documents/${doc.id}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-sm font-medium hover:underline truncate block"
-                            >
-                              {doc.filename}
-                            </a>
-                            <p className="text-xs text-base-content/40">
-                              {new Date(doc.uploaded_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                              {doc.uploaded_by_email && ` · ${doc.uploaded_by_email}`}
-                            </p>
-                          </div>
-                          <a
-                            href={`/api/properties/${property.id}/documents/${doc.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="btn btn-xs btn-ghost"
-                            title="Open"
-                          >↗</a>
-                          {isAdmin && (
-                            <button className="btn btn-xs btn-ghost text-error" onClick={() => deleteDoc(doc.id)} title="Delete">✕</button>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )
-            }
-          </div>
-        )}
-
-        {/* Assign Users tab (admin only) */}
-        {tab === 'assign' && isAdmin && (
-          <AssignUsersTab
-            allUsers={allUsers}
-            assignLoading={assignLoading}
-            toggleAssign={toggleAssign}
-            onViewContact={setViewContactId}
-          />
-        )}
-
-          </div>{/* end tab content */}
-        </div>{/* end left panel */}
-
-        {/* ── Middle panel: Financials (only on Details tab) ── */}
-        {tab === 'details' && (
-          <div className="hidden md:flex flex-col w-[270px] flex-shrink-0 border-l border-base-300 overflow-y-auto max-h-screen bg-base-50">
-            <div className="px-4 pt-5 pb-3 border-b border-base-300">
-              <h4 className="font-semibold text-base uppercase tracking-wide text-base-content/60">Financials</h4>
-            </div>
-            <div className="px-4 py-4 space-y-3 flex-1">
+        {/* Financials tab */}
+        {tab === 'financials' && (
+          <div className="space-y-4">
 
               {/* Core financials */}
               <div className="space-y-3">
@@ -2494,23 +2377,134 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                   </Field>
                 </div>
               )}
-
-              {isAdmin && (
-                <div className="pt-3">
-                  <SaveButton onClick={handleSave} loading={saving} savedSignal={savedSignal}
-                    label={property?.id ? 'Save Changes' : 'Create Property'} />
-                </div>
-              )}
-            </div>
+            {isAdmin && (
+              <div className="pt-2">
+                <SaveButton onClick={handleSave} loading={saving} savedSignal={savedSignal}
+                  label={property?.id ? 'Save Changes' : 'Create Property'} />
+              </div>
+            )}
           </div>
         )}
 
-        {/* ── Right panel: map (only when Details tab active and property has address) ── */}
-        {tab === 'details' && (
-          <div className="hidden md:flex flex-1 border-l border-base-300" style={{ minHeight: '500px' }}>
-            <PropertyMap address={address} />
+                {/* Media tab */}
+        {tab === 'media' && (
+          <div className="space-y-5">
+            {isAdmin && (
+              <div className="border-2 border-dashed border-base-300 rounded-lg p-6 text-center">
+                <p className="text-sm text-base-content/50 mb-3">Upload images (JPG, PNG, GIF — max 10MB) or videos (MP4, MOV — max 50MB)</p>
+                <label className="btn btn-primary btn-sm cursor-pointer">
+                  Choose Files
+                  <input type="file" className="hidden" multiple accept="image/*,video/*" onChange={handleFileUpload} />
+                </label>
+                {uploadError && <p className="text-error text-sm mt-2">{uploadError}</p>}
+              </div>
+            )}
+            {mediaLoading
+              ? <p className="text-center text-base-content/40 py-6">Loading…</p>
+              : media.length === 0
+                ? <p className="text-center text-base-content/30 py-8">No media uploaded yet</p>
+                : (
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                    {media.map(m => (
+                      <div key={m.id} className="relative group rounded border border-base-300 overflow-hidden bg-base-200">
+                        {m.media_type?.startsWith('video/')
+                          ? <video src={`/api/properties/${property.id}/media/${m.id}`} className="w-full h-28 object-cover" controls />
+                          : <img src={`/api/properties/${property.id}/media/${m.id}`} alt={m.filename} className="w-full h-28 object-cover" />
+                        }
+                        <div className="px-2 py-1 flex items-center justify-between">
+                          <span className="text-xs text-base-content/50 truncate">{m.filename}</span>
+                          {isAdmin && (
+                            <button className="btn btn-xs btn-ghost text-error" onClick={() => deleteMedia(m.id)}>✕</button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+            }
           </div>
         )}
+
+        {/* Documents tab */}
+        {tab === 'documents' && (
+          <div className="space-y-5">
+            {isAdmin && (
+              <div className="border-2 border-dashed border-base-300 rounded-lg p-6 text-center">
+                <p className="text-sm text-base-content/50 mb-1">PDF, Word, Excel, CSV, images — max 25MB each</p>
+                <p className="text-xs text-base-content/30 mb-3">These are property documents, not visual media</p>
+                <label className="btn btn-primary btn-sm cursor-pointer">
+                  Upload Documents
+                  <input type="file" className="hidden" multiple
+                    accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*"
+                    onChange={handleDocUpload} />
+                </label>
+                {docUploadError && <p className="text-error text-sm mt-2">{docUploadError}</p>}
+              </div>
+            )}
+            {docsLoading
+              ? <p className="text-center text-base-content/40 py-6">Loading…</p>
+              : docs.length === 0
+                ? <p className="text-center text-base-content/30 py-8">No documents uploaded yet</p>
+                : (
+                  <div className="space-y-2">
+                    {docs.map(doc => {
+                      const isPdf = doc.file_type === 'application/pdf'
+                      const isImg = doc.file_type?.startsWith('image/')
+                      const icon = isPdf ? '📄' : isImg ? '🖼️' : doc.file_type?.includes('word') ? '📝' : doc.file_type?.includes('excel') || doc.file_type?.includes('sheet') ? '📊' : '📎'
+                      return (
+                        <div key={doc.id} className="flex items-center gap-3 p-3 rounded-lg border border-base-300 hover:bg-base-100">
+                          <span className="text-2xl flex-shrink-0">{icon}</span>
+                          <div className="flex-1 min-w-0">
+                            <a
+                              href={`/api/properties/${property.id}/documents/${doc.id}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm font-medium hover:underline truncate block"
+                            >
+                              {doc.filename}
+                            </a>
+                            <p className="text-xs text-base-content/40">
+                              {new Date(doc.uploaded_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                              {doc.uploaded_by_email && ` · ${doc.uploaded_by_email}`}
+                            </p>
+                          </div>
+                          <a
+                            href={`/api/properties/${property.id}/documents/${doc.id}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="btn btn-xs btn-ghost"
+                            title="Open"
+                          >↗</a>
+                          {isAdmin && (
+                            <button className="btn btn-xs btn-ghost text-error" onClick={() => deleteDoc(doc.id)} title="Delete">✕</button>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )
+            }
+          </div>
+        )}
+
+        {/* Assign Users tab (admin only) */}
+        {tab === 'assign' && isAdmin && (
+          <AssignUsersTab
+            allUsers={allUsers}
+            assignLoading={assignLoading}
+            toggleAssign={toggleAssign}
+            onViewContact={setViewContactId}
+          />
+        )}
+
+          </div>{/* end tab content */}
+        </div>{/* end left panel */}
+
+
+        {/* ── Right panel: map ── */}
+        <div className="hidden md:flex flex-1 border-l border-base-300" style={{ minHeight: '500px' }}>
+          <PropertyMap address={address} />
+        </div>>
 
       </div>
       <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
