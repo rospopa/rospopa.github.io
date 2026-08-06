@@ -3049,11 +3049,24 @@ function ContactDetailPage({ contactId, onBack, splitMode = false }) {
 function ContactsPage() {
   const [contacts, setContacts] = useState([])
   const [loading, setLoading] = useState(true)
-  const [view, setView] = useState('split')
+  const [view, setView] = useState(() => localStorage.getItem('contacts_view') || 'split')
   const [selectedContact, setSelectedContact] = useState(null) // notes drawer
   const [detailId, setDetailId] = useState(null)              // full-page detail
-  const [splitDetailId, setSplitDetailId] = useState(null)    // split view right panel
+  const [splitDetailId, setSplitDetailId] = useState(() => {
+    const saved = localStorage.getItem('contacts_split_id')
+    return saved ? Number(saved) : null
+  })
   const [refreshKey, setRefreshKey] = useState(0)
+
+  // Persist view selection
+  const changeView = (v) => { setView(v); localStorage.setItem('contacts_view', v) }
+
+  // Persist split selection
+  const selectSplit = (id) => {
+    setSplitDetailId(id)
+    if (id != null) localStorage.setItem('contacts_split_id', String(id))
+    else localStorage.removeItem('contacts_split_id')
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -3096,7 +3109,7 @@ function ContactsPage() {
             { id: 'kanban', label: 'Kanban' },
             { id: 'split',  label: 'Split' },
           ].map(({ id, label }) => (
-            <button key={id} className={`btn btn-sm ${view === id ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setView(id)}>
+            <button key={id} className={`btn btn-sm ${view === id ? 'btn-primary' : 'btn-ghost'}`} onClick={() => changeView(id)}>
               {label}
             </button>
           ))}
@@ -3219,7 +3232,7 @@ function ContactsPage() {
                 return (
                   <button
                     key={c.id}
-                    onClick={() => setSplitDetailId(c.id)}
+                    onClick={() => selectSplit(c.id)}
                     className={`w-full text-left px-3 py-2.5 flex items-center gap-2.5 border-b border-base-200/60 transition-colors
                       ${isActive ? 'bg-primary/10 border-l-2 border-l-primary' : 'hover:bg-base-200/60'}`}
                   >
@@ -3246,7 +3259,7 @@ function ContactsPage() {
                 <ContactDetailPage
                   key={splitDetailId}
                   contactId={splitDetailId}
-                  onBack={() => setSplitDetailId(null)}
+                  onBack={() => selectSplit(null)}
                   splitMode
                 />
               </div>
