@@ -986,6 +986,10 @@ function AuditLogs() {
                   landmarks: 'Landmarks', water_sources: 'Water Sources', military_bases: 'Military Bases',
                   first_name: 'First Name', last_name: 'Last Name', organization: 'Organization',
                   phone_number: 'Phone', buy_box: 'Buy Box', role: 'Role',
+                  grm: 'GRM', cap_rate: 'Cap Rate (%)', cash_on_cash: 'Cash-on-Cash (%)',
+                  irr: 'IRR (%)', price_per_unit: 'Price/Unit ($)', price_per_sqft: 'Price/SqFt ($)',
+                  rent_to_sales_ratio: 'Rent-to-Sales Ratio (%)', num_skus: '# SKUs',
+                  price_per_acre: 'Price/Acre ($)', electrical_voltage: 'Voltage (V)', electrical_amperage: 'Amperage (A)',
                 }
                 function fmtVal(v) {
                   if (v === null || v === undefined || v === '') return null
@@ -1205,6 +1209,17 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [incomeMax, setIncomeMax] = useState('')
   const [popDensity, setPopDensity] = useState('')
   const [propStatus, setPropStatus] = useState('New')
+  const [grm, setGrm] = useState('')
+  const [capRate, setCapRate] = useState('')
+  const [cashOnCash, setCashOnCash] = useState('')
+  const [irr, setIrr] = useState('')
+  const [pricePerUnit, setPricePerUnit] = useState('')
+  const [pricePerSqft, setPricePerSqft] = useState('')
+  const [rentToSales, setRentToSales] = useState('')
+  const [numSkus, setNumSkus] = useState('')
+  const [pricePerAcre, setPricePerAcre] = useState('')
+  const [elecVoltage, setElecVoltage] = useState('')
+  const [elecAmperage, setElecAmperage] = useState('')
   const [saving, setSaving] = useState(false)
   const [savedSignal, setSavedSignal] = useState(0)
   const [media, setMedia] = useState([])
@@ -1242,6 +1257,17 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     setIncomeMax(p.household_income_max ?? '')
     setPopDensity(p.population_density ?? '')
     setPropStatus(p.status || 'New')
+    setGrm(p.grm ?? '')
+    setCapRate(p.cap_rate ?? '')
+    setCashOnCash(p.cash_on_cash ?? '')
+    setIrr(p.irr ?? '')
+    setPricePerUnit(p.price_per_unit ?? '')
+    setPricePerSqft(p.price_per_sqft ?? '')
+    setRentToSales(p.rent_to_sales_ratio ?? '')
+    setNumSkus(p.num_skus ?? '')
+    setPricePerAcre(p.price_per_acre ?? '')
+    setElecVoltage(p.electrical_voltage ?? '')
+    setElecAmperage(p.electrical_amperage ?? '')
   }
 
   useEffect(() => {
@@ -1254,6 +1280,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       setWaterAccess(false); setNextToPublicLand(false); setInterstates([])
       setLogisticsHubs([]); setLandmarksList([]); setWaterSources([]); setMilitaryBases([])
       setIncomeMin(''); setIncomeMax(''); setPopDensity(''); setPropStatus('New')
+      setGrm(''); setCapRate(''); setCashOnCash(''); setIrr('')
+      setPricePerUnit(''); setPricePerSqft(''); setRentToSales(''); setNumSkus('')
+      setPricePerAcre(''); setElecVoltage(''); setElecAmperage('')
       setTab('details')
     }
   }, [property, open])
@@ -1343,6 +1372,17 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       household_income_max: incomeMax !== '' ? Number(incomeMax) : null,
       population_density: popDensity !== '' ? Number(popDensity) : null,
       status: propStatus,
+      grm: grm !== '' ? Number(grm) : null,
+      cap_rate: capRate !== '' ? Number(capRate) : null,
+      cash_on_cash: cashOnCash !== '' ? Number(cashOnCash) : null,
+      irr: irr !== '' ? Number(irr) : null,
+      price_per_unit: pricePerUnit !== '' ? Number(pricePerUnit) : null,
+      price_per_sqft: pricePerSqft !== '' ? Number(pricePerSqft) : null,
+      rent_to_sales_ratio: rentToSales !== '' ? Number(rentToSales) : null,
+      num_skus: numSkus !== '' ? Number(numSkus) : null,
+      price_per_acre: pricePerAcre !== '' ? Number(pricePerAcre) : null,
+      electrical_voltage: elecVoltage !== '' ? Number(elecVoltage) : null,
+      electrical_amperage: elecAmperage !== '' ? Number(elecAmperage) : null,
     })
     setSaving(false)
     setSavedSignal(s => s + 1)
@@ -1660,6 +1700,60 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
               <Field label="Population Density (per sq mi)">
                 <NumericInput placeholder="e.g. 3,500" value={popDensity}
                   onChange={setPopDensity} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+            </div>
+
+            {/* Investment Metrics */}
+            <div className="divider text-xs text-base-content/40 my-1">Investment Metrics</div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <Field label="GRM (Gross Rent Multiplier)">
+                <NumericInput placeholder="e.g. 8.5" value={grm} onChange={setGrm}
+                  className="input input-bordered w-full" disabled={!isAdmin} allowDecimal />
+              </Field>
+              <Field label="Cap Rate (%)">
+                <NumericInput placeholder="e.g. 6.5" value={capRate} onChange={setCapRate}
+                  className="input input-bordered w-full" disabled={!isAdmin} allowDecimal />
+              </Field>
+              <Field label="Cash-on-Cash Return (%)">
+                <NumericInput placeholder="e.g. 8.0" value={cashOnCash} onChange={setCashOnCash}
+                  className="input input-bordered w-full" disabled={!isAdmin} allowDecimal />
+              </Field>
+              <Field label="IRR (%)">
+                <NumericInput placeholder="e.g. 12.0" value={irr} onChange={setIrr}
+                  className="input input-bordered w-full" disabled={!isAdmin} allowDecimal />
+              </Field>
+              <Field label="Price per Unit ($)">
+                <NumericInput placeholder="e.g. 150,000" value={pricePerUnit} onChange={setPricePerUnit}
+                  className="input input-bordered w-full" disabled={!isAdmin} allowDecimal />
+              </Field>
+              <Field label="Price per Sq Ft ($)">
+                <NumericInput placeholder="e.g. 125" value={pricePerSqft} onChange={setPricePerSqft}
+                  className="input input-bordered w-full" disabled={!isAdmin} allowDecimal />
+              </Field>
+              <Field label="Rent-to-Sales Ratio (%)">
+                <NumericInput placeholder="e.g. 5.0" value={rentToSales} onChange={setRentToSales}
+                  className="input input-bordered w-full" disabled={!isAdmin} allowDecimal />
+              </Field>
+              <Field label="Number of SKUs">
+                <NumericInput placeholder="e.g. 500" value={numSkus} onChange={setNumSkus}
+                  className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Price per Acre ($)">
+                <NumericInput placeholder="e.g. 50,000" value={pricePerAcre} onChange={setPricePerAcre}
+                  className="input input-bordered w-full" disabled={!isAdmin} allowDecimal />
+              </Field>
+            </div>
+
+            {/* Electrical */}
+            <div className="divider text-xs text-base-content/40 my-1">Electrical</div>
+            <div className="grid grid-cols-2 gap-4">
+              <Field label="Voltage (V)">
+                <NumericInput placeholder="e.g. 480" value={elecVoltage} onChange={setElecVoltage}
+                  className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Amperage (A)">
+                <NumericInput placeholder="e.g. 400" value={elecAmperage} onChange={setElecAmperage}
+                  className="input input-bordered w-full" disabled={!isAdmin} />
               </Field>
             </div>
 

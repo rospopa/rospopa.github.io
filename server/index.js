@@ -114,6 +114,17 @@ async function initializeSchema() {
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS water_sources JSONB DEFAULT '[]'`);
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS military_bases JSONB DEFAULT '[]'`);
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'New'`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS grm NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS cap_rate NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS cash_on_cash NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS irr NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS price_per_unit NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS price_per_sqft NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS rent_to_sales_ratio NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS num_skus INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS price_per_acre NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS electrical_voltage INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS electrical_amperage INTEGER`);
 
   await pool.query(`CREATE TABLE IF NOT EXISTS property_assignments (
     id SERIAL PRIMARY KEY,
@@ -1035,7 +1046,9 @@ app.post('/api/properties', async (req, res) => {
     price, square_feet, lot_size, year_built,
     on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
     major_interstates, household_income_min, household_income_max, population_density,
-    logistics_hubs, landmarks, water_sources, military_bases
+    logistics_hubs, landmarks, water_sources, military_bases,
+    grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+    rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage
   } = req.body || {};
   if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
   if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
@@ -1047,8 +1060,10 @@ app.post('/api/properties', async (req, res) => {
         price, square_feet, lot_size, year_built,
         on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
         major_interstates, household_income_min, household_income_max, population_density,
-        logistics_hubs, landmarks, water_sources, military_bases)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21) RETURNING id`,
+        logistics_hubs, landmarks, water_sources, military_bases,
+        grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+        rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32) RETURNING id`,
       [pin.trim(), address.trim(), county.trim(), req.session.user.id,
        price || null, square_feet || null, lot_size || null, year_built || null,
        on_major_road || false, traffic_vpd || null, on_corner_lot || false,
@@ -1056,7 +1071,11 @@ app.post('/api/properties', async (req, res) => {
        JSON.stringify(major_interstates || []),
        household_income_min || null, household_income_max || null, population_density || null,
        JSON.stringify(logistics_hubs || []), JSON.stringify(landmarks || []),
-       JSON.stringify(water_sources || []), JSON.stringify(military_bases || [])]
+       JSON.stringify(water_sources || []), JSON.stringify(military_bases || []),
+       grm || null, cap_rate || null, cash_on_cash || null, irr || null,
+       price_per_unit || null, price_per_sqft || null,
+       rent_to_sales_ratio || null, num_skus || null, price_per_acre || null,
+       electrical_voltage || null, electrical_amperage || null]
     );
     await logAudit(req.session.user.id, req.session.user.email, 'create_property', { pin, address, county }, null, null, clientIp(req));
     res.json({ id: result.rows[0].id, pin, address, county });
@@ -1086,7 +1105,10 @@ app.get('/api/properties', async (req, res) => {
       `SELECT id, pin, address, county, price, square_feet, lot_size, year_built,
               on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
               major_interstates, household_income_min, household_income_max, population_density,
-              logistics_hubs, landmarks, water_sources, military_bases, status, created_by, created_at, updated_at
+              logistics_hubs, landmarks, water_sources, military_bases, status,
+              grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+              rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+              created_by, created_at, updated_at
        FROM properties ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
     );
@@ -1106,7 +1128,10 @@ app.get('/api/properties/:id', async (req, res) => {
       `SELECT id, pin, address, county, price, square_feet, lot_size, year_built,
               on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
               major_interstates, household_income_min, household_income_max, population_density,
-              logistics_hubs, landmarks, water_sources, military_bases, status, created_by, created_at, updated_at
+              logistics_hubs, landmarks, water_sources, military_bases, status,
+              grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+              rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+              created_by, created_at, updated_at
        FROM properties WHERE id = $1`, [propId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
     res.json(result.rows[0]);
@@ -1136,7 +1161,9 @@ app.put('/api/properties/:id', async (req, res) => {
       `SELECT pin, address, county, price, square_feet, lot_size, year_built,
               on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
               major_interstates, household_income_min, household_income_max, population_density,
-              logistics_hubs, landmarks, water_sources, military_bases
+              logistics_hubs, landmarks, water_sources, military_bases,
+              grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+              rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage
        FROM properties WHERE id=$1`, [propId]
     );
     if (oldResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
@@ -1153,7 +1180,12 @@ app.put('/api/properties/:id', async (req, res) => {
       population_density: population_density || null,
       logistics_hubs: JSON.stringify(logistics_hubs || []), landmarks: JSON.stringify(landmarks || []),
       water_sources: JSON.stringify(water_sources || []), military_bases: JSON.stringify(military_bases || []),
-      status: ['New','Under Review','Active','Other'].includes(status) ? status : 'New'
+      status: ['New','Under Review','Active','Other'].includes(status) ? status : 'New',
+      grm: grm || null, cap_rate: cap_rate || null, cash_on_cash: cash_on_cash || null, irr: irr || null,
+      price_per_unit: price_per_unit || null, price_per_sqft: price_per_sqft || null,
+      rent_to_sales_ratio: rent_to_sales_ratio || null, num_skus: num_skus || null,
+      price_per_acre: price_per_acre || null,
+      electrical_voltage: electrical_voltage || null, electrical_amperage: electrical_amperage || null
     };
 
     // Build field-level diff — normalize types for accurate comparison
@@ -1189,8 +1221,12 @@ app.put('/api/properties/:id', async (req, res) => {
         major_interstates=$13, household_income_min=$14, household_income_max=$15,
         population_density=$16, logistics_hubs=$17, landmarks=$18,
         water_sources=$19, military_bases=$20, status=$21,
+        grm=$22, cap_rate=$23, cash_on_cash=$24, irr=$25,
+        price_per_unit=$26, price_per_sqft=$27,
+        rent_to_sales_ratio=$28, num_skus=$29, price_per_acre=$30,
+        electrical_voltage=$31, electrical_amperage=$32,
         updated_at=CURRENT_TIMESTAMP
-       WHERE id=$22`,
+       WHERE id=$33`,
       [newVals.pin, newVals.address, newVals.county,
        newVals.price, newVals.square_feet, newVals.lot_size, newVals.year_built,
        newVals.on_major_road, newVals.traffic_vpd, newVals.on_corner_lot,
@@ -1200,6 +1236,10 @@ app.put('/api/properties/:id', async (req, res) => {
        newVals.population_density,
        newVals.logistics_hubs, newVals.landmarks,
        newVals.water_sources, newVals.military_bases, newVals.status,
+       newVals.grm, newVals.cap_rate, newVals.cash_on_cash, newVals.irr,
+       newVals.price_per_unit, newVals.price_per_sqft,
+       newVals.rent_to_sales_ratio, newVals.num_skus, newVals.price_per_acre,
+       newVals.electrical_voltage, newVals.electrical_amperage,
        propId]
     );
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
