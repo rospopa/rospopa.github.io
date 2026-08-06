@@ -384,6 +384,7 @@ const ACTION_LABELS = {
   register:         (d, t) => `New account registered (${t || d?.email || ''})`,
   login:            (d)    => `Signed in`,
   login_failed:     (d, t) => `Failed sign-in attempt for ${t || d?.email || 'unknown email'}`,
+  recaptcha_failed: (d)    => `Security check failed (score: ${d?.score ?? '?'}, reason: ${d?.reason || '?'})`,
   logout:           ()     => `Signed out`,
   create_user:      (d, t) => `Created user ${t || ''} with role "${d?.role || 'user'}"`,
   edit_user:        (d, t) => `Updated profile of ${t || 'user'}${d?.changed_fields?.length ? ` — fields: ${d.changed_fields.join(', ')}` : ''}`,
@@ -1471,10 +1472,17 @@ export default function App() {
     } catch { setLoginPreview(null) }
   }
 
+  async function getRecaptchaToken(action) {
+    try {
+      return await window.grecaptcha.enterprise.execute('6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv', { action })
+    } catch { return null }
+  }
+
   async function login(e) {
     e.preventDefault(); setMsg(''); setLoading(true)
     try {
-      const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) })
+      const recaptchaToken = await getRecaptchaToken('LOGIN')
+      const res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, recaptchaToken }) })
       const data = await res.json()
       if (!res.ok) { setMsg(data.error || 'Login failed'); return }
       setCurrentUser(data.user); setPage('dashboard'); setEmail(''); setPassword('')
@@ -1485,7 +1493,8 @@ export default function App() {
   async function register(e) {
     e.preventDefault(); setMsg(''); setLoading(true)
     try {
-      const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password }) })
+      const recaptchaToken = await getRecaptchaToken('REGISTER')
+      const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, recaptchaToken }) })
       const data = await res.json()
       if (!res.ok) { setMsg(data.error || 'Register failed'); return }
       setCurrentUser(data.user); setPage('dashboard'); setEmail(''); setPassword('')

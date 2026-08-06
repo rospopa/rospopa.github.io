@@ -5,9 +5,14 @@ const fs = require('fs');
 const { Pool } = require('pg');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
+const https = require('https');
 
 const PORT = process.env.PORT || 3000;
 const DATABASE_URL = process.env.DATABASE_URL;
+const RECAPTCHA_API_KEY = process.env.RECAPTCHA_API_KEY;
+const RECAPTCHA_PROJECT_ID = 'rospopa-recaptcha';
+const RECAPTCHA_SITE_KEY = '6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv';
+const RECAPTCHA_MIN_SCORE = 0.5;
 
 if (!DATABASE_URL) {
   throw new Error('DATABASE_URL is required');
@@ -148,6 +153,36 @@ function clientIp(req) {
   return req.socket?.remoteAddress || null;
 }
 
+/** Verify a reCAPTCHA Enterprise token. Returns { ok, score, reason } */
+async function verifyRecaptcha(token, action) {
+  if (!RECAPTCHA_API_KEY) return { ok: true, score: 1, reason: 'no_api_key_configured' };
+  if (!token) return { ok: false, score: 0, reason: 'missing_token' };
+  return new Promise((resolve) => {
+    const body = JSON.stringify({
+      event: { token, expectedAction: action, siteKey: RECAPTCHA_SITE_KEY }
+    });
+    const url = `https://recaptchaenterprise.googleapis.com/v1/projects/${RECAPTCHA_PROJECT_ID}/assessments?key=${RECAPTCHA_API_KEY}`;
+    const req = https.request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          const score = parsed?.riskAnalysis?.score ?? parsed?.score ?? 0;
+          const valid = parsed?.tokenProperties?.valid ?? false;
+          const actionMatch = !parsed?.tokenProperties?.action || parsed.tokenProperties.action === action;
+          if (!valid) return resolve({ ok: false, score, reason: 'invalid_token' });
+          if (!actionMatch) return resolve({ ok: false, score, reason: 'action_mismatch' });
+          resolve({ ok: score >= RECAPTCHA_MIN_SCORE, score, reason: score < RECAPTCHA_MIN_SCORE ? 'low_score' : 'pass' });
+        } catch { resolve({ ok: false, score: 0, reason: 'parse_error' }); }
+      });
+    });
+    req.on('error', () => resolve({ ok: false, score: 0, reason: 'network_error' }));
+    req.write(body);
+    req.end();
+  });
+}
+
 // Session middleware is initialized async (after DB schema ready) via a proxy
 // When multiple connect.sid cookies exist (stale + new), keep only the last one
 // MUST be registered before the session middleware placeholder
@@ -226,11 +261,17 @@ async function initializeSessionMiddleware() {
 }
 
 app.post('/api/register', async (req, res) => {
-  let { email, password, first_name, last_name, organization, phone_number, buy_box } = req.body || {};
+  let { email, password, first_name, last_name, organization, phone_number, buy_box, recaptchaToken } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
   if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
+
+  const captcha = await verifyRecaptcha(recaptchaToken, 'REGISTER');
+  if (!captcha.ok) {
+    logAudit(null, email, 'recaptcha_failed', { action: 'REGISTER', reason: captcha.reason, score: captcha.score, ip: clientIp(req) }, null, email, clientIp(req));
+    return res.status(403).json({ error: 'Security check failed. Please try again.' });
+  }
 
   try {
     const hashed = await bcrypt.hash(password, 10);
@@ -270,10 +311,16 @@ app.post('/api/lookup-user', async (req, res) => {
 });
 
 app.post('/api/login', async (req, res) => {
-  let { email, password } = req.body || {};
+  let { email, password, recaptchaToken } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
+
+  const captcha = await verifyRecaptcha(recaptchaToken, 'LOGIN');
+  if (!captcha.ok) {
+    logAudit(null, email, 'recaptcha_failed', { action: 'LOGIN', reason: captcha.reason, score: captcha.score, ip: clientIp(req) }, null, email, clientIp(req));
+    return res.status(403).json({ error: 'Security check failed. Please try again.' });
+  }
 
   try {
     const result = await pool.query(
