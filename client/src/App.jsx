@@ -125,6 +125,153 @@ function Field({ label, required, children }) {
   )
 }
 
+/* ─── Calendar Widget ─────────────────────────────────────────── */
+const EVENT_COLORS = {
+  property_created: 'bg-emerald-500',
+  property_updated: 'bg-amber-400',
+  assigned:         'bg-sky-500',
+  audit:            'bg-violet-400',
+};
+const EVENT_LABELS = {
+  property_created: 'Created',
+  property_updated: 'Updated',
+  assigned:         'Assigned',
+  audit:            'Activity',
+};
+
+function CalendarWidget({ role }) {
+  const today = new Date()
+  const [year, setYear]   = useState(today.getFullYear())
+  const [month, setMonth] = useState(today.getMonth() + 1) // 1-12
+  const [events, setEvents] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState(null) // { day, events[] }
+
+  useEffect(() => {
+    setLoading(true)
+    setSelected(null)
+    fetch(`/api/calendar-events?year=${year}&month=${month}`, { credentials: 'include' })
+      .then(r => r.json())
+      .then(d => { setEvents(d.events || []); setLoading(false) })
+      .catch(() => setLoading(false))
+  }, [year, month])
+
+  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
+  const daysInMonth = new Date(year, month, 0).getDate()
+  const firstDow    = new Date(year, month - 1, 1).getDay() // 0=Sun
+
+  // Group events by date string YYYY-MM-DD (local)
+  const byDay = {}
+  for (const ev of events) {
+    const d = new Date(ev.date)
+    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
+    if (!byDay[key]) byDay[key] = []
+    byDay[key].push(ev)
+  }
+
+  function prevMonth() {
+    if (month === 1) { setYear(y => y - 1); setMonth(12) }
+    else setMonth(m => m - 1)
+  }
+  function nextMonth() {
+    if (month === 12) { setYear(y => y + 1); setMonth(1) }
+    else setMonth(m => m + 1)
+  }
+
+  const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+
+  const cells = []
+  for (let i = 0; i < firstDow; i++) cells.push(null)
+  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+
+  return (
+    <div className="card bg-base-100 border border-base-300 w-full">
+      <div className="card-body p-4 md:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-base font-semibold uppercase tracking-widest text-base-content/50">Calendar</h3>
+          <div className="flex items-center gap-2">
+            <button className="btn btn-xs btn-ghost" onClick={prevMonth}>‹</button>
+            <span className="text-sm font-medium min-w-[130px] text-center">{MONTHS[month-1]} {year}</span>
+            <button className="btn btn-xs btn-ghost" onClick={nextMonth}>›</button>
+          </div>
+        </div>
+
+        {/* Legend */}
+        <div className="flex flex-wrap gap-3 mb-3 text-xs">
+          {Object.entries(EVENT_LABELS).map(([type, label]) =>
+            (role === 'admin' || type === 'assigned') && (
+              <span key={type} className="flex items-center gap-1">
+                <span className={`inline-block w-2 h-2 rounded-full ${EVENT_COLORS[type]}`}/>
+                {label}
+              </span>
+            )
+          )}
+        </div>
+
+        {/* Day-of-week headers */}
+        <div className="grid grid-cols-7 mb-1">
+          {['Su','Mo','Tu','We','Th','Fr','Sa'].map(d => (
+            <div key={d} className="text-center text-xs font-semibold text-base-content/40 py-1">{d}</div>
+          ))}
+        </div>
+
+        {loading ? (
+          <div className="flex justify-center py-8 text-base-content/40 text-sm">Loading…</div>
+        ) : (
+          <div className="grid grid-cols-7 gap-0.5">
+            {cells.map((day, i) => {
+              if (!day) return <div key={`e${i}`}/>
+              const key = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`
+              const dayEvents = byDay[key] || []
+              const isToday = key === todayKey
+              const isSelected = selected?.day === day
+              const dots = [...new Set(dayEvents.map(e => e.type))].slice(0, 3)
+              return (
+                <button
+                  key={key}
+                  onClick={() => setSelected(isSelected ? null : { day, events: dayEvents })}
+                  className={`rounded p-1 flex flex-col items-center transition-colors min-h-[40px]
+                    ${isToday ? 'ring-1 ring-primary' : ''}
+                    ${isSelected ? 'bg-primary/10' : 'hover:bg-base-200'}
+                    ${dayEvents.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
+                >
+                  <span className={`text-xs font-medium ${isToday ? 'text-primary font-bold' : ''}`}>{day}</span>
+                  <div className="flex gap-0.5 mt-0.5 flex-wrap justify-center">
+                    {dots.map(type => (
+                      <span key={type} className={`w-1.5 h-1.5 rounded-full ${EVENT_COLORS[type]}`}/>
+                    ))}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+        {/* Selected day detail panel */}
+        {selected && selected.events.length > 0 && (
+          <div className="mt-4 border-t border-base-300 pt-3 space-y-1.5 max-h-48 overflow-y-auto">
+            <p className="text-xs font-semibold text-base-content/50 mb-2">
+              {MONTHS[month-1]} {selected.day}, {year} — {selected.events.length} event{selected.events.length > 1 ? 's' : ''}
+            </p>
+            {selected.events.map((ev, i) => (
+              <div key={i} className="flex items-start gap-2 text-xs">
+                <span className={`mt-0.5 flex-shrink-0 w-2 h-2 rounded-full ${EVENT_COLORS[ev.type]}`}/>
+                <div>
+                  <span className="font-medium capitalize">{ev.label}</span>
+                  {ev.meta?.pin && <span className="text-base-content/50 ml-1">PIN: {ev.meta.pin}</span>}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        {selected && selected.events.length === 0 && (
+          <p className="mt-3 text-xs text-base-content/40 text-center">No events on this day</p>
+        )}
+      </div>
+    </div>
+  )
+}
+
 /** Text input that displays numbers with comma formatting; stores raw digits in state */
 function NumericInput({ value, onChange, placeholder, className, disabled, allowDecimal }) {
   const [display, setDisplay] = useState('')
@@ -2595,13 +2742,18 @@ export default function App() {
         <ErrorBoundary key={page}>
 
         {page === 'dashboard' && (
-          <div className="text-center py-16">
-            <h1 className="text-2xl md:text-4xl font-bold mb-3">
-              Welcome back, {currentUser.first_name || currentUser.email.split('@')[0]}
-            </h1>
-            <div className="flex flex-wrap justify-center gap-4 mt-6">
-              <button className="btn btn-primary" onClick={() => navigateTo('properties')}>View Properties</button>
-              {currentUser.role === 'admin' && <button className="btn btn-outline" onClick={() => navigateTo('users')}>Manage Users</button>}
+          <div className="space-y-8 py-8">
+            <div className="text-center">
+              <h1 className="text-2xl md:text-4xl font-bold mb-3">
+                Welcome back, {currentUser.first_name || currentUser.email.split('@')[0]}
+              </h1>
+              <div className="flex flex-wrap justify-center gap-4 mt-4">
+                <button className="btn btn-primary" onClick={() => navigateTo('properties')}>View Properties</button>
+                {currentUser.role === 'admin' && <button className="btn btn-outline" onClick={() => navigateTo('users')}>Manage Users</button>}
+              </div>
+            </div>
+            <div className="max-w-lg mx-auto">
+              <CalendarWidget role={currentUser.role} />
             </div>
           </div>
         )}

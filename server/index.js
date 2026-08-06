@@ -1074,6 +1074,89 @@ app.get('/api/me/properties', async (req, res) => {
   }
 });
 
+// Calendar events — returns events for the requesting user's role
+// Admin: property creations + audit log entries for the current month ± 1
+// User: their assigned properties (assigned_at) + any property created dates
+app.get('/api/calendar-events', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const { year, month } = req.query; // month = 1-12
+  const y = parseInt(year, 10) || new Date().getFullYear();
+  const m = parseInt(month, 10) || (new Date().getMonth() + 1);
+  // Build date range: full month
+  const from = new Date(y, m - 1, 1).toISOString();
+  const to   = new Date(y, m, 1).toISOString(); // exclusive start of next month
+
+  try {
+    const events = [];
+    if (req.session.user.role === 'admin') {
+      // Property creations this month
+      const props = await pool.query(
+        `SELECT id, pin, address, county, status, created_at FROM properties
+         WHERE created_at >= $1 AND created_at < $2 ORDER BY created_at`,
+        [from, to]
+      );
+      for (const p of props.rows) {
+        events.push({
+          date: p.created_at,
+          type: 'property_created',
+          label: `Property created: ${p.address}`,
+          meta: { id: p.id, pin: p.pin, status: p.status },
+        });
+      }
+      // Audit log entries this month
+      const audit = await pool.query(
+        `SELECT action, details, created_at FROM audit_logs
+         WHERE created_at >= $1 AND created_at < $2 ORDER BY created_at`,
+        [from, to]
+      );
+      for (const a of audit.rows) {
+        events.push({
+          date: a.created_at,
+          type: 'audit',
+          label: a.action.replace(/_/g, ' '),
+          meta: a.details,
+        });
+      }
+      // Property status changes (updated_at) — deduplicated from audit above if needed
+      const statusChanges = await pool.query(
+        `SELECT id, address, status, updated_at FROM properties
+         WHERE updated_at >= $1 AND updated_at < $2 AND updated_at != created_at ORDER BY updated_at`,
+        [from, to]
+      );
+      for (const p of statusChanges.rows) {
+        events.push({
+          date: p.updated_at,
+          type: 'property_updated',
+          label: `Status → ${p.status}: ${p.address}`,
+          meta: { id: p.id },
+        });
+      }
+    } else {
+      // Regular user: show their assigned properties
+      const userId = req.session.user.id;
+      const assigned = await pool.query(
+        `SELECT p.id, p.pin, p.address, p.county, p.status, pa.assigned_at
+         FROM properties p
+         JOIN property_assignments pa ON p.id = pa.property_id
+         WHERE pa.user_id = $1 AND pa.assigned_at >= $2 AND pa.assigned_at < $3
+         ORDER BY pa.assigned_at`,
+        [userId, from, to]
+      );
+      for (const p of assigned.rows) {
+        events.push({
+          date: p.assigned_at,
+          type: 'assigned',
+          label: `Assigned: ${p.address}`,
+          meta: { id: p.id, pin: p.pin, status: p.status },
+        });
+      }
+    }
+    res.json({ events });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
 app.get('/api/properties/:id/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
