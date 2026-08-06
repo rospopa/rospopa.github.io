@@ -2836,7 +2836,7 @@ function BuyBoxEditor({ userId, initialValue }) {
   )
 }
 
-function ContactDetailPage({ contactId, onBack, splitMode = false }) {
+function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = false }) {
   const [data, setData] = useState(null)
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -2846,6 +2846,16 @@ function ContactDetailPage({ contactId, onBack, splitMode = false }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const fileInputRef = useRef(null)
+  const [viewProp, setViewProp] = useState(null)     // full property object for modal
+  const [propModalOpen, setPropModalOpen] = useState(false)
+
+  const openPropertyModal = async (propId) => {
+    try {
+      const full = await apiFetch(`/api/properties/${propId}`)
+      setViewProp(full)
+      setPropModalOpen(true)
+    } catch { /* ignore */ }
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -2964,7 +2974,11 @@ function ContactDetailPage({ contactId, onBack, splitMode = false }) {
             )}
             <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
               {properties.map(p => (
-                <div key={p.id} className="flex items-start justify-between gap-3 p-3 rounded-lg bg-base-200/60 hover:bg-base-200 transition-colors">
+                <button
+                  key={p.id}
+                  onClick={() => openPropertyModal(p.id)}
+                  className="w-full text-left flex items-start justify-between gap-3 p-3 rounded-lg bg-base-200/60 hover:bg-base-200 transition-colors cursor-pointer"
+                >
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm truncate">{p.address}</div>
                     <div className="text-xs text-base-content/50 mt-0.5">{p.county} · PIN: {p.pin}</div>
@@ -2975,8 +2989,9 @@ function ContactDetailPage({ contactId, onBack, splitMode = false }) {
                     <span className="text-[10px] text-base-content/40">
                       Assigned {new Date(p.assigned_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
+                    <span className="text-[10px] text-primary/70 font-medium">Click to open →</span>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </div>
@@ -3042,11 +3057,18 @@ function ContactDetailPage({ contactId, onBack, splitMode = false }) {
           </div>
         </div>
       </div>
+
+      {/* Property detail modal */}
+      <PropertyDetailModal
+        open={propModalOpen}
+        property={viewProp}
+        isAdmin={isAdmin}
+        onClose={() => { setPropModalOpen(false); setViewProp(null) }}
+        onSave={() => { setPropModalOpen(false); setViewProp(null) }}
+      />
     </div>
   )
 }
-
-function ContactsPage() {
   const [contacts, setContacts] = useState([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState(() => localStorage.getItem('contacts_view') || 'split')
@@ -3085,6 +3107,7 @@ function ContactsPage() {
       <ContactDetailPage
         contactId={detailId}
         onBack={closeDetail}
+        isAdmin
       />
     )
   }
@@ -3261,6 +3284,7 @@ function ContactsPage() {
                   contactId={splitDetailId}
                   onBack={() => selectSplit(null)}
                   splitMode
+                  isAdmin
                 />
               </div>
             ) : (
