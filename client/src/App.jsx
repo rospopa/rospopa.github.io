@@ -133,7 +133,7 @@ function PropertyCardCarousel({ propertyId, onClick }) {
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    fetch(`/api/properties/${propertyId}/media`)
+    fetch(`/api/properties/${propertyId}/media`, { credentials: 'include' })
       .then(r => r.json())
       .then(d => { setMedia(d.media || []); setLoaded(true) })
       .catch(() => setLoaded(true))
@@ -209,8 +209,7 @@ function PropertyModalCarousel({ propertyId }) {
   const [loaded, setLoaded] = useState(false)
 
   useEffect(() => {
-    if (!propertyId) return
-    fetch(`/api/properties/${propertyId}/media`)
+    fetch(`/api/properties/${propertyId}/media`, { credentials: 'include' })
       .then(r => r.json())
       .then(d => { setMedia(d.media || []); setLoaded(true) })
       .catch(() => setLoaded(true))
