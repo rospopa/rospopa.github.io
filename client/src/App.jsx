@@ -3075,19 +3075,19 @@ function ContactsPage() {
       )}
 
       {!loading && view === 'list' && (
-        <div className="overflow-x-auto rounded-box border border-base-200">
-          <table className="table table-zebra w-full min-w-[640px]">
+        <div className="rounded-box border border-base-200 overflow-x-auto">
+          <table className="table table-zebra w-full">
             <thead>
               <tr className="text-xs uppercase tracking-wider text-base-content/50">
                 <th className="w-10">Photo</th>
                 <th>Name</th>
                 <th className="hidden md:table-cell">Email</th>
-                <th>Role</th>
+                <th className="w-16">Role</th>
                 <th className="hidden lg:table-cell">Organization</th>
-                <th>Phone</th>
+                <th className="hidden sm:table-cell">Phone</th>
                 <th className="hidden xl:table-cell">Buy Box</th>
-                <th className="text-center">Notes</th>
-                <th className="hidden sm:table-cell text-center">Last Note</th>
+                <th className="text-center w-14">Notes</th>
+                <th className="hidden md:table-cell text-center w-20">Last Note</th>
               </tr>
             </thead>
             <tbody>
@@ -3103,12 +3103,12 @@ function ContactsPage() {
                     <td className="hidden md:table-cell text-sm"><EmailLink email={c.email} /></td>
                     <td><span className={`badge badge-sm ${c.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{c.role}</span></td>
                     <td className="hidden lg:table-cell text-sm">{c.organization || <span className="text-base-content/30">—</span>}</td>
-                    <td className="text-sm"><PhoneLink phone={c.phone_number} /></td>
+                    <td className="hidden sm:table-cell text-sm"><PhoneLink phone={c.phone_number} /></td>
                     <td className="hidden xl:table-cell text-sm max-w-[180px]">
                       <span className="line-clamp-2 text-base-content/60">{c.buy_box || <span className="text-base-content/30">—</span>}</span>
                     </td>
                     <td className="text-center"><span className="badge badge-ghost badge-sm">{c.note_count}</span></td>
-                    <td className="hidden sm:table-cell text-center text-xs text-base-content/50 whitespace-nowrap">
+                    <td className="hidden md:table-cell text-center text-xs text-base-content/50 whitespace-nowrap">
                       {fmtLastNote(c.last_note_at) || <span className="text-base-content/25">—</span>}
                     </td>
                   </tr>
