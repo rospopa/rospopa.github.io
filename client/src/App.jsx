@@ -340,11 +340,11 @@ function AuditLogs() {
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-wrap">
         <input type="text" placeholder="Search by email or action…" value={q}
           onChange={e => setQ(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && (setPage(1), fetchLogs(1))}
-          className="input input-bordered flex-1" />
+          className="input input-bordered flex-1 min-w-0" />
         <button className="btn btn-primary" onClick={() => { setPage(1); fetchLogs(1) }}>Search</button>
       </div>
 
@@ -364,10 +364,11 @@ function AuditLogs() {
                   <div key={log.id} className="flex gap-3 items-start py-2.5 px-4 rounded-lg hover:bg-base-200 border-b border-base-300/50">
                     <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <span className="font-semibold text-sm">{actor}</span>
+                      <span className="font-semibold text-sm break-all">{actor}</span>
                       <span className="text-base-content/70 text-sm"> — {text}</span>
+                      <div className="text-xs text-base-content/40 mt-0.5 md:hidden">{ts}</div>
                     </div>
-                    <span className="text-xs text-base-content/40 flex-shrink-0 mt-0.5">{ts}</span>
+                    <span className="hidden md:block text-xs text-base-content/40 flex-shrink-0 mt-0.5 whitespace-nowrap">{ts}</span>
                   </div>
                 )
               })
@@ -375,7 +376,7 @@ function AuditLogs() {
         </div>
       )}
 
-      <div className="flex justify-between items-center pt-2">
+      <div className="flex flex-wrap justify-between items-center gap-2 pt-2">
         <span className="text-xs text-base-content/40">{total} total events</span>
         <div className="flex items-center gap-2">
           <button className="btn btn-xs btn-ghost" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading}>← Prev</button>
@@ -697,7 +698,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
 
   return (
     <div className="modal modal-open">
-      <div className="modal-box max-w-2xl w-full">
+      <div className="modal-box max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-bold text-xl">
             {property?.id ? property.address : 'New Property'}
@@ -1519,17 +1520,17 @@ export default function App() {
       )}
 
       {/* Main content */}
-      <main className="container mx-auto px-6 py-10 max-w-6xl">
+      <main className="container mx-auto px-4 md:px-6 py-6 md:py-10 max-w-6xl">
         <ErrorBoundary key={page}>
 
         {page === 'dashboard' && (
           <div className="text-center py-16">
-            <h1 className="text-4xl font-bold mb-3">
+            <h1 className="text-2xl md:text-4xl font-bold mb-3">
               Welcome back, {currentUser.first_name || currentUser.email.split('@')[0]}
             </h1>
             <p className="text-base-content/50 text-lg mb-2">{currentUser.email}</p>
             <span className="badge badge-primary mb-8">{currentUser.role}</span>
-            <div className="flex justify-center gap-4 mt-6">
+            <div className="flex flex-wrap justify-center gap-4 mt-6">
               <button className="btn btn-primary" onClick={() => navigateTo('properties')}>View Properties</button>
               {currentUser.role === 'admin' && <button className="btn btn-outline" onClick={() => navigateTo('users')}>Manage Users</button>}
             </div>
@@ -1540,7 +1541,7 @@ export default function App() {
           <div className="space-y-10">
             <h2 className="text-2xl font-bold">Manage Users</h2>
             <div className="card bg-base-100 border border-base-300">
-              <div className="card-body p-8">
+              <div className="card-body p-4 md:p-8">
                 <h3 className="text-base font-semibold uppercase tracking-widest text-base-content/50 mb-6">Create New User</h3>
                 <AddUserForm onCreated={() => { }} />
               </div>
