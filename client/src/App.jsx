@@ -990,6 +990,16 @@ function AuditLogs() {
                   irr: 'IRR (%)', price_per_unit: 'Price/Unit ($)', price_per_sqft: 'Price/SqFt ($)',
                   rent_to_sales_ratio: 'Rent-to-Sales Ratio (%)', num_skus: '# SKUs',
                   price_per_acre: 'Price/Acre ($)', electrical_voltage: 'Voltage (V)', electrical_amperage: 'Amperage (A)',
+                  gross_scheduled_rent: 'Gross Scheduled Rent ($)', vacancy_rate: 'Vacancy/Credit Loss (%)',
+                  other_income: 'Other Income ($)', operating_expenses: 'Operating Expenses ($)',
+                  reserves_capex: 'Reserves/Capex ($)',
+                  loan_amount: 'Loan Amount ($)', ltv: 'LTV (%)', interest_rate: 'Interest Rate (%)',
+                  amortization_term: 'Amortization Term (yrs)', interest_only_period: 'Interest-Only Period (yrs)',
+                  unit_count: 'Unit / Bay / Suite Count', closing_costs: 'Closing Costs ($)',
+                  hold_period: 'Hold Period (yrs)', rent_growth: 'Rent Growth (%)',
+                  expense_growth: 'Expense Growth (%)', exit_cap_rate: 'Exit Cap Rate (%)',
+                  cost_of_sale: 'Cost of Sale (%)',
+                  tenant_gross_sales: 'Tenant Annual Gross Sales ($)', tenant_base_rent: 'Tenant Base Rent ($)',
                 }
                 function fmtVal(v) {
                   if (v === null || v === undefined || v === '') return null
@@ -1311,6 +1321,29 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [elecVoltage, setElecVoltage] = useState('')
   const [elecAmperage, setElecAmperage] = useState('')
   const [assetType, setAssetType] = useState('')
+  // Income block
+  const [grossScheduledRent, setGrossScheduledRent] = useState('')
+  const [vacancyRate, setVacancyRate] = useState('')
+  const [otherIncome, setOtherIncome] = useState('')
+  const [operatingExpenses, setOperatingExpenses] = useState('')
+  const [reservesCapex, setReservesCapex] = useState('')
+  // Debt block
+  const [loanAmount, setLoanAmount] = useState('')
+  const [ltv, setLtv] = useState('')
+  const [interestRate, setInterestRate] = useState('')
+  const [amortizationTerm, setAmortizationTerm] = useState('')
+  const [interestOnlyPeriod, setInterestOnlyPeriod] = useState('')
+  // Deal block
+  const [unitCount, setUnitCount] = useState('')
+  const [closingCosts, setClosingCosts] = useState('')
+  const [holdPeriod, setHoldPeriod] = useState('')
+  const [rentGrowth, setRentGrowth] = useState('')
+  const [expenseGrowth, setExpenseGrowth] = useState('')
+  const [exitCapRate, setExitCapRate] = useState('')
+  const [costOfSale, setCostOfSale] = useState('')
+  // Tenant block
+  const [tenantGrossSales, setTenantGrossSales] = useState('')
+  const [tenantBaseRent, setTenantBaseRent] = useState('')
   const [saving, setSaving] = useState(false)
   const [savedSignal, setSavedSignal] = useState(0)
   const [media, setMedia] = useState([])
@@ -1361,6 +1394,25 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     setElecVoltage(p.electrical_voltage ?? '')
     setElecAmperage(p.electrical_amperage ?? '')
     setAssetType(p.asset_type || '')
+    setGrossScheduledRent(p.gross_scheduled_rent ?? '')
+    setVacancyRate(p.vacancy_rate ?? '')
+    setOtherIncome(p.other_income ?? '')
+    setOperatingExpenses(p.operating_expenses ?? '')
+    setReservesCapex(p.reserves_capex ?? '')
+    setLoanAmount(p.loan_amount ?? '')
+    setLtv(p.ltv ?? '')
+    setInterestRate(p.interest_rate ?? '')
+    setAmortizationTerm(p.amortization_term ?? '')
+    setInterestOnlyPeriod(p.interest_only_period ?? '')
+    setUnitCount(p.unit_count ?? '')
+    setClosingCosts(p.closing_costs ?? '')
+    setHoldPeriod(p.hold_period ?? '')
+    setRentGrowth(p.rent_growth ?? '')
+    setExpenseGrowth(p.expense_growth ?? '')
+    setExitCapRate(p.exit_cap_rate ?? '')
+    setCostOfSale(p.cost_of_sale ?? '')
+    setTenantGrossSales(p.tenant_gross_sales ?? '')
+    setTenantBaseRent(p.tenant_base_rent ?? '')
   }
 
   useEffect(() => {
@@ -1376,6 +1428,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       setGrm(''); setCapRate(''); setCashOnCash(''); setIrr('')
       setPricePerUnit(''); setPricePerSqft(''); setRentToSales(''); setNumSkus('')
       setPricePerAcre(''); setElecVoltage(''); setElecAmperage(''); setAssetType('')
+      setGrossScheduledRent(''); setVacancyRate(''); setOtherIncome(''); setOperatingExpenses(''); setReservesCapex('')
+      setLoanAmount(''); setLtv(''); setInterestRate(''); setAmortizationTerm(''); setInterestOnlyPeriod('')
+      setUnitCount(''); setClosingCosts(''); setHoldPeriod(''); setRentGrowth(''); setExpenseGrowth('')
+      setExitCapRate(''); setCostOfSale(''); setTenantGrossSales(''); setTenantBaseRent('')
       setTab('details')
     }
   }, [property, open])
@@ -1477,6 +1533,25 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       electrical_voltage: elecVoltage !== '' ? Number(elecVoltage) : null,
       electrical_amperage: elecAmperage !== '' ? Number(elecAmperage) : null,
       asset_type: assetType || null,
+      gross_scheduled_rent: grossScheduledRent !== '' ? Number(grossScheduledRent) : null,
+      vacancy_rate: vacancyRate !== '' ? Number(vacancyRate) : null,
+      other_income: otherIncome !== '' ? Number(otherIncome) : null,
+      operating_expenses: operatingExpenses !== '' ? Number(operatingExpenses) : null,
+      reserves_capex: reservesCapex !== '' ? Number(reservesCapex) : null,
+      loan_amount: loanAmount !== '' ? Number(loanAmount) : null,
+      ltv: ltv !== '' ? Number(ltv) : null,
+      interest_rate: interestRate !== '' ? Number(interestRate) : null,
+      amortization_term: amortizationTerm !== '' ? Number(amortizationTerm) : null,
+      interest_only_period: interestOnlyPeriod !== '' ? Number(interestOnlyPeriod) : null,
+      unit_count: unitCount !== '' ? Number(unitCount) : null,
+      closing_costs: closingCosts !== '' ? Number(closingCosts) : null,
+      hold_period: holdPeriod !== '' ? Number(holdPeriod) : null,
+      rent_growth: rentGrowth !== '' ? Number(rentGrowth) : null,
+      expense_growth: expenseGrowth !== '' ? Number(expenseGrowth) : null,
+      exit_cap_rate: exitCapRate !== '' ? Number(exitCapRate) : null,
+      cost_of_sale: costOfSale !== '' ? Number(costOfSale) : null,
+      tenant_gross_sales: tenantGrossSales !== '' ? Number(tenantGrossSales) : null,
+      tenant_base_rent: tenantBaseRent !== '' ? Number(tenantBaseRent) : null,
     })
     setSaving(false)
     setSavedSignal(s => s + 1)
@@ -1991,6 +2066,134 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                     className="input input-bordered input-sm w-full" disabled={!isAdmin} />
                 </Field>
               </div>
+
+              {/* Income */}
+              <div className="space-y-3 pt-2">
+                <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Income</div>
+                <Field label="Gross Scheduled Rent ($/yr)">
+                  <NumericInput placeholder="e.g. 120000" value={grossScheduledRent} onChange={setGrossScheduledRent}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Vacancy / Credit Loss (%)">
+                  <NumericInput placeholder="e.g. 5" value={vacancyRate} onChange={setVacancyRate}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                {grossScheduledRent !== '' && vacancyRate !== '' && (
+                  <div className="text-xs text-base-content/60 bg-base-200 rounded px-2 py-1">
+                    EGI ≈ <span className="font-medium">${(Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>/yr
+                  </div>
+                )}
+                <Field label="Other Income ($/yr)">
+                  <NumericInput placeholder="parking, RUBS, storage" value={otherIncome} onChange={setOtherIncome}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Operating Expenses ($/yr)">
+                  <NumericInput placeholder="e.g. 40000" value={operatingExpenses} onChange={setOperatingExpenses}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Reserves / Replacement Capex ($/yr)">
+                  <NumericInput placeholder="e.g. 5000" value={reservesCapex} onChange={setReservesCapex}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                {grossScheduledRent !== '' && vacancyRate !== '' && operatingExpenses !== '' && (
+                  <div className="text-xs text-base-content/60 bg-base-200 rounded px-2 py-1">
+                    NOI ≈ <span className="font-medium">${(
+                      Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) +
+                      Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0)
+                    ).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>/yr
+                  </div>
+                )}
+              </div>
+
+              {/* Debt */}
+              <div className="space-y-3 pt-2">
+                <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Debt</div>
+                <Field label="Loan Amount ($)">
+                  <NumericInput placeholder="e.g. 750000" value={loanAmount} onChange={setLoanAmount}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="LTV (%)">
+                  <NumericInput placeholder="e.g. 75" value={ltv} onChange={setLtv}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Interest Rate (%)">
+                  <NumericInput placeholder="e.g. 6.5" value={interestRate} onChange={setInterestRate}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Amortization Term (yrs)">
+                  <NumericInput placeholder="e.g. 25" value={amortizationTerm} onChange={setAmortizationTerm}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Interest-Only Period (yrs)">
+                  <NumericInput placeholder="e.g. 3" value={interestOnlyPeriod} onChange={setInterestOnlyPeriod}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                {loanAmount !== '' && interestRate !== '' && amortizationTerm !== '' && Number(amortizationTerm) > 0 && (
+                  (() => {
+                    const r = Number(interestRate) / 100 / 12
+                    const n = Number(amortizationTerm) * 12
+                    const pmt = r === 0 ? Number(loanAmount) / n : Number(loanAmount) * r / (1 - Math.pow(1 + r, -n))
+                    return (
+                      <div className="text-xs text-base-content/60 bg-base-200 rounded px-2 py-1">
+                        Annual Debt Service ≈ <span className="font-medium">${(pmt * 12).toLocaleString(undefined, { maximumFractionDigits: 0 })}</span>/yr
+                      </div>
+                    )
+                  })()
+                )}
+              </div>
+
+              {/* Deal */}
+              <div className="space-y-3 pt-2">
+                <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Deal</div>
+                <Field label="Unit / Bay / Suite Count">
+                  <NumericInput placeholder="e.g. 24" value={unitCount} onChange={setUnitCount}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Closing Costs ($)">
+                  <NumericInput placeholder="e.g. 25000" value={closingCosts} onChange={setClosingCosts}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Hold Period (yrs)">
+                  <NumericInput placeholder="e.g. 7" value={holdPeriod} onChange={setHoldPeriod}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Rent Growth (% / yr)">
+                  <NumericInput placeholder="e.g. 3" value={rentGrowth} onChange={setRentGrowth}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Expense Growth (% / yr)">
+                  <NumericInput placeholder="e.g. 2" value={expenseGrowth} onChange={setExpenseGrowth}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Exit Cap Rate (%)">
+                  <NumericInput placeholder="e.g. 6.5" value={exitCapRate} onChange={setExitCapRate}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+                <Field label="Cost of Sale (%)">
+                  <NumericInput placeholder="e.g. 2" value={costOfSale} onChange={setCostOfSale}
+                    className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                </Field>
+              </div>
+
+              {/* Tenant — retail / percentage-rent only */}
+              {(assetType === 'Retail' || assetType === 'Net Lease' || assetType === '') && (
+                <div className="space-y-3 pt-2">
+                  <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Tenant</div>
+                  <Field label="Tenant Annual Gross Sales ($)">
+                    <NumericInput placeholder="e.g. 1200000" value={tenantGrossSales} onChange={setTenantGrossSales}
+                      className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                  </Field>
+                  <Field label="Tenant Base Rent ($/yr)">
+                    <NumericInput placeholder="e.g. 60000" value={tenantBaseRent} onChange={setTenantBaseRent}
+                      className="input input-bordered input-sm w-full" disabled={!isAdmin} />
+                  </Field>
+                  {tenantGrossSales !== '' && tenantBaseRent !== '' && Number(tenantGrossSales) > 0 && (
+                    <div className="text-xs text-base-content/60 bg-base-200 rounded px-2 py-1">
+                      Rent-to-Sales ≈ <span className="font-medium">{(Number(tenantBaseRent) / Number(tenantGrossSales) * 100).toFixed(2)}%</span>
+                    </div>
+                  )}
+                </div>
+              )}
 
               {isAdmin && (
                 <div className="pt-3">
