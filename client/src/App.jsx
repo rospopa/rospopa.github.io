@@ -221,7 +221,8 @@ function PropertyModalCarousel({ propertyId }) {
 function RecaptchaShield({ status }) {
   // status: null | 'verifying' | 'success' | 'denied'
   const r = 22, circ = 2 * Math.PI * r
-  const color = status === 'denied' ? '#ef4444' : '#22c55e'
+  const ringColor = status === 'success' ? '#22c55e' : status === 'denied' ? '#ef4444' : '#9ca3af'
+  const iconColor = status === 'success' ? '#22c55e' : status === 'denied' ? '#ef4444' : '#9ca3af'
   const label = status === 'verifying' ? 'Verifying…' : status === 'success' ? 'Verified' : status === 'denied' ? 'Denied' : 'Protected by reCAPTCHA'
 
   return (
@@ -229,16 +230,16 @@ function RecaptchaShield({ status }) {
       <div className="relative w-14 h-14 flex items-center justify-center">
         {/* Spinning progress ring */}
         <svg className="absolute inset-0 w-14 h-14" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx="28" cy="28" r={r} fill="none" stroke={status ? color + '33' : '#0001'} strokeWidth="3" />
+          <circle cx="28" cy="28" r={r} fill="none" stroke={status ? ringColor + '33' : '#0001'} strokeWidth="3" />
           {status === 'verifying' && (
-            <circle cx="28" cy="28" r={r} fill="none" stroke={color} strokeWidth="3"
+            <circle cx="28" cy="28" r={r} fill="none" stroke={ringColor} strokeWidth="3"
               strokeDasharray={circ} strokeDashoffset={circ * 0.7}
               strokeLinecap="round">
               <animateTransform attributeName="transform" type="rotate" from="0 28 28" to="360 28 28" dur="1s" repeatCount="indefinite" />
             </circle>
           )}
           {(status === 'success' || status === 'denied') && (
-            <circle cx="28" cy="28" r={r} fill="none" stroke={color} strokeWidth="3"
+            <circle cx="28" cy="28" r={r} fill="none" stroke={ringColor} strokeWidth="3"
               strokeDasharray={circ} strokeDashoffset="0" strokeLinecap="round"
               style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
           )}
@@ -249,7 +250,7 @@ function RecaptchaShield({ status }) {
         </svg>
 
         {/* Shield icon */}
-        <svg viewBox="0 0 24 24" className="w-7 h-7 relative z-10" fill={status ? color : '#9ca3af'}
+        <svg viewBox="0 0 24 24" className="w-7 h-7 relative z-10" fill={iconColor}
           style={{ transition: 'fill 0.3s ease' }}>
           {status === 'success' ? (
             // Shield with checkmark
@@ -263,7 +264,7 @@ function RecaptchaShield({ status }) {
           )}
         </svg>
       </div>
-      <span className="text-xs" style={{ color: status ? color : '#9ca3af', transition: 'color 0.3s ease' }}>
+      <span className="text-xs" style={{ color: ringColor, transition: 'color 0.3s ease' }}>
         {label}
       </span>
     </div>
