@@ -1993,7 +1993,6 @@ export default function App() {
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
-  const [isRegister, setIsRegister] = useState(false)
   const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null })
   const [authChecked, setAuthChecked] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -2094,18 +2093,6 @@ export default function App() {
     finally { setLoading(false) }
   }
 
-  async function register(e) {
-    e.preventDefault(); setMsg(''); setLoading(true)
-    try {
-      const recaptchaToken = await getRecaptchaToken('REGISTER')
-      const res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password, recaptchaToken }) })
-      const data = await res.json()
-      if (!res.ok) { setMsg(data.error || 'Register failed'); return }
-      setCurrentUser(data.user); setPage('dashboard'); setEmail(''); setPassword('')
-    } catch { setMsg('Network error') }
-    finally { setLoading(false) }
-  }
-
   async function logout() {
     await fetch('/api/logout', { method: 'POST', credentials: 'include' }).catch(() => {})
     localStorage.removeItem('rep_page')
@@ -2147,7 +2134,7 @@ export default function App() {
                   <Logo />
                 )}
               </div>
-              <form onSubmit={isRegister ? register : login} className="space-y-5">
+              <form onSubmit={login} className="space-y-5">
                 <Field label="Email" required>
                   <input type="email" placeholder="your@email.com" value={email}
                     onChange={e => { setEmail(e.target.value); setLoginPreview(null) }}
@@ -2161,19 +2148,20 @@ export default function App() {
                 {msg && <div className="alert alert-error text-sm">{msg}</div>}
 
                 {/* reCAPTCHA shield indicator — only shown after loginPreview (user recognised) */}
-                {loginPreview && !isRegister && (
+                {loginPreview && (
                   <div className="flex justify-center">
                     <RecaptchaShield status={loginStatus} />
                   </div>
                 )}
 
                 <button className="btn btn-primary w-full" disabled={loading}>
-                  {loading ? 'Processing…' : (isRegister ? 'Create Account' : 'Sign In')}
+                  {loading ? 'Processing…' : 'Sign In'}
                 </button>
               </form>
-              <div className="divider text-xs text-base-content/30 my-0">or</div>
-              <button className="btn btn-ghost btn-sm w-full text-base-content/60" onClick={() => { setIsRegister(!isRegister); setMsg('') }}>
-                {isRegister ? 'Already have an account? Sign in' : 'Need an account? Register'}
+              <div className="divider text-xs text-base-content/30 my-0" />
+              <button className="btn btn-ghost btn-sm w-full text-base-content/60"
+                onClick={() => setMsg('Password reset coming soon — contact your administrator.')}>
+                Forgot your password?
               </button>
             </div>
           </div>

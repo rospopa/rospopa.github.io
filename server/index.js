@@ -270,37 +270,8 @@ async function initializeSessionMiddleware() {
   });
 }
 
-app.post('/api/register', async (req, res) => {
-  let { email, password, first_name, last_name, organization, phone_number, buy_box, recaptchaToken } = req.body || {};
-  email = sanitizeEmail(email);
-  if (!email || !password) return res.status(400).json({ error: 'email and password required' });
-  if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
-  if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
-
-  const captcha = await verifyRecaptcha(recaptchaToken, 'REGISTER');
-  if (!captcha.ok) {
-    logAudit(null, email, 'recaptcha_failed', { action: 'REGISTER', reason: captcha.reason, score: captcha.score, ip: clientIp(req) }, null, email, clientIp(req));
-    return res.status(403).json({ error: 'Security check failed. Please try again.' });
-  }
-
-  try {
-    const hashed = await bcrypt.hash(password, 10);
-    const result = await pool.query(
-      'INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
-      [email, hashed, 'user', first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null]
-    );
-    const id = result.rows[0].id;
-    const userObj = { id, email, role: 'user', first_name, last_name, organization, phone_number, buy_box };
-    await logAudit(id, email, 'register', { email, first_name, last_name }, null, email, clientIp(req));
-    req.session.user = userObj;
-    req.session.save(err => {
-      if (err) return res.status(500).json({ error: 'session save failed' });
-      res.json({ user: userObj });
-    });
-  } catch (e) {
-    if (e.code === '23505') return res.status(409).json({ error: 'email exists' });
-    res.status(500).json({ error: 'server error' });
-  }
+app.post('/api/register', (req, res) => {
+  res.status(403).json({ error: 'Registration is disabled. Contact your administrator.' })
 });
 
 /** Public endpoint — returns first_name, last_name, profile_photo for a given email.
