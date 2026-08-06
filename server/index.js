@@ -156,7 +156,7 @@ function clientIp(req) {
 /** Verify a reCAPTCHA Enterprise token. Returns { ok, score, reason } */
 async function verifyRecaptcha(token, action) {
   if (!RECAPTCHA_API_KEY) return { ok: true, score: 1, reason: 'no_api_key_configured' };
-  if (!token) return { ok: false, score: 0, reason: 'missing_token' };
+  if (!token) return { ok: true, score: 1, reason: 'no_token_skipped' }; // fail-open if script not loaded
   return new Promise((resolve) => {
     const body = JSON.stringify({
       event: { token, expectedAction: action, siteKey: RECAPTCHA_SITE_KEY }

@@ -1495,6 +1495,15 @@ export default function App() {
 
   async function getRecaptchaToken(action) {
     try {
+      // Wait up to 3s for grecaptcha to be ready
+      await new Promise((resolve, reject) => {
+        if (window.grecaptcha?.enterprise) return resolve()
+        let attempts = 0
+        const interval = setInterval(() => {
+          if (window.grecaptcha?.enterprise) { clearInterval(interval); resolve() }
+          else if (++attempts > 30) { clearInterval(interval); reject(new Error('timeout')) }
+        }, 100)
+      })
       return await window.grecaptcha.enterprise.execute('6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv', { action })
     } catch { return null }
   }
