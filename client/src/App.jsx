@@ -2134,6 +2134,7 @@ export default function App() {
   const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null })
   const [authChecked, setAuthChecked] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('rep_theme') === 'dark')
   const [loginPreview, setLoginPreview] = useState(null)
   const [loginStatus, setLoginStatus] = useState(null)
   const [editingUser, setEditingUser] = useState(null)
@@ -2319,8 +2320,28 @@ export default function App() {
 
   const displayName = [currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email
 
+  function toggleDarkMode() {
+    const next = !darkMode
+    setDarkMode(next)
+    localStorage.setItem('rep_theme', next ? 'dark' : 'light')
+  }
+
+  // Sun icon (day)
+  const SunIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707M17.657 17.657l-.707-.707M6.343 6.343l-.707-.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
+    </svg>
+  )
+
+  // Moon icon (night)
+  const MoonIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
+    </svg>
+  )
+
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-base-200" data-theme={darkMode ? 'monochrome-dark' : 'monochrome'}>
       {/* Navbar */}
       <nav className="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50 px-4 md:px-6 gap-2">
         {/* Logo */}
@@ -2335,6 +2356,9 @@ export default function App() {
 
         {/* Desktop right side */}
         <div className="hidden md:flex flex-none items-center gap-2">
+          <button className="btn btn-sm btn-ghost" onClick={toggleDarkMode} title={darkMode ? 'Day mode' : 'Night mode'}>
+            {darkMode ? <SunIcon /> : <MoonIcon />}
+          </button>
           <button
             className={`btn btn-ghost h-auto py-1.5 px-3 flex items-center gap-2.5 rounded-lg ${page === 'profile' ? 'btn-active' : ''}`}
             onClick={() => navigateTo('profile')}
@@ -2374,6 +2398,10 @@ export default function App() {
         <div className="md:hidden bg-base-100 border-b border-base-300 px-4 py-3 flex flex-col gap-1 sticky top-[64px] z-40 shadow-md">
           {navLinks.map(({ id, label }) => navBtn(id, label))}
           <div className="divider my-1" />
+          <button className="btn btn-sm btn-ghost w-full justify-start gap-2" onClick={toggleDarkMode}>
+            {darkMode ? <SunIcon /> : <MoonIcon />}
+            {darkMode ? 'Day Mode' : 'Night Mode'}
+          </button>
           <button className="btn btn-sm btn-outline w-full" onClick={() => { logout(); setMobileMenuOpen(false) }}>Sign Out</button>
         </div>
       )}
