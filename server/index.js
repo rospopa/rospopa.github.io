@@ -656,7 +656,7 @@ app.post('/api/properties/:id/media', async (req, res) => {
       'INSERT INTO property_media (property_id, filename, media_type, file_path, uploaded_by) VALUES ($1, $2, $3, $4, $5) RETURNING id',
       [propId, filename, mediaType, base64Data, req.session.user.id]
     );
-    await logAudit(req.session.user.id, req.session.user.email, 'upload_media', { property_id: propId, filename, mediaType }, clientIp(req));
+    await logAudit(req.session.user.id, req.session.user.email, 'upload_media', { property_id: propId, filename, mediaType }, null, null, clientIp(req));
     res.json({ id: result.rows[0].id, filename, mediaType });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -714,7 +714,7 @@ app.delete('/api/properties/:id/media/:mediaId', async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM property_media WHERE id = $1 AND property_id = $2', [mediaId, propId]);
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
-    await logAudit(req.session.user.id, req.session.user.email, 'delete_media', { property_id: propId, media_id: mediaId }, clientIp(req));
+    await logAudit(req.session.user.id, req.session.user.email, 'delete_media', { property_id: propId, media_id: mediaId }, null, null, clientIp(req));
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -819,7 +819,7 @@ app.post('/api/properties', async (req, res) => {
        JSON.stringify(logistics_hubs || []), JSON.stringify(landmarks || []),
        JSON.stringify(water_sources || []), JSON.stringify(military_bases || [])]
     );
-    await logAudit(req.session.user.id, req.session.user.email, 'create_property', { pin, address, county }, clientIp(req));
+    await logAudit(req.session.user.id, req.session.user.email, 'create_property', { pin, address, county }, null, null, clientIp(req));
     res.json({ id: result.rows[0].id, pin, address, county });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -915,7 +915,7 @@ app.put('/api/properties/:id', async (req, res) => {
        propId]
     );
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
-    await logAudit(req.session.user.id, req.session.user.email, 'edit_property', { property_id: propId, pin, address, county }, clientIp(req));
+    await logAudit(req.session.user.id, req.session.user.email, 'edit_property', { property_id: propId, pin, address, county }, null, null, clientIp(req));
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -930,7 +930,7 @@ app.delete('/api/properties/:id', async (req, res) => {
   try {
     const result = await pool.query('DELETE FROM properties WHERE id = $1', [propId]);
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
-    await logAudit(req.session.user.id, req.session.user.email, 'delete_property', { property_id: propId }, clientIp(req));
+    await logAudit(req.session.user.id, req.session.user.email, 'delete_property', { property_id: propId }, null, null, clientIp(req));
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -959,7 +959,7 @@ app.post('/api/properties/:id/assign', async (req, res) => {
       if (result.rowCount > 0) assigned++;
     }
 
-    await logAudit(req.session.user.id, req.session.user.email, 'assign_property', { property_id: propId, user_count: assigned, user_ids: userIds }, clientIp(req));
+    await logAudit(req.session.user.id, req.session.user.email, 'assign_property', { property_id: propId, user_count: assigned, user_ids: userIds }, null, null, clientIp(req));
     res.json({ ok: true, assigned });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -974,7 +974,7 @@ app.delete('/api/properties/:id/assign/:userId', async (req, res) => {
 
   try {
     await pool.query('DELETE FROM property_assignments WHERE property_id = $1 AND user_id = $2', [propId, userId]);
-    await logAudit(req.session.user.id, req.session.user.email, 'unassign_property', { property_id: propId, user_id: userId }, clientIp(req));
+    await logAudit(req.session.user.id, req.session.user.email, 'unassign_property', { property_id: propId, user_id: userId }, null, null, clientIp(req));
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
