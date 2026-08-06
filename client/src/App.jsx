@@ -3069,6 +3069,8 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
     </div>
   )
 }
+
+function ContactsPage() {
   const [contacts, setContacts] = useState([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState(() => localStorage.getItem('contacts_view') || 'split')
