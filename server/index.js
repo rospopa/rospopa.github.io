@@ -462,7 +462,7 @@ app.put('/api/users/:id', async (req, res) => {
   if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
   if (userRole !== 'admin' && userId !== id) return res.status(403).json({ error: 'forbidden' });
 
-  const { first_name, last_name, organization, phone_number, buy_box, profile_photo } = req.body || {};
+  const { first_name, last_name, organization, phone_number, buy_box, profile_photo, role } = req.body || {};
   const updates = [];
   const values = [];
 
@@ -472,6 +472,11 @@ app.put('/api/users/:id', async (req, res) => {
   if (phone_number !== undefined) { updates.push(`phone_number = $${updates.length + 1}`); values.push(phone_number || null); }
   if (buy_box !== undefined) { updates.push(`buy_box = $${updates.length + 1}`); values.push(buy_box || null); }
   if (profile_photo !== undefined) { updates.push(`profile_photo = $${updates.length + 1}`); values.push(profile_photo || null); }
+  if (role !== undefined && userRole === 'admin') {
+    const validRoles = ['user', 'admin'];
+    if (!validRoles.includes(role)) return res.status(400).json({ error: 'invalid role' });
+    updates.push(`role = $${updates.length + 1}`); values.push(role);
+  }
 
   if (updates.length === 0) {
     return res.status(400).json({ error: 'no fields to update' });

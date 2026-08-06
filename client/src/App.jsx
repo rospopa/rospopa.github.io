@@ -1251,7 +1251,13 @@ function EditUserModal({ open, user, onClose, onSave }) {
   const [lastName, setLastName] = useState('')
   const [organization, setOrganization] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
+  const [role, setRole] = useState('user')
+  const [buyBox, setBuyBox] = useState('')
+  const [photo, setPhoto] = useState(null)
+  const [showCropper, setShowCropper] = useState(false)
+  const [cropSrc, setCropSrc] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [err, setErr] = useState('')
 
   useEffect(() => {
     if (open && user) {
@@ -1259,11 +1265,24 @@ function EditUserModal({ open, user, onClose, onSave }) {
       setLastName(user.last_name || '')
       setOrganization(user.organization || '')
       setPhoneNumber(user.phone_number || '')
+      setRole(user.role || 'user')
+      setBuyBox(user.buy_box || '')
+      setPhoto(user.profile_photo || null)
+      setErr('')
     }
   }, [open, user])
 
+  function handlePhotoChange(e) {
+    const file = e.target.files[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = ev => { setCropSrc(ev.target.result); setShowCropper(true) }
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
   async function handleSave() {
-    setSaving(true)
+    setSaving(true); setErr('')
     try {
       await apiFetch(`/api/users/${user.id}`, {
         method: 'PUT',
@@ -1272,43 +1291,82 @@ function EditUserModal({ open, user, onClose, onSave }) {
           first_name: firstName || null,
           last_name: lastName || null,
           organization: organization || null,
-          phone_number: phoneNumber || null
+          phone_number: phoneNumber || null,
+          role,
+          buy_box: buyBox || null,
+          profile_photo: photo || null
         })
       })
       onSave()
       onClose()
     } catch (e) {
-      console.error('Save failed:', e.message)
+      setErr(e.message || 'Save failed')
     } finally {
       setSaving(false)
     }
   }
 
   if (!open || !user) return null
+  const displayName = [firstName, lastName].filter(Boolean).join(' ') || user.email
 
   return (
     <div className="modal modal-open">
-      <div className="modal-box w-full max-w-md">
+      <div className="modal-box w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        {showCropper && cropSrc && (
+          <PhotoCropper
+            src={cropSrc}
+            onSave={dataUrl => { setPhoto(dataUrl); setShowCropper(false) }}
+            onClose={() => setShowCropper(false)}
+          />
+        )}
+
         <div className="flex items-center justify-between mb-6">
           <h3 className="font-bold text-lg">Edit User</h3>
           <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
         </div>
 
         <div className="space-y-4">
-          <div className="text-sm text-base-content/50 pb-2">
-            <p className="font-medium">{user.email}</p>
+          {/* Email (read-only identifier) */}
+          <div className="text-sm text-base-content/50 pb-1 border-b border-base-300">
+            <p className="font-medium text-base-content">{user.email}</p>
             <p className="text-xs">ID: {user.id}</p>
           </div>
 
-          <Field label="First Name">
-            <input type="text" placeholder="First name" value={firstName}
-              onChange={e => setFirstName(e.target.value)} className="input input-bordered w-full" />
-          </Field>
+          {/* Profile photo */}
+          <div className="flex items-center gap-4">
+            <div className="relative flex-shrink-0">
+              <Avatar src={photo} name={displayName} size="lg" />
+              <label className="absolute -bottom-1 -right-1 btn btn-xs btn-circle btn-primary cursor-pointer" title="Upload photo">
+                <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+              </label>
+            </div>
+            <div>
+              <p className="font-medium text-sm">{displayName}</p>
+              {photo
+                ? <p className="text-xs text-success mt-0.5">✓ Photo set</p>
+                : <p className="text-xs text-base-content/40 mt-0.5">No photo uploaded</p>}
+              {photo && (
+                <button className="btn btn-xs btn-ghost text-error mt-1" onClick={() => setPhoto(null)}>Remove photo</button>
+              )}
+            </div>
+          </div>
 
-          <Field label="Last Name">
-            <input type="text" placeholder="Last name" value={lastName}
-              onChange={e => setLastName(e.target.value)} className="input input-bordered w-full" />
-          </Field>
+          <div className="divider my-1" />
+
+          {/* Name */}
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="First Name">
+              <input type="text" placeholder="First name" value={firstName}
+                onChange={e => setFirstName(e.target.value)} className="input input-bordered w-full" />
+            </Field>
+            <Field label="Last Name">
+              <input type="text" placeholder="Last name" value={lastName}
+                onChange={e => setLastName(e.target.value)} className="input input-bordered w-full" />
+            </Field>
+          </div>
 
           <Field label="Organization">
             <input type="text" placeholder="Company or firm" value={organization}
@@ -1320,16 +1378,30 @@ function EditUserModal({ open, user, onClose, onSave }) {
               onChange={e => setPhoneNumber(formatPhone(e.target.value))} className="input input-bordered w-full" />
           </Field>
 
-          <div className="flex gap-2 pt-4">
+          <Field label="Role">
+            <select value={role} onChange={e => setRole(e.target.value)} className="select select-bordered w-full">
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </Field>
+
+          <Field label="Buy Box">
+            <textarea placeholder="Describe investment criteria, preferred asset types, geography, deal size…"
+              value={buyBox} onChange={e => setBuyBox(e.target.value)}
+              className="textarea textarea-bordered w-full leading-relaxed" rows={4} />
+          </Field>
+
+          {err && <div className="alert alert-error text-sm">{err}</div>}
+
+          <div className="flex gap-2 pt-2">
             <button className="btn btn-ghost flex-1" onClick={onClose}>Cancel</button>
             <button className="btn btn-primary flex-1" onClick={handleSave} disabled={saving}>
-              {saving ? 'Saving…' : 'Save'}
+              {saving ? 'Saving…' : 'Save Changes'}
             </button>
           </div>
         </div>
-
-        <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
       </div>
+      <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
     </div>
   )
 }
