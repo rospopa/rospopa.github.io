@@ -2017,29 +2017,59 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
               {/* Investment metrics */}
               <div className="space-y-3 pt-2">
                 <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200">Investment Metrics</div>
+                {/* GRM = Price / Gross Scheduled Rent */}
                 <Field label="GRM">
-                  <NumericInput placeholder="e.g. 8.5" value={grm} onChange={setGrm}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                  <input readOnly
+                    value={price !== '' && grossScheduledRent !== '' && Number(grossScheduledRent) > 0
+                      ? (Number(price) / Number(grossScheduledRent)).toFixed(2) : '—'}
+                    className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
+                {/* Cap Rate = NOI / Price */}
                 <Field label="Cap Rate (%)">
-                  <NumericInput placeholder="e.g. 6.5" value={capRate} onChange={setCapRate}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                  {(() => {
+                    const noi = grossScheduledRent !== '' && vacancyRate !== '' && operatingExpenses !== ''
+                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate)/100) + Number(otherIncome||0) - Number(operatingExpenses) - Number(reservesCapex||0)
+                      : null
+                    const val = noi !== null && price !== '' && Number(price) > 0
+                      ? (noi / Number(price) * 100).toFixed(2) + '%' : '—'
+                    return <input readOnly value={val} className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
                 </Field>
+                {/* Cash-on-Cash = (NOI - Debt Service) / Equity */}
                 <Field label="Cash-on-Cash (%)">
-                  <NumericInput placeholder="e.g. 8.0" value={cashOnCash} onChange={setCashOnCash}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                  {(() => {
+                    const noi = grossScheduledRent !== '' && vacancyRate !== '' && operatingExpenses !== ''
+                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate)/100) + Number(otherIncome||0) - Number(operatingExpenses) - Number(reservesCapex||0)
+                      : null
+                    let ds = 0
+                    if (loanAmount !== '' && interestRate !== '' && amortizationTerm !== '' && Number(amortizationTerm) > 0) {
+                      const r = Number(interestRate)/100/12, n = Number(amortizationTerm)*12
+                      ds = r === 0 ? Number(loanAmount)/n*12 : Number(loanAmount)*r/(1-Math.pow(1+r,-n))*12
+                    }
+                    const equity = price !== '' && loanAmount !== '' ? Number(price) + Number(closingCosts||0) - Number(loanAmount) : null
+                    const val = noi !== null && equity !== null && equity > 0
+                      ? ((noi - ds) / equity * 100).toFixed(2) + '%' : '—'
+                    return <input readOnly value={val} className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
+                  })()}
                 </Field>
+                {/* IRR — requires multi-year DCF, manual entry */}
                 <Field label="IRR (%)">
                   <NumericInput placeholder="e.g. 12.0" value={irr} onChange={setIrr}
                     className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
+                {/* Price/Unit = Price / Unit Count */}
                 <Field label="Price / Unit ($)">
-                  <NumericInput placeholder="e.g. 150,000" value={pricePerUnit} onChange={setPricePerUnit}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                  <input readOnly
+                    value={price !== '' && unitCount !== '' && Number(unitCount) > 0
+                      ? '$' + (Number(price) / Number(unitCount)).toLocaleString(undefined, {maximumFractionDigits:0}) : '—'}
+                    className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
+                {/* Price/SqFt = Price / SqFt */}
                 <Field label="Price / Sq Ft ($)">
-                  <NumericInput placeholder="e.g. 125" value={pricePerSqft} onChange={setPricePerSqft}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                  <input readOnly
+                    value={price !== '' && sqft !== '' && Number(sqft) > 0
+                      ? '$' + (Number(price) / Number(sqft)).toFixed(2) : '—'}
+                    className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Rent-to-Sales (%)">
                   <NumericInput placeholder="e.g. 5.0" value={rentToSales} onChange={setRentToSales}
@@ -2049,9 +2079,12 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                   <NumericInput placeholder="e.g. 500" value={numSkus} onChange={setNumSkus}
                     className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
+                {/* Price/Acre = Price / Lot Size */}
                 <Field label="Price / Acre ($)">
-                  <NumericInput placeholder="e.g. 50,000" value={pricePerAcre} onChange={setPricePerAcre}
-                    className="input input-bordered input-sm w-full md:text-sm" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                  <input readOnly
+                    value={price !== '' && lot !== '' && Number(lot) > 0
+                      ? '$' + (Number(price) / Number(lot)).toLocaleString(undefined, {maximumFractionDigits:0}) : '—'}
+                    className="input input-bordered input-sm w-full md:text-sm cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
               </div>
 
