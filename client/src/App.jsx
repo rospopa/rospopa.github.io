@@ -969,10 +969,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   return (
     <div className="modal modal-open">
       {/* Wide container: left form + right map */}
-      <div className="modal-box p-0 max-w-6xl w-full max-h-[92vh] flex flex-col md:flex-row overflow-hidden">
+      <div className="modal-box p-0 w-screen h-screen max-w-none max-h-none rounded-none flex flex-col md:flex-row overflow-hidden">
 
         {/* ── Left panel: form ── */}
-        <div className="flex flex-col w-full md:w-[480px] md:flex-shrink-0 overflow-y-auto max-h-[92vh]">
+        <div className="flex flex-col w-full md:w-[480px] md:flex-shrink-0 overflow-y-auto max-h-screen">
           <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-base-300">
             <h3 className="font-bold text-xl">
               {property?.id ? property.address : 'New Property'}
