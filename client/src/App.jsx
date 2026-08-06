@@ -128,6 +128,119 @@ function PropertyCardCarousel({ propertyId, onClick }) {
   )
 }
 
+function PropertyModalCarousel({ propertyId }) {
+  const [media, setMedia] = useState([])
+  const [idx, setIdx] = useState(0)
+  const [loaded, setLoaded] = useState(false)
+  const [lightbox, setLightbox] = useState(false)
+
+  useEffect(() => {
+    if (!propertyId) return
+    fetch(`/api/properties/${propertyId}/media`)
+      .then(r => r.json())
+      .then(d => { setMedia(d.media || []); setLoaded(true) })
+      .catch(() => setLoaded(true))
+  }, [propertyId])
+
+  if (!propertyId) return null
+  if (!loaded) return <div className="w-full h-64 bg-base-200 animate-pulse rounded-lg mb-4" />
+  if (media.length === 0) return (
+    <div className="w-full h-40 bg-base-200 rounded-lg flex items-center justify-center mb-4">
+      <span className="text-xs text-base-content/30 uppercase tracking-widest">No media uploaded</span>
+    </div>
+  )
+
+  const current = media[idx]
+  const isVideo = current.media_type?.startsWith('video')
+  const prev = () => setIdx(i => (i - 1 + media.length) % media.length)
+  const next = () => setIdx(i => (i + 1) % media.length)
+
+  return (
+    <>
+      {/* Main image */}
+      <div className="relative w-full h-64 md:h-80 bg-black rounded-lg overflow-hidden mb-3 group">
+        {isVideo
+          ? <video key={current.id}
+              src={`/api/properties/${propertyId}/media/${current.id}`}
+              className="w-full h-full object-contain"
+              controls
+            />
+          : <img key={current.id}
+              src={`/api/properties/${propertyId}/media/${current.id}`}
+              alt={current.filename}
+              className="w-full h-full object-contain cursor-zoom-in transition-opacity duration-200"
+              onClick={() => setLightbox(true)}
+            />
+        }
+
+        {/* Nav arrows */}
+        {media.length > 1 && (
+          <>
+            <button
+              className="absolute left-2 top-1/2 -translate-y-1/2 btn btn-sm btn-circle bg-black/60 border-0 text-white"
+              onClick={prev}
+            >‹</button>
+            <button
+              className="absolute right-2 top-1/2 -translate-y-1/2 btn btn-sm btn-circle bg-black/60 border-0 text-white"
+              onClick={next}
+            >›</button>
+          </>
+        )}
+
+        {/* Counter */}
+        <div className="absolute bottom-2 right-3 text-xs text-white/70 bg-black/40 px-2 py-0.5 rounded-full">
+          {idx + 1} / {media.length}
+        </div>
+      </div>
+
+      {/* Thumbnail strip */}
+      {media.length > 1 && (
+        <div className="flex gap-2 overflow-x-auto pb-1 mb-4">
+          {media.map((m, i) => {
+            const isVid = m.media_type?.startsWith('video')
+            return (
+              <button
+                key={m.id}
+                onClick={() => setIdx(i)}
+                className={`flex-shrink-0 w-16 h-16 rounded overflow-hidden border-2 transition-colors ${i === idx ? 'border-primary' : 'border-transparent'}`}
+              >
+                {isVid
+                  ? <div className="w-full h-full bg-base-300 flex items-center justify-center text-xl">▶</div>
+                  : <img src={`/api/properties/${propertyId}/media/${m.id}`} alt="" className="w-full h-full object-cover" />
+                }
+              </button>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Lightbox */}
+      {lightbox && !isVideo && (
+        <div
+          className="fixed inset-0 z-[200] bg-black/90 flex items-center justify-center"
+          onClick={() => setLightbox(false)}
+        >
+          <button className="absolute top-4 right-4 btn btn-sm btn-circle bg-white/20 border-0 text-white text-lg">✕</button>
+          {media.length > 1 && (
+            <>
+              <button className="absolute left-4 top-1/2 -translate-y-1/2 btn btn-circle bg-white/20 border-0 text-white text-2xl"
+                onClick={e => { e.stopPropagation(); prev() }}>‹</button>
+              <button className="absolute right-4 top-1/2 -translate-y-1/2 btn btn-circle bg-white/20 border-0 text-white text-2xl"
+                onClick={e => { e.stopPropagation(); next() }}>›</button>
+            </>
+          )}
+          <img
+            src={`/api/properties/${propertyId}/media/${current.id}`}
+            alt=""
+            className="max-w-[90vw] max-h-[90vh] object-contain rounded"
+            onClick={e => e.stopPropagation()}
+          />
+        </div>
+      )}
+    </>
+  )
+}
+
 /* ─── Logo ────────────────────────────────────────────────────── */
 
 function Logo() {
@@ -720,6 +833,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
         {/* Details tab */}
         {tab === 'details' && (
           <div className="space-y-5">
+            {/* Media carousel — shown inline for existing properties */}
+            {property?.id && <PropertyModalCarousel propertyId={property.id} />}
             {/* Core */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="PIN(s)" required>
