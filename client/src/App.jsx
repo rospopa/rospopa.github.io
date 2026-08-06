@@ -125,47 +125,43 @@ function Field({ label, required, children }) {
   )
 }
 
-/* ─── Calendar Widget ─────────────────────────────────────────── */
-const EVENT_COLORS = {
-  property_created: 'bg-emerald-500',
-  property_updated: 'bg-amber-400',
-  assigned:         'bg-sky-500',
-  audit:            'bg-violet-400',
-};
-const EVENT_LABELS = {
-  property_created: 'Created',
-  property_updated: 'Updated',
-  assigned:         'Assigned',
-  audit:            'Activity',
-};
+/* ─── FOMC Calendar Widget ────────────────────────────────────── */
+// Displays upcoming Federal Reserve FOMC meeting dates.
+// Data sourced from FRED API (official St. Louis Fed) or hardcoded fallback.
 
-function CalendarWidget({ role }) {
+function CalendarWidget() {
   const today = new Date()
   const [year, setYear]   = useState(today.getFullYear())
-  const [month, setMonth] = useState(today.getMonth() + 1) // 1-12
-  const [events, setEvents] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [selected, setSelected] = useState(null) // { day, events[] }
+  const [month, setMonth] = useState(today.getMonth() + 1)
+  const [meetings, setMeetings] = useState([]) // { decision_date, start_date, end_date, source }
+  const [loading, setLoading]   = useState(true)
+  const [selected, setSelected] = useState(null) // { day, meeting }
 
   useEffect(() => {
     setLoading(true)
     setSelected(null)
-    fetch(`/api/calendar-events?year=${year}&month=${month}`, { credentials: 'include' })
+    fetch(`/api/fomc-meetings?year=${year}&month=${month}`, { credentials: 'include' })
       .then(r => r.json())
-      .then(d => { setEvents(d.events || []); setLoading(false) })
+      .then(d => { setMeetings(d.meetings || []); setLoading(false) })
       .catch(() => setLoading(false))
   }, [year, month])
 
   const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
   const daysInMonth = new Date(year, month, 0).getDate()
-  const firstDow    = new Date(year, month - 1, 1).getDay() // 0=Sun
+  const firstDow    = new Date(year, month - 1, 1).getDay()
 
+  // Index meetings by each day they span (start..end or just decision day)
   const byDay = {}
-  for (const ev of events) {
-    const d = new Date(ev.date)
-    const key = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`
-    if (!byDay[key]) byDay[key] = []
-    byDay[key].push(ev)
+  for (const m of meetings) {
+    const decDay  = parseInt(m.decision_date.slice(8), 10)
+    const startDay = m.start_date ? parseInt(m.start_date.slice(8), 10) : decDay
+    const endDay   = m.end_date   ? parseInt(m.end_date.slice(8), 10)   : decDay
+    // Only mark days that belong to this month
+    for (let d = startDay; d <= endDay; d++) {
+      const isDecision = d === decDay
+      if (!byDay[d]) byDay[d] = []
+      byDay[d].push({ ...m, isDecision, day: d })
+    }
   }
 
   function prevMonth() {
@@ -177,58 +173,63 @@ function CalendarWidget({ role }) {
     else setMonth(m => m + 1)
   }
 
-  const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+  const todayKey = today.getFullYear() === year && today.getMonth() + 1 === month
+    ? today.getDate() : -1
 
   const cells = []
   for (let i = 0; i < firstDow; i++) cells.push(null)
   for (let d = 1; d <= daysInMonth; d++) cells.push(d)
-
-  // Pad to complete last row so grid is always full
   while (cells.length % 7 !== 0) cells.push(null)
+
+  const isPast = (day) => {
+    const cellDate = new Date(year, month - 1, day)
+    return cellDate < today
+  }
 
   return (
     <div className="card bg-base-100 border border-base-300 w-full">
       <div className="card-body p-4 sm:p-6 md:p-8">
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-5">
-          <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">Calendar</h3>
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">Federal Reserve</h3>
+            <p className="text-xs text-base-content/40 mt-0.5">FOMC Meeting Schedule</p>
+          </div>
           <div className="flex items-center gap-3">
-            <button
-              className="btn btn-sm btn-ghost px-3"
-              onClick={prevMonth}
-              aria-label="Previous month"
-            >‹</button>
+            <button className="btn btn-sm btn-ghost px-3" onClick={prevMonth} aria-label="Previous month">‹</button>
             <span className="text-base sm:text-lg font-semibold min-w-[160px] text-center">
               {MONTHS[month-1]} {year}
             </span>
-            <button
-              className="btn btn-sm btn-ghost px-3"
-              onClick={nextMonth}
-              aria-label="Next month"
-            >›</button>
+            <button className="btn btn-sm btn-ghost px-3" onClick={nextMonth} aria-label="Next month">›</button>
           </div>
         </div>
 
         {/* Legend */}
-        <div className="flex flex-wrap gap-4 mb-5 text-xs sm:text-sm">
-          {Object.entries(EVENT_LABELS).map(([type, label]) =>
-            (role === 'admin' || type === 'assigned') && (
-              <span key={type} className="flex items-center gap-1.5">
-                <span className={`inline-block w-2.5 h-2.5 rounded-full flex-shrink-0 ${EVENT_COLORS[type]}`}/>
-                <span className="text-base-content/70">{label}</span>
-              </span>
-            )
-          )}
+        <div className="flex flex-wrap gap-4 mb-4 text-xs sm:text-sm">
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block w-3 h-3 rounded-sm bg-amber-400 flex-shrink-0"/>
+            <span className="text-base-content/70">Meeting days</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block w-3 h-3 rounded-sm bg-red-500 flex-shrink-0"/>
+            <span className="text-base-content/70">Rate decision day</span>
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block w-3 h-3 rounded-full bg-primary flex-shrink-0"/>
+            <span className="text-base-content/70">Today</span>
+          </span>
         </div>
 
         {/* Day-of-week headers */}
         <div className="grid grid-cols-7 mb-1 border-b border-base-300 pb-2">
-          {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => (
-            <div key={d} className="text-center text-xs sm:text-sm font-semibold text-base-content/40 py-1 hidden sm:block">{d}</div>
-          ))}
-          {['S','M','T','W','T','F','S'].map((d, i) => (
-            <div key={`sm${i}`} className="text-center text-xs font-semibold text-base-content/40 py-1 sm:hidden">{d}</div>
+          {['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((d, i) => (
+            <div key={d} className="text-center font-semibold text-base-content/40 py-1
+              text-[10px] sm:text-xs md:text-sm">
+              <span className="hidden md:inline">{d}</span>
+              <span className="hidden sm:inline md:hidden">{d.slice(0,3)}</span>
+              <span className="sm:hidden">{d[0]}</span>
+            </div>
           ))}
         </div>
 
@@ -238,46 +239,57 @@ function CalendarWidget({ role }) {
           <div className="grid grid-cols-7">
             {cells.map((day, i) => {
               if (!day) return (
-                <div key={`e${i}`} className="border-b border-r border-base-200 min-h-[56px] sm:min-h-[80px] md:min-h-[96px]
-                  first:border-l [&:nth-child(7n+1)]:border-l" />
+                <div key={`e${i}`} className="border-b border-r border-base-200 min-h-[56px] sm:min-h-[80px] md:min-h-[100px]
+                  [&:nth-child(7n+1)]:border-l bg-base-200/30" />
               )
-              const key = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`
-              const dayEvents = byDay[key] || []
-              const isToday = key === todayKey
-              const isSelected = selected?.day === day
-              const dots = [...new Set(dayEvents.map(e => e.type))].slice(0, 4)
+              const dayMeetings = byDay[day] || []
+              const isToday     = day === todayKey
+              const isSelected  = selected?.day === day
+              const hasMeeting  = dayMeetings.length > 0
+              const hasDecision = dayMeetings.some(m => m.isDecision)
+              const past        = isPast(day)
+
+              // Cell background color
+              let cellBg = ''
+              if (hasDecision) cellBg = past ? 'bg-red-100 dark:bg-red-900/20' : 'bg-red-50 dark:bg-red-900/30'
+              else if (hasMeeting) cellBg = past ? 'bg-amber-50 dark:bg-amber-900/10' : 'bg-amber-50/80 dark:bg-amber-900/20'
+              if (isSelected) cellBg = 'bg-primary/10'
+
               return (
                 <button
-                  key={key}
-                  onClick={() => setSelected(isSelected ? null : { day, events: dayEvents })}
-                  className={`relative border-b border-r border-base-200 [&:nth-child(7n+1)]:border-l
-                    min-h-[56px] sm:min-h-[80px] md:min-h-[96px]
+                  key={day}
+                  onClick={() => hasMeeting && setSelected(isSelected ? null : { day, meetings: dayMeetings })}
+                  className={`border-b border-r border-base-200 [&:nth-child(7n+1)]:border-l
+                    min-h-[56px] sm:min-h-[80px] md:min-h-[100px]
                     flex flex-col items-start p-1 sm:p-2 transition-colors text-left w-full
-                    ${isSelected ? 'bg-primary/10' : 'hover:bg-base-200'}
-                    ${dayEvents.length > 0 ? 'cursor-pointer' : 'cursor-default'}`}
+                    ${cellBg || 'hover:bg-base-100'}
+                    ${hasMeeting ? 'cursor-pointer' : 'cursor-default'}`}
                 >
                   {/* Day number */}
-                  <span className={`text-xs sm:text-sm font-medium rounded-full w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center flex-shrink-0
-                    ${isToday ? 'bg-primary text-primary-content font-bold' : 'text-base-content'}`}>
+                  <span className={`text-xs sm:text-sm font-medium rounded-full
+                    w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center flex-shrink-0
+                    ${isToday ? 'bg-primary text-primary-content font-bold' : past ? 'text-base-content/40' : 'text-base-content'}`}>
                     {day}
                   </span>
-                  {/* Event dots on mobile */}
-                  <div className="flex gap-0.5 mt-1 flex-wrap sm:hidden">
-                    {dots.map(type => (
-                      <span key={type} className={`w-1.5 h-1.5 rounded-full ${EVENT_COLORS[type]}`}/>
-                    ))}
-                  </div>
-                  {/* Event label pills on sm+ */}
-                  <div className="hidden sm:flex flex-col gap-0.5 mt-1 w-full overflow-hidden">
-                    {dayEvents.slice(0, 3).map((ev, ei) => (
-                      <span key={ei} className={`text-[10px] md:text-xs text-white rounded px-1 py-0.5 truncate leading-tight ${EVENT_COLORS[ev.type]}`}>
-                        {ev.label}
+
+                  {/* Mobile: colored dot */}
+                  {hasMeeting && (
+                    <div className="flex gap-0.5 mt-0.5 sm:hidden">
+                      <span className={`w-1.5 h-1.5 rounded-full ${hasDecision ? 'bg-red-500' : 'bg-amber-400'}`}/>
+                    </div>
+                  )}
+
+                  {/* Tablet+: pill label */}
+                  {hasMeeting && (
+                    <div className="hidden sm:flex flex-col gap-0.5 mt-1 w-full overflow-hidden">
+                      <span className={`text-[10px] md:text-xs font-medium rounded px-1.5 py-0.5 truncate leading-tight
+                        ${hasDecision
+                          ? 'bg-red-500 text-white'
+                          : 'bg-amber-400 text-white'}`}>
+                        {hasDecision ? '📊 Rate Decision' : '🏛 FOMC Meeting'}
                       </span>
-                    ))}
-                    {dayEvents.length > 3 && (
-                      <span className="text-[10px] text-base-content/40 pl-1">+{dayEvents.length - 3} more</span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </button>
               )
             })}
@@ -285,29 +297,71 @@ function CalendarWidget({ role }) {
         )}
 
         {/* Selected day detail panel */}
-        {selected && selected.events.length > 0 && (
-          <div className="mt-4 border-t border-base-300 pt-4 space-y-2 max-h-60 overflow-y-auto">
-            <p className="text-sm font-semibold text-base-content/60 mb-2">
-              {MONTHS[month-1]} {selected.day}, {year} — {selected.events.length} event{selected.events.length > 1 ? 's' : ''}
-            </p>
-            {selected.events.map((ev, i) => (
-              <div key={i} className="flex items-start gap-2 text-sm">
-                <span className={`mt-1 flex-shrink-0 w-2.5 h-2.5 rounded-full ${EVENT_COLORS[ev.type]}`}/>
-                <div>
-                  <span className="font-medium capitalize">{ev.label}</span>
-                  {ev.meta?.pin && <span className="text-base-content/50 ml-1.5 text-xs">PIN: {ev.meta.pin}</span>}
+        {selected && (
+          <div className="mt-4 border-t border-base-300 pt-4">
+            {selected.meetings.map((m, i) => {
+              const decDate  = new Date(m.decision_date + 'T12:00:00')
+              const startDate = m.start_date ? new Date(m.start_date + 'T12:00:00') : decDate
+              const endDate   = m.end_date   ? new Date(m.end_date + 'T12:00:00')   : decDate
+              const isTwoDay  = m.start_date !== m.end_date
+              const future    = decDate >= today
+              const source    = m.source || 'fallback'
+              return (
+                <div key={i} className="flex gap-3 items-start">
+                  <span className={`mt-1 w-2.5 h-2.5 rounded-full flex-shrink-0 ${m.isDecision ? 'bg-red-500' : 'bg-amber-400'}`}/>
+                  <div className="space-y-0.5">
+                    <p className="font-semibold text-sm">
+                      {m.isDecision ? 'Rate Decision Day' : 'FOMC Meeting Day'}
+                    </p>
+                    <p className="text-sm text-base-content/60">
+                      {isTwoDay
+                        ? `${startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} – ${endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
+                        : decDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
+                    </p>
+                    {m.isDecision && (
+                      <p className="text-xs text-base-content/40">
+                        {future ? '⏳ Upcoming' : '✅ Completed'} · Statement released ~2:00 PM ET
+                      </p>
+                    )}
+                    <p className="text-[10px] text-base-content/30 mt-1">
+                      Source: {source === 'fred' || source === 'fred+fallback' ? 'FRED / Federal Reserve (St. Louis Fed)' : 'Published FOMC schedule'}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
-        {selected && selected.events.length === 0 && (
-          <p className="mt-3 text-sm text-base-content/40 text-center">No events on this day</p>
+
+        {/* Footer: months with no meetings */}
+        {!loading && meetings.length === 0 && (
+          <p className="mt-4 text-sm text-base-content/40 text-center">No FOMC meetings scheduled this month</p>
+        )}
+
+        {/* Upcoming meetings summary strip */}
+        {!loading && meetings.length > 0 && !selected && (
+          <div className="mt-4 border-t border-base-300 pt-3">
+            <p className="text-xs text-base-content/40 mb-2 font-semibold uppercase tracking-widest">This month</p>
+            <div className="flex flex-wrap gap-2">
+              {[...new Map(meetings.map(m => [m.decision_date, m])).values()].map((m, i) => {
+                const decDate = new Date(m.decision_date + 'T12:00:00')
+                const future  = decDate >= today
+                return (
+                  <span key={i} className={`badge badge-sm gap-1 ${future ? 'badge-outline' : 'badge-ghost opacity-60'}`}>
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"/>
+                    {decDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                    {future ? ' ↑' : ' ✓'}
+                  </span>
+                )
+              })}
+            </div>
+          </div>
         )}
       </div>
     </div>
   )
 }
+
 
 /** Text input that displays numbers with comma formatting; stores raw digits in state */
 function NumericInput({ value, onChange, placeholder, className, disabled, allowDecimal }) {
@@ -2783,7 +2837,7 @@ export default function App() {
             <h1 className="text-2xl md:text-3xl font-bold">
               Welcome back, {currentUser.first_name || currentUser.email.split('@')[0]}
             </h1>
-            <CalendarWidget role={currentUser.role} />
+            <CalendarWidget />
           </div>
         )}
 

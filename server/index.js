@@ -1077,84 +1077,144 @@ app.get('/api/me/properties', async (req, res) => {
 // Calendar events — returns events for the requesting user's role
 // Admin: property creations + audit log entries for the current month ± 1
 // User: their assigned properties (assigned_at) + any property created dates
-app.get('/api/calendar-events', async (req, res) => {
+// ─── FOMC Meeting Calendar ─────────────────────────────────────────────────
+// Fetches upcoming Federal Reserve (FOMC) meeting dates from the FRED API.
+// Falls back to a hardcoded schedule if FRED_API_KEY is not set.
+// Cache: stored in DB table `fomc_cache` to avoid hammering the API.
+
+const FRED_API_KEY = process.env.FRED_API_KEY;
+const FOMC_RELEASE_ID = 226; // "FOMC Press Release" in FRED
+
+// Known FOMC meeting dates as fallback (both days listed; decision on 2nd day)
+// Updated through end of 2026 per Fed published schedule
+const FOMC_FALLBACK = [
+  // 2026
+  { start: '2026-01-28', end: '2026-01-29', decision: '2026-01-29' },
+  { start: '2026-03-18', end: '2026-03-19', decision: '2026-03-19' },
+  { start: '2026-04-29', end: '2026-04-30', decision: '2026-04-30' },
+  { start: '2026-06-16', end: '2026-06-17', decision: '2026-06-17' },
+  { start: '2026-07-28', end: '2026-07-29', decision: '2026-07-29' },
+  { start: '2026-09-15', end: '2026-09-16', decision: '2026-09-16' },
+  { start: '2026-10-27', end: '2026-10-28', decision: '2026-10-28' },
+  { start: '2026-12-15', end: '2026-12-16', decision: '2026-12-16' },
+  // 2027
+  { start: '2027-01-26', end: '2027-01-27', decision: '2027-01-27' },
+  { start: '2027-03-16', end: '2027-03-17', decision: '2027-03-17' },
+  { start: '2027-04-27', end: '2027-04-28', decision: '2027-04-28' },
+  { start: '2027-06-15', end: '2027-06-16', decision: '2027-06-16' },
+  { start: '2027-07-27', end: '2027-07-28', decision: '2027-07-28' },
+  { start: '2027-09-14', end: '2027-09-15', decision: '2027-09-15' },
+  { start: '2027-10-26', end: '2027-10-27', decision: '2027-10-27' },
+  { start: '2027-12-14', end: '2027-12-15', decision: '2027-12-15' },
+];
+
+async function ensureFomcCacheTable() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS fomc_cache (
+    id SERIAL PRIMARY KEY,
+    decision_date DATE NOT NULL UNIQUE,
+    start_date DATE,
+    end_date DATE,
+    source TEXT DEFAULT 'fallback',
+    fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+}
+
+// Refresh FOMC dates from FRED if API key present and cache is stale (>24h)
+async function refreshFomcCache() {
+  await ensureFomcCacheTable();
+
+  // Check last fetch time
+  const last = await pool.query(`SELECT MAX(fetched_at) as t FROM fomc_cache`);
+  const lastFetch = last.rows[0]?.t ? new Date(last.rows[0].t) : null;
+  const stale = !lastFetch || (Date.now() - lastFetch.getTime() > 24 * 60 * 60 * 1000);
+
+  if (FRED_API_KEY && stale) {
+    try {
+      const url = `https://api.stlouisfed.org/fred/release/dates?release_id=${FOMC_RELEASE_ID}&api_key=${FRED_API_KEY}&file_type=json&include_release_dates_with_no_data=true&sort_order=asc`;
+      const data = await new Promise((resolve, reject) => {
+        https.get(url, res => {
+          let body = '';
+          res.on('data', c => body += c);
+          res.on('end', () => {
+            try { resolve(JSON.parse(body)); } catch { reject(new Error('invalid json')); }
+          });
+        }).on('error', reject);
+      });
+
+      const dates = (data.release_dates || []).map(d => d.date).filter(Boolean);
+      if (dates.length > 0) {
+        // Upsert each FRED date as decision date (FRED only gives 1 date per meeting = decision day)
+        for (const date of dates) {
+          await pool.query(
+            `INSERT INTO fomc_cache (decision_date, start_date, end_date, source, fetched_at)
+             VALUES ($1, $1, $1, 'fred', NOW())
+             ON CONFLICT (decision_date) DO UPDATE SET source='fred', fetched_at=NOW()`,
+            [date]
+          );
+        }
+        // Also upsert fallback dates to fill in start/end fields FRED doesn't provide
+        for (const m of FOMC_FALLBACK) {
+          await pool.query(
+            `INSERT INTO fomc_cache (decision_date, start_date, end_date, source, fetched_at)
+             VALUES ($1, $2, $3, 'fred+fallback', NOW())
+             ON CONFLICT (decision_date) DO UPDATE
+               SET start_date = EXCLUDED.start_date,
+                   end_date   = EXCLUDED.end_date`,
+            [m.decision, m.start, m.end]
+          );
+        }
+        return;
+      }
+    } catch (e) {
+      console.error('FRED fetch failed, using fallback:', e.message);
+    }
+  }
+
+  // Seed fallback if table is empty
+  const count = await pool.query(`SELECT COUNT(*) as n FROM fomc_cache`);
+  if (parseInt(count.rows[0].n, 10) === 0) {
+    for (const m of FOMC_FALLBACK) {
+      await pool.query(
+        `INSERT INTO fomc_cache (decision_date, start_date, end_date, source)
+         VALUES ($1, $2, $3, 'fallback')
+         ON CONFLICT DO NOTHING`,
+        [m.decision, m.start, m.end]
+      );
+    }
+  }
+}
+
+// Kick off background refresh on server start
+refreshFomcCache().catch(e => console.error('FOMC cache init error:', e.message));
+
+app.get('/api/fomc-meetings', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
-  const { year, month } = req.query; // month = 1-12
+  const { year, month } = req.query;
   const y = parseInt(year, 10) || new Date().getFullYear();
   const m = parseInt(month, 10) || (new Date().getMonth() + 1);
-  // Build date range: full month
-  const from = new Date(y, m - 1, 1).toISOString();
-  const to   = new Date(y, m, 1).toISOString(); // exclusive start of next month
-
+  const from = `${y}-${String(m).padStart(2,'0')}-01`;
+  const to   = new Date(y, m, 1).toISOString().slice(0, 10); // first day of next month
   try {
-    const events = [];
-    if (req.session.user.role === 'admin') {
-      // Property creations this month
-      const props = await pool.query(
-        `SELECT id, pin, address, county, status, created_at FROM properties
-         WHERE created_at >= $1 AND created_at < $2 ORDER BY created_at`,
-        [from, to]
-      );
-      for (const p of props.rows) {
-        events.push({
-          date: p.created_at,
-          type: 'property_created',
-          label: `Property created: ${p.address}`,
-          meta: { id: p.id, pin: p.pin, status: p.status },
-        });
-      }
-      // Audit log entries this month
-      const audit = await pool.query(
-        `SELECT action, details, created_at FROM audit_logs
-         WHERE created_at >= $1 AND created_at < $2 ORDER BY created_at`,
-        [from, to]
-      );
-      for (const a of audit.rows) {
-        events.push({
-          date: a.created_at,
-          type: 'audit',
-          label: a.action.replace(/_/g, ' '),
-          meta: a.details,
-        });
-      }
-      // Property status changes (updated_at) — deduplicated from audit above if needed
-      const statusChanges = await pool.query(
-        `SELECT id, address, status, updated_at FROM properties
-         WHERE updated_at >= $1 AND updated_at < $2 AND updated_at != created_at ORDER BY updated_at`,
-        [from, to]
-      );
-      for (const p of statusChanges.rows) {
-        events.push({
-          date: p.updated_at,
-          type: 'property_updated',
-          label: `Status → ${p.status}: ${p.address}`,
-          meta: { id: p.id },
-        });
-      }
-    } else {
-      // Regular user: show their assigned properties
-      const userId = req.session.user.id;
-      const assigned = await pool.query(
-        `SELECT p.id, p.pin, p.address, p.county, p.status, pa.assigned_at
-         FROM properties p
-         JOIN property_assignments pa ON p.id = pa.property_id
-         WHERE pa.user_id = $1 AND pa.assigned_at >= $2 AND pa.assigned_at < $3
-         ORDER BY pa.assigned_at`,
-        [userId, from, to]
-      );
-      for (const p of assigned.rows) {
-        events.push({
-          date: p.assigned_at,
-          type: 'assigned',
-          label: `Assigned: ${p.address}`,
-          meta: { id: p.id, pin: p.pin, status: p.status },
-        });
-      }
-    }
-    res.json({ events });
+    await ensureFomcCacheTable();
+    // Async refresh in background (don't block response)
+    refreshFomcCache().catch(() => {});
+    const result = await pool.query(
+      `SELECT decision_date, start_date, end_date, source
+       FROM fomc_cache
+       WHERE decision_date >= $1 AND decision_date < $2
+       ORDER BY decision_date`,
+      [from, to]
+    );
+    res.json({ meetings: result.rows });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
   }
+});
+
+// Keep old /api/calendar-events for any future use but now returns empty
+app.get('/api/calendar-events', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  res.json({ events: [] });
 });
 
 app.get('/api/properties/:id/users', async (req, res) => {
