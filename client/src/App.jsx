@@ -1091,6 +1091,49 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const num = Number(value)
     return Number.isFinite(num) ? num : null
   }
+  function calculateIrr(cashFlows) {
+    if (!Array.isArray(cashFlows) || cashFlows.length < 2) return null
+    const hasPositive = cashFlows.some(value => value > 0)
+    const hasNegative = cashFlows.some(value => value < 0)
+    if (!hasPositive || !hasNegative) return null
+    let rate = 0.1
+    for (let iteration = 0; iteration < 100; iteration += 1) {
+      let npv = 0
+      let derivative = 0
+      for (let year = 0; year < cashFlows.length; year += 1) {
+        const denom = Math.pow(1 + rate, year)
+        npv += cashFlows[year] / denom
+        if (year > 0) derivative -= year * cashFlows[year] / Math.pow(1 + rate, year + 1)
+      }
+      if (Math.abs(npv) < 0.0001) return rate
+      if (!Number.isFinite(derivative) || Math.abs(derivative) < 0.0000001) break
+      const nextRate = rate - (npv / derivative)
+      if (!Number.isFinite(nextRate) || nextRate <= -0.9999 || nextRate > 1000) break
+      if (Math.abs(nextRate - rate) < 0.0000001) return nextRate
+      rate = nextRate
+    }
+
+    let low = -0.9999
+    let high = 10
+    const npvAt = (discountRate) => cashFlows.reduce((sum, value, year) => sum + (value / Math.pow(1 + discountRate, year)), 0)
+    let lowNpv = npvAt(low)
+    let highNpv = npvAt(high)
+    if (!Number.isFinite(lowNpv) || !Number.isFinite(highNpv) || lowNpv * highNpv > 0) return null
+    for (let iteration = 0; iteration < 200; iteration += 1) {
+      const mid = (low + high) / 2
+      const midNpv = npvAt(mid)
+      if (!Number.isFinite(midNpv)) return null
+      if (Math.abs(midNpv) < 0.0001) return mid
+      if (lowNpv * midNpv <= 0) {
+        high = mid
+        highNpv = midNpv
+      } else {
+        low = mid
+        lowNpv = midNpv
+      }
+    }
+    return (low + high) / 2
+  }
   function buildDefaultDcfModelFromProperty(prop = {}) {
     const model = defaultDcfModel()
     const hold = Math.min(DCF_MAX_YEARS, Math.max(1, Number(prop.hold_period || 1)))
@@ -1347,6 +1390,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
 
   const activeHoldPeriod = Math.min(DCF_MAX_YEARS, Math.max(1, Number(holdPeriod || 1)))
   const visibleDcfYears = dcfModel.years.slice(0, activeHoldPeriod)
+  const acquisitionBasis = (parseNum(price) || 0) + (parseNum(closingCosts) || 0)
+  const initialEquity = acquisitionBasis - (parseNum(loanAmount) || 0)
+  const discountRateDecimal = (parseNum(irr) || 0) / 100
   function updateDcfCell(yearIndex, field, value) {
     setDcfModel(prev => ({
       years: prev.years.map((row, index) => index === yearIndex ? { ...row, [field]: value } : row)
@@ -1380,6 +1426,45 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     if (rowKey === 'cashFlowAfterSale') return cashFlowAfterSale
     return null
   }
+  const dcfYearSummaries = visibleDcfYears.map((yearRow) => {
+    const effectiveGrossIncome = getComputedDcfValue(yearRow, 'effectiveGrossIncome') || 0
+    const netOperatingIncome = getComputedDcfValue(yearRow, 'netOperatingIncomeDcf') || 0
+    const cashFlowBeforeSale = getComputedDcfValue(yearRow, 'cashFlowBeforeSale') || 0
+    const cashFlowAfterSale = getComputedDcfValue(yearRow, 'cashFlowAfterSale') || 0
+    const debtService = parseNum(yearRow.debtServiceDcf) || 0
+    return { effectiveGrossIncome, netOperatingIncome, cashFlowBeforeSale, cashFlowAfterSale, debtService }
+  })
+  const leveredCashFlows = initialEquity > 0
+    ? [-initialEquity, ...dcfYearSummaries.map(row => row.cashFlowAfterSale)]
+    : null
+  const leveredIrr = leveredCashFlows ? calculateIrr(leveredCashFlows) : null
+  const unleveredCashFlowsResolved = acquisitionBasis > 0
+    ? [-acquisitionBasis, ...visibleDcfYears.map((yearRow) => {
+      const noi = getComputedDcfValue(yearRow, 'netOperatingIncomeDcf') || 0
+      const sale = parseNum(yearRow.saleProceedsDcf) || 0
+      const taxes = parseNum(yearRow.taxesDcf) || 0
+      return noi + sale - taxes
+    })]
+    : null
+  const unleveredIrr = unleveredCashFlowsResolved ? calculateIrr(unleveredCashFlowsResolved) : null
+  const leveredEquityMultiple = leveredCashFlows && initialEquity > 0
+    ? leveredCashFlows.slice(1).reduce((sum, value) => sum + value, 0) / initialEquity
+    : null
+  const unleveredEquityMultiple = unleveredCashFlowsResolved && acquisitionBasis > 0
+    ? unleveredCashFlowsResolved.slice(1).reduce((sum, value) => sum + value, 0) / acquisitionBasis
+    : null
+  const leveredNpv = leveredCashFlows && discountRateDecimal > -1
+    ? leveredCashFlows.reduce((sum, value, index) => sum + (value / Math.pow(1 + discountRateDecimal, index)), 0)
+    : null
+  const unleveredNpv = unleveredCashFlowsResolved && discountRateDecimal > -1
+    ? unleveredCashFlowsResolved.reduce((sum, value, index) => sum + (value / Math.pow(1 + discountRateDecimal, index)), 0)
+    : null
+  const debtYield = dcfYearSummaries[0] && parseNum(loanAmount) > 0
+    ? dcfYearSummaries[0].netOperatingIncome / parseNum(loanAmount) * 100
+    : null
+  const yieldOnCost = dcfYearSummaries[0] && acquisitionBasis > 0
+    ? dcfYearSummaries[0].netOperatingIncome / acquisitionBasis * 100
+    : null
 
   useEffect(() => {
     if (open && property?.id) {
@@ -1934,9 +2019,38 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                   })()}
                 </Field>
-                {/* IRR — requires multi-year DCF, manual entry */}
-                <Field label="IRR (%)">
-                  <NumericInput placeholder="e.g. 12.0" value={irr} onChange={setIrr}
+                <Field label="Levered IRR (%)">
+                  <input readOnly
+                    value={leveredIrr !== null ? `${(leveredIrr * 100).toFixed(2)}%` : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                </Field>
+                <Field label="Unlevered IRR (%)">
+                  <input readOnly
+                    value={unleveredIrr !== null ? `${(unleveredIrr * 100).toFixed(2)}%` : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                </Field>
+                <Field label="Levered EMx">
+                  <input readOnly
+                    value={leveredEquityMultiple !== null ? `${leveredEquityMultiple.toFixed(2)}x` : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                </Field>
+                <Field label="Unlevered EMx">
+                  <input readOnly
+                    value={unleveredEquityMultiple !== null ? `${unleveredEquityMultiple.toFixed(2)}x` : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                </Field>
+                <Field label="Levered NPV ($)">
+                  <input readOnly
+                    value={leveredNpv !== null ? '$' + leveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                </Field>
+                <Field label="Unlevered NPV ($)">
+                  <input readOnly
+                    value={unleveredNpv !== null ? '$' + unleveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                </Field>
+                <Field label="NPV Discount Rate (%)">
+                  <NumericInput placeholder="e.g. 10.0" value={irr} onChange={setIrr}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 {/* Price/Unit = Price / Unit Count */}
@@ -2071,6 +2185,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     const val = adjNoi !== null && ds > 0 ? (adjNoi / ds).toFixed(2) : '—'
                     return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                   })()}
+                </Field>
+                <Field label="Debt Yield (%)">
+                  <input readOnly
+                    value={debtYield !== null ? `${debtYield.toFixed(2)}%` : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                </Field>
+                <Field label="Yield on Cost (%)">
+                  <input readOnly
+                    value={yieldOnCost !== null ? `${yieldOnCost.toFixed(2)}%` : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
               </div>
 
