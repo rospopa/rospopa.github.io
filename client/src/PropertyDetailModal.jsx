@@ -1093,6 +1093,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   const [popDensity, setPopDensity] = useState('')
   const [propStatus, setPropStatus] = useState('New')
   const [collapsedDcfGroups, setCollapsedDcfGroups] = useState({})
+  const [dcfColumnStart, setDcfColumnStart] = useState(0)
   const [grm, setGrm] = useState('')
   const [capRate, setCapRate] = useState('')
   const [cashOnCash, setCashOnCash] = useState('')
@@ -1460,6 +1461,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
     ? liveDerivedDcfModel.months.slice(0, activeHoldPeriod * 12)
     : []
   const dcfPeriods = dcfModel.timing.viewMode === 'monthly' ? engineVisibleDcfMonths : visibleDcfYears
+  const dcfColumnWindowSize = dcfModel.timing.viewMode === 'monthly' ? 4 : 3
+  const clampedDcfColumnStart = Math.max(0, Math.min(dcfColumnStart, Math.max(0, dcfPeriods.length - dcfColumnWindowSize)))
+  const visibleDcfColumns = dcfPeriods.slice(clampedDcfColumnStart, clampedDcfColumnStart + dcfColumnWindowSize)
   const groupedDcfRows = DCF_GROUPS.map((group) => ({
     ...group,
     rows: DCF_ROW_DEFS.filter((row) => row.group === group.key)
@@ -3315,21 +3319,46 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
           <div className="hidden md:flex flex-1 border-l border-base-300 bg-base-100 min-h-0 flex-col">
             <div className="flex-1 p-6 overflow-auto">
               <div className="rounded-2xl border border-base-300 overflow-hidden bg-base-100 shadow-sm min-h-full">
-                <div className="px-5 py-4 border-b border-base-300 flex items-center justify-between gap-3 flex-wrap sticky top-0 bg-base-100 z-[1]">
-                  <div>
-                    <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
+                <div className="px-5 py-4 border-b border-base-300 sticky top-0 bg-base-100 z-[1] space-y-3">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div>
+                      <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap justify-end">
+                      <select
+                        value={dcfModel.timing.viewMode || 'yearly'}
+                        onChange={(e) => { updateTimingField('viewMode', e.target.value); setDcfColumnStart(0) }}
+                        className="select select-bordered select-sm"
+                        disabled={!isAdmin}
+                      >
+                        <option value="yearly">Yearly View</option>
+                        <option value="monthly">Monthly View</option>
+                      </select>
+                      <div className="badge badge-outline whitespace-nowrap">{activeHoldPeriod} Year Hold</div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <select
-                      value={dcfModel.timing.viewMode || 'yearly'}
-                      onChange={(e) => updateTimingField('viewMode', e.target.value)}
-                      className="select select-bordered select-sm"
-                      disabled={!isAdmin}
-                    >
-                      <option value="yearly">Yearly View</option>
-                      <option value="monthly">Monthly View</option>
-                    </select>
-                    <div className="badge badge-outline">{activeHoldPeriod} Year Hold</div>
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="text-xs uppercase tracking-[0.18em] text-base-content/45">
+                      Showing {visibleDcfColumns.length > 0 ? clampedDcfColumnStart + 1 : 0}-{clampedDcfColumnStart + visibleDcfColumns.length} of {dcfPeriods.length} {dcfModel.timing.viewMode === 'monthly' ? 'periods' : 'years'}
+                    </div>
+                    <div className="join">
+                      <button
+                        type="button"
+                        className="btn btn-xs join-item"
+                        onClick={() => setDcfColumnStart(Math.max(0, clampedDcfColumnStart - dcfColumnWindowSize))}
+                        disabled={clampedDcfColumnStart === 0}
+                      >
+                        Prev
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-xs join-item"
+                        onClick={() => setDcfColumnStart(Math.min(Math.max(0, dcfPeriods.length - dcfColumnWindowSize), clampedDcfColumnStart + dcfColumnWindowSize))}
+                        disabled={clampedDcfColumnStart + dcfColumnWindowSize >= dcfPeriods.length}
+                      >
+                        Next
+                      </button>
+                    </div>
                   </div>
                 </div>
                 <div className="md:hidden p-4 space-y-4">
@@ -3372,7 +3401,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     <thead>
                       <tr className="bg-base-200/80">
                         <th className="sticky left-0 top-0 z-[3] min-w-[280px] bg-base-200 border-b border-base-300">Line Item</th>
-                        {dcfPeriods.map((period) => (
+                        {visibleDcfColumns.map((period) => (
                           <th key={dcfModel.timing.viewMode === 'monthly' ? `month-${period.month}` : `year-${period.year}`} className="sticky top-0 z-[2] text-center bg-base-200 min-w-[140px] border-b border-base-300">
                             {dcfModel.timing.viewMode === 'monthly' ? `M${period.month}` : `Year ${period.year}`}
                           </th>
@@ -3383,7 +3412,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                       {groupedDcfRows.map((group) => (
                         <>
                           <tr key={`group-${group.key}`} className={`${group.tone}`}>
-                            <th colSpan={dcfPeriods.length + 1} className={`sticky left-0 z-[1] px-0 ${group.tone}`}>
+                            <th colSpan={visibleDcfColumns.length + 1} className={`sticky left-0 z-[1] px-0 ${group.tone}`}>
                               <button
                                 type="button"
                                 className="w-full flex items-center justify-between px-4 py-3 text-left"
@@ -3411,7 +3440,8 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                                   </div>
                                 </div>
                               </th>
-                              {dcfPeriods.map((period, yearIndex) => {
+                              {visibleDcfColumns.map((period, periodIndex) => {
+                                const yearIndex = clampedDcfColumnStart + periodIndex
                                 const computedValue = row.readOnly ? getComputedDcfValue(period, row.key) : null
                                 return (
                                   <td key={`${row.key}-${dcfModel.timing.viewMode === 'monthly' ? period.month : period.year}`} className={`align-middle border-b border-base-200 ${row.subtotal ? 'bg-slate-100/60' : ''}`}>
