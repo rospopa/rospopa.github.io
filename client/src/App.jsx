@@ -2591,14 +2591,14 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   const engineVisibleDcfMonths = Array.isArray(liveDerivedDcfModel.months)
     ? liveDerivedDcfModel.months.slice(0, activeHoldPeriod * 12)
     : []
-  const dcfYearSummaries = engineVisibleDcfYears.map((yearRow) => {
+  const dcfYearSummaries = useMemo(() => engineVisibleDcfYears.map((yearRow) => {
     const effectiveGrossIncome = getComputedDcfValue(yearRow, 'effectiveGrossIncome') || 0
     const netOperatingIncome = getComputedDcfValue(yearRow, 'netOperatingIncomeDcf') || 0
     const cashFlowBeforeSale = getComputedDcfValue(yearRow, 'cashFlowBeforeSale') || 0
     const cashFlowAfterSale = getComputedDcfValue(yearRow, 'cashFlowAfterSale') || 0
     const debtService = parseNum(yearRow.debtServiceDcf) || 0
     return { effectiveGrossIncome, netOperatingIncome, cashFlowBeforeSale, cashFlowAfterSale, debtService }
-  })
+  }), [engineVisibleDcfYears])
   const leveredCashFlows = initialEquity > 0
     ? [-initialEquity, ...dcfYearSummaries.map(row => row.cashFlowAfterSale)]
     : null
@@ -2688,8 +2688,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       cashTrap: firstYear ? firstYear.cashFlowAfterSale < 0 : false,
     }
   }
-  const scenarioComparison = ['base', 'upside', 'downside'].map((scenarioKey) => summarizeScenarioModel(scenarioKey))
-  const sensitivityCases = [
+  const scenarioComparison = useMemo(() => ['base', 'upside', 'downside'].map((scenarioKey) => summarizeScenarioModel(scenarioKey)), [dcfModel, price, closingCosts, holdPeriod, grossScheduledRent, vacancyRate, otherIncome, operatingExpenses, reservesCapex, loanAmount, interestRate, amortizationTerm, interestOnlyPeriod, rentGrowth, expenseGrowth, exitCapRate, costOfSale, tenantGrossSales, tenantBaseRent, managementFeePct, insurance, propertyTaxes, landValuePct, costSegBonusPct, effectiveTaxRate, depreciationRecaptureRate, refiLtv, refiRate, refiYear, rentToSales])
+  const sensitivityCases = useMemo(() => [
     { key: 'exitCapUp', label: 'Exit Cap +50 bps', overrides: { exit_cap_rate: String((parseNum(exitCapRate) || 0) + 0.5) } },
     { key: 'rentGrowthDown', label: 'Rent Growth -100 bps', overrides: { rent_growth: String((parseNum(rentGrowth) || 0) - 1) } },
     { key: 'vacancyUp', label: 'Vacancy +100 bps', overrides: { vacancy_rate: String((parseNum(vacancyRate) || 0) + 1) } },
@@ -2698,7 +2698,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   ].map((sensitivity) => ({
     ...sensitivity,
     result: summarizeScenarioModel('base', sensitivity.overrides)
-  }))
+  })), [exitCapRate, rentGrowth, vacancyRate, loanAmount, price, holdPeriod, dcfModel, closingCosts, grossScheduledRent, otherIncome, operatingExpenses, reservesCapex, interestRate, amortizationTerm, interestOnlyPeriod, expenseGrowth, costOfSale, tenantGrossSales, tenantBaseRent, managementFeePct, insurance, propertyTaxes, landValuePct, costSegBonusPct, effectiveTaxRate, depreciationRecaptureRate, refiLtv, refiRate, refiYear, rentToSales])
 
   useEffect(() => {
     if (open && property?.id) {
