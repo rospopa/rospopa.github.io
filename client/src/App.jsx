@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, Component } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, Component } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 
