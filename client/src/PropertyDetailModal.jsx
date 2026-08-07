@@ -3439,12 +3439,12 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   </div>
                 </div>
                 <div className="hidden md:block overflow-auto h-full">
-                  <table className="table text-sm min-w-[1200px] border-separate border-spacing-0">
+                  <table className="table text-sm min-w-[860px] border-separate border-spacing-0 table-fixed">
                     <thead>
                       <tr className="bg-base-200/80">
-                        <th className="sticky left-0 top-0 z-[3] min-w-[280px] bg-base-200 border-b border-base-300">Line Item</th>
+                        <th className="sticky left-0 top-0 z-[3] w-[220px] min-w-[220px] bg-base-200 border-b border-base-300">Line Item</th>
                         {visibleDcfColumns.map((period) => (
-                          <th key={dcfModel.timing.viewMode === 'monthly' ? `month-${period.month}` : `year-${period.year}`} className="sticky top-0 z-[2] text-center bg-base-200 min-w-[140px] border-b border-base-300">
+                          <th key={dcfModel.timing.viewMode === 'monthly' ? `month-${period.month}` : `year-${period.year}`} className="sticky top-0 z-[2] text-center bg-base-200 w-[120px] min-w-[120px] border-b border-base-300 px-2">
                             {dcfModel.timing.viewMode === 'monthly' ? `M${period.month}` : `Year ${period.year}`}
                           </th>
                         ))}
@@ -3467,7 +3467,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                           </tr>
                           {!collapsedDcfGroups[group.key] && group.rows.map((row) => (
                             <tr key={row.key} className={row.subtotal ? 'bg-slate-100/90' : row.readOnly ? 'bg-base-200/30' : 'bg-white'}>
-                              <th className={`sticky left-0 z-[1] whitespace-nowrap border-b border-base-200 ${row.subtotal ? 'bg-slate-100 font-semibold' : 'bg-white font-medium'}`}>
+                              <th className={`sticky left-0 z-[1] w-[220px] min-w-[220px] whitespace-normal border-b border-base-200 ${row.subtotal ? 'bg-slate-100 font-semibold' : 'bg-white font-medium'}`}>
                                 <div className="flex items-start gap-2">
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1">
@@ -3486,9 +3486,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                                 const yearIndex = clampedDcfColumnStart + periodIndex
                                 const computedValue = row.readOnly ? getComputedDcfValue(period, row.key) : null
                                 return (
-                                  <td key={`${row.key}-${dcfModel.timing.viewMode === 'monthly' ? period.month : period.year}`} className={`align-middle border-b border-base-200 ${row.subtotal ? 'bg-slate-100/60' : ''}`}>
+                                  <td key={`${row.key}-${dcfModel.timing.viewMode === 'monthly' ? period.month : period.year}`} className={`align-middle border-b border-base-200 px-2 py-2 ${row.subtotal ? 'bg-slate-100/60' : ''}`}>
                                     {row.readOnly ? (
-                                      <div className={`input input-bordered input-md w-full md:text-base cursor-default flex items-center justify-end ${row.subtotal ? 'border-slate-400 bg-slate-50 font-bold text-slate-900' : 'border-slate-300 bg-slate-50 font-semibold text-slate-900'}`}>
+                                      <div className={`input input-bordered input-sm w-[108px] max-w-full ml-auto text-sm cursor-default flex items-center justify-end px-2 ${row.subtotal ? 'border-slate-400 bg-slate-50 font-bold text-slate-900' : 'border-slate-300 bg-slate-50 font-semibold text-slate-900'}`}>
                                         {formatMoneyCell(computedValue)}
                                       </div>
                                     ) : (
@@ -3496,7 +3496,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                                         placeholder="0"
                                         value={period[row.key]}
                                         onChange={(value) => dcfModel.timing.viewMode === 'monthly' ? null : updateDcfCell(yearIndex, row.key, value)}
-                                        className={`input input-bordered input-md w-full md:text-base text-right ${row.subtotal ? 'border-slate-300 bg-slate-50 font-semibold text-slate-900' : 'border-sky-200 bg-sky-50/60 text-sky-900'}`}
+                                        className={`input input-bordered input-sm w-[108px] max-w-full ml-auto text-sm text-right px-2 ${row.subtotal ? 'border-slate-300 bg-slate-50 font-semibold text-slate-900' : 'border-sky-200 bg-sky-50/60 text-sky-900'}`}
                                         disabled={!isAdmin || dcfModel.timing.viewMode === 'monthly'}
                                         allowDecimal={false}
                                       />
