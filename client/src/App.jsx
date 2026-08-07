@@ -2402,7 +2402,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   const dscrFromEngine = adjustedNoiValue !== null && annualDebtServiceAmount > 0
     ? (adjustedNoiValue / annualDebtServiceAmount)
     : null
-  function summarizeScenarioModel(scenarioKey, propertyOverrides = {}) {
+  const summarizeScenarioModel = useCallback((scenarioKey, propertyOverrides = {}) => {
     const scenarioProp = buildScenarioProperty(scenarioKey, {}, propertyOverrides)
     const scenarioModel = normalizeDcfModel(scenarioProp.dcf_model, scenarioProp)
     const scenarioHold = Math.min(DCF_MAX_YEARS, Math.max(1, Number(scenarioProp.hold_period || 1)))
@@ -2442,7 +2442,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       covenantBreach,
       cashTrap: firstYear ? firstYear.cashFlowAfterSale < 0 : false,
     }
-  }
+  }, [dcfModel, buildScenarioProperty, normalizeDcfModel, getComputedDcfValue, parseNum, calculateIrr])
   const scenarioComparison = useMemo(
     () => ['base', 'upside', 'downside'].map((scenarioKey) => summarizeScenarioModel(scenarioKey)),
     [summarizeScenarioModel]
