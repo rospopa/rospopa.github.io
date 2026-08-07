@@ -192,7 +192,7 @@ function AddUserForm({ onCreated }) {
         </Field>
         <Field label="Phone Number">
           <input type="tel" placeholder="+1 (000) 000-0000" value={phoneNumber}
-            onChange={e => setPhoneNumber(e.target.value)} className="input input-bordered w-full" />
+            onChange={e => setPhoneNumber(formatPhone(e.target.value))} className="input input-bordered w-full" />
         </Field>
         <Field label="Role">
           <select value={role} onChange={e => setRole(e.target.value)} className="select select-bordered w-full">
