@@ -93,6 +93,579 @@ function AssignUsersTab({ allUsers, assignLoading, toggleAssign, onViewContact }
   )
 }
 
+function FinancialsTabUI(props) {
+  const {
+    isAdmin,
+    price, setPrice,
+    sqft, setSqft,
+    lot, setLot,
+    yearBuilt, setYearBuilt,
+    unitCount, setUnitCount,
+    closingCosts, setClosingCosts,
+    grossScheduledRent, setGrossScheduledRent,
+    vacancyRate, setVacancyRate,
+    otherIncome, setOtherIncome,
+    operatingExpenses, setOperatingExpenses,
+    reservesCapex, setReservesCapex,
+    managementFeePct, setManagementFeePct,
+    insurance, setInsurance,
+    propertyTaxes, setPropertyTaxes,
+    loanAmount, setLoanAmount,
+    ltv, setLtv,
+    interestRate, setInterestRate,
+    amortizationTerm, setAmortizationTerm,
+    interestOnlyPeriod, setInterestOnlyPeriod,
+    holdPeriod, setHoldPeriod,
+    rentGrowth, setRentGrowth,
+    expenseGrowth, setExpenseGrowth,
+    exitCapRate, setExitCapRate,
+    costOfSale, setCostOfSale,
+    refiLtv, setRefiLtv,
+    refiRate, setRefiRate,
+    refiYear, setRefiYear,
+    landValuePct, setLandValuePct,
+    costSegBonusPct, setCostSegBonusPct,
+    effectiveTaxRate, setEffectiveTaxRate,
+    depreciationRecaptureRate, setDepreciationRecaptureRate,
+    irr, setIrr,
+    rentToSales, setRentToSales,
+    numSkus, setNumSkus,
+    assetType,
+    tenantGrossSales, setTenantGrossSales,
+    tenantBaseRent, setTenantBaseRent,
+    elecVoltage, setElecVoltage,
+    elecAmperage, setElecAmperage,
+    dcfModel, setDcfModel,
+    updateDebtTermField,
+    updateTimingField,
+    updateTaxModelField,
+    updateLeaseEconomicsField,
+    updateScenarioField,
+    updateWaterfallField,
+    updateGovernanceField,
+    addRentRollRow,
+    removeRentRollRow,
+    updateRentRollRow,
+    capRateFromEngine,
+    cashOnCashFromEngine,
+    leveredIrr,
+    unleveredIrr,
+    leveredEquityMultiple,
+    unleveredEquityMultiple,
+    leveredNpv,
+    unleveredNpv,
+    dscrFromEngine,
+    debtYield,
+    yieldOnCost,
+    adjustedNoiValue,
+    egiAmount,
+    annualDebtServiceAmount,
+    exitValueAmount,
+    netSaleProceedsAmount,
+    loanBalanceAtExitAmount,
+    netEquityOnExitAmount,
+    firstYearDcf,
+    holdYearDcf,
+    scenarioComparison,
+    sensitivityCases,
+    governanceDiagnostics,
+    parseNum,
+    saving,
+    savedSignal,
+    handleSave,
+    property,
+  } = props
+
+  const [openSections, setOpenSections] = useState({
+    overview: true,
+    income: true,
+    expenses: false,
+    financing: false,
+    exit: false,
+    tax: false,
+    advanced: false,
+  })
+
+  function toggleSection(key) {
+    setOpenSections(prev => ({ ...prev, [key]: !prev[key] }))
+  }
+
+  function SummaryChip({ label, value, tone = 'neutral' }) {
+    const toneClass = tone === 'primary'
+      ? 'border-primary/20 bg-primary/5'
+      : tone === 'success'
+        ? 'border-success/20 bg-success/5'
+        : 'border-base-300 bg-base-100'
+    return (
+      <div className={`rounded-xl border px-3 py-2 ${toneClass}`}>
+        <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-base-content/45">{label}</div>
+        <div className="mt-1 text-sm font-semibold text-base-content">{value}</div>
+      </div>
+    )
+  }
+
+  function SectionCard({ sectionKey, emoji, title, subtitle, children, defaultOpen = false }) {
+    const open = openSections[sectionKey] ?? defaultOpen
+    return (
+      <div className="rounded-2xl border border-base-300 bg-base-100 shadow-sm overflow-hidden">
+        <button
+          type="button"
+          className="flex w-full items-center justify-between gap-4 px-4 py-4 text-left hover:bg-base-200/50"
+          onClick={() => toggleSection(sectionKey)}
+        >
+          <div className="min-w-0">
+            <div className="flex items-center gap-3">
+              <span className="text-lg">{emoji}</span>
+              <div>
+                <div className="text-sm font-semibold text-base-content">{title}</div>
+                {subtitle && <div className="text-xs text-base-content/55">{subtitle}</div>}
+              </div>
+            </div>
+          </div>
+          <span className="text-base-content/45 text-lg">{open ? '−' : '+'}</span>
+        </button>
+        {open && <div className="border-t border-base-200 px-4 py-4">{children}</div>}
+      </div>
+    )
+  }
+
+  function InputShell({ children }) {
+    return <div className="space-y-3">{children}</div>
+  }
+
+  function OutputShell({ children }) {
+    return <div className="space-y-3">{children}</div>
+  }
+
+  function GridShell({ children }) {
+    return <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">{children}</div>
+  }
+
+  function OutputField({ label, help, value }) {
+    return (
+      <Field label={label} help={help}>
+        <input
+          readOnly
+          value={value}
+          className="input input-bordered input-md w-full md:text-base cursor-default bg-base-200/60 text-base-content font-semibold"
+        />
+      </Field>
+    )
+  }
+
+  const equityValue = price !== '' && loanAmount !== ''
+    ? '$' + (Number(price) + Number(closingCosts || 0) - Number(loanAmount)).toLocaleString(undefined, { maximumFractionDigits: 0 })
+    : '—'
+  const grmValue = price !== '' && grossScheduledRent !== '' && Number(grossScheduledRent) > 0
+    ? (Number(price) / Number(grossScheduledRent)).toFixed(2)
+    : '—'
+  const pricePerUnitValue = price !== '' && unitCount !== '' && Number(unitCount) > 0
+    ? '$' + (Number(price) / Number(unitCount)).toLocaleString(undefined, { maximumFractionDigits: 0 })
+    : '—'
+  const pricePerSqftValue = price !== '' && sqft !== '' && Number(sqft) > 0
+    ? '$' + (Number(price) / Number(sqft)).toFixed(2)
+    : '—'
+  const pricePerAcreValue = price !== '' && lot !== '' && Number(lot) > 0
+    ? '$' + (Number(price) / Number(lot)).toLocaleString(undefined, { maximumFractionDigits: 0 })
+    : '—'
+  const depreciableBasisValue = price !== '' && landValuePct !== ''
+    ? '$' + (Number(price) * (1 - Number(landValuePct) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 })
+    : '—'
+  const tenantRentToSalesValue = tenantGrossSales !== '' && tenantBaseRent !== '' && Number(tenantGrossSales) > 0
+    ? `${(Number(tenantBaseRent) / Number(tenantGrossSales) * 100).toFixed(2)}%`
+    : '—'
+
+  return (
+    <div className="space-y-4 pb-24">
+      <div className="sticky top-[106px] z-[3] rounded-2xl border border-base-300 bg-base-100/95 backdrop-blur px-4 py-4 shadow-sm">
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-base-content/45">Financial Workflow</div>
+              <h3 className="text-lg font-semibold text-base-content">Enter assumptions on the left, review live outputs on the right.</h3>
+            </div>
+            <div className="tabs tabs-boxed bg-base-200/60 self-start">
+              {['Base', 'Upside', 'Downside'].map((label) => (
+                <button
+                  key={label}
+                  type="button"
+                  className={`tab ${dcfModel.scenarioName === label ? 'tab-active' : ''}`}
+                  onClick={() => setDcfModel(prev => ({ ...prev, scenarioName: label }))}
+                  disabled={!isAdmin}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-5">
+            <SummaryChip label="Cap Rate" value={capRateFromEngine !== null ? `${capRateFromEngine.toFixed(2)}%` : '—'} tone="primary" />
+            <SummaryChip label="Cash-on-Cash" value={cashOnCashFromEngine !== null ? `${cashOnCashFromEngine.toFixed(2)}%` : '—'} />
+            <SummaryChip label="Levered IRR" value={leveredIrr !== null ? `${(leveredIrr * 100).toFixed(2)}%` : '—'} tone="success" />
+            <SummaryChip label="EMx" value={leveredEquityMultiple !== null ? `${leveredEquityMultiple.toFixed(2)}x` : '—'} />
+            <SummaryChip label="NOI" value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+          </div>
+        </div>
+      </div>
+
+      <SectionCard sectionKey="overview" emoji="🏢" title="Property & Deal Setup" subtitle="Start with the core deal facts and let headline metrics populate automatically.">
+        <GridShell>
+          <InputShell>
+            <Field label="Price ($)" help={FIELD_HELP.price}>
+              <NumericInput placeholder="0" value={price} onChange={setPrice} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Square Feet" help={FIELD_HELP.sqft}>
+              <NumericInput placeholder="0" value={sqft} onChange={setSqft} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Lot Size (acres)" help={FIELD_HELP.lot}>
+              <input type="number" placeholder="0.00" step="0.01" value={lot} onChange={e => setLot(e.target.value)} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Year Built" help={FIELD_HELP.yearBuilt}>
+              <input type="number" placeholder="e.g. 1998" value={yearBuilt} onChange={e => setYearBuilt(e.target.value)} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Unit / Bay / Suite Count" help={FIELD_HELP.unitCount}>
+              <NumericInput placeholder="e.g. 24" value={unitCount} onChange={setUnitCount} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Closing Costs ($)" help={FIELD_HELP.closingCosts}>
+              <NumericInput placeholder="e.g. 25000" value={closingCosts} onChange={setClosingCosts} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+          </InputShell>
+          <OutputShell>
+            <OutputField label="GRM" help={FIELD_HELP.grm} value={grmValue} />
+            <OutputField label="Price / Unit ($)" help={FIELD_HELP.pricePerUnit} value={pricePerUnitValue} />
+            <OutputField label="Price / Sq Ft ($)" help={FIELD_HELP.pricePerSqft} value={pricePerSqftValue} />
+            <OutputField label="Price / Acre ($)" help={FIELD_HELP.pricePerAcre} value={pricePerAcreValue} />
+            <OutputField label="Equity ($)" help={FIELD_HELP.equity} value={equityValue} />
+            <OutputField label="Yield on Cost (%)" help={FIELD_HELP.yieldOnCost} value={yieldOnCost !== null ? `${yieldOnCost.toFixed(2)}%` : '—'} />
+          </OutputShell>
+        </GridShell>
+      </SectionCard>
+
+      <SectionCard sectionKey="income" emoji="💰" title="Income" subtitle="Enter the top-line revenue assumptions first, then confirm effective income and NOI.">
+        <GridShell>
+          <InputShell>
+            <Field label="Gross Scheduled Rent ($/yr)" help={FIELD_HELP.grossScheduledRent}>
+              <NumericInput placeholder="e.g. 120000" value={grossScheduledRent} onChange={setGrossScheduledRent} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Vacancy / Credit Loss (%)" help={FIELD_HELP.vacancyRate}>
+              <NumericInput placeholder="e.g. 5" value={vacancyRate} onChange={setVacancyRate} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Other Income ($/yr)" help={FIELD_HELP.otherIncome}>
+              <NumericInput placeholder="parking, RUBS, storage" value={otherIncome} onChange={setOtherIncome} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Rent-to-Sales (%)" help={FIELD_HELP.rentToSales}>
+              <NumericInput placeholder="e.g. 5.0" value={rentToSales} onChange={setRentToSales} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} allowDecimal />
+            </Field>
+            <Field label="# SKUs" help={FIELD_HELP.numSkus}>
+              <NumericInput placeholder="e.g. 500" value={numSkus} onChange={setNumSkus} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+          </InputShell>
+          <OutputShell>
+            <OutputField label="EGI — Effective Gross Income ($/yr)" help={FIELD_HELP.egi} value={egiAmount !== null ? '$' + egiAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+            <OutputField label="NOI — Net Operating Income ($/yr)" help={FIELD_HELP.adjustedNoi} value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+            <OutputField label="Cap Rate (%)" help={FIELD_HELP.capRate} value={capRateFromEngine !== null ? `${capRateFromEngine.toFixed(2)}%` : '—'} />
+            <OutputField label="Unlevered IRR (%)" help={FIELD_HELP.unleveredIrr} value={unleveredIrr !== null ? `${(unleveredIrr * 100).toFixed(2)}%` : '—'} />
+            <OutputField label="Unlevered EMx" help={FIELD_HELP.unleveredEmx} value={unleveredEquityMultiple !== null ? `${unleveredEquityMultiple.toFixed(2)}x` : '—'} />
+          </OutputShell>
+        </GridShell>
+      </SectionCard>
+
+      <SectionCard sectionKey="expenses" emoji="📉" title="Expenses & Operating Costs" subtitle="Define the recurring expense stack and verify how it compresses NOI.">
+        <GridShell>
+          <InputShell>
+            <Field label="Operating Expenses ($/yr)" help={FIELD_HELP.operatingExpenses}>
+              <NumericInput placeholder="e.g. 40000" value={operatingExpenses} onChange={setOperatingExpenses} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Management Fee (%)" help={FIELD_HELP.managementFeePct}>
+              <NumericInput placeholder="e.g. 8" value={managementFeePct} onChange={setManagementFeePct} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} allowDecimal />
+            </Field>
+            <Field label="Insurance ($/yr)" help={FIELD_HELP.insurance}>
+              <NumericInput placeholder="e.g. 12000" value={insurance} onChange={setInsurance} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Property Taxes ($/yr)" help={FIELD_HELP.propertyTaxes}>
+              <NumericInput placeholder="e.g. 18000" value={propertyTaxes} onChange={setPropertyTaxes} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Reserves / Replacement Capex ($/yr)" help={FIELD_HELP.reservesCapex}>
+              <NumericInput placeholder="e.g. 5000" value={reservesCapex} onChange={setReservesCapex} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+          </InputShell>
+          <OutputShell>
+            <OutputField label="Management Fee ($/yr)" help={FIELD_HELP.managementFeeDollar} value={firstYearDcf ? '$' + (parseNum(firstYearDcf.managementFeesDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+            <OutputField label="Adjusted NOI ($/yr)" help={FIELD_HELP.adjustedNoi} value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+            <OutputField label="Debt Yield (%)" help={FIELD_HELP.debtYield} value={debtYield !== null ? `${debtYield.toFixed(2)}%` : '—'} />
+            <OutputField label="NPV Discount Rate (%)" help={FIELD_HELP.discountRate} value={irr !== '' ? `${irr}%` : '—'} />
+            <Field label="NPV Discount Rate (%)" help={FIELD_HELP.discountRate}>
+              <NumericInput placeholder="e.g. 10.0" value={irr} onChange={setIrr} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} allowDecimal />
+            </Field>
+          </OutputShell>
+        </GridShell>
+      </SectionCard>
+
+      <SectionCard sectionKey="financing" emoji="🏦" title="Financing" subtitle="Set debt structure, then review leverage, debt service, and coverage instantly.">
+        <GridShell>
+          <InputShell>
+            <Field label="Loan Amount ($)" help={FIELD_HELP.loanAmount}>
+              <NumericInput placeholder="e.g. 750000" value={loanAmount} onChange={setLoanAmount} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="LTV (%)" help={FIELD_HELP.ltv}>
+              <NumericInput placeholder="e.g. 75" value={ltv} onChange={setLtv} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Interest Rate (%)" help={FIELD_HELP.interestRate}>
+              <NumericInput placeholder="e.g. 6.5" value={interestRate} onChange={setInterestRate} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Amortization Term (yrs)" help={FIELD_HELP.amortTerm}>
+              <NumericInput placeholder="e.g. 25" value={amortizationTerm} onChange={setAmortizationTerm} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Interest-Only Period (yrs)" help={FIELD_HELP.ioPeriod}>
+              <NumericInput placeholder="e.g. 3" value={interestOnlyPeriod} onChange={setInterestOnlyPeriod} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Initial Loan Term (yrs)" help={FIELD_HELP.loanTerm}>
+              <NumericInput placeholder="e.g. 5" value={dcfModel.debtTerms.initialLoanTermYears} onChange={(value) => updateDebtTermField('initialLoanTermYears', value)} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <label className="label cursor-pointer justify-start gap-3">
+              <input type="checkbox" className="checkbox checkbox-sm" checked={!!dcfModel.debtTerms.floatingRate} onChange={(e) => updateDebtTermField('floatingRate', e.target.checked)} disabled={!isAdmin} />
+              <span className="label-text">Floating-rate loan</span>
+            </label>
+          </InputShell>
+          <OutputShell>
+            <OutputField label="Annual Debt Service ($/yr)" help={FIELD_HELP.annualDebtService} value={annualDebtServiceAmount !== null ? '$' + annualDebtServiceAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+            <OutputField label="DSCR" help={FIELD_HELP.dscr} value={dscrFromEngine !== null ? dscrFromEngine.toFixed(2) : '—'} />
+            <OutputField label="Cash-on-Cash (%)" help={FIELD_HELP.cashOnCash} value={cashOnCashFromEngine !== null ? `${cashOnCashFromEngine.toFixed(2)}%` : '—'} />
+            <OutputField label="Levered IRR (%)" help={FIELD_HELP.leveredIrr} value={leveredIrr !== null ? `${(leveredIrr * 100).toFixed(2)}%` : '—'} />
+            <OutputField label="Levered EMx" help={FIELD_HELP.leveredEmx} value={leveredEquityMultiple !== null ? `${leveredEquityMultiple.toFixed(2)}x` : '—'} />
+            <OutputField label="Levered NPV ($)" help={FIELD_HELP.leveredNpv} value={leveredNpv !== null ? '$' + leveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+          </OutputShell>
+        </GridShell>
+      </SectionCard>
+
+      <SectionCard sectionKey="exit" emoji="🏁" title="Exit / Reversion" subtitle="Model the hold, refinance, and sale timing without losing sight of net equity on exit.">
+        <GridShell>
+          <InputShell>
+            <Field label="Hold Period (yrs)" help={FIELD_HELP.holdPeriod}>
+              <NumericInput placeholder="e.g. 7" value={holdPeriod} onChange={setHoldPeriod} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Sale Month" help={FIELD_HELP.saleMonth}>
+              <NumericInput placeholder="1-12" value={dcfModel.timing.saleMonth} onChange={(value) => updateTimingField('saleMonth', value)} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Rent Growth (% / yr)" help={FIELD_HELP.rentGrowth}>
+              <NumericInput placeholder="e.g. 3" value={rentGrowth} onChange={setRentGrowth} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Expense Growth (% / yr)" help={FIELD_HELP.expenseGrowth}>
+              <NumericInput placeholder="e.g. 2" value={expenseGrowth} onChange={setExpenseGrowth} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Exit Cap Rate (%)" help={FIELD_HELP.exitCapRate}>
+              <NumericInput placeholder="e.g. 6.5" value={exitCapRate} onChange={setExitCapRate} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Cost of Sale (%)" help={FIELD_HELP.costOfSale}>
+              <NumericInput placeholder="e.g. 2" value={costOfSale} onChange={setCostOfSale} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+            <Field label="Refi LTV (%)" help={FIELD_HELP.refiLtv}>
+              <NumericInput placeholder="e.g. 70" value={refiLtv} onChange={setRefiLtv} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} allowDecimal />
+            </Field>
+            <Field label="Refi Interest Rate (%)" help={FIELD_HELP.refiRate}>
+              <NumericInput placeholder="e.g. 6.0" value={refiRate} onChange={setRefiRate} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} allowDecimal />
+            </Field>
+            <Field label="Refi Year" help={FIELD_HELP.refiYear}>
+              <NumericInput placeholder="e.g. 3" value={refiYear} onChange={setRefiYear} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+            </Field>
+          </InputShell>
+          <OutputShell>
+            <OutputField label="Exit Value ($)" help={FIELD_HELP.exitValue} value={exitValueAmount !== null ? '$' + exitValueAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+            <OutputField label="Net Sale Proceeds ($)" help={FIELD_HELP.netSaleProceeds} value={netSaleProceedsAmount !== null ? '$' + netSaleProceedsAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+            <OutputField label="Loan Balance at Exit ($)" help={FIELD_HELP.loanBalanceAtExit} value={loanBalanceAtExitAmount !== null ? '$' + loanBalanceAtExitAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+            <OutputField label="Net Equity on Exit ($)" help={FIELD_HELP.netEquityOnExit} value={netEquityOnExitAmount !== null ? '$' + netEquityOnExitAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+            <OutputField label="Capital Gains Tax on Exit ($)" help={FIELD_HELP.capitalGainsTax} value={holdYearDcf ? '$' + (parseNum(holdYearDcf.capitalGainsTaxDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+            <OutputField label="Recapture Tax on Exit ($)" help={FIELD_HELP.recaptureTax} value={holdYearDcf ? '$' + (parseNum(holdYearDcf.recaptureTaxDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+          </OutputShell>
+        </GridShell>
+      </SectionCard>
+
+      <SectionCard sectionKey="tax" emoji="🧾" title="Tax & Cost Segregation" subtitle="Capture basis, depreciation, and tax assumptions in one focused place.">
+        <GridShell>
+          <InputShell>
+            <Field label="Land Value (%)" help={FIELD_HELP.landValuePct}>
+              <NumericInput placeholder="e.g. 20" value={landValuePct} onChange={setLandValuePct} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} allowDecimal />
+            </Field>
+            <Field label="Cost Seg Bonus (%)" help={FIELD_HELP.costSegBonus}>
+              <NumericInput placeholder="e.g. 30" value={costSegBonusPct} onChange={setCostSegBonusPct} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} allowDecimal />
+            </Field>
+            <Field label="Effective Tax Rate (%)" help={FIELD_HELP.effectiveTaxRate}>
+              <NumericInput placeholder="e.g. 37" value={effectiveTaxRate} onChange={setEffectiveTaxRate} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} allowDecimal />
+            </Field>
+            <Field label="Depreciation Recapture Rate (%)" help={FIELD_HELP.deprecRecapture}>
+              <NumericInput placeholder="e.g. 25" value={depreciationRecaptureRate} onChange={setDepreciationRecaptureRate} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} allowDecimal />
+            </Field>
+            <Field label="Capital Gains Tax Rate (%)" help={FIELD_HELP.capitalGainsTaxRate}>
+              <NumericInput value={dcfModel.taxModel.capitalGainsRatePct} onChange={(value) => updateTaxModelField('capitalGainsRatePct', value)} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} allowDecimal />
+            </Field>
+            <Field label="Ordinary Income Tax Rate (%)" help={FIELD_HELP.ordinaryIncomeTaxRate}>
+              <NumericInput value={dcfModel.taxModel.ordinaryIncomeTaxRatePct} onChange={(value) => updateTaxModelField('ordinaryIncomeTaxRatePct', value)} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} allowDecimal />
+            </Field>
+          </InputShell>
+          <OutputShell>
+            <OutputField label="Depreciable Basis ($)" help={FIELD_HELP.depreciableBasis} value={depreciableBasisValue} />
+            <OutputField label="Tax Shield Year 1 ($)" help={FIELD_HELP.taxShield} value={(() => {
+              const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : null
+              const bonus = costSegBonusPct !== '' ? Number(costSegBonusPct) / 100 : 0
+              const totalDepr = depBasis !== null ? depBasis * bonus + depBasis * (1 - bonus) / 39 : null
+              return totalDepr !== null && effectiveTaxRate !== ''
+                ? '$' + (totalDepr * Number(effectiveTaxRate) / 100).toLocaleString(undefined, { maximumFractionDigits: 0 })
+                : '—'
+            })()} />
+            <OutputField label="Unlevered NPV ($)" help={FIELD_HELP.unleveredNpv} value={unleveredNpv !== null ? '$' + unleveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+            <OutputField label="Levered NPV ($)" help={FIELD_HELP.leveredNpv} value={leveredNpv !== null ? '$' + leveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'} />
+          </OutputShell>
+        </GridShell>
+      </SectionCard>
+
+      <SectionCard sectionKey="advanced" emoji="⚙️" title="Advanced Modeling" subtitle="Scenarios, governance diagnostics, sensitivities, and detailed rent-roll controls.">
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-base-300 bg-base-200/30 p-4">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-base-content/45 mb-3">Scenario Comparison</div>
+            <div className="overflow-x-auto">
+              <table className="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Scenario</th>
+                    <th className="text-right">Levered IRR</th>
+                    <th className="text-right">Levered EMx</th>
+                    <th className="text-right">Exit NOI</th>
+                    <th className="text-right">Exit Value</th>
+                    <th className="text-right">Net Sale</th>
+                    <th className="text-right">DSCR</th>
+                    <th className="text-right">Debt Yield</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {scenarioComparison.map((scenario) => (
+                    <tr key={scenario.key}>
+                      <td className="font-medium">{scenario.label}</td>
+                      <td className="text-right">{scenario.irr !== null ? `${(scenario.irr * 100).toFixed(2)}%` : '—'}</td>
+                      <td className="text-right">{scenario.emx !== null ? `${scenario.emx.toFixed(2)}x` : '—'}</td>
+                      <td className="text-right">{scenario.noi ? '$' + scenario.noi.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}</td>
+                      <td className="text-right">{scenario.exitValue ? '$' + scenario.exitValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}</td>
+                      <td className="text-right">{scenario.netSale ? '$' + scenario.netSale.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}</td>
+                      <td className="text-right">{scenario.dscr !== null ? scenario.dscr.toFixed(2) : '—'}</td>
+                      <td className="text-right">{scenario.debtYield !== null ? `${scenario.debtYield.toFixed(2)}%` : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {assetType === 'Retail' || assetType === 'Net Lease' || assetType === '' ? (
+            <div className="rounded-2xl border border-base-300 bg-base-100 p-4 space-y-4">
+              <div>
+                <div className="text-sm font-semibold text-base-content">Tenant / Retail Inputs</div>
+                <div className="text-xs text-base-content/55">Use this for tenant sales, percentage rent, and rent roll assumptions.</div>
+              </div>
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                <InputShell>
+                  <Field label="Tenant Annual Gross Sales ($)" help={FIELD_HELP.tenantGrossSales}>
+                    <NumericInput placeholder="e.g. 1200000" value={tenantGrossSales} onChange={setTenantGrossSales} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+                  </Field>
+                  <Field label="Tenant Base Rent ($/yr)" help={FIELD_HELP.tenantBaseRent}>
+                    <NumericInput placeholder="e.g. 60000" value={tenantBaseRent} onChange={setTenantBaseRent} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+                  </Field>
+                  <Field label="Voltage (V)" help={FIELD_HELP.voltage}>
+                    <NumericInput placeholder="e.g. 480" value={elecVoltage} onChange={setElecVoltage} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+                  </Field>
+                  <Field label="Amperage (A)" help={FIELD_HELP.amperage}>
+                    <NumericInput placeholder="e.g. 400" value={elecAmperage} onChange={setElecAmperage} className="input input-bordered input-md w-full md:text-base" style={{ color: '#1d4ed8' }} disabled={!isAdmin} />
+                  </Field>
+                </InputShell>
+                <OutputShell>
+                  <OutputField label="Rent-to-Sales Ratio (%)" help={FIELD_HELP.rentToSalesRatio} value={tenantRentToSalesValue} />
+                  <Field label="Active Scenario" help={FIELD_HELP.activeScenario}>
+                    <select value={dcfModel.scenarioName} onChange={(e) => setDcfModel(prev => ({ ...prev, scenarioName: e.target.value }))} className="select select-bordered select-md w-full md:text-base" disabled={!isAdmin}>
+                      <option value="Base">Base</option>
+                      <option value="Upside">Upside</option>
+                      <option value="Downside">Downside</option>
+                    </select>
+                  </Field>
+                </OutputShell>
+              </div>
+            </div>
+          ) : null}
+
+          <div className="rounded-2xl border border-base-300 bg-base-100 p-4 space-y-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className={`badge ${governanceDiagnostics.summary.hasErrors ? 'badge-error' : governanceDiagnostics.summary.hasWarnings ? 'badge-warning' : 'badge-success'}`}>
+                {governanceDiagnostics.summary.hasErrors ? 'Errors present' : governanceDiagnostics.summary.hasWarnings ? 'Warnings present' : 'No broken states'}
+              </span>
+              <span className="badge badge-outline">{governanceDiagnostics.summary.overrideCount} override{governanceDiagnostics.summary.overrideCount === 1 ? '' : 's'}</span>
+            </div>
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <InputShell>
+                <label className="label cursor-pointer justify-start gap-3">
+                  <input type="checkbox" className="checkbox checkbox-sm" checked={!!dcfModel.governance.inputsLocked} onChange={(e) => updateGovernanceField('inputsLocked', e.target.checked)} disabled={!isAdmin} />
+                  <span className="label-text">Lock manual inputs</span>
+                </label>
+                <label className="label cursor-pointer justify-start gap-3">
+                  <input type="checkbox" className="checkbox checkbox-sm" checked={!!dcfModel.governance.formulasLocked} onChange={(e) => updateGovernanceField('formulasLocked', e.target.checked)} disabled={!isAdmin} />
+                  <span className="label-text">Lock formulas / engine outputs</span>
+                </label>
+                <label className="label cursor-pointer justify-start gap-3">
+                  <input type="checkbox" className="checkbox checkbox-sm" checked={!!dcfModel.governance.overridesEnabled} onChange={(e) => updateGovernanceField('overridesEnabled', e.target.checked)} disabled={!isAdmin} />
+                  <span className="label-text">Allow assumption overrides</span>
+                </label>
+                <Field label="Override Memo" help={FIELD_HELP.overrideNote}>
+                  <textarea value={dcfModel.governance.overrideNote} onChange={(e) => updateGovernanceField('overrideNote', e.target.value)} className="textarea textarea-bordered min-h-24 w-full md:text-base" disabled={!isAdmin} placeholder="Explain why non-default assumptions or manual overrides were used." />
+                </Field>
+              </InputShell>
+              <div className="space-y-2">
+                {governanceDiagnostics.issues.length === 0 ? (
+                  <div className="text-sm text-base-content/60">No governance issues detected.</div>
+                ) : governanceDiagnostics.issues.map((issue, index) => (
+                  <div key={`governance-issue-${index}`} className={`rounded-lg border px-3 py-2 text-sm ${issue.severity === 'error' ? 'border-error/30 bg-error/10 text-error-content' : 'border-warning/30 bg-warning/10 text-warning-content'}`}>
+                    <div className="font-semibold">{issue.scope}</div>
+                    <div>{issue.message}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-base-300 bg-base-100 p-4">
+            <div className="text-xs font-semibold uppercase tracking-[0.18em] text-base-content/45 mb-3">Sensitivity Table</div>
+            <div className="overflow-x-auto">
+              <table className="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Case</th>
+                    <th className="text-right">Levered IRR</th>
+                    <th className="text-right">Levered EMx</th>
+                    <th className="text-right">DSCR</th>
+                    <th className="text-right">Exit Value</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sensitivityCases.map((sensitivity) => (
+                    <tr key={sensitivity.key}>
+                      <td className="font-medium">{sensitivity.label}</td>
+                      <td className="text-right">{sensitivity.result.irr !== null ? `${(sensitivity.result.irr * 100).toFixed(2)}%` : '—'}</td>
+                      <td className="text-right">{sensitivity.result.emx !== null ? `${sensitivity.result.emx.toFixed(2)}x` : '—'}</td>
+                      <td className="text-right">{sensitivity.result.dscr !== null ? sensitivity.result.dscr.toFixed(2) : '—'}</td>
+                      <td className="text-right">{sensitivity.result.exitValue ? '$' + sensitivity.result.exitValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {isAdmin && (
+            <div className="pt-2">
+              <SaveButton onClick={handleSave} loading={saving} savedSignal={savedSignal} label={property?.id ? 'Save Changes' : 'Create Property'} />
+            </div>
+          )}
+        </div>
+      </SectionCard>
+    </div>
+  )
+}
+
 export default function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffset = 0 }) {
   const DCF_ROW_DEFS = [
     { key: 'grossRevenue', label: 'Gross Revenue', type: 'currency', category: 'income' },
@@ -2193,6 +2766,89 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
         {/* Financials tab */}
         {tab === 'financials' && (
+          <FinancialsTabUI
+            isAdmin={isAdmin}
+            price={price} setPrice={setPrice}
+            sqft={sqft} setSqft={setSqft}
+            lot={lot} setLot={setLot}
+            yearBuilt={yearBuilt} setYearBuilt={setYearBuilt}
+            unitCount={unitCount} setUnitCount={setUnitCount}
+            closingCosts={closingCosts} setClosingCosts={setClosingCosts}
+            grossScheduledRent={grossScheduledRent} setGrossScheduledRent={setGrossScheduledRent}
+            vacancyRate={vacancyRate} setVacancyRate={setVacancyRate}
+            otherIncome={otherIncome} setOtherIncome={setOtherIncome}
+            operatingExpenses={operatingExpenses} setOperatingExpenses={setOperatingExpenses}
+            reservesCapex={reservesCapex} setReservesCapex={setReservesCapex}
+            managementFeePct={managementFeePct} setManagementFeePct={setManagementFeePct}
+            insurance={insurance} setInsurance={setInsurance}
+            propertyTaxes={propertyTaxes} setPropertyTaxes={setPropertyTaxes}
+            loanAmount={loanAmount} setLoanAmount={setLoanAmount}
+            ltv={ltv} setLtv={setLtv}
+            interestRate={interestRate} setInterestRate={setInterestRate}
+            amortizationTerm={amortizationTerm} setAmortizationTerm={setAmortizationTerm}
+            interestOnlyPeriod={interestOnlyPeriod} setInterestOnlyPeriod={setInterestOnlyPeriod}
+            holdPeriod={holdPeriod} setHoldPeriod={setHoldPeriod}
+            rentGrowth={rentGrowth} setRentGrowth={setRentGrowth}
+            expenseGrowth={expenseGrowth} setExpenseGrowth={setExpenseGrowth}
+            exitCapRate={exitCapRate} setExitCapRate={setExitCapRate}
+            costOfSale={costOfSale} setCostOfSale={setCostOfSale}
+            refiLtv={refiLtv} setRefiLtv={setRefiLtv}
+            refiRate={refiRate} setRefiRate={setRefiRate}
+            refiYear={refiYear} setRefiYear={setRefiYear}
+            landValuePct={landValuePct} setLandValuePct={setLandValuePct}
+            costSegBonusPct={costSegBonusPct} setCostSegBonusPct={setCostSegBonusPct}
+            effectiveTaxRate={effectiveTaxRate} setEffectiveTaxRate={setEffectiveTaxRate}
+            depreciationRecaptureRate={depreciationRecaptureRate} setDepreciationRecaptureRate={setDepreciationRecaptureRate}
+            irr={irr} setIrr={setIrr}
+            rentToSales={rentToSales} setRentToSales={setRentToSales}
+            numSkus={numSkus} setNumSkus={setNumSkus}
+            assetType={assetType}
+            tenantGrossSales={tenantGrossSales} setTenantGrossSales={setTenantGrossSales}
+            tenantBaseRent={tenantBaseRent} setTenantBaseRent={setTenantBaseRent}
+            elecVoltage={elecVoltage} setElecVoltage={setElecVoltage}
+            elecAmperage={elecAmperage} setElecAmperage={setElecAmperage}
+            dcfModel={dcfModel} setDcfModel={setDcfModel}
+            updateDebtTermField={updateDebtTermField}
+            updateTimingField={updateTimingField}
+            updateTaxModelField={updateTaxModelField}
+            updateLeaseEconomicsField={updateLeaseEconomicsField}
+            updateScenarioField={updateScenarioField}
+            updateWaterfallField={updateWaterfallField}
+            updateGovernanceField={updateGovernanceField}
+            addRentRollRow={addRentRollRow}
+            removeRentRollRow={removeRentRollRow}
+            updateRentRollRow={updateRentRollRow}
+            capRateFromEngine={capRateFromEngine}
+            cashOnCashFromEngine={cashOnCashFromEngine}
+            leveredIrr={leveredIrr}
+            unleveredIrr={unleveredIrr}
+            leveredEquityMultiple={leveredEquityMultiple}
+            unleveredEquityMultiple={unleveredEquityMultiple}
+            leveredNpv={leveredNpv}
+            unleveredNpv={unleveredNpv}
+            dscrFromEngine={dscrFromEngine}
+            debtYield={debtYield}
+            yieldOnCost={yieldOnCost}
+            adjustedNoiValue={adjustedNoiValue}
+            egiAmount={egiAmount}
+            annualDebtServiceAmount={annualDebtServiceAmount}
+            exitValueAmount={exitValueAmount}
+            netSaleProceedsAmount={netSaleProceedsAmount}
+            loanBalanceAtExitAmount={loanBalanceAtExitAmount}
+            netEquityOnExitAmount={netEquityOnExitAmount}
+            firstYearDcf={firstYearDcf}
+            holdYearDcf={holdYearDcf}
+            scenarioComparison={scenarioComparison}
+            sensitivityCases={sensitivityCases}
+            governanceDiagnostics={governanceDiagnostics}
+            parseNum={parseNum}
+            saving={saving}
+            savedSignal={savedSignal}
+            handleSave={handleSave}
+            property={property}
+          />
+        )}
+        {false && (
           <div className="space-y-4">
               {/* Core financials */}
               <div className="space-y-3">
