@@ -1491,6 +1491,23 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   const derivedRentToSales = parseNum(tenantGrossSales) > 0 && parseNum(tenantBaseRent) >= 0
     ? (parseNum(tenantBaseRent) / parseNum(tenantGrossSales) * 100)
     : null
+  const firstYearDcf = engineVisibleDcfYears[0] || null
+  const holdYearDcf = engineVisibleDcfYears[engineVisibleDcfYears.length - 1] || null
+  const adjustedNoiValue = firstYearDcf ? (getComputedDcfValue(firstYearDcf, 'netOperatingIncomeDcf') || 0) : null
+  const exitValueAmount = holdYearDcf ? (parseNum(holdYearDcf.grossSaleProceedsDcf) || 0) : null
+  const netSaleProceedsAmount = holdYearDcf ? (parseNum(holdYearDcf.saleProceedsDcf) || 0) : null
+  const loanBalanceAtExitAmount = holdYearDcf ? (parseNum(holdYearDcf.loanPayoffAtSale) || 0) : null
+  const netEquityOnExitAmount = netSaleProceedsAmount
+  const annualDebtServiceAmount = firstYearDcf ? (parseNum(firstYearDcf.debtServiceDcf) || 0) : null
+  const grossRevenueAmount = firstYearDcf ? (parseNum(firstYearDcf.grossRevenue) || 0) : null
+  const egiAmount = firstYearDcf ? (getComputedDcfValue(firstYearDcf, 'effectiveGrossIncome') || 0) : null
+  const capRateFromEngine = adjustedNoiValue !== null && parseNum(price) > 0 ? (adjustedNoiValue / parseNum(price) * 100) : null
+  const cashOnCashFromEngine = adjustedNoiValue !== null && annualDebtServiceAmount !== null && initialEquity > 0
+    ? ((adjustedNoiValue - annualDebtServiceAmount) / initialEquity * 100)
+    : null
+  const dscrFromEngine = adjustedNoiValue !== null && annualDebtServiceAmount > 0
+    ? (adjustedNoiValue / annualDebtServiceAmount)
+    : null
   const financialInputClass = 'input input-bordered input-md w-full md:text-base border-sky-300 bg-sky-50/60 text-sky-900 focus:border-sky-500 focus:outline-none'
   const financialOutputClass = 'input input-bordered input-md w-full md:text-base cursor-default border-slate-300 bg-slate-100 text-slate-900 font-semibold'
   const sectionHeaderClass = 'text-sm font-semibold uppercase tracking-wide pb-2 border-b'
@@ -1509,23 +1526,6 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   const cashOnCashTone = cashOnCashFromEngine !== null
     ? cashOnCashFromEngine >= 8 ? metricTone.good : cashOnCashFromEngine >= 4 ? metricTone.caution : metricTone.danger
     : metricTone.neutral
-  const firstYearDcf = engineVisibleDcfYears[0] || null
-  const holdYearDcf = engineVisibleDcfYears[engineVisibleDcfYears.length - 1] || null
-  const adjustedNoiValue = firstYearDcf ? (getComputedDcfValue(firstYearDcf, 'netOperatingIncomeDcf') || 0) : null
-  const exitValueAmount = holdYearDcf ? (parseNum(holdYearDcf.grossSaleProceedsDcf) || 0) : null
-  const netSaleProceedsAmount = holdYearDcf ? (parseNum(holdYearDcf.saleProceedsDcf) || 0) : null
-  const loanBalanceAtExitAmount = holdYearDcf ? (parseNum(holdYearDcf.loanPayoffAtSale) || 0) : null
-  const netEquityOnExitAmount = netSaleProceedsAmount
-  const annualDebtServiceAmount = firstYearDcf ? (parseNum(firstYearDcf.debtServiceDcf) || 0) : null
-  const grossRevenueAmount = firstYearDcf ? (parseNum(firstYearDcf.grossRevenue) || 0) : null
-  const egiAmount = firstYearDcf ? (getComputedDcfValue(firstYearDcf, 'effectiveGrossIncome') || 0) : null
-  const capRateFromEngine = adjustedNoiValue !== null && parseNum(price) > 0 ? (adjustedNoiValue / parseNum(price) * 100) : null
-  const cashOnCashFromEngine = adjustedNoiValue !== null && annualDebtServiceAmount !== null && initialEquity > 0
-    ? ((adjustedNoiValue - annualDebtServiceAmount) / initialEquity * 100)
-    : null
-  const dscrFromEngine = adjustedNoiValue !== null && annualDebtServiceAmount > 0
-    ? (adjustedNoiValue / annualDebtServiceAmount)
-    : null
   const summarizeScenarioModel = useCallback((scenarioKey, propertyOverrides = {}) => {
     const scenarioProp = buildScenarioProperty(scenarioKey, {}, propertyOverrides)
     const scenarioModel = normalizeDcfModel(scenarioProp.dcf_model, scenarioProp)
