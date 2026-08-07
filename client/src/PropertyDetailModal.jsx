@@ -1313,7 +1313,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
     }))
   }
   const liveDerivedDcfModel = useMemo(
-    () => normalizeDcfModel(buildPropertyFromDraft().dcf_model, buildPropertyFromDraft()),
+    () => buildDefaultDcfModelFromProperty(buildPropertyFromDraft()),
     [
       property,
       price,
