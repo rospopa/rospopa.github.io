@@ -463,7 +463,7 @@ app.post('/api/forgot-password', forgotPasswordLimiter, async (req, res) => {
     );
 
     await resend.emails.send({
-      from: `ROSPOPA <${FROM_EMAIL}>`,
+      from: `ROSPOPA PAVLO <${FROM_EMAIL}>`,
       to: email,
       subject: 'Your password reset code',
       html: `
@@ -1877,4 +1877,3 @@ app.use((err, req, res, next) => {
     process.exit(1);
   }
 })();
-
