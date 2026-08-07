@@ -1,115 +1,278 @@
 require('dotenv').config();
 const express = require('express');
+const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
-const os = require('os');
-const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 const session = require('express-session');
 const bcrypt = require('bcryptjs');
+const https = require('https');
+const { Resend } = require('resend');
+const { rateLimit } = require('express-rate-limit');
 
-const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'users.db');
 const PORT = process.env.PORT || 3000;
+const DATABASE_URL = process.env.DATABASE_URL;
+const RECAPTCHA_API_KEY = process.env.RECAPTCHA_API_KEY;
+const RECAPTCHA_PROJECT_ID = 'rospopa-recaptcha';
+const RECAPTCHA_SITE_KEY = '6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv';
+const RECAPTCHA_MIN_SCORE = 0.5;
+const FROM_EMAIL = 'noreply@rospopa.com';
 
-// If DB_PATH points at a mounted persistent disk and the file doesn't exist there
-// but a local users.db exists in the repository area, copy it once so existing users persist.
-try {
-  const defaultLocal = path.join(__dirname, 'users.db');
-  if (DB_PATH !== defaultLocal && fs.existsSync(defaultLocal) && !fs.existsSync(DB_PATH)) {
-    // copy local DB to persistent path
-    fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
-    fs.copyFileSync(defaultLocal, DB_PATH);
-    console.log(`Copied existing users.db to persistent DB_PATH: ${DB_PATH}`);
-  }
-} catch (e) {
-  console.warn('Could not auto-migrate users.db to DB_PATH:', e && e.message);
+const resend = new Resend(process.env.RESEND_API_KEY);
+
+// In-memory set of currently logged-in user IDs
+const onlineUsers = new Set();
+
+if (!DATABASE_URL) {
+  throw new Error('DATABASE_URL is required');
 }
 
-const db = new sqlite3.Database(DB_PATH);
-
-// Initialize users table with email column and migrate username->email if needed
-db.serialize(() => {
-  // Create table if it doesn't exist with the desired schema (add role column)
-  db.run(`CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    email TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL,
-    role TEXT NOT NULL DEFAULT 'user'
-  )`);
-
-  // Inspect existing columns to detect legacy 'username' column or missing role
-  db.all("PRAGMA table_info(users)", (err, cols) => {
-    if (err) return console.error('PRAGMA failed', err);
-    const hasUsername = cols && cols.some(c => c.name === 'username');
-    const hasEmail = cols && cols.some(c => c.name === 'email');
-    const hasRole = cols && cols.some(c => c.name === 'role');
-
-    const ensureEmailIndex = () => db.run("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email)", () => {});
-
-    if (hasUsername && !hasEmail) {
-      // Add email column and copy values from username
-      db.run("ALTER TABLE users ADD COLUMN email TEXT", function (aerr) {
-        if (aerr) return console.warn('Could not add email column:', aerr.message);
-        db.run("UPDATE users SET email = username WHERE email IS NULL", function (uerr) {
-          if (uerr) console.warn('Could not migrate username to email', uerr.message);
-          ensureEmailIndex();
-        });
-      });
-    } else if (!hasEmail) {
-      // No email column and no username � ensure unique index exists if email present
-      ensureEmailIndex();
-    } else {
-      // Ensure unique index exists
-      ensureEmailIndex();
-    }
-
-    if (!hasRole) {
-      // Add role column with default 'user' for existing rows
-      db.run("ALTER TABLE users ADD COLUMN role TEXT DEFAULT 'user'", function (rerr) {
-        if (rerr) return console.warn('Could not add role column:', rerr.message);
-        db.run("UPDATE users SET role = 'user' WHERE role IS NULL", () => {});
-      });
-    }
-  });
+const pool = new Pool({
+  connectionString: DATABASE_URL,
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 });
 
-// Create audit_logs table for admin action auditing
-db.run(`CREATE TABLE IF NOT EXISTS audit_logs (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  admin_id INTEGER,
-  action TEXT,
-  target_user_id INTEGER,
-  target_email TEXT,
-  details TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)`);
+async function initializeSchema() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'user',
+    first_name TEXT,
+    last_name TEXT,
+    organization TEXT,
+    phone_number TEXT,
+    buy_box TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
 
-// Create properties table
-db.run(`CREATE TABLE IF NOT EXISTS properties (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  pin TEXT NOT NULL,
-  address TEXT NOT NULL,
-  county TEXT NOT NULL,
-  created_by INTEGER,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
-)`);
+  // Migrate existing users table to add timestamp columns if missing
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS login_count INTEGER NOT NULL DEFAULT 0`);
+  // Backfill last_login from audit_logs for users who logged in before column existed
+  await pool.query(`
+    UPDATE users u SET last_login = sub.last_login
+    FROM (
+      SELECT target_user_id AS uid, MAX(created_at) AS last_login
+      FROM audit_logs WHERE action = 'login' AND target_user_id IS NOT NULL
+      GROUP BY target_user_id
+    ) sub
+    WHERE u.id = sub.uid AND (u.last_login IS NULL OR sub.last_login > u.last_login)
+  `).catch(() => {});
+  // Also backfill using acted_by / admin_id when target_user_id is null (self-login rows)
+  await pool.query(`
+    UPDATE users u SET last_login = sub.last_login
+    FROM (
+      SELECT admin_id AS uid, MAX(created_at) AS last_login
+      FROM audit_logs WHERE action = 'login' AND admin_id IS NOT NULL
+      GROUP BY admin_id
+    ) sub
+    WHERE u.id = sub.uid AND (u.last_login IS NULL OR sub.last_login > u.last_login)
+  `).catch(() => {});
 
-// Create property_assignments table (link properties to users)
-db.run(`CREATE TABLE IF NOT EXISTS property_assignments (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  property_id INTEGER NOT NULL,
-  user_id INTEGER NOT NULL,
-  assigned_by INTEGER,
-  assigned_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (property_id) REFERENCES properties(id) ON DELETE CASCADE,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  UNIQUE(property_id, user_id)
-)`);
+  await pool.query(`CREATE TABLE IF NOT EXISTS audit_logs (
+    id SERIAL PRIMARY KEY,
+    admin_id INTEGER,
+    acted_by_email TEXT,
+    action TEXT,
+    target_user_id INTEGER,
+    target_email TEXT,
+    details TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+  await pool.query(`ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS acted_by_email TEXT`);
+  await pool.query(`ALTER TABLE audit_logs ADD COLUMN IF NOT EXISTS ip_address TEXT`);
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS properties (
+    id SERIAL PRIMARY KEY,
+    pin TEXT NOT NULL,
+    address TEXT NOT NULL,
+    county TEXT NOT NULL,
+    created_by INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  // New property fields (added incrementally so existing data is preserved)
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS price NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS square_feet NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS lot_size NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS year_built INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS on_major_road BOOLEAN DEFAULT FALSE`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS traffic_vpd INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS on_corner_lot BOOLEAN DEFAULT FALSE`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS direct_water_access BOOLEAN DEFAULT FALSE`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS next_to_public_land BOOLEAN DEFAULT FALSE`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS major_interstates JSONB DEFAULT '[]'`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS household_income_min INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS household_income_max INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS population_density NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS logistics_hubs JSONB DEFAULT '[]'`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS landmarks JSONB DEFAULT '[]'`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS water_sources JSONB DEFAULT '[]'`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS military_bases JSONB DEFAULT '[]'`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'New'`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS grm NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS cap_rate NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS cash_on_cash NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS irr NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS price_per_unit NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS price_per_sqft NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS rent_to_sales_ratio NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS num_skus INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS price_per_acre NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS electrical_voltage INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS electrical_amperage INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS asset_type TEXT`);
+  // Income block
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS gross_scheduled_rent NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS vacancy_rate NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS other_income NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS operating_expenses NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS reserves_capex NUMERIC`);
+  // Debt block
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS loan_amount NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS ltv NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS interest_rate NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS amortization_term INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS interest_only_period INTEGER`);
+  // Deal block
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS unit_count INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS closing_costs NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS hold_period INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS rent_growth NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS expense_growth NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS exit_cap_rate NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS cost_of_sale NUMERIC`);
+  // Tenant block
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS tenant_gross_sales NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS tenant_base_rent NUMERIC`);
+  // Operating block
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS management_fee_pct NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS insurance NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS property_taxes NUMERIC`);
+  // Tax / Cost Segregation block
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS land_value_pct NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS cost_seg_bonus_pct NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS effective_tax_rate NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS depreciation_recapture_rate NUMERIC`);
+  // Debt / Refinance block
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS refi_ltv NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS refi_rate NUMERIC`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS refi_year INTEGER`);
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS property_assignments (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    assigned_by INTEGER,
+    assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(property_id, user_id)
+  )`);
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS property_media (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    media_type TEXT NOT NULL,
+    file_path TEXT NOT NULL,
+    uploaded_by INTEGER,
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS property_documents (
+    id SERIAL PRIMARY KEY,
+    property_id INTEGER NOT NULL REFERENCES properties(id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    file_type TEXT NOT NULL,
+    file_data TEXT NOT NULL,
+    uploaded_by INTEGER REFERENCES users(id),
+    uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS password_reset_otps (
+    id SERIAL PRIMARY KEY,
+    email TEXT NOT NULL,
+    code TEXT NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    used BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS contact_notes (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    admin_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    note_text TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  await pool.query(`CREATE TABLE IF NOT EXISTS contact_attachments (
+    id SERIAL PRIMARY KEY,
+    note_id INTEGER NOT NULL REFERENCES contact_notes(id) ON DELETE CASCADE,
+    filename TEXT NOT NULL,
+    file_type TEXT NOT NULL,
+    file_data TEXT NOT NULL,
+    file_size INTEGER,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+
+  // Drop and recreate session table with correct schema for connect-pg-simple v8
+  await pool.query(`DROP TABLE IF EXISTS "session"`);
+  await pool.query(`CREATE TABLE "session" (
+    sid VARCHAR NOT NULL COLLATE "default" PRIMARY KEY,
+    sess JSONB NOT NULL,
+    expire TIMESTAMP(6) NOT NULL
+  )`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire")`);
+}
 
 const app = express();
-app.use(express.json());
 
-// Input validation helpers
+// Origin-guard: verifies requests arrived via the Cloudflare zone,
+// which injects x-origin-key through a Transform Rule.
+const _originKey = process.env.ORIGIN_KEY || '';
+const _healthPath = process.env.HEALTH_PATH || '/healthz';
+if (!_originKey) {
+  console.warn('[origin-guard] WARNING: ORIGIN_KEY is not set — all non-health requests will be rejected with 403');
+}
+app.use((req, res, next) => {
+  if (req.path === _healthPath) return next();
+  if (!_originKey) return res.status(403).send('Forbidden');
+  const incoming = req.headers['x-origin-key'] || '';
+  const a = Buffer.from(incoming);
+  const b = Buffer.from(_originKey);
+  if (a.length !== b.length) return res.status(403).send('Forbidden');
+  if (!crypto.timingSafeEqual(a, b)) return res.status(403).send('Forbidden');
+  next();
+});
+
+app.use(express.json({ limit: '60mb' }));
+app.use(express.urlencoded({ limit: '60mb', extended: true }));
+
+app.set('trust proxy', 1);
+
+// Rate limiters
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 5,                    // max 5 requests per IP per hour
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many password reset attempts. Please try again in an hour.' }
+});
+
+const resetPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10,                   // max 10 code attempts per IP per hour
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: 'Too many reset attempts. Please try again in an hour.' }
+});
+
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 function isValidEmail(email) {
   return typeof email === 'string' && EMAIL_REGEX.test(email);
@@ -121,486 +284,1533 @@ function isValidPassword(pw) {
   return typeof pw === 'string' && pw.length >= 8 && pw.length <= 128;
 }
 
-// Session store selection: prefer Postgres, then disk-backed file store (SESSION_DIR), then MemoryStore.
-let sessionStore;
-let sessionStoreType = 'unknown'; // 'postgres' | 'file' | 'memory' | 'unknown'
-if (process.env.DATABASE_URL) {
+let sessionStoreType = 'unknown';
+
+/** Fire-and-forget audit log helper */
+async function logAudit(actorId, actorEmail, action, details = {}, targetUserId = null, targetEmail = null, ip = null) {
   try {
-    const { Pool } = require('pg');
-    const PgSession = require('connect-pg-simple')(session);
-    const pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false });
-    // Ensure session table exists (idempotent) but do not block session store creation
-    pool.query(`CREATE TABLE IF NOT EXISTS "session" (sid VARCHAR PRIMARY KEY, sess JSON NOT NULL, expire TIMESTAMP NOT NULL)`).catch(e => console.warn('Could not ensure session table exists:', e && e.message));
-    sessionStore = new PgSession({ pool });
-    sessionStoreType = 'postgres';
-    console.log('Using Postgres-backed session store')
+    await pool.query(
+      `INSERT INTO audit_logs (admin_id, acted_by_email, action, target_user_id, target_email, details, ip_address)
+       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+      [actorId, actorEmail, action, targetUserId, targetEmail, JSON.stringify(details), ip]
+    );
   } catch (e) {
-    console.warn('Postgres session store setup failed:', e && e.message);
+    console.warn('Audit log failed:', e.message);
   }
 }
 
-// If no DATABASE_URL or Postgres setup failed, attempt disk-backed session store using SESSION_DIR
-if (!sessionStore && process.env.SESSION_DIR) {
-  try {
-    const FileStore = require('session-file-store')(session);
-    let sessionsDir = process.env.SESSION_DIR;
+/** Extract real client IP, respecting X-Forwarded-For from Render's proxy */
+function clientIp(req) {
+  const fwd = req.headers['x-forwarded-for'];
+  if (fwd) return fwd.split(',')[0].trim();
+  return req.socket?.remoteAddress || null;
+}
 
-    // Ensure the directory exists and is writable. If not, fall back to a temp dir.
-    try {
-      fs.mkdirSync(sessionsDir, { recursive: true });
-    } catch (e) {
-      console.warn('Could not create SESSION_DIR', sessionsDir, e && e.message);
-      sessionsDir = null;
-    }
+/** Verify a reCAPTCHA Enterprise token. Returns { ok, score, reason } */
+async function verifyRecaptcha(token, action) {
+  if (!RECAPTCHA_API_KEY) return { ok: true, score: 1, reason: 'no_api_key_configured' };
+  if (!token) return { ok: true, score: 1, reason: 'no_token_skipped' }; // fail-open if script not loaded
+  return new Promise((resolve) => {
+    const body = JSON.stringify({
+      event: { token, expectedAction: action, siteKey: RECAPTCHA_SITE_KEY }
+    });
+    const url = `https://recaptchaenterprise.googleapis.com/v1/projects/${RECAPTCHA_PROJECT_ID}/assessments?key=${RECAPTCHA_API_KEY}`;
+    const req = https.request(url, { method: 'POST', headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(body) } }, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => {
+        try {
+          const parsed = JSON.parse(data);
+          const score = parsed?.riskAnalysis?.score ?? parsed?.score ?? 0;
+          const valid = parsed?.tokenProperties?.valid ?? false;
+          const actionMatch = !parsed?.tokenProperties?.action || parsed.tokenProperties.action === action;
+          if (!valid) return resolve({ ok: false, score, reason: 'invalid_token' });
+          if (!actionMatch) return resolve({ ok: false, score, reason: 'action_mismatch' });
+          resolve({ ok: score >= RECAPTCHA_MIN_SCORE, score, reason: score < RECAPTCHA_MIN_SCORE ? 'low_score' : 'pass' });
+        } catch { resolve({ ok: false, score: 0, reason: 'parse_error' }); }
+      });
+    });
+    req.on('error', () => resolve({ ok: false, score: 0, reason: 'network_error' }));
+    req.write(body);
+    req.end();
+  });
+}
 
-    if (sessionsDir) {
+// Session middleware is initialized async (after DB schema ready) via a proxy
+// When multiple connect.sid cookies exist (stale + new), keep only the last one
+// MUST be registered before the session middleware placeholder
+app.use((req, res, next) => {
+  const cookieHeader = req.headers.cookie || '';
+  const matches = [...cookieHeader.matchAll(/connect\.sid=([^;]+)/g)];
+  if (matches.length > 1) {
+    const last = matches[matches.length - 1][1];
+    const otherCookies = cookieHeader
+      .split(';')
+      .filter(c => !c.trim().startsWith('connect.sid'))
+      .join('; ');
+    req.headers.cookie = (otherCookies ? otherCookies + '; ' : '') + `connect.sid=${last}`;
+  }
+  next();
+});
+
+let _sessionMiddleware = (req, res, next) => next(); // placeholder until ready
+app.use((req, res, next) => _sessionMiddleware(req, res, next));
+
+async function initializeSessionMiddleware() {
+  // Minimal custom Postgres session store — avoids connect-pg-simple compatibility issues
+  const Store = require('express-session').Store;
+  class PgStore extends Store {
+    async get(sid, cb) {
       try {
-        fs.accessSync(sessionsDir, fs.constants.R_OK | fs.constants.W_OK);
-      } catch (e) {
-        console.warn('SESSION_DIR not writable, falling back to tmpdir:', sessionsDir, e && e.message);
-        sessionsDir = null;
-      }
+        const r = await pool.query('SELECT sess FROM session WHERE sid=$1 AND expire > NOW()', [sid]);
+        cb(null, r.rows.length ? r.rows[0].sess : null);
+      } catch(e) { console.error('Session get error:', e.message); cb(e); }
     }
-
-    if (!sessionsDir) {
-      // Create a dedicated temp sessions directory to avoid ENOENT noise
-      sessionsDir = fs.mkdtempSync(path.join(os.tmpdir(), 'sessions-'));
-      console.log('Using temporary sessions dir:', sessionsDir);
+    async set(sid, sess, cb) {
+      try {
+        const exp = new Date(Date.now() + (sess.cookie?.maxAge || 7*24*60*60*1000));
+        await pool.query(`
+          INSERT INTO session(sid, sess, expire) VALUES($1,$2,$3)
+          ON CONFLICT(sid) DO UPDATE SET sess=$2, expire=$3
+        `, [sid, JSON.stringify(sess), exp]);
+        cb(null);
+      } catch(e) { console.error('Session set error:', e.message); cb(e); }
     }
-
-    sessionStore = new FileStore({ path: sessionsDir, ttl: 86400 });
-    sessionStoreType = 'file';
-
-    // Log current directory contents for easier debugging on startup
-    try {
-      const files = fs.readdirSync(sessionsDir).slice(0, 20);
-      console.log('Session store directory contents:', sessionsDir, files.length ? files : '(empty)');
-    } catch (e) {
-      console.warn('Could not read SESSION_DIR contents:', e && e.message);
+    async destroy(sid, cb) {
+      try {
+        await pool.query('DELETE FROM session WHERE sid=$1', [sid]);
+        cb(null);
+      } catch(e) { cb(e); }
     }
-
-    console.log('Using disk-backed session-file-store at', sessionsDir);
-  } catch (e) {
-    console.warn('session-file-store setup failed:', e && e.message);
+    async touch(sid, sess, cb) {
+      try {
+        const exp = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+        await pool.query('UPDATE session SET expire=$2 WHERE sid=$1', [sid, exp]);
+        cb(null);
+      } catch(e) { cb(e); }
+    }
   }
+
+  const sessionStore = new PgStore();
+  sessionStoreType = 'postgres-custom';
+  console.log('Using custom Postgres session store');
+
+  const cookieOptions = {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 days
+  };
+
+  _sessionMiddleware = session({
+    store: sessionStore,
+    secret: process.env.SESSION_SECRET || 'change-this-secret',
+    resave: false,
+    saveUninitialized: false,
+    rolling: true,
+    proxy: true,
+    cookie: cookieOptions
+  });
 }
 
-// Final fallback to MemoryStore (not for production)
-if (!sessionStore) {
-  console.warn('No persistent session store configured � using MemoryStore (not for production)');
-  sessionStore = new session.MemoryStore();
-  sessionStoreType = 'memory';
-}
+app.post('/api/register', (req, res) => {
+  res.status(403).json({ error: 'Registration is disabled. Contact your administrator.' })
+});
 
-// Trust reverse proxy (Render) so secure cookies and req.protocol work correctly
-app.set('trust proxy', 1);
+/** Public endpoint — returns first_name, last_name, profile_photo for a given email.
+ *  Used to personalise the login screen. Never returns sensitive data. */
+app.post('/api/lookup-user', async (req, res) => {
+  let { email } = req.body || {};
+  email = sanitizeEmail(email);
+  if (!email) return res.json({ found: false });
+  try {
+    const result = await pool.query(
+      'SELECT first_name, last_name, profile_photo, login_count FROM users WHERE email = $1',
+      [email]
+    );
+    if (result.rows.length === 0) return res.json({ found: false });
+    const { first_name, last_name, profile_photo, login_count } = result.rows[0];
+    res.json({ found: true, first_name, last_name, profile_photo, login_count: login_count || 0 });
+  } catch { res.json({ found: false }); }
+});
 
-const cookieOptions = {
-  httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
-  sameSite: 'lax',
-  domain: process.env.COOKIE_DOMAIN || '.rospopa.com'
-};
+/** Send a 6-digit OTP to the user's email for password reset */
+app.post('/api/forgot-password', forgotPasswordLimiter, async (req, res) => {
+  let { email, recaptchaToken } = req.body || {};
+  email = sanitizeEmail(email);
+  if (!email || !isValidEmail(email)) return res.status(400).json({ error: 'valid email required' });
 
-app.use(session({
-  store: sessionStore,
-  secret: process.env.SESSION_SECRET || 'change-this-secret',
-  resave: false,
-  saveUninitialized: false,
-  cookie: cookieOptions
-}));
+  const captcha = await verifyRecaptcha(recaptchaToken, 'FORGOT_PASSWORD');
+  if (!captcha.ok) {
+    logAudit(null, email, 'recaptcha_failed', { action: 'FORGOT_PASSWORD', reason: captcha.reason, score: captcha.score }, null, email, clientIp(req));
+    return res.status(403).json({ error: 'Security check failed. Please try again.' });
+  }
 
-// Register
-app.post('/api/register', async (req, res) => {
-  let { email, password } = req.body || {};
+  try {
+    const userResult = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+    if (userResult.rows.length === 0) return res.status(404).json({ error: 'No account found with that email address.' });
+
+    // Invalidate old codes for this email
+    await pool.query('UPDATE password_reset_otps SET used = TRUE WHERE email = $1', [email]);
+
+    // Generate 6-digit code, hash it before storing
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const codeHash = await bcrypt.hash(code, 10);
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 min
+    await pool.query(
+      'INSERT INTO password_reset_otps (email, code, expires_at) VALUES ($1, $2, $3)',
+      [email, codeHash, expiresAt]
+    );
+
+    await resend.emails.send({
+      from: `ROSPOPA <${FROM_EMAIL}>`,
+      to: email,
+      subject: 'Your password reset code',
+      html: `
+        <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px">
+          <h2 style="margin-bottom:8px">Password Reset</h2>
+          <p style="color:#555">Enter this code in the portal to reset your password. It expires in <strong>15 minutes</strong>.</p>
+          <div style="font-size:40px;font-weight:800;letter-spacing:12px;text-align:center;padding:24px;background:#f4f4f4;border-radius:8px;margin:24px 0">${code}</div>
+          <p style="color:#999;font-size:12px">If you didn't request this, ignore this email. Your password won't change.</p>
+        </div>
+      `
+    });
+
+    logAudit(null, email, 'forgot_password', { email }, null, email, clientIp(req));
+  } catch (e) {
+    console.error('forgot-password error:', e.message);
+  }
+  res.json({ ok: true });
+});
+
+/** Verify OTP + set new password */
+app.post('/api/reset-password', resetPasswordLimiter, async (req, res) => {
+  let { email, code, newPassword } = req.body || {};
+  email = sanitizeEmail(email);
+  if (!email || !code || !newPassword) return res.status(400).json({ error: 'email, code and newPassword required' });
+  if (!isValidPassword(newPassword)) return res.status(400).json({ error: 'password must be 8-128 characters' });
+
+  try {
+    // Fetch the most recent unused, unexpired OTP for this email
+    const otpResult = await pool.query(
+      `SELECT id, code FROM password_reset_otps
+       WHERE email = $1 AND used = FALSE AND expires_at > NOW()
+       ORDER BY created_at DESC LIMIT 1`,
+      [email]
+    );
+    if (otpResult.rows.length === 0) return res.status(400).json({ error: 'Invalid or expired code' });
+
+    // Compare submitted code against the stored hash
+    const match = await bcrypt.compare(code.trim(), otpResult.rows[0].code);
+    if (!match) return res.status(400).json({ error: 'Invalid or expired code' });
+
+    // Mark used
+    await pool.query('UPDATE password_reset_otps SET used = TRUE WHERE id = $1', [otpResult.rows[0].id]);
+
+    const hashed = await bcrypt.hash(newPassword, 10);
+    const upd = await pool.query('UPDATE users SET password = $1, updated_at = NOW() WHERE email = $2 RETURNING id', [hashed, email]);
+    if (upd.rowCount === 0) return res.status(404).json({ error: 'User not found' });
+
+    logAudit(upd.rows[0].id, email, 'password_reset', {}, null, email, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    console.error('reset-password error:', e.message);
+    res.status(500).json({ error: 'Server error' });
+  }
+});
+
+app.post('/api/login', async (req, res) => {
+  let { email, password, recaptchaToken } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
-  if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
+
+  const captcha = await verifyRecaptcha(recaptchaToken, 'LOGIN');
+  if (!captcha.ok) {
+    logAudit(null, email, 'recaptcha_failed', { action: 'LOGIN', reason: captcha.reason, score: captcha.score, ip: clientIp(req) }, null, email, clientIp(req));
+    return res.status(403).json({ error: 'Security check failed. Please try again.' });
+  }
+
   try {
-    const hashed = await bcrypt.hash(password, 10);
-    db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [email, hashed, 'user'], function(err) {
+    const result = await pool.query(
+      'SELECT id, email, password, role, first_name, last_name, organization, phone_number, buy_box, profile_photo FROM users WHERE email = $1',
+      [email]
+    );
+    if (result.rows.length === 0) {
+      logAudit(null, email, 'login_failed', { reason: 'user not found', ip: clientIp(req) }, null, email, clientIp(req));
+      return res.status(401).json({ error: 'invalid credentials' });
+    }
+    const row = result.rows[0];
+    const ok = await bcrypt.compare(password, row.password);
+    if (!ok) {
+      logAudit(row.id, row.email, 'login_failed', { reason: 'wrong password', ip: clientIp(req) }, null, row.email, clientIp(req));
+      return res.status(401).json({ error: 'invalid credentials' });
+    }
+    // Note: profile_photo intentionally excluded from session to keep session size small
+    const userObj = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
+    req.session.user = userObj;
+    req.session.save(err => {
       if (err) {
-        if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
-        return res.status(500).json({ error: 'db error' });
+        console.error('Session save error on login:', err);
+        return res.status(500).json({ error: 'session save failed' });
       }
-      req.session.user = { id: this.lastID, email: email, role: 'user' };
-      res.json({ id: this.lastID, email: email, role: 'user' });
+      console.log('Session saved ok, sid:', req.session.id);
+      onlineUsers.add(row.id);
+      pool.query('UPDATE users SET last_login = NOW(), login_count = COALESCE(login_count, 0) + 1 WHERE id = $1', [row.id]).catch(() => {});
+      logAudit(row.id, row.email, 'login', { ip: clientIp(req) }, null, null, clientIp(req));
+      res.json({ user: { ...userObj, login_count: (row.login_count || 0) + 1 } });
     });
   } catch (e) {
-    res.status(500).json({ error: 'server error' });
+    res.status(500).json({ error: 'db error' });
   }
 });
 
-// Login
-app.post('/api/login', (req, res) => {
-  let { email, password } = req.body || {};
-  email = sanitizeEmail(email);
-  if (!email || !password) return res.status(400).json({ error: 'email and password required' });
-  if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
-  db.get('SELECT id, email, password, role FROM users WHERE email = ?', [email], async (err, row) => {
-    if (err) return res.status(500).json({ error: 'db error' });
-    if (!row) return res.status(401).json({ error: 'invalid credentials' });
-    const ok = await bcrypt.compare(password, row.password);
-    if (!ok) return res.status(401).json({ error: 'invalid credentials' });
-    req.session.user = { id: row.id, email: row.email, role: row.role || 'user' };
-    res.json({ id: row.id, email: row.email, role: row.role || 'user' });
-  });
-});
-
-// Logout
-app.post('/api/logout', (req, res) => {
+app.post('/api/logout', async (req, res) => {
+  const user = req.session.user;
+  const ip = clientIp(req);
   req.session.destroy(err => {
     if (err) return res.status(500).json({ error: 'logout failed' });
+    if (user) { onlineUsers.delete(user.id); logAudit(user.id, user.email, 'logout', { ip }, null, null, ip); }
     res.json({ ok: true });
   });
 });
 
-// Current user
-app.get('/api/me', (req, res) => {
+app.get('/api/me', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ user: null });
-  res.json({ user: req.session.user });
+  onlineUsers.add(req.session.user.id); // re-sync after server restart
+  try {
+    const r = await pool.query('SELECT profile_photo, login_count FROM users WHERE id=$1', [req.session.user.id]);
+    const extra = r.rows.length ? { profile_photo: r.rows[0].profile_photo, login_count: r.rows[0].login_count } : {};
+    res.json({ user: { ...req.session.user, ...extra } });
+  } catch {
+    res.json({ user: req.session.user });
+  }
 });
 
-// Admin-only: list users with search & pagination
-app.get('/api/users', (req, res) => {
+app.get('/api/online-status', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  try {
+    const result = await pool.query(`SELECT id, last_login FROM users ORDER BY id`);
+    const lastLogin = {};
+    result.rows.forEach(r => { lastLogin[r.id] = r.last_login; });
+    res.json({ online: [...onlineUsers], lastLogin });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.get('/api/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const q = (req.query.q || '').trim().toLowerCase();
   const limit = Math.min(100, parseInt(req.query.limit || '10', 10) || 10);
   const offset = Math.max(0, parseInt(req.query.offset || '0', 10) || 0);
 
-  const where = q ? 'WHERE LOWER(email) LIKE ?' : '';
-  const params = q ? [`%${q}%`] : [];
-
-  db.get(`SELECT COUNT(*) as total FROM users ${where}`, params, (cerr, countRow) => {
-    if (cerr) return res.status(500).json({ error: 'db error' });
-    db.all(`SELECT id, email, role FROM users ${where} ORDER BY id DESC LIMIT ? OFFSET ?`, params.concat([limit, offset]), (err, rows) => {
-      if (err) return res.status(500).json({ error: 'db error' });
-      res.json({ users: rows, total: countRow.total });
-    });
-  });
+  try {
+    const countParams = [];
+    const listParams = [];
+    let where = '';
+    if (q) {
+      where = 'WHERE LOWER(email) LIKE $1';
+      countParams.push(`%${q}%`);
+      listParams.push(`%${q}%`);
+    }
+    listParams.push(limit, offset);
+    const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM users ${where}`, countParams);
+    const listResult = await pool.query(
+      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at, last_login FROM users ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      listParams
+    );
+    res.json({ users: listResult.rows, total: countResult.rows[0].total });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin-only: change role
-app.post('/api/users/:id/role', (req, res) => {
+app.post('/api/users/:id/role', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const adminId = req.session.user.id;
   const id = Number(req.params.id);
   if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
   const { role } = req.body || {};
   if (!['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
-  // Prevent admin from demoting/removing their own admin role accidentally
   if (adminId === id && role !== 'admin') return res.status(400).json({ error: 'cannot change own role' });
 
-  // Fetch existing user to log details
-  db.get('SELECT id, email, role FROM users WHERE id = ?', [id], (gerr, row) => {
-    if (gerr) return res.status(500).json({ error: 'db error' });
-    if (!row) return res.status(404).json({ error: 'not found' });
+  try {
+    const existingResult = await pool.query('SELECT id, email, role FROM users WHERE id = $1', [id]);
+    if (existingResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const row = existingResult.rows[0];
     const oldRole = row.role || 'user';
-    db.run('UPDATE users SET role = ? WHERE id = ?', [role, id], function (err) {
-      if (err) return res.status(500).json({ error: 'db error' });
-      // Log audit
-      try {
-        const details = JSON.stringify({ from: oldRole, to: role });
-        db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [adminId, `role_change`, id, row.email, details]);
-      } catch (e) { console.warn('Audit log failed', e && e.message); }
-      res.json({ ok: true });
-    });
-  });
+    await pool.query('UPDATE users SET role = $1 WHERE id = $2', [role, id]);
+    await logAudit(adminId, req.session.user.email, 'role_change', { from: oldRole, to: role }, id, row.email, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin-only: create user
 app.post('/api/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  let { email, password, role } = req.body || {};
+  let { email, password, role, first_name, last_name, organization, phone_number, buy_box, profile_photo } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
   if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
   if (role && !['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
+  if (!profile_photo) return res.status(400).json({ error: 'profile photo is required' });
+
   try {
     const hashed = await bcrypt.hash(password, 10);
-    db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [email, hashed, (role || 'user')], function (err) {
-      if (err) {
-        if (err.message && err.message.includes('UNIQUE')) return res.status(409).json({ error: 'email exists' });
-        return res.status(500).json({ error: 'db error' });
-      }
-      // Log audit
-      try {
-        const details = JSON.stringify({ created: true, role: role || 'user' });
-        db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [req.session.user.id, `create_user`, this.lastID, email, details]);
-      } catch (e) { console.warn('Audit log failed', e && e.message); }
-      res.json({ id: this.lastID, email: email, role: role || 'user' });
-    });
+    const result = await pool.query(
+      'INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box, profile_photo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id',
+      [email, hashed, role || 'user', first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null, profile_photo]
+    );
+    const id = result.rows[0].id;
+    await logAudit(req.session.user.id, req.session.user.email, 'create_user', { role: role || 'user' }, id, email, clientIp(req));
+    res.json({ id, email, role: role || 'user', first_name, last_name, organization, phone_number, buy_box });
   } catch (e) {
+    if (e.code === '23505') return res.status(409).json({ error: 'email exists' });
     res.status(500).json({ error: 'server error' });
   }
 });
 
-// Admin-only: delete user
-app.delete('/api/users/:id', (req, res) => {
+app.put('/api/users/:id', async (req, res) => {
+  const userId = req.session.user ? req.session.user.id : null;
+  const userRole = req.session.user ? req.session.user.role : null;
+
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+
+  const id = Number(req.params.id);
+  if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
+  if (userRole !== 'admin' && userId !== id) return res.status(403).json({ error: 'forbidden' });
+
+  const { first_name, last_name, organization, phone_number, buy_box, profile_photo, role } = req.body || {};
+  const updates = [];
+  const values = [];
+
+  if (first_name !== undefined) { updates.push(`first_name = $${updates.length + 1}`); values.push(first_name || null); }
+  if (last_name !== undefined) { updates.push(`last_name = $${updates.length + 1}`); values.push(last_name || null); }
+  if (organization !== undefined) { updates.push(`organization = $${updates.length + 1}`); values.push(organization || null); }
+  if (phone_number !== undefined) { updates.push(`phone_number = $${updates.length + 1}`); values.push(phone_number || null); }
+  if (buy_box !== undefined) { updates.push(`buy_box = $${updates.length + 1}`); values.push(buy_box || null); }
+  if (profile_photo !== undefined) { updates.push(`profile_photo = $${updates.length + 1}`); values.push(profile_photo || null); }
+  if (role !== undefined && userRole === 'admin') {
+    const validRoles = ['user', 'admin'];
+    if (!validRoles.includes(role)) return res.status(400).json({ error: 'invalid role' });
+    updates.push(`role = $${updates.length + 1}`); values.push(role);
+  }
+
+  if (updates.length === 0) {
+    return res.status(400).json({ error: 'no fields to update' });
+  }
+
+  updates.push(`updated_at = CURRENT_TIMESTAMP`);
+  values.push(id);
+
+  try {
+    // Fetch current values before update for before/after diff
+    const preResult = await pool.query('SELECT first_name,last_name,organization,phone_number,buy_box,role,email FROM users WHERE id=$1', [id]);
+    if (preResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const pre = preResult.rows[0];
+
+    const updateResult = await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${values.length}`, values);
+    if (updateResult.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    const userResult = await pool.query('SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at FROM users WHERE id = $1', [id]);
+    if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const row = userResult.rows[0];
+    // Build before/after diff for loggable fields
+    const trackFields = ['first_name','last_name','organization','phone_number','buy_box','role'];
+    const changes = {};
+    for (const f of trackFields) {
+      if (req.body[f] !== undefined && String(req.body[f] ?? '') !== String(pre[f] ?? '')) {
+        changes[f] = { from: pre[f] ?? null, to: row[f] ?? null };
+      }
+    }
+    const changedFields = Object.keys(changes);
+    await logAudit(userId, req.session.user.email, 'edit_user', { changed_fields: changedFields, changes: Object.keys(changes).length ? changes : undefined }, id, row.email, clientIp(req));
+    if (userId === id) {
+      req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
+    }
+    res.json(row);
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.delete('/api/users/:id', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const adminId = req.session.user.id;
   const id = Number(req.params.id);
-  // Prevent admin from deleting themselves
   if (adminId === id) return res.status(400).json({ error: 'cannot delete self' });
 
-  db.get('SELECT id, email FROM users WHERE id = ?', [id], (gerr, row) => {
-    if (gerr) return res.status(500).json({ error: 'db error' });
-    if (!row) return res.status(404).json({ error: 'not found' });
-    db.run('DELETE FROM users WHERE id = ?', [id], function (err) {
-      if (err) return res.status(500).json({ error: 'db error' });
-      // Log audit
-      try {
-        const details = JSON.stringify({ deleted: true });
-        db.run('INSERT INTO audit_logs (admin_id, action, target_user_id, target_email, details) VALUES (?, ?, ?, ?, ?)', [adminId, `delete_user`, id, row.email, details]);
-      } catch (e) { console.warn('Audit log failed', e && e.message); }
-      res.json({ ok: true });
-    });
-  });
+  try {
+    const existingResult = await pool.query('SELECT id, email FROM users WHERE id = $1', [id]);
+    if (existingResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const row = existingResult.rows[0];
+    await pool.query('DELETE FROM users WHERE id = $1', [id]);
+    await logAudit(adminId, req.session.user.email, 'delete_user', {}, id, row.email, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Audit logs viewer
-app.get('/api/audit-logs', (req, res) => {
+/* ─── Contacts API ──────────────────────────────────────────────── */
+
+app.get('/api/contacts', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  try {
+    const result = await pool.query(`
+      SELECT u.id, u.email, u.role, u.first_name, u.last_name, u.organization, u.phone_number,
+             u.buy_box, u.profile_photo, u.created_at, u.updated_at, u.last_login,
+             COUNT(cn.id)::int AS note_count,
+             MAX(cn.created_at) AS last_note_at
+      FROM users u
+      LEFT JOIN contact_notes cn ON cn.user_id = u.id
+      GROUP BY u.id
+      ORDER BY u.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.get('/api/contacts/:id', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const userId = Number(req.params.id);
+  if (!Number.isFinite(userId)) return res.status(400).json({ error: 'invalid id' });
+  try {
+    const userResult = await pool.query(
+      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, profile_photo, created_at, updated_at, last_login FROM users WHERE id = $1`,
+      [userId]
+    );
+    if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const user = userResult.rows[0];
+
+    // Assigned properties
+    const propsResult = await pool.query(
+      `SELECT p.id, p.pin, p.address, p.county, p.price, p.square_feet, p.status, p.created_at, pa.assigned_at
+       FROM properties p
+       JOIN property_assignments pa ON p.id = pa.property_id
+       WHERE pa.user_id = $1
+       ORDER BY pa.assigned_at DESC`,
+      [userId]
+    );
+
+    res.json({ user, properties: propsResult.rows });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.patch('/api/contacts/:id/buybox', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const userId = Number(req.params.id);
+  if (!Number.isFinite(userId)) return res.status(400).json({ error: 'invalid id' });
+  const { buy_box } = req.body || {};
+  try {
+    await pool.query('UPDATE users SET buy_box=$1, updated_at=CURRENT_TIMESTAMP WHERE id=$2', [buy_box || null, userId]);
+    await logAudit(req.session.user.id, req.session.user.email, 'edit_user', { changed_fields: ['buy_box'] }, userId, null, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.get('/api/contacts/:id/notes', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const userId = Number(req.params.id);
+  try {
+    const notes = await pool.query(
+      `SELECT id, user_id, admin_id, note_text, created_at FROM contact_notes WHERE user_id = $1 ORDER BY created_at DESC`,
+      [userId]
+    );
+    const noteIds = notes.rows.map(n => n.id);
+    let attachments = [];
+    if (noteIds.length > 0) {
+      const attResult = await pool.query(
+        `SELECT id, note_id, filename, file_type, file_size, created_at FROM contact_attachments WHERE note_id = ANY($1)`,
+        [noteIds]
+      );
+      attachments = attResult.rows;
+    }
+    const rows = notes.rows.map(n => ({
+      ...n,
+      attachments: attachments.filter(a => a.note_id === n.id)
+    }));
+    res.json(rows);
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.post('/api/contacts/:id/notes', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const userId = Number(req.params.id);
+  const adminId = req.session.user.id;
+  const { note_text, attachments = [] } = req.body;
+  try {
+    // Fetch contact name for audit log
+    const contactResult = await pool.query('SELECT first_name, last_name, email FROM users WHERE id=$1', [userId]);
+    const contact = contactResult.rows[0] || {};
+    const contactName = [contact.first_name, contact.last_name].filter(Boolean).join(' ') || contact.email || `User #${userId}`;
+
+    const noteResult = await pool.query(
+      `INSERT INTO contact_notes (user_id, admin_id, note_text) VALUES ($1, $2, $3) RETURNING *`,
+      [userId, adminId, note_text || null]
+    );
+    const note = noteResult.rows[0];
+    const insertedAttachments = [];
+    for (const att of attachments) {
+      const ar = await pool.query(
+        `INSERT INTO contact_attachments (note_id, filename, file_type, file_data, file_size) VALUES ($1,$2,$3,$4,$5) RETURNING id, note_id, filename, file_type, file_size, created_at`,
+        [note.id, att.filename, att.file_type, att.file_data, att.file_size || null]
+      );
+      insertedAttachments.push(ar.rows[0]);
+    }
+    const notePreview = note_text ? (note_text.length > 120 ? note_text.slice(0, 120) + '…' : note_text) : null;
+    const filenames = attachments.map(a => a.filename);
+    await logAudit(adminId, req.session.user.email, 'add_contact_note', {
+      contact_name: contactName, user_id: userId,
+      note_preview: notePreview, attachment_count: attachments.length,
+      filenames: filenames.length ? filenames : undefined,
+    }, userId, contact.email || null, clientIp(req));
+    res.json({ ...note, attachments: insertedAttachments });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.delete('/api/contacts/:id/notes/:noteId', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const noteId = Number(req.params.noteId);
+  const contactId = Number(req.params.id);
+  const adminId = req.session.user.id;
+  try {
+    // Fetch note text + contact name before deleting
+    const noteResult = await pool.query(
+      `SELECT cn.note_text, u.first_name, u.last_name, u.email
+       FROM contact_notes cn JOIN users u ON u.id = cn.user_id WHERE cn.id=$1`, [noteId]
+    );
+    const row = noteResult.rows[0] || {};
+    const contactName = [row.first_name, row.last_name].filter(Boolean).join(' ') || row.email || `User #${contactId}`;
+    const notePreview = row.note_text ? (row.note_text.length > 120 ? row.note_text.slice(0, 120) + '…' : row.note_text) : null;
+
+    await pool.query('DELETE FROM contact_notes WHERE id = $1', [noteId]);
+    await logAudit(adminId, req.session.user.email, 'delete_contact_note', {
+      note_id: noteId, contact_name: contactName, note_preview: notePreview,
+    }, contactId, row.email || null, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.get('/api/contacts/:id/notes/:noteId/attachments/:attachId', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const attachId = Number(req.params.attachId);
+  try {
+    const result = await pool.query('SELECT filename, file_type, file_data FROM contact_attachments WHERE id = $1', [attachId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const { filename, file_type, file_data } = result.rows[0];
+    const buf = Buffer.from(file_data, 'base64');
+    res.setHeader('Content-Type', file_type);
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+    res.send(buf);
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.get('/api/audit-logs', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const q = (req.query.q || '').trim().toLowerCase();
   const limit = Math.min(100, parseInt(req.query.limit || '20', 10) || 20);
   const offset = Math.max(0, parseInt(req.query.offset || '0', 10) || 0);
-  const where = q ? 'WHERE LOWER(target_email) LIKE ? OR LOWER(action) LIKE ?' : '';
-  const params = q ? [`%${q}%`, `%${q}%`] : [];
-  db.get(`SELECT COUNT(*) as total FROM audit_logs ${where}`, params, (cerr, countRow) => {
-    if (cerr) return res.status(500).json({ error: 'db error' });
-    db.all(`SELECT id, admin_id, action, target_user_id, target_email, details, created_at FROM audit_logs ${where} ORDER BY id DESC LIMIT ? OFFSET ?`, params.concat([limit, offset]), (err, rows) => {
-      if (err) return res.status(500).json({ error: 'db error' });
-      res.json({ logs: rows, total: countRow.total });
-    });
-  });
+
+  try {
+    let where = '';
+    const countParams = [];
+    const listParams = [];
+    if (q) {
+      where = 'WHERE LOWER(target_email) LIKE $1 OR LOWER(action) LIKE $2';
+      countParams.push(`%${q}%`, `%${q}%`);
+      listParams.push(`%${q}%`, `%${q}%`);
+    }
+    listParams.push(limit, offset);
+    const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM audit_logs ${where}`, countParams);
+    const listResult = await pool.query(
+      `SELECT id, admin_id, acted_by_email, action, target_user_id, target_email, details, ip_address, created_at FROM audit_logs ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      listParams
+    );
+    res.json({ logs: listResult.rows, total: countResult.rows[0].total });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-
-// ===== PROPERTIES ENDPOINTS =====
-
-// Admin: create property
-app.post('/api/properties', (req, res) => {
+app.post('/api/properties/:id/media', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  const { pin, address, county } = req.body || {};
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
+  const { filename, mediaType, base64Data } = req.body || {};
+  if (!filename || !mediaType || !base64Data) return res.status(400).json({ error: 'filename, mediaType, and base64Data required' });
+
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm', 'video/quicktime'];
+  if (!allowedTypes.includes(mediaType)) return res.status(400).json({ error: 'unsupported media type' });
+
+  try {
+    const result = await pool.query(
+      'INSERT INTO property_media (property_id, filename, media_type, file_path, uploaded_by) VALUES ($1, $2, $3, $4, $5) RETURNING id',
+      [propId, filename, mediaType, base64Data, req.session.user.id]
+    );
+    await logAudit(req.session.user.id, req.session.user.email, 'upload_media', { property_id: propId, filename, mediaType }, null, null, clientIp(req));
+    res.json({ id: result.rows[0].id, filename, mediaType });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.get('/api/properties/:id/media', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
+
+  try {
+    const result = await pool.query('SELECT id, filename, media_type, uploaded_at FROM property_media WHERE property_id = $1 ORDER BY uploaded_at DESC', [propId]);
+    res.json({ media: result.rows || [] });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.get('/api/properties/:id/media/:mediaId', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const propId = Number(req.params.id);
+  const mediaId = Number(req.params.mediaId);
+  if (!Number.isFinite(propId) || !Number.isFinite(mediaId)) return res.status(400).json({ error: 'invalid ids' });
+
+  try {
+    const result = await pool.query('SELECT file_path, media_type FROM property_media WHERE id = $1 AND property_id = $2', [mediaId, propId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const row = result.rows[0];
+    // file_path stores a base64 data URL like "data:image/jpeg;base64,/9j/..."
+    // strip the prefix and decode to binary buffer
+    const dataUrl = row.file_path;
+    const base64Index = dataUrl.indexOf(',');
+    if (base64Index === -1) {
+      // fallback: send raw
+      res.set('Content-Type', row.media_type);
+      return res.send(dataUrl);
+    }
+    const base64 = dataUrl.substring(base64Index + 1);
+    const buffer = Buffer.from(base64, 'base64');
+    res.set('Content-Type', row.media_type);
+    res.set('Cache-Control', 'public, max-age=86400');
+    res.send(buffer);
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.delete('/api/properties/:id/media/:mediaId', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  const mediaId = Number(req.params.mediaId);
+  if (!Number.isFinite(propId) || !Number.isFinite(mediaId)) return res.status(400).json({ error: 'invalid ids' });
+
+  try {
+    const result = await pool.query('DELETE FROM property_media WHERE id = $1 AND property_id = $2', [mediaId, propId]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    await logAudit(req.session.user.id, req.session.user.email, 'delete_media', { property_id: propId, media_id: mediaId }, null, null, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+/* ─── Documents endpoints ─────────────────────────────────────── */
+
+app.post('/api/properties/:id/documents', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
+  const { filename, fileType, fileData } = req.body || {};
+  if (!filename || !fileType || !fileData) return res.status(400).json({ error: 'filename, fileType, and fileData required' });
+  const allowed = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif',
+    'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+    'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    'text/plain', 'text/csv'];
+  if (!allowed.includes(fileType)) return res.status(400).json({ error: 'unsupported file type' });
+  try {
+    const result = await pool.query(
+      'INSERT INTO property_documents (property_id, filename, file_type, file_data, uploaded_by) VALUES ($1,$2,$3,$4,$5) RETURNING id',
+      [propId, filename, fileType, fileData, req.session.user.id]
+    );
+    await logAudit(req.session.user.id, req.session.user.email, 'upload_document', { property_id: propId, filename, fileType }, null, null, clientIp(req));
+    res.json({ id: result.rows[0].id, filename, fileType });
+  } catch (e) { res.status(500).json({ error: 'db error' }); }
+});
+
+app.get('/api/properties/:id/documents', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
+  try {
+    const result = await pool.query(
+      `SELECT d.id, d.filename, d.file_type, d.uploaded_at, u.email AS uploaded_by_email
+       FROM property_documents d LEFT JOIN users u ON d.uploaded_by = u.id
+       WHERE d.property_id = $1 ORDER BY d.uploaded_at DESC`, [propId]);
+    res.json({ documents: result.rows || [] });
+  } catch (e) { res.status(500).json({ error: 'db error' }); }
+});
+
+app.get('/api/properties/:id/documents/:docId', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const propId = Number(req.params.id);
+  const docId = Number(req.params.docId);
+  if (!Number.isFinite(propId) || !Number.isFinite(docId)) return res.status(400).json({ error: 'invalid ids' });
+  try {
+    const result = await pool.query('SELECT filename, file_type, file_data FROM property_documents WHERE id=$1 AND property_id=$2', [docId, propId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const { filename, file_type, file_data } = result.rows[0];
+    const base64Index = file_data.indexOf(',');
+    const base64 = base64Index !== -1 ? file_data.substring(base64Index + 1) : file_data;
+    const buffer = Buffer.from(base64, 'base64');
+    res.set('Content-Type', file_type);
+    res.set('Content-Disposition', `inline; filename="${encodeURIComponent(filename)}"`);
+    res.set('Cache-Control', 'private, max-age=3600');
+    res.send(buffer);
+  } catch (e) { res.status(500).json({ error: 'db error' }); }
+});
+
+app.delete('/api/properties/:id/documents/:docId', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  const docId = Number(req.params.docId);
+  if (!Number.isFinite(propId) || !Number.isFinite(docId)) return res.status(400).json({ error: 'invalid ids' });
+  try {
+    const result = await pool.query('DELETE FROM property_documents WHERE id=$1 AND property_id=$2', [docId, propId]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    await logAudit(req.session.user.id, req.session.user.email, 'delete_document', { property_id: propId, doc_id: docId }, null, null, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: 'db error' }); }
+});
+
+app.post('/api/properties', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const {
+    pin, address, county,
+    price, square_feet, lot_size, year_built,
+    on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+    major_interstates, household_income_min, household_income_max, population_density,
+    logistics_hubs, landmarks, water_sources, military_bases,
+    grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+    rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+    asset_type,
+    gross_scheduled_rent, vacancy_rate, other_income, operating_expenses, reserves_capex,
+    loan_amount, ltv, interest_rate, amortization_term, interest_only_period,
+    unit_count, closing_costs, hold_period, rent_growth, expense_growth, exit_cap_rate, cost_of_sale,
+    tenant_gross_sales, tenant_base_rent,
+    management_fee_pct, insurance, property_taxes,
+    land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
+    refi_ltv, refi_rate, refi_year
+  } = req.body || {};
   if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
   if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
   if (!county || !county.trim()) return res.status(400).json({ error: 'county required' });
-  
-  db.run(
-    'INSERT INTO properties (pin, address, county, created_by) VALUES (?, ?, ?, ?)',
-    [pin.trim(), address.trim(), county.trim(), req.session.user.id],
-    function(err) {
-      if (err) return res.status(500).json({ error: 'db error' });
-      try {
-        const details = JSON.stringify({ pin, address, county });
-        db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'create_property', details]);
-      } catch (e) { console.warn('Audit log failed'); }
-      res.json({ id: this.lastID, pin, address, county });
-    }
-  );
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO properties (pin, address, county, created_by,
+        price, square_feet, lot_size, year_built,
+        on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+        major_interstates, household_income_min, household_income_max, population_density,
+        logistics_hubs, landmarks, water_sources, military_bases,
+        grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+        rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+        asset_type,
+        gross_scheduled_rent, vacancy_rate, other_income, operating_expenses, reserves_capex,
+        loan_amount, ltv, interest_rate, amortization_term, interest_only_period,
+        unit_count, closing_costs, hold_period, rent_growth, expense_growth, exit_cap_rate, cost_of_sale,
+        tenant_gross_sales, tenant_base_rent,
+        management_fee_pct, insurance, property_taxes,
+        land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
+        refi_ltv, refi_rate, refi_year)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58,$59,$60,$61,$62) RETURNING id`,
+      [pin.trim(), address.trim(), county.trim(), req.session.user.id,
+       price || null, square_feet || null, lot_size || null, year_built || null,
+       on_major_road || false, traffic_vpd || null, on_corner_lot || false,
+       direct_water_access || false, next_to_public_land || false,
+       JSON.stringify(major_interstates || []),
+       household_income_min || null, household_income_max || null, population_density || null,
+       JSON.stringify(logistics_hubs || []), JSON.stringify(landmarks || []),
+       JSON.stringify(water_sources || []), JSON.stringify(military_bases || []),
+       grm || null, cap_rate || null, cash_on_cash || null, irr || null,
+       price_per_unit || null, price_per_sqft || null,
+       rent_to_sales_ratio || null, num_skus || null, price_per_acre || null,
+       electrical_voltage || null, electrical_amperage || null,
+       asset_type || null,
+       gross_scheduled_rent || null, vacancy_rate || null, other_income || null,
+       operating_expenses || null, reserves_capex || null,
+       loan_amount || null, ltv || null, interest_rate || null,
+       amortization_term || null, interest_only_period || null,
+       unit_count || null, closing_costs || null, hold_period || null,
+       rent_growth || null, expense_growth || null, exit_cap_rate || null, cost_of_sale || null,
+       tenant_gross_sales || null, tenant_base_rent || null,
+       management_fee_pct || null, insurance || null, property_taxes || null,
+       land_value_pct || null, cost_seg_bonus_pct || null, effective_tax_rate || null,
+       depreciation_recapture_rate || null,
+       refi_ltv || null, refi_rate || null, refi_year || null]
+    );
+    await logAudit(req.session.user.id, req.session.user.email, 'create_property', { pin, address, county }, null, null, clientIp(req));
+    res.json({ id: result.rows[0].id, pin, address, county });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: list properties
-app.get('/api/properties', (req, res) => {
+app.get('/api/properties', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const q = (req.query.q || '').trim().toLowerCase();
   const limit = Math.min(100, parseInt(req.query.limit || '20', 10) || 20);
   const offset = Math.max(0, parseInt(req.query.offset || '0', 10) || 0);
-  
-  const where = q ? 'WHERE LOWER(pin) LIKE ? OR LOWER(address) LIKE ? OR LOWER(county) LIKE ?' : '';
-  const params = q ? [`%${q}%`, `%${q}%`, `%${q}%`] : [];
-  
-  db.get(`SELECT COUNT(*) as total FROM properties ${where}`, params, (cerr, countRow) => {
-    if (cerr) return res.status(500).json({ error: 'db error' });
-    db.all(
-      `SELECT id, pin, address, county, created_by, created_at, updated_at FROM properties ${where} ORDER BY id DESC LIMIT ? OFFSET ?`,
-      params.concat([limit, offset]),
-      (err, rows) => {
-        if (err) return res.status(500).json({ error: 'db error' });
-        res.json({ properties: rows || [], total: countRow.total });
-      }
+
+  try {
+    let where = '';
+    const countParams = [];
+    const listParams = [];
+    if (q) {
+      where = 'WHERE LOWER(pin) LIKE $1 OR LOWER(address) LIKE $2 OR LOWER(county) LIKE $3';
+      countParams.push(`%${q}%`, `%${q}%`, `%${q}%`);
+      listParams.push(`%${q}%`, `%${q}%`, `%${q}%`);
+    }
+    listParams.push(limit, offset);
+    const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM properties ${where}`, countParams);
+    const listResult = await pool.query(
+      `SELECT id, pin, address, county, price, square_feet, lot_size, year_built,
+              on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+              major_interstates, household_income_min, household_income_max, population_density,
+              logistics_hubs, landmarks, water_sources, military_bases, status,
+              grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+              rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+              asset_type,
+              gross_scheduled_rent, vacancy_rate, other_income, operating_expenses, reserves_capex,
+              loan_amount, ltv, interest_rate, amortization_term, interest_only_period,
+              unit_count, closing_costs, hold_period, rent_growth, expense_growth, exit_cap_rate, cost_of_sale,
+              tenant_gross_sales, tenant_base_rent,
+              management_fee_pct, insurance, property_taxes,
+              land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
+              refi_ltv, refi_rate, refi_year,
+              created_by, created_at, updated_at
+       FROM properties ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      listParams
     );
-  });
+    res.json({ properties: listResult.rows || [], total: countResult.rows[0].total });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: get single property
-app.get('/api/properties/:id', (req, res) => {
+app.get('/api/properties/:id', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
-  
-  db.get('SELECT id, pin, address, county, created_by, created_at, updated_at FROM properties WHERE id = ?', [propId], (err, prop) => {
-    if (err) return res.status(500).json({ error: 'db error' });
-    if (!prop) return res.status(404).json({ error: 'not found' });
-    res.json(prop);
-  });
+
+  try {
+    const result = await pool.query(
+      `SELECT id, pin, address, county, price, square_feet, lot_size, year_built,
+              on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+              major_interstates, household_income_min, household_income_max, population_density,
+              logistics_hubs, landmarks, water_sources, military_bases, status,
+              grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+              rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+              asset_type,
+              gross_scheduled_rent, vacancy_rate, other_income, operating_expenses, reserves_capex,
+              loan_amount, ltv, interest_rate, amortization_term, interest_only_period,
+              unit_count, closing_costs, hold_period, rent_growth, expense_growth, exit_cap_rate, cost_of_sale,
+              tenant_gross_sales, tenant_base_rent,
+              management_fee_pct, insurance, property_taxes,
+              land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
+              refi_ltv, refi_rate, refi_year,
+              created_by, created_at, updated_at
+       FROM properties WHERE id = $1`, [propId]);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    res.json(result.rows[0]);
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: edit property
-app.put('/api/properties/:id', (req, res) => {
+app.put('/api/properties/:id', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
-  const { pin, address, county } = req.body || {};
+  const {
+    pin, address, county,
+    price, square_feet, lot_size, year_built,
+    on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+    major_interstates, household_income_min, household_income_max, population_density,
+    logistics_hubs, landmarks, water_sources, military_bases,
+    status,
+    grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+    rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+    asset_type,
+    gross_scheduled_rent, vacancy_rate, other_income, operating_expenses, reserves_capex,
+    loan_amount, ltv, interest_rate, amortization_term, interest_only_period,
+    unit_count, closing_costs, hold_period, rent_growth, expense_growth, exit_cap_rate, cost_of_sale,
+    tenant_gross_sales, tenant_base_rent,
+    management_fee_pct, insurance, property_taxes,
+    land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
+    refi_ltv, refi_rate, refi_year
+  } = req.body || {};
   if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
   if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
   if (!county || !county.trim()) return res.status(400).json({ error: 'county required' });
-  
-  db.run(
-    'UPDATE properties SET pin = ?, address = ?, county = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?',
-    [pin.trim(), address.trim(), county.trim(), propId],
-    function(err) {
-      if (err) return res.status(500).json({ error: 'db error' });
-      if (this.changes === 0) return res.status(404).json({ error: 'not found' });
-      try {
-        const details = JSON.stringify({ property_id: propId, pin, address, county });
-        db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'edit_property', details]);
-      } catch (e) { console.warn('Audit log failed'); }
-      res.json({ ok: true });
+
+  try {
+    // Fetch old values before update for diff
+    const oldResult = await pool.query(
+      `SELECT pin, address, county, price, square_feet, lot_size, year_built,
+              on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
+              major_interstates, household_income_min, household_income_max, population_density,
+              logistics_hubs, landmarks, water_sources, military_bases, status,
+              grm, cap_rate, cash_on_cash, irr, price_per_unit, price_per_sqft,
+              rent_to_sales_ratio, num_skus, price_per_acre, electrical_voltage, electrical_amperage,
+              asset_type,
+              gross_scheduled_rent, vacancy_rate, other_income, operating_expenses, reserves_capex,
+              loan_amount, ltv, interest_rate, amortization_term, interest_only_period,
+              unit_count, closing_costs, hold_period, rent_growth, expense_growth, exit_cap_rate, cost_of_sale,
+              tenant_gross_sales, tenant_base_rent,
+              management_fee_pct, insurance, property_taxes,
+              land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
+              refi_ltv, refi_rate, refi_year
+       FROM properties WHERE id=$1`, [propId]
+    );
+    if (oldResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const old = oldResult.rows[0];
+
+    const newVals = {
+      pin: pin.trim(), address: address.trim(), county: county.trim(),
+      price: price || null, square_feet: square_feet || null, lot_size: lot_size || null, year_built: year_built || null,
+      on_major_road: on_major_road === true || on_major_road === 'true',
+      traffic_vpd: traffic_vpd || null,
+      on_corner_lot: on_corner_lot === true || on_corner_lot === 'true',
+      direct_water_access: direct_water_access === true || direct_water_access === 'true',
+      next_to_public_land: next_to_public_land === true || next_to_public_land === 'true',
+      major_interstates: JSON.stringify(major_interstates || []),
+      household_income_min: household_income_min || null, household_income_max: household_income_max || null,
+      population_density: population_density || null,
+      logistics_hubs: JSON.stringify(logistics_hubs || []), landmarks: JSON.stringify(landmarks || []),
+      water_sources: JSON.stringify(water_sources || []), military_bases: JSON.stringify(military_bases || []),
+      status: ['New','Under Review','Active','Other'].includes(status) ? status : 'New',
+      grm: grm || null, cap_rate: cap_rate || null, cash_on_cash: cash_on_cash || null, irr: irr || null,
+      price_per_unit: price_per_unit || null, price_per_sqft: price_per_sqft || null,
+      rent_to_sales_ratio: rent_to_sales_ratio || null, num_skus: num_skus || null,
+      price_per_acre: price_per_acre || null,
+      electrical_voltage: electrical_voltage || null, electrical_amperage: electrical_amperage || null,
+      asset_type: asset_type || null,
+      gross_scheduled_rent: gross_scheduled_rent || null, vacancy_rate: vacancy_rate || null,
+      other_income: other_income || null, operating_expenses: operating_expenses || null,
+      reserves_capex: reserves_capex || null,
+      loan_amount: loan_amount || null, ltv: ltv || null, interest_rate: interest_rate || null,
+      amortization_term: amortization_term || null, interest_only_period: interest_only_period || null,
+      unit_count: unit_count || null, closing_costs: closing_costs || null,
+      hold_period: hold_period || null, rent_growth: rent_growth || null,
+      expense_growth: expense_growth || null, exit_cap_rate: exit_cap_rate || null,
+      cost_of_sale: cost_of_sale || null,
+      tenant_gross_sales: tenant_gross_sales || null, tenant_base_rent: tenant_base_rent || null,
+      management_fee_pct: management_fee_pct || null, insurance: insurance || null,
+      property_taxes: property_taxes || null,
+      land_value_pct: land_value_pct || null, cost_seg_bonus_pct: cost_seg_bonus_pct || null,
+      effective_tax_rate: effective_tax_rate || null,
+      depreciation_recapture_rate: depreciation_recapture_rate || null,
+      refi_ltv: refi_ltv || null, refi_rate: refi_rate || null, refi_year: refi_year || null
+    };
+
+    // Build field-level diff — normalize types for accurate comparison
+    const changes = {};
+    const arrayFields = new Set(['major_interstates', 'logistics_hubs', 'landmarks', 'water_sources', 'military_bases']);
+    for (const key of Object.keys(newVals)) {
+      let oldNorm, newNorm, oldDisplay, newDisplay;
+      if (arrayFields.has(key)) {
+        // Both sides normalised to JSON string; treat null/undefined DB value as "[]"
+        oldNorm = JSON.stringify(old[key] ?? []);
+        newNorm = newVals[key]; // already JSON.stringify'd
+        oldDisplay = old[key] ?? [];
+        newDisplay = JSON.parse(newNorm);
+      } else {
+        // Scalar: compare as strings, treat null/0/'' consistently
+        const oldRaw = old[key] ?? null;
+        const newRaw = newVals[key] ?? null;
+        // Convert numbers to string for comparison, keep null as null
+        oldNorm = oldRaw === null ? '' : String(oldRaw);
+        newNorm = newRaw === null ? '' : String(newRaw);
+        oldDisplay = oldRaw;
+        newDisplay = newRaw;
+      }
+      if (oldNorm !== newNorm) changes[key] = { from: oldDisplay, to: newDisplay };
     }
-  );
+
+    const result = await pool.query(
+      `UPDATE properties SET
+        pin=$1, address=$2, county=$3,
+        price=$4, square_feet=$5, lot_size=$6, year_built=$7,
+        on_major_road=$8, traffic_vpd=$9, on_corner_lot=$10,
+        direct_water_access=$11, next_to_public_land=$12,
+        major_interstates=$13, household_income_min=$14, household_income_max=$15,
+        population_density=$16, logistics_hubs=$17, landmarks=$18,
+        water_sources=$19, military_bases=$20, status=$21,
+        grm=$22, cap_rate=$23, cash_on_cash=$24, irr=$25,
+        price_per_unit=$26, price_per_sqft=$27,
+        rent_to_sales_ratio=$28, num_skus=$29, price_per_acre=$30,
+        electrical_voltage=$31, electrical_amperage=$32,
+        asset_type=$33,
+        gross_scheduled_rent=$34, vacancy_rate=$35, other_income=$36,
+        operating_expenses=$37, reserves_capex=$38,
+        loan_amount=$39, ltv=$40, interest_rate=$41,
+        amortization_term=$42, interest_only_period=$43,
+        unit_count=$44, closing_costs=$45, hold_period=$46,
+        rent_growth=$47, expense_growth=$48, exit_cap_rate=$49, cost_of_sale=$50,
+        tenant_gross_sales=$51, tenant_base_rent=$52,
+        management_fee_pct=$53, insurance=$54, property_taxes=$55,
+        land_value_pct=$56, cost_seg_bonus_pct=$57, effective_tax_rate=$58,
+        depreciation_recapture_rate=$59,
+        refi_ltv=$60, refi_rate=$61, refi_year=$62,
+        updated_at=CURRENT_TIMESTAMP
+       WHERE id=$63`,
+      [newVals.pin, newVals.address, newVals.county,
+       newVals.price, newVals.square_feet, newVals.lot_size, newVals.year_built,
+       newVals.on_major_road, newVals.traffic_vpd, newVals.on_corner_lot,
+       newVals.direct_water_access, newVals.next_to_public_land,
+       newVals.major_interstates,
+       newVals.household_income_min, newVals.household_income_max,
+       newVals.population_density,
+       newVals.logistics_hubs, newVals.landmarks,
+       newVals.water_sources, newVals.military_bases, newVals.status,
+       newVals.grm, newVals.cap_rate, newVals.cash_on_cash, newVals.irr,
+       newVals.price_per_unit, newVals.price_per_sqft,
+       newVals.rent_to_sales_ratio, newVals.num_skus, newVals.price_per_acre,
+       newVals.electrical_voltage, newVals.electrical_amperage,
+       newVals.asset_type,
+       newVals.gross_scheduled_rent, newVals.vacancy_rate, newVals.other_income,
+       newVals.operating_expenses, newVals.reserves_capex,
+       newVals.loan_amount, newVals.ltv, newVals.interest_rate,
+       newVals.amortization_term, newVals.interest_only_period,
+       newVals.unit_count, newVals.closing_costs, newVals.hold_period,
+       newVals.rent_growth, newVals.expense_growth, newVals.exit_cap_rate, newVals.cost_of_sale,
+       newVals.tenant_gross_sales, newVals.tenant_base_rent,
+       newVals.management_fee_pct, newVals.insurance, newVals.property_taxes,
+       newVals.land_value_pct, newVals.cost_seg_bonus_pct, newVals.effective_tax_rate,
+       newVals.depreciation_recapture_rate,
+       newVals.refi_ltv, newVals.refi_rate, newVals.refi_year,
+       propId]
+    );
+    if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    await logAudit(req.session.user.id, req.session.user.email, 'edit_property',
+      { property_id: propId, address: newVals.address, changed_fields: Object.keys(changes), changes },
+      null, null, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: delete property
-app.delete('/api/properties/:id', (req, res) => {
+app.delete('/api/properties/:id', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
-  
-  db.run('DELETE FROM properties WHERE id = ?', [propId], function(err) {
-    if (err) return res.status(500).json({ error: 'db error' });
-    if (this.changes === 0) return res.status(404).json({ error: 'not found' });
-    try {
-      const details = JSON.stringify({ property_id: propId });
-      db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'delete_property', details]);
-    } catch (e) { console.warn('Audit log failed'); }
+
+  try {
+    const propResult = await pool.query('SELECT address, pin, county FROM properties WHERE id=$1', [propId]);
+    if (propResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const { address, pin, county } = propResult.rows[0];
+    const result = await pool.query('DELETE FROM properties WHERE id = $1', [propId]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    await logAudit(req.session.user.id, req.session.user.email, 'delete_property', { property_id: propId, address, pin, county }, null, null, clientIp(req));
     res.json({ ok: true });
-  });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: assign property to user(s)
-app.post('/api/properties/:id/assign', (req, res) => {
+// Quick status update — used by Kanban move buttons
+app.patch('/api/properties/:id/status', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const propId = Number(req.params.id);
+  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
+  const { status } = req.body || {};
+  const valid = ['New', 'Under Review', 'Active', 'Other'];
+  if (!valid.includes(status)) return res.status(400).json({ error: 'invalid status' });
+  try {
+    const oldResult = await pool.query('SELECT status, address FROM properties WHERE id=$1', [propId]);
+    if (oldResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const { status: oldStatus, address } = oldResult.rows[0];
+    await pool.query('UPDATE properties SET status=$1, updated_at=CURRENT_TIMESTAMP WHERE id=$2', [status, propId]);
+    await logAudit(req.session.user.id, req.session.user.email, 'edit_property',
+      { property_id: propId, address, changed_fields: ['status'], changes: { status: { from: oldStatus, to: status } } },
+      null, null, clientIp(req));
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.post('/api/properties/:id/assign', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
   const { userIds } = req.body || {};
   if (!Array.isArray(userIds) || userIds.length === 0) return res.status(400).json({ error: 'userIds array required' });
-  
-  // Verify property exists
-  db.get('SELECT id FROM properties WHERE id = ?', [propId], (gerr, prop) => {
-    if (gerr) return res.status(500).json({ error: 'db error' });
-    if (!prop) return res.status(404).json({ error: 'property not found' });
-    
-    // Assign to each user (ignore duplicates via UNIQUE constraint)
-    let remaining = userIds.length;
+
+  try {
+    const propertyResult = await pool.query('SELECT id FROM properties WHERE id = $1', [propId]);
+    if (propertyResult.rows.length === 0) return res.status(404).json({ error: 'property not found' });
+
     let assigned = 0;
-    userIds.forEach(uid => {
+    for (const uid of userIds) {
       const userId = Number(uid);
-      if (!Number.isFinite(userId)) {
-        remaining--;
-        return;
-      }
-      db.run(
-        'INSERT OR IGNORE INTO property_assignments (property_id, user_id, assigned_by) VALUES (?, ?, ?)',
-        [propId, userId, req.session.user.id],
-        function(err) {
-          if (!err && this.changes > 0) assigned++;
-          remaining--;
-          if (remaining === 0) {
-            try {
-              const details = JSON.stringify({ property_id: propId, user_count: assigned });
-              db.run('INSERT INTO audit_logs (admin_id, action, details) VALUES (?, ?, ?)', [req.session.user.id, 'assign_property', details]);
-            } catch (e) { console.warn('Audit log failed'); }
-            res.json({ ok: true, assigned });
-          }
-        }
+      if (!Number.isFinite(userId)) continue;
+      const result = await pool.query(
+        'INSERT INTO property_assignments (property_id, user_id, assigned_by) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
+        [propId, userId, req.session.user.id]
       );
-    });
-  });
+      if (result.rowCount > 0) assigned++;
+    }
+
+    await logAudit(req.session.user.id, req.session.user.email, 'assign_property', { property_id: propId, user_count: assigned, user_ids: userIds }, null, null, clientIp(req));
+    res.json({ ok: true, assigned });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Remove property assignment
-app.delete('/api/properties/:id/assign/:userId', (req, res) => {
+app.delete('/api/properties/:id/assign/:userId', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   const userId = Number(req.params.userId);
   if (!Number.isFinite(propId) || !Number.isFinite(userId)) return res.status(400).json({ error: 'invalid ids' });
-  
-  db.run('DELETE FROM property_assignments WHERE property_id = ? AND user_id = ?', [propId, userId], function(err) {
-    if (err) return res.status(500).json({ error: 'db error' });
+
+  try {
+    await pool.query('DELETE FROM property_assignments WHERE property_id = $1 AND user_id = $2', [propId, userId]);
+    await logAudit(req.session.user.id, req.session.user.email, 'unassign_property', { property_id: propId, user_id: userId }, null, null, clientIp(req));
     res.json({ ok: true });
-  });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// User: get assigned properties (read-only)
-app.get('/api/me/properties', (req, res) => {
+app.get('/api/me/properties', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
   const userId = req.session.user.id;
-  
-  db.all(
-    `SELECT p.id, p.pin, p.address, p.county, p.created_at, pa.assigned_at
-     FROM properties p
-     JOIN property_assignments pa ON p.id = pa.property_id
-     WHERE pa.user_id = ?
-     ORDER BY pa.assigned_at DESC`,
-    [userId],
-    (err, rows) => {
-      if (err) return res.status(500).json({ error: 'db error' });
-      res.json({ properties: rows || [] });
-    }
-  );
+
+  try {
+    const result = await pool.query(
+      `SELECT p.id, p.pin, p.address, p.county, p.created_at, pa.assigned_at
+       FROM properties p
+       JOIN property_assignments pa ON p.id = pa.property_id
+       WHERE pa.user_id = $1
+       ORDER BY pa.assigned_at DESC`,
+      [userId]
+    );
+    res.json({ properties: result.rows || [] });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
-// Admin: list users for a property (for assignment UI)
-app.get('/api/properties/:id/users', (req, res) => {
+// Calendar events — returns events for the requesting user's role
+// Admin: property creations + audit log entries for the current month ± 1
+// User: their assigned properties (assigned_at) + any property created dates
+// ─── FOMC Meeting Calendar ─────────────────────────────────────────────────
+// Fetches upcoming Federal Reserve (FOMC) meeting dates from the FRED API.
+// Falls back to a hardcoded schedule if FRED_API_KEY is not set.
+// Cache: stored in DB table `fomc_cache` to avoid hammering the API.
+
+const FRED_API_KEY = process.env.FRED_API_KEY;
+const FOMC_RELEASE_ID = 226; // "FOMC Press Release" in FRED
+
+// Known FOMC meeting dates as fallback (both days listed; decision on 2nd day)
+// Updated through end of 2026 per Fed published schedule
+const FOMC_FALLBACK = [
+  // 2026
+  { start: '2026-01-28', end: '2026-01-29', decision: '2026-01-29' },
+  { start: '2026-03-18', end: '2026-03-19', decision: '2026-03-19' },
+  { start: '2026-04-29', end: '2026-04-30', decision: '2026-04-30' },
+  { start: '2026-06-16', end: '2026-06-17', decision: '2026-06-17' },
+  { start: '2026-07-28', end: '2026-07-29', decision: '2026-07-29' },
+  { start: '2026-09-15', end: '2026-09-16', decision: '2026-09-16' },
+  { start: '2026-10-27', end: '2026-10-28', decision: '2026-10-28' },
+  { start: '2026-12-15', end: '2026-12-16', decision: '2026-12-16' },
+  // 2027
+  { start: '2027-01-26', end: '2027-01-27', decision: '2027-01-27' },
+  { start: '2027-03-16', end: '2027-03-17', decision: '2027-03-17' },
+  { start: '2027-04-27', end: '2027-04-28', decision: '2027-04-28' },
+  { start: '2027-06-15', end: '2027-06-16', decision: '2027-06-16' },
+  { start: '2027-07-27', end: '2027-07-28', decision: '2027-07-28' },
+  { start: '2027-09-14', end: '2027-09-15', decision: '2027-09-15' },
+  { start: '2027-10-26', end: '2027-10-27', decision: '2027-10-27' },
+  { start: '2027-12-14', end: '2027-12-15', decision: '2027-12-15' },
+];
+
+async function ensureFomcCacheTable() {
+  await pool.query(`CREATE TABLE IF NOT EXISTS fomc_cache (
+    id SERIAL PRIMARY KEY,
+    decision_date DATE NOT NULL UNIQUE,
+    start_date DATE,
+    end_date DATE,
+    source TEXT DEFAULT 'fallback',
+    fetched_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+}
+
+// Refresh FOMC dates from FRED if API key present and cache is stale (>24h)
+async function refreshFomcCache() {
+  await ensureFomcCacheTable();
+
+  // Check last fetch time
+  const last = await pool.query(`SELECT MAX(fetched_at) as t FROM fomc_cache`);
+  const lastFetch = last.rows[0]?.t ? new Date(last.rows[0].t) : null;
+  const stale = !lastFetch || (Date.now() - lastFetch.getTime() > 24 * 60 * 60 * 1000);
+
+  if (FRED_API_KEY && stale) {
+    try {
+      const url = `https://api.stlouisfed.org/fred/release/dates?release_id=${FOMC_RELEASE_ID}&api_key=${FRED_API_KEY}&file_type=json&include_release_dates_with_no_data=true&sort_order=asc`;
+      const data = await new Promise((resolve, reject) => {
+        https.get(url, res => {
+          let body = '';
+          res.on('data', c => body += c);
+          res.on('end', () => {
+            try { resolve(JSON.parse(body)); } catch { reject(new Error('invalid json')); }
+          });
+        }).on('error', reject);
+      });
+
+      const dates = (data.release_dates || []).map(d => d.date).filter(Boolean);
+      if (dates.length > 0) {
+        // Upsert each FRED date as decision date (FRED only gives 1 date per meeting = decision day)
+        for (const date of dates) {
+          await pool.query(
+            `INSERT INTO fomc_cache (decision_date, start_date, end_date, source, fetched_at)
+             VALUES ($1, $1, $1, 'fred', NOW())
+             ON CONFLICT (decision_date) DO UPDATE SET source='fred', fetched_at=NOW()`,
+            [date]
+          );
+        }
+        // Also upsert fallback dates to fill in start/end fields FRED doesn't provide
+        for (const m of FOMC_FALLBACK) {
+          await pool.query(
+            `INSERT INTO fomc_cache (decision_date, start_date, end_date, source, fetched_at)
+             VALUES ($1, $2, $3, 'fred+fallback', NOW())
+             ON CONFLICT (decision_date) DO UPDATE
+               SET start_date = EXCLUDED.start_date,
+                   end_date   = EXCLUDED.end_date`,
+            [m.decision, m.start, m.end]
+          );
+        }
+        return;
+      }
+    } catch (e) {
+      console.error('FRED fetch failed, using fallback:', e.message);
+    }
+  }
+
+  // Seed fallback if table is empty
+  const count = await pool.query(`SELECT COUNT(*) as n FROM fomc_cache`);
+  if (parseInt(count.rows[0].n, 10) === 0) {
+    for (const m of FOMC_FALLBACK) {
+      await pool.query(
+        `INSERT INTO fomc_cache (decision_date, start_date, end_date, source)
+         VALUES ($1, $2, $3, 'fallback')
+         ON CONFLICT DO NOTHING`,
+        [m.decision, m.start, m.end]
+      );
+    }
+  }
+}
+
+// Kick off background refresh on server start
+refreshFomcCache().catch(e => console.error('FOMC cache init error:', e.message));
+
+app.get('/api/fomc-meetings', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const { year, month } = req.query;
+  const y = parseInt(year, 10) || new Date().getFullYear();
+  const m = parseInt(month, 10) || (new Date().getMonth() + 1);
+  const from = `${y}-${String(m).padStart(2,'0')}-01`;
+  const to   = new Date(y, m, 1).toISOString().slice(0, 10); // first day of next month
+  try {
+    await ensureFomcCacheTable();
+    // Async refresh in background (don't block response)
+    refreshFomcCache().catch(() => {});
+    const result = await pool.query(
+      `SELECT decision_date, start_date, end_date, source
+       FROM fomc_cache
+       WHERE decision_date >= $1 AND decision_date < $2
+       ORDER BY decision_date`,
+      [from, to]
+    );
+    res.json({ meetings: result.rows });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+// ─── Economic Indicators Calendar ─────────────────────────────────────────────
+// Hardcoded release schedule for 2026–2027 major economic indicators.
+// Dates are approximate based on historical release cadence (typically 1st–3rd
+// business day of the month for ISM; mid-month for others).
+// Update annually when BEA/Fed/Census publish their release calendars.
+
+const ECON_INDICATORS = [
+  // ── ISM Manufacturing (released 1st business day of month) ──
+  ...['2026-01-02','2026-02-03','2026-03-02','2026-04-01','2026-05-01','2026-06-01',
+      '2026-07-01','2026-08-03','2026-09-01','2026-10-01','2026-11-02','2026-12-01',
+      '2027-01-04','2027-02-01','2027-03-01','2027-04-01','2027-05-03','2027-06-01',
+      '2027-07-01','2027-08-02','2027-09-01','2027-10-01','2027-11-01','2027-12-01',
+  ].map(date => ({ date, label: 'ISM Manufacturing PMI', short_label: 'ISM Mfg', category: 'ism',
+    description: 'Institute for Supply Management Manufacturing PMI report' })),
+
+  // ── ISM Non-Manufacturing / Services (released 3rd business day of month) ──
+  ...['2026-01-07','2026-02-05','2026-03-04','2026-04-06','2026-05-05','2026-06-03',
+      '2026-07-07','2026-08-05','2026-09-03','2026-10-05','2026-11-04','2026-12-03',
+      '2027-01-07','2027-02-04','2027-03-03','2027-04-06','2027-05-05','2027-06-03',
+      '2027-07-07','2027-08-04','2027-09-03','2027-10-05','2027-11-03','2027-12-02',
+  ].map(date => ({ date, label: 'ISM Services PMI', short_label: 'ISM Svc', category: 'ism',
+    description: 'Institute for Supply Management Non-Manufacturing (Services) PMI report' })),
+
+  // ── Advance Retail Sales (released ~mid-month, typically 15th-17th) ──
+  ...['2026-01-15','2026-02-13','2026-03-16','2026-04-15','2026-05-15','2026-06-16',
+      '2026-07-16','2026-08-14','2026-09-15','2026-10-15','2026-11-16','2026-12-15',
+      '2027-01-15','2027-02-12','2027-03-15','2027-04-14','2027-05-14','2027-06-15',
+      '2027-07-15','2027-08-13','2027-09-15','2027-10-15','2027-11-15','2027-12-15',
+  ].map(date => ({ date, label: 'Advance Retail Sales', short_label: 'Retail Sales', category: 'retail',
+    description: 'U.S. Census Bureau Advance Monthly Sales for Retail and Food Services' })),
+
+  // ── International Trade in Goods (Advance, released ~last week of month) ──
+  ...['2026-01-28','2026-02-25','2026-03-25','2026-04-29','2026-05-27','2026-06-24',
+      '2026-07-29','2026-08-26','2026-09-23','2026-10-28','2026-11-25','2026-12-23',
+      '2027-01-27','2027-02-24','2027-03-24','2027-04-28','2027-05-26','2027-06-23',
+      '2027-07-28','2027-08-25','2027-09-22','2027-10-27','2027-11-24','2027-12-22',
+  ].map(date => ({ date, label: 'Intl Trade in Goods (Advance)', short_label: 'Trade Goods', category: 'trade',
+    description: 'U.S. Census Bureau Advance International Trade in Goods report' })),
+
+  // ── NY Fed Global Supply Chain Pressure Index (released monthly, ~1st week) ──
+  ...['2026-01-06','2026-02-04','2026-03-03','2026-04-02','2026-05-05','2026-06-02',
+      '2026-07-02','2026-08-04','2026-09-02','2026-10-02','2026-11-03','2026-12-02',
+      '2027-01-05','2027-02-03','2027-03-02','2027-04-01','2027-05-04','2027-06-01',
+      '2027-07-01','2027-08-03','2027-09-01','2027-10-01','2027-11-02','2027-12-01',
+  ].map(date => ({ date, label: 'NY Fed GSCPI', short_label: 'GSCPI', category: 'gscpi',
+    description: "NY Fed's Global Supply Chain Pressure Index" })),
+
+  // ── Industrial Production & Capacity Utilization (released ~15th-17th) ──
+  ...['2026-01-16','2026-02-17','2026-03-17','2026-04-16','2026-05-15','2026-06-17',
+      '2026-07-17','2026-08-18','2026-09-16','2026-10-16','2026-11-17','2026-12-16',
+      '2027-01-16','2027-02-17','2027-03-16','2027-04-15','2027-05-17','2027-06-16',
+      '2027-07-16','2027-08-17','2027-09-15','2027-10-15','2027-11-16','2027-12-15',
+  ].map(date => ({ date, label: 'Industrial Production & Cap. Utilization', short_label: 'Ind. Production', category: 'ip',
+    description: 'Federal Reserve Industrial Production and Capacity Utilization report (G.17)' })),
+
+  // ── Jobs Report / Employment Situation (BLS, 1st Friday of month) ──
+  ...['2026-01-09','2026-02-06','2026-03-06','2026-04-03','2026-05-08','2026-06-05',
+      '2026-07-02','2026-08-07','2026-09-04','2026-10-02','2026-11-06','2026-12-04',
+      '2027-01-08','2027-02-05','2027-03-05','2027-04-02','2027-05-07','2027-06-04',
+      '2027-07-02','2027-08-06','2027-09-03','2027-10-01','2027-11-05','2027-12-03',
+  ].map(date => ({ date, label: 'Jobs Report (Employment Situation)', short_label: 'Jobs Report', category: 'unemployment',
+    description: 'BLS Employment Situation: nonfarm payrolls, unemployment rate, wage growth (released 8:30 AM ET)' })),
+
+  // ── Initial Jobless Claims (BLS, every Thursday) — show monthly totals only to avoid clutter ──
+  // Listing the first Thursday of each month as the representative weekly release
+  ...['2026-01-08','2026-02-05','2026-03-05','2026-04-02','2026-05-07','2026-06-04',
+      '2026-07-02','2026-08-06','2026-09-03','2026-10-01','2026-11-05','2026-12-03',
+      '2027-01-07','2027-02-04','2027-03-04','2027-04-01','2027-05-06','2027-06-03',
+      '2027-07-01','2027-08-05','2027-09-02','2027-10-07','2027-11-04','2027-12-02',
+  ].map(date => ({ date, label: 'Initial Jobless Claims (weekly)', short_label: 'Jobless Claims', category: 'unemployment',
+    description: 'DOL weekly Initial Jobless Claims — leading unemployment indicator (released Thursdays 8:30 AM ET)' })),
+
+  // ── CPI — Consumer Price Index (BLS, ~10th-12th of month) ──
+  ...['2026-01-14','2026-02-11','2026-03-11','2026-04-10','2026-05-12','2026-06-10',
+      '2026-07-14','2026-08-12','2026-09-11','2026-10-13','2026-11-12','2026-12-10',
+      '2027-01-13','2027-02-10','2027-03-10','2027-04-09','2027-05-12','2027-06-10',
+      '2027-07-13','2027-08-11','2027-09-10','2027-10-13','2027-11-10','2027-12-09',
+  ].map(date => ({ date, label: 'CPI — Consumer Price Index', short_label: 'CPI', category: 'inflation',
+    description: 'BLS Consumer Price Index: headline & core inflation (released 8:30 AM ET)' })),
+
+  // ── PPI — Producer Price Index (BLS, ~11th-14th of month) ──
+  ...['2026-01-15','2026-02-12','2026-03-12','2026-04-14','2026-05-13','2026-06-11',
+      '2026-07-15','2026-08-13','2026-09-12','2026-10-14','2026-11-13','2026-12-11',
+      '2027-01-14','2027-02-11','2027-03-11','2027-04-11','2027-05-13','2027-06-11',
+      '2027-07-14','2027-08-12','2027-09-11','2027-10-14','2027-11-11','2027-12-10',
+  ].map(date => ({ date, label: 'PPI — Producer Price Index', short_label: 'PPI', category: 'inflation',
+    description: 'BLS Producer Price Index: upstream inflation pressures (released 8:30 AM ET)' })),
+
+  // ── PCE Price Index (Fed's preferred inflation gauge, released ~last business day of month) ──
+  ...['2026-01-30','2026-02-27','2026-03-27','2026-04-30','2026-05-29','2026-06-26',
+      '2026-07-31','2026-08-28','2026-09-25','2026-10-30','2026-11-25','2026-12-23',
+      '2027-01-29','2027-02-26','2027-03-26','2027-04-30','2027-05-28','2027-06-25',
+      '2027-07-30','2027-08-27','2027-09-24','2027-10-29','2027-11-24','2027-12-22',
+  ].map(date => ({ date, label: 'PCE Price Index (Personal Income & Outlays)', short_label: 'PCE Inflation', category: 'inflation',
+    description: "BEA Personal Consumption Expenditures price index — the Fed's preferred inflation measure (released 8:30 AM ET)" })),
+];
+
+app.get('/api/econ-indicators', (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const { year, month } = req.query;
+  const y = parseInt(year, 10) || new Date().getFullYear();
+  const m = parseInt(month, 10) || (new Date().getMonth() + 1);
+  const prefix = `${y}-${String(m).padStart(2,'0')}-`;
+  const indicators = ECON_INDICATORS.filter(e => e.date.startsWith(prefix));
+  res.json({ indicators });
+});
+
+// Keep old /api/calendar-events for any future use but now returns empty
+app.get('/api/calendar-events', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  res.json({ events: [] });
+});
+
+app.get('/api/properties/:id/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
-  
-  db.all(
-    `SELECT u.id, u.email, 
-            CASE WHEN pa.id IS NOT NULL THEN 1 ELSE 0 END as assigned
-     FROM users u
-     LEFT JOIN property_assignments pa ON u.id = pa.user_id AND pa.property_id = ?
-     ORDER BY u.email`,
-    [propId],
-    (err, rows) => {
-      if (err) return res.status(500).json({ error: 'db error' });
-      res.json({ users: rows || [] });
-    }
-  );
+
+  try {
+    const result = await pool.query(
+      `SELECT u.id, u.email, u.first_name, u.last_name, u.organization, u.phone_number, u.profile_photo, u.role,
+              CASE WHEN pa.id IS NOT NULL THEN 1 ELSE 0 END as assigned
+       FROM users u
+       LEFT JOIN property_assignments pa ON u.id = pa.user_id AND pa.property_id = $1
+       ORDER BY u.email`,
+      [propId]
+    );
+    res.json({ users: result.rows || [] });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
 });
 
+async function initializeAdminUser() {
+  if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
+    return;
+  }
 
-if (process.env.ADMIN_EMAIL && process.env.ADMIN_PASSWORD) {
-  (async () => {
-    try {
-      const adminEmail = process.env.ADMIN_EMAIL.toLowerCase();
-      const adminPass = process.env.ADMIN_PASSWORD;
-      const hashed = await bcrypt.hash(adminPass, 10);
-      db.get('SELECT id FROM users WHERE email = ?', [adminEmail], (err, row) => {
-        if (err) return console.warn('Could not query for admin user:', err && err.message);
-        if (row) {
-          db.run('UPDATE users SET password = ?, role = ? WHERE id = ?', [hashed, 'admin', row.id], function (uerr) {
-            if (uerr) return console.warn('Could not update admin user:', uerr && uerr.message);
-            console.log('Updated admin user:', adminEmail);
-          });
-        } else {
-          db.run('INSERT INTO users (email, password, role) VALUES (?, ?, ?)', [adminEmail, hashed, 'admin'], function (ierr) {
-            if (ierr) return console.warn('Could not create admin user:', ierr && ierr.message);
-            console.log('Created admin user:', adminEmail);
-          });
-        }
-      });
-    } catch (e) {
-      console.warn('Admin setup failed:', e && e.message);
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL.toLowerCase();
+    const adminPass = process.env.ADMIN_PASSWORD;
+    const hashed = await bcrypt.hash(adminPass, 10);
+    const existingResult = await pool.query('SELECT id FROM users WHERE email = $1', [adminEmail]);
+    if (existingResult.rows.length > 0) {
+      await pool.query('UPDATE users SET password = $1, role = $2 WHERE id = $3', [hashed, 'admin', existingResult.rows[0].id]);
+      console.log('Updated admin user:', adminEmail);
+    } else {
+      await pool.query('INSERT INTO users (email, password, role) VALUES ($1, $2, $3)', [adminEmail, hashed, 'admin']);
+      console.log('Created admin user:', adminEmail);
     }
-  })();
+  } catch (e) {
+    console.warn('Admin setup failed:', e && e.message);
+  }
 }
 
-// Serve a favicon route (prefer client/dist then client/public)
 app.get('/favicon.ico', (req, res) => {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');
   const publicDir = path.join(__dirname, '..', 'client', 'public');
@@ -620,7 +1830,6 @@ app.get('/favicon.ico', (req, res) => {
   res.status(404).end();
 });
 
-// Serve site.webmanifest from dist or public
 app.get('/site.webmanifest', (req, res) => {
   const clientDist = path.join(__dirname, '..', 'client', 'dist');
   const publicDir = path.join(__dirname, '..', 'client', 'public');
@@ -631,25 +1840,25 @@ app.get('/site.webmanifest', (req, res) => {
   res.status(404).end();
 });
 
-// Lightweight status endpoint to report which session store is active
-app.get('/api/status', (req, res) => {
-  res.json({ sessionStore: sessionStoreType, hasDatabaseUrl: !!process.env.DATABASE_URL });
+app.get('/api/status', async (req, res) => {
+  res.json({
+    sessionStore: sessionStoreType,
+    hasDatabaseUrl: !!process.env.DATABASE_URL,
+    hasSession: !!req.session?.user,
+    sessionId: req.session?.id || null,
+    cookieHeader: req.headers.cookie || null
+  });
 });
 
-// Serve client in production
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
 if (require('fs').existsSync(clientDist)) {
   app.use(express.static(clientDist));
-  // Serve index.html for any unmatched route without registering a path pattern
   app.use((req, res) => res.sendFile(path.join(clientDist, 'index.html')));
 }
 
-// Generic error handler (must be registered after routes)
 app.use((err, req, res, next) => {
   console.error('Unhandled error:', err && err.stack ? err.stack : err);
-  // If headers already sent, delegate to default handler
   if (res.headersSent) return next(err);
-  // Provide helpful JSON error for XHR/API calls, otherwise a plain message
   if (req.headers['accept'] && req.headers['accept'].includes('application/json')) {
     res.status(err && err.statusCode ? err.statusCode : 500).json({ error: (err && err.message) || 'internal server error' });
   } else {
@@ -657,7 +1866,15 @@ app.use((err, req, res, next) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => console.log(`Server listening on port ${PORT}`));
-
+(async () => {
+  try {
+    await initializeSchema();
+    await initializeAdminUser();
+    await initializeSessionMiddleware();
+    app.listen(PORT, () => console.log(`Server listening on port ${PORT} [session: ${sessionStoreType}]`));
+  } catch (err) {
+    console.error('Failed to start server:', err && err.stack ? err.stack : err);
+    process.exit(1);
+  }
+})();
 

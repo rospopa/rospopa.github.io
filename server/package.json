@@ -14,14 +14,16 @@
   "type": "commonjs",
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "connect-pg-simple": "^8.0.0",
     "csurf": "^1.2.2",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
+    "express-rate-limit": "^8.6.2",
     "express-session": "^1.19.0",
     "nodemon": "^3.1.14",
-    "sqlite3": "^6.0.1",
-    "pg": "^8.11.0",
-    "connect-pg-simple": "^8.0.0",
-    "session-file-store": "^1.5.0"
+    "pg": "^8.22.0",
+    "resend": "^6.18.1",
+    "session-file-store": "^1.5.0",
+    "sqlite3": "^6.0.1"
   }
 }
