@@ -2032,7 +2032,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
           {/* Tabs */}
           {tabs.length > 1 && (
-            <div className="tabs tabs-bordered px-6 md:pt-0 sticky top-[53px] bg-base-100 z-[2]">
+            <div className="hidden md:flex tabs tabs-bordered px-6 md:pt-0 sticky top-[53px] bg-base-100 z-[2]">
               {tabs.map(t => (
                 <button key={t} className={`tab ${tab === t ? 'tab-active font-semibold' : ''}`} onClick={() => setTab(t)}>
                   {tabLabel[t]}
