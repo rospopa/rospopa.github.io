@@ -125,286 +125,133 @@ function Field({ label, required, children }) {
   )
 }
 
-/* ─── FOMC Calendar Widget ────────────────────────────────────── */
-// Displays upcoming Federal Reserve FOMC meeting dates.
-// Data sourced from FRED API (official St. Louis Fed) or hardcoded fallback.
-
-function CalendarWidget() {
-  const today = new Date()
-  const [year, setYear]   = useState(today.getFullYear())
-  const [month, setMonth] = useState(today.getMonth() + 1)
-  const [meetings, setMeetings]   = useState([]) // { decision_date, start_date, end_date, source }
-  const [indicators, setIndicators] = useState([]) // { date, label, category }
-  const [loading, setLoading]     = useState(true)
-  const [selected, setSelected]   = useState(null) // { day, meetings, indicators }
+/* ─── 10Y Treasury Dashboard Widget ───────────────────────────── */
+function TreasuryYieldWidget() {
+  const [points, setPoints] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
     setLoading(true)
-    setSelected(null)
-    Promise.all([
-      fetch(`/api/fomc-meetings?year=${year}&month=${month}`, { credentials: 'include' }).then(r => r.json()),
-      fetch(`/api/econ-indicators?year=${year}&month=${month}`, { credentials: 'include' }).then(r => r.json()),
-    ]).then(([fomcData, econData]) => {
-      setMeetings(fomcData.meetings || [])
-      setIndicators(econData.indicators || [])
-      setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [year, month])
+    setError('')
+    fetch('/api/treasury-yield-10y', { credentials: 'include' })
+      .then(async (response) => {
+        const data = await response.json().catch(() => ({}))
+        if (!response.ok) throw new Error(data.error || 'Failed to load Treasury yields')
+        setPoints(data.points || [])
+      })
+      .catch((err) => setError(err.message || 'Failed to load Treasury yields'))
+      .finally(() => setLoading(false))
+  }, [])
 
-  const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
-  const daysInMonth = new Date(year, month, 0).getDate()
-  const firstDow    = new Date(year, month - 1, 1).getDay()
-
-  // Index meetings by each day they span (start..end or just decision day)
-  // Slice to YYYY-MM-DD first — Postgres may return full ISO timestamp strings
-  const byDay = {}
-  for (const m of meetings) {
-    const dec   = String(m.decision_date).slice(0, 10)
-    const start = m.start_date ? String(m.start_date).slice(0, 10) : dec
-    const end   = m.end_date   ? String(m.end_date).slice(0, 10)   : dec
-    const decDay   = parseInt(dec.slice(8), 10)
-    const startDay = parseInt(start.slice(8), 10)
-    const endDay   = parseInt(end.slice(8), 10)
-    for (let d = startDay; d <= endDay; d++) {
-      const isDecision = d === decDay
-      if (!byDay[d]) byDay[d] = []
-      byDay[d].push({ ...m, isDecision, day: d })
-    }
+  const formatDate = (value) => {
+    const date = new Date(`${value}T12:00:00`)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
-
-  // Index economic indicators by day number
-  const indicByDay = {}
-  for (const ind of indicators) {
-    const day = parseInt(String(ind.date).slice(8), 10)
-    if (!indicByDay[day]) indicByDay[day] = []
-    indicByDay[day].push(ind)
-  }
-
-  // Color map for indicator categories
-  const INDIC_COLORS = {
-    ism:          'bg-blue-500',
-    retail:       'bg-purple-500',
-    trade:        'bg-teal-500',
-    gscpi:        'bg-green-600',
-    ip:           'bg-orange-500',
-    unemployment: 'bg-yellow-500',
-    inflation:    'bg-pink-500',
-    default:      'bg-indigo-400',
-  }
-
-  function prevMonth() {
-    if (month === 1) { setYear(y => y - 1); setMonth(12) }
-    else setMonth(m => m - 1)
-  }
-  function nextMonth() {
-    if (month === 12) { setYear(y => y + 1); setMonth(1) }
-    else setMonth(m => m + 1)
-  }
-
-  const todayKey = today.getFullYear() === year && today.getMonth() + 1 === month
-    ? today.getDate() : -1
-
-  const cells = []
-  for (let i = 0; i < firstDow; i++) cells.push(null)
-  for (let d = 1; d <= daysInMonth; d++) cells.push(d)
-  while (cells.length % 7 !== 0) cells.push(null)
-
-  const isPast = (day) => {
-    const cellDate = new Date(year, month - 1, day)
-    return cellDate < today
-  }
+  const formatYield = (value) => `${value.toFixed(2)}%`
+  const minYield = points.length ? Math.min(...points.map(p => p.yield)) : 0
+  const maxYield = points.length ? Math.max(...points.map(p => p.yield)) : 0
+  const range = maxYield - minYield || 1
+  const chartPoints = points.map((point, index) => {
+    const x = points.length === 1 ? 0 : (index / (points.length - 1)) * 100
+    const y = 100 - (((point.yield - minYield) / range) * 100)
+    return `${x},${y}`
+  }).join(' ')
+  const latest = points[points.length - 1]
+  const first = points[0]
+  const change = latest && first ? latest.yield - first.yield : 0
 
   return (
     <div className="card bg-base-100 border border-base-300 w-full">
-      <div className="card-body p-4 sm:p-6 md:p-8">
-
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+      <div className="card-body p-4 sm:p-6 md:p-8 gap-6">
+        <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">Federal Reserve</h3>
-            <p className="text-xs text-base-content/40 mt-0.5">FOMC Meeting Schedule</p>
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">U.S. Treasury</h3>
+            <p className="text-xl md:text-2xl font-semibold mt-1">10-Year Yield — Past 1 Month</p>
           </div>
-          <div className="flex items-center gap-3">
-            <button className="btn btn-sm btn-ghost px-3" onClick={prevMonth} aria-label="Previous month">‹</button>
-            <span className="text-base sm:text-lg font-semibold min-w-[160px] text-center">
-              {MONTHS[month-1]} {year}
-            </span>
-            <button className="btn btn-sm btn-ghost px-3" onClick={nextMonth} aria-label="Next month">›</button>
-          </div>
-        </div>
-
-        {/* Legend */}
-        <div className="flex flex-wrap gap-x-4 gap-y-2 mb-4 text-xs sm:text-sm">
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-amber-400 flex-shrink-0"/><span className="text-base-content/70">FOMC Meeting</span></span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-red-500 flex-shrink-0"/><span className="text-base-content/70">Rate Decision</span></span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-blue-500 flex-shrink-0"/><span className="text-base-content/70">ISM</span></span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-purple-500 flex-shrink-0"/><span className="text-base-content/70">Retail Sales</span></span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-teal-500 flex-shrink-0"/><span className="text-base-content/70">Trade</span></span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-green-600 flex-shrink-0"/><span className="text-base-content/70">GSCPI</span></span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-orange-500 flex-shrink-0"/><span className="text-base-content/70">Ind. Production</span></span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-yellow-500 flex-shrink-0"/><span className="text-base-content/70">Unemployment</span></span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-sm bg-pink-500 flex-shrink-0"/><span className="text-base-content/70">Inflation (CPI/PPI/PCE)</span></span>
-          <span className="flex items-center gap-1.5"><span className="inline-block w-3 h-3 rounded-full bg-primary flex-shrink-0"/><span className="text-base-content/70">Today</span></span>
-        </div>
-
-        {/* Day-of-week headers */}
-        <div className="grid grid-cols-7 mb-1 border-b border-base-300 pb-2">
-          {['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'].map((d, i) => (
-            <div key={d} className="text-center font-semibold text-base-content/40 py-1
-              text-[10px] sm:text-xs md:text-sm">
-              <span className="hidden md:inline">{d}</span>
-              <span className="hidden sm:inline md:hidden">{d.slice(0,3)}</span>
-              <span className="sm:hidden">{d[0]}</span>
+          {!loading && !error && latest && (
+            <div className="text-right">
+              <div className="text-xs uppercase tracking-widest text-base-content/40">Latest</div>
+              <div className="text-2xl font-bold">{formatYield(latest.yield)}</div>
+              <div className={`text-sm ${change >= 0 ? 'text-success' : 'text-error'}`}>
+                {change >= 0 ? '+' : ''}{change.toFixed(2)} pts vs start
+              </div>
             </div>
-          ))}
+          )}
         </div>
 
         {loading ? (
           <div className="flex justify-center py-16 text-base-content/40 text-sm">Loading…</div>
+        ) : error ? (
+          <div className="alert alert-error">
+            <span>{error}</span>
+          </div>
         ) : (
-          <div className="grid grid-cols-7">
-            {cells.map((day, i) => {
-              if (!day) return (
-                <div key={`e${i}`} className="border-b border-r border-base-200 min-h-[56px] sm:min-h-[80px] md:min-h-[100px]
-                  [&:nth-child(7n+1)]:border-l bg-base-200/30" />
-              )
-              const dayMeetings  = byDay[day] || []
-              const dayIndicators = indicByDay[day] || []
-              const isToday      = day === todayKey
-              const isSelected   = selected?.day === day
-              const hasMeeting   = dayMeetings.length > 0
-              const hasDecision  = dayMeetings.some(m => m.isDecision)
-              const hasIndicator = dayIndicators.length > 0
-              const hasAny       = hasMeeting || hasIndicator
-              const past         = isPast(day)
-
-              // Cell background — FOMC takes precedence
-              let cellBg = ''
-              if (hasDecision) cellBg = past ? 'bg-red-100 dark:bg-red-900/20' : 'bg-red-50 dark:bg-red-900/30'
-              else if (hasMeeting) cellBg = past ? 'bg-amber-50 dark:bg-amber-900/10' : 'bg-amber-50/80 dark:bg-amber-900/20'
-              if (isSelected) cellBg = 'bg-primary/10'
-
-              return (
-                <button
-                  key={day}
-                  onClick={() => hasAny && setSelected(isSelected ? null : { day, meetings: dayMeetings, indicators: dayIndicators })}
-                  className={`border-b border-r border-base-200 [&:nth-child(7n+1)]:border-l
-                    min-h-[56px] sm:min-h-[80px] md:min-h-[100px]
-                    flex flex-col items-start p-1 sm:p-2 transition-colors text-left w-full
-                    ${cellBg || 'hover:bg-base-100'}
-                    ${hasAny ? 'cursor-pointer' : 'cursor-default'}`}
-                >
-                  {/* Day number */}
-                  <span className={`text-xs sm:text-sm font-medium rounded-full
-                    w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center flex-shrink-0
-                    ${isToday ? 'bg-primary text-primary-content font-bold' : past ? 'text-base-content/40' : 'text-base-content'}`}>
-                    {day}
-                  </span>
-
-                  {/* Mobile: colored dots row */}
-                  {hasAny && (
-                    <div className="flex flex-wrap gap-0.5 mt-0.5 sm:hidden">
-                      {hasMeeting && <span className={`w-1.5 h-1.5 rounded-full ${hasDecision ? 'bg-red-500' : 'bg-amber-400'}`}/>}
-                      {dayIndicators.map((ind, j) => (
-                        <span key={j} className={`w-1.5 h-1.5 rounded-full ${INDIC_COLORS[ind.category] || INDIC_COLORS.default}`}/>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Tablet+: pill labels */}
-                  {hasAny && (
-                    <div className="hidden sm:flex flex-col gap-0.5 mt-1 w-full overflow-hidden">
-                      {hasMeeting && (
-                        <span className={`text-[10px] md:text-xs font-medium rounded px-1.5 py-0.5 truncate leading-tight
-                          ${hasDecision ? 'bg-red-500 text-white' : 'bg-amber-400 text-white'}`}>
-                          {hasDecision ? '📊 Rate Decision' : '🏛 FOMC Meeting'}
-                        </span>
-                      )}
-                      {dayIndicators.map((ind, j) => (
-                        <span key={j} className={`text-[10px] md:text-xs font-medium rounded px-1.5 py-0.5 truncate leading-tight text-white ${INDIC_COLORS[ind.category] || INDIC_COLORS.default}`}>
-                          {ind.short_label || ind.label}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </button>
-              )
-            })}
-          </div>
-        )}
-
-        {/* Selected day detail panel */}
-        {selected && (
-          <div className="mt-4 border-t border-base-300 pt-4">
-            {selected.meetings.map((m, i) => {
-              const toDate = (s) => s ? new Date(String(s).slice(0,10) + 'T12:00:00') : null
-              const decDate   = toDate(m.decision_date)
-              const startDate = toDate(m.start_date) || decDate
-              const endDate   = toDate(m.end_date)   || decDate
-              const isTwoDay  = m.start_date !== m.end_date
-              const future    = decDate >= today
-              const source    = m.source || 'fallback'
-              return (
-                <div key={i} className="flex gap-3 items-start">
-                  <span className={`mt-1 w-2.5 h-2.5 rounded-full flex-shrink-0 ${m.isDecision ? 'bg-red-500' : 'bg-amber-400'}`}/>
-                  <div className="space-y-0.5">
-                    <p className="font-semibold text-sm">
-                      {m.isDecision ? 'Rate Decision Day' : 'FOMC Meeting Day'}
-                    </p>
-                    <p className="text-sm text-base-content/60">
-                      {isTwoDay
-                        ? `${startDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })} – ${endDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}`
-                        : decDate.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
-                    </p>
-                    {m.isDecision && (
-                      <p className="text-xs text-base-content/40">
-                        {future ? '⏳ Upcoming' : '✅ Completed'} · Statement released ~2:00 PM ET
-                      </p>
-                    )}
-                    <p className="text-[10px] text-base-content/30 mt-1">
-                      Source: {source === 'fred' || source === 'fred+fallback' ? 'FRED / Federal Reserve (St. Louis Fed)' : 'Published FOMC schedule'}
-                    </p>
-                  </div>
-                </div>
-              )
-            })}
-            {/* Economic indicators for selected day */}
-            {(selected.indicators || []).map((ind, i) => (
-              <div key={`ind-${i}`} className="flex gap-3 items-start mt-2">
-                <span className={`mt-1 w-2.5 h-2.5 rounded-full flex-shrink-0 ${INDIC_COLORS[ind.category] || INDIC_COLORS.default}`}/>
-                <div className="space-y-0.5">
-                  <p className="font-semibold text-sm">{ind.label}</p>
-                  {ind.description && <p className="text-xs text-base-content/50">{ind.description}</p>}
-                  <p className="text-[10px] text-base-content/30">Economic Release · {new Date(String(ind.date).slice(0,10) + 'T12:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
-                </div>
+          <>
+            <div className="rounded-2xl border border-base-300 bg-base-100 p-4 md:p-6">
+              <div className="flex items-end justify-between mb-4 text-xs text-base-content/40 uppercase tracking-widest">
+                <span>Yield Chart</span>
+                <span>{points.length} trading days</span>
               </div>
-            ))}
-          </div>
-        )}
-
-        {/* Footer: months with no events */}
-        {!loading && meetings.length === 0 && indicators.length === 0 && (
-          <p className="mt-4 text-sm text-base-content/40 text-center">No scheduled events this month</p>
-        )}
-
-        {/* Upcoming meetings summary strip */}
-        {!loading && meetings.length > 0 && !selected && (
-          <div className="mt-4 border-t border-base-300 pt-3">
-            <p className="text-xs text-base-content/40 mb-2 font-semibold uppercase tracking-widest">This month</p>
-            <div className="flex flex-wrap gap-2">
-              {[...new Map(meetings.map(m => [m.decision_date, m])).values()].map((m, i) => {
-                const decDate = new Date(String(m.decision_date).slice(0,10) + 'T12:00:00')
-                const future  = decDate >= today
-                return (
-                  <span key={i} className={`badge badge-sm gap-1 ${future ? 'badge-outline' : 'badge-ghost opacity-60'}`}>
-                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 inline-block"/>
-                    {decDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    {future ? ' ↑' : ' ✓'}
-                  </span>
-                )
-              })}
+              <div className="h-64 w-full">
+                <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
+                  {[0, 25, 50, 75, 100].map((line) => (
+                    <line key={line} x1="0" y1={line} x2="100" y2={line} stroke="currentColor" strokeOpacity="0.12" />
+                  ))}
+                  <polyline
+                    fill="none"
+                    stroke="#111111"
+                    strokeWidth="1.5"
+                    vectorEffect="non-scaling-stroke"
+                    points={chartPoints}
+                  />
+                  {points.map((point, index) => {
+                    const x = points.length === 1 ? 0 : (index / (points.length - 1)) * 100
+                    const y = 100 - (((point.yield - minYield) / range) * 100)
+                    return <circle key={point.date} cx={x} cy={y} r="1.4" fill="#111111" />
+                  })}
+                </svg>
+              </div>
+              <div className="flex justify-between text-xs text-base-content/40 mt-3">
+                <span>{points[0] ? formatDate(points[0].date) : ''}</span>
+                <span>{latest ? formatDate(latest.date) : ''}</span>
+              </div>
             </div>
-          </div>
+
+            <div className="rounded-2xl border border-base-300 overflow-hidden">
+              <div className="px-4 py-3 border-b border-base-300 flex items-center justify-between">
+                <span className="text-sm font-semibold uppercase tracking-widest text-base-content/50">Trading Day Table</span>
+                <span className="text-xs text-base-content/40">Source: FRED DGS10</span>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th className="text-right">10Y Yield</th>
+                      <th className="text-right">Daily Change</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {points.slice().reverse().map((point, index, reversed) => {
+                      const originalIndex = points.findIndex(p => p.date === point.date)
+                      const prev = originalIndex > 0 ? points[originalIndex - 1] : null
+                      const dailyChange = prev ? point.yield - prev.yield : null
+                      return (
+                        <tr key={point.date}>
+                          <td>{new Date(`${point.date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
+                          <td className="text-right font-medium">{formatYield(point.yield)}</td>
+                          <td className={`text-right ${dailyChange === null ? 'text-base-content/30' : dailyChange >= 0 ? 'text-success' : 'text-error'}`}>
+                            {dailyChange === null ? '—' : `${dailyChange >= 0 ? '+' : ''}${dailyChange.toFixed(2)}`}
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
         )}
       </div>
     </div>
@@ -4821,7 +4668,7 @@ export default function App() {
               {(currentUser.login_count || 0) > 1 ? 'Welcome back, ' : 'Welcome, '}
               {[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email.split('@')[0]}
             </h1>
-            <CalendarWidget />
+            <TreasuryYieldWidget />
           </div>
         )}
 
