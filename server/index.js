@@ -463,7 +463,7 @@ app.post('/api/forgot-password', forgotPasswordLimiter, async (req, res) => {
     );
 
     await resend.emails.send({
-      from: `Capitalization Rate Portal <${FROM_EMAIL}>`,
+      from: `Folio <${FROM_EMAIL}>`,
       to: email,
       subject: 'Your password reset code',
       html: `

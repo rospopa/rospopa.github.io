@@ -743,7 +743,7 @@ function Logo() {
           letterSpacing: '0.08em',
           color: '#111111',
         }}>
-          Capitalization Rate
+          Folio
         </span>
         <span style={{
           fontFamily: "'Cormorant Garamond', serif",
