@@ -1780,9 +1780,14 @@ app.get('/api/calendar-events', async (req, res) => {
 
 app.get('/api/treasury-yield-10y', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const range = String(req.query.range || '1M').toUpperCase();
   const endDate = new Date();
   const startDate = new Date(endDate);
-  startDate.setMonth(startDate.getMonth() - 1);
+  if (range === '3M') startDate.setMonth(startDate.getMonth() - 3);
+  else if (range === '6M') startDate.setMonth(startDate.getMonth() - 6);
+  else if (range === '1Y') startDate.setFullYear(startDate.getFullYear() - 1);
+  else if (range === '5Y') startDate.setFullYear(startDate.getFullYear() - 5);
+  else startDate.setMonth(startDate.getMonth() - 1);
   const formatDate = (date) => date.toISOString().slice(0, 10);
   const seriesId = 'DGS10';
   if (!FRED_API_KEY) {
@@ -1809,7 +1814,7 @@ app.get('/api/treasury-yield-10y', async (req, res) => {
       }))
       .filter(obs => Number.isFinite(obs.yield));
 
-    res.json({ points });
+    res.json({ points, range });
   } catch (e) {
     res.status(500).json({ error: 'treasury yield fetch failed' });
   }
