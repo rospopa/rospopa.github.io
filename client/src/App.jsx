@@ -1293,6 +1293,167 @@ function AssignUsersTab({ allUsers, assignLoading, toggleAssign, onViewContact }
 }
 
 function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
+  const DCF_ROW_DEFS = [
+    { key: 'grossRevenue', label: 'Gross Revenue', type: 'currency', category: 'income' },
+    { key: 'vacancyCreditLoss', label: 'Vacancy / Credit Loss', type: 'currency', category: 'income' },
+    { key: 'otherIncomeDcf', label: 'Other Income', type: 'currency', category: 'income' },
+    { key: 'effectiveGrossIncome', label: 'Effective Gross Income', type: 'currency', category: 'formula', readOnly: true },
+    { key: 'operatingExpensesDcf', label: 'Operating Expenses', type: 'currency', category: 'expense' },
+    { key: 'managementFeesDcf', label: 'Management Fees', type: 'currency', category: 'expense' },
+    { key: 'propertyTaxesDcf', label: 'Property Taxes', type: 'currency', category: 'expense' },
+    { key: 'insuranceDcf', label: 'Insurance', type: 'currency', category: 'expense' },
+    { key: 'reservesCapexDcf', label: 'Reserves / Capex', type: 'currency', category: 'expense' },
+    { key: 'tenantImprovements', label: 'Tenant Improvements (TI)', type: 'currency', category: 'expense' },
+    { key: 'leasingCommissions', label: 'Leasing Commissions (LC)', type: 'currency', category: 'expense' },
+    { key: 'capitalExpenditures', label: 'Additional Capex', type: 'currency', category: 'expense' },
+    { key: 'netOperatingIncomeDcf', label: 'Net Operating Income', type: 'currency', category: 'formula', readOnly: true },
+    { key: 'debtServiceDcf', label: 'Debt Service', type: 'currency', category: 'debt' },
+    { key: 'refinanceProceeds', label: 'Refinance Proceeds', type: 'currency', category: 'capital' },
+    { key: 'taxesDcf', label: 'Taxes', type: 'currency', category: 'tax' },
+    { key: 'cashFlowBeforeSale', label: 'Cash Flow Before Sale', type: 'currency', category: 'formula', readOnly: true },
+    { key: 'saleProceedsDcf', label: 'Sale Proceeds', type: 'currency', category: 'exit' },
+    { key: 'cashFlowAfterSale', label: 'Cash Flow After Sale', type: 'currency', category: 'formula', readOnly: true },
+    { key: 'waterfallSponsor', label: 'Sponsor Waterfall', type: 'currency', category: 'waterfall' },
+    { key: 'waterfallInvestor', label: 'Investor Waterfall', type: 'currency', category: 'waterfall' },
+  ]
+  const DCF_MAX_YEARS = 10
+  const defaultDcfModel = () => ({
+    years: Array.from({ length: DCF_MAX_YEARS }, (_, index) => {
+      const year = index + 1
+      return {
+        year,
+        grossRevenue: '',
+        vacancyCreditLoss: '',
+        otherIncomeDcf: '',
+        operatingExpensesDcf: '',
+        managementFeesDcf: '',
+        propertyTaxesDcf: '',
+        insuranceDcf: '',
+        reservesCapexDcf: '',
+        tenantImprovements: '',
+        leasingCommissions: '',
+        capitalExpenditures: '',
+        debtServiceDcf: '',
+        refinanceProceeds: '',
+        taxesDcf: '',
+        saleProceedsDcf: '',
+        waterfallSponsor: '',
+        waterfallInvestor: '',
+      }
+    })
+  })
+  function toTextNumber(value) {
+    return value === null || value === undefined ? '' : String(value)
+  }
+  function normalizeYearDraft(year = {}, yearNumber) {
+    return {
+      year: yearNumber,
+      grossRevenue: toTextNumber(year.grossRevenue),
+      vacancyCreditLoss: toTextNumber(year.vacancyCreditLoss),
+      otherIncomeDcf: toTextNumber(year.otherIncomeDcf),
+      operatingExpensesDcf: toTextNumber(year.operatingExpensesDcf),
+      managementFeesDcf: toTextNumber(year.managementFeesDcf),
+      propertyTaxesDcf: toTextNumber(year.propertyTaxesDcf),
+      insuranceDcf: toTextNumber(year.insuranceDcf),
+      reservesCapexDcf: toTextNumber(year.reservesCapexDcf),
+      tenantImprovements: toTextNumber(year.tenantImprovements),
+      leasingCommissions: toTextNumber(year.leasingCommissions),
+      capitalExpenditures: toTextNumber(year.capitalExpenditures),
+      debtServiceDcf: toTextNumber(year.debtServiceDcf),
+      refinanceProceeds: toTextNumber(year.refinanceProceeds),
+      taxesDcf: toTextNumber(year.taxesDcf),
+      saleProceedsDcf: toTextNumber(year.saleProceedsDcf),
+      waterfallSponsor: toTextNumber(year.waterfallSponsor),
+      waterfallInvestor: toTextNumber(year.waterfallInvestor),
+    }
+  }
+  function formatMoneyCell(value) {
+    if (value === null || value === undefined || value === '') return '—'
+    const num = Number(value)
+    if (!Number.isFinite(num)) return '—'
+    return '$' + num.toLocaleString(undefined, { maximumFractionDigits: 0 })
+  }
+  function parseNum(value) {
+    if (value === '' || value === null || value === undefined) return null
+    const num = Number(value)
+    return Number.isFinite(num) ? num : null
+  }
+  function buildDefaultDcfModelFromProperty(prop = {}) {
+    const model = defaultDcfModel()
+    const hold = Math.min(DCF_MAX_YEARS, Math.max(1, Number(prop.hold_period || 1)))
+    const rentGrowthPct = Number(prop.rent_growth || 0) / 100
+    const expenseGrowthPct = Number(prop.expense_growth || 0) / 100
+    const grossRentBase = Number(prop.gross_scheduled_rent || 0)
+    const vacancyPct = Number(prop.vacancy_rate || 0) / 100
+    const otherIncomeBase = Number(prop.other_income || 0)
+    const operatingExpensesBase = Number(prop.operating_expenses || 0)
+    const reservesBase = Number(prop.reserves_capex || 0)
+    const propertyTaxesBase = Number(prop.property_taxes || 0)
+    const insuranceBase = Number(prop.insurance || 0)
+    const managementFeePct = Number(prop.management_fee_pct || 0) / 100
+    const effectiveTaxRatePct = Number(prop.effective_tax_rate || 0) / 100
+    const debtServiceBase = (() => {
+      const loanAmt = Number(prop.loan_amount || 0)
+      const rate = Number(prop.interest_rate || 0) / 100 / 12
+      const amortYears = Number(prop.amortization_term || 0)
+      if (!loanAmt || !amortYears) return 0
+      const months = amortYears * 12
+      if (!months) return 0
+      if (rate === 0) return (loanAmt / months) * 12
+      return (loanAmt * rate / (1 - Math.pow(1 + rate, -months))) * 12
+    })()
+    const exitCapPct = Number(prop.exit_cap_rate || 0) / 100
+    const costOfSalePct = Number(prop.cost_of_sale || 0) / 100
+    const refiYearValue = Number(prop.refi_year || 0)
+    const refiLtvPct = Number(prop.refi_ltv || 0) / 100
+
+    for (let index = 0; index < DCF_MAX_YEARS; index += 1) {
+      const year = index + 1
+      const rentGrowthFactor = Math.pow(1 + rentGrowthPct, index)
+      const expenseGrowthFactor = Math.pow(1 + expenseGrowthPct, index)
+      const grossRevenue = grossRentBase * rentGrowthFactor
+      const vacancyLoss = grossRevenue * vacancyPct
+      const otherIncome = otherIncomeBase * rentGrowthFactor
+      const effectiveGrossIncome = grossRevenue - vacancyLoss + otherIncome
+      const operatingExpensesYear = operatingExpensesBase * expenseGrowthFactor
+      const managementFees = effectiveGrossIncome * managementFeePct
+      const propertyTaxesYear = propertyTaxesBase * expenseGrowthFactor
+      const insuranceYear = insuranceBase * expenseGrowthFactor
+      const reservesYear = reservesBase * expenseGrowthFactor
+      const noi = effectiveGrossIncome - operatingExpensesYear - managementFees - propertyTaxesYear - insuranceYear - reservesYear
+      const taxesYear = Math.max(0, noi) * effectiveTaxRatePct
+      const saleProceeds = year === hold && exitCapPct > 0 ? Math.max(0, noi) / exitCapPct * (1 - costOfSalePct) : 0
+      const refinanceProceeds = refiYearValue === year && refiLtvPct > 0 && exitCapPct > 0 ? (Math.max(0, noi) / exitCapPct) * refiLtvPct : 0
+      model.years[index] = normalizeYearDraft({
+        year,
+        grossRevenue: Math.round(grossRevenue),
+        vacancyCreditLoss: Math.round(vacancyLoss),
+        otherIncomeDcf: Math.round(otherIncome),
+        operatingExpensesDcf: Math.round(operatingExpensesYear),
+        managementFeesDcf: Math.round(managementFees),
+        propertyTaxesDcf: Math.round(propertyTaxesYear),
+        insuranceDcf: Math.round(insuranceYear),
+        reservesCapexDcf: Math.round(reservesYear),
+        debtServiceDcf: Math.round(debtServiceBase),
+        refinanceProceeds: Math.round(refinanceProceeds),
+        taxesDcf: Math.round(taxesYear),
+        saleProceedsDcf: Math.round(saleProceeds),
+      }, year)
+    }
+    return model
+  }
+  function hydrateDcfModel(rawModel, prop = {}) {
+    const base = rawModel && typeof rawModel === 'object' && !Array.isArray(rawModel) ? rawModel : {}
+    const incomingYears = Array.isArray(base.years) ? base.years : []
+    const fallback = buildDefaultDcfModelFromProperty(prop)
+    return {
+      years: Array.from({ length: DCF_MAX_YEARS }, (_, index) => {
+        const yearNumber = index + 1
+        const source = incomingYears[index] || fallback.years[index] || {}
+        return normalizeYearDraft(source, yearNumber)
+      })
+    }
+  }
   const [tab, setTab] = useState('details')
   const [pin, setPin] = useState('')
   const [address, setAddress] = useState('')
@@ -1363,6 +1524,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const [refiLtv, setRefiLtv] = useState('')
   const [refiRate, setRefiRate] = useState('')
   const [refiYear, setRefiYear] = useState('')
+  const [dcfModel, setDcfModel] = useState(defaultDcfModel())
   const [saving, setSaving] = useState(false)
   const [savedSignal, setSavedSignal] = useState(0)
   const [media, setMedia] = useState([])
@@ -1442,6 +1604,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
     setRefiLtv(p.refi_ltv ?? '')
     setRefiRate(p.refi_rate ?? '')
     setRefiYear(p.refi_year ?? '')
+    setDcfModel(hydrateDcfModel(p.dcf_model, p))
   }
 
   useEffect(() => {
@@ -1464,9 +1627,46 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       setManagementFeePct(''); setInsurance(''); setPropertyTaxes('')
       setLandValuePct(''); setCostSegBonusPct(''); setEffectiveTaxRate(''); setDepreciationRecaptureRate('')
       setRefiLtv(''); setRefiRate(''); setRefiYear('')
+      setDcfModel(defaultDcfModel())
       setTab('details')
     }
   }, [property, open])
+
+  const activeHoldPeriod = Math.min(DCF_MAX_YEARS, Math.max(1, Number(holdPeriod || 1)))
+  const visibleDcfYears = dcfModel.years.slice(0, activeHoldPeriod)
+  function updateDcfCell(yearIndex, field, value) {
+    setDcfModel(prev => ({
+      years: prev.years.map((row, index) => index === yearIndex ? { ...row, [field]: value } : row)
+    }))
+  }
+  function getComputedDcfValue(yearRow, rowKey) {
+    const grossRevenueVal = parseNum(yearRow.grossRevenue) || 0
+    const vacancyLossVal = parseNum(yearRow.vacancyCreditLoss) || 0
+    const otherIncomeVal = parseNum(yearRow.otherIncomeDcf) || 0
+    const operatingExpensesVal = parseNum(yearRow.operatingExpensesDcf) || 0
+    const managementFeesVal = parseNum(yearRow.managementFeesDcf) || 0
+    const propertyTaxesVal = parseNum(yearRow.propertyTaxesDcf) || 0
+    const insuranceVal = parseNum(yearRow.insuranceDcf) || 0
+    const reservesVal = parseNum(yearRow.reservesCapexDcf) || 0
+    const tenantImprovementsVal = parseNum(yearRow.tenantImprovements) || 0
+    const leasingCommissionsVal = parseNum(yearRow.leasingCommissions) || 0
+    const capitalExpendituresVal = parseNum(yearRow.capitalExpenditures) || 0
+    const debtServiceVal = parseNum(yearRow.debtServiceDcf) || 0
+    const refinanceVal = parseNum(yearRow.refinanceProceeds) || 0
+    const taxesVal = parseNum(yearRow.taxesDcf) || 0
+    const saleProceedsVal = parseNum(yearRow.saleProceedsDcf) || 0
+    const sponsorVal = parseNum(yearRow.waterfallSponsor) || 0
+    const investorVal = parseNum(yearRow.waterfallInvestor) || 0
+    const effectiveGrossIncome = grossRevenueVal - vacancyLossVal + otherIncomeVal
+    const netOperatingIncome = effectiveGrossIncome - operatingExpensesVal - managementFeesVal - propertyTaxesVal - insuranceVal - reservesVal - tenantImprovementsVal - leasingCommissionsVal - capitalExpendituresVal
+    const cashFlowBeforeSale = netOperatingIncome - debtServiceVal + refinanceVal - taxesVal
+    const cashFlowAfterSale = cashFlowBeforeSale + saleProceedsVal - sponsorVal - investorVal
+    if (rowKey === 'effectiveGrossIncome') return effectiveGrossIncome
+    if (rowKey === 'netOperatingIncomeDcf') return netOperatingIncome
+    if (rowKey === 'cashFlowBeforeSale') return cashFlowBeforeSale
+    if (rowKey === 'cashFlowAfterSale') return cashFlowAfterSale
+    return null
+  }
 
   useEffect(() => {
     if (open && property?.id) {
@@ -1594,6 +1794,28 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
       refi_ltv: refiLtv !== '' ? Number(refiLtv) : null,
       refi_rate: refiRate !== '' ? Number(refiRate) : null,
       refi_year: refiYear !== '' ? Number(refiYear) : null,
+      dcf_model: {
+        years: dcfModel.years.map((year, index) => ({
+          year: index + 1,
+          grossRevenue: parseNum(year.grossRevenue),
+          vacancyCreditLoss: parseNum(year.vacancyCreditLoss),
+          otherIncomeDcf: parseNum(year.otherIncomeDcf),
+          operatingExpensesDcf: parseNum(year.operatingExpensesDcf),
+          managementFeesDcf: parseNum(year.managementFeesDcf),
+          propertyTaxesDcf: parseNum(year.propertyTaxesDcf),
+          insuranceDcf: parseNum(year.insuranceDcf),
+          reservesCapexDcf: parseNum(year.reservesCapexDcf),
+          tenantImprovements: parseNum(year.tenantImprovements),
+          leasingCommissions: parseNum(year.leasingCommissions),
+          capitalExpenditures: parseNum(year.capitalExpenditures),
+          debtServiceDcf: parseNum(year.debtServiceDcf),
+          refinanceProceeds: parseNum(year.refinanceProceeds),
+          taxesDcf: parseNum(year.taxesDcf),
+          saleProceedsDcf: parseNum(year.saleProceedsDcf),
+          waterfallSponsor: parseNum(year.waterfallSponsor),
+          waterfallInvestor: parseNum(year.waterfallInvestor),
+        }))
+      },
     })
     setSaving(false)
     setSavedSignal(s => s + 1)
@@ -1916,6 +2138,61 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
         {/* Financials tab */}
         {tab === 'financials' && (
           <div className="space-y-4">
+              <div className="rounded-2xl border border-base-300 overflow-hidden bg-base-100 shadow-sm">
+                <div className="px-4 py-3 border-b border-base-300 flex items-center justify-between gap-3 flex-wrap">
+                  <div>
+                    <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
+                    <p className="text-xs text-base-content/50 mt-1">Editable yearly institutional model saved per property. Black rows are formula outputs.</p>
+                  </div>
+                  <div className="badge badge-outline">{activeHoldPeriod} Year Hold</div>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="table table-pin-rows table-pin-cols text-sm min-w-[1200px]">
+                    <thead>
+                      <tr className="bg-base-200/80">
+                        <th className="min-w-[260px] bg-base-200">Line Item</th>
+                        {visibleDcfYears.map((year) => (
+                          <th key={year.year} className="text-center bg-base-200 min-w-[140px]">Year {year.year}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {DCF_ROW_DEFS.map((row) => (
+                        <tr key={row.key} className={row.readOnly ? 'bg-base-200/40' : ''}>
+                          <th className="font-medium whitespace-nowrap">
+                            <div className="flex flex-col">
+                              <span>{row.label}</span>
+                              <span className="text-[10px] uppercase tracking-[0.18em] text-base-content/35">{row.category}</span>
+                            </div>
+                          </th>
+                          {visibleDcfYears.map((year, yearIndex) => {
+                            const computedValue = row.readOnly ? getComputedDcfValue(year, row.key) : null
+                            return (
+                              <td key={`${row.key}-${year.year}`} className="align-middle">
+                                {row.readOnly ? (
+                                  <div className="input input-bordered input-md w-full md:text-base cursor-default flex items-center justify-end" style={{ color: '#000', fontWeight: 700 }}>
+                                    {formatMoneyCell(computedValue)}
+                                  </div>
+                                ) : (
+                                  <NumericInput
+                                    placeholder="0"
+                                    value={year[row.key]}
+                                    onChange={(value) => updateDcfCell(yearIndex, row.key, value)}
+                                    className="input input-bordered input-md w-full md:text-base text-right"
+                                    style={{ color: '#1d4ed8' }}
+                                    disabled={!isAdmin}
+                                    allowDecimal={false}
+                                  />
+                                )}
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
 
               {/* Core financials */}
               <div className="space-y-3">
@@ -2502,9 +2779,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
 
 
         {/* ── Right panel: map ── */}
-        <div className="hidden md:flex flex-1 border-l border-base-300" style={{ minHeight: '500px' }}>
-          <PropertyMap address={address} />
-        </div>
+        {tab !== 'financials' && (
+          <div className="hidden md:flex flex-1 border-l border-base-300" style={{ minHeight: '500px' }}>
+            <PropertyMap address={address} />
+          </div>
+        )}
 
       </div>
       <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>

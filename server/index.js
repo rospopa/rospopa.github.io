@@ -164,6 +164,7 @@ async function initializeSchema() {
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS refi_ltv NUMERIC`);
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS refi_rate NUMERIC`);
   await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS refi_year INTEGER`);
+  await pool.query(`ALTER TABLE properties ADD COLUMN IF NOT EXISTS dcf_model JSONB DEFAULT '{}'`);
 
   await pool.query(`CREATE TABLE IF NOT EXISTS property_assignments (
     id SERIAL PRIMARY KEY,
@@ -1114,7 +1115,7 @@ app.post('/api/properties', async (req, res) => {
     tenant_gross_sales, tenant_base_rent,
     management_fee_pct, insurance, property_taxes,
     land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
-    refi_ltv, refi_rate, refi_year
+    refi_ltv, refi_rate, refi_year, dcf_model
   } = req.body || {};
   if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
   if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
@@ -1136,8 +1137,8 @@ app.post('/api/properties', async (req, res) => {
         tenant_gross_sales, tenant_base_rent,
         management_fee_pct, insurance, property_taxes,
         land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
-        refi_ltv, refi_rate, refi_year)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58,$59,$60,$61,$62) RETURNING id`,
+        refi_ltv, refi_rate, refi_year, dcf_model)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58,$59,$60,$61,$62,$63) RETURNING id`,
       [pin.trim(), address.trim(), county.trim(), req.session.user.id,
        price || null, square_feet || null, lot_size || null, year_built || null,
        on_major_road || false, traffic_vpd || null, on_corner_lot || false,
@@ -1161,7 +1162,8 @@ app.post('/api/properties', async (req, res) => {
        management_fee_pct || null, insurance || null, property_taxes || null,
        land_value_pct || null, cost_seg_bonus_pct || null, effective_tax_rate || null,
        depreciation_recapture_rate || null,
-       refi_ltv || null, refi_rate || null, refi_year || null]
+       refi_ltv || null, refi_rate || null, refi_year || null,
+       JSON.stringify(dcf_model || {})]
     );
     await logAudit(req.session.user.id, req.session.user.email, 'create_property', { pin, address, county }, null, null, clientIp(req));
     res.json({ id: result.rows[0].id, pin, address, county });
@@ -1201,7 +1203,7 @@ app.get('/api/properties', async (req, res) => {
               tenant_gross_sales, tenant_base_rent,
               management_fee_pct, insurance, property_taxes,
               land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
-              refi_ltv, refi_rate, refi_year,
+              refi_ltv, refi_rate, refi_year, dcf_model,
               created_by, created_at, updated_at
        FROM properties ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
@@ -1232,7 +1234,7 @@ app.get('/api/properties/:id', async (req, res) => {
               tenant_gross_sales, tenant_base_rent,
               management_fee_pct, insurance, property_taxes,
               land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
-              refi_ltv, refi_rate, refi_year,
+              refi_ltv, refi_rate, refi_year, dcf_model,
               created_by, created_at, updated_at
        FROM properties WHERE id = $1`, [propId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
@@ -1262,7 +1264,7 @@ app.put('/api/properties/:id', async (req, res) => {
     tenant_gross_sales, tenant_base_rent,
     management_fee_pct, insurance, property_taxes,
     land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
-    refi_ltv, refi_rate, refi_year
+    refi_ltv, refi_rate, refi_year, dcf_model
   } = req.body || {};
   if (!pin || !pin.trim()) return res.status(400).json({ error: 'PIN required' });
   if (!address || !address.trim()) return res.status(400).json({ error: 'address required' });
@@ -1284,7 +1286,7 @@ app.put('/api/properties/:id', async (req, res) => {
               tenant_gross_sales, tenant_base_rent,
               management_fee_pct, insurance, property_taxes,
               land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
-              refi_ltv, refi_rate, refi_year
+              refi_ltv, refi_rate, refi_year, dcf_model
        FROM properties WHERE id=$1`, [propId]
     );
     if (oldResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
@@ -1325,12 +1327,14 @@ app.put('/api/properties/:id', async (req, res) => {
       land_value_pct: land_value_pct || null, cost_seg_bonus_pct: cost_seg_bonus_pct || null,
       effective_tax_rate: effective_tax_rate || null,
       depreciation_recapture_rate: depreciation_recapture_rate || null,
-      refi_ltv: refi_ltv || null, refi_rate: refi_rate || null, refi_year: refi_year || null
+      refi_ltv: refi_ltv || null, refi_rate: refi_rate || null, refi_year: refi_year || null,
+      dcf_model: JSON.stringify(dcf_model || {})
     };
 
     // Build field-level diff — normalize types for accurate comparison
     const changes = {};
     const arrayFields = new Set(['major_interstates', 'logistics_hubs', 'landmarks', 'water_sources', 'military_bases']);
+    const jsonFields = new Set(['dcf_model']);
     for (const key of Object.keys(newVals)) {
       let oldNorm, newNorm, oldDisplay, newDisplay;
       if (arrayFields.has(key)) {
@@ -1338,6 +1342,11 @@ app.put('/api/properties/:id', async (req, res) => {
         oldNorm = JSON.stringify(old[key] ?? []);
         newNorm = newVals[key]; // already JSON.stringify'd
         oldDisplay = old[key] ?? [];
+        newDisplay = JSON.parse(newNorm);
+      } else if (jsonFields.has(key)) {
+        oldNorm = JSON.stringify(old[key] ?? {});
+        newNorm = newVals[key];
+        oldDisplay = old[key] ?? {};
         newDisplay = JSON.parse(newNorm);
       } else {
         // Scalar: compare as strings, treat null/0/'' consistently
@@ -1376,9 +1385,9 @@ app.put('/api/properties/:id', async (req, res) => {
         management_fee_pct=$53, insurance=$54, property_taxes=$55,
         land_value_pct=$56, cost_seg_bonus_pct=$57, effective_tax_rate=$58,
         depreciation_recapture_rate=$59,
-        refi_ltv=$60, refi_rate=$61, refi_year=$62,
+        refi_ltv=$60, refi_rate=$61, refi_year=$62, dcf_model=$63,
         updated_at=CURRENT_TIMESTAMP
-       WHERE id=$63`,
+       WHERE id=$64`,
       [newVals.pin, newVals.address, newVals.county,
        newVals.price, newVals.square_feet, newVals.lot_size, newVals.year_built,
        newVals.on_major_road, newVals.traffic_vpd, newVals.on_corner_lot,
@@ -1403,7 +1412,7 @@ app.put('/api/properties/:id', async (req, res) => {
        newVals.management_fee_pct, newVals.insurance, newVals.property_taxes,
        newVals.land_value_pct, newVals.cost_seg_bonus_pct, newVals.effective_tax_rate,
        newVals.depreciation_recapture_rate,
-       newVals.refi_ltv, newVals.refi_rate, newVals.refi_year,
+       newVals.refi_ltv, newVals.refi_rate, newVals.refi_year, newVals.dcf_model,
        propId]
     );
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
