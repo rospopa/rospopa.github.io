@@ -1122,54 +1122,54 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       waterfallSponsor: toTextNumber(year.waterfallSponsor),
       waterfallInvestor: toTextNumber(year.waterfallInvestor),
     }
-    function normalizeScenarioDraft(scenario = {}, fallbackLabel) {
-      return {
-        label: scenario.label || fallbackLabel,
-        rentGrowthDelta: toTextNumber(scenario.rentGrowthDelta),
-        expenseGrowthDelta: toTextNumber(scenario.expenseGrowthDelta),
-        exitCapRateDelta: toTextNumber(scenario.exitCapRateDelta),
-        vacancyDelta: toTextNumber(scenario.vacancyDelta)
-      }
+  }
+  function normalizeScenarioDraft(scenario = {}, fallbackLabel) {
+    return {
+      label: scenario.label || fallbackLabel,
+      rentGrowthDelta: toTextNumber(scenario.rentGrowthDelta),
+      expenseGrowthDelta: toTextNumber(scenario.expenseGrowthDelta),
+      exitCapRateDelta: toTextNumber(scenario.exitCapRateDelta),
+      vacancyDelta: toTextNumber(scenario.vacancyDelta)
     }
-    function normalizeRentRollRow(row = {}) {
-      return {
-        tenantName: row.tenantName || '',
-        suite: row.suite || '',
-        annualRent: toTextNumber(row.annualRent),
-        annualSales: toTextNumber(row.annualSales),
-        leaseStartYear: toTextNumber(row.leaseStartYear || 1),
-        leaseEndYear: toTextNumber(row.leaseEndYear || DCF_MAX_YEARS),
-        rentBumpsPct: toTextNumber(row.rentBumpsPct),
-        renewalProbabilityPct: toTextNumber(row.renewalProbabilityPct || 50),
-        downtimeMonths: toTextNumber(row.downtimeMonths || 0)
-      }
+  }
+  function normalizeRentRollRow(row = {}) {
+    return {
+      tenantName: row.tenantName || '',
+      suite: row.suite || '',
+      annualRent: toTextNumber(row.annualRent),
+      annualSales: toTextNumber(row.annualSales),
+      leaseStartYear: toTextNumber(row.leaseStartYear || 1),
+      leaseEndYear: toTextNumber(row.leaseEndYear || DCF_MAX_YEARS),
+      rentBumpsPct: toTextNumber(row.rentBumpsPct),
+      renewalProbabilityPct: toTextNumber(row.renewalProbabilityPct || 50),
+      downtimeMonths: toTextNumber(row.downtimeMonths || 0)
     }
-    function normalizeDcfModel(rawModel, prop = {}) {
-      const hydrated = hydrateDcfModel(rawModel, prop)
-      const baseModel = defaultDcfModel()
-      const source = rawModel && typeof rawModel === 'object' && !Array.isArray(rawModel) ? rawModel : {}
-      return {
-        ...hydrated,
-        scenarioName: source.scenarioName || baseModel.scenarioName,
-        scenarios: {
-          base: normalizeScenarioDraft(source.scenarios?.base, 'Base'),
-          upside: normalizeScenarioDraft(source.scenarios?.upside, 'Upside'),
-          downside: normalizeScenarioDraft(source.scenarios?.downside, 'Downside')
-        },
-        debtTerms: {
-          initialLoanTermYears: toTextNumber(source.debtTerms?.initialLoanTermYears),
-          refinanceLoanTermYears: toTextNumber(source.debtTerms?.refinanceLoanTermYears),
-          refinanceCostPct: toTextNumber(source.debtTerms?.refinanceCostPct ?? baseModel.debtTerms.refinanceCostPct)
-        },
-        waterfall: {
-          prefRate: toTextNumber(source.waterfall?.prefRate ?? baseModel.waterfall.prefRate),
-          catchUpRate: toTextNumber(source.waterfall?.catchUpRate ?? baseModel.waterfall.catchUpRate),
-          promoteRate: toTextNumber(source.waterfall?.promoteRate ?? baseModel.waterfall.promoteRate)
-        },
-        rentRoll: Array.isArray(source.rentRoll) && source.rentRoll.length > 0
-          ? source.rentRoll.map(normalizeRentRollRow)
-          : baseModel.rentRoll.map(normalizeRentRollRow)
-      }
+  }
+  function normalizeDcfModel(rawModel, prop = {}) {
+    const hydrated = hydrateDcfModel(rawModel, prop)
+    const baseModel = defaultDcfModel()
+    const source = rawModel && typeof rawModel === 'object' && !Array.isArray(rawModel) ? rawModel : {}
+    return {
+      ...hydrated,
+      scenarioName: source.scenarioName || baseModel.scenarioName,
+      scenarios: {
+        base: normalizeScenarioDraft(source.scenarios?.base, 'Base'),
+        upside: normalizeScenarioDraft(source.scenarios?.upside, 'Upside'),
+        downside: normalizeScenarioDraft(source.scenarios?.downside, 'Downside')
+      },
+      debtTerms: {
+        initialLoanTermYears: toTextNumber(source.debtTerms?.initialLoanTermYears),
+        refinanceLoanTermYears: toTextNumber(source.debtTerms?.refinanceLoanTermYears),
+        refinanceCostPct: toTextNumber(source.debtTerms?.refinanceCostPct ?? baseModel.debtTerms.refinanceCostPct)
+      },
+      waterfall: {
+        prefRate: toTextNumber(source.waterfall?.prefRate ?? baseModel.waterfall.prefRate),
+        catchUpRate: toTextNumber(source.waterfall?.catchUpRate ?? baseModel.waterfall.catchUpRate),
+        promoteRate: toTextNumber(source.waterfall?.promoteRate ?? baseModel.waterfall.promoteRate)
+      },
+      rentRoll: Array.isArray(source.rentRoll) && source.rentRoll.length > 0
+        ? source.rentRoll.map(normalizeRentRollRow)
+        : baseModel.rentRoll.map(normalizeRentRollRow)
     }
   }
   function formatMoneyCell(value) {
