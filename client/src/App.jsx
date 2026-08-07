@@ -1381,10 +1381,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       const insuranceYear = insuranceBase * expenseGrowthFactor
       const reservesYear = reservesBase * expenseGrowthFactor
       const noi = effectiveGrossIncome - operatingExpensesYear - managementFees - propertyTaxesYear - insuranceYear - reservesYear
-      const annualDepreciation = depBasis > 0 ? (depBasis * (1 - Number(prop.cost_seg_bonus_pct || 0) / 100) / 39) : 0
-      const bonusDepreciation = year === 1 ? depBasis * (Number(prop.cost_seg_bonus_pct || 0) / 100) : 0
-      const taxableIncome = noi - annualDebtService - annualDepreciation - bonusDepreciation
-      const taxesYear = Math.max(0, taxableIncome) * effectiveTaxRatePct
       const monthsElapsed = year * 12
       const monthsSinceLoanStart = monthsElapsed - currentLoanStartMonth
       const inIoPeriod = monthsSinceLoanStart > 0 && monthsSinceLoanStart <= ioYears * 12 && currentLoanPrincipal > 0
@@ -1395,6 +1391,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           ? currentLoanPrincipal * (currentLoanRate / 100)
           : paymentForLoan(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears) * 12)
         : 0
+      const annualDepreciation = depBasis > 0 ? (depBasis * (1 - Number(prop.cost_seg_bonus_pct || 0) / 100) / 39) : 0
+      const bonusDepreciation = year === 1 ? depBasis * (Number(prop.cost_seg_bonus_pct || 0) / 100) : 0
+      const taxableIncome = noi - annualDebtService - annualDepreciation - bonusDepreciation
+      const taxesYear = Math.max(0, taxableIncome) * effectiveTaxRatePct
       const loanBalance = currentLoanPrincipal > 0
         ? (inIoPeriod
           ? currentLoanPrincipal
