@@ -1069,7 +1069,26 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         waterfallSponsor: '',
         waterfallInvestor: '',
       }
-    })
+    }),
+    scenarioName: 'Base',
+    scenarios: {
+      base: { label: 'Base', rentGrowthDelta: 0, expenseGrowthDelta: 0, exitCapRateDelta: 0, vacancyDelta: 0 },
+      upside: { label: 'Upside', rentGrowthDelta: 1, expenseGrowthDelta: -0.5, exitCapRateDelta: -0.25, vacancyDelta: -1 },
+      downside: { label: 'Downside', rentGrowthDelta: -1, expenseGrowthDelta: 1, exitCapRateDelta: 0.5, vacancyDelta: 1 }
+    },
+    debtTerms: {
+      initialLoanTermYears: '',
+      refinanceLoanTermYears: '',
+      refinanceCostPct: '1'
+    },
+    waterfall: {
+      prefRate: '8',
+      catchUpRate: '100',
+      promoteRate: '20'
+    },
+    rentRoll: [
+      { tenantName: '', suite: '', annualRent: '', annualSales: '', leaseStartYear: '1', leaseEndYear: '10', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0' }
+    ]
   })
   function toTextNumber(value) {
     return value === null || value === undefined ? '' : String(value)
@@ -1102,6 +1121,55 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       saleProceedsDcf: toTextNumber(year.saleProceedsDcf),
       waterfallSponsor: toTextNumber(year.waterfallSponsor),
       waterfallInvestor: toTextNumber(year.waterfallInvestor),
+    }
+    function normalizeScenarioDraft(scenario = {}, fallbackLabel) {
+      return {
+        label: scenario.label || fallbackLabel,
+        rentGrowthDelta: toTextNumber(scenario.rentGrowthDelta),
+        expenseGrowthDelta: toTextNumber(scenario.expenseGrowthDelta),
+        exitCapRateDelta: toTextNumber(scenario.exitCapRateDelta),
+        vacancyDelta: toTextNumber(scenario.vacancyDelta)
+      }
+    }
+    function normalizeRentRollRow(row = {}) {
+      return {
+        tenantName: row.tenantName || '',
+        suite: row.suite || '',
+        annualRent: toTextNumber(row.annualRent),
+        annualSales: toTextNumber(row.annualSales),
+        leaseStartYear: toTextNumber(row.leaseStartYear || 1),
+        leaseEndYear: toTextNumber(row.leaseEndYear || DCF_MAX_YEARS),
+        rentBumpsPct: toTextNumber(row.rentBumpsPct),
+        renewalProbabilityPct: toTextNumber(row.renewalProbabilityPct || 50),
+        downtimeMonths: toTextNumber(row.downtimeMonths || 0)
+      }
+    }
+    function normalizeDcfModel(rawModel, prop = {}) {
+      const hydrated = hydrateDcfModel(rawModel, prop)
+      const baseModel = defaultDcfModel()
+      const source = rawModel && typeof rawModel === 'object' && !Array.isArray(rawModel) ? rawModel : {}
+      return {
+        ...hydrated,
+        scenarioName: source.scenarioName || baseModel.scenarioName,
+        scenarios: {
+          base: normalizeScenarioDraft(source.scenarios?.base, 'Base'),
+          upside: normalizeScenarioDraft(source.scenarios?.upside, 'Upside'),
+          downside: normalizeScenarioDraft(source.scenarios?.downside, 'Downside')
+        },
+        debtTerms: {
+          initialLoanTermYears: toTextNumber(source.debtTerms?.initialLoanTermYears),
+          refinanceLoanTermYears: toTextNumber(source.debtTerms?.refinanceLoanTermYears),
+          refinanceCostPct: toTextNumber(source.debtTerms?.refinanceCostPct ?? baseModel.debtTerms.refinanceCostPct)
+        },
+        waterfall: {
+          prefRate: toTextNumber(source.waterfall?.prefRate ?? baseModel.waterfall.prefRate),
+          catchUpRate: toTextNumber(source.waterfall?.catchUpRate ?? baseModel.waterfall.catchUpRate),
+          promoteRate: toTextNumber(source.waterfall?.promoteRate ?? baseModel.waterfall.promoteRate)
+        },
+        rentRoll: Array.isArray(source.rentRoll) && source.rentRoll.length > 0
+          ? source.rentRoll.map(normalizeRentRollRow)
+          : baseModel.rentRoll.map(normalizeRentRollRow)
+      }
     }
   }
   function formatMoneyCell(value) {
@@ -1178,11 +1246,14 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   }
   function buildDefaultDcfModelFromProperty(prop = {}) {
     const model = defaultDcfModel()
+    const source = prop.dcf_model && typeof prop.dcf_model === 'object' && !Array.isArray(prop.dcf_model) ? prop.dcf_model : {}
+    const selectedScenarioKey = ['base', 'upside', 'downside'].includes(source.scenarioName?.toLowerCase()) ? source.scenarioName.toLowerCase() : 'base'
+    const scenario = source.scenarios && source.scenarios[selectedScenarioKey] ? source.scenarios[selectedScenarioKey] : null
     const hold = Math.min(DCF_MAX_YEARS, Math.max(1, Number(prop.hold_period || 1)))
-    const rentGrowthPct = Number(prop.rent_growth || 0) / 100
-    const expenseGrowthPct = Number(prop.expense_growth || 0) / 100
+    const rentGrowthPct = (Number(prop.rent_growth || 0) + Number(scenario?.rentGrowthDelta || 0)) / 100
+    const expenseGrowthPct = (Number(prop.expense_growth || 0) + Number(scenario?.expenseGrowthDelta || 0)) / 100
     const grossRentBase = Number(prop.gross_scheduled_rent || 0)
-    const vacancyPct = Number(prop.vacancy_rate || 0) / 100
+    const vacancyPct = Math.max(0, (Number(prop.vacancy_rate || 0) + Number(scenario?.vacancyDelta || 0))) / 100
     const otherIncomeBase = Number(prop.other_income || 0)
     const operatingExpensesBase = Number(prop.operating_expenses || 0)
     const reservesBase = Number(prop.reserves_capex || 0)
@@ -1194,7 +1265,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const interestRatePct = Number(prop.interest_rate || 0)
     const amortYears = Number(prop.amortization_term || 0)
     const ioYears = Math.max(0, Number(prop.interest_only_period || 0))
-    const exitCapPct = Number(prop.exit_cap_rate || 0) / 100
+    const exitCapPct = (Number(prop.exit_cap_rate || 0) + Number(scenario?.exitCapRateDelta || 0)) / 100
     const costOfSalePct = Number(prop.cost_of_sale || 0) / 100
     const refiYearValue = Number(prop.refi_year || 0)
     const refiLtvPct = Number(prop.refi_ltv || 0) / 100
@@ -1204,19 +1275,44 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const tenantSalesBase = Number(prop.tenant_gross_sales || 0)
     const tenantBaseRentBase = Number(prop.tenant_base_rent || 0)
     const depBasis = Number(prop.price || 0) * (1 - Number(prop.land_value_pct || 0) / 100)
+    const rentRoll = Array.isArray(source.rentRoll) ? source.rentRoll : []
+    const initialLoanTermYears = Number(source.debtTerms?.initialLoanTermYears || hold)
+    const refinanceLoanTermYears = Number(source.debtTerms?.refinanceLoanTermYears || initialLoanTermYears || hold)
+    const refinanceCostPct = Number(source.debtTerms?.refinanceCostPct || 1) / 100
     let currentLoanPrincipal = loanAmt
     let currentLoanRate = interestRatePct
     let currentLoanAmortYears = amortYears
     let currentLoanStartMonth = 0
+    let currentLoanTermYears = initialLoanTermYears
 
     for (let index = 0; index < DCF_MAX_YEARS; index += 1) {
       const year = index + 1
       const rentGrowthFactor = Math.pow(1 + rentGrowthPct, index)
       const expenseGrowthFactor = Math.pow(1 + expenseGrowthPct, index)
-      const grossRevenue = grossRentBase * rentGrowthFactor
+      const rentRollRevenue = rentRoll.reduce((sum, tenant) => {
+        const startYear = Math.max(1, Number(tenant.leaseStartYear || 1))
+        const endYear = Math.max(startYear, Number(tenant.leaseEndYear || DCF_MAX_YEARS))
+        const baseRent = Number(tenant.annualRent || 0)
+        const annualSales = Number(tenant.annualSales || 0)
+        const renewalProb = Math.max(0, Math.min(100, Number(tenant.renewalProbabilityPct || 0))) / 100
+        const downtimeMonths = Math.max(0, Number(tenant.downtimeMonths || 0))
+        const rentBumpsPct = Number(tenant.rentBumpsPct || 0) / 100
+        if (year < startYear) return sum
+        const activeYears = year - startYear
+        const bumpedRent = baseRent * Math.pow(1 + rentBumpsPct, Math.max(0, activeYears))
+        if (year <= endYear) return sum + bumpedRent
+        const renewedRent = bumpedRent * renewalProb
+        const downtimeFactor = Math.max(0, 12 - downtimeMonths) / 12
+        return sum + (renewedRent * downtimeFactor)
+      }, 0)
+      const grossRevenue = rentRollRevenue > 0 ? rentRollRevenue : grossRentBase * rentGrowthFactor
       const vacancyLoss = grossRevenue * vacancyPct
-      const tenantSalesYear = tenantSalesBase * rentGrowthFactor
-      const baseRentYear = tenantBaseRentBase * rentGrowthFactor
+      const tenantSalesYear = rentRoll.reduce((sum, tenant) => {
+        const startYear = Math.max(1, Number(tenant.leaseStartYear || 1))
+        if (year < startYear) return sum
+        return sum + (Number(tenant.annualSales || 0) * Math.pow(1 + rentGrowthPct, Math.max(0, year - startYear)))
+      }, 0) || (tenantSalesBase * rentGrowthFactor)
+      const baseRentYear = rentRollRevenue > 0 ? grossRevenue : tenantBaseRentBase * rentGrowthFactor
       const percentageRent = Math.max(0, tenantSalesYear * rentToSalesPct - baseRentYear)
       const otherIncome = otherIncomeBase * rentGrowthFactor
       const effectiveGrossIncome = grossRevenue - vacancyLoss + percentageRent + otherIncome
@@ -1230,6 +1326,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       const monthsElapsed = year * 12
       const monthsSinceLoanStart = monthsElapsed - currentLoanStartMonth
       const inIoPeriod = monthsSinceLoanStart > 0 && monthsSinceLoanStart <= ioYears * 12 && currentLoanPrincipal > 0
+      const balloonMonth = currentLoanTermYears > 0 ? currentLoanTermYears * 12 : null
+      const hitsBalloon = balloonMonth !== null && monthsSinceLoanStart >= balloonMonth && currentLoanPrincipal > 0
       const annualDebtService = currentLoanPrincipal > 0
         ? (inIoPeriod
           ? currentLoanPrincipal * (currentLoanRate / 100)
@@ -1242,14 +1340,17 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         : 0
       const stabilizedValue = exitCapPct > 0 ? Math.max(0, noi) / exitCapPct : 0
       const refiGrossProceeds = refiYearValue === year && refiLtvPct > 0 ? stabilizedValue * refiLtvPct : 0
-      const refinanceCosts = refiGrossProceeds > 0 ? refiGrossProceeds * 0.01 : 0
-      const loanPayoffAtRefi = refiGrossProceeds > 0 ? loanBalance : 0
+      const refinanceCosts = refiGrossProceeds > 0 ? refiGrossProceeds * refinanceCostPct : 0
+      const loanPayoffAtRefi = refiGrossProceeds > 0 || hitsBalloon ? loanBalance : 0
       const refinanceProceeds = Math.max(0, refiGrossProceeds - refinanceCosts - loanPayoffAtRefi)
       if (refiGrossProceeds > 0) {
         currentLoanPrincipal = refiGrossProceeds
         currentLoanRate = refiRatePct > 0 ? refiRatePct : currentLoanRate
         currentLoanAmortYears = amortYears || currentLoanAmortYears
         currentLoanStartMonth = monthsElapsed
+        currentLoanTermYears = refinanceLoanTermYears || currentLoanTermYears
+      } else if (hitsBalloon) {
+        currentLoanPrincipal = 0
       }
       const grossSaleProceeds = year === hold ? stabilizedValue : 0
       const saleCosts = grossSaleProceeds > 0 ? grossSaleProceeds * costOfSalePct : 0
@@ -1446,7 +1547,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     setRefiLtv(p.refi_ltv ?? '')
     setRefiRate(p.refi_rate ?? '')
     setRefiYear(p.refi_year ?? '')
-    setDcfModel(hydrateDcfModel(p.dcf_model, p))
+    setDcfModel(normalizeDcfModel(p.dcf_model, p))
   }
 
   useEffect(() => {
@@ -1482,6 +1583,39 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   function updateDcfCell(yearIndex, field, value) {
     setDcfModel(prev => ({
       years: prev.years.map((row, index) => index === yearIndex ? { ...row, [field]: value } : row)
+    }))
+  }
+  function updateScenarioField(scenarioKey, field, value) {
+    setDcfModel(prev => ({
+      ...prev,
+      scenarios: {
+        ...prev.scenarios,
+        [scenarioKey]: { ...prev.scenarios[scenarioKey], [field]: value }
+      }
+    }))
+  }
+  function updateDebtTermField(field, value) {
+    setDcfModel(prev => ({ ...prev, debtTerms: { ...prev.debtTerms, [field]: value } }))
+  }
+  function updateWaterfallField(field, value) {
+    setDcfModel(prev => ({ ...prev, waterfall: { ...prev.waterfall, [field]: value } }))
+  }
+  function updateRentRollRow(index, field, value) {
+    setDcfModel(prev => ({
+      ...prev,
+      rentRoll: prev.rentRoll.map((row, rowIndex) => rowIndex === index ? { ...row, [field]: value } : row)
+    }))
+  }
+  function addRentRollRow() {
+    setDcfModel(prev => ({
+      ...prev,
+      rentRoll: [...prev.rentRoll, normalizeRentRollRow({})]
+    }))
+  }
+  function removeRentRollRow(index) {
+    setDcfModel(prev => ({
+      ...prev,
+      rentRoll: prev.rentRoll.length <= 1 ? prev.rentRoll : prev.rentRoll.filter((_, rowIndex) => rowIndex !== index)
     }))
   }
   function getComputedDcfValue(yearRow, rowKey) {
@@ -1717,6 +1851,51 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           saleProceedsDcf: parseNum(year.saleProceedsDcf),
           waterfallSponsor: parseNum(year.waterfallSponsor),
           waterfallInvestor: parseNum(year.waterfallInvestor),
+        })),
+        scenarioName: dcfModel.scenarioName,
+        scenarios: {
+          base: {
+            label: dcfModel.scenarios.base.label,
+            rentGrowthDelta: parseNum(dcfModel.scenarios.base.rentGrowthDelta),
+            expenseGrowthDelta: parseNum(dcfModel.scenarios.base.expenseGrowthDelta),
+            exitCapRateDelta: parseNum(dcfModel.scenarios.base.exitCapRateDelta),
+            vacancyDelta: parseNum(dcfModel.scenarios.base.vacancyDelta),
+          },
+          upside: {
+            label: dcfModel.scenarios.upside.label,
+            rentGrowthDelta: parseNum(dcfModel.scenarios.upside.rentGrowthDelta),
+            expenseGrowthDelta: parseNum(dcfModel.scenarios.upside.expenseGrowthDelta),
+            exitCapRateDelta: parseNum(dcfModel.scenarios.upside.exitCapRateDelta),
+            vacancyDelta: parseNum(dcfModel.scenarios.upside.vacancyDelta),
+          },
+          downside: {
+            label: dcfModel.scenarios.downside.label,
+            rentGrowthDelta: parseNum(dcfModel.scenarios.downside.rentGrowthDelta),
+            expenseGrowthDelta: parseNum(dcfModel.scenarios.downside.expenseGrowthDelta),
+            exitCapRateDelta: parseNum(dcfModel.scenarios.downside.exitCapRateDelta),
+            vacancyDelta: parseNum(dcfModel.scenarios.downside.vacancyDelta),
+          }
+        },
+        debtTerms: {
+          initialLoanTermYears: parseNum(dcfModel.debtTerms.initialLoanTermYears),
+          refinanceLoanTermYears: parseNum(dcfModel.debtTerms.refinanceLoanTermYears),
+          refinanceCostPct: parseNum(dcfModel.debtTerms.refinanceCostPct),
+        },
+        waterfall: {
+          prefRate: parseNum(dcfModel.waterfall.prefRate),
+          catchUpRate: parseNum(dcfModel.waterfall.catchUpRate),
+          promoteRate: parseNum(dcfModel.waterfall.promoteRate),
+        },
+        rentRoll: dcfModel.rentRoll.map((row) => ({
+          tenantName: row.tenantName || '',
+          suite: row.suite || '',
+          annualRent: parseNum(row.annualRent),
+          annualSales: parseNum(row.annualSales),
+          leaseStartYear: parseNum(row.leaseStartYear),
+          leaseEndYear: parseNum(row.leaseEndYear),
+          rentBumpsPct: parseNum(row.rentBumpsPct),
+          renewalProbabilityPct: parseNum(row.renewalProbabilityPct),
+          downtimeMonths: parseNum(row.downtimeMonths),
         }))
       },
     })
@@ -2319,6 +2498,14 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput placeholder="e.g. 3" value={interestOnlyPeriod} onChange={setInterestOnlyPeriod}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
+                <Field label="Initial Loan Term (yrs)">
+                  <NumericInput placeholder="e.g. 5" value={dcfModel.debtTerms.initialLoanTermYears} onChange={(value) => updateDebtTermField('initialLoanTermYears', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+                <Field label="Refi Loan Term (yrs)">
+                  <NumericInput placeholder="e.g. 5" value={dcfModel.debtTerms.refinanceLoanTermYears} onChange={(value) => updateDebtTermField('refinanceLoanTermYears', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
                 <Field label="Annual Debt Service ($/yr)">
                   <input readOnly
                     value={annualDebtServiceAmount !== null ? '$' + annualDebtServiceAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
@@ -2411,6 +2598,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput placeholder="e.g. 3" value={refiYear} onChange={setRefiYear}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
+                <Field label="Refi Cost (%)">
+                  <NumericInput placeholder="e.g. 1.0" value={dcfModel.debtTerms.refinanceCostPct} onChange={(value) => updateDebtTermField('refinanceCostPct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
                 <Field label="Exit Value ($)">
                   <input readOnly
                     value={exitValueAmount !== null ? '$' + exitValueAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
@@ -2496,8 +2687,113 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                       value={tenantGrossSales !== '' && tenantBaseRent !== '' && Number(tenantGrossSales) > 0 ? (Number(tenantBaseRent) / Number(tenantGrossSales) * 100).toFixed(2) + '%' : '—'}
                       className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                   </Field>
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between pb-2">
+                      <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40">Tenant Rent Roll</div>
+                      {isAdmin && <button type="button" className="btn btn-xs btn-outline" onClick={addRentRollRow}>Add Tenant</button>}
+                    </div>
+                    <div className="space-y-3">
+                      {dcfModel.rentRoll.map((tenant, index) => (
+                        <div key={`tenant-${index}`} className="rounded-xl border border-base-300 p-3 space-y-3">
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="font-medium">Tenant {index + 1}</div>
+                            {isAdmin && dcfModel.rentRoll.length > 1 && (
+                              <button type="button" className="btn btn-xs btn-ghost text-error" onClick={() => removeRentRollRow(index)}>Remove</button>
+                            )}
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <Field label="Tenant Name">
+                              <input value={tenant.tenantName} onChange={(e) => updateRentRollRow(index, 'tenantName', e.target.value)}
+                                className="input input-bordered input-md w-full md:text-base" disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Suite">
+                              <input value={tenant.suite} onChange={(e) => updateRentRollRow(index, 'suite', e.target.value)}
+                                className="input input-bordered input-md w-full md:text-base" disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Annual Rent ($)">
+                              <NumericInput value={tenant.annualRent} onChange={(value) => updateRentRollRow(index, 'annualRent', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Annual Sales ($)">
+                              <NumericInput value={tenant.annualSales} onChange={(value) => updateRentRollRow(index, 'annualSales', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Lease Start Year">
+                              <NumericInput value={tenant.leaseStartYear} onChange={(value) => updateRentRollRow(index, 'leaseStartYear', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Lease End Year">
+                              <NumericInput value={tenant.leaseEndYear} onChange={(value) => updateRentRollRow(index, 'leaseEndYear', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Annual Rent Bumps (%)">
+                              <NumericInput value={tenant.rentBumpsPct} onChange={(value) => updateRentRollRow(index, 'rentBumpsPct', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                            </Field>
+                            <Field label="Renewal Probability (%)">
+                              <NumericInput value={tenant.renewalProbabilityPct} onChange={(value) => updateRentRollRow(index, 'renewalProbabilityPct', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                            </Field>
+                            <Field label="Downtime (months)">
+                              <NumericInput value={tenant.downtimeMonths} onChange={(value) => updateRentRollRow(index, 'downtimeMonths', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               )}
+              <div className="space-y-3 pt-2">
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Waterfall</div>
+                <Field label="Preferred Return (%)">
+                  <NumericInput value={dcfModel.waterfall.prefRate} onChange={(value) => updateWaterfallField('prefRate', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Catch-Up Share (%)">
+                  <NumericInput value={dcfModel.waterfall.catchUpRate} onChange={(value) => updateWaterfallField('catchUpRate', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Promote / Sponsor Share (%)">
+                  <NumericInput value={dcfModel.waterfall.promoteRate} onChange={(value) => updateWaterfallField('promoteRate', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+              </div>
+              <div className="space-y-3 pt-2">
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Scenarios</div>
+                <Field label="Active Scenario">
+                  <select value={dcfModel.scenarioName} onChange={(e) => setDcfModel(prev => ({ ...prev, scenarioName: e.target.value }))}
+                    className="select select-bordered select-md w-full md:text-base" disabled={!isAdmin}>
+                    <option value="Base">Base</option>
+                    <option value="Upside">Upside</option>
+                    <option value="Downside">Downside</option>
+                  </select>
+                </Field>
+                {['base', 'upside', 'downside'].map((scenarioKey) => (
+                  <div key={scenarioKey} className="rounded-xl border border-base-300 p-3 space-y-3">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40">{dcfModel.scenarios[scenarioKey].label}</div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <Field label="Rent Growth Delta (%)">
+                        <NumericInput value={dcfModel.scenarios[scenarioKey].rentGrowthDelta} onChange={(value) => updateScenarioField(scenarioKey, 'rentGrowthDelta', value)}
+                          className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                      </Field>
+                      <Field label="Expense Growth Delta (%)">
+                        <NumericInput value={dcfModel.scenarios[scenarioKey].expenseGrowthDelta} onChange={(value) => updateScenarioField(scenarioKey, 'expenseGrowthDelta', value)}
+                          className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                      </Field>
+                      <Field label="Exit Cap Delta (%)">
+                        <NumericInput value={dcfModel.scenarios[scenarioKey].exitCapRateDelta} onChange={(value) => updateScenarioField(scenarioKey, 'exitCapRateDelta', value)}
+                          className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                      </Field>
+                      <Field label="Vacancy Delta (%)">
+                        <NumericInput value={dcfModel.scenarios[scenarioKey].vacancyDelta} onChange={(value) => updateScenarioField(scenarioKey, 'vacancyDelta', value)}
+                          className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                      </Field>
+                    </div>
+                  </div>
+                ))}
+              </div>
             {isAdmin && (
               <div className="pt-2">
                 <SaveButton onClick={handleSave} loading={saving} savedSignal={savedSignal}
