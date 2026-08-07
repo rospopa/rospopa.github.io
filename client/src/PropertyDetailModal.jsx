@@ -203,6 +203,11 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
       ordinaryIncomeTaxRatePct: '',
       passiveLossLimitPct: '100',
       initialTaxBasis: '',
+      assessedValue: '',
+      appraisedValue: '',
+      landAssessment: '',
+      improvementAssessment: '',
+      personalPropertyAssessment: '',
       suspendedLossCarryforward: '0',
       entityType: 'Direct',
       enable1031: false,
@@ -235,7 +240,33 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
       insurancePoolRecoverablePct: '100',
       camPoolRecoverablePct: '100',
       grossUpMethod: 'category',
-      reconciliationMonth: '12'
+      reconciliationMonth: '12',
+      occupiedSqft: '',
+      vacantSqft: '',
+      parkingIncome: '',
+      laundryIncome: '',
+      storageIncome: '',
+      otherIncomeMisc: '',
+      personalPropertyTaxes: '',
+      payroll: '',
+      payrollBenefits: '',
+      workersComp: '',
+      repairsMaintenance: '',
+      janitorial: '',
+      utilitiesFuel: '',
+      utilitiesWaterSewer: '',
+      utilitiesElectric: '',
+      utilitiesPhoneInternet: '',
+      accountingLegal: '',
+      advertisingLicensesPermits: '',
+      supplies: '',
+      contractLawnSnow: '',
+      contractRefuse: '',
+      contractPest: '',
+      contractSweeping: '',
+      contractSecurity: '',
+      associationDues: '',
+      miscellaneousExpense: ''
     },
     lenderConstraints: {
       minDscr: '1.25',
@@ -243,7 +274,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
       maxLtv: '75.00'
     },
     rentRoll: [
-      { tenantName: '', suite: '', annualRent: '', annualSales: '', leasedSf: '', annualRentPsf: '', leaseType: 'NNN', reimbursementsPct: '0', freeRentMonths: '0', leaseStartYear: '1', leaseStartMonth: '1', leaseEndYear: '10', leaseEndMonth: '12', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0', marketRentPsf: '', newLeaseSpreadPct: '', renewalSpreadPct: '', tenantImprovementPerSf: '', leasingCommissionPct: '', expenseStopPerSf: '', grossUpPct: '', breakpointSales: '', percentageRentPct: '', anchorTenant: false, coTenancyGroup: '', extensionOptionMonths: '0', expansionSf: '0', contractionSf: '0', terminationMonth: '', purchaseOptionPrice: '', renewalTiPerSf: '', newLeaseTiPerSf: '', renewalLcPct: '', newLeaseLcPct: '', camPoolSharePct: '100', adminFeePct: '', controllableCapPct: '', nonRecoverableExpensePct: '' }
+      { tenantName: '', suite: '', annualRent: '', monthlyRent: '', annualRecoveries: '', monthlyRecoveries: '', grossAnnualRent: '', grossMonthlyRent: '', securityDeposit: '', annualSales: '', leasedSf: '', annualRentPsf: '', recoveryPsf: '', leaseType: 'NNN', reimbursementsPct: '0', freeRentMonths: '0', leaseStartYear: '1', leaseStartMonth: '1', leaseEndYear: '10', leaseEndMonth: '12', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0', marketRentPsf: '', newLeaseSpreadPct: '', renewalSpreadPct: '', tenantImprovementPerSf: '', leasingCommissionPct: '', expenseStopPerSf: '', grossUpPct: '', breakpointSales: '', percentageRentPct: '', anchorTenant: false, coTenancyGroup: '', extensionOptionMonths: '0', expansionSf: '0', contractionSf: '0', terminationMonth: '', purchaseOptionPrice: '', renewalTiPerSf: '', newLeaseTiPerSf: '', renewalLcPct: '', newLeaseLcPct: '', camPoolSharePct: '100', adminFeePct: '', controllableCapPct: '', nonRecoverableExpensePct: '' }
     ]
   })
   function toTextNumber(value) {
@@ -296,9 +327,16 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
       tenantName: row.tenantName || '',
       suite: row.suite || '',
       annualRent: toTextNumber(row.annualRent),
+      monthlyRent: toTextNumber(row.monthlyRent),
+      annualRecoveries: toTextNumber(row.annualRecoveries),
+      monthlyRecoveries: toTextNumber(row.monthlyRecoveries),
+      grossAnnualRent: toTextNumber(row.grossAnnualRent),
+      grossMonthlyRent: toTextNumber(row.grossMonthlyRent),
+      securityDeposit: toTextNumber(row.securityDeposit),
       annualSales: toTextNumber(row.annualSales),
       leasedSf: toTextNumber(row.leasedSf),
       annualRentPsf: toTextNumber(row.annualRentPsf),
+      recoveryPsf: toTextNumber(row.recoveryPsf),
       leaseType: row.leaseType || 'NNN',
       reimbursementsPct: toTextNumber(row.reimbursementsPct || 0),
       freeRentMonths: toTextNumber(row.freeRentMonths || 0),
@@ -397,6 +435,11 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
         ordinaryIncomeTaxRatePct: toTextNumber(source.taxModel?.ordinaryIncomeTaxRatePct ?? source.effectiveTaxRate ?? baseModel.taxModel.ordinaryIncomeTaxRatePct),
         passiveLossLimitPct: toTextNumber(source.taxModel?.passiveLossLimitPct ?? baseModel.taxModel.passiveLossLimitPct),
         initialTaxBasis: toTextNumber(source.taxModel?.initialTaxBasis),
+        assessedValue: toTextNumber(source.taxModel?.assessedValue),
+        appraisedValue: toTextNumber(source.taxModel?.appraisedValue),
+        landAssessment: toTextNumber(source.taxModel?.landAssessment),
+        improvementAssessment: toTextNumber(source.taxModel?.improvementAssessment),
+        personalPropertyAssessment: toTextNumber(source.taxModel?.personalPropertyAssessment),
         suspendedLossCarryforward: toTextNumber(source.taxModel?.suspendedLossCarryforward ?? baseModel.taxModel.suspendedLossCarryforward),
         entityType: source.taxModel?.entityType || baseModel.taxModel.entityType,
         enable1031: !!source.taxModel?.enable1031,
@@ -429,7 +472,33 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
         insurancePoolRecoverablePct: toTextNumber(source.leaseEconomics?.insurancePoolRecoverablePct ?? baseModel.leaseEconomics.insurancePoolRecoverablePct),
         camPoolRecoverablePct: toTextNumber(source.leaseEconomics?.camPoolRecoverablePct ?? baseModel.leaseEconomics.camPoolRecoverablePct),
         grossUpMethod: source.leaseEconomics?.grossUpMethod || baseModel.leaseEconomics.grossUpMethod,
-        reconciliationMonth: toTextNumber(source.leaseEconomics?.reconciliationMonth ?? baseModel.leaseEconomics.reconciliationMonth)
+        reconciliationMonth: toTextNumber(source.leaseEconomics?.reconciliationMonth ?? baseModel.leaseEconomics.reconciliationMonth),
+        occupiedSqft: toTextNumber(source.leaseEconomics?.occupiedSqft),
+        vacantSqft: toTextNumber(source.leaseEconomics?.vacantSqft),
+        parkingIncome: toTextNumber(source.leaseEconomics?.parkingIncome),
+        laundryIncome: toTextNumber(source.leaseEconomics?.laundryIncome),
+        storageIncome: toTextNumber(source.leaseEconomics?.storageIncome),
+        otherIncomeMisc: toTextNumber(source.leaseEconomics?.otherIncomeMisc),
+        personalPropertyTaxes: toTextNumber(source.leaseEconomics?.personalPropertyTaxes),
+        payroll: toTextNumber(source.leaseEconomics?.payroll),
+        payrollBenefits: toTextNumber(source.leaseEconomics?.payrollBenefits),
+        workersComp: toTextNumber(source.leaseEconomics?.workersComp),
+        repairsMaintenance: toTextNumber(source.leaseEconomics?.repairsMaintenance),
+        janitorial: toTextNumber(source.leaseEconomics?.janitorial),
+        utilitiesFuel: toTextNumber(source.leaseEconomics?.utilitiesFuel),
+        utilitiesWaterSewer: toTextNumber(source.leaseEconomics?.utilitiesWaterSewer),
+        utilitiesElectric: toTextNumber(source.leaseEconomics?.utilitiesElectric),
+        utilitiesPhoneInternet: toTextNumber(source.leaseEconomics?.utilitiesPhoneInternet),
+        accountingLegal: toTextNumber(source.leaseEconomics?.accountingLegal),
+        advertisingLicensesPermits: toTextNumber(source.leaseEconomics?.advertisingLicensesPermits),
+        supplies: toTextNumber(source.leaseEconomics?.supplies),
+        contractLawnSnow: toTextNumber(source.leaseEconomics?.contractLawnSnow),
+        contractRefuse: toTextNumber(source.leaseEconomics?.contractRefuse),
+        contractPest: toTextNumber(source.leaseEconomics?.contractPest),
+        contractSweeping: toTextNumber(source.leaseEconomics?.contractSweeping),
+        contractSecurity: toTextNumber(source.leaseEconomics?.contractSecurity),
+        associationDues: toTextNumber(source.leaseEconomics?.associationDues),
+        miscellaneousExpense: toTextNumber(source.leaseEconomics?.miscellaneousExpense)
       },
       lenderConstraints: {
         minDscr: toTextNumber(source.lenderConstraints?.minDscr ?? baseModel.lenderConstraints.minDscr),
@@ -791,12 +860,42 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
         }, 0)
         : 0
       const totalRecoveries = recoveries + reconciliationAdjustment
+      const leaseEconomicsOtherIncome = [
+        source.leaseEconomics?.parkingIncome,
+        source.leaseEconomics?.laundryIncome,
+        source.leaseEconomics?.storageIncome,
+        source.leaseEconomics?.otherIncomeMisc,
+      ].reduce((sum, value) => sum + (Number(value || 0) / 12), 0) * expenseGrowthFactor
+      const leaseEconomicsExpenseAdders = [
+        source.leaseEconomics?.personalPropertyTaxes,
+        source.leaseEconomics?.payroll,
+        source.leaseEconomics?.payrollBenefits,
+        source.leaseEconomics?.workersComp,
+        source.leaseEconomics?.repairsMaintenance,
+        source.leaseEconomics?.janitorial,
+        source.leaseEconomics?.utilitiesFuel,
+        source.leaseEconomics?.utilitiesWaterSewer,
+        source.leaseEconomics?.utilitiesElectric,
+        source.leaseEconomics?.utilitiesPhoneInternet,
+        source.leaseEconomics?.accountingLegal,
+        source.leaseEconomics?.advertisingLicensesPermits,
+        source.leaseEconomics?.supplies,
+        source.leaseEconomics?.contractLawnSnow,
+        source.leaseEconomics?.contractRefuse,
+        source.leaseEconomics?.contractPest,
+        source.leaseEconomics?.contractSweeping,
+        source.leaseEconomics?.contractSecurity,
+        source.leaseEconomics?.associationDues,
+        source.leaseEconomics?.miscellaneousExpense,
+      ].reduce((sum, value) => sum + (Number(value || 0) / 12), 0) * expenseGrowthFactor
       const effectiveGrossIncome = grossRevenue - vacancyLoss + percentageRent + otherIncome + totalRecoveries
-      const managementFees = effectiveGrossIncome * managementFeePct
+      const effectiveGrossIncomeWithRollups = effectiveGrossIncome + leaseEconomicsOtherIncome
+      const managementFees = effectiveGrossIncomeWithRollups * managementFeePct
       const propertyTaxesMonth = monthlyPropertyTaxesBase * expenseGrowthFactor
       const insuranceMonth = monthlyInsuranceBase * expenseGrowthFactor
       const reservesMonth = monthlyReservesBase * expenseGrowthFactor
-      const noi = effectiveGrossIncome - operatingExpensesMonth - managementFees - propertyTaxesMonth - insuranceMonth - reservesMonth
+      const operatingExpensesMonthWithRollups = operatingExpensesMonth + leaseEconomicsExpenseAdders
+      const noi = effectiveGrossIncomeWithRollups - operatingExpensesMonthWithRollups - managementFees - propertyTaxesMonth - insuranceMonth - reservesMonth
       const tenantImprovementsMonth = rentRoll.reduce((sum, tenant) => {
         const leaseEndIndex = toMonthIndex(tenant.leaseEndYear, tenant.leaseEndMonth)
         const extensionOptionMonths = Math.max(0, Number(tenant.extensionOptionMonths || 0))
@@ -919,8 +1018,8 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
         grossRevenue: Math.round(grossRevenue),
         vacancyCreditLoss: Math.round(vacancyLoss),
         percentageRentDcf: Math.round(percentageRent),
-        otherIncomeDcf: Math.round(otherIncome),
-        operatingExpensesDcf: Math.round(operatingExpensesMonth),
+        otherIncomeDcf: Math.round(otherIncome + leaseEconomicsOtherIncome),
+        operatingExpensesDcf: Math.round(operatingExpensesMonthWithRollups),
         managementFeesDcf: Math.round(managementFees),
         propertyTaxesDcf: Math.round(propertyTaxesMonth),
         insuranceDcf: Math.round(insuranceMonth),
@@ -947,8 +1046,8 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
       yearlyBuckets[yearIndex].grossRevenue += grossRevenue
       yearlyBuckets[yearIndex].vacancyCreditLoss += vacancyLoss
       yearlyBuckets[yearIndex].percentageRentDcf += percentageRent
-      yearlyBuckets[yearIndex].otherIncomeDcf += otherIncome
-      yearlyBuckets[yearIndex].operatingExpensesDcf += operatingExpensesMonth
+      yearlyBuckets[yearIndex].otherIncomeDcf += otherIncome + leaseEconomicsOtherIncome
+      yearlyBuckets[yearIndex].operatingExpensesDcf += operatingExpensesMonthWithRollups
       yearlyBuckets[yearIndex].managementFeesDcf += managementFees
       yearlyBuckets[yearIndex].propertyTaxesDcf += propertyTaxesMonth
       yearlyBuckets[yearIndex].insuranceDcf += insuranceMonth
@@ -1031,6 +1130,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
       ...propertyOverrides,
       price,
       closing_costs: closingCosts,
+      acquisition_basis: ((parseNum(price) || 0) + (parseNum(closingCosts) || 0)).toFixed(2),
       hold_period: holdPeriod,
       gross_scheduled_rent: grossScheduledRent,
       vacancy_rate: vacancyRate,
@@ -1842,6 +1942,11 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
           ordinaryIncomeTaxRatePct: parseNum(dcfModel.taxModel.ordinaryIncomeTaxRatePct),
           passiveLossLimitPct: parseNum(dcfModel.taxModel.passiveLossLimitPct),
           initialTaxBasis: parseNum(dcfModel.taxModel.initialTaxBasis),
+          assessedValue: parseNum(dcfModel.taxModel.assessedValue),
+          appraisedValue: parseNum(dcfModel.taxModel.appraisedValue),
+          landAssessment: parseNum(dcfModel.taxModel.landAssessment),
+          improvementAssessment: parseNum(dcfModel.taxModel.improvementAssessment),
+          personalPropertyAssessment: parseNum(dcfModel.taxModel.personalPropertyAssessment),
           suspendedLossCarryforward: parseNum(dcfModel.taxModel.suspendedLossCarryforward),
           entityType: dcfModel.taxModel.entityType,
           enable1031: !!dcfModel.taxModel.enable1031,
@@ -1878,6 +1983,32 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
           camPoolRecoverablePct: parseNum(dcfModel.leaseEconomics.camPoolRecoverablePct),
           grossUpMethod: dcfModel.leaseEconomics.grossUpMethod,
           reconciliationMonth: parseNum(dcfModel.leaseEconomics.reconciliationMonth),
+          occupiedSqft: parseNum(dcfModel.leaseEconomics.occupiedSqft),
+          vacantSqft: parseNum(dcfModel.leaseEconomics.vacantSqft),
+          parkingIncome: parseNum(dcfModel.leaseEconomics.parkingIncome),
+          laundryIncome: parseNum(dcfModel.leaseEconomics.laundryIncome),
+          storageIncome: parseNum(dcfModel.leaseEconomics.storageIncome),
+          otherIncomeMisc: parseNum(dcfModel.leaseEconomics.otherIncomeMisc),
+          personalPropertyTaxes: parseNum(dcfModel.leaseEconomics.personalPropertyTaxes),
+          payroll: parseNum(dcfModel.leaseEconomics.payroll),
+          payrollBenefits: parseNum(dcfModel.leaseEconomics.payrollBenefits),
+          workersComp: parseNum(dcfModel.leaseEconomics.workersComp),
+          repairsMaintenance: parseNum(dcfModel.leaseEconomics.repairsMaintenance),
+          janitorial: parseNum(dcfModel.leaseEconomics.janitorial),
+          utilitiesFuel: parseNum(dcfModel.leaseEconomics.utilitiesFuel),
+          utilitiesWaterSewer: parseNum(dcfModel.leaseEconomics.utilitiesWaterSewer),
+          utilitiesElectric: parseNum(dcfModel.leaseEconomics.utilitiesElectric),
+          utilitiesPhoneInternet: parseNum(dcfModel.leaseEconomics.utilitiesPhoneInternet),
+          accountingLegal: parseNum(dcfModel.leaseEconomics.accountingLegal),
+          advertisingLicensesPermits: parseNum(dcfModel.leaseEconomics.advertisingLicensesPermits),
+          supplies: parseNum(dcfModel.leaseEconomics.supplies),
+          contractLawnSnow: parseNum(dcfModel.leaseEconomics.contractLawnSnow),
+          contractRefuse: parseNum(dcfModel.leaseEconomics.contractRefuse),
+          contractPest: parseNum(dcfModel.leaseEconomics.contractPest),
+          contractSweeping: parseNum(dcfModel.leaseEconomics.contractSweeping),
+          contractSecurity: parseNum(dcfModel.leaseEconomics.contractSecurity),
+          associationDues: parseNum(dcfModel.leaseEconomics.associationDues),
+          miscellaneousExpense: parseNum(dcfModel.leaseEconomics.miscellaneousExpense),
         },
         lenderConstraints: {
           minDscr: parseNum(dcfModel.lenderConstraints.minDscr),
@@ -1888,9 +2019,16 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
           tenantName: row.tenantName || '',
           suite: row.suite || '',
           annualRent: parseNum(row.annualRent),
+          monthlyRent: parseNum(row.monthlyRent),
+          annualRecoveries: parseNum(row.annualRecoveries),
+          monthlyRecoveries: parseNum(row.monthlyRecoveries),
+          grossAnnualRent: parseNum(row.grossAnnualRent),
+          grossMonthlyRent: parseNum(row.grossMonthlyRent),
+          securityDeposit: parseNum(row.securityDeposit),
           annualSales: parseNum(row.annualSales),
           leasedSf: parseNum(row.leasedSf),
           annualRentPsf: parseNum(row.annualRentPsf),
+          recoveryPsf: parseNum(row.recoveryPsf),
           leaseType: row.leaseType || 'NNN',
           reimbursementsPct: parseNum(row.reimbursementsPct),
           freeRentMonths: parseNum(row.freeRentMonths),
@@ -2496,6 +2634,30 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   <NumericInput placeholder="e.g. 18000" value={propertyTaxes} onChange={setPropertyTaxes}
                     className={financialInputClass} disabled={!isAdmin} />
                 </Field>
+                <Field label="Personal Property Taxes ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.personalPropertyTaxes} onChange={(value) => updateLeaseEconomicsField('personalPropertyTaxes', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Payroll ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.payroll} onChange={(value) => updateLeaseEconomicsField('payroll', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Payroll Benefits ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.payrollBenefits} onChange={(value) => updateLeaseEconomicsField('payrollBenefits', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Workers Comp ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.workersComp} onChange={(value) => updateLeaseEconomicsField('workersComp', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Repairs & Maintenance ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.repairsMaintenance} onChange={(value) => updateLeaseEconomicsField('repairsMaintenance', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Janitorial ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.janitorial} onChange={(value) => updateLeaseEconomicsField('janitorial', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
                 <Field label="Adjusted NOI ($/yr)" help={FIELD_HELP.adjustedNoi}>
                   <input readOnly
                     value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
@@ -2521,6 +2683,22 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 <Field label="Other Income ($/yr)" help={FIELD_HELP.otherIncome}>
                   <NumericInput placeholder="parking, RUBS, storage" value={otherIncome} onChange={setOtherIncome}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Parking Income ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.parkingIncome} onChange={(value) => updateLeaseEconomicsField('parkingIncome', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Laundry Income ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.laundryIncome} onChange={(value) => updateLeaseEconomicsField('laundryIncome', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Storage Income ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.storageIncome} onChange={(value) => updateLeaseEconomicsField('storageIncome', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Other Misc Income ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.otherIncomeMisc} onChange={(value) => updateLeaseEconomicsField('otherIncomeMisc', value)}
                     className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Operating Expenses ($/yr)" help={FIELD_HELP.operatingExpenses}>
@@ -2690,6 +2868,26 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   <NumericInput value={dcfModel.taxModel.initialTaxBasis} onChange={(value) => updateTaxModelField('initialTaxBasis', value)}
                     className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
+                <Field label="Assessed Value ($)">
+                  <NumericInput value={dcfModel.taxModel.assessedValue} onChange={(value) => updateTaxModelField('assessedValue', value)}
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Appraised Value ($)">
+                  <NumericInput value={dcfModel.taxModel.appraisedValue} onChange={(value) => updateTaxModelField('appraisedValue', value)}
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Land Assessment ($)">
+                  <NumericInput value={dcfModel.taxModel.landAssessment} onChange={(value) => updateTaxModelField('landAssessment', value)}
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Improvement Assessment ($)">
+                  <NumericInput value={dcfModel.taxModel.improvementAssessment} onChange={(value) => updateTaxModelField('improvementAssessment', value)}
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Personal Property Assessment ($)">
+                  <NumericInput value={dcfModel.taxModel.personalPropertyAssessment} onChange={(value) => updateTaxModelField('personalPropertyAssessment', value)}
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
+                </Field>
                 <Field label="Suspended Loss Carryforward ($)" help={FIELD_HELP.startingLoss}>
                   <NumericInput value={dcfModel.taxModel.suspendedLossCarryforward} onChange={(value) => updateTaxModelField('suspendedLossCarryforward', value)}
                     className={financialInputClass} disabled={!isAdmin} allowDecimal />
@@ -2792,6 +2990,16 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <Field label="Closing Costs ($)" help={FIELD_HELP.closingCosts}>
                   <NumericInput placeholder="e.g. 25000" value={closingCosts} onChange={setClosingCosts}
                     className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Down Payment / Equity ($)">
+                  <input readOnly
+                    value={price !== '' && loanAmount !== '' ? '$' + Math.max(0, Number(price) - Number(loanAmount)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className={financialFormulaClass} />
+                </Field>
+                <Field label="Acquisition Basis ($)">
+                  <input readOnly
+                    value={'$' + (((parseNum(price) || 0) + (parseNum(closingCosts) || 0)).toLocaleString(undefined, { maximumFractionDigits: 0 }))}
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Hold Period (yrs)" help={FIELD_HELP.holdPeriod}>
                   <NumericInput placeholder="e.g. 7" value={holdPeriod} onChange={setHoldPeriod}
@@ -2952,6 +3160,80 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   <NumericInput value={dcfModel.leaseEconomics.reconciliationMonth} onChange={(value) => updateLeaseEconomicsField('reconciliationMonth', value)}
                     className={financialInputClass} disabled={!isAdmin} />
                 </Field>
+                <Field label="Occupied SF">
+                  <NumericInput value={dcfModel.leaseEconomics.occupiedSqft} onChange={(value) => updateLeaseEconomicsField('occupiedSqft', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Vacant SF">
+                  <NumericInput value={dcfModel.leaseEconomics.vacantSqft} onChange={(value) => updateLeaseEconomicsField('vacantSqft', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Occupancy (%)">
+                  <input readOnly
+                    value={(() => {
+                      const occupied = Number(dcfModel.leaseEconomics.occupiedSqft || 0)
+                      const vacant = Number(dcfModel.leaseEconomics.vacantSqft || 0)
+                      const total = occupied + vacant
+                      return total > 0 ? `${((occupied / total) * 100).toFixed(2)}%` : '—'
+                    })()}
+                    className={financialFormulaClass} />
+                </Field>
+                <Field label="Utilities — Fuel ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.utilitiesFuel} onChange={(value) => updateLeaseEconomicsField('utilitiesFuel', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Utilities — Water/Sewer ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.utilitiesWaterSewer} onChange={(value) => updateLeaseEconomicsField('utilitiesWaterSewer', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Utilities — Electric ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.utilitiesElectric} onChange={(value) => updateLeaseEconomicsField('utilitiesElectric', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Utilities — Phone/Internet ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.utilitiesPhoneInternet} onChange={(value) => updateLeaseEconomicsField('utilitiesPhoneInternet', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Accounting & Legal ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.accountingLegal} onChange={(value) => updateLeaseEconomicsField('accountingLegal', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Advertising / Licenses / Permits ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.advertisingLicensesPermits} onChange={(value) => updateLeaseEconomicsField('advertisingLicensesPermits', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Supplies ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.supplies} onChange={(value) => updateLeaseEconomicsField('supplies', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Contract — Lawn/Snow ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.contractLawnSnow} onChange={(value) => updateLeaseEconomicsField('contractLawnSnow', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Contract — Refuse ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.contractRefuse} onChange={(value) => updateLeaseEconomicsField('contractRefuse', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Contract — Pest Control ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.contractPest} onChange={(value) => updateLeaseEconomicsField('contractPest', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Contract — Lot Sweeping ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.contractSweeping} onChange={(value) => updateLeaseEconomicsField('contractSweeping', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Contract — Security ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.contractSecurity} onChange={(value) => updateLeaseEconomicsField('contractSecurity', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Association Dues ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.associationDues} onChange={(value) => updateLeaseEconomicsField('associationDues', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
+                <Field label="Miscellaneous Expense ($/yr)">
+                  <NumericInput value={dcfModel.leaseEconomics.miscellaneousExpense} onChange={(value) => updateLeaseEconomicsField('miscellaneousExpense', value)}
+                    className={financialInputClass} disabled={!isAdmin} />
+                </Field>
               </div>
 
               {/* Tenant — retail / percentage-rent only */}
@@ -2998,9 +3280,49 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                               <NumericInput value={tenant.annualRent} onChange={(value) => updateRentRollRow(index, 'annualRent', value)}
                                 className={financialInputClass} disabled={!isAdmin} />
                             </Field>
+                            <Field label="Monthly Rent ($)">
+                              <NumericInput value={tenant.monthlyRent} onChange={(value) => updateRentRollRow(index, 'monthlyRent', value)}
+                                className={financialInputClass} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Annual Recoveries ($)">
+                              <NumericInput value={tenant.annualRecoveries} onChange={(value) => updateRentRollRow(index, 'annualRecoveries', value)}
+                                className={financialInputClass} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Monthly Recoveries ($)">
+                              <NumericInput value={tenant.monthlyRecoveries} onChange={(value) => updateRentRollRow(index, 'monthlyRecoveries', value)}
+                                className={financialInputClass} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Gross Annual Rent ($)">
+                              <NumericInput value={tenant.grossAnnualRent} onChange={(value) => updateRentRollRow(index, 'grossAnnualRent', value)}
+                                className={financialInputClass} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Gross Monthly Rent ($)">
+                              <NumericInput value={tenant.grossMonthlyRent} onChange={(value) => updateRentRollRow(index, 'grossMonthlyRent', value)}
+                                className={financialInputClass} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Security Deposit ($)">
+                              <NumericInput value={tenant.securityDeposit} onChange={(value) => updateRentRollRow(index, 'securityDeposit', value)}
+                                className={financialInputClass} disabled={!isAdmin} />
+                            </Field>
                             <Field label="Annual Sales ($)" help={FIELD_HELP.annualSales}>
                               <NumericInput value={tenant.annualSales} onChange={(value) => updateRentRollRow(index, 'annualSales', value)}
                                 className={financialInputClass} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Leased SF">
+                              <NumericInput value={tenant.leasedSf} onChange={(value) => updateRentRollRow(index, 'leasedSf', value)}
+                                className={financialInputClass} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Rent / SF ($)">
+                              <NumericInput value={tenant.annualRentPsf} onChange={(value) => updateRentRollRow(index, 'annualRentPsf', value)}
+                                className={financialInputClass} disabled={!isAdmin} allowDecimal />
+                            </Field>
+                            <Field label="Recovery / SF ($)">
+                              <NumericInput value={tenant.recoveryPsf} onChange={(value) => updateRentRollRow(index, 'recoveryPsf', value)}
+                                className={financialInputClass} disabled={!isAdmin} allowDecimal />
+                            </Field>
+                            <Field label="Recoveries (%)">
+                              <NumericInput value={tenant.reimbursementsPct} onChange={(value) => updateRentRollRow(index, 'reimbursementsPct', value)}
+                                className={financialInputClass} disabled={!isAdmin} allowDecimal />
                             </Field>
                             <Field label="Lease Start Year" help={FIELD_HELP.leaseStartYear}>
                               <NumericInput value={tenant.leaseStartYear} onChange={(value) => updateRentRollRow(index, 'leaseStartYear', value)}
