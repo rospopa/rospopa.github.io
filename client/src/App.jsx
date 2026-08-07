@@ -1931,10 +1931,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row overflow-hidden min-h-0 flex-1">
+        <div className="flex flex-col md:flex-row overflow-hidden min-h-0 flex-1 md:pt-0">
         {/* ── Left panel: form ── */}
         <div className="flex flex-col w-full md:w-[480px] md:flex-shrink-0 overflow-y-auto max-h-screen">
-          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-base-300">
+          <div className="hidden md:flex items-center justify-between px-6 py-2 border-b border-base-300">
             <h3 className="font-bold text-xl">
               {property?.id ? property.address : 'New Property'}
             </h3>
@@ -1943,7 +1943,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
 
           {/* Tabs */}
           {tabs.length > 1 && (
-            <div className="tabs tabs-bordered px-6 pt-2">
+            <div className="tabs tabs-bordered px-6 md:pt-0">
               {tabs.map(t => (
                 <button key={t} className={`tab ${tab === t ? 'tab-active font-semibold' : ''}`} onClick={() => setTab(t)}>
                   {tabLabel[t]}
