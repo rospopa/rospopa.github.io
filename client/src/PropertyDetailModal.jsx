@@ -2017,6 +2017,38 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
               </select>
             </Field>
 
+            <div className="divider text-xs text-base-content/40 my-1">Property Specs</div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Field label="Price ($)" help={FIELD_HELP.price}>
+                <NumericInput placeholder="0" value={price} onChange={setPrice}
+                  className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Square Feet" help={FIELD_HELP.sqft}>
+                <NumericInput placeholder="0" value={sqft} onChange={setSqft}
+                  className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Lot Size (acres)" help={FIELD_HELP.lot}>
+                <input type="number" placeholder="0.00" step="0.01" value={lot}
+                  onChange={e => setLot(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Year Built" help={FIELD_HELP.yearBuilt}>
+                <input type="number" placeholder="e.g. 1998" value={yearBuilt}
+                  onChange={e => setYearBuilt(e.target.value)} className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Unit / Bay / Suite Count" help={FIELD_HELP.unitCount}>
+                <NumericInput placeholder="e.g. 24" value={unitCount} onChange={setUnitCount}
+                  className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Voltage (V)" help={FIELD_HELP.voltage}>
+                <NumericInput placeholder="e.g. 480" value={elecVoltage} onChange={setElecVoltage}
+                  className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+              <Field label="Amperage (A)" help={FIELD_HELP.amperage}>
+                <NumericInput placeholder="e.g. 400" value={elecAmperage} onChange={setElecAmperage}
+                  className="input input-bordered w-full" disabled={!isAdmin} />
+              </Field>
+            </div>
+
             {/* Asset Type */}
             <Field label="Asset Type">
               <select value={assetType} onChange={e => setAssetType(e.target.value)}
@@ -2194,27 +2226,6 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
         {/* Financials tab */}
         {tab === 'financials' && (
           <div className="space-y-4">
-              {/* Core financials */}
-              <div className="space-y-3">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Property</div>
-                <Field label="Price ($)" help={FIELD_HELP.price}>
-                  <NumericInput placeholder="0" value={price} onChange={setPrice}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
-                <Field label="Square Feet" help={FIELD_HELP.sqft}>
-                  <NumericInput placeholder="0" value={sqft} onChange={setSqft}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
-                <Field label="Lot Size (acres)" help={FIELD_HELP.lot}>
-                  <input type="number" placeholder="0.00" step="0.01" value={lot}
-                    onChange={e => setLot(e.target.value)} className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
-                <Field label="Year Built" help={FIELD_HELP.yearBuilt}>
-                  <input type="number" placeholder="e.g. 1998" value={yearBuilt}
-                    onChange={e => setYearBuilt(e.target.value)} className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
-              </div>
-
               {/* Investment metrics */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Investment Metrics</div>
@@ -2609,10 +2620,6 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
               {/* Deal */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Deal</div>
-                <Field label="Unit / Bay / Suite Count" help={FIELD_HELP.unitCount}>
-                  <NumericInput placeholder="e.g. 24" value={unitCount} onChange={setUnitCount}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
                 <Field label="Closing Costs ($)" help={FIELD_HELP.closingCosts}>
                   <NumericInput placeholder="e.g. 25000" value={closingCosts} onChange={setClosingCosts}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
@@ -2774,19 +2781,6 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 <Field label="Reconciliation Month" help={FIELD_HELP.reconciliationMonth}>
                   <NumericInput value={dcfModel.leaseEconomics.reconciliationMonth} onChange={(value) => updateLeaseEconomicsField('reconciliationMonth', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
-              </div>
-
-              {/* Electrical */}
-              <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Electrical</div>
-                <Field label="Voltage (V)" help={FIELD_HELP.voltage}>
-                  <NumericInput placeholder="e.g. 480" value={elecVoltage} onChange={setElecVoltage}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
-                <Field label="Amperage (A)" help={FIELD_HELP.amperage}>
-                  <NumericInput placeholder="e.g. 400" value={elecAmperage} onChange={setElecAmperage}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
               </div>
