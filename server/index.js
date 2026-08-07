@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const crypto = require('crypto');
 const path = require('path');
 const fs = require('fs');
 const { Pool } = require('pg');
@@ -231,6 +232,25 @@ async function initializeSchema() {
 }
 
 const app = express();
+
+// Origin-guard: verifies requests arrived via the Cloudflare zone,
+// which injects x-origin-key through a Transform Rule.
+const _originKey = process.env.ORIGIN_KEY || '';
+const _healthPath = process.env.HEALTH_PATH || '/healthz';
+if (!_originKey) {
+  console.warn('[origin-guard] WARNING: ORIGIN_KEY is not set — all non-health requests will be rejected with 403');
+}
+app.use((req, res, next) => {
+  if (req.path === _healthPath) return next();
+  if (!_originKey) return res.status(403).send('Forbidden');
+  const incoming = req.headers['x-origin-key'] || '';
+  const a = Buffer.from(incoming);
+  const b = Buffer.from(_originKey);
+  if (a.length !== b.length) return res.status(403).send('Forbidden');
+  if (!crypto.timingSafeEqual(a, b)) return res.status(403).send('Forbidden');
+  next();
+});
+
 app.use(express.json({ limit: '60mb' }));
 app.use(express.urlencoded({ limit: '60mb', extended: true }));
 
