@@ -277,14 +277,14 @@ function FinancialsTabUI(props) {
 
   return (
     <div className="space-y-4 pb-24">
-      <div className="sticky top-[106px] z-[3] rounded-2xl border border-base-300 bg-base-100/95 backdrop-blur px-4 py-4 shadow-sm">
+      <div className="relative md:sticky md:top-[106px] z-[3] rounded-2xl border border-base-300 bg-base-100/95 backdrop-blur px-4 py-4 shadow-sm">
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.22em] text-base-content/45">Financial Workflow</div>
               <h3 className="text-lg font-semibold text-base-content">Enter assumptions on the left, review live outputs on the right.</h3>
             </div>
-            <div className="tabs tabs-boxed bg-base-200/60 self-start">
+            <div className="tabs tabs-boxed bg-base-200/60 self-start flex-wrap">
               {['Base', 'Upside', 'Downside'].map((label) => (
                 <button
                   key={label}
@@ -852,7 +852,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
       exitCapRate: toTextNumber(scenario.exitCapRate ?? fallbackValues.exitCapRate),
       vacancyRate: toTextNumber(scenario.vacancyRate ?? fallbackValues.vacancyRate),
       loanAmount: toTextNumber(scenario.loanAmount ?? fallbackValues.loanAmount),
-      holdPeriod: toTextNumber(scenario.holdPeriod ?? fallbackValues.holdPeriod)
+      holdPeriod: toTextNumber(scenario.holdPeriod ?? fallbackValues.holdPeriod ?? 10)
     }
   }
   function normalizeRentRollRow(row = {}) {
@@ -1671,7 +1671,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   // Deal block
   const [unitCount, setUnitCount] = useState('')
   const [closingCosts, setClosingCosts] = useState('')
-  const [holdPeriod, setHoldPeriod] = useState('')
+  const [holdPeriod, setHoldPeriod] = useState('10')
   const [rentGrowth, setRentGrowth] = useState('')
   const [expenseGrowth, setExpenseGrowth] = useState('')
   const [exitCapRate, setExitCapRate] = useState('')
@@ -1755,7 +1755,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
     setInterestOnlyPeriod(p.interest_only_period ?? '')
     setUnitCount(p.unit_count ?? '')
     setClosingCosts(p.closing_costs ?? '')
-    setHoldPeriod(p.hold_period ?? '')
+    setHoldPeriod(p.hold_period ?? '10')
     setRentGrowth(p.rent_growth ?? '')
     setExpenseGrowth(p.expense_growth ?? '')
     setExitCapRate(p.exit_cap_rate ?? '')
@@ -1790,7 +1790,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
       setPricePerAcre(''); setElecVoltage(''); setElecAmperage(''); setAssetType('')
       setGrossScheduledRent(''); setVacancyRate(''); setOtherIncome(''); setOperatingExpenses(''); setReservesCapex('')
       setLoanAmount(''); setLtv(''); setInterestRate(''); setAmortizationTerm(''); setInterestOnlyPeriod('')
-      setUnitCount(''); setClosingCosts(''); setHoldPeriod(''); setRentGrowth(''); setExpenseGrowth('')
+      setUnitCount(''); setClosingCosts(''); setHoldPeriod('10'); setRentGrowth(''); setExpenseGrowth('')
       setExitCapRate(''); setCostOfSale(''); setTenantGrossSales(''); setTenantBaseRent('')
       setManagementFeePct(''); setInsurance(''); setPropertyTaxes('')
       setLandValuePct(''); setCostSegBonusPct(''); setEffectiveTaxRate(''); setDepreciationRecaptureRate('')
