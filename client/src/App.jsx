@@ -1488,6 +1488,44 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       })
     }
   }
+  function buildPropertyFromDraft(overrides = {}) {
+    return {
+      ...property,
+      price,
+      closing_costs: closingCosts,
+      hold_period: holdPeriod,
+      gross_scheduled_rent: grossScheduledRent,
+      vacancy_rate: vacancyRate,
+      other_income: otherIncome,
+      operating_expenses: operatingExpenses,
+      reserves_capex: reservesCapex,
+      loan_amount: loanAmount,
+      interest_rate: interestRate,
+      amortization_term: amortizationTerm,
+      interest_only_period: interestOnlyPeriod,
+      rent_growth: rentGrowth,
+      expense_growth: expenseGrowth,
+      exit_cap_rate: exitCapRate,
+      cost_of_sale: costOfSale,
+      tenant_gross_sales: tenantGrossSales,
+      tenant_base_rent: tenantBaseRent,
+      management_fee_pct: managementFeePct,
+      insurance,
+      property_taxes: propertyTaxes,
+      land_value_pct: landValuePct,
+      cost_seg_bonus_pct: costSegBonusPct,
+      effective_tax_rate: effectiveTaxRate,
+      depreciation_recapture_rate: depreciationRecaptureRate,
+      refi_ltv: refiLtv,
+      refi_rate: refiRate,
+      refi_year: refiYear,
+      rent_to_sales_ratio: rentToSales,
+      dcf_model: {
+        ...dcfModel,
+        ...overrides
+      }
+    }
+  }
   const [tab, setTab] = useState('details')
   const [pin, setPin] = useState('')
   const [address, setAddress] = useState('')
@@ -1715,6 +1753,42 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       rentRoll: prev.rentRoll.length <= 1 ? prev.rentRoll : prev.rentRoll.filter((_, rowIndex) => rowIndex !== index)
     }))
   }
+  const liveDerivedDcfModel = useMemo(
+    () => normalizeDcfModel(buildPropertyFromDraft().dcf_model, buildPropertyFromDraft()),
+    [
+      property,
+      price,
+      closingCosts,
+      holdPeriod,
+      grossScheduledRent,
+      vacancyRate,
+      otherIncome,
+      operatingExpenses,
+      reservesCapex,
+      loanAmount,
+      interestRate,
+      amortizationTerm,
+      interestOnlyPeriod,
+      rentGrowth,
+      expenseGrowth,
+      exitCapRate,
+      costOfSale,
+      tenantGrossSales,
+      tenantBaseRent,
+      managementFeePct,
+      insurance,
+      propertyTaxes,
+      landValuePct,
+      costSegBonusPct,
+      effectiveTaxRate,
+      depreciationRecaptureRate,
+      refiLtv,
+      refiRate,
+      refiYear,
+      rentToSales,
+      dcfModel
+    ]
+  )
   function getComputedDcfValue(yearRow, rowKey) {
     const grossRevenueVal = parseNum(yearRow.grossRevenue) || 0
     const vacancyLossVal = parseNum(yearRow.vacancyCreditLoss) || 0
@@ -1746,7 +1820,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     if (rowKey === 'cashFlowAfterSale') return cashFlowAfterSale
     return null
   }
-  const dcfYearSummaries = visibleDcfYears.map((yearRow) => {
+  const engineVisibleDcfYears = liveDerivedDcfModel.years.slice(0, activeHoldPeriod)
+  const dcfYearSummaries = engineVisibleDcfYears.map((yearRow) => {
     const effectiveGrossIncome = getComputedDcfValue(yearRow, 'effectiveGrossIncome') || 0
     const netOperatingIncome = getComputedDcfValue(yearRow, 'netOperatingIncomeDcf') || 0
     const cashFlowBeforeSale = getComputedDcfValue(yearRow, 'cashFlowBeforeSale') || 0
@@ -1759,7 +1834,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     : null
   const leveredIrr = leveredCashFlows ? calculateIrr(leveredCashFlows) : null
   const unleveredCashFlowsResolved = acquisitionBasis > 0
-    ? [-acquisitionBasis, ...visibleDcfYears.map((yearRow) => {
+    ? [-acquisitionBasis, ...engineVisibleDcfYears.map((yearRow) => {
       const noi = getComputedDcfValue(yearRow, 'netOperatingIncomeDcf') || 0
       const sale = parseNum(yearRow.saleProceedsDcf) || 0
       const taxes = parseNum(yearRow.taxesDcf) || 0
@@ -1785,8 +1860,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   const yieldOnCost = dcfYearSummaries[0] && acquisitionBasis > 0
     ? dcfYearSummaries[0].netOperatingIncome / acquisitionBasis * 100
     : null
-  const firstYearDcf = visibleDcfYears[0] || null
-  const holdYearDcf = visibleDcfYears[visibleDcfYears.length - 1] || null
+  const firstYearDcf = engineVisibleDcfYears[0] || null
+  const holdYearDcf = engineVisibleDcfYears[engineVisibleDcfYears.length - 1] || null
   const adjustedNoiValue = firstYearDcf ? (getComputedDcfValue(firstYearDcf, 'netOperatingIncomeDcf') || 0) : null
   const exitValueAmount = holdYearDcf ? (parseNum(holdYearDcf.grossSaleProceedsDcf) || 0) : null
   const netSaleProceedsAmount = holdYearDcf ? (parseNum(holdYearDcf.saleProceedsDcf) || 0) : null
@@ -1812,9 +1887,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const exitNoi = baseNoi * Math.pow(1 + scenarioRentGrowth - scenarioExpenseGrowth, Math.max(0, activeHoldPeriod - 1))
     const scenarioExitValue = scenarioExitCap > 0 ? exitNoi / scenarioExitCap : 0
     const scenarioNetSale = scenarioExitValue * (1 - (Number(costOfSale || 0) / 100))
-    const scenarioLeveredCashFlows = initialEquity > 0 ? [-initialEquity, ...visibleDcfYears.map((yearRow, index) => {
+    const scenarioLeveredCashFlows = initialEquity > 0 ? [-initialEquity, ...engineVisibleDcfYears.map((yearRow, index) => {
       const baseCash = getComputedDcfValue(yearRow, 'cashFlowAfterSale') || 0
-      if (index !== visibleDcfYears.length - 1) return baseCash
+      if (index !== engineVisibleDcfYears.length - 1) return baseCash
       return baseCash - netSaleProceedsAmount + scenarioNetSale
     })] : null
     const scenarioIrr = scenarioLeveredCashFlows ? calculateIrr(scenarioLeveredCashFlows) : null
@@ -2171,7 +2246,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         <div className="flex flex-col md:flex-row overflow-hidden min-h-0 flex-1 md:pt-0">
         {/* ── Left panel: form ── */}
         <div className="flex flex-col w-full md:w-[480px] md:flex-shrink-0 overflow-y-auto max-h-screen">
-          <div className="hidden md:flex items-center justify-between px-6 py-2 border-b border-base-300">
+          <div className="hidden md:flex items-center justify-between px-6 py-2 border-b border-base-300 sticky top-0 bg-base-100 z-[2]">
             <h3 className="font-bold text-xl">
               {property?.id ? property.address : 'New Property'}
             </h3>
@@ -2180,7 +2255,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
 
           {/* Tabs */}
           {tabs.length > 1 && (
-            <div className="tabs tabs-bordered px-6 md:pt-0">
+            <div className="tabs tabs-bordered px-6 md:pt-0 sticky top-[53px] bg-base-100 z-[2]">
               {tabs.map(t => (
                 <button key={t} className={`tab ${tab === t ? 'tab-active font-semibold' : ''}`} onClick={() => setTab(t)}>
                   {tabLabel[t]}
@@ -3071,7 +3146,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           <div className="hidden md:flex flex-1 border-l border-base-300 bg-base-100 min-h-0 flex-col">
             <div className="flex-1 p-6 overflow-auto">
               <div className="rounded-2xl border border-base-300 overflow-hidden bg-base-100 shadow-sm min-h-full">
-                <div className="px-5 py-4 border-b border-base-300 flex items-center justify-between gap-3 flex-wrap sticky top-0 bg-base-100 z-10">
+                <div className="px-5 py-4 border-b border-base-300 flex items-center justify-between gap-3 flex-wrap sticky top-0 bg-base-100 z-[1]">
                   <div>
                     <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
                   </div>
