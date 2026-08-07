@@ -113,12 +113,114 @@ async function apiFetch(url, options = {}) {
   return res.json()
 }
 
+const FIELD_HELP = {
+  // Property
+  price: 'Total purchase price of the property.',
+  sqft: 'Rentable or gross building square footage.',
+  lot: 'Total land area in acres.',
+  yearBuilt: 'Year the building was originally constructed.',
+  // Investment Metrics
+  grm: 'Gross Rent Multiplier: Price ÷ Gross Scheduled Rent. Lower = cheaper relative to income.',
+  capRate: 'Cap Rate: NOI ÷ Price. The unlevered yield on the asset. Higher = more income per dollar paid.',
+  cashOnCash: 'Cash-on-Cash: (NOI − Debt Service) ÷ Equity invested. Your actual annual cash yield after debt.',
+  leveredIrr: 'Levered IRR: Internal rate of return on equity invested, including debt. Accounts for financing.',
+  unleveredIrr: 'Unlevered IRR: IRR on the full acquisition cost, ignoring debt. Measures pure asset performance.',
+  leveredEmx: 'Equity Multiple (levered): Total cash returned to equity ÷ equity invested. 2x = you doubled your money.',
+  unleveredEmx: 'Equity Multiple (unlevered): Total cash returned ÷ total cost. Ignores financing.',
+  leveredNpv: 'Net Present Value of levered cash flows at the discount rate. Positive = deal exceeds your hurdle.',
+  unleveredNpv: 'Net Present Value of unlevered cash flows at the discount rate.',
+  discountRate: 'Your target/hurdle rate used to compute NPV. Usually your cost of capital or required return.',
+  pricePerUnit: 'Price divided by number of units. Common multifamily benchmark.',
+  pricePerSqft: 'Price divided by total square footage. Measures relative value across comparable assets.',
+  rentToSales: 'Tenant rent as a percentage of their gross sales. Retail health check — above ~12% is a warning sign.',
+  numSkus: 'Number of SKUs (retail product lines) the tenant carries. Operational detail.',
+  pricePerAcre: 'Price divided by lot size in acres. Used for land-heavy or industrial deals.',
+  // Operating
+  managementFeePct: 'Property management fee as % of Effective Gross Income. Typically 4–10% for commercial.',
+  managementFeeDollar: 'Computed annual management fee in dollars (read-only).',
+  insurance: 'Annual property and liability insurance cost.',
+  propertyTaxes: 'Annual real estate tax bill. Verify against most recent tax bill.',
+  adjustedNoi: 'Net Operating Income after all operating expenses but before debt service. The core valuation metric.',
+  // Income
+  grossScheduledRent: 'Maximum potential rent if 100% occupied and all tenants pay full face rent.',
+  vacancyRate: 'Estimated vacancy and credit loss as % of GSR. Reflects expected downtime between leases.',
+  egi: 'Effective Gross Income: GSR − Vacancy + Other Income. What you actually collect.',
+  otherIncome: 'Non-rent income: parking, signage, antenna rent, etc.',
+  operatingExpenses: 'Total controllable operating costs excluding taxes, insurance, and reserves.',
+  reservesCapex: 'Annual reserves set aside for capital expenditures and future deferred maintenance.',
+  rentGrowth: 'Annual rent escalation rate applied to market rents and lease bumps.',
+  expenseGrowth: 'Annual growth rate applied to operating expenses.',
+  // Hold & Timing
+  holdPeriod: 'Number of years you plan to own the asset before selling.',
+  closingCosts: 'Acquisition costs beyond purchase price: title, legal, due diligence, etc.',
+  exitCapRate: 'Cap rate applied to exit-year NOI to determine sale price. Higher = lower sale price.',
+  costOfSale: 'Brokerage and closing costs on the sale, as % of gross sale price.',
+  unitCount: 'Number of rentable units (apartments, suites, or bays).',
+  tenantGrossSales: 'Tenant\'s annual gross sales volume. Used for percentage rent calculations.',
+  tenantBaseRent: 'Tenant\'s contractual base rent, separate from percentage rent.',
+  // Debt
+  loanAmount: 'Total senior loan amount. LTV = Loan ÷ Price.',
+  interestRate: 'Annual interest rate on the senior loan.',
+  amortTerm: 'Number of years over which the loan amortizes (principal pays down).',
+  ioPeriod: 'Interest-only period in months. During I/O, no principal is paid, maximizing early cash flow.',
+  loanTerm: 'Total loan term before the balloon payment or maturity.',
+  floatingRate: 'Toggle for floating-rate debt. Rate = SOFR + spread.',
+  sofrRate: 'Current SOFR rate (base index for floating-rate loans).',
+  indexSpread: 'Spread above SOFR charged by the lender.',
+  interestReserve: 'Months of interest held in reserve at closing, often required during lease-up.',
+  loanFee: 'Origination or placement fee as % of loan amount.',
+  refiYear: 'Year in the hold period when you refinance.',
+  refiMonth: 'Month within the refi year when the refinance closes.',
+  refiLtv: 'Loan-to-Value at refinance. Determines how much new debt you can pull out.',
+  refiRate: 'Interest rate on the refinance loan.',
+  debtYield: 'Debt Yield: NOI ÷ Loan Balance. Lenders typically require 8–10%.',
+  dscr: 'Debt Service Coverage Ratio: NOI ÷ Annual Debt Service. Lenders typically require ≥1.20x.',
+  // Tax
+  landValuePct: 'Portion of purchase price allocated to land (not depreciable). Reduces depreciation benefit.',
+  costSegBonus: 'Bonus depreciation % from cost segregation study. Accelerates early deductions.',
+  effectiveTaxRate: 'Your effective combined federal + state income tax rate.',
+  deprecRecapture: 'Tax rate on depreciation recapture at sale. Typically 25% federal.',
+  startingLoss: 'Existing suspended passive losses carried into this investment.',
+  // Lease Economics
+  leaseType: 'Lease structure: NNN (tenant pays all expenses), Modified Gross, or Gross (landlord pays).',
+  expenseStopPerSf: 'Base year expense stop: landlord pays expenses up to this amount per SF; tenant pays overage.',
+  grossUpPct: 'For expense recovery calculations, grosses up expenses as if building is X% occupied.',
+  newLeaseSpread: 'Mark-to-market spread for new leases vs. in-place rents.',
+  renewalSpread: 'Mark-to-market spread for lease renewals vs. in-place rents.',
+  tiPerSf: 'Tenant Improvement allowance per square foot for new leases.',
+  lcPct: 'Leasing commission as % of total lease value.',
+  percentageRentBreakpoint: 'Type of breakpoint for percentage rent: Natural (base rent ÷ pct rent rate) or Artificial (fixed).',
+  camAdminFee: 'Administrative fee added to CAM recoveries, as % of gross CAM pool.',
+  controllableExpensePct: 'Share of operating expenses classified as controllable (subject to annual cap).',
+  controllableCapPct: 'Maximum annual increase in controllable expenses billed to tenants.',
+  nonRecoverablePct: 'Share of expenses that cannot be recovered from tenants.',
+  recoveryMethod: 'How CAM pool is grossed up when building is not 100% occupied.',
+  reconciliationMonth: 'Month of year when annual CAM reconciliation is performed.',
+  // Waterfall
+  prefRate: 'Preferred return rate: investors receive this annual return before any promote is paid.',
+  catchUpRate: 'GP catch-up rate after LP pref is paid, before tiered splits kick in.',
+  promoteRate: 'GP promote (carried interest) on profits above the pref hurdle.',
+  lpShare: 'LP share of distributions after the pref and promote hurdles.',
+  gpShare: 'GP/Sponsor share of distributions (co-invest, not promote).',
+  // Governance
+  inputsLocked: 'Prevents any input changes — use to freeze assumptions for board or lender review.',
+  formulasLocked: 'Locks formula overrides — computed values cannot be manually changed.',
+  overridesEnabled: 'Allow manual overrides to formula-computed values.',
+  overrideNote: 'Memo explaining why overrides were applied.',
+  diagnosticLevel: 'How aggressively the model checks for broken or unusual assumptions.',
+}
+
 /** A labelled form field with consistent top-margin between label and input */
-function Field({ label, required, children }) {
+function Field({ label, required, help, children }) {
   return (
     <div className="flex flex-col gap-1">
-      <label className="text-xs font-semibold uppercase tracking-widest text-base-content/60">
+      <label className="text-xs font-semibold uppercase tracking-widest text-base-content/60 flex items-center gap-1">
         {label}{required && <span className="text-base-content ml-0.5">*</span>}
+        {help && (
+          <span className="tooltip tooltip-right normal-case font-normal tracking-normal" data-tip={help}>
+            <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-base-300 text-base-content/50 text-[9px] cursor-help select-none leading-none">?</span>
+          </span>
+        )}
       </label>
       {children}
     </div>
@@ -3109,19 +3211,19 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Core financials */}
               <div className="space-y-3">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Property</div>
-                <Field label="Price ($)">
+                <Field label="Price ($)" help={FIELD_HELP.price}>
                   <NumericInput placeholder="0" value={price} onChange={setPrice}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Square Feet">
+                <Field label="Square Feet" help={FIELD_HELP.sqft}>
                   <NumericInput placeholder="0" value={sqft} onChange={setSqft}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Lot Size (acres)">
+                <Field label="Lot Size (acres)" help={FIELD_HELP.lot}>
                   <input type="number" placeholder="0.00" step="0.01" value={lot}
                     onChange={e => setLot(e.target.value)} className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Year Built">
+                <Field label="Year Built" help={FIELD_HELP.yearBuilt}>
                   <input type="number" placeholder="e.g. 1998" value={yearBuilt}
                     onChange={e => setYearBuilt(e.target.value)} className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3131,78 +3233,78 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Investment Metrics</div>
                 {/* GRM = Price / Gross Scheduled Rent */}
-                <Field label="GRM">
+                <Field label="GRM" help={FIELD_HELP.grm}>
                   <input readOnly
                     value={price !== '' && grossScheduledRent !== '' && Number(grossScheduledRent) > 0
                       ? (Number(price) / Number(grossScheduledRent)).toFixed(2) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 {/* Cap Rate = NOI / Price */}
-                <Field label="Cap Rate (%)">
+                <Field label="Cap Rate (%)" help={FIELD_HELP.capRate}>
                   <input readOnly value={capRateFromEngine !== null ? `${capRateFromEngine.toFixed(2)}%` : '—'} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 {/* Cash-on-Cash = (NOI - Debt Service) / Equity */}
-                <Field label="Cash-on-Cash (%)">
+                <Field label="Cash-on-Cash (%)" help={FIELD_HELP.cashOnCash}>
                   <input readOnly value={cashOnCashFromEngine !== null ? `${cashOnCashFromEngine.toFixed(2)}%` : '—'} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Levered IRR (%)">
+                <Field label="Levered IRR (%)" help={FIELD_HELP.leveredIrr}>
                   <input readOnly
                     value={leveredIrr !== null ? `${(leveredIrr * 100).toFixed(2)}%` : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Unlevered IRR (%)">
+                <Field label="Unlevered IRR (%)" help={FIELD_HELP.unleveredIrr}>
                   <input readOnly
                     value={unleveredIrr !== null ? `${(unleveredIrr * 100).toFixed(2)}%` : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Levered EMx">
+                <Field label="Levered EMx" help={FIELD_HELP.leveredEmx}>
                   <input readOnly
                     value={leveredEquityMultiple !== null ? `${leveredEquityMultiple.toFixed(2)}x` : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Unlevered EMx">
+                <Field label="Unlevered EMx" help={FIELD_HELP.unleveredEmx}>
                   <input readOnly
                     value={unleveredEquityMultiple !== null ? `${unleveredEquityMultiple.toFixed(2)}x` : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Levered NPV ($)">
+                <Field label="Levered NPV ($)" help={FIELD_HELP.leveredNpv}>
                   <input readOnly
                     value={leveredNpv !== null ? '$' + leveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Unlevered NPV ($)">
+                <Field label="Unlevered NPV ($)" help={FIELD_HELP.unleveredNpv}>
                   <input readOnly
                     value={unleveredNpv !== null ? '$' + unleveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="NPV Discount Rate (%)">
+                <Field label="NPV Discount Rate (%)" help={FIELD_HELP.discountRate}>
                   <NumericInput placeholder="e.g. 10.0" value={irr} onChange={setIrr}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 {/* Price/Unit = Price / Unit Count */}
-                <Field label="Price / Unit ($)">
+                <Field label="Price / Unit ($)" help={FIELD_HELP.pricePerUnit}>
                   <input readOnly
                     value={price !== '' && unitCount !== '' && Number(unitCount) > 0
                       ? '$' + (Number(price) / Number(unitCount)).toLocaleString(undefined, {maximumFractionDigits:0}) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 {/* Price/SqFt = Price / SqFt */}
-                <Field label="Price / Sq Ft ($)">
+                <Field label="Price / Sq Ft ($)" help={FIELD_HELP.pricePerSqft}>
                   <input readOnly
                     value={price !== '' && sqft !== '' && Number(sqft) > 0
                       ? '$' + (Number(price) / Number(sqft)).toFixed(2) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Rent-to-Sales (%)">
+                <Field label="Rent-to-Sales (%)" help={FIELD_HELP.rentToSales}>
                   <NumericInput placeholder="e.g. 5.0" value={rentToSales} onChange={setRentToSales}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="# SKUs">
+                <Field label="# SKUs" help={FIELD_HELP.numSkus}>
                   <NumericInput placeholder="e.g. 500" value={numSkus} onChange={setNumSkus}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 {/* Price/Acre = Price / Lot Size */}
-                <Field label="Price / Acre ($)">
+                <Field label="Price / Acre ($)" help={FIELD_HELP.pricePerAcre}>
                   <input readOnly
                     value={price !== '' && lot !== '' && Number(lot) > 0
                       ? '$' + (Number(price) / Number(lot)).toLocaleString(undefined, {maximumFractionDigits:0}) : '—'}
@@ -3213,23 +3315,23 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Operating */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Operating</div>
-                <Field label="Management Fee (%)">
+                <Field label="Management Fee (%)" help={FIELD_HELP.managementFeePct}>
                   <NumericInput placeholder="e.g. 8" value={managementFeePct} onChange={setManagementFeePct}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Management Fee ($/yr)">
+                <Field label="Management Fee ($/yr)" help={FIELD_HELP.managementFeeDollar}>
                   <input readOnly value={firstYearDcf ? '$' + (parseNum(firstYearDcf.managementFeesDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Insurance ($/yr)">
+                <Field label="Insurance ($/yr)" help={FIELD_HELP.insurance}>
                   <NumericInput placeholder="e.g. 12000" value={insurance} onChange={setInsurance}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Property Taxes ($/yr)">
+                <Field label="Property Taxes ($/yr)" help={FIELD_HELP.propertyTaxes}>
                   <NumericInput placeholder="e.g. 18000" value={propertyTaxes} onChange={setPropertyTaxes}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Adjusted NOI ($/yr)">
+                <Field label="Adjusted NOI ($/yr)" help={FIELD_HELP.adjustedNoi}>
                   <input readOnly
                     value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
@@ -3239,32 +3341,32 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Income */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Income</div>
-                <Field label="Gross Scheduled Rent ($/yr)">
+                <Field label="Gross Scheduled Rent ($/yr)" help={FIELD_HELP.grossScheduledRent}>
                   <NumericInput placeholder="e.g. 120000" value={grossScheduledRent} onChange={setGrossScheduledRent}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Vacancy / Credit Loss (%)">
+                <Field label="Vacancy / Credit Loss (%)" help={FIELD_HELP.vacancyRate}>
                   <NumericInput placeholder="e.g. 5" value={vacancyRate} onChange={setVacancyRate}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="EGI — Effective Gross Income ($/yr)">
+                <Field label="EGI — Effective Gross Income ($/yr)" help={FIELD_HELP.egi}>
                   <input readOnly
                     value={egiAmount !== null ? '$' + egiAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Other Income ($/yr)">
+                <Field label="Other Income ($/yr)" help={FIELD_HELP.otherIncome}>
                   <NumericInput placeholder="parking, RUBS, storage" value={otherIncome} onChange={setOtherIncome}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Operating Expenses ($/yr)">
+                <Field label="Operating Expenses ($/yr)" help={FIELD_HELP.operatingExpenses}>
                   <NumericInput placeholder="e.g. 40000" value={operatingExpenses} onChange={setOperatingExpenses}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Reserves / Replacement Capex ($/yr)">
+                <Field label="Reserves / Replacement Capex ($/yr)" help={FIELD_HELP.reservesCapex}>
                   <NumericInput placeholder="e.g. 5000" value={reservesCapex} onChange={setReservesCapex}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="NOI — Net Operating Income ($/yr)">
+                <Field label="NOI — Net Operating Income ($/yr)" help={FIELD_HELP.adjustedNoi}>
                   <input readOnly
                     value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
@@ -3280,10 +3382,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                       ? '$' + (Number(price) + Number(closingCosts || 0) - Number(loanAmount)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="DSCR">
+                <Field label="DSCR" help={FIELD_HELP.dscr}>
                   <input readOnly value={dscrFromEngine !== null ? dscrFromEngine.toFixed(2) : '—'} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Debt Yield (%)">
+                <Field label="Debt Yield (%)" help={FIELD_HELP.debtYield}>
                   <input readOnly
                     value={debtYield !== null ? `${debtYield.toFixed(2)}%` : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
@@ -3298,7 +3400,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Debt */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Debt</div>
-                <Field label="Loan Amount ($)">
+                <Field label="Loan Amount ($)" help={FIELD_HELP.loanAmount}>
                   <NumericInput placeholder="e.g. 750000" value={loanAmount} onChange={setLoanAmount}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3306,19 +3408,19 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput placeholder="e.g. 75" value={ltv} onChange={setLtv}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Interest Rate (%)">
+                <Field label="Interest Rate (%)" help={FIELD_HELP.interestRate}>
                   <NumericInput placeholder="e.g. 6.5" value={interestRate} onChange={setInterestRate}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Amortization Term (yrs)">
+                <Field label="Amortization Term (yrs)" help={FIELD_HELP.amortTerm}>
                   <NumericInput placeholder="e.g. 25" value={amortizationTerm} onChange={setAmortizationTerm}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Interest-Only Period (yrs)">
+                <Field label="Interest-Only Period (yrs)" help={FIELD_HELP.ioPeriod}>
                   <NumericInput placeholder="e.g. 3" value={interestOnlyPeriod} onChange={setInterestOnlyPeriod}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Initial Loan Term (yrs)">
+                <Field label="Initial Loan Term (yrs)" help={FIELD_HELP.loanTerm}>
                   <NumericInput placeholder="e.g. 5" value={dcfModel.debtTerms.initialLoanTermYears} onChange={(value) => updateDebtTermField('initialLoanTermYears', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3329,11 +3431,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     disabled={!isAdmin} />
                   <span className="label-text">Floating-rate loan</span>
                 </label>
-                <Field label="SOFR / Index Rate (%)">
+                <Field label="SOFR / Index Rate (%)" help={FIELD_HELP.sofrRate}>
                   <NumericInput value={dcfModel.debtTerms.sofrRatePct} onChange={(value) => updateDebtTermField('sofrRatePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Index Spread (%)">
+                <Field label="Index Spread (%)" help={FIELD_HELP.indexSpread}>
                   <NumericInput value={dcfModel.debtTerms.indexSpreadPct} onChange={(value) => updateDebtTermField('indexSpreadPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3345,7 +3447,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput value={dcfModel.debtTerms.rateFloorPct} onChange={(value) => updateDebtTermField('rateFloorPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Interest Reserve (months)">
+                <Field label="Interest Reserve (months)" help={FIELD_HELP.interestReserve}>
                   <NumericInput value={dcfModel.debtTerms.interestReserveMonths} onChange={(value) => updateDebtTermField('interestReserveMonths', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3363,7 +3465,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Tax & Cost Segregation */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Tax &amp; Cost Segregation</div>
-                <Field label="Land Value (%)">
+                <Field label="Land Value (%)" help={FIELD_HELP.landValuePct}>
                   <NumericInput placeholder="e.g. 20" value={landValuePct} onChange={setLandValuePct}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3373,7 +3475,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                       ? '$' + (Number(price) * (1 - Number(landValuePct) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Cost Seg Bonus (%)">
+                <Field label="Cost Seg Bonus (%)" help={FIELD_HELP.costSegBonus}>
                   <NumericInput placeholder="e.g. 30" value={costSegBonusPct} onChange={setCostSegBonusPct}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3402,7 +3504,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                       className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                   })()}
                 </Field>
-                <Field label="Effective Tax Rate (%)">
+                <Field label="Effective Tax Rate (%)" help={FIELD_HELP.effectiveTaxRate}>
                   <NumericInput placeholder="e.g. 37" value={effectiveTaxRate} onChange={setEffectiveTaxRate}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3422,7 +3524,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput value={dcfModel.taxModel.initialTaxBasis} onChange={(value) => updateTaxModelField('initialTaxBasis', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Suspended Loss Carryforward ($)">
+                <Field label="Suspended Loss Carryforward ($)" help={FIELD_HELP.startingLoss}>
                   <NumericInput value={dcfModel.taxModel.suspendedLossCarryforward} onChange={(value) => updateTaxModelField('suspendedLossCarryforward', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3436,7 +3538,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                   })()}
                 </Field>
-                <Field label="Depreciation Recapture Rate (%)">
+                <Field label="Depreciation Recapture Rate (%)" help={FIELD_HELP.deprecRecapture}>
                   <NumericInput placeholder="e.g. 25" value={depreciationRecaptureRate} onChange={setDepreciationRecaptureRate}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3476,19 +3578,19 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Exit / Reversion */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Exit / Reversion</div>
-                <Field label="Refi LTV (%)">
+                <Field label="Refi LTV (%)" help={FIELD_HELP.refiLtv}>
                   <NumericInput placeholder="e.g. 70" value={refiLtv} onChange={setRefiLtv}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Refi Interest Rate (%)">
+                <Field label="Refi Interest Rate (%)" help={FIELD_HELP.refiRate}>
                   <NumericInput placeholder="e.g. 6.0" value={refiRate} onChange={setRefiRate}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Refi Year">
+                <Field label="Refi Year" help={FIELD_HELP.refiYear}>
                   <NumericInput placeholder="e.g. 3" value={refiYear} onChange={setRefiYear}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Refi Month">
+                <Field label="Refi Month" help={FIELD_HELP.refiMonth}>
                   <NumericInput placeholder="1-12" value={dcfModel.timing.refiMonth} onChange={(value) => updateTimingField('refiMonth', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3521,15 +3623,15 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Deal */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Deal</div>
-                <Field label="Unit / Bay / Suite Count">
+                <Field label="Unit / Bay / Suite Count" help={FIELD_HELP.unitCount}>
                   <NumericInput placeholder="e.g. 24" value={unitCount} onChange={setUnitCount}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Closing Costs ($)">
+                <Field label="Closing Costs ($)" help={FIELD_HELP.closingCosts}>
                   <NumericInput placeholder="e.g. 25000" value={closingCosts} onChange={setClosingCosts}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Hold Period (yrs)">
+                <Field label="Hold Period (yrs)" help={FIELD_HELP.holdPeriod}>
                   <NumericInput placeholder="e.g. 7" value={holdPeriod} onChange={setHoldPeriod}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3537,19 +3639,19 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput placeholder="1-12" value={dcfModel.timing.saleMonth} onChange={(value) => updateTimingField('saleMonth', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Rent Growth (% / yr)">
+                <Field label="Rent Growth (% / yr)" help={FIELD_HELP.rentGrowth}>
                   <NumericInput placeholder="e.g. 3" value={rentGrowth} onChange={setRentGrowth}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Expense Growth (% / yr)">
+                <Field label="Expense Growth (% / yr)" help={FIELD_HELP.expenseGrowth}>
                   <NumericInput placeholder="e.g. 2" value={expenseGrowth} onChange={setExpenseGrowth}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Exit Cap Rate (%)">
+                <Field label="Exit Cap Rate (%)" help={FIELD_HELP.exitCapRate}>
                   <NumericInput placeholder="e.g. 6.5" value={exitCapRate} onChange={setExitCapRate}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Cost of Sale (%)">
+                <Field label="Cost of Sale (%)" help={FIELD_HELP.costOfSale}>
                   <NumericInput placeholder="e.g. 2" value={costOfSale} onChange={setCostOfSale}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3572,7 +3674,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     onChange={(e) => updateGovernanceField('overridesEnabled', e.target.checked)} disabled={!isAdmin} />
                   <span className="label-text">Allow assumption overrides</span>
                 </label>
-                <Field label="Diagnostic Mode">
+                <Field label="Diagnostic Mode" help={FIELD_HELP.diagnosticLevel}>
                   <select value={dcfModel.governance.diagnosticLevel} onChange={(e) => updateGovernanceField('diagnosticLevel', e.target.value)}
                     className="select select-bordered input-md w-full md:text-base" disabled={!isAdmin}>
                     <option value="strict">Strict</option>
@@ -3580,7 +3682,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     <option value="informational">Informational</option>
                   </select>
                 </Field>
-                <Field label="Override Memo">
+                <Field label="Override Memo" help={FIELD_HELP.overrideNote}>
                   <textarea value={dcfModel.governance.overrideNote} onChange={(e) => updateGovernanceField('overrideNote', e.target.value)}
                     className="textarea textarea-bordered min-h-24 w-full md:text-base" disabled={!isAdmin}
                     placeholder="Explain why non-default assumptions or manual overrides were used." />
@@ -3625,43 +3727,43 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput value={dcfModel.leaseEconomics.marketRentGrowthPct} onChange={(value) => updateLeaseEconomicsField('marketRentGrowthPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="New Lease Spread (%)">
+                <Field label="New Lease Spread (%)" help={FIELD_HELP.newLeaseSpread}>
                   <NumericInput value={dcfModel.leaseEconomics.newLeaseSpreadPct} onChange={(value) => updateLeaseEconomicsField('newLeaseSpreadPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Renewal Spread (%)">
+                <Field label="Renewal Spread (%)" help={FIELD_HELP.renewalSpread}>
                   <NumericInput value={dcfModel.leaseEconomics.renewalSpreadPct} onChange={(value) => updateLeaseEconomicsField('renewalSpreadPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="TI per SF ($)">
+                <Field label="TI per SF ($)" help={FIELD_HELP.tiPerSf}>
                   <NumericInput value={dcfModel.leaseEconomics.tenantImprovementPerSf} onChange={(value) => updateLeaseEconomicsField('tenantImprovementPerSf', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="LC (% of Rent)">
+                <Field label="LC (% of Rent)" help={FIELD_HELP.lcPct}>
                   <NumericInput value={dcfModel.leaseEconomics.leasingCommissionPct} onChange={(value) => updateLeaseEconomicsField('leasingCommissionPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Expense Stop ($/SF)">
+                <Field label="Expense Stop ($/SF)" help={FIELD_HELP.expenseStopPerSf}>
                   <NumericInput value={dcfModel.leaseEconomics.expenseStopPerSf} onChange={(value) => updateLeaseEconomicsField('expenseStopPerSf', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Gross-Up Occupancy (%)">
+                <Field label="Gross-Up Occupancy (%)" help={FIELD_HELP.grossUpPct}>
                   <NumericInput value={dcfModel.leaseEconomics.grossUpPct} onChange={(value) => updateLeaseEconomicsField('grossUpPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="CAM Admin Fee (%)">
+                <Field label="CAM Admin Fee (%)" help={FIELD_HELP.camAdminFee}>
                   <NumericInput value={dcfModel.leaseEconomics.camAdminFeePct} onChange={(value) => updateLeaseEconomicsField('camAdminFeePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Controllable Expense Share (%)">
+                <Field label="Controllable Expense Share (%)" help={FIELD_HELP.controllableExpensePct}>
                   <NumericInput value={dcfModel.leaseEconomics.controllableExpensePct} onChange={(value) => updateLeaseEconomicsField('controllableExpensePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Controllable Cap (%)">
+                <Field label="Controllable Cap (%)" help={FIELD_HELP.controllableCapPct}>
                   <NumericInput value={dcfModel.leaseEconomics.controllableCapPct} onChange={(value) => updateLeaseEconomicsField('controllableCapPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Non-Recoverable Expense (%)">
+                <Field label="Non-Recoverable Expense (%)" help={FIELD_HELP.nonRecoverablePct}>
                   <NumericInput value={dcfModel.leaseEconomics.nonRecoverableExpensePct} onChange={(value) => updateLeaseEconomicsField('nonRecoverableExpensePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3677,14 +3779,14 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput value={dcfModel.leaseEconomics.insurancePoolRecoverablePct} onChange={(value) => updateLeaseEconomicsField('insurancePoolRecoverablePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Gross-Up Method">
+                <Field label="Gross-Up Method" help={FIELD_HELP.recoveryMethod}>
                   <select value={dcfModel.leaseEconomics.grossUpMethod} onChange={(e) => updateLeaseEconomicsField('grossUpMethod', e.target.value)}
                     className="select select-bordered input-md w-full md:text-base" disabled={!isAdmin}>
                     <option value="category">By category</option>
                     <option value="occupied">Occupied ratio</option>
                   </select>
                 </Field>
-                <Field label="Reconciliation Month">
+                <Field label="Reconciliation Month" help={FIELD_HELP.reconciliationMonth}>
                   <NumericInput value={dcfModel.leaseEconomics.reconciliationMonth} onChange={(value) => updateLeaseEconomicsField('reconciliationMonth', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3707,11 +3809,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {(assetType === 'Retail' || assetType === 'Net Lease' || assetType === '') && (
                 <div className="space-y-3 pt-2">
                   <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Tenant</div>
-                  <Field label="Tenant Annual Gross Sales ($)">
+                  <Field label="Tenant Annual Gross Sales ($)" help={FIELD_HELP.tenantGrossSales}>
                     <NumericInput placeholder="e.g. 1200000" value={tenantGrossSales} onChange={setTenantGrossSales}
                       className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                   </Field>
-                  <Field label="Tenant Base Rent ($/yr)">
+                  <Field label="Tenant Base Rent ($/yr)" help={FIELD_HELP.tenantBaseRent}>
                     <NumericInput placeholder="e.g. 60000" value={tenantBaseRent} onChange={setTenantBaseRent}
                       className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                   </Field>
@@ -3775,11 +3877,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                               <NumericInput value={tenant.marketRentPsf} onChange={(value) => updateRentRollRow(index, 'marketRentPsf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="New Lease Spread (%)">
+                            <Field label="New Lease Spread (%)" help={FIELD_HELP.newLeaseSpread}>
                               <NumericInput value={tenant.newLeaseSpreadPct} onChange={(value) => updateRentRollRow(index, 'newLeaseSpreadPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Renewal Spread (%)">
+                            <Field label="Renewal Spread (%)" help={FIELD_HELP.renewalSpread}>
                               <NumericInput value={tenant.renewalSpreadPct} onChange={(value) => updateRentRollRow(index, 'renewalSpreadPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
@@ -3811,35 +3913,35 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                               <NumericInput value={tenant.purchaseOptionPrice} onChange={(value) => updateRentRollRow(index, 'purchaseOptionPrice', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="TI per SF ($)">
+                            <Field label="TI per SF ($)" help={FIELD_HELP.tiPerSf}>
                               <NumericInput value={tenant.tenantImprovementPerSf} onChange={(value) => updateRentRollRow(index, 'tenantImprovementPerSf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Renewal TI per SF ($)">
+                            <Field label="Renewal TI per SF ($)" help={FIELD_HELP.tiPerSf}>
                               <NumericInput value={tenant.renewalTiPerSf} onChange={(value) => updateRentRollRow(index, 'renewalTiPerSf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="New Lease TI per SF ($)">
+                            <Field label="New Lease TI per SF ($)" help={FIELD_HELP.tiPerSf}>
                               <NumericInput value={tenant.newLeaseTiPerSf} onChange={(value) => updateRentRollRow(index, 'newLeaseTiPerSf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="LC (% of Rent)">
+                            <Field label="LC (% of Rent)" help={FIELD_HELP.lcPct}>
                               <NumericInput value={tenant.leasingCommissionPct} onChange={(value) => updateRentRollRow(index, 'leasingCommissionPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Renewal LC (%)">
+                            <Field label="Renewal LC (%)" help={FIELD_HELP.lcPct}>
                               <NumericInput value={tenant.renewalLcPct} onChange={(value) => updateRentRollRow(index, 'renewalLcPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="New Lease LC (%)">
+                            <Field label="New Lease LC (%)" help={FIELD_HELP.lcPct}>
                               <NumericInput value={tenant.newLeaseLcPct} onChange={(value) => updateRentRollRow(index, 'newLeaseLcPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Expense Stop ($/SF)">
+                            <Field label="Expense Stop ($/SF)" help={FIELD_HELP.expenseStopPerSf}>
                               <NumericInput value={tenant.expenseStopPerSf} onChange={(value) => updateRentRollRow(index, 'expenseStopPerSf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Gross-Up Occupancy (%)">
+                            <Field label="Gross-Up Occupancy (%)" help={FIELD_HELP.grossUpPct}>
                               <NumericInput value={tenant.grossUpPct} onChange={(value) => updateRentRollRow(index, 'grossUpPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
@@ -3863,11 +3965,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                               <NumericInput value={tenant.adminFeePct} onChange={(value) => updateRentRollRow(index, 'adminFeePct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Controllable Cap (%)">
+                            <Field label="Controllable Cap (%)" help={FIELD_HELP.controllableCapPct}>
                               <NumericInput value={tenant.controllableCapPct} onChange={(value) => updateRentRollRow(index, 'controllableCapPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Non-Recoverable Expense (%)">
+                            <Field label="Non-Recoverable Expense (%)" help={FIELD_HELP.nonRecoverablePct}>
                               <NumericInput value={tenant.nonRecoverableExpensePct} onChange={(value) => updateRentRollRow(index, 'nonRecoverableExpensePct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
@@ -3887,23 +3989,23 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               )}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Waterfall</div>
-                <Field label="Preferred Return (%)">
+                <Field label="Preferred Return (%)" help={FIELD_HELP.prefRate}>
                   <NumericInput value={dcfModel.waterfall.prefRate} onChange={(value) => updateWaterfallField('prefRate', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Catch-Up Share (%)">
+                <Field label="Catch-Up Share (%)" help={FIELD_HELP.catchUpRate}>
                   <NumericInput value={dcfModel.waterfall.catchUpRate} onChange={(value) => updateWaterfallField('catchUpRate', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Promote / Sponsor Share (%)">
+                <Field label="Promote / Sponsor Share (%)" help={FIELD_HELP.promoteRate}>
                   <NumericInput value={dcfModel.waterfall.promoteRate} onChange={(value) => updateWaterfallField('promoteRate', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="LP Equity Share (%)">
+                <Field label="LP Equity Share (%)" help={FIELD_HELP.lpShare}>
                   <NumericInput value={dcfModel.waterfall.lpSharePct} onChange={(value) => updateWaterfallField('lpSharePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="GP Equity Share (%)">
+                <Field label="GP Equity Share (%)" help={FIELD_HELP.gpShare}>
                   <NumericInput value={dcfModel.waterfall.gpSharePct} onChange={(value) => updateWaterfallField('gpSharePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
