@@ -2305,6 +2305,83 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
         {/* Financials tab */}
         {tab === 'financials' && (
           <div className="space-y-4">
+              <div className="md:hidden space-y-4">
+                <div className="rounded-2xl border border-base-300 overflow-hidden bg-base-100 shadow-sm">
+                  <div className="px-4 py-3 border-b border-base-300 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
+                      <div className="badge badge-outline whitespace-nowrap">{activeHoldPeriod} Year Hold</div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={dcfModel.timing.viewMode || 'yearly'}
+                        onChange={(e) => { updateTimingField('viewMode', e.target.value); setDcfColumnStart(0) }}
+                        className="select select-bordered select-sm flex-1"
+                        disabled={!isAdmin}
+                      >
+                        <option value="yearly">Yearly View</option>
+                        <option value="monthly">Monthly View</option>
+                      </select>
+                      <div className="join">
+                        <button
+                          type="button"
+                          className="btn btn-xs join-item"
+                          onClick={() => setDcfColumnStart(Math.max(0, clampedDcfColumnStart - dcfColumnWindowSize))}
+                          disabled={clampedDcfColumnStart === 0}
+                        >
+                          Prev
+                        </button>
+                        <button
+                          type="button"
+                          className="btn btn-xs join-item"
+                          onClick={() => setDcfColumnStart(Math.min(Math.max(0, dcfPeriods.length - dcfColumnWindowSize), clampedDcfColumnStart + dcfColumnWindowSize))}
+                          disabled={clampedDcfColumnStart + dcfColumnWindowSize >= dcfPeriods.length}
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
+                    <div className="text-xs uppercase tracking-[0.18em] text-base-content/45">
+                      Showing {visibleDcfColumns.length > 0 ? clampedDcfColumnStart + 1 : 0}-{clampedDcfColumnStart + visibleDcfColumns.length} of {dcfPeriods.length} {dcfModel.timing.viewMode === 'monthly' ? 'periods' : 'years'}
+                    </div>
+                  </div>
+                  <div className="p-4 space-y-4">
+                    {groupedDcfRows.map((group) => (
+                      <div key={`mobile-inline-${group.key}`} className={`rounded-xl border ${group.tone} overflow-hidden`}>
+                        <button
+                          type="button"
+                          className="w-full flex items-center justify-between px-4 py-3 text-left"
+                          onClick={() => toggleDcfGroup(group.key)}
+                        >
+                          <span className="text-xs font-semibold uppercase tracking-[0.18em]">{group.label}</span>
+                          <span className="text-lg leading-none">{collapsedDcfGroups[group.key] ? '+' : '-'}</span>
+                        </button>
+                        {!collapsedDcfGroups[group.key] && (
+                          <div className="bg-white px-4 py-3 space-y-3">
+                            {group.rows.filter(row => row.subtotal || row.readOnly).map((row) => (
+                              <div key={`mobile-inline-row-${row.key}`} className={`rounded-lg border px-3 py-2 ${row.subtotal ? 'border-slate-300 bg-slate-50' : 'border-base-200 bg-base-100'}`}>
+                                <div className="flex items-center justify-between gap-3">
+                                  <div>
+                                    <div className="text-sm font-semibold text-slate-900">{row.label}</div>
+                                    <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">{row.category}</div>
+                                  </div>
+                                  <div className="text-right">
+                                    <div className="text-xs text-slate-500">{dcfModel.timing.viewMode === 'monthly' ? 'Current period' : 'Year 1'}</div>
+                                    <div className="text-sm font-semibold text-slate-900">
+                                      {formatMoneyCell(row.readOnly ? getComputedDcfValue(visibleDcfColumns[0] || {}, row.key) : visibleDcfColumns[0]?.[row.key])}
+                                    </div>
+                                  </div>
+                                </div>
+                                {row.help && <div className="mt-2 text-xs text-slate-500">{row.help}</div>}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
               <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
                 <div className="flex flex-wrap items-center gap-2">
                   <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Legend</span>
@@ -3360,41 +3437,6 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                       </button>
                     </div>
                   </div>
-                </div>
-                <div className="md:hidden p-4 space-y-4">
-                  {groupedDcfRows.map((group) => (
-                    <div key={`mobile-${group.key}`} className={`rounded-xl border ${group.tone} overflow-hidden`}>
-                      <button
-                        type="button"
-                        className="w-full flex items-center justify-between px-4 py-3 text-left"
-                        onClick={() => toggleDcfGroup(group.key)}
-                      >
-                        <span className="text-xs font-semibold uppercase tracking-[0.18em]">{group.label}</span>
-                        <span className="text-lg leading-none">{collapsedDcfGroups[group.key] ? '+' : '-'}</span>
-                      </button>
-                      {!collapsedDcfGroups[group.key] && (
-                        <div className="bg-white px-4 py-3 space-y-3">
-                          {group.rows.filter(row => row.subtotal || row.readOnly).map((row) => (
-                            <div key={`mobile-row-${row.key}`} className={`rounded-lg border px-3 py-2 ${row.subtotal ? 'border-slate-300 bg-slate-50' : 'border-base-200 bg-base-100'}`}>
-                              <div className="flex items-center justify-between gap-3">
-                                <div>
-                                  <div className="text-sm font-semibold text-slate-900">{row.label}</div>
-                                  <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">{row.category}</div>
-                                </div>
-                                <div className="text-right">
-                                  <div className="text-xs text-slate-500">{dcfModel.timing.viewMode === 'monthly' ? 'Current period' : 'Year 1'}</div>
-                                  <div className="text-sm font-semibold text-slate-900">
-                                    {formatMoneyCell(row.readOnly ? getComputedDcfValue(dcfPeriods[0] || {}, row.key) : dcfPeriods[0]?.[row.key])}
-                                  </div>
-                                </div>
-                              </div>
-                              {row.help && <div className="mt-2 text-xs text-slate-500">{row.help}</div>}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
                 </div>
                 <div className="hidden md:block overflow-auto h-full">
                   <table className="table text-sm min-w-[1200px] border-separate border-spacing-0">
