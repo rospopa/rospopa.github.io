@@ -1491,6 +1491,24 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   const derivedRentToSales = parseNum(tenantGrossSales) > 0 && parseNum(tenantBaseRent) >= 0
     ? (parseNum(tenantBaseRent) / parseNum(tenantGrossSales) * 100)
     : null
+  const financialInputClass = 'input input-bordered input-md w-full md:text-base border-sky-300 bg-sky-50/60 text-sky-900 focus:border-sky-500 focus:outline-none'
+  const financialOutputClass = 'input input-bordered input-md w-full md:text-base cursor-default border-slate-300 bg-slate-100 text-slate-900 font-semibold'
+  const sectionHeaderClass = 'text-sm font-semibold uppercase tracking-wide pb-2 border-b'
+  const metricTone = {
+    good: 'border-emerald-300 bg-emerald-50 text-emerald-900',
+    caution: 'border-amber-300 bg-amber-50 text-amber-900',
+    danger: 'border-rose-300 bg-rose-50 text-rose-900',
+    neutral: financialOutputClass,
+  }
+  const dscrTone = dscrFromEngine !== null
+    ? dscrFromEngine >= 1.25 ? metricTone.good : dscrFromEngine >= 1 ? metricTone.caution : metricTone.danger
+    : metricTone.neutral
+  const irrTone = leveredIrr !== null
+    ? leveredIrr >= 0.15 ? metricTone.good : leveredIrr >= 0.08 ? metricTone.caution : metricTone.danger
+    : metricTone.neutral
+  const cashOnCashTone = cashOnCashFromEngine !== null
+    ? cashOnCashFromEngine >= 8 ? metricTone.good : cashOnCashFromEngine >= 4 ? metricTone.caution : metricTone.danger
+    : metricTone.neutral
   const firstYearDcf = engineVisibleDcfYears[0] || null
   const holdYearDcf = engineVisibleDcfYears[engineVisibleDcfYears.length - 1] || null
   const adjustedNoiValue = firstYearDcf ? (getComputedDcfValue(firstYearDcf, 'netOperatingIncomeDcf') || 0) : null
@@ -2246,200 +2264,200 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
           <div className="space-y-4">
               {/* Investment metrics */}
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Investment Metrics</div>
+                <div className={`${sectionHeaderClass} text-emerald-700 border-emerald-200`}>Investment Metrics</div>
                 {/* GRM = Price / Gross Scheduled Rent */}
                 <Field label="GRM" help={FIELD_HELP.grm}>
                   <input readOnly
                     value={price !== '' && grossScheduledRent !== '' && Number(grossScheduledRent) > 0
                       ? (Number(price) / Number(grossScheduledRent)).toFixed(2) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 {/* Cap Rate = NOI / Price */}
                 <Field label="Cap Rate (%)" help={FIELD_HELP.capRate}>
-                  <input readOnly value={capRateFromEngine !== null ? `${capRateFromEngine.toFixed(2)}%` : '—'} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  <input readOnly value={capRateFromEngine !== null ? `${capRateFromEngine.toFixed(2)}%` : '—'} className={financialOutputClass} />
                 </Field>
                 {/* Cash-on-Cash = (NOI - Debt Service) / Equity */}
                 <Field label="Cash-on-Cash (%)" help={FIELD_HELP.cashOnCash}>
-                  <input readOnly value={cashOnCashFromEngine !== null ? `${cashOnCashFromEngine.toFixed(2)}%` : '—'} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  <input readOnly value={cashOnCashFromEngine !== null ? `${cashOnCashFromEngine.toFixed(2)}%` : '—'} className={`input input-bordered input-md w-full md:text-base font-semibold ${cashOnCashTone}`} />
                 </Field>
                 <Field label="Levered IRR (%)" help={FIELD_HELP.leveredIrr}>
                   <input readOnly
                     value={leveredIrr !== null ? `${(leveredIrr * 100).toFixed(2)}%` : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={`input input-bordered input-md w-full md:text-base font-semibold ${irrTone}`} />
                 </Field>
                 <Field label="Unlevered IRR (%)" help={FIELD_HELP.unleveredIrr}>
                   <input readOnly
                     value={unleveredIrr !== null ? `${(unleveredIrr * 100).toFixed(2)}%` : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Levered EMx" help={FIELD_HELP.leveredEmx}>
                   <input readOnly
                     value={leveredEquityMultiple !== null ? `${leveredEquityMultiple.toFixed(2)}x` : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Unlevered EMx" help={FIELD_HELP.unleveredEmx}>
                   <input readOnly
                     value={unleveredEquityMultiple !== null ? `${unleveredEquityMultiple.toFixed(2)}x` : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Levered NPV ($)" help={FIELD_HELP.leveredNpv}>
                   <input readOnly
                     value={leveredNpv !== null ? '$' + leveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Unlevered NPV ($)" help={FIELD_HELP.unleveredNpv}>
                   <input readOnly
                     value={unleveredNpv !== null ? '$' + unleveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="NPV Discount Rate (%)" help={FIELD_HELP.discountRate}>
                   <NumericInput placeholder="e.g. 10.0" value={irr} onChange={setIrr}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 {/* Price/Unit = Price / Unit Count */}
                 <Field label="Price / Unit ($)" help={FIELD_HELP.pricePerUnit}>
                   <input readOnly
                     value={price !== '' && unitCount !== '' && Number(unitCount) > 0
                       ? '$' + (Number(price) / Number(unitCount)).toLocaleString(undefined, {maximumFractionDigits:0}) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 {/* Price/SqFt = Price / SqFt */}
                 <Field label="Price / Sq Ft ($)" help={FIELD_HELP.pricePerSqft}>
                   <input readOnly
                     value={price !== '' && sqft !== '' && Number(sqft) > 0
                       ? '$' + (Number(price) / Number(sqft)).toFixed(2) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Rent-to-Sales (%)" help={FIELD_HELP.rentToSales}>
                   <input readOnly
                     value={derivedRentToSales !== null ? `${derivedRentToSales.toFixed(2)}%` : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="# SKUs" help={FIELD_HELP.numSkus}>
                   <NumericInput placeholder="e.g. 500" value={numSkus} onChange={setNumSkus}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 {/* Price/Acre = Price / Lot Size */}
                 <Field label="Price / Acre ($)" help={FIELD_HELP.pricePerAcre}>
                   <input readOnly
                     value={price !== '' && lot !== '' && Number(lot) > 0
                       ? '$' + (Number(price) / Number(lot)).toLocaleString(undefined, {maximumFractionDigits:0}) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
               </div>
 
               {/* Operating */}
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Operating</div>
+                <div className={`${sectionHeaderClass} text-amber-700 border-amber-200`}>Operating</div>
                 <Field label="Management Fee (%)" help={FIELD_HELP.managementFeePct}>
                   <NumericInput placeholder="e.g. 8" value={managementFeePct} onChange={setManagementFeePct}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Management Fee ($/yr)" help={FIELD_HELP.managementFeeDollar}>
                   <input readOnly value={firstYearDcf ? '$' + (parseNum(firstYearDcf.managementFeesDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Insurance ($/yr)" help={FIELD_HELP.insurance}>
                   <NumericInput placeholder="e.g. 12000" value={insurance} onChange={setInsurance}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Property Taxes ($/yr)" help={FIELD_HELP.propertyTaxes}>
                   <NumericInput placeholder="e.g. 18000" value={propertyTaxes} onChange={setPropertyTaxes}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Adjusted NOI ($/yr)" help={FIELD_HELP.adjustedNoi}>
                   <input readOnly
                     value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
               </div>
 
               {/* Income */}
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Income</div>
+                <div className={`${sectionHeaderClass} text-sky-700 border-sky-200`}>Income</div>
                 <Field label="Gross Scheduled Rent ($/yr)" help={FIELD_HELP.grossScheduledRent}>
                   <NumericInput placeholder="e.g. 120000" value={grossScheduledRent} onChange={setGrossScheduledRent}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Vacancy / Credit Loss (%)" help={FIELD_HELP.vacancyRate}>
                   <NumericInput placeholder="e.g. 5" value={vacancyRate} onChange={setVacancyRate}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="EGI — Effective Gross Income ($/yr)" help={FIELD_HELP.egi}>
                   <input readOnly
                     value={egiAmount !== null ? '$' + egiAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Other Income ($/yr)" help={FIELD_HELP.otherIncome}>
                   <NumericInput placeholder="parking, RUBS, storage" value={otherIncome} onChange={setOtherIncome}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Operating Expenses ($/yr)" help={FIELD_HELP.operatingExpenses}>
                   <NumericInput placeholder="e.g. 40000" value={operatingExpenses} onChange={setOperatingExpenses}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Reserves / Replacement Capex ($/yr)" help={FIELD_HELP.reservesCapex}>
                   <NumericInput placeholder="e.g. 5000" value={reservesCapex} onChange={setReservesCapex}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="NOI — Net Operating Income ($/yr)" help={FIELD_HELP.adjustedNoi}>
                   <input readOnly
                     value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
               </div>
 
               {/* Equity / Returns */}
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Equity / Returns</div>
+                <div className={`${sectionHeaderClass} text-emerald-700 border-emerald-200`}>Equity / Returns</div>
                 <Field label="Equity ($)" help={FIELD_HELP.equity}>
                   <input readOnly
                     value={price !== '' && loanAmount !== ''
                       ? '$' + (Number(price) + Number(closingCosts || 0) - Number(loanAmount)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="DSCR" help={FIELD_HELP.dscr}>
-                  <input readOnly value={dscrFromEngine !== null ? dscrFromEngine.toFixed(2) : '—'} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                  <input readOnly value={dscrFromEngine !== null ? dscrFromEngine.toFixed(2) : '—'} className={`input input-bordered input-md w-full md:text-base font-semibold ${dscrTone}`} />
                 </Field>
                 <Field label="Debt Yield (%)" help={FIELD_HELP.debtYield}>
                   <input readOnly
                     value={debtYield !== null ? `${debtYield.toFixed(2)}%` : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Yield on Cost (%)" help={FIELD_HELP.yieldOnCost}>
                   <input readOnly
                     value={yieldOnCost !== null ? `${yieldOnCost.toFixed(2)}%` : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
               </div>
 
               {/* Debt */}
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Debt</div>
+                <div className={`${sectionHeaderClass} text-indigo-700 border-indigo-200`}>Debt</div>
                 <Field label="Loan Amount ($)" help={FIELD_HELP.loanAmount}>
                   <NumericInput placeholder="e.g. 750000" value={loanAmount} onChange={setLoanAmount}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="LTV (%)" help={FIELD_HELP.ltv}>
                   <input readOnly
                     value={derivedLtv !== null ? `${derivedLtv.toFixed(2)}%` : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Interest Rate (%)" help={FIELD_HELP.interestRate}>
                   <NumericInput placeholder="e.g. 6.5" value={interestRate} onChange={setInterestRate}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Amortization Term (yrs)" help={FIELD_HELP.amortTerm}>
                   <NumericInput placeholder="e.g. 25" value={amortizationTerm} onChange={setAmortizationTerm}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Interest-Only Period (yrs)" help={FIELD_HELP.ioPeriod}>
                   <NumericInput placeholder="e.g. 3" value={interestOnlyPeriod} onChange={setInterestOnlyPeriod}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Initial Loan Term (yrs)" help={FIELD_HELP.loanTerm}>
                   <NumericInput placeholder="e.g. 5" value={dcfModel.debtTerms.initialLoanTermYears} onChange={(value) => updateDebtTermField('initialLoanTermYears', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <label className="label cursor-pointer justify-start gap-3">
                   <input type="checkbox" className="checkbox checkbox-sm"
@@ -2450,15 +2468,15 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </label>
                 <Field label="SOFR / Index Rate (%)" help={FIELD_HELP.sofrRate}>
                   <NumericInput value={dcfModel.debtTerms.sofrRatePct} onChange={(value) => updateDebtTermField('sofrRatePct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Index Spread (%)" help={FIELD_HELP.indexSpread}>
                   <NumericInput value={dcfModel.debtTerms.indexSpreadPct} onChange={(value) => updateDebtTermField('indexSpreadPct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Rate Cap (%)" help={FIELD_HELP.rateCap}>
                   <NumericInput value={dcfModel.debtTerms.rateCapPct} onChange={(value) => updateDebtTermField('rateCapPct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Rate Floor (%)" help={FIELD_HELP.rateFloor}>
                   <NumericInput value={dcfModel.debtTerms.rateFloorPct} onChange={(value) => updateDebtTermField('rateFloorPct', value)}
@@ -2466,42 +2484,42 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 <Field label="Interest Reserve (months)" help={FIELD_HELP.interestReserve}>
                   <NumericInput value={dcfModel.debtTerms.interestReserveMonths} onChange={(value) => updateDebtTermField('interestReserveMonths', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Refi Loan Term (yrs)" help={FIELD_HELP.refiLoanTerm}>
                   <NumericInput placeholder="e.g. 5" value={dcfModel.debtTerms.refinanceLoanTermYears} onChange={(value) => updateDebtTermField('refinanceLoanTermYears', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Annual Debt Service ($/yr)" help={FIELD_HELP.annualDebtService}>
                   <input readOnly
                     value={annualDebtServiceAmount !== null ? '$' + annualDebtServiceAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
               </div>
 
               {/* Tax & Cost Segregation */}
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Tax &amp; Cost Segregation</div>
+                <div className={`${sectionHeaderClass} text-rose-700 border-rose-200`}>Tax &amp; Cost Segregation</div>
                 <Field label="Land Value (%)" help={FIELD_HELP.landValuePct}>
                   <NumericInput placeholder="e.g. 20" value={landValuePct} onChange={setLandValuePct}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Depreciable Basis ($)" help={FIELD_HELP.depreciableBasis}>
                   <input readOnly
                     value={price !== '' && landValuePct !== ''
                       ? '$' + (Number(price) * (1 - Number(landValuePct) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Cost Seg Bonus (%)" help={FIELD_HELP.costSegBonus}>
                   <NumericInput placeholder="e.g. 30" value={costSegBonusPct} onChange={setCostSegBonusPct}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Year 1 Bonus Depreciation ($)" help={FIELD_HELP.bonusDepreciation}>
                   {(() => {
                     const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : null
                     const val = depBasis !== null && costSegBonusPct !== ''
                       ? '$' + (depBasis * Number(costSegBonusPct) / 100).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    return <input readOnly value={val} className={financialOutputClass} />
                   })()}
                 </Field>
                 <Field label="Standard Depreciation / 39-yr ($)" help={FIELD_HELP.standardDepreciation}>
@@ -2509,7 +2527,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : null
                     const bonus = costSegBonusPct !== '' ? Number(costSegBonusPct) / 100 : 0
                     const val = depBasis !== null ? '$' + (depBasis * (1 - bonus) / 39).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    return <input readOnly value={val} className={financialOutputClass} />
                   })()}
                 </Field>
                 <Field label="Total Year 1 Depreciation ($)" help={FIELD_HELP.totalDepreciation}>
@@ -2518,32 +2536,32 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     const bonus = costSegBonusPct !== '' ? Number(costSegBonusPct) / 100 : 0
                     const totalDepr = depBasis !== null ? depBasis * bonus + depBasis * (1 - bonus) / 39 : null
                     return <input readOnly value={totalDepr !== null ? '$' + totalDepr.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                      className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                      className={financialOutputClass} />
                   })()}
                 </Field>
                 <Field label="Effective Tax Rate (%)" help={FIELD_HELP.effectiveTaxRate}>
                   <NumericInput placeholder="e.g. 37" value={effectiveTaxRate} onChange={setEffectiveTaxRate}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Capital Gains Tax Rate (%)" help={FIELD_HELP.capitalGainsTaxRate}>
                   <NumericInput value={dcfModel.taxModel.capitalGainsRatePct} onChange={(value) => updateTaxModelField('capitalGainsRatePct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Ordinary Income Tax Rate (%)" help={FIELD_HELP.ordinaryIncomeTaxRate}>
                   <NumericInput value={dcfModel.taxModel.ordinaryIncomeTaxRatePct} onChange={(value) => updateTaxModelField('ordinaryIncomeTaxRatePct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Passive Loss Usage Limit (%)" help={FIELD_HELP.passiveLossLimit}>
                   <NumericInput value={dcfModel.taxModel.passiveLossLimitPct} onChange={(value) => updateTaxModelField('passiveLossLimitPct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Initial Tax Basis ($)" help={FIELD_HELP.initialTaxBasis}>
                   <NumericInput value={dcfModel.taxModel.initialTaxBasis} onChange={(value) => updateTaxModelField('initialTaxBasis', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Suspended Loss Carryforward ($)" help={FIELD_HELP.startingLoss}>
                   <NumericInput value={dcfModel.taxModel.suspendedLossCarryforward} onChange={(value) => updateTaxModelField('suspendedLossCarryforward', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Tax Shield Year 1 ($)" help={FIELD_HELP.taxShield}>
                   {(() => {
@@ -2552,20 +2570,20 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     const totalDepr = depBasis !== null ? depBasis * bonus + depBasis * (1 - bonus) / 39 : null
                     const val = totalDepr !== null && effectiveTaxRate !== ''
                       ? '$' + (totalDepr * Number(effectiveTaxRate) / 100).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    return <input readOnly value={val} className={financialOutputClass} />
                   })()}
                 </Field>
                 <Field label="Depreciation Recapture Rate (%)" help={FIELD_HELP.deprecRecapture}>
                   <NumericInput placeholder="e.g. 25" value={depreciationRecaptureRate} onChange={setDepreciationRecaptureRate}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Installment Sale Deferral (%)" help={FIELD_HELP.installmentSale}>
                   <NumericInput value={dcfModel.taxModel.installmentSalePct} onChange={(value) => updateTaxModelField('installmentSalePct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Entity Type" help={FIELD_HELP.entityType}>
                   <select value={dcfModel.taxModel.entityType} onChange={(e) => updateTaxModelField('entityType', e.target.value)}
-                    className="select select-bordered input-md w-full md:text-base" disabled={!isAdmin}>
+                    className="select select-bordered input-md w-full md:text-base border-rose-300 bg-rose-50/40 text-rose-900" disabled={!isAdmin}>
                     <option value="Direct">Direct</option>
                     <option value="Partnership">Partnership</option>
                     <option value="Corporate">Corporate</option>
@@ -2581,92 +2599,92 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <Field label="Recapture Tax on Exit ($)" help={FIELD_HELP.recaptureTax}>
                   {(() => {
                     const val = holdYearDcf ? '$' + (parseNum(holdYearDcf.recaptureTaxDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    return <input readOnly value={val} className={financialOutputClass} />
                   })()}
                 </Field>
                 <Field label="Capital Gains Tax on Exit ($)" help={FIELD_HELP.capitalGainsTax}>
                   {(() => {
                     const val = holdYearDcf ? '$' + (parseNum(holdYearDcf.capitalGainsTaxDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    return <input readOnly value={val} className={financialOutputClass} />
                   })()}
                 </Field>
               </div>
 
               {/* Exit / Reversion */}
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Exit / Reversion</div>
+                <div className={`${sectionHeaderClass} text-violet-700 border-violet-200`}>Exit / Reversion</div>
                 <Field label="Refi LTV (%)" help={FIELD_HELP.refiLtv}>
                   <NumericInput placeholder="e.g. 70" value={refiLtv} onChange={setRefiLtv}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Refi Interest Rate (%)" help={FIELD_HELP.refiRate}>
                   <NumericInput placeholder="e.g. 6.0" value={refiRate} onChange={setRefiRate}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Refi Year" help={FIELD_HELP.refiYear}>
                   <NumericInput placeholder="e.g. 3" value={refiYear} onChange={setRefiYear}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Refi Month" help={FIELD_HELP.refiMonth}>
                   <NumericInput placeholder="1-12" value={dcfModel.timing.refiMonth} onChange={(value) => updateTimingField('refiMonth', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Refi Cost (%)" help={FIELD_HELP.refiCost}>
                   <NumericInput placeholder="e.g. 1.0" value={dcfModel.debtTerms.refinanceCostPct} onChange={(value) => updateDebtTermField('refinanceCostPct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Exit Value ($)" help={FIELD_HELP.exitValue}>
                   <input readOnly
                     value={exitValueAmount !== null ? '$' + exitValueAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Net Sale Proceeds ($)" help={FIELD_HELP.netSaleProceeds}>
                   <input readOnly
                     value={netSaleProceedsAmount !== null ? '$' + netSaleProceedsAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Loan Balance at Exit ($)" help={FIELD_HELP.loanBalanceAtExit}>
                   <input readOnly
                     value={loanBalanceAtExitAmount !== null ? '$' + loanBalanceAtExitAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
                 <Field label="Net Equity on Exit ($)" help={FIELD_HELP.netEquityOnExit}>
                   <input readOnly
                     value={netEquityOnExitAmount !== null ? '$' + netEquityOnExitAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
+                    className={financialOutputClass} />
                 </Field>
               </div>
 
               {/* Deal */}
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Deal</div>
+                <div className={`${sectionHeaderClass} text-violet-700 border-violet-200`}>Deal</div>
                 <Field label="Closing Costs ($)" help={FIELD_HELP.closingCosts}>
                   <NumericInput placeholder="e.g. 25000" value={closingCosts} onChange={setClosingCosts}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Hold Period (yrs)" help={FIELD_HELP.holdPeriod}>
                   <NumericInput placeholder="e.g. 7" value={holdPeriod} onChange={setHoldPeriod}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Sale Month" help={FIELD_HELP.saleMonth}>
                   <NumericInput placeholder="1-12" value={dcfModel.timing.saleMonth} onChange={(value) => updateTimingField('saleMonth', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Rent Growth (% / yr)" help={FIELD_HELP.rentGrowth}>
                   <NumericInput placeholder="e.g. 3" value={rentGrowth} onChange={setRentGrowth}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Expense Growth (% / yr)" help={FIELD_HELP.expenseGrowth}>
                   <NumericInput placeholder="e.g. 2" value={expenseGrowth} onChange={setExpenseGrowth}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Exit Cap Rate (%)" help={FIELD_HELP.exitCapRate}>
                   <NumericInput placeholder="e.g. 6.5" value={exitCapRate} onChange={setExitCapRate}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={`${financialInputClass} border-amber-300 bg-amber-50/70 text-amber-900`} disabled={!isAdmin} />
                 </Field>
                 <Field label="Cost of Sale (%)" help={FIELD_HELP.costOfSale}>
                   <NumericInput placeholder="e.g. 2" value={costOfSale} onChange={setCostOfSale}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
               </div>
 
