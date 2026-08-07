@@ -7,6 +7,105 @@ const AuditLogs = lazy(() => import('./AuditLogs'))
 
 export { ErrorBoundary } from './shared'
 
+function UsersTable({ users, onReload, onEdit }) {
+  const [query, setQuery] = useState('')
+  const [perPage, setPerPage] = useState(10)
+  const [page, setPage] = useState(1)
+  const [loading, setLoading] = useState(false)
+  const [onlineStatus, setOnlineStatus] = useState({ online: [], lastLogin: {} })
+
+  async function fetchUsers() {
+    setLoading(true)
+    try {
+      const data = await apiFetch(`/api/users?q=${encodeURIComponent(query)}&perPage=${perPage}&page=${page}`)
+      if (data.users) onReload(data.users)
+    } catch (e) { console.error('Fetch failed:', e.message) }
+    finally { setLoading(false) }
+  }
+
+  useEffect(() => {
+    apiFetch('/api/online-status').then(d => setOnlineStatus(d)).catch(() => {})
+    const t = setInterval(() => apiFetch('/api/online-status').then(d => setOnlineStatus(d)).catch(() => {}), 30000)
+    return () => clearInterval(t)
+  }, [])
+
+  useEffect(() => { fetchUsers() }, [page, perPage])
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-3">
+        <input type="text" placeholder="Search by email…" value={query}
+          onChange={e => setQuery(e.target.value)} className="input input-bordered flex-1" />
+        <button className="btn btn-primary" onClick={() => { setPage(1); fetchUsers() }}>Search</button>
+      </div>
+      <div className="overflow-x-auto rounded border border-base-300">
+        <table className="table table-zebra w-full">
+          <thead>
+            <tr className="text-xs uppercase tracking-widest text-base-content/50">
+              <th className="py-3 px-4">User</th>
+              <th className="py-3 px-4">Role</th>
+              <th className="py-3 px-4">Organization</th>
+              <th className="py-3 px-4">Phone</th>
+              <th className="py-3 px-4">Last Login</th>
+              <th className="py-3 px-4">Created</th>
+              <th className="py-3 px-4 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {users.length === 0
+              ? <tr><td colSpan={7} className="text-center py-8 text-base-content/40">No users found</td></tr>
+              : users.map((u, i) => {
+                const isOnline = onlineStatus.online.includes(u.id)
+                const lastLogin = onlineStatus.lastLogin[u.id] || u.last_login
+                return (
+                  <tr key={i}>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-3">
+                        <div className="relative flex-shrink-0">
+                          <Avatar src={u.profile_photo} name={[u.first_name, u.last_name].filter(Boolean).join(' ') || u.email} size="sm" />
+                          <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} title={isOnline ? 'Online' : 'Offline'} />
+                        </div>
+                        <div>
+                          <p className="font-medium text-sm">{[u.first_name, u.last_name].filter(Boolean).join(' ') || <span className="text-base-content/30">—</span>}</p>
+                          <p className="text-xs text-base-content/50">{u.email}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4"><span className="badge badge-primary badge-sm">{u.role}</span></td>
+                    <td className="py-3 px-4">{u.organization || <span className="text-base-content/30">—</span>}</td>
+                    <td className="py-3 px-4">{u.phone_number || <span className="text-base-content/30">—</span>}</td>
+                    <td className="py-3 px-4 text-xs">
+                      <span className={isOnline ? 'text-green-600 font-medium' : 'text-base-content/50'}>
+                        {isOnline ? '● Online' : fmtLastLogin(lastLogin)}
+                      </span>
+                    </td>
+                    <td className="py-3 px-4 text-xs text-base-content/50">{u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
+                    <td className="py-3 px-4 text-right"><button className="btn btn-xs btn-ghost" onClick={() => onEdit?.(u)}>Edit</button></td>
+                  </tr>
+                )
+              })
+            }
+          </tbody>
+        </table>
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-base-content/50 uppercase tracking-widest">Rows</span>
+          <select value={perPage} onChange={e => { setPerPage(Number(e.target.value)); setPage(1) }} className="select select-bordered select-sm">
+            <option value={10}>10</option>
+            <option value={25}>25</option>
+            <option value={50}>50</option>
+          </select>
+        </div>
+        <div className="flex gap-2">
+          <button className="btn btn-sm btn-ghost" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading}>← Prev</button>
+          <button className="btn btn-sm btn-ghost" onClick={() => setPage(p => p + 1)} disabled={loading}>Next →</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function AddUserForm({ onCreated }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
