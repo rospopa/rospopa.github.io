@@ -1009,21 +1009,29 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   const DCF_ROW_DEFS = [
     { key: 'grossRevenue', label: 'Gross Revenue', type: 'currency', category: 'income' },
     { key: 'vacancyCreditLoss', label: 'Vacancy / Credit Loss', type: 'currency', category: 'income' },
+    { key: 'percentageRentDcf', label: 'Percentage Rent', type: 'currency', category: 'income' },
     { key: 'otherIncomeDcf', label: 'Other Income', type: 'currency', category: 'income' },
     { key: 'effectiveGrossIncome', label: 'Effective Gross Income', type: 'currency', category: 'formula', readOnly: true },
     { key: 'operatingExpensesDcf', label: 'Operating Expenses', type: 'currency', category: 'expense' },
     { key: 'managementFeesDcf', label: 'Management Fees', type: 'currency', category: 'expense' },
     { key: 'propertyTaxesDcf', label: 'Property Taxes', type: 'currency', category: 'expense' },
     { key: 'insuranceDcf', label: 'Insurance', type: 'currency', category: 'expense' },
-    { key: 'reservesCapexDcf', label: 'Reserves / Capex', type: 'currency', category: 'expense' },
-    { key: 'tenantImprovements', label: 'Tenant Improvements (TI)', type: 'currency', category: 'expense' },
-    { key: 'leasingCommissions', label: 'Leasing Commissions (LC)', type: 'currency', category: 'expense' },
-    { key: 'capitalExpenditures', label: 'Additional Capex', type: 'currency', category: 'expense' },
+    { key: 'reservesCapexDcf', label: 'Reserves / Replacement Reserve', type: 'currency', category: 'expense' },
     { key: 'netOperatingIncomeDcf', label: 'Net Operating Income', type: 'currency', category: 'formula', readOnly: true },
+    { key: 'tenantImprovements', label: 'Tenant Improvements (TI)', type: 'currency', category: 'capital' },
+    { key: 'leasingCommissions', label: 'Leasing Commissions (LC)', type: 'currency', category: 'capital' },
+    { key: 'capitalExpenditures', label: 'Additional Capex', type: 'currency', category: 'capital' },
     { key: 'debtServiceDcf', label: 'Debt Service', type: 'currency', category: 'debt' },
+    { key: 'loanBalanceDcf', label: 'Loan Balance', type: 'currency', category: 'debt', readOnly: true },
     { key: 'refinanceProceeds', label: 'Refinance Proceeds', type: 'currency', category: 'capital' },
+    { key: 'refinanceCostsDcf', label: 'Refinance Costs', type: 'currency', category: 'capital' },
+    { key: 'loanPayoffAtRefi', label: 'Loan Payoff at Refi', type: 'currency', category: 'capital', readOnly: true },
     { key: 'taxesDcf', label: 'Taxes', type: 'currency', category: 'tax' },
     { key: 'cashFlowBeforeSale', label: 'Cash Flow Before Sale', type: 'currency', category: 'formula', readOnly: true },
+    { key: 'grossSaleProceedsDcf', label: 'Gross Sale Proceeds', type: 'currency', category: 'exit', readOnly: true },
+    { key: 'saleCostsDcf', label: 'Sale Costs', type: 'currency', category: 'exit', readOnly: true },
+    { key: 'loanPayoffAtSale', label: 'Loan Payoff at Sale', type: 'currency', category: 'exit', readOnly: true },
+    { key: 'recaptureTaxDcf', label: 'Recapture Tax', type: 'currency', category: 'exit', readOnly: true },
     { key: 'saleProceedsDcf', label: 'Sale Proceeds', type: 'currency', category: 'exit' },
     { key: 'cashFlowAfterSale', label: 'Cash Flow After Sale', type: 'currency', category: 'formula', readOnly: true },
     { key: 'waterfallSponsor', label: 'Sponsor Waterfall', type: 'currency', category: 'waterfall' },
@@ -1037,6 +1045,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         year,
         grossRevenue: '',
         vacancyCreditLoss: '',
+        percentageRentDcf: '',
         otherIncomeDcf: '',
         operatingExpensesDcf: '',
         managementFeesDcf: '',
@@ -1047,8 +1056,15 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         leasingCommissions: '',
         capitalExpenditures: '',
         debtServiceDcf: '',
+        loanBalanceDcf: '',
         refinanceProceeds: '',
+        refinanceCostsDcf: '',
+        loanPayoffAtRefi: '',
         taxesDcf: '',
+        grossSaleProceedsDcf: '',
+        saleCostsDcf: '',
+        loanPayoffAtSale: '',
+        recaptureTaxDcf: '',
         saleProceedsDcf: '',
         waterfallSponsor: '',
         waterfallInvestor: '',
@@ -1063,6 +1079,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       year: yearNumber,
       grossRevenue: toTextNumber(year.grossRevenue),
       vacancyCreditLoss: toTextNumber(year.vacancyCreditLoss),
+      percentageRentDcf: toTextNumber(year.percentageRentDcf),
       otherIncomeDcf: toTextNumber(year.otherIncomeDcf),
       operatingExpensesDcf: toTextNumber(year.operatingExpensesDcf),
       managementFeesDcf: toTextNumber(year.managementFeesDcf),
@@ -1073,8 +1090,15 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       leasingCommissions: toTextNumber(year.leasingCommissions),
       capitalExpenditures: toTextNumber(year.capitalExpenditures),
       debtServiceDcf: toTextNumber(year.debtServiceDcf),
+      loanBalanceDcf: toTextNumber(year.loanBalanceDcf),
       refinanceProceeds: toTextNumber(year.refinanceProceeds),
+      refinanceCostsDcf: toTextNumber(year.refinanceCostsDcf),
+      loanPayoffAtRefi: toTextNumber(year.loanPayoffAtRefi),
       taxesDcf: toTextNumber(year.taxesDcf),
+      grossSaleProceedsDcf: toTextNumber(year.grossSaleProceedsDcf),
+      saleCostsDcf: toTextNumber(year.saleCostsDcf),
+      loanPayoffAtSale: toTextNumber(year.loanPayoffAtSale),
+      recaptureTaxDcf: toTextNumber(year.recaptureTaxDcf),
       saleProceedsDcf: toTextNumber(year.saleProceedsDcf),
       waterfallSponsor: toTextNumber(year.waterfallSponsor),
       waterfallInvestor: toTextNumber(year.waterfallInvestor),
@@ -1134,6 +1158,24 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     }
     return (low + high) / 2
   }
+  function paymentForLoan(principal, annualRate, amortYears) {
+    if (!principal || principal <= 0) return 0
+    const rate = annualRate / 100 / 12
+    const months = amortYears * 12
+    if (!months) return 0
+    if (rate === 0) return principal / months
+    return principal * rate / (1 - Math.pow(1 + rate, -months))
+  }
+  function endingLoanBalance(principal, annualRate, amortYears, monthsElapsed) {
+    if (!principal || principal <= 0) return 0
+    const months = Math.max(0, Math.round(monthsElapsed))
+    const totalMonths = amortYears * 12
+    if (!totalMonths) return 0
+    const rate = annualRate / 100 / 12
+    if (rate === 0) return Math.max(0, principal - (principal / totalMonths) * months)
+    if (months <= 0) return principal
+    return Math.max(0, principal * (Math.pow(1 + rate, totalMonths) - Math.pow(1 + rate, months)) / (Math.pow(1 + rate, totalMonths) - 1))
+  }
   function buildDefaultDcfModelFromProperty(prop = {}) {
     const model = defaultDcfModel()
     const hold = Math.min(DCF_MAX_YEARS, Math.max(1, Number(prop.hold_period || 1)))
@@ -1148,20 +1190,24 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const insuranceBase = Number(prop.insurance || 0)
     const managementFeePct = Number(prop.management_fee_pct || 0) / 100
     const effectiveTaxRatePct = Number(prop.effective_tax_rate || 0) / 100
-    const debtServiceBase = (() => {
-      const loanAmt = Number(prop.loan_amount || 0)
-      const rate = Number(prop.interest_rate || 0) / 100 / 12
-      const amortYears = Number(prop.amortization_term || 0)
-      if (!loanAmt || !amortYears) return 0
-      const months = amortYears * 12
-      if (!months) return 0
-      if (rate === 0) return (loanAmt / months) * 12
-      return (loanAmt * rate / (1 - Math.pow(1 + rate, -months))) * 12
-    })()
+    const loanAmt = Number(prop.loan_amount || 0)
+    const interestRatePct = Number(prop.interest_rate || 0)
+    const amortYears = Number(prop.amortization_term || 0)
+    const ioYears = Math.max(0, Number(prop.interest_only_period || 0))
     const exitCapPct = Number(prop.exit_cap_rate || 0) / 100
     const costOfSalePct = Number(prop.cost_of_sale || 0) / 100
     const refiYearValue = Number(prop.refi_year || 0)
     const refiLtvPct = Number(prop.refi_ltv || 0) / 100
+    const refiRatePct = Number(prop.refi_rate || 0)
+    const recaptureRatePct = Number(prop.depreciation_recapture_rate || 0) / 100
+    const rentToSalesPct = Number(prop.rent_to_sales_ratio || 0) / 100
+    const tenantSalesBase = Number(prop.tenant_gross_sales || 0)
+    const tenantBaseRentBase = Number(prop.tenant_base_rent || 0)
+    const depBasis = Number(prop.price || 0) * (1 - Number(prop.land_value_pct || 0) / 100)
+    let currentLoanPrincipal = loanAmt
+    let currentLoanRate = interestRatePct
+    let currentLoanAmortYears = amortYears
+    let currentLoanStartMonth = 0
 
     for (let index = 0; index < DCF_MAX_YEARS; index += 1) {
       const year = index + 1
@@ -1169,8 +1215,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       const expenseGrowthFactor = Math.pow(1 + expenseGrowthPct, index)
       const grossRevenue = grossRentBase * rentGrowthFactor
       const vacancyLoss = grossRevenue * vacancyPct
+      const tenantSalesYear = tenantSalesBase * rentGrowthFactor
+      const baseRentYear = tenantBaseRentBase * rentGrowthFactor
+      const percentageRent = Math.max(0, tenantSalesYear * rentToSalesPct - baseRentYear)
       const otherIncome = otherIncomeBase * rentGrowthFactor
-      const effectiveGrossIncome = grossRevenue - vacancyLoss + otherIncome
+      const effectiveGrossIncome = grossRevenue - vacancyLoss + percentageRent + otherIncome
       const operatingExpensesYear = operatingExpensesBase * expenseGrowthFactor
       const managementFees = effectiveGrossIncome * managementFeePct
       const propertyTaxesYear = propertyTaxesBase * expenseGrowthFactor
@@ -1178,21 +1227,58 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       const reservesYear = reservesBase * expenseGrowthFactor
       const noi = effectiveGrossIncome - operatingExpensesYear - managementFees - propertyTaxesYear - insuranceYear - reservesYear
       const taxesYear = Math.max(0, noi) * effectiveTaxRatePct
-      const saleProceeds = year === hold && exitCapPct > 0 ? Math.max(0, noi) / exitCapPct * (1 - costOfSalePct) : 0
-      const refinanceProceeds = refiYearValue === year && refiLtvPct > 0 && exitCapPct > 0 ? (Math.max(0, noi) / exitCapPct) * refiLtvPct : 0
+      const monthsElapsed = year * 12
+      const monthsSinceLoanStart = monthsElapsed - currentLoanStartMonth
+      const inIoPeriod = monthsSinceLoanStart > 0 && monthsSinceLoanStart <= ioYears * 12 && currentLoanPrincipal > 0
+      const annualDebtService = currentLoanPrincipal > 0
+        ? (inIoPeriod
+          ? currentLoanPrincipal * (currentLoanRate / 100)
+          : paymentForLoan(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears) * 12)
+        : 0
+      const loanBalance = currentLoanPrincipal > 0
+        ? (inIoPeriod
+          ? currentLoanPrincipal
+          : endingLoanBalance(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears, monthsSinceLoanStart))
+        : 0
+      const stabilizedValue = exitCapPct > 0 ? Math.max(0, noi) / exitCapPct : 0
+      const refiGrossProceeds = refiYearValue === year && refiLtvPct > 0 ? stabilizedValue * refiLtvPct : 0
+      const refinanceCosts = refiGrossProceeds > 0 ? refiGrossProceeds * 0.01 : 0
+      const loanPayoffAtRefi = refiGrossProceeds > 0 ? loanBalance : 0
+      const refinanceProceeds = Math.max(0, refiGrossProceeds - refinanceCosts - loanPayoffAtRefi)
+      if (refiGrossProceeds > 0) {
+        currentLoanPrincipal = refiGrossProceeds
+        currentLoanRate = refiRatePct > 0 ? refiRatePct : currentLoanRate
+        currentLoanAmortYears = amortYears || currentLoanAmortYears
+        currentLoanStartMonth = monthsElapsed
+      }
+      const grossSaleProceeds = year === hold ? stabilizedValue : 0
+      const saleCosts = grossSaleProceeds > 0 ? grossSaleProceeds * costOfSalePct : 0
+      const loanPayoffAtSale = grossSaleProceeds > 0
+        ? endingLoanBalance(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears, monthsElapsed - currentLoanStartMonth)
+        : 0
+      const recaptureTax = grossSaleProceeds > 0 ? depBasis * recaptureRatePct : 0
+      const saleProceeds = Math.max(0, grossSaleProceeds - saleCosts - loanPayoffAtSale - recaptureTax)
       model.years[index] = normalizeYearDraft({
         year,
         grossRevenue: Math.round(grossRevenue),
         vacancyCreditLoss: Math.round(vacancyLoss),
+        percentageRentDcf: Math.round(percentageRent),
         otherIncomeDcf: Math.round(otherIncome),
         operatingExpensesDcf: Math.round(operatingExpensesYear),
         managementFeesDcf: Math.round(managementFees),
         propertyTaxesDcf: Math.round(propertyTaxesYear),
         insuranceDcf: Math.round(insuranceYear),
         reservesCapexDcf: Math.round(reservesYear),
-        debtServiceDcf: Math.round(debtServiceBase),
+        debtServiceDcf: Math.round(annualDebtService),
+        loanBalanceDcf: Math.round(loanBalance),
         refinanceProceeds: Math.round(refinanceProceeds),
+        refinanceCostsDcf: Math.round(refinanceCosts),
+        loanPayoffAtRefi: Math.round(loanPayoffAtRefi),
         taxesDcf: Math.round(taxesYear),
+        grossSaleProceedsDcf: Math.round(grossSaleProceeds),
+        saleCostsDcf: Math.round(saleCosts),
+        loanPayoffAtSale: Math.round(loanPayoffAtSale),
+        recaptureTaxDcf: Math.round(recaptureTax),
         saleProceedsDcf: Math.round(saleProceeds),
       }, year)
     }
@@ -1401,6 +1487,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   function getComputedDcfValue(yearRow, rowKey) {
     const grossRevenueVal = parseNum(yearRow.grossRevenue) || 0
     const vacancyLossVal = parseNum(yearRow.vacancyCreditLoss) || 0
+    const percentageRentVal = parseNum(yearRow.percentageRentDcf) || 0
     const otherIncomeVal = parseNum(yearRow.otherIncomeDcf) || 0
     const operatingExpensesVal = parseNum(yearRow.operatingExpensesDcf) || 0
     const managementFeesVal = parseNum(yearRow.managementFeesDcf) || 0
@@ -1412,13 +1499,15 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const capitalExpendituresVal = parseNum(yearRow.capitalExpenditures) || 0
     const debtServiceVal = parseNum(yearRow.debtServiceDcf) || 0
     const refinanceVal = parseNum(yearRow.refinanceProceeds) || 0
+    const refinanceCostsVal = parseNum(yearRow.refinanceCostsDcf) || 0
     const taxesVal = parseNum(yearRow.taxesDcf) || 0
     const saleProceedsVal = parseNum(yearRow.saleProceedsDcf) || 0
     const sponsorVal = parseNum(yearRow.waterfallSponsor) || 0
     const investorVal = parseNum(yearRow.waterfallInvestor) || 0
-    const effectiveGrossIncome = grossRevenueVal - vacancyLossVal + otherIncomeVal
-    const netOperatingIncome = effectiveGrossIncome - operatingExpensesVal - managementFeesVal - propertyTaxesVal - insuranceVal - reservesVal - tenantImprovementsVal - leasingCommissionsVal - capitalExpendituresVal
-    const cashFlowBeforeSale = netOperatingIncome - debtServiceVal + refinanceVal - taxesVal
+    const effectiveGrossIncome = grossRevenueVal - vacancyLossVal + percentageRentVal + otherIncomeVal
+    const netOperatingIncome = effectiveGrossIncome - operatingExpensesVal - managementFeesVal - propertyTaxesVal - insuranceVal - reservesVal
+    const belowTheLineCapital = tenantImprovementsVal + leasingCommissionsVal + capitalExpendituresVal
+    const cashFlowBeforeSale = netOperatingIncome - belowTheLineCapital - debtServiceVal + refinanceVal - refinanceCostsVal - taxesVal
     const cashFlowAfterSale = cashFlowBeforeSale + saleProceedsVal - sponsorVal - investorVal
     if (rowKey === 'effectiveGrossIncome') return effectiveGrossIncome
     if (rowKey === 'netOperatingIncomeDcf') return netOperatingIncome
@@ -1465,6 +1554,14 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   const yieldOnCost = dcfYearSummaries[0] && acquisitionBasis > 0
     ? dcfYearSummaries[0].netOperatingIncome / acquisitionBasis * 100
     : null
+  const firstYearDcf = visibleDcfYears[0] || null
+  const holdYearDcf = visibleDcfYears[visibleDcfYears.length - 1] || null
+  const adjustedNoiValue = firstYearDcf ? (getComputedDcfValue(firstYearDcf, 'netOperatingIncomeDcf') || 0) : null
+  const exitValueAmount = holdYearDcf ? (parseNum(holdYearDcf.grossSaleProceedsDcf) || 0) : null
+  const netSaleProceedsAmount = holdYearDcf ? (parseNum(holdYearDcf.saleProceedsDcf) || 0) : null
+  const loanBalanceAtExitAmount = holdYearDcf ? (parseNum(holdYearDcf.loanPayoffAtSale) || 0) : null
+  const netEquityOnExitAmount = netSaleProceedsAmount
+  const annualDebtServiceAmount = firstYearDcf ? (parseNum(firstYearDcf.debtServiceDcf) || 0) : null
 
   useEffect(() => {
     if (open && property?.id) {
@@ -1597,6 +1694,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           year: index + 1,
           grossRevenue: parseNum(year.grossRevenue),
           vacancyCreditLoss: parseNum(year.vacancyCreditLoss),
+          percentageRentDcf: parseNum(year.percentageRentDcf),
           otherIncomeDcf: parseNum(year.otherIncomeDcf),
           operatingExpensesDcf: parseNum(year.operatingExpensesDcf),
           managementFeesDcf: parseNum(year.managementFeesDcf),
@@ -1607,8 +1705,15 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           leasingCommissions: parseNum(year.leasingCommissions),
           capitalExpenditures: parseNum(year.capitalExpenditures),
           debtServiceDcf: parseNum(year.debtServiceDcf),
+          loanBalanceDcf: parseNum(year.loanBalanceDcf),
           refinanceProceeds: parseNum(year.refinanceProceeds),
+          refinanceCostsDcf: parseNum(year.refinanceCostsDcf),
+          loanPayoffAtRefi: parseNum(year.loanPayoffAtRefi),
           taxesDcf: parseNum(year.taxesDcf),
+          grossSaleProceedsDcf: parseNum(year.grossSaleProceedsDcf),
+          saleCostsDcf: parseNum(year.saleCostsDcf),
+          loanPayoffAtSale: parseNum(year.loanPayoffAtSale),
+          recaptureTaxDcf: parseNum(year.recaptureTaxDcf),
           saleProceedsDcf: parseNum(year.saleProceedsDcf),
           waterfallSponsor: parseNum(year.waterfallSponsor),
           waterfallInvestor: parseNum(year.waterfallInvestor),
@@ -2109,16 +2214,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Adjusted NOI ($/yr)">
-                  {(() => {
-                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
-                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
-                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : 0
-                    const noi = egi !== null && operatingExpenses !== ''
-                      ? egi + Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0) : null
-                    const adjNoi = noi !== null ? noi - mgmtFee - Number(insurance || 0) - Number(propertyTaxes || 0) : null
-                    return <input readOnly value={adjNoi !== null ? '$' + adjNoi.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                      className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
-                  })()}
+                  <input readOnly
+                    value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
               </div>
 
@@ -2223,12 +2321,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                 </Field>
                 <Field label="Annual Debt Service ($/yr)">
                   <input readOnly
-                    value={loanAmount !== '' && interestRate !== '' && amortizationTerm !== '' && Number(amortizationTerm) > 0 ? (() => {
-                      const r = Number(interestRate) / 100 / 12
-                      const n = Number(amortizationTerm) * 12
-                      const pmt = r === 0 ? Number(loanAmount) / n : Number(loanAmount) * r / (1 - Math.pow(1 + r, -n))
-                      return '$' + (pmt * 12).toLocaleString(undefined, { maximumFractionDigits: 0 })
-                    })() : '—'}
+                    value={annualDebtServiceAmount !== null ? '$' + annualDebtServiceAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
               </div>
@@ -2319,78 +2412,24 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Exit Value ($)">
-                  {(() => {
-                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
-                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
-                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : 0
-                    const noi = egi !== null && operatingExpenses !== ''
-                      ? egi + Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0) : null
-                    const adjNoi = noi !== null ? noi - mgmtFee - Number(insurance || 0) - Number(propertyTaxes || 0) : null
-                    const exitNoi = adjNoi !== null && rentGrowth !== '' && holdPeriod !== ''
-                      ? adjNoi * Math.pow(1 + Number(rentGrowth) / 100, Number(holdPeriod))
-                      : adjNoi
-                    const val = exitNoi !== null && exitCapRate !== '' && Number(exitCapRate) > 0
-                      ? '$' + (exitNoi / (Number(exitCapRate) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
-                  })()}
+                  <input readOnly
+                    value={exitValueAmount !== null ? '$' + exitValueAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Net Sale Proceeds ($)">
-                  {(() => {
-                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
-                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
-                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : 0
-                    const noi = egi !== null && operatingExpenses !== ''
-                      ? egi + Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0) : null
-                    const adjNoi = noi !== null ? noi - mgmtFee - Number(insurance || 0) - Number(propertyTaxes || 0) : null
-                    const exitNoi = adjNoi !== null && rentGrowth !== '' && holdPeriod !== ''
-                      ? adjNoi * Math.pow(1 + Number(rentGrowth) / 100, Number(holdPeriod))
-                      : adjNoi
-                    const exitVal = exitNoi !== null && exitCapRate !== '' && Number(exitCapRate) > 0
-                      ? exitNoi / (Number(exitCapRate) / 100) : null
-                    const val = exitVal !== null && costOfSale !== ''
-                      ? '$' + (exitVal * (1 - Number(costOfSale) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
-                  })()}
+                  <input readOnly
+                    value={netSaleProceedsAmount !== null ? '$' + netSaleProceedsAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Loan Balance at Exit ($)">
-                  {(() => {
-                    if (loanAmount === '' || interestRate === '' || amortizationTerm === '' || holdPeriod === '' || Number(amortizationTerm) <= 0) return <input readOnly value="—" className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
-                    const r = Number(interestRate) / 100 / 12
-                    const n = Number(amortizationTerm) * 12
-                    const hp = Number(holdPeriod) * 12
-                    const bal = r === 0
-                      ? Number(loanAmount) - (Number(loanAmount) / n * hp)
-                      : Number(loanAmount) * (Math.pow(1 + r, n) - Math.pow(1 + r, hp)) / (Math.pow(1 + r, n) - 1)
-                    return <input readOnly value={'$' + Math.max(0, bal).toLocaleString(undefined, { maximumFractionDigits: 0 })}
-                      className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
-                  })()}
+                  <input readOnly
+                    value={loanBalanceAtExitAmount !== null ? '$' + loanBalanceAtExitAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Net Equity on Exit ($)">
-                  {(() => {
-                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
-                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
-                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : 0
-                    const noi = egi !== null && operatingExpenses !== ''
-                      ? egi + Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0) : null
-                    const adjNoi = noi !== null ? noi - mgmtFee - Number(insurance || 0) - Number(propertyTaxes || 0) : null
-                    const exitNoi = adjNoi !== null && rentGrowth !== '' && holdPeriod !== ''
-                      ? adjNoi * Math.pow(1 + Number(rentGrowth) / 100, Number(holdPeriod))
-                      : adjNoi
-                    const exitVal = exitNoi !== null && exitCapRate !== '' && Number(exitCapRate) > 0
-                      ? exitNoi / (Number(exitCapRate) / 100) : null
-                    const netProceeds = exitVal !== null && costOfSale !== '' ? exitVal * (1 - Number(costOfSale) / 100) : null
-                    let bal = 0
-                    if (loanAmount !== '' && interestRate !== '' && amortizationTerm !== '' && holdPeriod !== '' && Number(amortizationTerm) > 0) {
-                      const r = Number(interestRate) / 100 / 12, n = Number(amortizationTerm) * 12, hp = Number(holdPeriod) * 12
-                      bal = r === 0 ? Number(loanAmount) - (Number(loanAmount) / n * hp)
-                        : Number(loanAmount) * (Math.pow(1 + r, n) - Math.pow(1 + r, hp)) / (Math.pow(1 + r, n) - 1)
-                      bal = Math.max(0, bal)
-                    }
-                    const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : 0
-                    const recapture = depreciationRecaptureRate !== '' ? depBasis * Number(depreciationRecaptureRate) / 100 : 0
-                    const val = netProceeds !== null ? '$' + (netProceeds - bal - recapture).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
-                  })()}
+                  <input readOnly
+                    value={netEquityOnExitAmount !== null ? '$' + netEquityOnExitAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
               </div>
 
