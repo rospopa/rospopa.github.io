@@ -113,32 +113,13 @@ async function apiFetch(url, options = {}) {
   return res.json()
 }
 
-/** A labelled form field with optional inline guidance */
-function Field({ label, required, help, importance = 'core', children }) {
-  const importanceTone = importance === 'core'
-    ? 'text-success'
-    : importance === 'advanced'
-      ? 'text-warning'
-      : 'text-base-content/50'
+/** A labelled form field with consistent top-margin between label and input */
+function Field({ label, required, children }) {
   return (
     <div className="flex flex-col gap-1">
-      <div className="flex items-center justify-between gap-2">
-        <label className="text-xs font-semibold uppercase tracking-widest text-base-content/60">
-          {label}{required && <span className="text-base-content ml-0.5">*</span>}
-        </label>
-        <div className="flex items-center gap-2">
-          <span className={`text-[10px] font-semibold uppercase tracking-[0.18em] ${importanceTone}`}>
-            {importance}
-          </span>
-          {help && (
-            <div className="tooltip tooltip-left max-w-xs" data-tip={help}>
-              <button type="button" className="btn btn-ghost btn-xs btn-circle min-h-0 h-5 w-5 text-info" aria-label={`Explain ${label}`}>
-                ?
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+      <label className="text-xs font-semibold uppercase tracking-widest text-base-content/60">
+        {label}{required && <span className="text-base-content ml-0.5">*</span>}
+      </label>
       {children}
     </div>
   )
@@ -1024,69 +1005,7 @@ function AssignUsersTab({ allUsers, assignLoading, toggleAssign, onViewContact }
   )
 }
 
-const FINANCIAL_FIELD_HELP = {
-  npvDiscountRate: 'Your target discount rate for NPV. Use the return threshold you would underwrite this deal against, not the property interest rate.',
-  grossScheduledRent: 'Annual contractual base rent before vacancy, credit loss, collections issues, and free rent.',
-  vacancyRate: 'Top-line economic vacancy assumption before tenant-specific default and collections stress.',
-  otherIncome: 'Recurring non-rent income such as parking, RUBS, signage, storage, or miscellaneous recoveries.',
-  operatingExpenses: 'Controllable and non-controllable operating costs before debt service and capital events.',
-  reservesCapex: 'Recurring replacement reserves for roofs, paving, HVAC, turnover, and similar recurring capital items.',
-  managementFeePct: 'Asset or property management fee as a percent of effective gross income.',
-  insurance: 'Annual insurance burden for the property.',
-  propertyTaxes: 'Annual real estate taxes before any recovery to tenants.',
-  loanAmount: 'Senior loan principal at acquisition.',
-  ltv: 'Loan-to-value ratio at closing. Useful as a reasonableness check against the loan amount.',
-  interestRate: 'Senior note coupon if the loan is fixed-rate.',
-  amortizationTerm: 'Amortization schedule used to calculate required principal paydown.',
-  interestOnlyPeriod: 'Years with interest-only payments before amortization begins.',
-  initialLoanTermYears: 'Maturity of the initial senior loan, used for balloon and refinance timing.',
-  sofrRatePct: 'Floating benchmark index used before adding spread.',
-  indexSpreadPct: 'Spread above the floating index.',
-  rateCapPct: 'Maximum all-in floating rate.',
-  rateFloorPct: 'Minimum all-in floating rate.',
-  interestReserveMonths: 'Months of senior debt service prefunded into an interest reserve.',
-  refinanceLoanTermYears: 'Term of the replacement senior loan after refinance.',
-  mezzAmount: 'Subordinate debt balance behind the senior loan.',
-  mezzRatePct: 'Mezz coupon or effective current-pay rate.',
-  prefEquityAmount: 'Preferred equity capital sitting below debt but above common equity.',
-  prefEquityRatePct: 'Current-pay yield on the preferred equity tranche.',
-  sellerPaperAmount: 'Seller financing note balance provided at acquisition.',
-  sellerPaperRatePct: 'Coupon on seller financing.',
-  intercreditorMode: 'How refinance or sale proceeds are allocated across tranches: pay senior first or share pari passu.',
-  landValuePct: 'Portion of purchase price allocated to non-depreciable land.',
-  costSegBonusPct: 'Percent of depreciable basis assumed to qualify for accelerated bonus depreciation.',
-  effectiveTaxRate: 'Fallback effective tax rate if a more detailed tax input is not provided.',
-  depreciationRecaptureRate: 'Tax rate applied to depreciation recapture at sale.',
-  capitalGainsRatePct: 'Tax rate on capital gains at sale.',
-  ordinaryIncomeTaxRatePct: 'Tax rate for ongoing taxable operating income.',
-  passiveLossLimitPct: 'Percent of taxable losses assumed usable each period before suspension.',
-  initialTaxBasis: 'Tax basis used for depreciation and sale-gain calculations.',
-  suspendedLossCarryforward: 'Previously suspended losses available to offset future income or sale proceeds.',
-  refiLtv: 'Refinance sizing constraint based on stabilized value.',
-  refiRate: 'Coupon on the refinance loan.',
-  refiYear: 'Year in which the refinance occurs.',
-  saleMonth: 'Month of the final-year sale, so exit does not have to occur at year-end.',
-  rentGrowth: 'Annual market rent growth assumption across the hold.',
-  expenseGrowth: 'Annual growth rate for operating expenses and similar burdens.',
-  exitCapRate: 'Cap rate used to estimate terminal value from stabilized exit NOI.',
-  costOfSale: 'Brokerage, legal, transfer tax, and disposition friction at sale.',
-  prefRate: 'Preferred return accrued to the LP before promote sharing.',
-  catchUpRate: 'GP catch-up share used after pref distributions.',
-  promoteRate: 'Residual GP promote share above the first hurdle.',
-  lpSharePct: 'LP share of common equity capital.',
-  gpSharePct: 'GP share of common equity capital.',
-  hurdle1IrrPct: 'First promote hurdle used in the waterfall.',
-  hurdle2IrrPct: 'Second promote hurdle for higher GP sharing.',
-  hurdle2PromotePct: 'GP promote share between hurdle 2 and hurdle 3.',
-  hurdle3IrrPct: 'Third promote hurdle for the highest tier.',
-  hurdle3PromotePct: 'GP promote share above the third hurdle.',
-  recyclingPct: 'Portion of interim distributions recycled back into partner capital accounts.',
-  partialRecapMonth: 'Month index where a partial recapitalization distribution occurs.',
-  partialRecapDistributionPct: 'Percent of balance distributed in that recap event.',
-}
-
 function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffset = 0 }) {
-  const getFieldHelp = (key, fallback = '') => FINANCIAL_FIELD_HELP[key] || fallback
   const DCF_ROW_DEFS = [
     { key: 'grossRevenue', label: 'Gross Revenue', type: 'currency', category: 'income' },
     { key: 'vacancyCreditLoss', label: 'Vacancy / Credit Loss', type: 'currency', category: 'income' },
@@ -1169,32 +1088,14 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       indexSpreadPct: '0',
       rateCapPct: '',
       rateFloorPct: '',
-      interestReserveMonths: '0',
-      mezzAmount: '0',
-      mezzRatePct: '0',
-      mezzInterestOnly: true,
-      prefEquityAmount: '0',
-      prefEquityRatePct: '0',
-      sellerPaperAmount: '0',
-      sellerPaperRatePct: '0',
-      sellerPaperInterestOnly: true,
-      intercreditorMode: 'sequential'
+      interestReserveMonths: '0'
     },
     waterfall: {
       prefRate: '8',
       catchUpRate: '100',
       promoteRate: '20',
       lpSharePct: '95',
-      gpSharePct: '5',
-      hurdle1IrrPct: '10',
-      hurdle2IrrPct: '14',
-      hurdle2PromotePct: '30',
-      hurdle3IrrPct: '18',
-      hurdle3PromotePct: '40',
-      recyclingPct: '0',
-      clawbackEnabled: true,
-      partialRecapMonth: '',
-      partialRecapDistributionPct: '0'
+      gpSharePct: '5'
     },
     timing: {
       granularity: 'monthly',
@@ -1245,7 +1146,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       maxLtv: '75.00'
     },
     rentRoll: [
-      { tenantName: '', suite: '', annualRent: '', annualSales: '', leasedSf: '', annualRentPsf: '', leaseType: 'NNN', reimbursementsPct: '0', freeRentMonths: '0', leaseStartYear: '1', leaseStartMonth: '1', leaseEndYear: '10', leaseEndMonth: '12', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0', marketRentPsf: '', newLeaseSpreadPct: '', renewalSpreadPct: '', tenantImprovementPerSf: '', leasingCommissionPct: '', expenseStopPerSf: '', grossUpPct: '', breakpointSales: '', percentageRentPct: '', anchorTenant: false, coTenancyGroup: '', extensionOptionMonths: '0', expansionSf: '0', contractionSf: '0', terminationMonth: '', purchaseOptionPrice: '', renewalTiPerSf: '', newLeaseTiPerSf: '', renewalLcPct: '', newLeaseLcPct: '', camPoolSharePct: '100', adminFeePct: '', controllableCapPct: '', nonRecoverableExpensePct: '', defaultProbabilityPct: '0', badDebtReservePct: '0', collectionsLagMonths: '0', guarantorStrengthPct: '100', securityDepositMonths: '0' }
+      { tenantName: '', suite: '', annualRent: '', annualSales: '', leasedSf: '', annualRentPsf: '', leaseType: 'NNN', reimbursementsPct: '0', freeRentMonths: '0', leaseStartYear: '1', leaseStartMonth: '1', leaseEndYear: '10', leaseEndMonth: '12', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0', marketRentPsf: '', newLeaseSpreadPct: '', renewalSpreadPct: '', tenantImprovementPerSf: '', leasingCommissionPct: '', expenseStopPerSf: '', grossUpPct: '', breakpointSales: '', percentageRentPct: '', anchorTenant: false, coTenancyGroup: '', extensionOptionMonths: '0', expansionSf: '0', contractionSf: '0', terminationMonth: '', purchaseOptionPrice: '', renewalTiPerSf: '', newLeaseTiPerSf: '', renewalLcPct: '', newLeaseLcPct: '', camPoolSharePct: '100', adminFeePct: '', controllableCapPct: '', nonRecoverableExpensePct: '' }
     ]
   })
   function toTextNumber(value) {
@@ -1334,12 +1235,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       camPoolSharePct: toTextNumber(row.camPoolSharePct || 100),
       adminFeePct: toTextNumber(row.adminFeePct),
       controllableCapPct: toTextNumber(row.controllableCapPct),
-      nonRecoverableExpensePct: toTextNumber(row.nonRecoverableExpensePct),
-      defaultProbabilityPct: toTextNumber(row.defaultProbabilityPct || 0),
-      badDebtReservePct: toTextNumber(row.badDebtReservePct || 0),
-      collectionsLagMonths: toTextNumber(row.collectionsLagMonths || 0),
-      guarantorStrengthPct: toTextNumber(row.guarantorStrengthPct || 100),
-      securityDepositMonths: toTextNumber(row.securityDepositMonths || 0)
+      nonRecoverableExpensePct: toTextNumber(row.nonRecoverableExpensePct)
     }
   }
   function normalizeDcfModel(rawModel, prop = {}) {
@@ -1384,32 +1280,14 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         indexSpreadPct: toTextNumber(source.debtTerms?.indexSpreadPct ?? baseModel.debtTerms.indexSpreadPct),
         rateCapPct: toTextNumber(source.debtTerms?.rateCapPct),
         rateFloorPct: toTextNumber(source.debtTerms?.rateFloorPct),
-        interestReserveMonths: toTextNumber(source.debtTerms?.interestReserveMonths ?? baseModel.debtTerms.interestReserveMonths),
-        mezzAmount: toTextNumber(source.debtTerms?.mezzAmount ?? baseModel.debtTerms.mezzAmount),
-        mezzRatePct: toTextNumber(source.debtTerms?.mezzRatePct ?? baseModel.debtTerms.mezzRatePct),
-        mezzInterestOnly: source.debtTerms?.mezzInterestOnly !== undefined ? !!source.debtTerms.mezzInterestOnly : !!baseModel.debtTerms.mezzInterestOnly,
-        prefEquityAmount: toTextNumber(source.debtTerms?.prefEquityAmount ?? baseModel.debtTerms.prefEquityAmount),
-        prefEquityRatePct: toTextNumber(source.debtTerms?.prefEquityRatePct ?? baseModel.debtTerms.prefEquityRatePct),
-        sellerPaperAmount: toTextNumber(source.debtTerms?.sellerPaperAmount ?? baseModel.debtTerms.sellerPaperAmount),
-        sellerPaperRatePct: toTextNumber(source.debtTerms?.sellerPaperRatePct ?? baseModel.debtTerms.sellerPaperRatePct),
-        sellerPaperInterestOnly: source.debtTerms?.sellerPaperInterestOnly !== undefined ? !!source.debtTerms.sellerPaperInterestOnly : !!baseModel.debtTerms.sellerPaperInterestOnly,
-        intercreditorMode: source.debtTerms?.intercreditorMode || baseModel.debtTerms.intercreditorMode
+        interestReserveMonths: toTextNumber(source.debtTerms?.interestReserveMonths ?? baseModel.debtTerms.interestReserveMonths)
       },
       waterfall: {
         prefRate: toTextNumber(source.waterfall?.prefRate ?? baseModel.waterfall.prefRate),
         catchUpRate: toTextNumber(source.waterfall?.catchUpRate ?? baseModel.waterfall.catchUpRate),
         promoteRate: toTextNumber(source.waterfall?.promoteRate ?? baseModel.waterfall.promoteRate),
         lpSharePct: toTextNumber(source.waterfall?.lpSharePct ?? baseModel.waterfall.lpSharePct),
-        gpSharePct: toTextNumber(source.waterfall?.gpSharePct ?? baseModel.waterfall.gpSharePct),
-        hurdle1IrrPct: toTextNumber(source.waterfall?.hurdle1IrrPct ?? baseModel.waterfall.hurdle1IrrPct),
-        hurdle2IrrPct: toTextNumber(source.waterfall?.hurdle2IrrPct ?? baseModel.waterfall.hurdle2IrrPct),
-        hurdle2PromotePct: toTextNumber(source.waterfall?.hurdle2PromotePct ?? baseModel.waterfall.hurdle2PromotePct),
-        hurdle3IrrPct: toTextNumber(source.waterfall?.hurdle3IrrPct ?? baseModel.waterfall.hurdle3IrrPct),
-        hurdle3PromotePct: toTextNumber(source.waterfall?.hurdle3PromotePct ?? baseModel.waterfall.hurdle3PromotePct),
-        recyclingPct: toTextNumber(source.waterfall?.recyclingPct ?? baseModel.waterfall.recyclingPct),
-        clawbackEnabled: source.waterfall?.clawbackEnabled !== undefined ? !!source.waterfall.clawbackEnabled : !!baseModel.waterfall.clawbackEnabled,
-        partialRecapMonth: toTextNumber(source.waterfall?.partialRecapMonth),
-        partialRecapDistributionPct: toTextNumber(source.waterfall?.partialRecapDistributionPct ?? baseModel.waterfall.partialRecapDistributionPct)
+        gpSharePct: toTextNumber(source.waterfall?.gpSharePct ?? baseModel.waterfall.gpSharePct)
       },
       timing: {
         granularity: source.timing?.granularity || baseModel.timing.granularity,
@@ -1596,15 +1474,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const floatingRate = !!source.debtTerms?.floatingRate
     const sofrRatePct = Number(source.debtTerms?.sofrRatePct || 0)
     const indexSpreadPct = Number(source.debtTerms?.indexSpreadPct || 0)
-    const mezzAmount = Math.max(0, Number(source.debtTerms?.mezzAmount || 0))
-    const mezzRatePct = Math.max(0, Number(source.debtTerms?.mezzRatePct || 0))
-    const mezzInterestOnly = source.debtTerms?.mezzInterestOnly !== undefined ? !!source.debtTerms.mezzInterestOnly : true
-    const prefEquityAmount = Math.max(0, Number(source.debtTerms?.prefEquityAmount || 0))
-    const prefEquityRatePct = Math.max(0, Number(source.debtTerms?.prefEquityRatePct || 0))
-    const sellerPaperAmount = Math.max(0, Number(source.debtTerms?.sellerPaperAmount || 0))
-    const sellerPaperRatePct = Math.max(0, Number(source.debtTerms?.sellerPaperRatePct || 0))
-    const sellerPaperInterestOnly = source.debtTerms?.sellerPaperInterestOnly !== undefined ? !!source.debtTerms.sellerPaperInterestOnly : true
-    const intercreditorMode = source.debtTerms?.intercreditorMode || 'sequential'
     const rateCapPct = source.debtTerms?.rateCapPct !== '' && source.debtTerms?.rateCapPct !== null && source.debtTerms?.rateCapPct !== undefined
       ? Number(source.debtTerms.rateCapPct)
       : null
@@ -1641,29 +1510,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const prefRate = Number(source.waterfall?.prefRate || 0) / 100
     const catchUpRate = Number(source.waterfall?.catchUpRate || 0) / 100
     const promoteRate = Number(source.waterfall?.promoteRate || 0) / 100
-    const hurdle1IrrPct = Number(source.waterfall?.hurdle1IrrPct || 0) / 100
-    const hurdle2IrrPct = Number(source.waterfall?.hurdle2IrrPct || 0) / 100
-    const hurdle2PromotePct = Number(source.waterfall?.hurdle2PromotePct || 0) / 100
-    const hurdle3IrrPct = Number(source.waterfall?.hurdle3IrrPct || 0) / 100
-    const hurdle3PromotePct = Number(source.waterfall?.hurdle3PromotePct || 0) / 100
-    const recyclingPct = Math.max(0, Number(source.waterfall?.recyclingPct || 0)) / 100
-    const clawbackEnabled = source.waterfall?.clawbackEnabled !== undefined ? !!source.waterfall.clawbackEnabled : true
-    const partialRecapMonth = source.waterfall?.partialRecapMonth !== '' && source.waterfall?.partialRecapMonth !== null && source.waterfall?.partialRecapMonth !== undefined
-      ? Math.max(0, Number(source.waterfall.partialRecapMonth))
-      : null
-    const partialRecapDistributionPct = Math.max(0, Number(source.waterfall?.partialRecapDistributionPct || 0)) / 100
     const lpSharePct = Math.max(0, Number(source.waterfall?.lpSharePct || 95)) / 100
     const gpSharePct = Math.max(0, Number(source.waterfall?.gpSharePct || 5)) / 100
     let unpaidPrefBalance = 0
     let lpUnreturnedCapital = Math.max(0, ((Number(prop.price || 0) + Number(prop.closing_costs || 0) - loanAmt) || 0) * lpSharePct)
     let gpUnreturnedCapital = Math.max(0, ((Number(prop.price || 0) + Number(prop.closing_costs || 0) - loanAmt) || 0) * gpSharePct)
-    let lpCapitalAccount = lpUnreturnedCapital
-    let gpCapitalAccount = gpUnreturnedCapital
-    let currentMezzPrincipal = mezzAmount
-    let currentSellerPaperPrincipal = sellerPaperAmount
-    let sponsorDistributionsCumulative = 0
-    let investorDistributionsCumulative = 0
-    let recycledCapitalBalance = 0
     let currentLoanPrincipal = loanAmt
     let currentLoanRate = interestRatePct
     let currentLoanAmortYears = amortYears
@@ -1718,7 +1569,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const monthlyReservesBase = reservesBase / 12
     const monthlyTenantSalesBase = tenantSalesBase / 12
     const monthlyTenantBaseRentBase = tenantBaseRentBase / 12
-    const collectionsQueue = []
 
     for (let monthIndex = 0; monthIndex < totalMonths; monthIndex += 1) {
       const yearIndex = Math.floor(monthIndex / 12)
@@ -1744,11 +1594,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         const extensionOptionMonths = Math.max(0, Number(tenant.extensionOptionMonths || 0))
         const expansionSf = Math.max(0, Number(tenant.expansionSf || 0))
         const contractionSf = Math.max(0, Number(tenant.contractionSf || 0))
-        const defaultProbabilityPct = Math.max(0, Math.min(100, Number(tenant.defaultProbabilityPct || 0))) / 100
-        const badDebtReservePct = Math.max(0, Math.min(100, Number(tenant.badDebtReservePct || 0))) / 100
-        const collectionsLagMonths = Math.max(0, Number(tenant.collectionsLagMonths || 0))
-        const guarantorStrengthPct = Math.max(0, Math.min(100, Number(tenant.guarantorStrengthPct || 100))) / 100
-        const securityDepositMonths = Math.max(0, Number(tenant.securityDepositMonths || 0))
         const terminationMonth = tenant.terminationMonth !== '' && tenant.terminationMonth !== null && tenant.terminationMonth !== undefined
           ? Math.max(0, Number(tenant.terminationMonth))
           : null
@@ -1762,16 +1607,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         const baseMonthlyRentAdjusted = effectiveLeasedSf > 0 && annualRentPsf > 0 ? (effectiveLeasedSf * annualRentPsf) / 12 : baseMonthlyRent
         const inInitialTerm = monthIndex <= effectiveLeaseEndIndex
         const bumpedMonthlyRent = baseMonthlyRentAdjusted * Math.pow(1 + monthlyRentBumpPct, monthsActive)
-        const contractualMonthlyRent = bumpedMonthlyRent * (1 + reimbursementsPct)
-        const expectedDefaultLoss = contractualMonthlyRent * defaultProbabilityPct * (1 - guarantorStrengthPct)
-        const badDebtReserve = contractualMonthlyRent * badDebtReservePct
-        const securityDepositSupport = Math.min(contractualMonthlyRent * securityDepositMonths, expectedDefaultLoss)
-        const netCollectedRent = Math.max(0, contractualMonthlyRent - expectedDefaultLoss - badDebtReserve + securityDepositSupport)
-        if (collectionsLagMonths > 0) collectionsQueue.push({ releaseMonth: monthIndex + collectionsLagMonths, amount: netCollectedRent })
-        const laggedCollections = collectionsQueue
-          .filter(entry => entry.releaseMonth === monthIndex)
-          .reduce((sum, entry) => sum + entry.amount, 0)
-        const recoveredMonthlyRent = collectionsLagMonths > 0 ? laggedCollections : netCollectedRent
+        const recoveredMonthlyRent = bumpedMonthlyRent * (1 + reimbursementsPct)
         if (inInitialTerm) {
           const freeRentEnds = leaseStartIndex + freeRentMonths
           return sum + (monthIndex < freeRentEnds ? 0 : recoveredMonthlyRent)
@@ -1783,14 +1619,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           ? marketRentPsf * effectiveLeasedSf
           : (baseAnnualRent + (purchaseOptionPrice > 0 ? 0 : 0)) * Math.pow(1 + monthlyMarketRentGrowthPct, monthIndex)
         const renewalAnnualRent = marketAnnualRent * (1 + renewalSpreadPct)
-        const renewalContractualRent = (renewalAnnualRent / 12)
+        const renewalMonthlyRent = (renewalAnnualRent / 12)
           * renewalProb
           * (1 + reimbursementsPct)
           * Math.pow(1 + monthlyRentBumpPct, monthsSinceRenewal)
-        const renewalDefaultLoss = renewalContractualRent * defaultProbabilityPct * (1 - guarantorStrengthPct)
-        const renewalBadDebtReserve = renewalContractualRent * badDebtReservePct
-        const renewalSecurityDepositSupport = Math.min(renewalContractualRent * securityDepositMonths, renewalDefaultLoss)
-        const renewalMonthlyRent = Math.max(0, renewalContractualRent - renewalDefaultLoss - renewalBadDebtReserve + renewalSecurityDepositSupport)
         return sum + renewalMonthlyRent
       }, 0)
       const grossRevenue = rentRollRevenue > 0 ? rentRollRevenue : (grossRentBase / 12) * rentGrowthFactor
@@ -1900,20 +1732,12 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         rateFloorPct !== null ? rateFloorPct : floatingAllInRate,
         Math.min(rateCapPct !== null ? rateCapPct : floatingAllInRate, floatingAllInRate)
       )
-      const seniorDebtService = currentLoanPrincipal > 0
+      const monthlyDebtService = currentLoanPrincipal > 0
         ? (inIoPeriod
           ? currentLoanPrincipal * ((floatingRate ? boundedRate : currentLoanRate) / 100 / 12)
           : paymentForLoan(currentLoanPrincipal, floatingRate ? boundedRate : currentLoanRate, currentLoanAmortYears))
         : 0
-      const mezzDebtService = currentMezzPrincipal > 0
-        ? (mezzInterestOnly ? currentMezzPrincipal * (mezzRatePct / 100 / 12) : paymentForLoan(currentMezzPrincipal, mezzRatePct, currentLoanAmortYears))
-        : 0
-      const sellerPaperDebtService = currentSellerPaperPrincipal > 0
-        ? (sellerPaperInterestOnly ? currentSellerPaperPrincipal * (sellerPaperRatePct / 100 / 12) : paymentForLoan(currentSellerPaperPrincipal, sellerPaperRatePct, currentLoanAmortYears))
-        : 0
-      const prefEquityCurrentPay = prefEquityAmount > 0 ? prefEquityAmount * (prefEquityRatePct / 100 / 12) : 0
-      const monthlyDebtService = seniorDebtService + mezzDebtService + sellerPaperDebtService + prefEquityCurrentPay
-      const reserveDraw = interestReserveBalance > 0 ? Math.min(interestReserveBalance, seniorDebtService) : 0
+      const reserveDraw = interestReserveBalance > 0 ? Math.min(interestReserveBalance, monthlyDebtService) : 0
       interestReserveBalance = Math.max(0, interestReserveBalance - reserveDraw)
       const annualDepreciation = depBasis > 0 ? (depBasis * (1 - Number(prop.cost_seg_bonus_pct || 0) / 100) / 39) : 0
       const monthlyDepreciation = annualDepreciation / 12
@@ -1926,23 +1750,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       suspendedLossCarryforward = Math.max(0, suspendedLossCarryforward - usableSuspendedLoss)
       const taxesMonth = ordinaryTaxableIncome * ordinaryIncomeTaxRatePct
       accumulatedDepreciation += monthlyDepreciation + bonusDepreciation
-      const seniorLoanBalance = currentLoanPrincipal > 0
+      const loanBalance = currentLoanPrincipal > 0
         ? (inIoPeriod
           ? currentLoanPrincipal
           : endingLoanBalance(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears, monthsSinceLoanStart))
         : 0
-      const mezzLoanBalance = currentMezzPrincipal > 0
-        ? (mezzInterestOnly ? currentMezzPrincipal : endingLoanBalance(currentMezzPrincipal, mezzRatePct, currentLoanAmortYears, monthsSinceLoanStart))
-        : 0
-      const sellerPaperBalance = currentSellerPaperPrincipal > 0
-        ? (sellerPaperInterestOnly ? currentSellerPaperPrincipal : endingLoanBalance(currentSellerPaperPrincipal, sellerPaperRatePct, currentLoanAmortYears, monthsSinceLoanStart))
-        : 0
-      const loanBalance = seniorLoanBalance + mezzLoanBalance + sellerPaperBalance + prefEquityAmount
       const annualizedNoi = noi * 12
       const stabilizedValue = exitCapPct > 0 ? Math.max(0, annualizedNoi) / exitCapPct : 0
       const dscrConstrainedLoan = minDscr > 0 && currentLoanRate > 0 && currentLoanAmortYears > 0
         ? paymentForLoan(1, currentLoanRate, currentLoanAmortYears) > 0
-          ? (Math.max(0, annualizedNoi) / minDscr) / ((paymentForLoan(1, currentLoanRate, currentLoanAmortYears) + (mezzRatePct / 100 / 12) + (sellerPaperRatePct / 100 / 12) + (prefEquityRatePct / 100 / 12)) * 12)
+          ? (Math.max(0, annualizedNoi) / minDscr) / (paymentForLoan(1, currentLoanRate, currentLoanAmortYears) * 12)
           : 0
         : Infinity
       const debtYieldConstrainedLoan = minDebtYield > 0 ? Math.max(0, annualizedNoi) / minDebtYield : Infinity
@@ -1954,51 +1771,22 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       )
       const refiGrossProceeds = monthIndex === refiMonthIndex && refiLtvPct > 0 ? stabilizedValue * refiLtvPct : 0
       const refinanceCosts = refiGrossProceeds > 0 ? refiGrossProceeds * refinanceCostPct : 0
+      const loanPayoffAtRefi = refiGrossProceeds > 0 || hitsBalloon ? loanBalance : 0
       const refinanceLoanAmount = refiGrossProceeds > 0 ? Math.min(refiGrossProceeds, maxDebtByConstraints) : 0
-      let refiRemaining = Math.max(0, refinanceLoanAmount - refinanceCosts)
-      let seniorPayoffAtRefi = 0
-      let mezzPayoffAtRefi = 0
-      let sellerPaperPayoffAtRefi = 0
-      let prefEquityPayoffAtRefi = 0
-      if (refiGrossProceeds > 0 || hitsBalloon) {
-        if (intercreditorMode === 'pari-passu') {
-          const totalRefiNeed = seniorLoanBalance + mezzLoanBalance + sellerPaperBalance + prefEquityAmount
-          const payoutRatio = totalRefiNeed > 0 ? Math.min(1, refiRemaining / totalRefiNeed) : 0
-          seniorPayoffAtRefi = seniorLoanBalance * payoutRatio
-          mezzPayoffAtRefi = mezzLoanBalance * payoutRatio
-          sellerPaperPayoffAtRefi = sellerPaperBalance * payoutRatio
-          prefEquityPayoffAtRefi = prefEquityAmount * payoutRatio
-          refiRemaining = Math.max(0, refiRemaining - (seniorPayoffAtRefi + mezzPayoffAtRefi + sellerPaperPayoffAtRefi + prefEquityPayoffAtRefi))
-        } else {
-          seniorPayoffAtRefi = Math.min(refiRemaining, seniorLoanBalance)
-          refiRemaining -= seniorPayoffAtRefi
-          mezzPayoffAtRefi = Math.min(refiRemaining, mezzLoanBalance)
-          refiRemaining -= mezzPayoffAtRefi
-          sellerPaperPayoffAtRefi = Math.min(refiRemaining, sellerPaperBalance)
-          refiRemaining -= sellerPaperPayoffAtRefi
-          prefEquityPayoffAtRefi = Math.min(refiRemaining, prefEquityAmount)
-          refiRemaining -= prefEquityPayoffAtRefi
-        }
-      }
-      const loanPayoffAtRefi = seniorPayoffAtRefi + mezzPayoffAtRefi + sellerPaperPayoffAtRefi + prefEquityPayoffAtRefi
-      const refinanceProceeds = Math.max(0, refiRemaining)
+      const refinanceProceeds = Math.max(0, refinanceLoanAmount - refinanceCosts - loanPayoffAtRefi)
       if (refiGrossProceeds > 0) {
         currentLoanPrincipal = refinanceLoanAmount
-        currentMezzPrincipal = Math.max(0, mezzLoanBalance - mezzPayoffAtRefi)
-        currentSellerPaperPrincipal = Math.max(0, sellerPaperBalance - sellerPaperPayoffAtRefi)
         currentLoanRate = refiRatePct > 0 ? refiRatePct : currentLoanRate
         currentLoanAmortYears = amortYears || currentLoanAmortYears
         currentLoanStartMonth = monthIndex + 1
         currentLoanTermYears = refinanceLoanTermYears || currentLoanTermYears
       } else if (hitsBalloon) {
         currentLoanPrincipal = 0
-        currentMezzPrincipal = 0
-        currentSellerPaperPrincipal = 0
       }
       const grossSaleProceeds = monthIndex === saleMonthIndex ? stabilizedValue : 0
       const saleCosts = grossSaleProceeds > 0 ? grossSaleProceeds * costOfSalePct : 0
       const loanPayoffAtSale = grossSaleProceeds > 0
-        ? (seniorLoanBalance + mezzLoanBalance + sellerPaperBalance + prefEquityAmount)
+        ? endingLoanBalance(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears, monthIndex + 1 - currentLoanStartMonth)
         : 0
       const taxBasisAtSale = Math.max(0, initialTaxBasis - accumulatedDepreciation)
       const gainBeforeTaxes = Math.max(0, grossSaleProceeds - saleCosts - initialTaxBasis)
@@ -2013,53 +1801,20 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       suspendedLossCarryforward = grossSaleProceeds > 0 ? 0 : suspendedLossCarryforward
       const afterTaxSaleBridge = recaptureTax + capitalGainsTax - suspendedLossBenefit
       const saleProceeds = Math.max(0, grossSaleProceeds - saleCosts - loanPayoffAtSale - afterTaxSaleBridge)
-      const recapDistribution = partialRecapMonth !== null && monthIndex === partialRecapMonth
-        ? Math.max(0, loanBalance * partialRecapDistributionPct)
-        : 0
-      const cashAvailableForDistribution = Math.max(0, noi - (monthlyDebtService - reserveDraw) - taxesMonth + refinanceProceeds + saleProceeds + recapDistribution)
+      const cashAvailableForDistribution = Math.max(0, noi - (monthlyDebtService - reserveDraw) - taxesMonth + refinanceProceeds + saleProceeds)
       const prefAccrual = lpUnreturnedCapital * (prefRate / 12)
       unpaidPrefBalance += prefAccrual
       let remainingCash = cashAvailableForDistribution
       const lpReturnOfCapital = Math.min(remainingCash, lpUnreturnedCapital)
       remainingCash -= lpReturnOfCapital
       lpUnreturnedCapital -= lpReturnOfCapital
-      lpCapitalAccount = Math.max(0, lpCapitalAccount - lpReturnOfCapital)
       const lpPrefDistribution = Math.min(remainingCash, unpaidPrefBalance)
       remainingCash -= lpPrefDistribution
       unpaidPrefBalance -= lpPrefDistribution
-      const hurdle1CatchUp = Math.min(remainingCash, lpPrefDistribution > 0 ? lpPrefDistribution * catchUpRate * promoteRate : 0)
-      remainingCash -= hurdle1CatchUp
-      const hurdle1Split = Math.min(remainingCash, Math.max(0, (lpCapitalAccount + gpCapitalAccount) * (hurdle1IrrPct / 12)))
-      remainingCash -= hurdle1Split
-      const hurdle2Split = Math.min(remainingCash, Math.max(0, (lpCapitalAccount + gpCapitalAccount) * Math.max(0, hurdle2IrrPct - hurdle1IrrPct) / 12))
-      remainingCash -= hurdle2Split
-      const hurdle3Split = Math.min(remainingCash, Math.max(0, (lpCapitalAccount + gpCapitalAccount) * Math.max(0, hurdle3IrrPct - hurdle2IrrPct) / 12))
-      remainingCash -= hurdle3Split
-      const recycledCapital = Math.min(remainingCash, cashAvailableForDistribution * recyclingPct)
-      remainingCash -= recycledCapital
-      recycledCapitalBalance += recycledCapital
-      lpCapitalAccount += recycledCapital * lpSharePct
-      gpCapitalAccount += recycledCapital * gpSharePct
-      const gpCatchUp = hurdle1CatchUp
-      const tier2SponsorDistribution = hurdle2Split * hurdle2PromotePct
-      const tier2InvestorDistribution = hurdle2Split * (1 - hurdle2PromotePct)
-      const tier3SponsorDistribution = hurdle3Split * hurdle3PromotePct
-      const tier3InvestorDistribution = hurdle3Split * (1 - hurdle3PromotePct)
-      const residualSponsorDistribution = remainingCash * promoteRate
-      const residualInvestorDistribution = remainingCash * (1 - promoteRate)
-      let sponsorDistribution = gpCatchUp + (hurdle1Split * promoteRate) + tier2SponsorDistribution + tier3SponsorDistribution + residualSponsorDistribution
-      let investorDistribution = lpReturnOfCapital + lpPrefDistribution + (hurdle1Split * (1 - promoteRate)) + tier2InvestorDistribution + tier3InvestorDistribution + residualInvestorDistribution
-      sponsorDistributionsCumulative += sponsorDistribution
-      investorDistributionsCumulative += investorDistribution
-      gpCapitalAccount = Math.max(0, gpCapitalAccount - sponsorDistribution)
-      if (clawbackEnabled && monthIndex === totalMonths - 1) {
-        const targetSponsorShare = Math.max(0, sponsorDistributionsCumulative - (Math.max(0, sponsorDistributionsCumulative + investorDistributionsCumulative - (lpSharePct * (sponsorDistributionsCumulative + investorDistributionsCumulative)))))
-        const clawbackAmount = Math.max(0, sponsorDistributionsCumulative - targetSponsorShare)
-        sponsorDistribution = Math.max(0, sponsorDistribution - clawbackAmount)
-        investorDistribution += clawbackAmount
-        sponsorDistributionsCumulative -= clawbackAmount
-        investorDistributionsCumulative += clawbackAmount
-      }
+      const gpCatchUp = Math.min(remainingCash, lpPrefDistribution > 0 ? lpPrefDistribution * catchUpRate * promoteRate : 0)
+      remainingCash -= gpCatchUp
+      const sponsorDistribution = gpCatchUp + (remainingCash * promoteRate)
+      const investorDistribution = lpReturnOfCapital + lpPrefDistribution + (remainingCash * (1 - promoteRate))
       monthlyRows.push({
         month: monthIndex + 1,
         year: yearIndex + 1,
@@ -2688,17 +2443,23 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       cashTrap: firstYear ? firstYear.cashFlowAfterSale < 0 : false,
     }
   }
-  const scenarioComparison = useMemo(() => ['base', 'upside', 'downside'].map((scenarioKey) => summarizeScenarioModel(scenarioKey)), [dcfModel, price, closingCosts, holdPeriod, grossScheduledRent, vacancyRate, otherIncome, operatingExpenses, reservesCapex, loanAmount, interestRate, amortizationTerm, interestOnlyPeriod, rentGrowth, expenseGrowth, exitCapRate, costOfSale, tenantGrossSales, tenantBaseRent, managementFeePct, insurance, propertyTaxes, landValuePct, costSegBonusPct, effectiveTaxRate, depreciationRecaptureRate, refiLtv, refiRate, refiYear, rentToSales])
-  const sensitivityCases = useMemo(() => [
-    { key: 'exitCapUp', label: 'Exit Cap +50 bps', overrides: { exit_cap_rate: String((parseNum(exitCapRate) || 0) + 0.5) } },
-    { key: 'rentGrowthDown', label: 'Rent Growth -100 bps', overrides: { rent_growth: String((parseNum(rentGrowth) || 0) - 1) } },
-    { key: 'vacancyUp', label: 'Vacancy +100 bps', overrides: { vacancy_rate: String((parseNum(vacancyRate) || 0) + 1) } },
-    { key: 'leverageUp', label: 'Leverage +5% LTV', overrides: { loan_amount: String((parseNum(loanAmount) || 0) + ((parseNum(price) || 0) * 0.05)) } },
-    { key: 'holdShorter', label: 'Hold -1 year', overrides: { hold_period: String(Math.max(1, (parseNum(holdPeriod) || 1) - 1)) } },
-  ].map((sensitivity) => ({
-    ...sensitivity,
-    result: summarizeScenarioModel('base', sensitivity.overrides)
-  })), [exitCapRate, rentGrowth, vacancyRate, loanAmount, price, holdPeriod, dcfModel, closingCosts, grossScheduledRent, otherIncome, operatingExpenses, reservesCapex, interestRate, amortizationTerm, interestOnlyPeriod, expenseGrowth, costOfSale, tenantGrossSales, tenantBaseRent, managementFeePct, insurance, propertyTaxes, landValuePct, costSegBonusPct, effectiveTaxRate, depreciationRecaptureRate, refiLtv, refiRate, refiYear, rentToSales])
+  const scenarioComparison = useMemo(
+    () => ['base', 'upside', 'downside'].map((scenarioKey) => summarizeScenarioModel(scenarioKey)),
+    [summarizeScenarioModel]
+  )
+  const sensitivityCases = useMemo(
+    () => [
+      { key: 'exitCapUp', label: 'Exit Cap +50 bps', overrides: { exit_cap_rate: String((parseNum(exitCapRate) || 0) + 0.5) } },
+      { key: 'rentGrowthDown', label: 'Rent Growth -100 bps', overrides: { rent_growth: String((parseNum(rentGrowth) || 0) - 1) } },
+      { key: 'vacancyUp', label: 'Vacancy +100 bps', overrides: { vacancy_rate: String((parseNum(vacancyRate) || 0) + 1) } },
+      { key: 'leverageUp', label: 'Leverage +5% LTV', overrides: { loan_amount: String((parseNum(loanAmount) || 0) + ((parseNum(price) || 0) * 0.05)) } },
+      { key: 'holdShorter', label: 'Hold -1 year', overrides: { hold_period: String(Math.max(1, (parseNum(holdPeriod) || 1) - 1)) } },
+    ].map((sensitivity) => ({
+      ...sensitivity,
+      result: summarizeScenarioModel('base', sensitivity.overrides)
+    })),
+    [exitCapRate, rentGrowth, vacancyRate, loanAmount, price, holdPeriod, summarizeScenarioModel]
+  )
 
   useEffect(() => {
     if (open && property?.id) {
@@ -2895,15 +2656,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           rateCapPct: parseNum(dcfModel.debtTerms.rateCapPct),
           rateFloorPct: parseNum(dcfModel.debtTerms.rateFloorPct),
           interestReserveMonths: parseNum(dcfModel.debtTerms.interestReserveMonths),
-          mezzAmount: parseNum(dcfModel.debtTerms.mezzAmount),
-          mezzRatePct: parseNum(dcfModel.debtTerms.mezzRatePct),
-          mezzInterestOnly: !!dcfModel.debtTerms.mezzInterestOnly,
-          prefEquityAmount: parseNum(dcfModel.debtTerms.prefEquityAmount),
-          prefEquityRatePct: parseNum(dcfModel.debtTerms.prefEquityRatePct),
-          sellerPaperAmount: parseNum(dcfModel.debtTerms.sellerPaperAmount),
-          sellerPaperRatePct: parseNum(dcfModel.debtTerms.sellerPaperRatePct),
-          sellerPaperInterestOnly: !!dcfModel.debtTerms.sellerPaperInterestOnly,
-          intercreditorMode: dcfModel.debtTerms.intercreditorMode,
         },
         waterfall: {
           prefRate: parseNum(dcfModel.waterfall.prefRate),
@@ -2911,15 +2663,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           promoteRate: parseNum(dcfModel.waterfall.promoteRate),
           lpSharePct: parseNum(dcfModel.waterfall.lpSharePct),
           gpSharePct: parseNum(dcfModel.waterfall.gpSharePct),
-          hurdle1IrrPct: parseNum(dcfModel.waterfall.hurdle1IrrPct),
-          hurdle2IrrPct: parseNum(dcfModel.waterfall.hurdle2IrrPct),
-          hurdle2PromotePct: parseNum(dcfModel.waterfall.hurdle2PromotePct),
-          hurdle3IrrPct: parseNum(dcfModel.waterfall.hurdle3IrrPct),
-          hurdle3PromotePct: parseNum(dcfModel.waterfall.hurdle3PromotePct),
-          recyclingPct: parseNum(dcfModel.waterfall.recyclingPct),
-          clawbackEnabled: !!dcfModel.waterfall.clawbackEnabled,
-          partialRecapMonth: parseNum(dcfModel.waterfall.partialRecapMonth),
-          partialRecapDistributionPct: parseNum(dcfModel.waterfall.partialRecapDistributionPct),
         },
         timing: {
           granularity: dcfModel.timing.granularity,
@@ -3015,11 +2758,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           adminFeePct: parseNum(row.adminFeePct),
           controllableCapPct: parseNum(row.controllableCapPct),
           nonRecoverableExpensePct: parseNum(row.nonRecoverableExpensePct),
-          defaultProbabilityPct: parseNum(row.defaultProbabilityPct),
-          badDebtReservePct: parseNum(row.badDebtReservePct),
-          collectionsLagMonths: parseNum(row.collectionsLagMonths),
-          guarantorStrengthPct: parseNum(row.guarantorStrengthPct),
-          securityDepositMonths: parseNum(row.securityDepositMonths),
         }))
       },
     })
@@ -3203,38 +2941,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               </select>
             </Field>
 
-            <div className="divider text-xs text-base-content/40 my-1">Property</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Price ($)">
-                <NumericInput placeholder="0" value={price} onChange={setPrice}
-                  className="input input-bordered w-full" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-              </Field>
-              <Field label="Square Feet">
-                <NumericInput placeholder="0" value={sqft} onChange={setSqft}
-                  className="input input-bordered w-full" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-              </Field>
-              <Field label="Lot Size (acres)">
-                <input type="number" placeholder="0.00" step="0.01" value={lot}
-                  onChange={e => setLot(e.target.value)} className="input input-bordered w-full" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-              </Field>
-              <Field label="Year Built">
-                <input type="number" placeholder="e.g. 1998" value={yearBuilt}
-                  onChange={e => setYearBuilt(e.target.value)} className="input input-bordered w-full" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-              </Field>
-            </div>
-
-            <div className="divider text-xs text-base-content/40 my-1">Electrical</div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Field label="Voltage (V)">
-                <NumericInput placeholder="e.g. 480" value={elecVoltage} onChange={setElecVoltage}
-                  className="input input-bordered w-full" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-              </Field>
-              <Field label="Amperage (A)">
-                <NumericInput placeholder="e.g. 400" value={elecAmperage} onChange={setElecAmperage}
-                  className="input input-bordered w-full" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-              </Field>
-            </div>
-
             {/* Location attributes */}
             <div className="divider text-xs text-base-content/40 my-1">Location Attributes</div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -3400,24 +3106,27 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         {/* Financials tab */}
         {tab === 'financials' && (
           <div className="space-y-4">
-              <div className="rounded-2xl border border-base-300 bg-base-100 p-4 shadow-sm">
-                <div className="text-sm font-semibold text-base-content">How to use Property Financials</div>
-                <div className="mt-2 grid gap-3 md:grid-cols-3 text-sm">
-                  <div className="rounded-xl bg-success/10 border border-success/20 p-3">
-                    <div className="font-semibold text-success">Start here</div>
-                    <div className="text-base-content/70">Price, rent, vacancy, operating expenses, debt amount, rate, exit cap, and hold period drive most of the answer.</div>
-                  </div>
-                  <div className="rounded-xl bg-base-200/60 border border-base-300 p-3">
-                    <div className="font-semibold">Usually optional</div>
-                    <div className="text-base-content/70">Only fill lease, CAM, tax, waterfall, and capital-stack detail when the deal structure actually has those features.</div>
-                  </div>
-                  <div className="rounded-xl bg-warning/10 border border-warning/20 p-3">
-                    <div className="font-semibold text-warning">Advanced</div>
-                    <div className="text-base-content/70">Floating-rate, multi-tranche debt, partner waterfall, and credit-loss fields are for structured deals, not every quick screen.</div>
-                  </div>
-                </div>
-              </div>
               {/* Core financials */}
+              <div className="space-y-3">
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Property</div>
+                <Field label="Price ($)">
+                  <NumericInput placeholder="0" value={price} onChange={setPrice}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+                <Field label="Square Feet">
+                  <NumericInput placeholder="0" value={sqft} onChange={setSqft}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+                <Field label="Lot Size (acres)">
+                  <input type="number" placeholder="0.00" step="0.01" value={lot}
+                    onChange={e => setLot(e.target.value)} className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+                <Field label="Year Built">
+                  <input type="number" placeholder="e.g. 1998" value={yearBuilt}
+                    onChange={e => setYearBuilt(e.target.value)} className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+              </div>
+
               {/* Investment metrics */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Investment Metrics</div>
@@ -3466,7 +3175,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     value={unleveredNpv !== null ? '$' + unleveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="NPV Discount Rate (%)" help={getFieldHelp('npvDiscountRate')} importance="advanced">
+                <Field label="NPV Discount Rate (%)">
                   <NumericInput placeholder="e.g. 10.0" value={irr} onChange={setIrr}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3484,11 +3193,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                       ? '$' + (Number(price) / Number(sqft)).toFixed(2) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Rent-to-Sales (%)" help="Only relevant for percentage-rent retail underwriting. Ignore for most office, industrial, and multifamily deals." importance="optional">
+                <Field label="Rent-to-Sales (%)">
                   <NumericInput placeholder="e.g. 5.0" value={rentToSales} onChange={setRentToSales}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="# SKUs" help="Retail merchandising density input. Ignore unless assortment count matters to the deal thesis." importance="optional">
+                <Field label="# SKUs">
                   <NumericInput placeholder="e.g. 500" value={numSkus} onChange={setNumSkus}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3504,7 +3213,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Operating */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Operating</div>
-                <Field label="Management Fee (%)" help={getFieldHelp('managementFeePct')} importance="core">
+                <Field label="Management Fee (%)">
                   <NumericInput placeholder="e.g. 8" value={managementFeePct} onChange={setManagementFeePct}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3512,11 +3221,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <input readOnly value={firstYearDcf ? '$' + (parseNum(firstYearDcf.managementFeesDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Insurance ($/yr)" help={getFieldHelp('insurance')} importance="core">
+                <Field label="Insurance ($/yr)">
                   <NumericInput placeholder="e.g. 12000" value={insurance} onChange={setInsurance}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Property Taxes ($/yr)" help={getFieldHelp('propertyTaxes')} importance="core">
+                <Field label="Property Taxes ($/yr)">
                   <NumericInput placeholder="e.g. 18000" value={propertyTaxes} onChange={setPropertyTaxes}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3530,11 +3239,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Income */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Income</div>
-                <Field label="Gross Scheduled Rent ($/yr)" help={getFieldHelp('grossScheduledRent')} importance="core">
+                <Field label="Gross Scheduled Rent ($/yr)">
                   <NumericInput placeholder="e.g. 120000" value={grossScheduledRent} onChange={setGrossScheduledRent}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Vacancy / Credit Loss (%)" help={getFieldHelp('vacancyRate')} importance="core">
+                <Field label="Vacancy / Credit Loss (%)">
                   <NumericInput placeholder="e.g. 5" value={vacancyRate} onChange={setVacancyRate}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3543,15 +3252,15 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     value={egiAmount !== null ? '$' + egiAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Other Income ($/yr)" help={getFieldHelp('otherIncome')} importance="optional">
+                <Field label="Other Income ($/yr)">
                   <NumericInput placeholder="parking, RUBS, storage" value={otherIncome} onChange={setOtherIncome}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Operating Expenses ($/yr)" help={getFieldHelp('operatingExpenses')} importance="core">
+                <Field label="Operating Expenses ($/yr)">
                   <NumericInput placeholder="e.g. 40000" value={operatingExpenses} onChange={setOperatingExpenses}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Reserves / Replacement Capex ($/yr)" help={getFieldHelp('reservesCapex')} importance="core">
+                <Field label="Reserves / Replacement Capex ($/yr)">
                   <NumericInput placeholder="e.g. 5000" value={reservesCapex} onChange={setReservesCapex}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3589,27 +3298,27 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Debt */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Debt</div>
-                <Field label="Loan Amount ($)" help={getFieldHelp('loanAmount')} importance="core">
+                <Field label="Loan Amount ($)">
                   <NumericInput placeholder="e.g. 750000" value={loanAmount} onChange={setLoanAmount}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="LTV (%)" help={getFieldHelp('ltv')} importance="optional">
+                <Field label="LTV (%)">
                   <NumericInput placeholder="e.g. 75" value={ltv} onChange={setLtv}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Interest Rate (%)" help={getFieldHelp('interestRate')} importance="core">
+                <Field label="Interest Rate (%)">
                   <NumericInput placeholder="e.g. 6.5" value={interestRate} onChange={setInterestRate}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Amortization Term (yrs)" help={getFieldHelp('amortizationTerm')} importance="core">
+                <Field label="Amortization Term (yrs)">
                   <NumericInput placeholder="e.g. 25" value={amortizationTerm} onChange={setAmortizationTerm}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Interest-Only Period (yrs)" help={getFieldHelp('interestOnlyPeriod')} importance="optional">
+                <Field label="Interest-Only Period (yrs)">
                   <NumericInput placeholder="e.g. 3" value={interestOnlyPeriod} onChange={setInterestOnlyPeriod}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Initial Loan Term (yrs)" help={getFieldHelp('initialLoanTermYears')} importance="optional">
+                <Field label="Initial Loan Term (yrs)">
                   <NumericInput placeholder="e.g. 5" value={dcfModel.debtTerms.initialLoanTermYears} onChange={(value) => updateDebtTermField('initialLoanTermYears', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3620,74 +3329,29 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     disabled={!isAdmin} />
                   <span className="label-text">Floating-rate loan</span>
                 </label>
-                <Field label="SOFR / Index Rate (%)" help={getFieldHelp('sofrRatePct')} importance="advanced">
+                <Field label="SOFR / Index Rate (%)">
                   <NumericInput value={dcfModel.debtTerms.sofrRatePct} onChange={(value) => updateDebtTermField('sofrRatePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Index Spread (%)" help={getFieldHelp('indexSpreadPct')} importance="advanced">
+                <Field label="Index Spread (%)">
                   <NumericInput value={dcfModel.debtTerms.indexSpreadPct} onChange={(value) => updateDebtTermField('indexSpreadPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Rate Cap (%)" help={getFieldHelp('rateCapPct')} importance="advanced">
+                <Field label="Rate Cap (%)">
                   <NumericInput value={dcfModel.debtTerms.rateCapPct} onChange={(value) => updateDebtTermField('rateCapPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Rate Floor (%)" help={getFieldHelp('rateFloorPct')} importance="advanced">
+                <Field label="Rate Floor (%)">
                   <NumericInput value={dcfModel.debtTerms.rateFloorPct} onChange={(value) => updateDebtTermField('rateFloorPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Interest Reserve (months)" help={getFieldHelp('interestReserveMonths')} importance="advanced">
+                <Field label="Interest Reserve (months)">
                   <NumericInput value={dcfModel.debtTerms.interestReserveMonths} onChange={(value) => updateDebtTermField('interestReserveMonths', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
-                <Field label="Refi Loan Term (yrs)" help={getFieldHelp('refinanceLoanTermYears')} importance="advanced">
+                <Field label="Refi Loan Term (yrs)">
                   <NumericInput placeholder="e.g. 5" value={dcfModel.debtTerms.refinanceLoanTermYears} onChange={(value) => updateDebtTermField('refinanceLoanTermYears', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
-                <Field label="Mezz Debt Amount ($)" help={getFieldHelp('mezzAmount')} importance="advanced">
-                  <NumericInput value={dcfModel.debtTerms.mezzAmount} onChange={(value) => updateDebtTermField('mezzAmount', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
-                <Field label="Mezz Rate (%)" help={getFieldHelp('mezzRatePct')} importance="advanced">
-                  <NumericInput value={dcfModel.debtTerms.mezzRatePct} onChange={(value) => updateDebtTermField('mezzRatePct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                </Field>
-                <label className="label cursor-pointer justify-start gap-3">
-                  <input type="checkbox" className="checkbox checkbox-sm"
-                    checked={!!dcfModel.debtTerms.mezzInterestOnly}
-                    onChange={(e) => updateDebtTermField('mezzInterestOnly', e.target.checked)}
-                    disabled={!isAdmin} />
-                  <span className="label-text">Mezz interest-only</span>
-                </label>
-                <Field label="Pref Equity Amount ($)" help={getFieldHelp('prefEquityAmount')} importance="advanced">
-                  <NumericInput value={dcfModel.debtTerms.prefEquityAmount} onChange={(value) => updateDebtTermField('prefEquityAmount', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
-                <Field label="Pref Equity Current Pay (%)" help={getFieldHelp('prefEquityRatePct')} importance="advanced">
-                  <NumericInput value={dcfModel.debtTerms.prefEquityRatePct} onChange={(value) => updateDebtTermField('prefEquityRatePct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                </Field>
-                <Field label="Seller Paper Amount ($)" help={getFieldHelp('sellerPaperAmount')} importance="advanced">
-                  <NumericInput value={dcfModel.debtTerms.sellerPaperAmount} onChange={(value) => updateDebtTermField('sellerPaperAmount', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
-                <Field label="Seller Paper Rate (%)" help={getFieldHelp('sellerPaperRatePct')} importance="advanced">
-                  <NumericInput value={dcfModel.debtTerms.sellerPaperRatePct} onChange={(value) => updateDebtTermField('sellerPaperRatePct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                </Field>
-                <label className="label cursor-pointer justify-start gap-3">
-                  <input type="checkbox" className="checkbox checkbox-sm"
-                    checked={!!dcfModel.debtTerms.sellerPaperInterestOnly}
-                    onChange={(e) => updateDebtTermField('sellerPaperInterestOnly', e.target.checked)}
-                    disabled={!isAdmin} />
-                  <span className="label-text">Seller paper interest-only</span>
-                </label>
-                <Field label="Intercreditor Allocation" help={getFieldHelp('intercreditorMode')} importance="advanced">
-                  <select value={dcfModel.debtTerms.intercreditorMode} onChange={(e) => updateDebtTermField('intercreditorMode', e.target.value)}
-                    className="select select-bordered input-md w-full md:text-base" disabled={!isAdmin}>
-                    <option value="sequential">Sequential priority</option>
-                    <option value="pari-passu">Pari passu</option>
-                  </select>
                 </Field>
                 <Field label="Annual Debt Service ($/yr)">
                   <input readOnly
@@ -3699,7 +3363,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Tax & Cost Segregation */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Tax &amp; Cost Segregation</div>
-                <Field label="Land Value (%)" help={getFieldHelp('landValuePct')} importance="optional">
+                <Field label="Land Value (%)">
                   <NumericInput placeholder="e.g. 20" value={landValuePct} onChange={setLandValuePct}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3709,7 +3373,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                       ? '$' + (Number(price) * (1 - Number(landValuePct) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
-                <Field label="Cost Seg Bonus (%)" help={getFieldHelp('costSegBonusPct')} importance="advanced">
+                <Field label="Cost Seg Bonus (%)">
                   <NumericInput placeholder="e.g. 30" value={costSegBonusPct} onChange={setCostSegBonusPct}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3746,19 +3410,19 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput value={dcfModel.taxModel.capitalGainsRatePct} onChange={(value) => updateTaxModelField('capitalGainsRatePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Ordinary Income Tax Rate (%)" help={getFieldHelp('ordinaryIncomeTaxRatePct')} importance="advanced">
+                <Field label="Ordinary Income Tax Rate (%)">
                   <NumericInput value={dcfModel.taxModel.ordinaryIncomeTaxRatePct} onChange={(value) => updateTaxModelField('ordinaryIncomeTaxRatePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Passive Loss Usage Limit (%)" help={getFieldHelp('passiveLossLimitPct')} importance="advanced">
+                <Field label="Passive Loss Usage Limit (%)">
                   <NumericInput value={dcfModel.taxModel.passiveLossLimitPct} onChange={(value) => updateTaxModelField('passiveLossLimitPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Initial Tax Basis ($)" help={getFieldHelp('initialTaxBasis')} importance="advanced">
+                <Field label="Initial Tax Basis ($)">
                   <NumericInput value={dcfModel.taxModel.initialTaxBasis} onChange={(value) => updateTaxModelField('initialTaxBasis', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Suspended Loss Carryforward ($)" help={getFieldHelp('suspendedLossCarryforward')} importance="advanced">
+                <Field label="Suspended Loss Carryforward ($)">
                   <NumericInput value={dcfModel.taxModel.suspendedLossCarryforward} onChange={(value) => updateTaxModelField('suspendedLossCarryforward', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3812,7 +3476,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {/* Exit / Reversion */}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Exit / Reversion</div>
-                <Field label="Refi LTV (%)" help={getFieldHelp('refiLtv')} importance="advanced">
+                <Field label="Refi LTV (%)">
                   <NumericInput placeholder="e.g. 70" value={refiLtv} onChange={setRefiLtv}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
@@ -3820,7 +3484,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput placeholder="e.g. 6.0" value={refiRate} onChange={setRefiRate}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Refi Year" help={getFieldHelp('refiYear')} importance="advanced">
+                <Field label="Refi Year">
                   <NumericInput placeholder="e.g. 3" value={refiYear} onChange={setRefiYear}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
@@ -3957,71 +3621,84 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
 
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Lease Economics</div>
-                <Field label="Market Rent Growth (% / yr)" help="Use when mark-to-market leasing assumptions differ from in-place rent growth." importance="advanced">
+                <Field label="Market Rent Growth (% / yr)">
                   <NumericInput value={dcfModel.leaseEconomics.marketRentGrowthPct} onChange={(value) => updateLeaseEconomicsField('marketRentGrowthPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="New Lease Spread (%)" help="Spread to market rent on new deals after rollover. Ignore if you are underwriting only simple in-place income." importance="advanced">
+                <Field label="New Lease Spread (%)">
                   <NumericInput value={dcfModel.leaseEconomics.newLeaseSpreadPct} onChange={(value) => updateLeaseEconomicsField('newLeaseSpreadPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Renewal Spread (%)" help="Spread to market for tenant renewals, typically lower than new-lease rent." importance="advanced">
+                <Field label="Renewal Spread (%)">
                   <NumericInput value={dcfModel.leaseEconomics.renewalSpreadPct} onChange={(value) => updateLeaseEconomicsField('renewalSpreadPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="TI per SF ($)" help="Default tenant improvement cost for leasing events." importance="advanced">
+                <Field label="TI per SF ($)">
                   <NumericInput value={dcfModel.leaseEconomics.tenantImprovementPerSf} onChange={(value) => updateLeaseEconomicsField('tenantImprovementPerSf', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="LC (% of Rent)" help="Default leasing commission burden on new or renewal deals." importance="advanced">
+                <Field label="LC (% of Rent)">
                   <NumericInput value={dcfModel.leaseEconomics.leasingCommissionPct} onChange={(value) => updateLeaseEconomicsField('leasingCommissionPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Expense Stop ($/SF)" help="Base-year or stop structure for leases that pay recoveries above a stated threshold." importance="advanced">
+                <Field label="Expense Stop ($/SF)">
                   <NumericInput value={dcfModel.leaseEconomics.expenseStopPerSf} onChange={(value) => updateLeaseEconomicsField('expenseStopPerSf', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Gross-Up Occupancy (%)" help="Occupancy level used to normalize variable recoverable expenses." importance="advanced">
+                <Field label="Gross-Up Occupancy (%)">
                   <NumericInput value={dcfModel.leaseEconomics.grossUpPct} onChange={(value) => updateLeaseEconomicsField('grossUpPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="CAM Admin Fee (%)" help="Administrative fee loaded onto recoverable CAM pools." importance="advanced">
+                <Field label="CAM Admin Fee (%)">
                   <NumericInput value={dcfModel.leaseEconomics.camAdminFeePct} onChange={(value) => updateLeaseEconomicsField('camAdminFeePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Controllable Expense Share (%)" help="Portion of expenses subject to controllable caps." importance="advanced">
+                <Field label="Controllable Expense Share (%)">
                   <NumericInput value={dcfModel.leaseEconomics.controllableExpensePct} onChange={(value) => updateLeaseEconomicsField('controllableExpensePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Controllable Cap (%)" help="Annual growth cap applied to controllable recoverable expenses." importance="advanced">
+                <Field label="Controllable Cap (%)">
                   <NumericInput value={dcfModel.leaseEconomics.controllableCapPct} onChange={(value) => updateLeaseEconomicsField('controllableCapPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Non-Recoverable Expense (%)" help="Portion of operating costs assumed non-recoverable from tenants." importance="advanced">
+                <Field label="Non-Recoverable Expense (%)">
                   <NumericInput value={dcfModel.leaseEconomics.nonRecoverableExpensePct} onChange={(value) => updateLeaseEconomicsField('nonRecoverableExpensePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="CAM Pool Recoverable (%)" help="Percent of CAM pool eligible to be billed back to tenants." importance="advanced">
+                <Field label="CAM Pool Recoverable (%)">
                   <NumericInput value={dcfModel.leaseEconomics.camPoolRecoverablePct} onChange={(value) => updateLeaseEconomicsField('camPoolRecoverablePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Tax Pool Recoverable (%)" help="Percent of property taxes recoverable from tenants." importance="advanced">
+                <Field label="Tax Pool Recoverable (%)">
                   <NumericInput value={dcfModel.leaseEconomics.taxPoolRecoverablePct} onChange={(value) => updateLeaseEconomicsField('taxPoolRecoverablePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Insurance Pool Recoverable (%)" help="Percent of insurance costs recoverable from tenants." importance="advanced">
+                <Field label="Insurance Pool Recoverable (%)">
                   <NumericInput value={dcfModel.leaseEconomics.insurancePoolRecoverablePct} onChange={(value) => updateLeaseEconomicsField('insurancePoolRecoverablePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Gross-Up Method" help="Choose whether recoveries gross up by category assumption or by occupied ratio." importance="advanced">
+                <Field label="Gross-Up Method">
                   <select value={dcfModel.leaseEconomics.grossUpMethod} onChange={(e) => updateLeaseEconomicsField('grossUpMethod', e.target.value)}
                     className="select select-bordered input-md w-full md:text-base" disabled={!isAdmin}>
                     <option value="category">By category</option>
                     <option value="occupied">Occupied ratio</option>
                   </select>
                 </Field>
-                <Field label="Reconciliation Month" help="Month when year-end CAM true-ups are collected or paid." importance="advanced">
+                <Field label="Reconciliation Month">
                   <NumericInput value={dcfModel.leaseEconomics.reconciliationMonth} onChange={(value) => updateLeaseEconomicsField('reconciliationMonth', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+              </div>
+
+              {/* Electrical */}
+              <div className="space-y-3 pt-2">
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Electrical</div>
+                <Field label="Voltage (V)">
+                  <NumericInput placeholder="e.g. 480" value={elecVoltage} onChange={setElecVoltage}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+                <Field label="Amperage (A)">
+                  <NumericInput placeholder="e.g. 400" value={elecAmperage} onChange={setElecAmperage}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
               </div>
@@ -4030,11 +3707,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               {(assetType === 'Retail' || assetType === 'Net Lease' || assetType === '') && (
                 <div className="space-y-3 pt-2">
                   <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Tenant</div>
-                  <Field label="Tenant Annual Gross Sales ($)" help="Only needed for percentage-rent retail deals." importance="optional">
+                  <Field label="Tenant Annual Gross Sales ($)">
                     <NumericInput placeholder="e.g. 1200000" value={tenantGrossSales} onChange={setTenantGrossSales}
                       className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                   </Field>
-                  <Field label="Tenant Base Rent ($/yr)" help="Retail base rent used for rent-to-sales and breakpoint logic." importance="optional">
+                  <Field label="Tenant Base Rent ($/yr)">
                     <NumericInput placeholder="e.g. 60000" value={tenantBaseRent} onChange={setTenantBaseRent}
                       className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                   </Field>
@@ -4058,7 +3735,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                             )}
                           </div>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            <Field label="Tenant Name" help="Reference only; helps you track which lease the assumptions belong to." importance="optional">
+                            <Field label="Tenant Name">
                               <input value={tenant.tenantName} onChange={(e) => updateRentRollRow(index, 'tenantName', e.target.value)}
                                 className="input input-bordered input-md w-full md:text-base" disabled={!isAdmin} />
                             </Field>
@@ -4066,71 +3743,71 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                               <input value={tenant.suite} onChange={(e) => updateRentRollRow(index, 'suite', e.target.value)}
                                 className="input input-bordered input-md w-full md:text-base" disabled={!isAdmin} />
                             </Field>
-                            <Field label="Annual Rent ($)" help="Current contractual annual base rent for this tenant." importance="core">
+                            <Field label="Annual Rent ($)">
                               <NumericInput value={tenant.annualRent} onChange={(value) => updateRentRollRow(index, 'annualRent', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="Annual Sales ($)" help="Only needed if this lease has percentage-rent exposure." importance="optional">
+                            <Field label="Annual Sales ($)">
                               <NumericInput value={tenant.annualSales} onChange={(value) => updateRentRollRow(index, 'annualSales', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="Lease Start Year" help="First year of rent commencement in the model." importance="core">
+                            <Field label="Lease Start Year">
                               <NumericInput value={tenant.leaseStartYear} onChange={(value) => updateRentRollRow(index, 'leaseStartYear', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="Lease Start Month" help="Month of commencement in the first modeled year." importance="core">
+                            <Field label="Lease Start Month">
                               <NumericInput value={tenant.leaseStartMonth} onChange={(value) => updateRentRollRow(index, 'leaseStartMonth', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="Lease End Year" help="Last contractual year before renewal or rollover." importance="core">
+                            <Field label="Lease End Year">
                               <NumericInput value={tenant.leaseEndYear} onChange={(value) => updateRentRollRow(index, 'leaseEndYear', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="Lease End Month" help="Last contractual month before rollover timing begins." importance="core">
+                            <Field label="Lease End Month">
                               <NumericInput value={tenant.leaseEndMonth} onChange={(value) => updateRentRollRow(index, 'leaseEndMonth', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="Annual Rent Bumps (%)" help="Contractual annual escalations during the term." importance="optional">
+                            <Field label="Annual Rent Bumps (%)">
                               <NumericInput value={tenant.rentBumpsPct} onChange={(value) => updateRentRollRow(index, 'rentBumpsPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Market Rent ($/SF)" help="Mark-to-market rent used when this lease rolls." importance="advanced">
+                            <Field label="Market Rent ($/SF)">
                               <NumericInput value={tenant.marketRentPsf} onChange={(value) => updateRentRollRow(index, 'marketRentPsf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="New Lease Spread (%)" help="Override for this tenant’s new-lease mark-to-market spread." importance="advanced">
+                            <Field label="New Lease Spread (%)">
                               <NumericInput value={tenant.newLeaseSpreadPct} onChange={(value) => updateRentRollRow(index, 'newLeaseSpreadPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Renewal Spread (%)" help="Override for this tenant’s renewal spread to market." importance="advanced">
+                            <Field label="Renewal Spread (%)">
                               <NumericInput value={tenant.renewalSpreadPct} onChange={(value) => updateRentRollRow(index, 'renewalSpreadPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Renewal Probability (%)" help="Chance the tenant renews instead of vacating." importance="advanced">
+                            <Field label="Renewal Probability (%)">
                               <NumericInput value={tenant.renewalProbabilityPct} onChange={(value) => updateRentRollRow(index, 'renewalProbabilityPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Downtime (months)" help="Vacant downtime between expiration and new cash rent." importance="advanced">
+                            <Field label="Downtime (months)">
                               <NumericInput value={tenant.downtimeMonths} onChange={(value) => updateRentRollRow(index, 'downtimeMonths', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="Extension Option (months)" help="Optional extension period carried before rollover." importance="advanced">
+                            <Field label="Extension Option (months)">
                               <NumericInput value={tenant.extensionOptionMonths} onChange={(value) => updateRentRollRow(index, 'extensionOptionMonths', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="Expansion SF" help="Additional square footage this lease can take." importance="advanced">
+                            <Field label="Expansion SF">
                               <NumericInput value={tenant.expansionSf} onChange={(value) => updateRentRollRow(index, 'expansionSf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="Contraction SF" help="Square footage this tenant may give back." importance="advanced">
+                            <Field label="Contraction SF">
                               <NumericInput value={tenant.contractionSf} onChange={(value) => updateRentRollRow(index, 'contractionSf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="Termination Month Index" help="Absolute month index where the tenant exits early, if applicable." importance="advanced">
+                            <Field label="Termination Month Index">
                               <NumericInput value={tenant.terminationMonth} onChange={(value) => updateRentRollRow(index, 'terminationMonth', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
-                            <Field label="Purchase Option Price ($)" help="Purchase option strike if tenant has a buyout right." importance="advanced">
+                            <Field label="Purchase Option Price ($)">
                               <NumericInput value={tenant.purchaseOptionPrice} onChange={(value) => updateRentRollRow(index, 'purchaseOptionPrice', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
@@ -4138,11 +3815,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                               <NumericInput value={tenant.tenantImprovementPerSf} onChange={(value) => updateRentRollRow(index, 'tenantImprovementPerSf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Renewal TI per SF ($)" help="Tenant-specific TI cost on renewal." importance="advanced">
+                            <Field label="Renewal TI per SF ($)">
                               <NumericInput value={tenant.renewalTiPerSf} onChange={(value) => updateRentRollRow(index, 'renewalTiPerSf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="New Lease TI per SF ($)" help="Tenant-specific TI cost on new lease-up." importance="advanced">
+                            <Field label="New Lease TI per SF ($)">
                               <NumericInput value={tenant.newLeaseTiPerSf} onChange={(value) => updateRentRollRow(index, 'newLeaseTiPerSf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
@@ -4178,41 +3855,21 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                               <input value={tenant.coTenancyGroup} onChange={(e) => updateRentRollRow(index, 'coTenancyGroup', e.target.value)}
                                 className="input input-bordered input-md w-full md:text-base" disabled={!isAdmin} />
                             </Field>
-                            <Field label="CAM Pool Share (%)" help="Share of recoverable CAM pool allocated to this tenant." importance="advanced">
+                            <Field label="CAM Pool Share (%)">
                               <NumericInput value={tenant.camPoolSharePct} onChange={(value) => updateRentRollRow(index, 'camPoolSharePct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Admin Fee (%)" help="Tenant-specific admin fee override on CAM recovery." importance="advanced">
+                            <Field label="Admin Fee (%)">
                               <NumericInput value={tenant.adminFeePct} onChange={(value) => updateRentRollRow(index, 'adminFeePct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Controllable Cap (%)" help="Tenant-specific cap on controllable CAM growth." importance="advanced">
+                            <Field label="Controllable Cap (%)">
                               <NumericInput value={tenant.controllableCapPct} onChange={(value) => updateRentRollRow(index, 'controllableCapPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
-                            <Field label="Non-Recoverable Expense (%)" help="Tenant-specific non-recoverable carveout." importance="advanced">
+                            <Field label="Non-Recoverable Expense (%)">
                               <NumericInput value={tenant.nonRecoverableExpensePct} onChange={(value) => updateRentRollRow(index, 'nonRecoverableExpensePct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                            </Field>
-                            <Field label="Default Probability (%)" help="Expected likelihood of payment default for this tenant." importance="advanced">
-                              <NumericInput value={tenant.defaultProbabilityPct} onChange={(value) => updateRentRollRow(index, 'defaultProbabilityPct', value)}
-                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                            </Field>
-                            <Field label="Bad Debt Reserve (%)" help="Reserve against billed rent that may never be collected." importance="advanced">
-                              <NumericInput value={tenant.badDebtReservePct} onChange={(value) => updateRentRollRow(index, 'badDebtReservePct', value)}
-                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                            </Field>
-                            <Field label="Collections Lag (months)" help="Months between billing and actual cash receipt." importance="advanced">
-                              <NumericInput value={tenant.collectionsLagMonths} onChange={(value) => updateRentRollRow(index, 'collectionsLagMonths', value)}
-                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                            </Field>
-                            <Field label="Guarantor Strength (%)" help="Percent of credit loss assumed mitigated by a guarantor." importance="advanced">
-                              <NumericInput value={tenant.guarantorStrengthPct} onChange={(value) => updateRentRollRow(index, 'guarantorStrengthPct', value)}
-                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                            </Field>
-                            <Field label="Security Deposit (months)" help="Deposit coverage available to offset tenant default." importance="advanced">
-                              <NumericInput value={tenant.securityDepositMonths} onChange={(value) => updateRentRollRow(index, 'securityDepositMonths', value)}
-                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
                           </div>
                           <label className="label cursor-pointer justify-start gap-3">
@@ -4230,61 +3887,24 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               )}
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Waterfall</div>
-                <Field label="Preferred Return (%)" help={getFieldHelp('prefRate')} importance="advanced">
+                <Field label="Preferred Return (%)">
                   <NumericInput value={dcfModel.waterfall.prefRate} onChange={(value) => updateWaterfallField('prefRate', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Catch-Up Share (%)" help={getFieldHelp('catchUpRate')} importance="advanced">
+                <Field label="Catch-Up Share (%)">
                   <NumericInput value={dcfModel.waterfall.catchUpRate} onChange={(value) => updateWaterfallField('catchUpRate', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="Promote / Sponsor Share (%)" help={getFieldHelp('promoteRate')} importance="advanced">
+                <Field label="Promote / Sponsor Share (%)">
                   <NumericInput value={dcfModel.waterfall.promoteRate} onChange={(value) => updateWaterfallField('promoteRate', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="LP Equity Share (%)" help={getFieldHelp('lpSharePct')} importance="advanced">
+                <Field label="LP Equity Share (%)">
                   <NumericInput value={dcfModel.waterfall.lpSharePct} onChange={(value) => updateWaterfallField('lpSharePct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
-                <Field label="GP Equity Share (%)" help={getFieldHelp('gpSharePct')} importance="advanced">
+                <Field label="GP Equity Share (%)">
                   <NumericInput value={dcfModel.waterfall.gpSharePct} onChange={(value) => updateWaterfallField('gpSharePct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                </Field>
-                <Field label="Hurdle 1 IRR (%)" help={getFieldHelp('hurdle1IrrPct')} importance="advanced">
-                  <NumericInput value={dcfModel.waterfall.hurdle1IrrPct} onChange={(value) => updateWaterfallField('hurdle1IrrPct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                </Field>
-                <Field label="Hurdle 2 IRR (%)" help={getFieldHelp('hurdle2IrrPct')} importance="advanced">
-                  <NumericInput value={dcfModel.waterfall.hurdle2IrrPct} onChange={(value) => updateWaterfallField('hurdle2IrrPct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                </Field>
-                <Field label="Hurdle 2 Promote (%)" help={getFieldHelp('hurdle2PromotePct')} importance="advanced">
-                  <NumericInput value={dcfModel.waterfall.hurdle2PromotePct} onChange={(value) => updateWaterfallField('hurdle2PromotePct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                </Field>
-                <Field label="Hurdle 3 IRR (%)" help={getFieldHelp('hurdle3IrrPct')} importance="advanced">
-                  <NumericInput value={dcfModel.waterfall.hurdle3IrrPct} onChange={(value) => updateWaterfallField('hurdle3IrrPct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                </Field>
-                <Field label="Hurdle 3 Promote (%)" help={getFieldHelp('hurdle3PromotePct')} importance="advanced">
-                  <NumericInput value={dcfModel.waterfall.hurdle3PromotePct} onChange={(value) => updateWaterfallField('hurdle3PromotePct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                </Field>
-                <Field label="Recycling (%)" help={getFieldHelp('recyclingPct')} importance="advanced">
-                  <NumericInput value={dcfModel.waterfall.recyclingPct} onChange={(value) => updateWaterfallField('recyclingPct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
-                </Field>
-                <label className="label cursor-pointer justify-start gap-3">
-                  <input type="checkbox" className="checkbox checkbox-sm" checked={!!dcfModel.waterfall.clawbackEnabled}
-                    onChange={(e) => updateWaterfallField('clawbackEnabled', e.target.checked)} disabled={!isAdmin} />
-                  <span className="label-text">Enable sponsor clawback</span>
-                </label>
-                <Field label="Partial Recap Month Index" help={getFieldHelp('partialRecapMonth')} importance="advanced">
-                  <NumericInput value={dcfModel.waterfall.partialRecapMonth} onChange={(value) => updateWaterfallField('partialRecapMonth', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
-                </Field>
-                <Field label="Partial Recap Distribution (%)" help={getFieldHelp('partialRecapDistributionPct')} importance="advanced">
-                  <NumericInput value={dcfModel.waterfall.partialRecapDistributionPct} onChange={(value) => updateWaterfallField('partialRecapDistributionPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
               </div>
