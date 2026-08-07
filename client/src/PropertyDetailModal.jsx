@@ -1011,6 +1011,12 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
     }
   }
   function buildPropertyFromDraft(overrides = {}, propertyOverrides = {}) {
+    const derivedLtv = parseNum(price) > 0 && parseNum(loanAmount) >= 0
+      ? ((parseNum(loanAmount) / parseNum(price)) * 100).toFixed(2)
+      : ltv
+    const derivedRentToSales = parseNum(tenantGrossSales) > 0 && parseNum(tenantBaseRent) >= 0
+      ? ((parseNum(tenantBaseRent) / parseNum(tenantGrossSales)) * 100).toFixed(2)
+      : rentToSales
     return {
       ...property,
       ...propertyOverrides,
@@ -1042,9 +1048,15 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
       refi_ltv: refiLtv,
       refi_rate: refiRate,
       refi_year: refiYear,
-      rent_to_sales_ratio: rentToSales,
+      ltv: derivedLtv,
+      rent_to_sales_ratio: derivedRentToSales,
       dcf_model: {
         ...dcfModel,
+        taxModel: {
+          ...dcfModel.taxModel,
+          capitalGainsRatePct: dcfModel.taxModel.capitalGainsRatePct !== '' ? dcfModel.taxModel.capitalGainsRatePct : effectiveTaxRate,
+          ordinaryIncomeTaxRatePct: dcfModel.taxModel.ordinaryIncomeTaxRatePct !== '' ? dcfModel.taxModel.ordinaryIncomeTaxRatePct : effectiveTaxRate,
+        },
         ...overrides
       }
     }
@@ -1472,6 +1484,12 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
     : null
   const yieldOnCost = dcfYearSummaries[0] && acquisitionBasis > 0
     ? dcfYearSummaries[0].netOperatingIncome / acquisitionBasis * 100
+    : null
+  const derivedLtv = parseNum(price) > 0 && parseNum(loanAmount) >= 0
+    ? (parseNum(loanAmount) / parseNum(price) * 100)
+    : null
+  const derivedRentToSales = parseNum(tenantGrossSales) > 0 && parseNum(tenantBaseRent) >= 0
+    ? (parseNum(tenantBaseRent) / parseNum(tenantGrossSales) * 100)
     : null
   const firstYearDcf = engineVisibleDcfYears[0] || null
   const holdYearDcf = engineVisibleDcfYears[engineVisibleDcfYears.length - 1] || null
@@ -2293,8 +2311,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Rent-to-Sales (%)" help={FIELD_HELP.rentToSales}>
-                  <NumericInput placeholder="e.g. 5.0" value={rentToSales} onChange={setRentToSales}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                  <input readOnly
+                    value={derivedRentToSales !== null ? `${derivedRentToSales.toFixed(2)}%` : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="# SKUs" help={FIELD_HELP.numSkus}>
                   <NumericInput placeholder="e.g. 500" value={numSkus} onChange={setNumSkus}
@@ -2402,8 +2421,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="LTV (%)" help={FIELD_HELP.ltv}>
-                  <NumericInput placeholder="e.g. 75" value={ltv} onChange={setLtv}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                  <input readOnly
+                    value={derivedLtv !== null ? `${derivedLtv.toFixed(2)}%` : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Interest Rate (%)" help={FIELD_HELP.interestRate}>
                   <NumericInput placeholder="e.g. 6.5" value={interestRate} onChange={setInterestRate}
