@@ -2138,62 +2138,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
         {/* Financials tab */}
         {tab === 'financials' && (
           <div className="space-y-4">
-              <div className="rounded-2xl border border-base-300 overflow-hidden bg-base-100 shadow-sm">
-                <div className="px-4 py-3 border-b border-base-300 flex items-center justify-between gap-3 flex-wrap">
-                  <div>
-                    <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
-                    <p className="text-xs text-base-content/50 mt-1">Editable yearly institutional model saved per property. Black rows are formula outputs.</p>
-                  </div>
-                  <div className="badge badge-outline">{activeHoldPeriod} Year Hold</div>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="table table-pin-rows table-pin-cols text-sm min-w-[1200px]">
-                    <thead>
-                      <tr className="bg-base-200/80">
-                        <th className="min-w-[260px] bg-base-200">Line Item</th>
-                        {visibleDcfYears.map((year) => (
-                          <th key={year.year} className="text-center bg-base-200 min-w-[140px]">Year {year.year}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {DCF_ROW_DEFS.map((row) => (
-                        <tr key={row.key} className={row.readOnly ? 'bg-base-200/40' : ''}>
-                          <th className="font-medium whitespace-nowrap">
-                            <div className="flex flex-col">
-                              <span>{row.label}</span>
-                              <span className="text-[10px] uppercase tracking-[0.18em] text-base-content/35">{row.category}</span>
-                            </div>
-                          </th>
-                          {visibleDcfYears.map((year, yearIndex) => {
-                            const computedValue = row.readOnly ? getComputedDcfValue(year, row.key) : null
-                            return (
-                              <td key={`${row.key}-${year.year}`} className="align-middle">
-                                {row.readOnly ? (
-                                  <div className="input input-bordered input-md w-full md:text-base cursor-default flex items-center justify-end" style={{ color: '#000', fontWeight: 700 }}>
-                                    {formatMoneyCell(computedValue)}
-                                  </div>
-                                ) : (
-                                  <NumericInput
-                                    placeholder="0"
-                                    value={year[row.key]}
-                                    onChange={(value) => updateDcfCell(yearIndex, row.key, value)}
-                                    className="input input-bordered input-md w-full md:text-base text-right"
-                                    style={{ color: '#1d4ed8' }}
-                                    disabled={!isAdmin}
-                                    allowDecimal={false}
-                                  />
-                                )}
-                              </td>
-                            )
-                          })}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
               {/* Core financials */}
               <div className="space-y-3">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Property</div>
@@ -2778,8 +2722,68 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
         </div>{/* end left panel */}
 
 
-        {/* ── Right panel: map ── */}
-        {tab !== 'financials' && (
+        {/* ── Right panel: map / DCF ── */}
+        {tab === 'financials' ? (
+          <div className="hidden md:flex flex-1 border-l border-base-300 bg-base-100 min-h-0">
+            <div className="flex-1 p-6 overflow-auto">
+              <div className="rounded-2xl border border-base-300 overflow-hidden bg-base-100 shadow-sm min-h-full">
+                <div className="px-5 py-4 border-b border-base-300 flex items-center justify-between gap-3 flex-wrap sticky top-0 bg-base-100 z-10">
+                  <div>
+                    <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
+                    <p className="text-xs text-base-content/50 mt-1">Editable yearly institutional model saved per property. Black rows are formula outputs.</p>
+                  </div>
+                  <div className="badge badge-outline">{activeHoldPeriod} Year Hold</div>
+                </div>
+                <div className="overflow-auto h-full">
+                  <table className="table table-pin-rows table-pin-cols text-sm min-w-[1200px]">
+                    <thead>
+                      <tr className="bg-base-200/80">
+                        <th className="min-w-[260px] bg-base-200">Line Item</th>
+                        {visibleDcfYears.map((year) => (
+                          <th key={year.year} className="text-center bg-base-200 min-w-[140px]">Year {year.year}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {DCF_ROW_DEFS.map((row) => (
+                        <tr key={row.key} className={row.readOnly ? 'bg-base-200/40' : ''}>
+                          <th className="font-medium whitespace-nowrap">
+                            <div className="flex flex-col">
+                              <span>{row.label}</span>
+                              <span className="text-[10px] uppercase tracking-[0.18em] text-base-content/35">{row.category}</span>
+                            </div>
+                          </th>
+                          {visibleDcfYears.map((year, yearIndex) => {
+                            const computedValue = row.readOnly ? getComputedDcfValue(year, row.key) : null
+                            return (
+                              <td key={`${row.key}-${year.year}`} className="align-middle">
+                                {row.readOnly ? (
+                                  <div className="input input-bordered input-md w-full md:text-base cursor-default flex items-center justify-end" style={{ color: '#000', fontWeight: 700 }}>
+                                    {formatMoneyCell(computedValue)}
+                                  </div>
+                                ) : (
+                                  <NumericInput
+                                    placeholder="0"
+                                    value={year[row.key]}
+                                    onChange={(value) => updateDcfCell(yearIndex, row.key, value)}
+                                    className="input input-bordered input-md w-full md:text-base text-right"
+                                    style={{ color: '#1d4ed8' }}
+                                    disabled={!isAdmin}
+                                    allowDecimal={false}
+                                  />
+                                )}
+                              </td>
+                            )
+                          })}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        ) : (
           <div className="hidden md:flex flex-1 border-l border-base-300" style={{ minHeight: '500px' }}>
             <PropertyMap address={address} />
           </div>
