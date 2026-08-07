@@ -1159,13 +1159,15 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       waterfallInvestor: toTextNumber(year.waterfallInvestor),
     }
   }
-  function normalizeScenarioDraft(scenario = {}, fallbackLabel) {
+  function normalizeScenarioDraft(scenario = {}, fallbackLabel, fallbackValues = {}) {
     return {
       label: scenario.label || fallbackLabel,
-      rentGrowthDelta: toTextNumber(scenario.rentGrowthDelta),
-      expenseGrowthDelta: toTextNumber(scenario.expenseGrowthDelta),
-      exitCapRateDelta: toTextNumber(scenario.exitCapRateDelta),
-      vacancyDelta: toTextNumber(scenario.vacancyDelta)
+      rentGrowth: toTextNumber(scenario.rentGrowth ?? fallbackValues.rentGrowth),
+      expenseGrowth: toTextNumber(scenario.expenseGrowth ?? fallbackValues.expenseGrowth),
+      exitCapRate: toTextNumber(scenario.exitCapRate ?? fallbackValues.exitCapRate),
+      vacancyRate: toTextNumber(scenario.vacancyRate ?? fallbackValues.vacancyRate),
+      loanAmount: toTextNumber(scenario.loanAmount ?? fallbackValues.loanAmount),
+      holdPeriod: toTextNumber(scenario.holdPeriod ?? fallbackValues.holdPeriod)
     }
   }
   function normalizeRentRollRow(row = {}) {
@@ -1207,9 +1209,30 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       ...hydrated,
       scenarioName: source.scenarioName || baseModel.scenarioName,
       scenarios: {
-        base: normalizeScenarioDraft(source.scenarios?.base, 'Base'),
-        upside: normalizeScenarioDraft(source.scenarios?.upside, 'Upside'),
-        downside: normalizeScenarioDraft(source.scenarios?.downside, 'Downside')
+        base: normalizeScenarioDraft(source.scenarios?.base, 'Base', {
+          rentGrowth: prop.rent_growth,
+          expenseGrowth: prop.expense_growth,
+          exitCapRate: prop.exit_cap_rate,
+          vacancyRate: prop.vacancy_rate,
+          loanAmount: prop.loan_amount,
+          holdPeriod: prop.hold_period,
+        }),
+        upside: normalizeScenarioDraft(source.scenarios?.upside, 'Upside', {
+          rentGrowth: prop.rent_growth,
+          expenseGrowth: prop.expense_growth,
+          exitCapRate: prop.exit_cap_rate,
+          vacancyRate: prop.vacancy_rate,
+          loanAmount: prop.loan_amount,
+          holdPeriod: prop.hold_period,
+        }),
+        downside: normalizeScenarioDraft(source.scenarios?.downside, 'Downside', {
+          rentGrowth: prop.rent_growth,
+          expenseGrowth: prop.expense_growth,
+          exitCapRate: prop.exit_cap_rate,
+          vacancyRate: prop.vacancy_rate,
+          loanAmount: prop.loan_amount,
+          holdPeriod: prop.hold_period,
+        })
       },
       debtTerms: {
         initialLoanTermYears: toTextNumber(source.debtTerms?.initialLoanTermYears),
@@ -1725,9 +1748,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       })
     }
   }
-  function buildPropertyFromDraft(overrides = {}) {
+  function buildPropertyFromDraft(overrides = {}, propertyOverrides = {}) {
     return {
       ...property,
+      ...propertyOverrides,
       price,
       closing_costs: closingCosts,
       hold_period: holdPeriod,
@@ -1978,6 +2002,21 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   function updateTaxModelField(field, value) {
     setDcfModel(prev => ({ ...prev, taxModel: { ...prev.taxModel, [field]: value } }))
   }
+  function buildScenarioProperty(scenarioKey, overrides = {}) {
+    const scenario = dcfModel.scenarios[scenarioKey] || {}
+    return buildPropertyFromDraft({
+      ...overrides,
+      scenarioName: scenarioKey,
+      scenarios: dcfModel.scenarios,
+    }, {
+      rent_growth: scenario.rentGrowth !== '' ? scenario.rentGrowth : rentGrowth,
+      expense_growth: scenario.expenseGrowth !== '' ? scenario.expenseGrowth : expenseGrowth,
+      exit_cap_rate: scenario.exitCapRate !== '' ? scenario.exitCapRate : exitCapRate,
+      vacancy_rate: scenario.vacancyRate !== '' ? scenario.vacancyRate : vacancyRate,
+      loan_amount: scenario.loanAmount !== '' ? scenario.loanAmount : loanAmount,
+      hold_period: scenario.holdPeriod !== '' ? scenario.holdPeriod : holdPeriod,
+    })
+  }
   function updateRentRollRow(index, field, value) {
     setDcfModel(prev => ({
       ...prev,
@@ -2121,34 +2160,58 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   const dscrFromEngine = adjustedNoiValue !== null && annualDebtServiceAmount > 0
     ? (adjustedNoiValue / annualDebtServiceAmount)
     : null
-  const scenarioComparison = ['base', 'upside', 'downside'].map((scenarioKey) => {
-    const scenarioConfig = dcfModel.scenarios[scenarioKey]
-    const scenarioRentGrowth = (Number(rentGrowth || 0) + Number(scenarioConfig.rentGrowthDelta || 0)) / 100
-    const scenarioExpenseGrowth = (Number(expenseGrowth || 0) + Number(scenarioConfig.expenseGrowthDelta || 0)) / 100
-    const scenarioVacancy = Math.max(0, (Number(vacancyRate || 0) + Number(scenarioConfig.vacancyDelta || 0))) / 100
-    const scenarioExitCap = (Number(exitCapRate || 0) + Number(scenarioConfig.exitCapRateDelta || 0)) / 100
-    const baseNoi = adjustedNoiValue || 0
-    const exitNoi = baseNoi * Math.pow(1 + scenarioRentGrowth - scenarioExpenseGrowth, Math.max(0, activeHoldPeriod - 1))
-    const scenarioExitValue = scenarioExitCap > 0 ? exitNoi / scenarioExitCap : 0
-    const scenarioNetSale = scenarioExitValue * (1 - (Number(costOfSale || 0) / 100))
-    const scenarioLeveredCashFlows = initialEquity > 0 ? [-initialEquity, ...engineVisibleDcfYears.map((yearRow, index) => {
-      const baseCash = getComputedDcfValue(yearRow, 'cashFlowAfterSale') || 0
-      if (index !== engineVisibleDcfYears.length - 1) return baseCash
-      return baseCash - netSaleProceedsAmount + scenarioNetSale
-    })] : null
-    const scenarioIrr = scenarioLeveredCashFlows ? calculateIrr(scenarioLeveredCashFlows) : null
-    const scenarioEmx = scenarioLeveredCashFlows && initialEquity > 0
-      ? scenarioLeveredCashFlows.slice(1).reduce((sum, value) => sum + value, 0) / initialEquity
+  function summarizeScenarioModel(scenarioKey, propertyOverrides = {}) {
+    const scenarioProp = buildScenarioProperty(scenarioKey, {}, propertyOverrides)
+    const scenarioModel = normalizeDcfModel(scenarioProp.dcf_model, scenarioProp)
+    const scenarioHold = Math.min(DCF_MAX_YEARS, Math.max(1, Number(scenarioProp.hold_period || 1)))
+    const years = scenarioModel.years.slice(0, scenarioHold)
+    const yearSummaries = years.map((yearRow) => {
+      const effectiveGrossIncome = getComputedDcfValue(yearRow, 'effectiveGrossIncome') || 0
+      const netOperatingIncome = getComputedDcfValue(yearRow, 'netOperatingIncomeDcf') || 0
+      const cashFlowAfterSale = getComputedDcfValue(yearRow, 'cashFlowAfterSale') || 0
+      const debtService = parseNum(yearRow.debtServiceDcf) || 0
+      return { effectiveGrossIncome, netOperatingIncome, cashFlowAfterSale, debtService, yearRow }
+    })
+    const acquisitionCost = (parseNum(scenarioProp.price) || 0) + (parseNum(scenarioProp.closing_costs) || 0)
+    const scenarioInitialEquity = acquisitionCost - (parseNum(scenarioProp.loan_amount) || 0)
+    const leveredCashFlowsResolved = scenarioInitialEquity > 0 ? [-scenarioInitialEquity, ...yearSummaries.map(row => row.cashFlowAfterSale)] : null
+    const leveredIrrResolved = leveredCashFlowsResolved ? calculateIrr(leveredCashFlowsResolved) : null
+    const leveredEmxResolved = leveredCashFlowsResolved && scenarioInitialEquity > 0
+      ? leveredCashFlowsResolved.slice(1).reduce((sum, value) => sum + value, 0) / scenarioInitialEquity
       : null
+    const firstYear = yearSummaries[0] || null
+    const holdYear = yearSummaries[yearSummaries.length - 1] || null
+    const dscr = firstYear && firstYear.debtService > 0 ? firstYear.netOperatingIncome / firstYear.debtService : null
+    const debtYieldResolved = firstYear && parseNum(scenarioProp.loan_amount) > 0
+      ? firstYear.netOperatingIncome / parseNum(scenarioProp.loan_amount)
+      : null
+    const covenantBreach = (parseNum(dcfModel.lenderConstraints.minDscr) > 0 && dscr !== null && dscr < parseNum(dcfModel.lenderConstraints.minDscr))
+      || (parseNum(dcfModel.lenderConstraints.minDebtYield) > 0 && debtYieldResolved !== null && debtYieldResolved * 100 < parseNum(dcfModel.lenderConstraints.minDebtYield))
     return {
       key: scenarioKey,
-      label: scenarioConfig.label,
-      irr: scenarioIrr,
-      emx: scenarioEmx,
-      exitValue: scenarioExitValue,
-      noi: exitNoi
+      label: dcfModel.scenarios[scenarioKey].label,
+      irr: leveredIrrResolved,
+      emx: leveredEmxResolved,
+      noi: holdYear ? holdYear.netOperatingIncome : null,
+      exitValue: holdYear ? (parseNum(holdYear.yearRow.grossSaleProceedsDcf) || 0) : null,
+      netSale: holdYear ? (parseNum(holdYear.yearRow.saleProceedsDcf) || 0) : null,
+      dscr,
+      debtYield: debtYieldResolved !== null ? debtYieldResolved * 100 : null,
+      covenantBreach,
+      cashTrap: firstYear ? firstYear.cashFlowAfterSale < 0 : false,
     }
-  })
+  }
+  const scenarioComparison = ['base', 'upside', 'downside'].map((scenarioKey) => summarizeScenarioModel(scenarioKey))
+  const sensitivityCases = [
+    { key: 'exitCapUp', label: 'Exit Cap +50 bps', overrides: { exit_cap_rate: String((parseNum(exitCapRate) || 0) + 0.5) } },
+    { key: 'rentGrowthDown', label: 'Rent Growth -100 bps', overrides: { rent_growth: String((parseNum(rentGrowth) || 0) - 1) } },
+    { key: 'vacancyUp', label: 'Vacancy +100 bps', overrides: { vacancy_rate: String((parseNum(vacancyRate) || 0) + 1) } },
+    { key: 'leverageUp', label: 'Leverage +5% LTV', overrides: { loan_amount: String((parseNum(loanAmount) || 0) + ((parseNum(price) || 0) * 0.05)) } },
+    { key: 'holdShorter', label: 'Hold -1 year', overrides: { hold_period: String(Math.max(1, (parseNum(holdPeriod) || 1) - 1)) } },
+  ].map((sensitivity) => ({
+    ...sensitivity,
+    result: summarizeScenarioModel('base', sensitivity.overrides)
+  }))
 
   useEffect(() => {
     if (open && property?.id) {
@@ -2309,24 +2372,30 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         scenarios: {
           base: {
             label: dcfModel.scenarios.base.label,
-            rentGrowthDelta: parseNum(dcfModel.scenarios.base.rentGrowthDelta),
-            expenseGrowthDelta: parseNum(dcfModel.scenarios.base.expenseGrowthDelta),
-            exitCapRateDelta: parseNum(dcfModel.scenarios.base.exitCapRateDelta),
-            vacancyDelta: parseNum(dcfModel.scenarios.base.vacancyDelta),
+            rentGrowth: parseNum(dcfModel.scenarios.base.rentGrowth),
+            expenseGrowth: parseNum(dcfModel.scenarios.base.expenseGrowth),
+            exitCapRate: parseNum(dcfModel.scenarios.base.exitCapRate),
+            vacancyRate: parseNum(dcfModel.scenarios.base.vacancyRate),
+            loanAmount: parseNum(dcfModel.scenarios.base.loanAmount),
+            holdPeriod: parseNum(dcfModel.scenarios.base.holdPeriod),
           },
           upside: {
             label: dcfModel.scenarios.upside.label,
-            rentGrowthDelta: parseNum(dcfModel.scenarios.upside.rentGrowthDelta),
-            expenseGrowthDelta: parseNum(dcfModel.scenarios.upside.expenseGrowthDelta),
-            exitCapRateDelta: parseNum(dcfModel.scenarios.upside.exitCapRateDelta),
-            vacancyDelta: parseNum(dcfModel.scenarios.upside.vacancyDelta),
+            rentGrowth: parseNum(dcfModel.scenarios.upside.rentGrowth),
+            expenseGrowth: parseNum(dcfModel.scenarios.upside.expenseGrowth),
+            exitCapRate: parseNum(dcfModel.scenarios.upside.exitCapRate),
+            vacancyRate: parseNum(dcfModel.scenarios.upside.vacancyRate),
+            loanAmount: parseNum(dcfModel.scenarios.upside.loanAmount),
+            holdPeriod: parseNum(dcfModel.scenarios.upside.holdPeriod),
           },
           downside: {
             label: dcfModel.scenarios.downside.label,
-            rentGrowthDelta: parseNum(dcfModel.scenarios.downside.rentGrowthDelta),
-            expenseGrowthDelta: parseNum(dcfModel.scenarios.downside.expenseGrowthDelta),
-            exitCapRateDelta: parseNum(dcfModel.scenarios.downside.exitCapRateDelta),
-            vacancyDelta: parseNum(dcfModel.scenarios.downside.vacancyDelta),
+            rentGrowth: parseNum(dcfModel.scenarios.downside.rentGrowth),
+            expenseGrowth: parseNum(dcfModel.scenarios.downside.expenseGrowth),
+            exitCapRate: parseNum(dcfModel.scenarios.downside.exitCapRate),
+            vacancyRate: parseNum(dcfModel.scenarios.downside.vacancyRate),
+            loanAmount: parseNum(dcfModel.scenarios.downside.loanAmount),
+            holdPeriod: parseNum(dcfModel.scenarios.downside.holdPeriod),
           }
         },
         debtTerms: {
@@ -3384,20 +3453,28 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <div key={scenarioKey} className="rounded-xl border border-base-300 p-3 space-y-3">
                     <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40">{dcfModel.scenarios[scenarioKey].label}</div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <Field label="Rent Growth Delta (%)">
-                        <NumericInput value={dcfModel.scenarios[scenarioKey].rentGrowthDelta} onChange={(value) => updateScenarioField(scenarioKey, 'rentGrowthDelta', value)}
+                      <Field label="Rent Growth (% / yr)">
+                        <NumericInput value={dcfModel.scenarios[scenarioKey].rentGrowth} onChange={(value) => updateScenarioField(scenarioKey, 'rentGrowth', value)}
                           className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                       </Field>
-                      <Field label="Expense Growth Delta (%)">
-                        <NumericInput value={dcfModel.scenarios[scenarioKey].expenseGrowthDelta} onChange={(value) => updateScenarioField(scenarioKey, 'expenseGrowthDelta', value)}
+                      <Field label="Expense Growth (% / yr)">
+                        <NumericInput value={dcfModel.scenarios[scenarioKey].expenseGrowth} onChange={(value) => updateScenarioField(scenarioKey, 'expenseGrowth', value)}
                           className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                       </Field>
-                      <Field label="Exit Cap Delta (%)">
-                        <NumericInput value={dcfModel.scenarios[scenarioKey].exitCapRateDelta} onChange={(value) => updateScenarioField(scenarioKey, 'exitCapRateDelta', value)}
+                      <Field label="Exit Cap Rate (%)">
+                        <NumericInput value={dcfModel.scenarios[scenarioKey].exitCapRate} onChange={(value) => updateScenarioField(scenarioKey, 'exitCapRate', value)}
                           className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                       </Field>
-                      <Field label="Vacancy Delta (%)">
-                        <NumericInput value={dcfModel.scenarios[scenarioKey].vacancyDelta} onChange={(value) => updateScenarioField(scenarioKey, 'vacancyDelta', value)}
+                      <Field label="Vacancy Rate (%)">
+                        <NumericInput value={dcfModel.scenarios[scenarioKey].vacancyRate} onChange={(value) => updateScenarioField(scenarioKey, 'vacancyRate', value)}
+                          className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                      </Field>
+                      <Field label="Loan Amount ($)">
+                        <NumericInput value={dcfModel.scenarios[scenarioKey].loanAmount} onChange={(value) => updateScenarioField(scenarioKey, 'loanAmount', value)}
+                          className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                      </Field>
+                      <Field label="Hold Period (yrs)">
+                        <NumericInput value={dcfModel.scenarios[scenarioKey].holdPeriod} onChange={(value) => updateScenarioField(scenarioKey, 'holdPeriod', value)}
                           className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                       </Field>
                     </div>
@@ -3414,6 +3491,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                           <th className="text-right">Levered EMx</th>
                           <th className="text-right">Exit NOI</th>
                           <th className="text-right">Exit Value</th>
+                          <th className="text-right">Net Sale</th>
+                          <th className="text-right">DSCR</th>
+                          <th className="text-right">Debt Yield</th>
+                          <th className="text-right">Risk</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -3424,6 +3505,41 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                             <td className="text-right">{scenario.emx !== null ? `${scenario.emx.toFixed(2)}x` : '—'}</td>
                             <td className="text-right">{scenario.noi ? '$' + scenario.noi.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}</td>
                             <td className="text-right">{scenario.exitValue ? '$' + scenario.exitValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}</td>
+                            <td className="text-right">{scenario.netSale ? '$' + scenario.netSale.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}</td>
+                            <td className="text-right">{scenario.dscr !== null ? scenario.dscr.toFixed(2) : '—'}</td>
+                            <td className="text-right">{scenario.debtYield !== null ? `${scenario.debtYield.toFixed(2)}%` : '—'}</td>
+                            <td className="text-right">
+                              {scenario.covenantBreach ? <span className="badge badge-error badge-sm">Covenant breach</span>
+                                : scenario.cashTrap ? <span className="badge badge-warning badge-sm">Cash trap</span>
+                                  : <span className="badge badge-success badge-sm">OK</span>}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+                <div className="rounded-xl border border-base-300 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-base-300 text-xs font-semibold uppercase tracking-wide text-base-content/40">Sensitivity Table</div>
+                  <div className="overflow-x-auto">
+                    <table className="table table-sm">
+                      <thead>
+                        <tr>
+                          <th>Case</th>
+                          <th className="text-right">Levered IRR</th>
+                          <th className="text-right">Levered EMx</th>
+                          <th className="text-right">DSCR</th>
+                          <th className="text-right">Exit Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {sensitivityCases.map((sensitivity) => (
+                          <tr key={sensitivity.key}>
+                            <td className="font-medium">{sensitivity.label}</td>
+                            <td className="text-right">{sensitivity.result.irr !== null ? `${(sensitivity.result.irr * 100).toFixed(2)}%` : '—'}</td>
+                            <td className="text-right">{sensitivity.result.emx !== null ? `${sensitivity.result.emx.toFixed(2)}x` : '—'}</td>
+                            <td className="text-right">{sensitivity.result.dscr !== null ? sensitivity.result.dscr.toFixed(2) : '—'}</td>
+                            <td className="text-right">{sensitivity.result.exitValue ? '$' + sensitivity.result.exitValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}</td>
                           </tr>
                         ))}
                       </tbody>
