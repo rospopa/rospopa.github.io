@@ -743,7 +743,7 @@ function Logo() {
           letterSpacing: '0.08em',
           color: '#111111',
         }}>
-          ROSPOPA
+          ROSPOPA PAVLO
         </span>
         <span style={{
           fontFamily: "'Cormorant Garamond', serif",
@@ -753,7 +753,7 @@ function Logo() {
           textTransform: 'uppercase',
           opacity: 0.45,
         }}>
-          Portal
+          PAVLO
         </span>
       </div>
     </div>
