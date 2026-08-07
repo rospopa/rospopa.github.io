@@ -2413,7 +2413,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 <Field label="Vacancy / Credit Loss (%)" help={FIELD_HELP.vacancyRate}>
                   <NumericInput placeholder="e.g. 5" value={vacancyRate} onChange={setVacancyRate}
-                    className={financialInputClass} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="EGI — Effective Gross Income ($/yr)" help={FIELD_HELP.egi}>
                   <input readOnly
@@ -2477,7 +2477,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 <Field label="Interest Rate (%)" help={FIELD_HELP.interestRate}>
                   <NumericInput placeholder="e.g. 6.5" value={interestRate} onChange={setInterestRate}
-                    className={financialInputClass} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Amortization Term (yrs)" help={FIELD_HELP.amortTerm}>
                   <NumericInput placeholder="e.g. 25" value={amortizationTerm} onChange={setAmortizationTerm}
@@ -2696,7 +2696,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 <Field label="Hold Period (yrs)" help={FIELD_HELP.holdPeriod}>
                   <NumericInput placeholder="e.g. 7" value={holdPeriod} onChange={setHoldPeriod}
-                    className={financialInputClass} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Sale Month" help={FIELD_HELP.saleMonth}>
                   <NumericInput placeholder="1-12" value={dcfModel.timing.saleMonth} onChange={(value) => updateTimingField('saleMonth', value)}
@@ -2704,11 +2704,11 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 <Field label="Rent Growth (% / yr)" help={FIELD_HELP.rentGrowth}>
                   <NumericInput placeholder="e.g. 3" value={rentGrowth} onChange={setRentGrowth}
-                    className={financialInputClass} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Expense Growth (% / yr)" help={FIELD_HELP.expenseGrowth}>
                   <NumericInput placeholder="e.g. 2" value={expenseGrowth} onChange={setExpenseGrowth}
-                    className={financialInputClass} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Exit Cap Rate (%)" help={FIELD_HELP.exitCapRate}>
                   <NumericInput placeholder="e.g. 6.5" value={exitCapRate} onChange={setExitCapRate}
