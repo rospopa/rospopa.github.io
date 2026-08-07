@@ -1913,8 +1913,25 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   return (
     <div className="modal modal-open" style={{zIndex: 30}}>
       {/* Wide container: left form + right map */}
-      <div className="modal-box p-0 w-screen h-screen max-w-none max-h-none rounded-none flex flex-col md:flex-row overflow-hidden">
+      <div className="modal-box p-0 w-screen h-screen max-w-none max-h-none rounded-none flex flex-col overflow-hidden">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-base-300 md:hidden">
+          <h3 className="font-bold text-xl">
+            {property?.id ? property.address : 'New Property'}
+          </h3>
+          <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
+        </div>
 
+        {tabs.length > 1 && (
+          <div className="tabs tabs-bordered px-6 pt-2 md:hidden">
+            {tabs.map(t => (
+              <button key={t} className={`tab ${tab === t ? 'tab-active font-semibold' : ''}`} onClick={() => setTab(t)}>
+                {tabLabel[t]}
+              </button>
+            ))}
+          </div>
+        )}
+
+        <div className="flex flex-col md:flex-row overflow-hidden min-h-0 flex-1">
         {/* ── Left panel: form ── */}
         <div className="flex flex-col w-full md:w-[480px] md:flex-shrink-0 overflow-y-auto max-h-screen">
           <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-base-300">
@@ -2124,6 +2141,13 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
                   onChange={setPopDensity} className="input input-bordered w-full" disabled={!isAdmin} />
               </Field>
             </div>
+
+            {isAdmin && (
+              <div className="pt-2 hidden md:block">
+                <SaveButton onClick={handleSave} loading={saving} savedSignal={savedSignal}
+                  label={property?.id ? 'Save Changes' : 'Create Property'} />
+              </div>
+            )}
 
             {isAdmin && (
               <div className="pt-2 md:hidden">
@@ -2724,7 +2748,22 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
 
         {/* ── Right panel: map / DCF ── */}
         {tab === 'financials' ? (
-          <div className="hidden md:flex flex-1 border-l border-base-300 bg-base-100 min-h-0">
+          <div className="hidden md:flex flex-1 border-l border-base-300 bg-base-100 min-h-0 flex-col">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-base-300">
+              <h3 className="font-bold text-xl">
+                {property?.id ? property.address : 'New Property'}
+              </h3>
+              <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
+            </div>
+            {tabs.length > 1 && (
+              <div className="tabs tabs-bordered px-6 pt-2">
+                {tabs.map(t => (
+                  <button key={t} className={`tab ${tab === t ? 'tab-active font-semibold' : ''}`} onClick={() => setTab(t)}>
+                    {tabLabel[t]}
+                  </button>
+                ))}
+              </div>
+            )}
             <div className="flex-1 p-6 overflow-auto">
               <div className="rounded-2xl border border-base-300 overflow-hidden bg-base-100 shadow-sm min-h-full">
                 <div className="px-5 py-4 border-b border-base-300 flex items-center justify-between gap-3 flex-wrap sticky top-0 bg-base-100 z-10">
@@ -2784,11 +2823,29 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
             </div>
           </div>
         ) : (
-          <div className="hidden md:flex flex-1 border-l border-base-300" style={{ minHeight: '500px' }}>
-            <PropertyMap address={address} />
+          <div className="hidden md:flex flex-1 border-l border-base-300 bg-base-100 min-h-0 flex-col">
+            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-base-300">
+              <h3 className="font-bold text-xl">
+                {property?.id ? property.address : 'New Property'}
+              </h3>
+              <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
+            </div>
+            {tabs.length > 1 && (
+              <div className="tabs tabs-bordered px-6 pt-2">
+                {tabs.map(t => (
+                  <button key={t} className={`tab ${tab === t ? 'tab-active font-semibold' : ''}`} onClick={() => setTab(t)}>
+                    {tabLabel[t]}
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="flex-1 min-h-0">
+              <PropertyMap address={address} />
+            </div>
           </div>
         )}
 
+      </div>
       </div>
       <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
 
