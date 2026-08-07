@@ -1187,7 +1187,7 @@ function AssignUsersTab({ allUsers, assignLoading, toggleAssign, onViewContact }
   )
 }
 
-function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
+function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffset = 0 }) {
   const DCF_ROW_DEFS = [
     { key: 'grossRevenue', label: 'Gross Revenue', type: 'currency', category: 'income' },
     { key: 'vacancyCreditLoss', label: 'Vacancy / Credit Loss', type: 'currency', category: 'income' },
@@ -1806,9 +1806,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
   const tabLabel = { details: 'Details', financials: 'Financials', media: 'Media', documents: 'Documents', assign: 'Assign Users' }
 
   return (
-    <div className="modal modal-open" style={{ zIndex: 30, paddingTop: '64px' }}>
+    <div className="modal modal-open" style={{ zIndex: 30, paddingTop: `${topOffset}px` }}>
       {/* Wide container: left form + right map */}
-      <div className="modal-box p-0 w-screen h-[calc(100vh-64px)] max-w-none max-h-none rounded-none flex flex-col overflow-hidden">
+      <div className="modal-box p-0 w-screen max-w-none max-h-none rounded-none flex flex-col overflow-hidden" style={{ height: `calc(100vh - ${topOffset}px)` }}>
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-base-300 md:hidden">
           <h3 className="font-bold text-xl">
             {property?.id ? property.address : 'New Property'}
@@ -2888,10 +2888,26 @@ function PropertiesPage({ user }) {
   const [properties, setProperties] = useState([])
   const [selectedProperty, setSelectedProperty] = useState(null)
   const [showPropertyModal, setShowPropertyModal] = useState(false)
+  const [propertyModalTopOffset, setPropertyModalTopOffset] = useState(64)
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list' | 'kanban'
   const [search, setSearch] = useState('')
   const isAdmin = user.role === 'admin'
+
+  useEffect(() => {
+    function measureTopOffset() {
+      const nav = document.querySelector('nav.navbar')
+      const mobileMenu = document.querySelector('[data-mobile-nav-menu="true"]')
+      const navHeight = nav ? nav.getBoundingClientRect().height : 0
+      const mobileMenuHeight = mobileMenu && window.getComputedStyle(mobileMenu).display !== 'none'
+        ? mobileMenu.getBoundingClientRect().height
+        : 0
+      setPropertyModalTopOffset(Math.ceil(navHeight + mobileMenuHeight))
+    }
+    measureTopOffset()
+    window.addEventListener('resize', measureTopOffset)
+    return () => window.removeEventListener('resize', measureTopOffset)
+  }, [])
 
   async function fetchProperties() {
     setLoading(true)
@@ -3009,6 +3025,7 @@ function PropertiesPage({ user }) {
         isAdmin={user.role === 'admin'}
         onClose={() => setShowPropertyModal(false)}
         onSave={async (p) => { await saveProperty(p) }}
+        topOffset={propertyModalTopOffset}
       />
 
       {loading && <p className="text-base-content/40 text-sm">Loading…</p>}
@@ -4695,7 +4712,7 @@ export default function App() {
 
       {/* Mobile dropdown menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden bg-base-100 border-b border-base-300 px-4 py-3 flex flex-col gap-1 sticky top-[64px] z-40 shadow-md">
+        <div data-mobile-nav-menu="true" className="md:hidden bg-base-100 border-b border-base-300 px-4 py-3 flex flex-col gap-1 sticky top-[64px] z-40 shadow-md">
           {navLinks.map(({ id, label }) => navBtn(id, label))}
           <div className="divider my-1" />
           <button className="btn btn-sm btn-ghost w-full justify-start gap-2" onClick={toggleDarkMode}>
