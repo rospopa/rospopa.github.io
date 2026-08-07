@@ -9,6 +9,7 @@ const bcrypt = require('bcryptjs');
 const https = require('https');
 const { Resend } = require('resend');
 const { rateLimit } = require('express-rate-limit');
+const compression = require('compression');
 
 const PORT = process.env.PORT || 3000;
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -29,8 +30,33 @@ if (!DATABASE_URL) {
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  max: 10,                      // max concurrent connections
+  idleTimeoutMillis: 30000,     // close idle connections after 30s
+  connectionTimeoutMillis: 5000 // fail fast if no connection available in 5s
 });
+
+// ─── Simple in-memory cache ──────────────────────────────────────
+// Keyed by string. Each entry: { data, etag, ts }
+const _cache = new Map();
+const CACHE_TTL_MS = 15000; // 15 seconds — short enough to feel live, long enough to absorb bursts
+
+function cacheGet(key) {
+  const entry = _cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > CACHE_TTL_MS) { _cache.delete(key); return null; }
+  return entry;
+}
+function cacheSet(key, data) {
+  const etag = '"' + crypto.createHash('md5').update(JSON.stringify(data)).digest('hex').slice(0, 16) + '"';
+  _cache.set(key, { data, etag, ts: Date.now() });
+  return etag;
+}
+function cacheInvalidate(pattern) {
+  for (const key of _cache.keys()) {
+    if (key.startsWith(pattern)) _cache.delete(key);
+  }
+}
 
 async function initializeSchema() {
   await pool.query(`CREATE TABLE IF NOT EXISTS users (
@@ -233,6 +259,9 @@ async function initializeSchema() {
 }
 
 const app = express();
+
+// Gzip all responses ≥ 1KB
+app.use(compression({ threshold: 1024 }));
 
 // Origin-guard: verifies requests arrived via the Cloudflare zone,
 // which injects x-origin-key through a Transform Rule.
@@ -1178,6 +1207,14 @@ app.get('/api/properties', async (req, res) => {
   const limit = Math.min(100, parseInt(req.query.limit || '20', 10) || 20);
   const offset = Math.max(0, parseInt(req.query.offset || '0', 10) || 0);
 
+  const cacheKey = `props:list:${q}:${limit}:${offset}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) {
+    if (req.headers['if-none-match'] === cached.etag) return res.status(304).end();
+    res.set('ETag', cached.etag);
+    return res.json(cached.data);
+  }
+
   try {
     let where = '';
     const countParams = [];
@@ -1208,7 +1245,10 @@ app.get('/api/properties', async (req, res) => {
        FROM properties ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
     );
-    res.json({ properties: listResult.rows || [], total: countResult.rows[0].total });
+    const payload = { properties: listResult.rows || [], total: countResult.rows[0].total };
+    const etag = cacheSet(cacheKey, payload);
+    res.set('ETag', etag);
+    res.json(payload);
   } catch (e) {
     res.status(500).json({ error: 'db error' });
   }
@@ -1218,6 +1258,14 @@ app.get('/api/properties/:id', async (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
+
+  const cacheKey = `props:item:${propId}`;
+  const cached = cacheGet(cacheKey);
+  if (cached) {
+    if (req.headers['if-none-match'] === cached.etag) return res.status(304).end();
+    res.set('ETag', cached.etag);
+    return res.json(cached.data);
+  }
 
   try {
     const result = await pool.query(
@@ -1238,6 +1286,8 @@ app.get('/api/properties/:id', async (req, res) => {
               created_by, created_at, updated_at
        FROM properties WHERE id = $1`, [propId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
+    const etag = cacheSet(cacheKey, result.rows[0]);
+    res.set('ETag', etag);
     res.json(result.rows[0]);
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -1443,6 +1493,9 @@ app.put('/api/properties/:id', async (req, res) => {
        propId]
     );
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    // Invalidate cached data for this property and the list
+    cacheInvalidate(`props:item:${propId}`);
+    cacheInvalidate('props:list:');
     await logAudit(req.session.user.id, req.session.user.email, 'edit_property',
       { property_id: propId, address: newVals.address, changed_fields: Object.keys(changes), changes },
       null, null, clientIp(req));
@@ -1463,6 +1516,8 @@ app.delete('/api/properties/:id', async (req, res) => {
     const { address, pin, county } = propResult.rows[0];
     const result = await pool.query('DELETE FROM properties WHERE id = $1', [propId]);
     if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    cacheInvalidate(`props:item:${propId}`);
+    cacheInvalidate('props:list:');
     await logAudit(req.session.user.id, req.session.user.email, 'delete_property', { property_id: propId, address, pin, county }, null, null, clientIp(req));
     res.json({ ok: true });
   } catch (e) {
@@ -1483,6 +1538,8 @@ app.patch('/api/properties/:id/status', async (req, res) => {
     if (oldResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const { status: oldStatus, address } = oldResult.rows[0];
     await pool.query('UPDATE properties SET status=$1, updated_at=CURRENT_TIMESTAMP WHERE id=$2', [status, propId]);
+    cacheInvalidate(`props:item:${propId}`);
+    cacheInvalidate('props:list:');
     await logAudit(req.session.user.id, req.session.user.email, 'edit_property',
       { property_id: propId, address, changed_fields: ['status'], changes: { status: { from: oldStatus, to: status } } },
       null, null, clientIp(req));
@@ -1888,7 +1945,13 @@ app.get('/api/status', async (req, res) => {
 
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
 if (require('fs').existsSync(clientDist)) {
-  app.use(express.static(clientDist));
+  // Hashed assets (JS/CSS with content hash in filename) are immutable — cache 1 year
+  app.use('/assets', express.static(path.join(clientDist, 'assets'), {
+    maxAge: '1y',
+    immutable: true,
+  }));
+  // Everything else (index.html, favicon, etc.) — no-cache so updates are picked up
+  app.use(express.static(clientDist, { maxAge: 0, etag: true }));
   app.use((req, res) => res.sendFile(path.join(clientDist, 'index.html')));
 }
 
