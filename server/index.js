@@ -1790,31 +1790,42 @@ app.get('/api/treasury-yield-10y', async (req, res) => {
   else startDate.setMonth(startDate.getMonth() - 1);
   const formatDate = (date) => date.toISOString().slice(0, 10);
   const seriesId = 'DGS10';
+  const spreadSeriesId = 'BAMLC0A1CAAA';
   if (!FRED_API_KEY) {
     return res.status(500).json({ error: 'FRED_API_KEY is not configured' });
   }
 
   try {
-    const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${FRED_API_KEY}&file_type=json&sort_order=asc&observation_start=${formatDate(startDate)}&observation_end=${formatDate(endDate)}`;
-    const data = await new Promise((resolve, reject) => {
-      https.get(url, response => {
-        let body = '';
-        response.on('data', chunk => body += chunk);
-        response.on('end', () => {
-          try { resolve(JSON.parse(body)); } catch { reject(new Error('invalid json')); }
-        });
-      }).on('error', reject);
-    });
+    async function fetchFredSeries(targetSeriesId) {
+      const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${targetSeriesId}&api_key=${FRED_API_KEY}&file_type=json&sort_order=asc&observation_start=${formatDate(startDate)}&observation_end=${formatDate(endDate)}`;
+      const data = await new Promise((resolve, reject) => {
+        https.get(url, response => {
+          let body = '';
+          response.on('data', chunk => body += chunk);
+          response.on('end', () => {
+            try { resolve(JSON.parse(body)); } catch { reject(new Error('invalid json')); }
+          });
+        }).on('error', reject);
+      });
+      return (data.observations || [])
+        .filter(obs => obs && obs.value && obs.value !== '.')
+        .map(obs => ({ date: obs.date, value: Number(obs.value) }))
+        .filter(obs => Number.isFinite(obs.value));
+    }
 
-    const points = (data.observations || [])
-      .filter(obs => obs && obs.value && obs.value !== '.')
-      .map(obs => ({
-        date: obs.date,
-        yield: Number(obs.value)
-      }))
-      .filter(obs => Number.isFinite(obs.yield));
+    const [yieldPoints, spreadPoints] = await Promise.all([
+      fetchFredSeries(seriesId),
+      fetchFredSeries(spreadSeriesId)
+    ]);
 
-    res.json({ points, range });
+    const spreadByDate = new Map(spreadPoints.map(point => [point.date, point.value]));
+    const points = yieldPoints.map(point => ({
+      date: point.date,
+      yield: point.value,
+      aaaSpread: spreadByDate.has(point.date) ? spreadByDate.get(point.date) : null
+    }));
+
+    res.json({ points, range, overlay: { id: spreadSeriesId, label: 'AAA Spread' } });
   } catch (e) {
     res.status(500).json({ error: 'treasury yield fetch failed' });
   }

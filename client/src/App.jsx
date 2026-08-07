@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, Component, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts'
 
 // Fix default Leaflet marker icon paths broken by bundlers
 delete L.Icon.Default.prototype._getIconUrl
@@ -134,6 +134,7 @@ function TreasuryYieldWidget() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [hoveredPoint, setHoveredPoint] = useState(null)
+  const [overlayMeta, setOverlayMeta] = useState(null)
 
   useEffect(() => {
     setLoading(true)
@@ -143,6 +144,7 @@ function TreasuryYieldWidget() {
         const data = await response.json().catch(() => ({}))
         if (!response.ok) throw new Error(data.error || 'Failed to load Treasury yields')
         setPoints(data.points || [])
+        setOverlayMeta(data.overlay || null)
         setHoveredPoint(null)
       })
       .catch((err) => setError(err.message || 'Failed to load Treasury yields'))
@@ -172,6 +174,9 @@ function TreasuryYieldWidget() {
       <div className="rounded-xl border border-base-300 bg-base-100 px-3 py-2 shadow-lg text-sm">
         <div className="font-semibold">{point.fullLabel}</div>
         <div className="text-base-content/70">10Y Yield: <span className="font-medium text-base-content">{formatYield(point.yield)}</span></div>
+        {point.aaaSpread !== null && point.aaaSpread !== undefined && (
+          <div className="text-base-content/70">AAA Spread: <span className="font-medium text-base-content">{formatYield(point.aaaSpread)}</span></div>
+        )}
         <div className={`text-xs ${point.dailyChange === null ? 'text-base-content/40' : point.dailyChange >= 0 ? 'text-success' : 'text-error'}`}>
           Daily change: {point.dailyChange === null ? '—' : `${point.dailyChange >= 0 ? '+' : ''}${point.dailyChange.toFixed(2)} pts`}
         </div>
@@ -192,6 +197,9 @@ function TreasuryYieldWidget() {
               <div className="text-xs uppercase tracking-widest text-base-content/40">{hoveredPoint ? 'Selected' : 'Latest'}</div>
               <div className="text-2xl font-bold">{formatYield(activePoint.yield)}</div>
               <div className="text-xs text-base-content/50">{new Date(`${activePoint.date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
+              {activePoint.aaaSpread !== null && activePoint.aaaSpread !== undefined && (
+                <div className="text-sm text-base-content/70">AAA spread: {formatYield(activePoint.aaaSpread)}</div>
+              )}
               <div className={`text-sm ${change >= 0 ? 'text-success' : 'text-error'}`}>
                 {change >= 0 ? '+' : ''}{change.toFixed(2)} pts vs start
               </div>
@@ -233,6 +241,7 @@ function TreasuryYieldWidget() {
                     onMouseLeave={() => setHoveredPoint(null)}
                   >
                     <CartesianGrid stroke="currentColor" strokeOpacity={0.08} vertical={false} />
+                    <Legend />
                     <XAxis
                       dataKey="label"
                       tick={{ fontSize: 12, fill: 'currentColor' }}
@@ -248,14 +257,36 @@ function TreasuryYieldWidget() {
                       axisLine={false}
                       width={72}
                     />
+                    <YAxis
+                      yAxisId="right"
+                      orientation="right"
+                      domain={['dataMin - 0.1', 'dataMax + 0.1']}
+                      tickFormatter={(value) => `${value.toFixed(2)}%`}
+                      tick={{ fontSize: 12, fill: 'currentColor' }}
+                      tickLine={false}
+                      axisLine={false}
+                      width={72}
+                    />
                     <Tooltip content={<CustomTooltip />} />
                     <Line
                       type="monotone"
                       dataKey="yield"
+                      name="10Y Yield"
                       stroke="#111111"
                       strokeWidth={2.5}
                       dot={false}
                       activeDot={{ r: 5, fill: '#111111', stroke: '#ffffff', strokeWidth: 2 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="aaaSpread"
+                      yAxisId="right"
+                      name={overlayMeta?.label || 'AAA Spread'}
+                      stroke="#2563eb"
+                      strokeWidth={2.25}
+                      dot={false}
+                      connectNulls={false}
+                      activeDot={{ r: 4, fill: '#2563eb', stroke: '#ffffff', strokeWidth: 2 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -269,7 +300,7 @@ function TreasuryYieldWidget() {
             <div className="rounded-2xl border border-base-300 overflow-hidden">
               <div className="px-4 py-3 border-b border-base-300 flex items-center justify-between">
                 <span className="text-sm font-semibold uppercase tracking-widest text-base-content/50">Trading Day Table</span>
-                <span className="text-xs text-base-content/40">Source: FRED DGS10</span>
+                <span className="text-xs text-base-content/40">Source: FRED DGS10 + BAMLC0A1CAAA</span>
               </div>
               <div className="overflow-x-auto">
                 <table className="table">
@@ -277,6 +308,7 @@ function TreasuryYieldWidget() {
                     <tr>
                       <th>Date</th>
                       <th className="text-right">10Y Yield</th>
+                      <th className="text-right">AAA Spread</th>
                       <th className="text-right">Daily Change</th>
                     </tr>
                   </thead>
@@ -289,6 +321,7 @@ function TreasuryYieldWidget() {
                         <tr key={point.date}>
                           <td>{new Date(`${point.date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</td>
                           <td className="text-right font-medium">{formatYield(point.yield)}</td>
+                          <td className="text-right font-medium text-primary">{point.aaaSpread !== null && point.aaaSpread !== undefined ? formatYield(point.aaaSpread) : '—'}</td>
                           <td className={`text-right ${dailyChange === null ? 'text-base-content/30' : dailyChange >= 0 ? 'text-success' : 'text-error'}`}>
                             {dailyChange === null ? '—' : `${dailyChange >= 0 ? '+' : ''}${dailyChange.toFixed(2)}`}
                           </td>
