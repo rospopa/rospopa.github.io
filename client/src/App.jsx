@@ -1525,7 +1525,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       : 0
     let suspendedLossCarryforward = startingSuspendedLossCarryforward
     let accumulatedDepreciation = 0
-    let priorControllableMonthly = monthlyOperatingExpenseBase * controllableExpensePct
     const timingMode = source.timing?.granularity || 'monthly'
     const saleMonthValue = clampMonth(source.timing?.saleMonth || 12, 12)
     const totalMonths = hold * 12
@@ -1563,6 +1562,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const monthlyRows = []
 
     const monthlyOperatingExpenseBase = operatingExpensesBase / 12
+    let priorControllableMonthly = monthlyOperatingExpenseBase * controllableExpensePct
     const monthlyOtherIncomeBase = otherIncomeBase / 12
     const monthlyPropertyTaxesBase = propertyTaxesBase / 12
     const monthlyInsuranceBase = insuranceBase / 12
