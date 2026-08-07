@@ -1040,6 +1040,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   ]
   const DCF_MAX_YEARS = 10
   const defaultDcfModel = () => ({
+    months: [],
     years: Array.from({ length: DCF_MAX_YEARS }, (_, index) => {
       const year = index + 1
       return {
@@ -1081,7 +1082,13 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     debtTerms: {
       initialLoanTermYears: '',
       refinanceLoanTermYears: '',
-      refinanceCostPct: '1'
+      refinanceCostPct: '1',
+      floatingRate: false,
+      sofrRatePct: '0',
+      indexSpreadPct: '0',
+      rateCapPct: '',
+      rateFloorPct: '',
+      interestReserveMonths: '0'
     },
     waterfall: {
       prefRate: '8',
@@ -1091,7 +1098,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       gpSharePct: '5'
     },
     timing: {
-      granularity: 'monthly'
+      granularity: 'monthly',
+      viewMode: 'yearly'
     },
     taxModel: {
       capitalGainsRatePct: '20',
@@ -1122,7 +1130,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       maxLtv: '75.00'
     },
     rentRoll: [
-      { tenantName: '', suite: '', annualRent: '', annualSales: '', leasedSf: '', annualRentPsf: '', leaseType: 'NNN', reimbursementsPct: '0', freeRentMonths: '0', leaseStartYear: '1', leaseStartMonth: '1', leaseEndYear: '10', leaseEndMonth: '12', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0', marketRentPsf: '', newLeaseSpreadPct: '', renewalSpreadPct: '', tenantImprovementPerSf: '', leasingCommissionPct: '', expenseStopPerSf: '', grossUpPct: '', breakpointSales: '', percentageRentPct: '', anchorTenant: false, coTenancyGroup: '' }
+      { tenantName: '', suite: '', annualRent: '', annualSales: '', leasedSf: '', annualRentPsf: '', leaseType: 'NNN', reimbursementsPct: '0', freeRentMonths: '0', leaseStartYear: '1', leaseStartMonth: '1', leaseEndYear: '10', leaseEndMonth: '12', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0', marketRentPsf: '', newLeaseSpreadPct: '', renewalSpreadPct: '', tenantImprovementPerSf: '', leasingCommissionPct: '', expenseStopPerSf: '', grossUpPct: '', breakpointSales: '', percentageRentPct: '', anchorTenant: false, coTenancyGroup: '', extensionOptionMonths: '0', expansionSf: '0', contractionSf: '0', terminationMonth: '', purchaseOptionPrice: '', renewalTiPerSf: '', newLeaseTiPerSf: '', renewalLcPct: '', newLeaseLcPct: '' }
     ]
   })
   function toTextNumber(value) {
@@ -1198,7 +1206,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       breakpointSales: toTextNumber(row.breakpointSales),
       percentageRentPct: toTextNumber(row.percentageRentPct),
       anchorTenant: !!row.anchorTenant,
-      coTenancyGroup: row.coTenancyGroup || ''
+      coTenancyGroup: row.coTenancyGroup || '',
+      extensionOptionMonths: toTextNumber(row.extensionOptionMonths || 0),
+      expansionSf: toTextNumber(row.expansionSf || 0),
+      contractionSf: toTextNumber(row.contractionSf || 0),
+      terminationMonth: toTextNumber(row.terminationMonth),
+      purchaseOptionPrice: toTextNumber(row.purchaseOptionPrice),
+      renewalTiPerSf: toTextNumber(row.renewalTiPerSf),
+      newLeaseTiPerSf: toTextNumber(row.newLeaseTiPerSf),
+      renewalLcPct: toTextNumber(row.renewalLcPct),
+      newLeaseLcPct: toTextNumber(row.newLeaseLcPct)
     }
   }
   function normalizeDcfModel(rawModel, prop = {}) {
@@ -1237,7 +1254,13 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       debtTerms: {
         initialLoanTermYears: toTextNumber(source.debtTerms?.initialLoanTermYears),
         refinanceLoanTermYears: toTextNumber(source.debtTerms?.refinanceLoanTermYears),
-        refinanceCostPct: toTextNumber(source.debtTerms?.refinanceCostPct ?? baseModel.debtTerms.refinanceCostPct)
+        refinanceCostPct: toTextNumber(source.debtTerms?.refinanceCostPct ?? baseModel.debtTerms.refinanceCostPct),
+        floatingRate: !!source.debtTerms?.floatingRate,
+        sofrRatePct: toTextNumber(source.debtTerms?.sofrRatePct ?? baseModel.debtTerms.sofrRatePct),
+        indexSpreadPct: toTextNumber(source.debtTerms?.indexSpreadPct ?? baseModel.debtTerms.indexSpreadPct),
+        rateCapPct: toTextNumber(source.debtTerms?.rateCapPct),
+        rateFloorPct: toTextNumber(source.debtTerms?.rateFloorPct),
+        interestReserveMonths: toTextNumber(source.debtTerms?.interestReserveMonths ?? baseModel.debtTerms.interestReserveMonths)
       },
       waterfall: {
         prefRate: toTextNumber(source.waterfall?.prefRate ?? baseModel.waterfall.prefRate),
@@ -1248,6 +1271,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       },
       timing: {
         granularity: source.timing?.granularity || baseModel.timing.granularity,
+        viewMode: source.timing?.viewMode || baseModel.timing.viewMode,
         refiMonth: toTextNumber(source.timing?.refiMonth || 1),
         saleMonth: toTextNumber(source.timing?.saleMonth || 12)
       },
@@ -1411,6 +1435,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const initialLoanTermYears = Number(source.debtTerms?.initialLoanTermYears || hold)
     const refinanceLoanTermYears = Number(source.debtTerms?.refinanceLoanTermYears || initialLoanTermYears || hold)
     const refinanceCostPct = Number(source.debtTerms?.refinanceCostPct || 1) / 100
+    const floatingRate = !!source.debtTerms?.floatingRate
+    const sofrRatePct = Number(source.debtTerms?.sofrRatePct || 0)
+    const indexSpreadPct = Number(source.debtTerms?.indexSpreadPct || 0)
+    const rateCapPct = source.debtTerms?.rateCapPct !== '' && source.debtTerms?.rateCapPct !== null && source.debtTerms?.rateCapPct !== undefined
+      ? Number(source.debtTerms.rateCapPct)
+      : null
+    const rateFloorPct = source.debtTerms?.rateFloorPct !== '' && source.debtTerms?.rateFloorPct !== null && source.debtTerms?.rateFloorPct !== undefined
+      ? Number(source.debtTerms.rateFloorPct)
+      : null
+    const interestReserveMonths = Math.max(0, Number(source.debtTerms?.interestReserveMonths || 0))
     const freeRentMonthsDefault = Math.max(0, Number(source.leaseEconomics?.freeRentMonths || 0))
     const marketRentGrowthPct = Number(source.leaseEconomics?.marketRentGrowthPct || prop.rent_growth || 0) / 100
     const monthlyRentGrowthPct = annualToMonthlyGrowth(rentGrowthPct)
@@ -1441,6 +1475,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     let currentLoanAmortYears = amortYears
     let currentLoanStartMonth = 0
     let currentLoanTermYears = initialLoanTermYears
+    let interestReserveBalance = loanAmt > 0 && interestReserveMonths > 0
+      ? paymentForLoan(loanAmt, floatingRate ? (sofrRatePct + indexSpreadPct) : interestRatePct, amortYears || initialLoanTermYears || hold) * interestReserveMonths
+      : 0
     let suspendedLossCarryforward = startingSuspendedLossCarryforward
     let accumulatedDepreciation = 0
     const timingMode = source.timing?.granularity || 'monthly'
@@ -1477,6 +1514,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       waterfallSponsor: 0,
       waterfallInvestor: 0,
     }))
+    const monthlyRows = []
 
     const monthlyOperatingExpenseBase = operatingExpensesBase / 12
     const monthlyOtherIncomeBase = otherIncomeBase / 12
@@ -1507,21 +1545,33 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         const marketRentPsf = Number(tenant.marketRentPsf || 0)
         const newLeaseSpreadPct = Number(tenant.newLeaseSpreadPct || source.leaseEconomics?.newLeaseSpreadPct || 0) / 100
         const renewalSpreadPct = Number(tenant.renewalSpreadPct || source.leaseEconomics?.renewalSpreadPct || 0) / 100
+        const extensionOptionMonths = Math.max(0, Number(tenant.extensionOptionMonths || 0))
+        const expansionSf = Math.max(0, Number(tenant.expansionSf || 0))
+        const contractionSf = Math.max(0, Number(tenant.contractionSf || 0))
+        const terminationMonth = tenant.terminationMonth !== '' && tenant.terminationMonth !== null && tenant.terminationMonth !== undefined
+          ? Math.max(0, Number(tenant.terminationMonth))
+          : null
+        const purchaseOptionPrice = Math.max(0, Number(tenant.purchaseOptionPrice || 0))
         if (monthIndex < leaseStartIndex) return sum
         const monthsActive = Math.max(0, monthIndex - leaseStartIndex)
-        const inInitialTerm = monthIndex <= leaseEndIndex
-        const bumpedMonthlyRent = baseMonthlyRent * Math.pow(1 + monthlyRentBumpPct, monthsActive)
+        const extensionEndIndex = leaseEndIndex + extensionOptionMonths
+        const effectiveLeaseEndIndex = extensionOptionMonths > 0 ? extensionEndIndex : leaseEndIndex
+        if (terminationMonth !== null && monthIndex >= terminationMonth) return sum
+        const effectiveLeasedSf = Math.max(0, leasedSf + expansionSf - contractionSf)
+        const baseMonthlyRentAdjusted = effectiveLeasedSf > 0 && annualRentPsf > 0 ? (effectiveLeasedSf * annualRentPsf) / 12 : baseMonthlyRent
+        const inInitialTerm = monthIndex <= effectiveLeaseEndIndex
+        const bumpedMonthlyRent = baseMonthlyRentAdjusted * Math.pow(1 + monthlyRentBumpPct, monthsActive)
         const recoveredMonthlyRent = bumpedMonthlyRent * (1 + reimbursementsPct)
         if (inInitialTerm) {
           const freeRentEnds = leaseStartIndex + freeRentMonths
           return sum + (monthIndex < freeRentEnds ? 0 : recoveredMonthlyRent)
         }
-        const renewalStart = leaseEndIndex + downtimeMonths + 1
+        const renewalStart = effectiveLeaseEndIndex + downtimeMonths + 1
         if (monthIndex < renewalStart) return sum
         const monthsSinceRenewal = Math.max(0, monthIndex - renewalStart)
-        const marketAnnualRent = marketRentPsf > 0 && leasedSf > 0
-          ? marketRentPsf * leasedSf
-          : baseAnnualRent * Math.pow(1 + monthlyMarketRentGrowthPct, monthIndex)
+        const marketAnnualRent = marketRentPsf > 0 && effectiveLeasedSf > 0
+          ? marketRentPsf * effectiveLeasedSf
+          : (baseAnnualRent + (purchaseOptionPrice > 0 ? 0 : 0)) * Math.pow(1 + monthlyMarketRentGrowthPct, monthIndex)
         const renewalAnnualRent = marketAnnualRent * (1 + renewalSpreadPct)
         const renewalMonthlyRent = (renewalAnnualRent / 12)
           * renewalProb
@@ -1570,38 +1620,47 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       const noi = effectiveGrossIncome - operatingExpensesMonth - managementFees - propertyTaxesMonth - insuranceMonth - reservesMonth
       const tenantImprovementsMonth = rentRoll.reduce((sum, tenant) => {
         const leaseEndIndex = toMonthIndex(tenant.leaseEndYear, tenant.leaseEndMonth)
+        const extensionOptionMonths = Math.max(0, Number(tenant.extensionOptionMonths || 0))
         const downtimeMonths = Math.max(0, Number(tenant.downtimeMonths || downtimeMonthsDefault))
-        const renewalStart = leaseEndIndex + downtimeMonths + 1
+        const renewalStart = leaseEndIndex + extensionOptionMonths + downtimeMonths + 1
         if (monthIndex !== renewalStart) return sum
         const leasedSf = Number(tenant.leasedSf || 0)
-        const tiPerSf = Math.max(0, Number(tenant.tenantImprovementPerSf || source.leaseEconomics?.tenantImprovementPerSf || 0))
+        const tiPerSf = Math.max(0, Number(tenant.renewalTiPerSf || tenant.tenantImprovementPerSf || source.leaseEconomics?.tenantImprovementPerSf || 0))
         return sum + (leasedSf * tiPerSf)
       }, 0)
       const leasingCommissionsMonth = rentRoll.reduce((sum, tenant) => {
         const leaseEndIndex = toMonthIndex(tenant.leaseEndYear, tenant.leaseEndMonth)
+        const extensionOptionMonths = Math.max(0, Number(tenant.extensionOptionMonths || 0))
         const downtimeMonths = Math.max(0, Number(tenant.downtimeMonths || downtimeMonthsDefault))
-        const renewalStart = leaseEndIndex + downtimeMonths + 1
+        const renewalStart = leaseEndIndex + extensionOptionMonths + downtimeMonths + 1
         if (monthIndex !== renewalStart) return sum
         const leasedSf = Number(tenant.leasedSf || 0)
         const marketRentPsf = Number(tenant.marketRentPsf || 0) || Number(tenant.annualRentPsf || 0)
         const marketAnnualRent = marketRentPsf > 0 ? marketRentPsf * leasedSf : Number(tenant.annualRent || 0)
-        const newLeaseSpreadPct = Number(tenant.newLeaseSpreadPct || source.leaseEconomics?.newLeaseSpreadPct || 0) / 100
-        const lcPct = Math.max(0, Number(tenant.leasingCommissionPct || source.leaseEconomics?.leasingCommissionPct || 0)) / 100
-        return sum + (marketAnnualRent * (1 + newLeaseSpreadPct) * lcPct)
+        const renewalSpreadPct = Number(tenant.renewalSpreadPct || source.leaseEconomics?.renewalSpreadPct || 0) / 100
+        const lcPct = Math.max(0, Number(tenant.renewalLcPct || tenant.leasingCommissionPct || source.leaseEconomics?.leasingCommissionPct || 0)) / 100
+        return sum + (marketAnnualRent * (1 + renewalSpreadPct) * lcPct)
       }, 0)
       const monthsSinceLoanStart = monthIndex + 1 - currentLoanStartMonth
       const inIoPeriod = monthsSinceLoanStart > 0 && monthsSinceLoanStart <= ioYears * 12 && currentLoanPrincipal > 0
       const balloonMonth = currentLoanTermYears > 0 ? currentLoanTermYears * 12 : null
       const hitsBalloon = balloonMonth !== null && monthsSinceLoanStart >= balloonMonth && currentLoanPrincipal > 0
+      const floatingAllInRate = floatingRate ? (sofrRatePct + indexSpreadPct) : currentLoanRate
+      const boundedRate = Math.max(
+        rateFloorPct !== null ? rateFloorPct : floatingAllInRate,
+        Math.min(rateCapPct !== null ? rateCapPct : floatingAllInRate, floatingAllInRate)
+      )
       const monthlyDebtService = currentLoanPrincipal > 0
         ? (inIoPeriod
-          ? currentLoanPrincipal * (currentLoanRate / 100 / 12)
-          : paymentForLoan(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears))
+          ? currentLoanPrincipal * ((floatingRate ? boundedRate : currentLoanRate) / 100 / 12)
+          : paymentForLoan(currentLoanPrincipal, floatingRate ? boundedRate : currentLoanRate, currentLoanAmortYears))
         : 0
+      const reserveDraw = interestReserveBalance > 0 ? Math.min(interestReserveBalance, monthlyDebtService) : 0
+      interestReserveBalance = Math.max(0, interestReserveBalance - reserveDraw)
       const annualDepreciation = depBasis > 0 ? (depBasis * (1 - Number(prop.cost_seg_bonus_pct || 0) / 100) / 39) : 0
       const monthlyDepreciation = annualDepreciation / 12
       const bonusDepreciation = monthIndex === 0 ? depBasis * (Number(prop.cost_seg_bonus_pct || 0) / 100) : 0
-      const taxableIncome = noi - monthlyDebtService - monthlyDepreciation - bonusDepreciation
+      const taxableIncome = noi - (monthlyDebtService - reserveDraw) - monthlyDepreciation - bonusDepreciation
       const currentPeriodLoss = taxableIncome < 0 ? Math.abs(taxableIncome) : 0
       suspendedLossCarryforward += currentPeriodLoss
       const usableSuspendedLoss = taxableIncome > 0 ? Math.min(suspendedLossCarryforward, taxableIncome * passiveLossLimitPct) : 0
@@ -1660,7 +1719,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       suspendedLossCarryforward = grossSaleProceeds > 0 ? 0 : suspendedLossCarryforward
       const afterTaxSaleBridge = recaptureTax + capitalGainsTax - suspendedLossBenefit
       const saleProceeds = Math.max(0, grossSaleProceeds - saleCosts - loanPayoffAtSale - afterTaxSaleBridge)
-      const cashAvailableForDistribution = Math.max(0, noi - monthlyDebtService - taxesMonth + refinanceProceeds + saleProceeds)
+      const cashAvailableForDistribution = Math.max(0, noi - (monthlyDebtService - reserveDraw) - taxesMonth + refinanceProceeds + saleProceeds)
       const prefAccrual = lpUnreturnedCapital * (prefRate / 12)
       unpaidPrefBalance += prefAccrual
       let remainingCash = cashAvailableForDistribution
@@ -1674,6 +1733,37 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       remainingCash -= gpCatchUp
       const sponsorDistribution = gpCatchUp + (remainingCash * promoteRate)
       const investorDistribution = lpReturnOfCapital + lpPrefDistribution + (remainingCash * (1 - promoteRate))
+      monthlyRows.push({
+        month: monthIndex + 1,
+        year: yearIndex + 1,
+        monthInYear: monthNumber,
+        grossRevenue: Math.round(grossRevenue),
+        vacancyCreditLoss: Math.round(vacancyLoss),
+        percentageRentDcf: Math.round(percentageRent),
+        otherIncomeDcf: Math.round(otherIncome),
+        operatingExpensesDcf: Math.round(operatingExpensesMonth),
+        managementFeesDcf: Math.round(managementFees),
+        propertyTaxesDcf: Math.round(propertyTaxesMonth),
+        insuranceDcf: Math.round(insuranceMonth),
+        reservesCapexDcf: Math.round(reservesMonth),
+        tenantImprovements: Math.round(tenantImprovementsMonth),
+        leasingCommissions: Math.round(leasingCommissionsMonth),
+        capitalExpenditures: 0,
+        debtServiceDcf: Math.round(monthlyDebtService),
+        loanBalanceDcf: Math.round(loanBalance),
+        refinanceProceeds: Math.round(refinanceProceeds),
+        refinanceCostsDcf: Math.round(refinanceCosts),
+        loanPayoffAtRefi: Math.round(loanPayoffAtRefi),
+        taxesDcf: Math.round(taxesMonth),
+        capitalGainsTaxDcf: Math.round(capitalGainsTax),
+        grossSaleProceedsDcf: Math.round(grossSaleProceeds),
+        saleCostsDcf: Math.round(saleCosts),
+        loanPayoffAtSale: Math.round(loanPayoffAtSale),
+        recaptureTaxDcf: Math.round(recaptureTax),
+        saleProceedsDcf: Math.round(saleProceeds),
+        waterfallSponsor: Math.round(sponsorDistribution),
+        waterfallInvestor: Math.round(investorDistribution),
+      })
 
       yearlyBuckets[yearIndex].grossRevenue += grossRevenue
       yearlyBuckets[yearIndex].vacancyCreditLoss += vacancyLoss
@@ -1702,6 +1792,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       yearlyBuckets[yearIndex].waterfallInvestor += investorDistribution
     }
 
+    model.months = monthlyRows
     for (let index = 0; index < DCF_MAX_YEARS; index += 1) {
       const bucket = yearlyBuckets[index]
       model.years[index] = normalizeYearDraft({
@@ -1741,6 +1832,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const incomingYears = Array.isArray(base.years) ? base.years : []
     const fallback = buildDefaultDcfModelFromProperty(prop)
     return {
+      months: Array.isArray(base.months) ? base.months : fallback.months || [],
       years: Array.from({ length: DCF_MAX_YEARS }, (_, index) => {
         const yearNumber = index + 1
         const source = incomingYears[index] || fallback.years[index] || {}
@@ -2104,6 +2196,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     return null
   }
   const engineVisibleDcfYears = liveDerivedDcfModel.years.slice(0, activeHoldPeriod)
+  const engineVisibleDcfMonths = Array.isArray(liveDerivedDcfModel.months)
+    ? liveDerivedDcfModel.months.slice(0, activeHoldPeriod * 12)
+    : []
   const dcfYearSummaries = engineVisibleDcfYears.map((yearRow) => {
     const effectiveGrossIncome = getComputedDcfValue(yearRow, 'effectiveGrossIncome') || 0
     const netOperatingIncome = getComputedDcfValue(yearRow, 'netOperatingIncomeDcf') || 0
@@ -2402,6 +2497,12 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           initialLoanTermYears: parseNum(dcfModel.debtTerms.initialLoanTermYears),
           refinanceLoanTermYears: parseNum(dcfModel.debtTerms.refinanceLoanTermYears),
           refinanceCostPct: parseNum(dcfModel.debtTerms.refinanceCostPct),
+          floatingRate: !!dcfModel.debtTerms.floatingRate,
+          sofrRatePct: parseNum(dcfModel.debtTerms.sofrRatePct),
+          indexSpreadPct: parseNum(dcfModel.debtTerms.indexSpreadPct),
+          rateCapPct: parseNum(dcfModel.debtTerms.rateCapPct),
+          rateFloorPct: parseNum(dcfModel.debtTerms.rateFloorPct),
+          interestReserveMonths: parseNum(dcfModel.debtTerms.interestReserveMonths),
         },
         waterfall: {
           prefRate: parseNum(dcfModel.waterfall.prefRate),
@@ -2412,6 +2513,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         },
         timing: {
           granularity: dcfModel.timing.granularity,
+          viewMode: dcfModel.timing.viewMode,
           refiMonth: parseNum(dcfModel.timing.refiMonth),
           saleMonth: parseNum(dcfModel.timing.saleMonth),
         },
@@ -2471,6 +2573,15 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           percentageRentPct: parseNum(row.percentageRentPct),
           anchorTenant: !!row.anchorTenant,
           coTenancyGroup: row.coTenancyGroup || '',
+          extensionOptionMonths: parseNum(row.extensionOptionMonths),
+          expansionSf: parseNum(row.expansionSf),
+          contractionSf: parseNum(row.contractionSf),
+          terminationMonth: parseNum(row.terminationMonth),
+          purchaseOptionPrice: parseNum(row.purchaseOptionPrice),
+          renewalTiPerSf: parseNum(row.renewalTiPerSf),
+          newLeaseTiPerSf: parseNum(row.newLeaseTiPerSf),
+          renewalLcPct: parseNum(row.renewalLcPct),
+          newLeaseLcPct: parseNum(row.newLeaseLcPct),
         }))
       },
     })
@@ -3035,6 +3146,33 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput placeholder="e.g. 5" value={dcfModel.debtTerms.initialLoanTermYears} onChange={(value) => updateDebtTermField('initialLoanTermYears', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
+                <label className="label cursor-pointer justify-start gap-3">
+                  <input type="checkbox" className="checkbox checkbox-sm"
+                    checked={!!dcfModel.debtTerms.floatingRate}
+                    onChange={(e) => updateDebtTermField('floatingRate', e.target.checked)}
+                    disabled={!isAdmin} />
+                  <span className="label-text">Floating-rate loan</span>
+                </label>
+                <Field label="SOFR / Index Rate (%)">
+                  <NumericInput value={dcfModel.debtTerms.sofrRatePct} onChange={(value) => updateDebtTermField('sofrRatePct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Index Spread (%)">
+                  <NumericInput value={dcfModel.debtTerms.indexSpreadPct} onChange={(value) => updateDebtTermField('indexSpreadPct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Rate Cap (%)">
+                  <NumericInput value={dcfModel.debtTerms.rateCapPct} onChange={(value) => updateDebtTermField('rateCapPct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Rate Floor (%)">
+                  <NumericInput value={dcfModel.debtTerms.rateFloorPct} onChange={(value) => updateDebtTermField('rateFloorPct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Interest Reserve (months)">
+                  <NumericInput value={dcfModel.debtTerms.interestReserveMonths} onChange={(value) => updateDebtTermField('interestReserveMonths', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
                 <Field label="Refi Loan Term (yrs)">
                   <NumericInput placeholder="e.g. 5" value={dcfModel.debtTerms.refinanceLoanTermYears} onChange={(value) => updateDebtTermField('refinanceLoanTermYears', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
@@ -3374,12 +3512,48 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                               <NumericInput value={tenant.downtimeMonths} onChange={(value) => updateRentRollRow(index, 'downtimeMonths', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
+                            <Field label="Extension Option (months)">
+                              <NumericInput value={tenant.extensionOptionMonths} onChange={(value) => updateRentRollRow(index, 'extensionOptionMonths', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Expansion SF">
+                              <NumericInput value={tenant.expansionSf} onChange={(value) => updateRentRollRow(index, 'expansionSf', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Contraction SF">
+                              <NumericInput value={tenant.contractionSf} onChange={(value) => updateRentRollRow(index, 'contractionSf', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Termination Month Index">
+                              <NumericInput value={tenant.terminationMonth} onChange={(value) => updateRentRollRow(index, 'terminationMonth', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Purchase Option Price ($)">
+                              <NumericInput value={tenant.purchaseOptionPrice} onChange={(value) => updateRentRollRow(index, 'purchaseOptionPrice', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
                             <Field label="TI per SF ($)">
                               <NumericInput value={tenant.tenantImprovementPerSf} onChange={(value) => updateRentRollRow(index, 'tenantImprovementPerSf', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
+                            <Field label="Renewal TI per SF ($)">
+                              <NumericInput value={tenant.renewalTiPerSf} onChange={(value) => updateRentRollRow(index, 'renewalTiPerSf', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                            </Field>
+                            <Field label="New Lease TI per SF ($)">
+                              <NumericInput value={tenant.newLeaseTiPerSf} onChange={(value) => updateRentRollRow(index, 'newLeaseTiPerSf', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                            </Field>
                             <Field label="LC (% of Rent)">
                               <NumericInput value={tenant.leasingCommissionPct} onChange={(value) => updateRentRollRow(index, 'leasingCommissionPct', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                            </Field>
+                            <Field label="Renewal LC (%)">
+                              <NumericInput value={tenant.renewalLcPct} onChange={(value) => updateRentRollRow(index, 'renewalLcPct', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                            </Field>
+                            <Field label="New Lease LC (%)">
+                              <NumericInput value={tenant.newLeaseLcPct} onChange={(value) => updateRentRollRow(index, 'newLeaseLcPct', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
                             <Field label="Expense Stop ($/SF)">
@@ -3680,15 +3854,28 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <div>
                     <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
                   </div>
-                  <div className="badge badge-outline">{activeHoldPeriod} Year Hold</div>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={dcfModel.timing.viewMode || 'yearly'}
+                      onChange={(e) => updateTimingField('viewMode', e.target.value)}
+                      className="select select-bordered select-sm"
+                      disabled={!isAdmin}
+                    >
+                      <option value="yearly">Yearly View</option>
+                      <option value="monthly">Monthly View</option>
+                    </select>
+                    <div className="badge badge-outline">{activeHoldPeriod} Year Hold</div>
+                  </div>
                 </div>
                 <div className="overflow-auto h-full">
                   <table className="table table-pin-rows table-pin-cols text-sm min-w-[1200px]">
                     <thead>
                       <tr className="bg-base-200/80">
                         <th className="min-w-[260px] bg-base-200">Line Item</th>
-                        {visibleDcfYears.map((year) => (
-                          <th key={year.year} className="text-center bg-base-200 min-w-[140px]">Year {year.year}</th>
+                        {(dcfModel.timing.viewMode === 'monthly' ? engineVisibleDcfMonths : visibleDcfYears).map((period) => (
+                          <th key={dcfModel.timing.viewMode === 'monthly' ? `month-${period.month}` : `year-${period.year}`} className="text-center bg-base-200 min-w-[140px]">
+                            {dcfModel.timing.viewMode === 'monthly' ? `M${period.month}` : `Year ${period.year}`}
+                          </th>
                         ))}
                       </tr>
                     </thead>
@@ -3701,10 +3888,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                               <span className="text-[10px] uppercase tracking-[0.18em] text-base-content/35">{row.category}</span>
                             </div>
                           </th>
-                          {visibleDcfYears.map((year, yearIndex) => {
-                            const computedValue = row.readOnly ? getComputedDcfValue(year, row.key) : null
+                          {(dcfModel.timing.viewMode === 'monthly' ? engineVisibleDcfMonths : visibleDcfYears).map((period, yearIndex) => {
+                            const computedValue = row.readOnly ? getComputedDcfValue(period, row.key) : null
                             return (
-                              <td key={`${row.key}-${year.year}`} className="align-middle">
+                              <td key={`${row.key}-${dcfModel.timing.viewMode === 'monthly' ? period.month : period.year}`} className="align-middle">
                                 {row.readOnly ? (
                                   <div className="input input-bordered input-md w-full md:text-base cursor-default flex items-center justify-end" style={{ color: '#000', fontWeight: 700 }}>
                                     {formatMoneyCell(computedValue)}
@@ -3712,11 +3899,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                                 ) : (
                                   <NumericInput
                                     placeholder="0"
-                                    value={year[row.key]}
-                                    onChange={(value) => updateDcfCell(yearIndex, row.key, value)}
+                                    value={period[row.key]}
+                                    onChange={(value) => dcfModel.timing.viewMode === 'monthly' ? null : updateDcfCell(yearIndex, row.key, value)}
                                     className="input input-bordered input-md w-full md:text-base text-right"
                                     style={{ color: '#1d4ed8' }}
-                                    disabled={!isAdmin}
+                                    disabled={!isAdmin || dcfModel.timing.viewMode === 'monthly'}
                                     allowDecimal={false}
                                   />
                                 )}
