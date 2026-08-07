@@ -1103,7 +1103,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       maxLtv: '75.00'
     },
     rentRoll: [
-      { tenantName: '', suite: '', annualRent: '', annualSales: '', leasedSf: '', annualRentPsf: '', leaseType: 'NNN', reimbursementsPct: '0', freeRentMonths: '0', leaseStartYear: '1', leaseEndYear: '10', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0' }
+      { tenantName: '', suite: '', annualRent: '', annualSales: '', leasedSf: '', annualRentPsf: '', leaseType: 'NNN', reimbursementsPct: '0', freeRentMonths: '0', leaseStartYear: '1', leaseStartMonth: '1', leaseEndYear: '10', leaseEndMonth: '12', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0' }
     ]
   })
   function toTextNumber(value) {
@@ -1160,7 +1160,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       reimbursementsPct: toTextNumber(row.reimbursementsPct || 0),
       freeRentMonths: toTextNumber(row.freeRentMonths || 0),
       leaseStartYear: toTextNumber(row.leaseStartYear || 1),
+      leaseStartMonth: toTextNumber(row.leaseStartMonth || 1),
       leaseEndYear: toTextNumber(row.leaseEndYear || DCF_MAX_YEARS),
+      leaseEndMonth: toTextNumber(row.leaseEndMonth || 12),
       rentBumpsPct: toTextNumber(row.rentBumpsPct),
       renewalProbabilityPct: toTextNumber(row.renewalProbabilityPct || 50),
       downtimeMonths: toTextNumber(row.downtimeMonths || 0)
@@ -1191,7 +1193,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         gpSharePct: toTextNumber(source.waterfall?.gpSharePct ?? baseModel.waterfall.gpSharePct)
       },
       timing: {
-        granularity: source.timing?.granularity || baseModel.timing.granularity
+        granularity: source.timing?.granularity || baseModel.timing.granularity,
+        refiMonth: toTextNumber(source.timing?.refiMonth || 1),
+        saleMonth: toTextNumber(source.timing?.saleMonth || 12)
       },
       leaseEconomics: {
         freeRentMonths: toTextNumber(source.leaseEconomics?.freeRentMonths ?? baseModel.leaseEconomics.freeRentMonths),
@@ -1281,6 +1285,18 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     if (months <= 0) return principal
     return Math.max(0, principal * (Math.pow(1 + rate, totalMonths) - Math.pow(1 + rate, months)) / (Math.pow(1 + rate, totalMonths) - 1))
   }
+  function annualToMonthlyGrowth(rate) {
+    return Math.pow(1 + rate, 1 / 12) - 1
+  }
+  function clampMonth(value, fallback) {
+    const month = Number(value || fallback)
+    return Math.min(12, Math.max(1, Number.isFinite(month) ? month : fallback))
+  }
+  function toMonthIndex(yearValue, monthValue) {
+    const year = Math.max(1, Number(yearValue || 1))
+    const month = clampMonth(monthValue, 1)
+    return ((year - 1) * 12) + (month - 1)
+  }
   function buildDefaultDcfModelFromProperty(prop = {}) {
     const model = defaultDcfModel()
     const source = prop.dcf_model && typeof prop.dcf_model === 'object' && !Array.isArray(prop.dcf_model) ? prop.dcf_model : {}
@@ -1305,6 +1321,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const exitCapPct = (Number(prop.exit_cap_rate || 0) + Number(scenario?.exitCapRateDelta || 0)) / 100
     const costOfSalePct = Number(prop.cost_of_sale || 0) / 100
     const refiYearValue = Number(prop.refi_year || 0)
+    const refiMonthValue = clampMonth(source.timing?.refiMonth || 1, 1)
     const refiLtvPct = Number(prop.refi_ltv || 0) / 100
     const refiRatePct = Number(prop.refi_rate || 0)
     const recaptureRatePct = Number(prop.depreciation_recapture_rate || 0) / 100
@@ -1318,6 +1335,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const refinanceCostPct = Number(source.debtTerms?.refinanceCostPct || 1) / 100
     const freeRentMonthsDefault = Math.max(0, Number(source.leaseEconomics?.freeRentMonths || 0))
     const marketRentGrowthPct = Number(source.leaseEconomics?.marketRentGrowthPct || prop.rent_growth || 0) / 100
+    const monthlyRentGrowthPct = annualToMonthlyGrowth(rentGrowthPct)
+    const monthlyExpenseGrowthPct = annualToMonthlyGrowth(expenseGrowthPct)
+    const monthlyMarketRentGrowthPct = annualToMonthlyGrowth(marketRentGrowthPct)
     const downtimeMonthsDefault = Math.max(0, Number(source.leaseEconomics?.downtimeMonthsDefault || 0))
     const expenseRecoveryPct = Math.max(0, Number(source.leaseEconomics?.expenseRecoveryPct || 0)) / 100
     const minDscr = Number(source.lenderConstraints?.minDscr || 0)
@@ -1336,84 +1356,134 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     let currentLoanAmortYears = amortYears
     let currentLoanStartMonth = 0
     let currentLoanTermYears = initialLoanTermYears
+    const timingMode = source.timing?.granularity || 'monthly'
+    const saleMonthValue = clampMonth(source.timing?.saleMonth || 12, 12)
+    const totalMonths = hold * 12
+    const refiMonthIndex = refiYearValue > 0 ? toMonthIndex(refiYearValue, refiMonthValue) : -1
+    const saleMonthIndex = Math.max(0, totalMonths - (12 - saleMonthValue) - 1)
+    const yearlyBuckets = Array.from({ length: DCF_MAX_YEARS }, (_, index) => ({
+      year: index + 1,
+      grossRevenue: 0,
+      vacancyCreditLoss: 0,
+      percentageRentDcf: 0,
+      otherIncomeDcf: 0,
+      operatingExpensesDcf: 0,
+      managementFeesDcf: 0,
+      propertyTaxesDcf: 0,
+      insuranceDcf: 0,
+      reservesCapexDcf: 0,
+      debtServiceDcf: 0,
+      loanBalanceDcf: 0,
+      refinanceProceeds: 0,
+      refinanceCostsDcf: 0,
+      loanPayoffAtRefi: 0,
+      taxesDcf: 0,
+      grossSaleProceedsDcf: 0,
+      saleCostsDcf: 0,
+      loanPayoffAtSale: 0,
+      recaptureTaxDcf: 0,
+      saleProceedsDcf: 0,
+      waterfallSponsor: 0,
+      waterfallInvestor: 0,
+    }))
 
-    for (let index = 0; index < DCF_MAX_YEARS; index += 1) {
-      const year = index + 1
-      const rentGrowthFactor = Math.pow(1 + rentGrowthPct, index)
-      const expenseGrowthFactor = Math.pow(1 + expenseGrowthPct, index)
+    const monthlyOperatingExpenseBase = operatingExpensesBase / 12
+    const monthlyOtherIncomeBase = otherIncomeBase / 12
+    const monthlyPropertyTaxesBase = propertyTaxesBase / 12
+    const monthlyInsuranceBase = insuranceBase / 12
+    const monthlyReservesBase = reservesBase / 12
+    const monthlyTenantSalesBase = tenantSalesBase / 12
+    const monthlyTenantBaseRentBase = tenantBaseRentBase / 12
+
+    for (let monthIndex = 0; monthIndex < totalMonths; monthIndex += 1) {
+      const yearIndex = Math.floor(monthIndex / 12)
+      const monthNumber = (monthIndex % 12) + 1
+      const rentGrowthFactor = Math.pow(1 + monthlyRentGrowthPct, monthIndex)
+      const expenseGrowthFactor = Math.pow(1 + monthlyExpenseGrowthPct, monthIndex)
       const rentRollRevenue = rentRoll.reduce((sum, tenant) => {
-        const startYear = Math.max(1, Number(tenant.leaseStartYear || 1))
-        const endYear = Math.max(startYear, Number(tenant.leaseEndYear || DCF_MAX_YEARS))
+        const leaseStartIndex = toMonthIndex(tenant.leaseStartYear, tenant.leaseStartMonth)
+        const leaseEndIndex = toMonthIndex(tenant.leaseEndYear, tenant.leaseEndMonth)
         const leasedSf = Number(tenant.leasedSf || 0)
         const annualRentPsf = Number(tenant.annualRentPsf || 0)
-        const baseRent = Number(tenant.annualRent || 0) || (leasedSf > 0 && annualRentPsf > 0 ? leasedSf * annualRentPsf : 0)
-        const annualSales = Number(tenant.annualSales || 0)
+        const baseAnnualRent = Number(tenant.annualRent || 0) || (leasedSf > 0 && annualRentPsf > 0 ? leasedSf * annualRentPsf : 0)
+        const baseMonthlyRent = baseAnnualRent / 12
         const renewalProb = Math.max(0, Math.min(100, Number(tenant.renewalProbabilityPct || 0))) / 100
         const downtimeMonths = Math.max(0, Number(tenant.downtimeMonths || downtimeMonthsDefault))
         const freeRentMonths = Math.max(0, Number(tenant.freeRentMonths || freeRentMonthsDefault))
         const rentBumpsPct = Number(tenant.rentBumpsPct || 0) / 100
+        const monthlyRentBumpPct = annualToMonthlyGrowth(rentBumpsPct)
         const reimbursementsPct = Math.max(0, Number(tenant.reimbursementsPct || 0)) / 100
-        if (year < startYear) return sum
-        const activeYears = year - startYear
-        const bumpedRent = baseRent * Math.pow(1 + rentBumpsPct, Math.max(0, activeYears))
-        const freeRentFactor = Math.max(0, 12 - freeRentMonths) / 12
-        const reimbursedRent = bumpedRent * (1 + reimbursementsPct)
-        if (year <= endYear) return sum + (reimbursedRent * freeRentFactor)
-        const renewedRent = bumpedRent * renewalProb
-        const downtimeFactor = Math.max(0, 12 - downtimeMonths) / 12
-        return sum + (renewedRent * downtimeFactor * (1 + reimbursementsPct))
+        if (monthIndex < leaseStartIndex) return sum
+        const monthsActive = Math.max(0, monthIndex - leaseStartIndex)
+        const inInitialTerm = monthIndex <= leaseEndIndex
+        const bumpedMonthlyRent = baseMonthlyRent * Math.pow(1 + monthlyRentBumpPct, monthsActive)
+        const recoveredMonthlyRent = bumpedMonthlyRent * (1 + reimbursementsPct)
+        if (inInitialTerm) {
+          const freeRentEnds = leaseStartIndex + freeRentMonths
+          return sum + (monthIndex < freeRentEnds ? 0 : recoveredMonthlyRent)
+        }
+        const renewalStart = leaseEndIndex + downtimeMonths + 1
+        if (monthIndex < renewalStart) return sum
+        const monthsSinceRenewal = Math.max(0, monthIndex - renewalStart)
+        const renewalMonthlyRent = baseMonthlyRent
+          * Math.pow(1 + monthlyMarketRentGrowthPct, monthIndex)
+          * renewalProb
+          * (1 + reimbursementsPct)
+          * Math.pow(1 + monthlyRentBumpPct, monthsSinceRenewal)
+        return sum + renewalMonthlyRent
       }, 0)
-      const grossRevenue = rentRollRevenue > 0 ? rentRollRevenue : grossRentBase * rentGrowthFactor
+      const grossRevenue = rentRollRevenue > 0 ? rentRollRevenue : (grossRentBase / 12) * rentGrowthFactor
       const vacancyLoss = grossRevenue * vacancyPct
-      const tenantSalesYear = rentRoll.reduce((sum, tenant) => {
-        const startYear = Math.max(1, Number(tenant.leaseStartYear || 1))
-        if (year < startYear) return sum
-        return sum + (Number(tenant.annualSales || 0) * Math.pow(1 + rentGrowthPct, Math.max(0, year - startYear)))
-      }, 0) || (tenantSalesBase * rentGrowthFactor)
-      const baseRentYear = rentRollRevenue > 0 ? grossRevenue : tenantBaseRentBase * rentGrowthFactor
-      const percentageRent = Math.max(0, tenantSalesYear * rentToSalesPct - baseRentYear)
-      const otherIncome = otherIncomeBase * rentGrowthFactor
-      const recoveries = operatingExpensesBase * expenseRecoveryPct
+      const tenantSalesMonth = rentRoll.reduce((sum, tenant) => {
+        const leaseStartIndex = toMonthIndex(tenant.leaseStartYear, tenant.leaseStartMonth)
+        if (monthIndex < leaseStartIndex) return sum
+        return sum + ((Number(tenant.annualSales || 0) / 12) * Math.pow(1 + monthlyRentGrowthPct, Math.max(0, monthIndex - leaseStartIndex)))
+      }, 0) || (monthlyTenantSalesBase * rentGrowthFactor)
+      const baseRentMonth = rentRollRevenue > 0 ? grossRevenue : monthlyTenantBaseRentBase * rentGrowthFactor
+      const percentageRent = Math.max(0, tenantSalesMonth * rentToSalesPct - baseRentMonth)
+      const otherIncome = monthlyOtherIncomeBase * rentGrowthFactor
+      const operatingExpensesMonth = monthlyOperatingExpenseBase * expenseGrowthFactor
+      const recoveries = operatingExpensesMonth * expenseRecoveryPct
       const effectiveGrossIncome = grossRevenue - vacancyLoss + percentageRent + otherIncome + recoveries
-      const operatingExpensesYear = operatingExpensesBase * expenseGrowthFactor
       const managementFees = effectiveGrossIncome * managementFeePct
-      const propertyTaxesYear = propertyTaxesBase * expenseGrowthFactor
-      const insuranceYear = insuranceBase * expenseGrowthFactor
-      const reservesYear = reservesBase * expenseGrowthFactor
-      const noi = effectiveGrossIncome - operatingExpensesYear - managementFees - propertyTaxesYear - insuranceYear - reservesYear
-      const monthsElapsed = year * 12
-      const monthsSinceLoanStart = monthsElapsed - currentLoanStartMonth
+      const propertyTaxesMonth = monthlyPropertyTaxesBase * expenseGrowthFactor
+      const insuranceMonth = monthlyInsuranceBase * expenseGrowthFactor
+      const reservesMonth = monthlyReservesBase * expenseGrowthFactor
+      const noi = effectiveGrossIncome - operatingExpensesMonth - managementFees - propertyTaxesMonth - insuranceMonth - reservesMonth
+      const monthsSinceLoanStart = monthIndex + 1 - currentLoanStartMonth
       const inIoPeriod = monthsSinceLoanStart > 0 && monthsSinceLoanStart <= ioYears * 12 && currentLoanPrincipal > 0
       const balloonMonth = currentLoanTermYears > 0 ? currentLoanTermYears * 12 : null
       const hitsBalloon = balloonMonth !== null && monthsSinceLoanStart >= balloonMonth && currentLoanPrincipal > 0
-      const annualDebtService = currentLoanPrincipal > 0
+      const monthlyDebtService = currentLoanPrincipal > 0
         ? (inIoPeriod
-          ? currentLoanPrincipal * (currentLoanRate / 100)
-          : paymentForLoan(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears) * 12)
+          ? currentLoanPrincipal * (currentLoanRate / 100 / 12)
+          : paymentForLoan(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears))
         : 0
       const annualDepreciation = depBasis > 0 ? (depBasis * (1 - Number(prop.cost_seg_bonus_pct || 0) / 100) / 39) : 0
-      const bonusDepreciation = year === 1 ? depBasis * (Number(prop.cost_seg_bonus_pct || 0) / 100) : 0
-      const taxableIncome = noi - annualDebtService - annualDepreciation - bonusDepreciation
-      const taxesYear = Math.max(0, taxableIncome) * effectiveTaxRatePct
+      const monthlyDepreciation = annualDepreciation / 12
+      const bonusDepreciation = monthIndex === 0 ? depBasis * (Number(prop.cost_seg_bonus_pct || 0) / 100) : 0
+      const taxableIncome = noi - monthlyDebtService - monthlyDepreciation - bonusDepreciation
+      const taxesMonth = Math.max(0, taxableIncome) * effectiveTaxRatePct
       const loanBalance = currentLoanPrincipal > 0
         ? (inIoPeriod
           ? currentLoanPrincipal
           : endingLoanBalance(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears, monthsSinceLoanStart))
         : 0
-      const stabilizedValue = exitCapPct > 0 ? Math.max(0, noi) / exitCapPct : 0
+      const annualizedNoi = noi * 12
+      const stabilizedValue = exitCapPct > 0 ? Math.max(0, annualizedNoi) / exitCapPct : 0
       const dscrConstrainedLoan = minDscr > 0 && currentLoanRate > 0 && currentLoanAmortYears > 0
         ? paymentForLoan(1, currentLoanRate, currentLoanAmortYears) > 0
-          ? (Math.max(0, noi) / minDscr) / (paymentForLoan(1, currentLoanRate, currentLoanAmortYears) * 12)
+          ? (Math.max(0, annualizedNoi) / minDscr) / (paymentForLoan(1, currentLoanRate, currentLoanAmortYears) * 12)
           : 0
         : Infinity
-      const debtYieldConstrainedLoan = minDebtYield > 0 ? Math.max(0, noi) / minDebtYield : Infinity
+      const debtYieldConstrainedLoan = minDebtYield > 0 ? Math.max(0, annualizedNoi) / minDebtYield : Infinity
       const ltvConstrainedLoan = maxLtvConstraint > 0 ? stabilizedValue * maxLtvConstraint : Infinity
       const maxDebtByConstraints = Math.min(
         Number.isFinite(dscrConstrainedLoan) ? dscrConstrainedLoan : Infinity,
         Number.isFinite(debtYieldConstrainedLoan) ? debtYieldConstrainedLoan : Infinity,
         Number.isFinite(ltvConstrainedLoan) ? ltvConstrainedLoan : Infinity
       )
-      const refiGrossProceeds = refiYearValue === year && refiLtvPct > 0 ? stabilizedValue * refiLtvPct : 0
+      const refiGrossProceeds = monthIndex === refiMonthIndex && refiLtvPct > 0 ? stabilizedValue * refiLtvPct : 0
       const refinanceCosts = refiGrossProceeds > 0 ? refiGrossProceeds * refinanceCostPct : 0
       const loanPayoffAtRefi = refiGrossProceeds > 0 || hitsBalloon ? loanBalance : 0
       const refinanceLoanAmount = refiGrossProceeds > 0 ? Math.min(refiGrossProceeds, maxDebtByConstraints) : 0
@@ -1422,20 +1492,20 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         currentLoanPrincipal = refinanceLoanAmount
         currentLoanRate = refiRatePct > 0 ? refiRatePct : currentLoanRate
         currentLoanAmortYears = amortYears || currentLoanAmortYears
-        currentLoanStartMonth = monthsElapsed
+        currentLoanStartMonth = monthIndex + 1
         currentLoanTermYears = refinanceLoanTermYears || currentLoanTermYears
       } else if (hitsBalloon) {
         currentLoanPrincipal = 0
       }
-      const grossSaleProceeds = year === hold ? stabilizedValue : 0
+      const grossSaleProceeds = monthIndex === saleMonthIndex ? stabilizedValue : 0
       const saleCosts = grossSaleProceeds > 0 ? grossSaleProceeds * costOfSalePct : 0
       const loanPayoffAtSale = grossSaleProceeds > 0
-        ? endingLoanBalance(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears, monthsElapsed - currentLoanStartMonth)
+        ? endingLoanBalance(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears, monthIndex + 1 - currentLoanStartMonth)
         : 0
       const recaptureTax = grossSaleProceeds > 0 ? depBasis * recaptureRatePct : 0
       const saleProceeds = Math.max(0, grossSaleProceeds - saleCosts - loanPayoffAtSale - recaptureTax)
-      const cashAvailableForDistribution = Math.max(0, noi - (Number(prop.management_fee_pct || 0) ? 0 : 0) - annualDebtService - taxesYear + refinanceProceeds + saleProceeds)
-      const prefAccrual = lpUnreturnedCapital * prefRate
+      const cashAvailableForDistribution = Math.max(0, noi - monthlyDebtService - taxesMonth + refinanceProceeds + saleProceeds)
+      const prefAccrual = lpUnreturnedCapital * (prefRate / 12)
       unpaidPrefBalance += prefAccrual
       let remainingCash = cashAvailableForDistribution
       const lpReturnOfCapital = Math.min(remainingCash, lpUnreturnedCapital)
@@ -1448,31 +1518,58 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       remainingCash -= gpCatchUp
       const sponsorDistribution = gpCatchUp + (remainingCash * promoteRate)
       const investorDistribution = lpReturnOfCapital + lpPrefDistribution + (remainingCash * (1 - promoteRate))
+
+      yearlyBuckets[yearIndex].grossRevenue += grossRevenue
+      yearlyBuckets[yearIndex].vacancyCreditLoss += vacancyLoss
+      yearlyBuckets[yearIndex].percentageRentDcf += percentageRent
+      yearlyBuckets[yearIndex].otherIncomeDcf += otherIncome
+      yearlyBuckets[yearIndex].operatingExpensesDcf += operatingExpensesMonth
+      yearlyBuckets[yearIndex].managementFeesDcf += managementFees
+      yearlyBuckets[yearIndex].propertyTaxesDcf += propertyTaxesMonth
+      yearlyBuckets[yearIndex].insuranceDcf += insuranceMonth
+      yearlyBuckets[yearIndex].reservesCapexDcf += reservesMonth
+      yearlyBuckets[yearIndex].debtServiceDcf += monthlyDebtService
+      yearlyBuckets[yearIndex].loanBalanceDcf = loanBalance
+      yearlyBuckets[yearIndex].refinanceProceeds += refinanceProceeds
+      yearlyBuckets[yearIndex].refinanceCostsDcf += refinanceCosts
+      yearlyBuckets[yearIndex].loanPayoffAtRefi += loanPayoffAtRefi
+      yearlyBuckets[yearIndex].taxesDcf += taxesMonth
+      yearlyBuckets[yearIndex].grossSaleProceedsDcf += grossSaleProceeds
+      yearlyBuckets[yearIndex].saleCostsDcf += saleCosts
+      yearlyBuckets[yearIndex].loanPayoffAtSale += loanPayoffAtSale
+      yearlyBuckets[yearIndex].recaptureTaxDcf += recaptureTax
+      yearlyBuckets[yearIndex].saleProceedsDcf += saleProceeds
+      yearlyBuckets[yearIndex].waterfallSponsor += sponsorDistribution
+      yearlyBuckets[yearIndex].waterfallInvestor += investorDistribution
+    }
+
+    for (let index = 0; index < DCF_MAX_YEARS; index += 1) {
+      const bucket = yearlyBuckets[index]
       model.years[index] = normalizeYearDraft({
-        year,
-        grossRevenue: Math.round(grossRevenue),
-        vacancyCreditLoss: Math.round(vacancyLoss),
-        percentageRentDcf: Math.round(percentageRent),
-        otherIncomeDcf: Math.round(otherIncome),
-        operatingExpensesDcf: Math.round(operatingExpensesYear),
-        managementFeesDcf: Math.round(managementFees),
-        propertyTaxesDcf: Math.round(propertyTaxesYear),
-        insuranceDcf: Math.round(insuranceYear),
-        reservesCapexDcf: Math.round(reservesYear),
-        debtServiceDcf: Math.round(annualDebtService),
-        loanBalanceDcf: Math.round(loanBalance),
-        refinanceProceeds: Math.round(refinanceProceeds),
-        refinanceCostsDcf: Math.round(refinanceCosts),
-        loanPayoffAtRefi: Math.round(loanPayoffAtRefi),
-        taxesDcf: Math.round(taxesYear),
-        grossSaleProceedsDcf: Math.round(grossSaleProceeds),
-        saleCostsDcf: Math.round(saleCosts),
-        loanPayoffAtSale: Math.round(loanPayoffAtSale),
-        recaptureTaxDcf: Math.round(recaptureTax),
-        saleProceedsDcf: Math.round(saleProceeds),
-        waterfallSponsor: Math.round(sponsorDistribution),
-        waterfallInvestor: Math.round(investorDistribution),
-      }, year)
+        year: index + 1,
+        grossRevenue: Math.round(bucket.grossRevenue),
+        vacancyCreditLoss: Math.round(bucket.vacancyCreditLoss),
+        percentageRentDcf: Math.round(bucket.percentageRentDcf),
+        otherIncomeDcf: Math.round(bucket.otherIncomeDcf),
+        operatingExpensesDcf: Math.round(bucket.operatingExpensesDcf),
+        managementFeesDcf: Math.round(bucket.managementFeesDcf),
+        propertyTaxesDcf: Math.round(bucket.propertyTaxesDcf),
+        insuranceDcf: Math.round(bucket.insuranceDcf),
+        reservesCapexDcf: Math.round(bucket.reservesCapexDcf),
+        debtServiceDcf: Math.round(bucket.debtServiceDcf),
+        loanBalanceDcf: Math.round(bucket.loanBalanceDcf),
+        refinanceProceeds: Math.round(bucket.refinanceProceeds),
+        refinanceCostsDcf: Math.round(bucket.refinanceCostsDcf),
+        loanPayoffAtRefi: Math.round(bucket.loanPayoffAtRefi),
+        taxesDcf: Math.round(bucket.taxesDcf),
+        grossSaleProceedsDcf: Math.round(bucket.grossSaleProceedsDcf),
+        saleCostsDcf: Math.round(bucket.saleCostsDcf),
+        loanPayoffAtSale: Math.round(bucket.loanPayoffAtSale),
+        recaptureTaxDcf: Math.round(bucket.recaptureTaxDcf),
+        saleProceedsDcf: Math.round(bucket.saleProceedsDcf),
+        waterfallSponsor: Math.round(bucket.waterfallSponsor),
+        waterfallInvestor: Math.round(bucket.waterfallInvestor),
+      }, index + 1)
     }
     return model
   }
@@ -1734,6 +1831,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   }
   function updateLenderConstraintField(field, value) {
     setDcfModel(prev => ({ ...prev, lenderConstraints: { ...prev.lenderConstraints, [field]: value } }))
+  }
+  function updateTimingField(field, value) {
+    setDcfModel(prev => ({ ...prev, timing: { ...prev.timing, [field]: value } }))
   }
   function updateRentRollRow(index, field, value) {
     setDcfModel(prev => ({
@@ -2098,7 +2198,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           gpSharePct: parseNum(dcfModel.waterfall.gpSharePct),
         },
         timing: {
-          granularity: dcfModel.timing.granularity
+          granularity: dcfModel.timing.granularity,
+          refiMonth: parseNum(dcfModel.timing.refiMonth),
+          saleMonth: parseNum(dcfModel.timing.saleMonth),
         },
         leaseEconomics: {
           freeRentMonths: parseNum(dcfModel.leaseEconomics.freeRentMonths),
@@ -2122,7 +2224,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           reimbursementsPct: parseNum(row.reimbursementsPct),
           freeRentMonths: parseNum(row.freeRentMonths),
           leaseStartYear: parseNum(row.leaseStartYear),
+          leaseStartMonth: parseNum(row.leaseStartMonth),
           leaseEndYear: parseNum(row.leaseEndYear),
+          leaseEndMonth: parseNum(row.leaseEndMonth),
           rentBumpsPct: parseNum(row.rentBumpsPct),
           renewalProbabilityPct: parseNum(row.renewalProbabilityPct),
           downtimeMonths: parseNum(row.downtimeMonths),
@@ -2786,6 +2890,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput placeholder="e.g. 3" value={refiYear} onChange={setRefiYear}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
+                <Field label="Refi Month">
+                  <NumericInput placeholder="1-12" value={dcfModel.timing.refiMonth} onChange={(value) => updateTimingField('refiMonth', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
                 <Field label="Refi Cost (%)">
                   <NumericInput placeholder="e.g. 1.0" value={dcfModel.debtTerms.refinanceCostPct} onChange={(value) => updateDebtTermField('refinanceCostPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
@@ -2825,6 +2933,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                 </Field>
                 <Field label="Hold Period (yrs)">
                   <NumericInput placeholder="e.g. 7" value={holdPeriod} onChange={setHoldPeriod}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                </Field>
+                <Field label="Sale Month">
+                  <NumericInput placeholder="1-12" value={dcfModel.timing.saleMonth} onChange={(value) => updateTimingField('saleMonth', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
                 <Field label="Rent Growth (% / yr)">
@@ -2910,8 +3022,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                               <NumericInput value={tenant.leaseStartYear} onChange={(value) => updateRentRollRow(index, 'leaseStartYear', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
+                            <Field label="Lease Start Month">
+                              <NumericInput value={tenant.leaseStartMonth} onChange={(value) => updateRentRollRow(index, 'leaseStartMonth', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
                             <Field label="Lease End Year">
                               <NumericInput value={tenant.leaseEndYear} onChange={(value) => updateRentRollRow(index, 'leaseEndYear', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
+                            </Field>
+                            <Field label="Lease End Month">
+                              <NumericInput value={tenant.leaseEndMonth} onChange={(value) => updateRentRollRow(index, 'leaseEndMonth', value)}
                                 className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                             </Field>
                             <Field label="Annual Rent Bumps (%)">
