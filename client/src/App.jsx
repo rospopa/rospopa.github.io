@@ -1084,10 +1084,26 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     waterfall: {
       prefRate: '8',
       catchUpRate: '100',
-      promoteRate: '20'
+      promoteRate: '20',
+      lpSharePct: '95',
+      gpSharePct: '5'
+    },
+    timing: {
+      granularity: 'monthly'
+    },
+    leaseEconomics: {
+      freeRentMonths: '0',
+      marketRentGrowthPct: '',
+      downtimeMonthsDefault: '0',
+      expenseRecoveryPct: '0'
+    },
+    lenderConstraints: {
+      minDscr: '1.25',
+      minDebtYield: '8.00',
+      maxLtv: '75.00'
     },
     rentRoll: [
-      { tenantName: '', suite: '', annualRent: '', annualSales: '', leaseStartYear: '1', leaseEndYear: '10', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0' }
+      { tenantName: '', suite: '', annualRent: '', annualSales: '', leasedSf: '', annualRentPsf: '', leaseType: 'NNN', reimbursementsPct: '0', freeRentMonths: '0', leaseStartYear: '1', leaseEndYear: '10', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0' }
     ]
   })
   function toTextNumber(value) {
@@ -1138,6 +1154,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       suite: row.suite || '',
       annualRent: toTextNumber(row.annualRent),
       annualSales: toTextNumber(row.annualSales),
+      leasedSf: toTextNumber(row.leasedSf),
+      annualRentPsf: toTextNumber(row.annualRentPsf),
+      leaseType: row.leaseType || 'NNN',
+      reimbursementsPct: toTextNumber(row.reimbursementsPct || 0),
+      freeRentMonths: toTextNumber(row.freeRentMonths || 0),
       leaseStartYear: toTextNumber(row.leaseStartYear || 1),
       leaseEndYear: toTextNumber(row.leaseEndYear || DCF_MAX_YEARS),
       rentBumpsPct: toTextNumber(row.rentBumpsPct),
@@ -1165,7 +1186,23 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       waterfall: {
         prefRate: toTextNumber(source.waterfall?.prefRate ?? baseModel.waterfall.prefRate),
         catchUpRate: toTextNumber(source.waterfall?.catchUpRate ?? baseModel.waterfall.catchUpRate),
-        promoteRate: toTextNumber(source.waterfall?.promoteRate ?? baseModel.waterfall.promoteRate)
+        promoteRate: toTextNumber(source.waterfall?.promoteRate ?? baseModel.waterfall.promoteRate),
+        lpSharePct: toTextNumber(source.waterfall?.lpSharePct ?? baseModel.waterfall.lpSharePct),
+        gpSharePct: toTextNumber(source.waterfall?.gpSharePct ?? baseModel.waterfall.gpSharePct)
+      },
+      timing: {
+        granularity: source.timing?.granularity || baseModel.timing.granularity
+      },
+      leaseEconomics: {
+        freeRentMonths: toTextNumber(source.leaseEconomics?.freeRentMonths ?? baseModel.leaseEconomics.freeRentMonths),
+        marketRentGrowthPct: toTextNumber(source.leaseEconomics?.marketRentGrowthPct),
+        downtimeMonthsDefault: toTextNumber(source.leaseEconomics?.downtimeMonthsDefault ?? baseModel.leaseEconomics.downtimeMonthsDefault),
+        expenseRecoveryPct: toTextNumber(source.leaseEconomics?.expenseRecoveryPct ?? baseModel.leaseEconomics.expenseRecoveryPct)
+      },
+      lenderConstraints: {
+        minDscr: toTextNumber(source.lenderConstraints?.minDscr ?? baseModel.lenderConstraints.minDscr),
+        minDebtYield: toTextNumber(source.lenderConstraints?.minDebtYield ?? baseModel.lenderConstraints.minDebtYield),
+        maxLtv: toTextNumber(source.lenderConstraints?.maxLtv ?? baseModel.lenderConstraints.maxLtv)
       },
       rentRoll: Array.isArray(source.rentRoll) && source.rentRoll.length > 0
         ? source.rentRoll.map(normalizeRentRollRow)
@@ -1279,6 +1316,21 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const initialLoanTermYears = Number(source.debtTerms?.initialLoanTermYears || hold)
     const refinanceLoanTermYears = Number(source.debtTerms?.refinanceLoanTermYears || initialLoanTermYears || hold)
     const refinanceCostPct = Number(source.debtTerms?.refinanceCostPct || 1) / 100
+    const freeRentMonthsDefault = Math.max(0, Number(source.leaseEconomics?.freeRentMonths || 0))
+    const marketRentGrowthPct = Number(source.leaseEconomics?.marketRentGrowthPct || prop.rent_growth || 0) / 100
+    const downtimeMonthsDefault = Math.max(0, Number(source.leaseEconomics?.downtimeMonthsDefault || 0))
+    const expenseRecoveryPct = Math.max(0, Number(source.leaseEconomics?.expenseRecoveryPct || 0)) / 100
+    const minDscr = Number(source.lenderConstraints?.minDscr || 0)
+    const minDebtYield = Number(source.lenderConstraints?.minDebtYield || 0) / 100
+    const maxLtvConstraint = Number(source.lenderConstraints?.maxLtv || 0) / 100
+    const prefRate = Number(source.waterfall?.prefRate || 0) / 100
+    const catchUpRate = Number(source.waterfall?.catchUpRate || 0) / 100
+    const promoteRate = Number(source.waterfall?.promoteRate || 0) / 100
+    const lpSharePct = Math.max(0, Number(source.waterfall?.lpSharePct || 95)) / 100
+    const gpSharePct = Math.max(0, Number(source.waterfall?.gpSharePct || 5)) / 100
+    let unpaidPrefBalance = 0
+    let lpUnreturnedCapital = Math.max(0, ((Number(prop.price || 0) + Number(prop.closing_costs || 0) - loanAmt) || 0) * lpSharePct)
+    let gpUnreturnedCapital = Math.max(0, ((Number(prop.price || 0) + Number(prop.closing_costs || 0) - loanAmt) || 0) * gpSharePct)
     let currentLoanPrincipal = loanAmt
     let currentLoanRate = interestRatePct
     let currentLoanAmortYears = amortYears
@@ -1292,18 +1344,24 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       const rentRollRevenue = rentRoll.reduce((sum, tenant) => {
         const startYear = Math.max(1, Number(tenant.leaseStartYear || 1))
         const endYear = Math.max(startYear, Number(tenant.leaseEndYear || DCF_MAX_YEARS))
-        const baseRent = Number(tenant.annualRent || 0)
+        const leasedSf = Number(tenant.leasedSf || 0)
+        const annualRentPsf = Number(tenant.annualRentPsf || 0)
+        const baseRent = Number(tenant.annualRent || 0) || (leasedSf > 0 && annualRentPsf > 0 ? leasedSf * annualRentPsf : 0)
         const annualSales = Number(tenant.annualSales || 0)
         const renewalProb = Math.max(0, Math.min(100, Number(tenant.renewalProbabilityPct || 0))) / 100
-        const downtimeMonths = Math.max(0, Number(tenant.downtimeMonths || 0))
+        const downtimeMonths = Math.max(0, Number(tenant.downtimeMonths || downtimeMonthsDefault))
+        const freeRentMonths = Math.max(0, Number(tenant.freeRentMonths || freeRentMonthsDefault))
         const rentBumpsPct = Number(tenant.rentBumpsPct || 0) / 100
+        const reimbursementsPct = Math.max(0, Number(tenant.reimbursementsPct || 0)) / 100
         if (year < startYear) return sum
         const activeYears = year - startYear
         const bumpedRent = baseRent * Math.pow(1 + rentBumpsPct, Math.max(0, activeYears))
-        if (year <= endYear) return sum + bumpedRent
+        const freeRentFactor = Math.max(0, 12 - freeRentMonths) / 12
+        const reimbursedRent = bumpedRent * (1 + reimbursementsPct)
+        if (year <= endYear) return sum + (reimbursedRent * freeRentFactor)
         const renewedRent = bumpedRent * renewalProb
         const downtimeFactor = Math.max(0, 12 - downtimeMonths) / 12
-        return sum + (renewedRent * downtimeFactor)
+        return sum + (renewedRent * downtimeFactor * (1 + reimbursementsPct))
       }, 0)
       const grossRevenue = rentRollRevenue > 0 ? rentRollRevenue : grossRentBase * rentGrowthFactor
       const vacancyLoss = grossRevenue * vacancyPct
@@ -1315,14 +1373,18 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       const baseRentYear = rentRollRevenue > 0 ? grossRevenue : tenantBaseRentBase * rentGrowthFactor
       const percentageRent = Math.max(0, tenantSalesYear * rentToSalesPct - baseRentYear)
       const otherIncome = otherIncomeBase * rentGrowthFactor
-      const effectiveGrossIncome = grossRevenue - vacancyLoss + percentageRent + otherIncome
+      const recoveries = operatingExpensesBase * expenseRecoveryPct
+      const effectiveGrossIncome = grossRevenue - vacancyLoss + percentageRent + otherIncome + recoveries
       const operatingExpensesYear = operatingExpensesBase * expenseGrowthFactor
       const managementFees = effectiveGrossIncome * managementFeePct
       const propertyTaxesYear = propertyTaxesBase * expenseGrowthFactor
       const insuranceYear = insuranceBase * expenseGrowthFactor
       const reservesYear = reservesBase * expenseGrowthFactor
       const noi = effectiveGrossIncome - operatingExpensesYear - managementFees - propertyTaxesYear - insuranceYear - reservesYear
-      const taxesYear = Math.max(0, noi) * effectiveTaxRatePct
+      const annualDepreciation = depBasis > 0 ? (depBasis * (1 - Number(prop.cost_seg_bonus_pct || 0) / 100) / 39) : 0
+      const bonusDepreciation = year === 1 ? depBasis * (Number(prop.cost_seg_bonus_pct || 0) / 100) : 0
+      const taxableIncome = noi - annualDebtService - annualDepreciation - bonusDepreciation
+      const taxesYear = Math.max(0, taxableIncome) * effectiveTaxRatePct
       const monthsElapsed = year * 12
       const monthsSinceLoanStart = monthsElapsed - currentLoanStartMonth
       const inIoPeriod = monthsSinceLoanStart > 0 && monthsSinceLoanStart <= ioYears * 12 && currentLoanPrincipal > 0
@@ -1339,12 +1401,25 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           : endingLoanBalance(currentLoanPrincipal, currentLoanRate, currentLoanAmortYears, monthsSinceLoanStart))
         : 0
       const stabilizedValue = exitCapPct > 0 ? Math.max(0, noi) / exitCapPct : 0
+      const dscrConstrainedLoan = minDscr > 0 && currentLoanRate > 0 && currentLoanAmortYears > 0
+        ? paymentForLoan(1, currentLoanRate, currentLoanAmortYears) > 0
+          ? (Math.max(0, noi) / minDscr) / (paymentForLoan(1, currentLoanRate, currentLoanAmortYears) * 12)
+          : 0
+        : Infinity
+      const debtYieldConstrainedLoan = minDebtYield > 0 ? Math.max(0, noi) / minDebtYield : Infinity
+      const ltvConstrainedLoan = maxLtvConstraint > 0 ? stabilizedValue * maxLtvConstraint : Infinity
+      const maxDebtByConstraints = Math.min(
+        Number.isFinite(dscrConstrainedLoan) ? dscrConstrainedLoan : Infinity,
+        Number.isFinite(debtYieldConstrainedLoan) ? debtYieldConstrainedLoan : Infinity,
+        Number.isFinite(ltvConstrainedLoan) ? ltvConstrainedLoan : Infinity
+      )
       const refiGrossProceeds = refiYearValue === year && refiLtvPct > 0 ? stabilizedValue * refiLtvPct : 0
       const refinanceCosts = refiGrossProceeds > 0 ? refiGrossProceeds * refinanceCostPct : 0
       const loanPayoffAtRefi = refiGrossProceeds > 0 || hitsBalloon ? loanBalance : 0
-      const refinanceProceeds = Math.max(0, refiGrossProceeds - refinanceCosts - loanPayoffAtRefi)
+      const refinanceLoanAmount = refiGrossProceeds > 0 ? Math.min(refiGrossProceeds, maxDebtByConstraints) : 0
+      const refinanceProceeds = Math.max(0, refinanceLoanAmount - refinanceCosts - loanPayoffAtRefi)
       if (refiGrossProceeds > 0) {
-        currentLoanPrincipal = refiGrossProceeds
+        currentLoanPrincipal = refinanceLoanAmount
         currentLoanRate = refiRatePct > 0 ? refiRatePct : currentLoanRate
         currentLoanAmortYears = amortYears || currentLoanAmortYears
         currentLoanStartMonth = monthsElapsed
@@ -1359,6 +1434,20 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         : 0
       const recaptureTax = grossSaleProceeds > 0 ? depBasis * recaptureRatePct : 0
       const saleProceeds = Math.max(0, grossSaleProceeds - saleCosts - loanPayoffAtSale - recaptureTax)
+      const cashAvailableForDistribution = Math.max(0, noi - (Number(prop.management_fee_pct || 0) ? 0 : 0) - annualDebtService - taxesYear + refinanceProceeds + saleProceeds)
+      const prefAccrual = lpUnreturnedCapital * prefRate
+      unpaidPrefBalance += prefAccrual
+      let remainingCash = cashAvailableForDistribution
+      const lpReturnOfCapital = Math.min(remainingCash, lpUnreturnedCapital)
+      remainingCash -= lpReturnOfCapital
+      lpUnreturnedCapital -= lpReturnOfCapital
+      const lpPrefDistribution = Math.min(remainingCash, unpaidPrefBalance)
+      remainingCash -= lpPrefDistribution
+      unpaidPrefBalance -= lpPrefDistribution
+      const gpCatchUp = Math.min(remainingCash, lpPrefDistribution > 0 ? lpPrefDistribution * catchUpRate * promoteRate : 0)
+      remainingCash -= gpCatchUp
+      const sponsorDistribution = gpCatchUp + (remainingCash * promoteRate)
+      const investorDistribution = lpReturnOfCapital + lpPrefDistribution + (remainingCash * (1 - promoteRate))
       model.years[index] = normalizeYearDraft({
         year,
         grossRevenue: Math.round(grossRevenue),
@@ -1381,6 +1470,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         loanPayoffAtSale: Math.round(loanPayoffAtSale),
         recaptureTaxDcf: Math.round(recaptureTax),
         saleProceedsDcf: Math.round(saleProceeds),
+        waterfallSponsor: Math.round(sponsorDistribution),
+        waterfallInvestor: Math.round(investorDistribution),
       }, year)
     }
     return model
@@ -1600,6 +1691,12 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   function updateWaterfallField(field, value) {
     setDcfModel(prev => ({ ...prev, waterfall: { ...prev.waterfall, [field]: value } }))
   }
+  function updateLeaseEconomicsField(field, value) {
+    setDcfModel(prev => ({ ...prev, leaseEconomics: { ...prev.leaseEconomics, [field]: value } }))
+  }
+  function updateLenderConstraintField(field, value) {
+    setDcfModel(prev => ({ ...prev, lenderConstraints: { ...prev.lenderConstraints, [field]: value } }))
+  }
   function updateRentRollRow(index, field, value) {
     setDcfModel(prev => ({
       ...prev,
@@ -1696,6 +1793,43 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   const loanBalanceAtExitAmount = holdYearDcf ? (parseNum(holdYearDcf.loanPayoffAtSale) || 0) : null
   const netEquityOnExitAmount = netSaleProceedsAmount
   const annualDebtServiceAmount = firstYearDcf ? (parseNum(firstYearDcf.debtServiceDcf) || 0) : null
+  const grossRevenueAmount = firstYearDcf ? (parseNum(firstYearDcf.grossRevenue) || 0) : null
+  const egiAmount = firstYearDcf ? (getComputedDcfValue(firstYearDcf, 'effectiveGrossIncome') || 0) : null
+  const capRateFromEngine = adjustedNoiValue !== null && parseNum(price) > 0 ? (adjustedNoiValue / parseNum(price) * 100) : null
+  const cashOnCashFromEngine = adjustedNoiValue !== null && annualDebtServiceAmount !== null && initialEquity > 0
+    ? ((adjustedNoiValue - annualDebtServiceAmount) / initialEquity * 100)
+    : null
+  const dscrFromEngine = adjustedNoiValue !== null && annualDebtServiceAmount > 0
+    ? (adjustedNoiValue / annualDebtServiceAmount)
+    : null
+  const scenarioComparison = ['base', 'upside', 'downside'].map((scenarioKey) => {
+    const scenarioConfig = dcfModel.scenarios[scenarioKey]
+    const scenarioRentGrowth = (Number(rentGrowth || 0) + Number(scenarioConfig.rentGrowthDelta || 0)) / 100
+    const scenarioExpenseGrowth = (Number(expenseGrowth || 0) + Number(scenarioConfig.expenseGrowthDelta || 0)) / 100
+    const scenarioVacancy = Math.max(0, (Number(vacancyRate || 0) + Number(scenarioConfig.vacancyDelta || 0))) / 100
+    const scenarioExitCap = (Number(exitCapRate || 0) + Number(scenarioConfig.exitCapRateDelta || 0)) / 100
+    const baseNoi = adjustedNoiValue || 0
+    const exitNoi = baseNoi * Math.pow(1 + scenarioRentGrowth - scenarioExpenseGrowth, Math.max(0, activeHoldPeriod - 1))
+    const scenarioExitValue = scenarioExitCap > 0 ? exitNoi / scenarioExitCap : 0
+    const scenarioNetSale = scenarioExitValue * (1 - (Number(costOfSale || 0) / 100))
+    const scenarioLeveredCashFlows = initialEquity > 0 ? [-initialEquity, ...visibleDcfYears.map((yearRow, index) => {
+      const baseCash = getComputedDcfValue(yearRow, 'cashFlowAfterSale') || 0
+      if (index !== visibleDcfYears.length - 1) return baseCash
+      return baseCash - netSaleProceedsAmount + scenarioNetSale
+    })] : null
+    const scenarioIrr = scenarioLeveredCashFlows ? calculateIrr(scenarioLeveredCashFlows) : null
+    const scenarioEmx = scenarioLeveredCashFlows && initialEquity > 0
+      ? scenarioLeveredCashFlows.slice(1).reduce((sum, value) => sum + value, 0) / initialEquity
+      : null
+    return {
+      key: scenarioKey,
+      label: scenarioConfig.label,
+      irr: scenarioIrr,
+      emx: scenarioEmx,
+      exitValue: scenarioExitValue,
+      noi: exitNoi
+    }
+  })
 
   useEffect(() => {
     if (open && property?.id) {
@@ -1885,12 +2019,33 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           prefRate: parseNum(dcfModel.waterfall.prefRate),
           catchUpRate: parseNum(dcfModel.waterfall.catchUpRate),
           promoteRate: parseNum(dcfModel.waterfall.promoteRate),
+          lpSharePct: parseNum(dcfModel.waterfall.lpSharePct),
+          gpSharePct: parseNum(dcfModel.waterfall.gpSharePct),
+        },
+        timing: {
+          granularity: dcfModel.timing.granularity
+        },
+        leaseEconomics: {
+          freeRentMonths: parseNum(dcfModel.leaseEconomics.freeRentMonths),
+          marketRentGrowthPct: parseNum(dcfModel.leaseEconomics.marketRentGrowthPct),
+          downtimeMonthsDefault: parseNum(dcfModel.leaseEconomics.downtimeMonthsDefault),
+          expenseRecoveryPct: parseNum(dcfModel.leaseEconomics.expenseRecoveryPct),
+        },
+        lenderConstraints: {
+          minDscr: parseNum(dcfModel.lenderConstraints.minDscr),
+          minDebtYield: parseNum(dcfModel.lenderConstraints.minDebtYield),
+          maxLtv: parseNum(dcfModel.lenderConstraints.maxLtv),
         },
         rentRoll: dcfModel.rentRoll.map((row) => ({
           tenantName: row.tenantName || '',
           suite: row.suite || '',
           annualRent: parseNum(row.annualRent),
           annualSales: parseNum(row.annualSales),
+          leasedSf: parseNum(row.leasedSf),
+          annualRentPsf: parseNum(row.annualRentPsf),
+          leaseType: row.leaseType || 'NNN',
+          reimbursementsPct: parseNum(row.reimbursementsPct),
+          freeRentMonths: parseNum(row.freeRentMonths),
           leaseStartYear: parseNum(row.leaseStartYear),
           leaseEndYear: parseNum(row.leaseEndYear),
           rentBumpsPct: parseNum(row.rentBumpsPct),
@@ -2277,31 +2432,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                 </Field>
                 {/* Cap Rate = NOI / Price */}
                 <Field label="Cap Rate (%)">
-                  {(() => {
-                    const noi = grossScheduledRent !== '' && vacancyRate !== '' && operatingExpenses !== ''
-                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate)/100) + Number(otherIncome||0) - Number(operatingExpenses) - Number(reservesCapex||0)
-                      : null
-                    const val = noi !== null && price !== '' && Number(price) > 0
-                      ? (noi / Number(price) * 100).toFixed(2) + '%' : '—'
-                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
-                  })()}
+                  <input readOnly value={capRateFromEngine !== null ? `${capRateFromEngine.toFixed(2)}%` : '—'} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 {/* Cash-on-Cash = (NOI - Debt Service) / Equity */}
                 <Field label="Cash-on-Cash (%)">
-                  {(() => {
-                    const noi = grossScheduledRent !== '' && vacancyRate !== '' && operatingExpenses !== ''
-                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate)/100) + Number(otherIncome||0) - Number(operatingExpenses) - Number(reservesCapex||0)
-                      : null
-                    let ds = 0
-                    if (loanAmount !== '' && interestRate !== '' && amortizationTerm !== '' && Number(amortizationTerm) > 0) {
-                      const r = Number(interestRate)/100/12, n = Number(amortizationTerm)*12
-                      ds = r === 0 ? Number(loanAmount)/n*12 : Number(loanAmount)*r/(1-Math.pow(1+r,-n))*12
-                    }
-                    const equity = price !== '' && loanAmount !== '' ? Number(price) + Number(closingCosts||0) - Number(loanAmount) : null
-                    const val = noi !== null && equity !== null && equity > 0
-                      ? ((noi - ds) / equity * 100).toFixed(2) + '%' : '—'
-                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
-                  })()}
+                  <input readOnly value={cashOnCashFromEngine !== null ? `${cashOnCashFromEngine.toFixed(2)}%` : '—'} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Levered IRR (%)">
                   <input readOnly
@@ -2376,13 +2511,8 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Management Fee ($/yr)">
-                  {(() => {
-                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
-                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
-                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : null
-                    return <input readOnly value={mgmtFee !== null ? '$' + mgmtFee.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                      className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
-                  })()}
+                  <input readOnly value={firstYearDcf ? '$' + (parseNum(firstYearDcf.managementFeesDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Insurance ($/yr)">
                   <NumericInput placeholder="e.g. 12000" value={insurance} onChange={setInsurance}
@@ -2412,7 +2542,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                 </Field>
                 <Field label="EGI — Effective Gross Income ($/yr)">
                   <input readOnly
-                    value={grossScheduledRent !== '' && vacancyRate !== '' ? '$' + (Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    value={egiAmount !== null ? '$' + egiAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Other Income ($/yr)">
@@ -2429,10 +2559,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                 </Field>
                 <Field label="NOI — Net Operating Income ($/yr)">
                   <input readOnly
-                    value={grossScheduledRent !== '' && vacancyRate !== '' && operatingExpenses !== '' ? '$' + (
-                      Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) +
-                      Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0)
-                    ).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
+                    value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
               </div>
@@ -2447,21 +2574,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="DSCR">
-                  {(() => {
-                    const egi = grossScheduledRent !== '' && vacancyRate !== ''
-                      ? Number(grossScheduledRent) * (1 - Number(vacancyRate) / 100) : null
-                    const mgmtFee = egi !== null && managementFeePct !== '' ? egi * Number(managementFeePct) / 100 : 0
-                    const noi = egi !== null && operatingExpenses !== ''
-                      ? egi + Number(otherIncome || 0) - Number(operatingExpenses) - Number(reservesCapex || 0) : null
-                    const adjNoi = noi !== null ? noi - mgmtFee - Number(insurance || 0) - Number(propertyTaxes || 0) : null
-                    let ds = 0
-                    if (loanAmount !== '' && interestRate !== '' && amortizationTerm !== '' && Number(amortizationTerm) > 0) {
-                      const r = Number(interestRate) / 100 / 12, n = Number(amortizationTerm) * 12
-                      ds = r === 0 ? Number(loanAmount) / n * 12 : Number(loanAmount) * r / (1 - Math.pow(1 + r, -n)) * 12
-                    }
-                    const val = adjNoi !== null && ds > 0 ? (adjNoi / ds).toFixed(2) : '—'
-                    return <input readOnly value={val} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
-                  })()}
+                  <input readOnly value={dscrFromEngine !== null ? dscrFromEngine.toFixed(2) : '—'} className="input input-bordered input-md w-full md:text-base cursor-default" style={{color:'#000', fontWeight:700}} />
                 </Field>
                 <Field label="Debt Yield (%)">
                   <input readOnly
@@ -2759,6 +2872,14 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                   <NumericInput value={dcfModel.waterfall.promoteRate} onChange={(value) => updateWaterfallField('promoteRate', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                 </Field>
+                <Field label="LP Equity Share (%)">
+                  <NumericInput value={dcfModel.waterfall.lpSharePct} onChange={(value) => updateWaterfallField('lpSharePct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="GP Equity Share (%)">
+                  <NumericInput value={dcfModel.waterfall.gpSharePct} onChange={(value) => updateWaterfallField('gpSharePct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
               </div>
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Scenarios</div>
@@ -2793,6 +2914,33 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                     </div>
                   </div>
                 ))}
+                <div className="rounded-xl border border-base-300 overflow-hidden">
+                  <div className="px-4 py-3 border-b border-base-300 text-xs font-semibold uppercase tracking-wide text-base-content/40">Scenario Output Comparison</div>
+                  <div className="overflow-x-auto">
+                    <table className="table table-sm">
+                      <thead>
+                        <tr>
+                          <th>Scenario</th>
+                          <th className="text-right">Levered IRR</th>
+                          <th className="text-right">Levered EMx</th>
+                          <th className="text-right">Exit NOI</th>
+                          <th className="text-right">Exit Value</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {scenarioComparison.map((scenario) => (
+                          <tr key={scenario.key}>
+                            <td className="font-medium">{scenario.label}</td>
+                            <td className="text-right">{scenario.irr !== null ? `${(scenario.irr * 100).toFixed(2)}%` : '—'}</td>
+                            <td className="text-right">{scenario.emx !== null ? `${scenario.emx.toFixed(2)}x` : '—'}</td>
+                            <td className="text-right">{scenario.noi ? '$' + scenario.noi.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}</td>
+                            <td className="text-right">{scenario.exitValue ? '$' + scenario.exitValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
             {isAdmin && (
               <div className="pt-2">

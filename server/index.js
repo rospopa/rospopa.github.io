@@ -1348,6 +1348,33 @@ app.put('/api/properties/:id', async (req, res) => {
         newNorm = newVals[key];
         oldDisplay = old[key] ?? {};
         newDisplay = JSON.parse(newNorm);
+        if (key === 'dcf_model' && oldNorm !== newNorm) {
+          const oldModel = oldDisplay || {};
+          const newModel = newDisplay || {};
+          const structuredDiff = {};
+          const modelSections = ['scenarios', 'debtTerms', 'waterfall', 'timing', 'leaseEconomics', 'lenderConstraints', 'rentRoll'];
+          for (const section of modelSections) {
+            const beforeSection = oldModel[section] ?? null;
+            const afterSection = newModel[section] ?? null;
+            if (JSON.stringify(beforeSection) !== JSON.stringify(afterSection)) {
+              structuredDiff[section] = { from: beforeSection, to: afterSection };
+            }
+          }
+          const oldYears = Array.isArray(oldModel.years) ? oldModel.years : [];
+          const newYears = Array.isArray(newModel.years) ? newModel.years : [];
+          const yearlyChanges = [];
+          const maxYears = Math.max(oldYears.length, newYears.length);
+          for (let index = 0; index < maxYears; index += 1) {
+            const beforeYear = oldYears[index] ?? null;
+            const afterYear = newYears[index] ?? null;
+            if (JSON.stringify(beforeYear) !== JSON.stringify(afterYear)) {
+              yearlyChanges.push({ year: index + 1, from: beforeYear, to: afterYear });
+            }
+          }
+          if (yearlyChanges.length > 0) structuredDiff.years = yearlyChanges;
+          changes[key] = structuredDiff;
+          continue;
+        }
       } else {
         // Scalar: compare as strings, treat null/0/'' consistently
         const oldRaw = old[key] ?? null;
