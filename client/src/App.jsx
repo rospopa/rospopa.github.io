@@ -1111,6 +1111,13 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       enable1031: false,
       installmentSalePct: '0'
     },
+    governance: {
+      inputsLocked: false,
+      formulasLocked: true,
+      overridesEnabled: true,
+      overrideNote: '',
+      diagnosticLevel: 'strict'
+    },
     leaseEconomics: {
       freeRentMonths: '0',
       marketRentGrowthPct: '',
@@ -1122,7 +1129,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       leasingCommissionPct: '0',
       expenseStopPerSf: '0',
       grossUpPct: '95',
-      percentageRentBreakpointType: 'natural'
+      percentageRentBreakpointType: 'natural',
+      camAdminFeePct: '0',
+      controllableExpensePct: '60',
+      controllableCapPct: '5',
+      nonRecoverableExpensePct: '0',
+      taxPoolRecoverablePct: '100',
+      insurancePoolRecoverablePct: '100',
+      camPoolRecoverablePct: '100',
+      grossUpMethod: 'category',
+      reconciliationMonth: '12'
     },
     lenderConstraints: {
       minDscr: '1.25',
@@ -1130,7 +1146,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       maxLtv: '75.00'
     },
     rentRoll: [
-      { tenantName: '', suite: '', annualRent: '', annualSales: '', leasedSf: '', annualRentPsf: '', leaseType: 'NNN', reimbursementsPct: '0', freeRentMonths: '0', leaseStartYear: '1', leaseStartMonth: '1', leaseEndYear: '10', leaseEndMonth: '12', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0', marketRentPsf: '', newLeaseSpreadPct: '', renewalSpreadPct: '', tenantImprovementPerSf: '', leasingCommissionPct: '', expenseStopPerSf: '', grossUpPct: '', breakpointSales: '', percentageRentPct: '', anchorTenant: false, coTenancyGroup: '', extensionOptionMonths: '0', expansionSf: '0', contractionSf: '0', terminationMonth: '', purchaseOptionPrice: '', renewalTiPerSf: '', newLeaseTiPerSf: '', renewalLcPct: '', newLeaseLcPct: '' }
+      { tenantName: '', suite: '', annualRent: '', annualSales: '', leasedSf: '', annualRentPsf: '', leaseType: 'NNN', reimbursementsPct: '0', freeRentMonths: '0', leaseStartYear: '1', leaseStartMonth: '1', leaseEndYear: '10', leaseEndMonth: '12', rentBumpsPct: '', renewalProbabilityPct: '50', downtimeMonths: '0', marketRentPsf: '', newLeaseSpreadPct: '', renewalSpreadPct: '', tenantImprovementPerSf: '', leasingCommissionPct: '', expenseStopPerSf: '', grossUpPct: '', breakpointSales: '', percentageRentPct: '', anchorTenant: false, coTenancyGroup: '', extensionOptionMonths: '0', expansionSf: '0', contractionSf: '0', terminationMonth: '', purchaseOptionPrice: '', renewalTiPerSf: '', newLeaseTiPerSf: '', renewalLcPct: '', newLeaseLcPct: '', camPoolSharePct: '100', adminFeePct: '', controllableCapPct: '', nonRecoverableExpensePct: '' }
     ]
   })
   function toTextNumber(value) {
@@ -1215,7 +1231,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       renewalTiPerSf: toTextNumber(row.renewalTiPerSf),
       newLeaseTiPerSf: toTextNumber(row.newLeaseTiPerSf),
       renewalLcPct: toTextNumber(row.renewalLcPct),
-      newLeaseLcPct: toTextNumber(row.newLeaseLcPct)
+      newLeaseLcPct: toTextNumber(row.newLeaseLcPct),
+      camPoolSharePct: toTextNumber(row.camPoolSharePct || 100),
+      adminFeePct: toTextNumber(row.adminFeePct),
+      controllableCapPct: toTextNumber(row.controllableCapPct),
+      nonRecoverableExpensePct: toTextNumber(row.nonRecoverableExpensePct)
     }
   }
   function normalizeDcfModel(rawModel, prop = {}) {
@@ -1285,7 +1305,14 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         enable1031: !!source.taxModel?.enable1031,
         installmentSalePct: toTextNumber(source.taxModel?.installmentSalePct ?? baseModel.taxModel.installmentSalePct)
       },
-      leaseEconomics: {
+        governance: {
+          inputsLocked: !!source.governance?.inputsLocked,
+          formulasLocked: source.governance?.formulasLocked !== undefined ? !!source.governance.formulasLocked : baseModel.governance.formulasLocked,
+          overridesEnabled: source.governance?.overridesEnabled !== undefined ? !!source.governance.overridesEnabled : baseModel.governance.overridesEnabled,
+          overrideNote: source.governance?.overrideNote || baseModel.governance.overrideNote,
+          diagnosticLevel: source.governance?.diagnosticLevel || baseModel.governance.diagnosticLevel
+        },
+        leaseEconomics: {
         freeRentMonths: toTextNumber(source.leaseEconomics?.freeRentMonths ?? baseModel.leaseEconomics.freeRentMonths),
         marketRentGrowthPct: toTextNumber(source.leaseEconomics?.marketRentGrowthPct),
         downtimeMonthsDefault: toTextNumber(source.leaseEconomics?.downtimeMonthsDefault ?? baseModel.leaseEconomics.downtimeMonthsDefault),
@@ -1296,7 +1323,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
         leasingCommissionPct: toTextNumber(source.leaseEconomics?.leasingCommissionPct ?? baseModel.leaseEconomics.leasingCommissionPct),
         expenseStopPerSf: toTextNumber(source.leaseEconomics?.expenseStopPerSf ?? baseModel.leaseEconomics.expenseStopPerSf),
         grossUpPct: toTextNumber(source.leaseEconomics?.grossUpPct ?? baseModel.leaseEconomics.grossUpPct),
-        percentageRentBreakpointType: source.leaseEconomics?.percentageRentBreakpointType || baseModel.leaseEconomics.percentageRentBreakpointType
+        percentageRentBreakpointType: source.leaseEconomics?.percentageRentBreakpointType || baseModel.leaseEconomics.percentageRentBreakpointType,
+        camAdminFeePct: toTextNumber(source.leaseEconomics?.camAdminFeePct ?? baseModel.leaseEconomics.camAdminFeePct),
+        controllableExpensePct: toTextNumber(source.leaseEconomics?.controllableExpensePct ?? baseModel.leaseEconomics.controllableExpensePct),
+        controllableCapPct: toTextNumber(source.leaseEconomics?.controllableCapPct ?? baseModel.leaseEconomics.controllableCapPct),
+        nonRecoverableExpensePct: toTextNumber(source.leaseEconomics?.nonRecoverableExpensePct ?? baseModel.leaseEconomics.nonRecoverableExpensePct),
+        taxPoolRecoverablePct: toTextNumber(source.leaseEconomics?.taxPoolRecoverablePct ?? baseModel.leaseEconomics.taxPoolRecoverablePct),
+        insurancePoolRecoverablePct: toTextNumber(source.leaseEconomics?.insurancePoolRecoverablePct ?? baseModel.leaseEconomics.insurancePoolRecoverablePct),
+        camPoolRecoverablePct: toTextNumber(source.leaseEconomics?.camPoolRecoverablePct ?? baseModel.leaseEconomics.camPoolRecoverablePct),
+        grossUpMethod: source.leaseEconomics?.grossUpMethod || baseModel.leaseEconomics.grossUpMethod,
+        reconciliationMonth: toTextNumber(source.leaseEconomics?.reconciliationMonth ?? baseModel.leaseEconomics.reconciliationMonth)
       },
       lenderConstraints: {
         minDscr: toTextNumber(source.lenderConstraints?.minDscr ?? baseModel.lenderConstraints.minDscr),
@@ -1459,6 +1495,15 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
     const defaultExpenseStopPerSf = Math.max(0, Number(source.leaseEconomics?.expenseStopPerSf || 0))
     const defaultGrossUpPct = Math.max(0, Number(source.leaseEconomics?.grossUpPct || 95)) / 100
     const breakpointType = source.leaseEconomics?.percentageRentBreakpointType || 'natural'
+    const camAdminFeePct = Math.max(0, Number(source.leaseEconomics?.camAdminFeePct || 0)) / 100
+    const controllableExpensePct = Math.max(0, Number(source.leaseEconomics?.controllableExpensePct || 60)) / 100
+    const controllableCapPct = Math.max(0, Number(source.leaseEconomics?.controllableCapPct || 5)) / 100
+    const nonRecoverableExpensePct = Math.max(0, Number(source.leaseEconomics?.nonRecoverableExpensePct || 0)) / 100
+    const taxPoolRecoverablePct = Math.max(0, Number(source.leaseEconomics?.taxPoolRecoverablePct || 100)) / 100
+    const insurancePoolRecoverablePct = Math.max(0, Number(source.leaseEconomics?.insurancePoolRecoverablePct || 100)) / 100
+    const camPoolRecoverablePct = Math.max(0, Number(source.leaseEconomics?.camPoolRecoverablePct || 100)) / 100
+    const grossUpMethod = source.leaseEconomics?.grossUpMethod || 'category'
+    const reconciliationMonth = clampMonth(source.leaseEconomics?.reconciliationMonth || 12, 12)
     const minDscr = Number(source.lenderConstraints?.minDscr || 0)
     const minDebtYield = Number(source.lenderConstraints?.minDebtYield || 0) / 100
     const maxLtvConstraint = Number(source.lenderConstraints?.maxLtv || 0) / 100
@@ -1480,6 +1525,7 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       : 0
     let suspendedLossCarryforward = startingSuspendedLossCarryforward
     let accumulatedDepreciation = 0
+    let priorControllableMonthly = monthlyOperatingExpenseBase * controllableExpensePct
     const timingMode = source.timing?.granularity || 'monthly'
     const saleMonthValue = clampMonth(source.timing?.saleMonth || 12, 12)
     const totalMonths = hold * 12
@@ -1600,19 +1646,55 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       }, 0) || Math.max(0, tenantSalesMonth * rentToSalesPct - baseRentMonth)
       const otherIncome = monthlyOtherIncomeBase * rentGrowthFactor
       const operatingExpensesMonth = monthlyOperatingExpenseBase * expenseGrowthFactor
+      const controllableExpenseRaw = operatingExpensesMonth * controllableExpensePct
+      const controllableExpenseCapped = monthIndex === 0
+        ? controllableExpenseRaw
+        : Math.min(controllableExpenseRaw, priorControllableMonthly * (1 + controllableCapPct / 12))
+      priorControllableMonthly = controllableExpenseCapped
+      const nonControllableExpense = operatingExpensesMonth - controllableExpenseRaw
+      const excludedExpenseAmount = operatingExpensesMonth * nonRecoverableExpensePct
+      const camPoolNet = Math.max(0, controllableExpenseCapped + nonControllableExpense - excludedExpenseAmount)
+      const camAdminFee = camPoolNet * camAdminFeePct
+      const totalCamPool = camPoolNet + camAdminFee
+      const grossUpBase = grossUpMethod === 'category'
+        ? Math.max(0.0001, defaultGrossUpPct)
+        : Math.max(0.0001, 1 - vacancyPct)
+      const grossedUpCamPool = totalCamPool / grossUpBase
+      const grossedUpTaxPool = (monthlyPropertyTaxesBase * expenseGrowthFactor) / grossUpBase
+      const grossedUpInsurancePool = (monthlyInsuranceBase * expenseGrowthFactor) / grossUpBase
       const recoveries = rentRoll.reduce((sum, tenant) => {
         const leasedSf = Number(tenant.leasedSf || 0)
         const reimbursementsPct = Math.max(0, Number(tenant.reimbursementsPct || 0)) / 100
         const expenseStopPerSf = Number(tenant.expenseStopPerSf || source.leaseEconomics?.expenseStopPerSf || 0)
         const grossUpPct = Math.max(0, Number(tenant.grossUpPct || source.leaseEconomics?.grossUpPct || 95)) / 100
         const leaseType = tenant.leaseType || 'NNN'
-        const recoverableExpenses = operatingExpensesMonth / Math.max(0.0001, grossUpPct)
-        if (leaseType === 'NNN') return sum + (recoverableExpenses * reimbursementsPct)
-        if (leaseType === 'Base Year') return sum + Math.max(0, recoverableExpenses - ((expenseStopPerSf * leasedSf) / 12)) * reimbursementsPct
+        const tenantCamPoolSharePct = Math.max(0, Number(tenant.camPoolSharePct || 100)) / 100
+        const tenantAdminFeePct = Math.max(0, Number(tenant.adminFeePct || source.leaseEconomics?.camAdminFeePct || 0)) / 100
+        const tenantControllableCapPct = Math.max(0, Number(tenant.controllableCapPct || source.leaseEconomics?.controllableCapPct || 0)) / 100
+        const tenantNonRecoverableExpensePct = Math.max(0, Number(tenant.nonRecoverableExpensePct || source.leaseEconomics?.nonRecoverableExpensePct || 0)) / 100
+        const tenantGrossUpBase = grossUpMethod === 'category' ? Math.max(0.0001, grossUpPct) : Math.max(0.0001, 1 - vacancyPct)
+        const tenantExcludedAmount = totalCamPool * tenantNonRecoverableExpensePct
+        const tenantRecoverableCam = Math.max(0, ((grossedUpCamPool * camPoolRecoverablePct) - tenantExcludedAmount) * tenantCamPoolSharePct)
+        const tenantRecoverableTax = grossedUpTaxPool * taxPoolRecoverablePct * reimbursementsPct
+        const tenantRecoverableInsurance = grossedUpInsurancePool * insurancePoolRecoverablePct * reimbursementsPct
+        const recoverableExpenses = (tenantRecoverableCam + tenantRecoverableTax + tenantRecoverableInsurance) / tenantGrossUpBase
+        const controllableCapCredit = monthIndex > 0 ? (controllableExpenseRaw - controllableExpenseCapped) * tenantControllableCapPct : 0
+        const adminFeeRecovery = totalCamPool * tenantAdminFeePct * tenantCamPoolSharePct
+        if (leaseType === 'NNN') return sum + ((recoverableExpenses + adminFeeRecovery - controllableCapCredit) * reimbursementsPct)
+        if (leaseType === 'Base Year') return sum + Math.max(0, (recoverableExpenses + adminFeeRecovery - controllableCapCredit) - ((expenseStopPerSf * leasedSf) / 12)) * reimbursementsPct
         if (leaseType === 'Gross') return sum
-        return sum + (operatingExpensesMonth * expenseRecoveryPct * reimbursementsPct)
+        return sum + ((operatingExpensesMonth * expenseRecoveryPct * reimbursementsPct) + adminFeeRecovery - controllableCapCredit)
       }, 0) || (operatingExpensesMonth * expenseRecoveryPct)
-      const effectiveGrossIncome = grossRevenue - vacancyLoss + percentageRent + otherIncome + recoveries
+      const reconciliationAdjustment = monthNumber === reconciliationMonth
+        ? rentRoll.reduce((sum, tenant) => {
+          const tenantCamPoolSharePct = Math.max(0, Number(tenant.camPoolSharePct || 100)) / 100
+          const tenantExcludedPct = Math.max(0, Number(tenant.nonRecoverableExpensePct || source.leaseEconomics?.nonRecoverableExpensePct || 0)) / 100
+          const tenantReconciliation = (totalCamPool * tenantCamPoolSharePct) - (totalCamPool * expenseRecoveryPct * (1 - tenantExcludedPct) * tenantCamPoolSharePct)
+          return sum + tenantReconciliation
+        }, 0)
+        : 0
+      const totalRecoveries = recoveries + reconciliationAdjustment
+      const effectiveGrossIncome = grossRevenue - vacancyLoss + percentageRent + otherIncome + totalRecoveries
       const managementFees = effectiveGrossIncome * managementFeePct
       const propertyTaxesMonth = monthlyPropertyTaxesBase * expenseGrowthFactor
       const insuranceMonth = monthlyInsuranceBase * expenseGrowthFactor
@@ -2094,6 +2176,9 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   function updateTaxModelField(field, value) {
     setDcfModel(prev => ({ ...prev, taxModel: { ...prev.taxModel, [field]: value } }))
   }
+  function updateGovernanceField(field, value) {
+    setDcfModel(prev => ({ ...prev, governance: { ...prev.governance, [field]: value } }))
+  }
   function buildScenarioProperty(scenarioKey, overrides = {}) {
     const scenario = dcfModel.scenarios[scenarioKey] || {}
     return buildPropertyFromDraft({
@@ -2163,6 +2248,68 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
       dcfModel
     ]
   )
+  const governanceDiagnostics = useMemo(() => {
+    const issues = []
+    const overrideEntries = []
+    const currentModel = dcfModel || {}
+    const governance = currentModel.governance || {}
+    const baseLeaseEconomics = defaultDcfModel().leaseEconomics
+    const baseDebtTerms = defaultDcfModel().debtTerms
+    ;[
+      ['leaseEconomics', currentModel.leaseEconomics || {}, baseLeaseEconomics],
+      ['debtTerms', currentModel.debtTerms || {}, baseDebtTerms],
+      ['timing', currentModel.timing || {}, defaultDcfModel().timing],
+      ['taxModel', currentModel.taxModel || {}, defaultDcfModel().taxModel],
+    ].forEach(([sectionName, section, defaults]) => {
+      Object.keys(section).forEach((key) => {
+        if (defaults && Object.prototype.hasOwnProperty.call(defaults, key) && String(section[key] ?? '') !== String(defaults[key] ?? '')) {
+          overrideEntries.push({ section: sectionName, field: key, value: section[key] })
+        }
+      })
+    })
+    ;(currentModel.rentRoll || []).forEach((tenant, index) => {
+      const startYear = Number(tenant.leaseStartYear || 0)
+      const startMonth = Number(tenant.leaseStartMonth || 0)
+      const endYear = Number(tenant.leaseEndYear || 0)
+      const endMonth = Number(tenant.leaseEndMonth || 0)
+      const leasedSf = Number(tenant.leasedSf || 0)
+      const expansionSf = Number(tenant.expansionSf || 0)
+      const contractionSf = Number(tenant.contractionSf || 0)
+      const terminationMonth = tenant.terminationMonth === '' || tenant.terminationMonth === null || tenant.terminationMonth === undefined
+        ? null
+        : Number(tenant.terminationMonth)
+      const leaseStartIndex = toMonthIndex(startYear || 1, clampMonth(startMonth || 1, 1))
+      const leaseEndIndex = toMonthIndex(endYear || DCF_MAX_YEARS, clampMonth(endMonth || 12, 12))
+      if (leaseEndIndex < leaseStartIndex) {
+        issues.push({ severity: 'error', scope: `Tenant ${index + 1}`, message: 'Lease end occurs before lease start.' })
+      }
+      if (terminationMonth !== null && terminationMonth < leaseStartIndex) {
+        issues.push({ severity: 'error', scope: `Tenant ${index + 1}`, message: 'Termination month occurs before lease commencement.' })
+      }
+      if (leasedSf + expansionSf - contractionSf < 0) {
+        issues.push({ severity: 'error', scope: `Tenant ${index + 1}`, message: 'Expansion/contraction rights drive leased square footage below zero.' })
+      }
+      if (Number(tenant.freeRentMonths || 0) > Math.max(0, leaseEndIndex - leaseStartIndex + 1)) {
+        issues.push({ severity: 'warning', scope: `Tenant ${index + 1}`, message: 'Free rent exceeds the scheduled lease term.' })
+      }
+    })
+    if ((parseNum(holdPeriod) || 0) <= 0) {
+      issues.push({ severity: 'error', scope: 'Timing', message: 'Hold period must be at least one year.' })
+    }
+    if ((parseNum(loanAmount) || 0) > 0 && (parseNum(interestRate) || 0) <= 0 && !currentModel.debtTerms?.floatingRate) {
+      issues.push({ severity: 'warning', scope: 'Debt', message: 'Loan amount is set without a positive fixed interest rate.' })
+    }
+    return {
+      issues,
+      overrides: overrideEntries,
+      summary: {
+        hasErrors: issues.some(issue => issue.severity === 'error'),
+        hasWarnings: issues.some(issue => issue.severity === 'warning'),
+        overrideCount: overrideEntries.length,
+        diagnosticLevel: governance.diagnosticLevel || 'strict'
+      }
+    }
+  }, [dcfModel, holdPeriod, loanAmount, interestRate])
   function getComputedDcfValue(yearRow, rowKey) {
     const grossRevenueVal = parseNum(yearRow.grossRevenue) || 0
     const vacancyLossVal = parseNum(yearRow.vacancyCreditLoss) || 0
@@ -2199,6 +2346,12 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   const engineVisibleDcfMonths = Array.isArray(liveDerivedDcfModel.months)
     ? liveDerivedDcfModel.months.slice(0, activeHoldPeriod * 12)
     : []
+  const derivedGovernanceModel = useMemo(() => ({
+    ...(liveDerivedDcfModel.governance || dcfModel.governance || {}),
+    diagnostics: governanceDiagnostics.issues,
+    overrides: governanceDiagnostics.overrides,
+    summary: governanceDiagnostics.summary
+  }), [liveDerivedDcfModel, dcfModel.governance, governanceDiagnostics])
   const dcfYearSummaries = engineVisibleDcfYears.map((yearRow) => {
     const effectiveGrossIncome = getComputedDcfValue(yearRow, 'effectiveGrossIncome') || 0
     const netOperatingIncome = getComputedDcfValue(yearRow, 'netOperatingIncomeDcf') || 0
@@ -2527,6 +2680,16 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           enable1031: !!dcfModel.taxModel.enable1031,
           installmentSalePct: parseNum(dcfModel.taxModel.installmentSalePct),
         },
+        governance: {
+          inputsLocked: !!dcfModel.governance.inputsLocked,
+          formulasLocked: !!dcfModel.governance.formulasLocked,
+          overridesEnabled: !!dcfModel.governance.overridesEnabled,
+          overrideNote: dcfModel.governance.overrideNote || '',
+          diagnosticLevel: dcfModel.governance.diagnosticLevel || 'strict',
+          diagnostics: governanceDiagnostics.issues,
+          overrides: governanceDiagnostics.overrides,
+          summary: governanceDiagnostics.summary,
+        },
         leaseEconomics: {
           freeRentMonths: parseNum(dcfModel.leaseEconomics.freeRentMonths),
           marketRentGrowthPct: parseNum(dcfModel.leaseEconomics.marketRentGrowthPct),
@@ -2539,6 +2702,15 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           expenseStopPerSf: parseNum(dcfModel.leaseEconomics.expenseStopPerSf),
           grossUpPct: parseNum(dcfModel.leaseEconomics.grossUpPct),
           percentageRentBreakpointType: dcfModel.leaseEconomics.percentageRentBreakpointType,
+          camAdminFeePct: parseNum(dcfModel.leaseEconomics.camAdminFeePct),
+          controllableExpensePct: parseNum(dcfModel.leaseEconomics.controllableExpensePct),
+          controllableCapPct: parseNum(dcfModel.leaseEconomics.controllableCapPct),
+          nonRecoverableExpensePct: parseNum(dcfModel.leaseEconomics.nonRecoverableExpensePct),
+          taxPoolRecoverablePct: parseNum(dcfModel.leaseEconomics.taxPoolRecoverablePct),
+          insurancePoolRecoverablePct: parseNum(dcfModel.leaseEconomics.insurancePoolRecoverablePct),
+          camPoolRecoverablePct: parseNum(dcfModel.leaseEconomics.camPoolRecoverablePct),
+          grossUpMethod: dcfModel.leaseEconomics.grossUpMethod,
+          reconciliationMonth: parseNum(dcfModel.leaseEconomics.reconciliationMonth),
         },
         lenderConstraints: {
           minDscr: parseNum(dcfModel.lenderConstraints.minDscr),
@@ -2582,6 +2754,10 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
           newLeaseTiPerSf: parseNum(row.newLeaseTiPerSf),
           renewalLcPct: parseNum(row.renewalLcPct),
           newLeaseLcPct: parseNum(row.newLeaseLcPct),
+          camPoolSharePct: parseNum(row.camPoolSharePct),
+          adminFeePct: parseNum(row.adminFeePct),
+          controllableCapPct: parseNum(row.controllableCapPct),
+          nonRecoverableExpensePct: parseNum(row.nonRecoverableExpensePct),
         }))
       },
     })
@@ -3380,6 +3556,70 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
               </div>
 
               <div className="space-y-3 pt-2">
+                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Model Governance</div>
+                <label className="label cursor-pointer justify-start gap-3">
+                  <input type="checkbox" className="checkbox checkbox-sm" checked={!!dcfModel.governance.inputsLocked}
+                    onChange={(e) => updateGovernanceField('inputsLocked', e.target.checked)} disabled={!isAdmin} />
+                  <span className="label-text">Lock manual inputs</span>
+                </label>
+                <label className="label cursor-pointer justify-start gap-3">
+                  <input type="checkbox" className="checkbox checkbox-sm" checked={!!dcfModel.governance.formulasLocked}
+                    onChange={(e) => updateGovernanceField('formulasLocked', e.target.checked)} disabled={!isAdmin} />
+                  <span className="label-text">Lock formulas / engine outputs</span>
+                </label>
+                <label className="label cursor-pointer justify-start gap-3">
+                  <input type="checkbox" className="checkbox checkbox-sm" checked={!!dcfModel.governance.overridesEnabled}
+                    onChange={(e) => updateGovernanceField('overridesEnabled', e.target.checked)} disabled={!isAdmin} />
+                  <span className="label-text">Allow assumption overrides</span>
+                </label>
+                <Field label="Diagnostic Mode">
+                  <select value={dcfModel.governance.diagnosticLevel} onChange={(e) => updateGovernanceField('diagnosticLevel', e.target.value)}
+                    className="select select-bordered input-md w-full md:text-base" disabled={!isAdmin}>
+                    <option value="strict">Strict</option>
+                    <option value="warning">Warning only</option>
+                    <option value="informational">Informational</option>
+                  </select>
+                </Field>
+                <Field label="Override Memo">
+                  <textarea value={dcfModel.governance.overrideNote} onChange={(e) => updateGovernanceField('overrideNote', e.target.value)}
+                    className="textarea textarea-bordered min-h-24 w-full md:text-base" disabled={!isAdmin}
+                    placeholder="Explain why non-default assumptions or manual overrides were used." />
+                </Field>
+                <div className="rounded-xl border border-base-300 bg-base-100 p-3 space-y-3">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className={`badge ${governanceDiagnostics.summary.hasErrors ? 'badge-error' : governanceDiagnostics.summary.hasWarnings ? 'badge-warning' : 'badge-success'}`}>
+                      {governanceDiagnostics.summary.hasErrors ? 'Errors present' : governanceDiagnostics.summary.hasWarnings ? 'Warnings present' : 'No broken states'}
+                    </span>
+                    <span className="badge badge-outline">{governanceDiagnostics.summary.overrideCount} override{governanceDiagnostics.summary.overrideCount === 1 ? '' : 's'}</span>
+                  </div>
+                  <div className="space-y-2">
+                    {governanceDiagnostics.issues.length === 0 ? (
+                      <div className="text-sm text-base-content/60">No lease timing or cash flow state conflicts detected.</div>
+                    ) : governanceDiagnostics.issues.map((issue, index) => (
+                      <div key={`governance-issue-${index}`} className={`rounded-lg border px-3 py-2 text-sm ${issue.severity === 'error' ? 'border-error/30 bg-error/10 text-error-content' : 'border-warning/30 bg-warning/10 text-warning-content'}`}>
+                        <div className="font-semibold">{issue.scope}</div>
+                        <div>{issue.message}</div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="space-y-2">
+                    <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40">Override Inventory</div>
+                    {governanceDiagnostics.overrides.length === 0 ? (
+                      <div className="text-sm text-base-content/60">No non-default assumptions detected.</div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2">
+                        {governanceDiagnostics.overrides.map((override, index) => (
+                          <div key={`override-${index}`} className="rounded-lg border border-base-300 bg-base-200/40 px-3 py-2 text-sm">
+                            <span className="font-semibold">{override.section}.{override.field}</span>: {String(override.value)}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Lease Economics</div>
                 <Field label="Market Rent Growth (% / yr)">
                   <NumericInput value={dcfModel.leaseEconomics.marketRentGrowthPct} onChange={(value) => updateLeaseEconomicsField('marketRentGrowthPct', value)}
@@ -3408,6 +3648,45 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                 <Field label="Gross-Up Occupancy (%)">
                   <NumericInput value={dcfModel.leaseEconomics.grossUpPct} onChange={(value) => updateLeaseEconomicsField('grossUpPct', value)}
                     className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="CAM Admin Fee (%)">
+                  <NumericInput value={dcfModel.leaseEconomics.camAdminFeePct} onChange={(value) => updateLeaseEconomicsField('camAdminFeePct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Controllable Expense Share (%)">
+                  <NumericInput value={dcfModel.leaseEconomics.controllableExpensePct} onChange={(value) => updateLeaseEconomicsField('controllableExpensePct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Controllable Cap (%)">
+                  <NumericInput value={dcfModel.leaseEconomics.controllableCapPct} onChange={(value) => updateLeaseEconomicsField('controllableCapPct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Non-Recoverable Expense (%)">
+                  <NumericInput value={dcfModel.leaseEconomics.nonRecoverableExpensePct} onChange={(value) => updateLeaseEconomicsField('nonRecoverableExpensePct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="CAM Pool Recoverable (%)">
+                  <NumericInput value={dcfModel.leaseEconomics.camPoolRecoverablePct} onChange={(value) => updateLeaseEconomicsField('camPoolRecoverablePct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Tax Pool Recoverable (%)">
+                  <NumericInput value={dcfModel.leaseEconomics.taxPoolRecoverablePct} onChange={(value) => updateLeaseEconomicsField('taxPoolRecoverablePct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Insurance Pool Recoverable (%)">
+                  <NumericInput value={dcfModel.leaseEconomics.insurancePoolRecoverablePct} onChange={(value) => updateLeaseEconomicsField('insurancePoolRecoverablePct', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                </Field>
+                <Field label="Gross-Up Method">
+                  <select value={dcfModel.leaseEconomics.grossUpMethod} onChange={(e) => updateLeaseEconomicsField('grossUpMethod', e.target.value)}
+                    className="select select-bordered input-md w-full md:text-base" disabled={!isAdmin}>
+                    <option value="category">By category</option>
+                    <option value="occupied">Occupied ratio</option>
+                  </select>
+                </Field>
+                <Field label="Reconciliation Month">
+                  <NumericInput value={dcfModel.leaseEconomics.reconciliationMonth} onChange={(value) => updateLeaseEconomicsField('reconciliationMonth', value)}
+                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} />
                 </Field>
               </div>
 
@@ -3575,6 +3854,22 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
                             <Field label="Co-Tenancy Group">
                               <input value={tenant.coTenancyGroup} onChange={(e) => updateRentRollRow(index, 'coTenancyGroup', e.target.value)}
                                 className="input input-bordered input-md w-full md:text-base" disabled={!isAdmin} />
+                            </Field>
+                            <Field label="CAM Pool Share (%)">
+                              <NumericInput value={tenant.camPoolSharePct} onChange={(value) => updateRentRollRow(index, 'camPoolSharePct', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                            </Field>
+                            <Field label="Admin Fee (%)">
+                              <NumericInput value={tenant.adminFeePct} onChange={(value) => updateRentRollRow(index, 'adminFeePct', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                            </Field>
+                            <Field label="Controllable Cap (%)">
+                              <NumericInput value={tenant.controllableCapPct} onChange={(value) => updateRentRollRow(index, 'controllableCapPct', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                            </Field>
+                            <Field label="Non-Recoverable Expense (%)">
+                              <NumericInput value={tenant.nonRecoverableExpensePct} onChange={(value) => updateRentRollRow(index, 'nonRecoverableExpensePct', value)}
+                                className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
                             </Field>
                           </div>
                           <label className="label cursor-pointer justify-start gap-3">

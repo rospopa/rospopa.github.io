@@ -1352,7 +1352,7 @@ app.put('/api/properties/:id', async (req, res) => {
           const oldModel = oldDisplay || {};
           const newModel = newDisplay || {};
           const structuredDiff = {};
-          const modelSections = ['scenarios', 'debtTerms', 'waterfall', 'timing', 'leaseEconomics', 'lenderConstraints', 'rentRoll'];
+          const modelSections = ['scenarios', 'debtTerms', 'waterfall', 'timing', 'taxModel', 'governance', 'leaseEconomics', 'lenderConstraints', 'rentRoll'];
           for (const section of modelSections) {
             const beforeSection = oldModel[section] ?? null;
             const afterSection = newModel[section] ?? null;
