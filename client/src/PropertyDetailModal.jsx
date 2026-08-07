@@ -95,36 +95,45 @@ function AssignUsersTab({ allUsers, assignLoading, toggleAssign, onViewContact }
 
 export default function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffset = 0 }) {
   const DCF_ROW_DEFS = [
-    { key: 'grossRevenue', label: 'Gross Revenue', type: 'currency', category: 'income' },
-    { key: 'vacancyCreditLoss', label: 'Vacancy / Credit Loss', type: 'currency', category: 'income' },
-    { key: 'percentageRentDcf', label: 'Percentage Rent', type: 'currency', category: 'income' },
-    { key: 'otherIncomeDcf', label: 'Other Income', type: 'currency', category: 'income' },
-    { key: 'effectiveGrossIncome', label: 'Effective Gross Income', type: 'currency', category: 'formula', readOnly: true },
-    { key: 'operatingExpensesDcf', label: 'Operating Expenses', type: 'currency', category: 'expense' },
-    { key: 'managementFeesDcf', label: 'Management Fees', type: 'currency', category: 'expense' },
-    { key: 'propertyTaxesDcf', label: 'Property Taxes', type: 'currency', category: 'expense' },
-    { key: 'insuranceDcf', label: 'Insurance', type: 'currency', category: 'expense' },
-    { key: 'reservesCapexDcf', label: 'Reserves / Replacement Reserve', type: 'currency', category: 'expense' },
-    { key: 'netOperatingIncomeDcf', label: 'Net Operating Income', type: 'currency', category: 'formula', readOnly: true },
-    { key: 'tenantImprovements', label: 'Tenant Improvements (TI)', type: 'currency', category: 'capital' },
-    { key: 'leasingCommissions', label: 'Leasing Commissions (LC)', type: 'currency', category: 'capital' },
-    { key: 'capitalExpenditures', label: 'Additional Capex', type: 'currency', category: 'capital' },
-    { key: 'debtServiceDcf', label: 'Debt Service', type: 'currency', category: 'debt' },
-    { key: 'loanBalanceDcf', label: 'Loan Balance', type: 'currency', category: 'debt', readOnly: true },
-    { key: 'refinanceProceeds', label: 'Refinance Proceeds', type: 'currency', category: 'capital' },
-    { key: 'refinanceCostsDcf', label: 'Refinance Costs', type: 'currency', category: 'capital' },
-    { key: 'loanPayoffAtRefi', label: 'Loan Payoff at Refi', type: 'currency', category: 'capital', readOnly: true },
-    { key: 'taxesDcf', label: 'Operating Tax', type: 'currency', category: 'tax' },
-    { key: 'capitalGainsTaxDcf', label: 'Capital Gains Tax', type: 'currency', category: 'tax', readOnly: true },
-    { key: 'cashFlowBeforeSale', label: 'Cash Flow Before Sale', type: 'currency', category: 'formula', readOnly: true },
-    { key: 'grossSaleProceedsDcf', label: 'Gross Sale Proceeds', type: 'currency', category: 'exit', readOnly: true },
-    { key: 'saleCostsDcf', label: 'Sale Costs', type: 'currency', category: 'exit', readOnly: true },
-    { key: 'loanPayoffAtSale', label: 'Loan Payoff at Sale', type: 'currency', category: 'exit', readOnly: true },
-    { key: 'recaptureTaxDcf', label: 'Recapture Tax', type: 'currency', category: 'exit', readOnly: true },
-    { key: 'saleProceedsDcf', label: 'Sale Proceeds', type: 'currency', category: 'exit' },
-    { key: 'cashFlowAfterSale', label: 'Cash Flow After Sale', type: 'currency', category: 'formula', readOnly: true },
-    { key: 'waterfallSponsor', label: 'Sponsor Waterfall', type: 'currency', category: 'waterfall' },
-    { key: 'waterfallInvestor', label: 'Investor Waterfall', type: 'currency', category: 'waterfall' },
+    { key: 'grossRevenue', label: 'Gross Revenue', type: 'currency', category: 'income', group: 'revenue' },
+    { key: 'vacancyCreditLoss', label: 'Vacancy / Credit Loss', type: 'currency', category: 'income', group: 'revenue' },
+    { key: 'percentageRentDcf', label: 'Percentage Rent', type: 'currency', category: 'income', group: 'revenue' },
+    { key: 'otherIncomeDcf', label: 'Other Income', type: 'currency', category: 'income', group: 'revenue' },
+    { key: 'effectiveGrossIncome', label: 'Effective Gross Income', type: 'currency', category: 'formula', group: 'revenue', readOnly: true, subtotal: true, help: 'Gross Revenue - Vacancy / Credit Loss + Percentage Rent + Other Income.' },
+    { key: 'operatingExpensesDcf', label: 'Operating Expenses', type: 'currency', category: 'expense', group: 'expenses' },
+    { key: 'managementFeesDcf', label: 'Management Fees', type: 'currency', category: 'expense', group: 'expenses' },
+    { key: 'propertyTaxesDcf', label: 'Property Taxes', type: 'currency', category: 'expense', group: 'expenses' },
+    { key: 'insuranceDcf', label: 'Insurance', type: 'currency', category: 'expense', group: 'expenses' },
+    { key: 'reservesCapexDcf', label: 'Reserves / Replacement Reserve', type: 'currency', category: 'expense', group: 'expenses' },
+    { key: 'netOperatingIncomeDcf', label: 'Net Operating Income', type: 'currency', category: 'formula', group: 'expenses', readOnly: true, subtotal: true, help: 'EGI - Operating Expenses - Management Fees - Property Taxes - Insurance - Reserves.' },
+    { key: 'tenantImprovements', label: 'Tenant Improvements (TI)', type: 'currency', category: 'capital', group: 'capital' },
+    { key: 'leasingCommissions', label: 'Leasing Commissions (LC)', type: 'currency', category: 'capital', group: 'capital' },
+    { key: 'capitalExpenditures', label: 'Additional Capex', type: 'currency', category: 'capital', group: 'capital' },
+    { key: 'refinanceProceeds', label: 'Refinance Proceeds', type: 'currency', category: 'capital', group: 'capital' },
+    { key: 'refinanceCostsDcf', label: 'Refinance Costs', type: 'currency', category: 'capital', group: 'capital' },
+    { key: 'loanPayoffAtRefi', label: 'Loan Payoff at Refi', type: 'currency', category: 'capital', group: 'capital', readOnly: true },
+    { key: 'debtServiceDcf', label: 'Debt Service', type: 'currency', category: 'debt', group: 'debt' },
+    { key: 'loanBalanceDcf', label: 'Loan Balance', type: 'currency', category: 'debt', group: 'debt', readOnly: true },
+    { key: 'taxesDcf', label: 'Operating Tax', type: 'currency', category: 'tax', group: 'tax' },
+    { key: 'capitalGainsTaxDcf', label: 'Capital Gains Tax', type: 'currency', category: 'tax', group: 'tax', readOnly: true },
+    { key: 'cashFlowBeforeSale', label: 'Cash Flow Before Sale', type: 'currency', category: 'formula', group: 'tax', readOnly: true, subtotal: true, help: 'NOI - TI - LC - Capex - Debt Service + Refi Proceeds - Refi Costs - Taxes - Capital Gains Tax.' },
+    { key: 'grossSaleProceedsDcf', label: 'Gross Sale Proceeds', type: 'currency', category: 'exit', group: 'exit', readOnly: true },
+    { key: 'saleCostsDcf', label: 'Sale Costs', type: 'currency', category: 'exit', group: 'exit', readOnly: true },
+    { key: 'loanPayoffAtSale', label: 'Loan Payoff at Sale', type: 'currency', category: 'exit', group: 'exit', readOnly: true },
+    { key: 'recaptureTaxDcf', label: 'Recapture Tax', type: 'currency', category: 'exit', group: 'exit', readOnly: true },
+    { key: 'saleProceedsDcf', label: 'Sale Proceeds', type: 'currency', category: 'exit', group: 'exit', subtotal: true, help: 'Gross Sale Proceeds - Sale Costs - Loan Payoff at Sale - Exit Taxes.' },
+    { key: 'cashFlowAfterSale', label: 'Cash Flow After Sale', type: 'currency', category: 'formula', group: 'exit', readOnly: true, subtotal: true, help: 'Cash Flow Before Sale + Sale Proceeds - Waterfall Distributions.' },
+    { key: 'waterfallSponsor', label: 'Sponsor Waterfall', type: 'currency', category: 'waterfall', group: 'waterfall' },
+    { key: 'waterfallInvestor', label: 'Investor Waterfall', type: 'currency', category: 'waterfall', group: 'waterfall' },
+  ]
+  const DCF_GROUPS = [
+    { key: 'revenue', label: 'Revenue', tone: 'text-sky-700 border-sky-200 bg-sky-50/60' },
+    { key: 'expenses', label: 'Expenses / NOI', tone: 'text-amber-700 border-amber-200 bg-amber-50/60' },
+    { key: 'capital', label: 'Capital Events', tone: 'text-violet-700 border-violet-200 bg-violet-50/60' },
+    { key: 'debt', label: 'Debt', tone: 'text-indigo-700 border-indigo-200 bg-indigo-50/60' },
+    { key: 'tax', label: 'Taxes / Cash Flow', tone: 'text-rose-700 border-rose-200 bg-rose-50/60' },
+    { key: 'exit', label: 'Exit / Sale', tone: 'text-emerald-700 border-emerald-200 bg-emerald-50/60' },
+    { key: 'waterfall', label: 'Waterfall', tone: 'text-fuchsia-700 border-fuchsia-200 bg-fuchsia-50/60' },
   ]
   const DCF_MAX_YEARS = 10
   const defaultDcfModel = () => ({
@@ -1083,6 +1092,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   const [incomeMax, setIncomeMax] = useState('')
   const [popDensity, setPopDensity] = useState('')
   const [propStatus, setPropStatus] = useState('New')
+  const [collapsedDcfGroups, setCollapsedDcfGroups] = useState({})
   const [grm, setGrm] = useState('')
   const [capRate, setCapRate] = useState('')
   const [cashOnCash, setCashOnCash] = useState('')
@@ -1300,6 +1310,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
       rentRoll: prev.rentRoll.map((row, rowIndex) => rowIndex === index ? { ...row, [field]: value } : row)
     }))
   }
+  function toggleDcfGroup(groupKey) {
+    setCollapsedDcfGroups(prev => ({ ...prev, [groupKey]: !prev[groupKey] }))
+  }
   function addRentRollRow() {
     setDcfModel(prev => ({
       ...prev,
@@ -1446,6 +1459,11 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   const engineVisibleDcfMonths = Array.isArray(liveDerivedDcfModel.months)
     ? liveDerivedDcfModel.months.slice(0, activeHoldPeriod * 12)
     : []
+  const dcfPeriods = dcfModel.timing.viewMode === 'monthly' ? engineVisibleDcfMonths : visibleDcfYears
+  const groupedDcfRows = DCF_GROUPS.map((group) => ({
+    ...group,
+    rows: DCF_ROW_DEFS.filter((row) => row.group === group.key)
+  })).filter((group) => group.rows.length > 0)
   const dcfYearSummaries = useMemo(() => engineVisibleDcfYears.map((yearRow) => {
     const effectiveGrossIncome = getComputedDcfValue(yearRow, 'effectiveGrossIncome') || 0
     const netOperatingIncome = getComputedDcfValue(yearRow, 'netOperatingIncomeDcf') || 0
@@ -3314,50 +3332,109 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     <div className="badge badge-outline">{activeHoldPeriod} Year Hold</div>
                   </div>
                 </div>
-                <div className="overflow-auto h-full">
-                  <table className="table table-pin-rows table-pin-cols text-sm min-w-[1200px]">
+                <div className="md:hidden p-4 space-y-4">
+                  {groupedDcfRows.map((group) => (
+                    <div key={`mobile-${group.key}`} className={`rounded-xl border ${group.tone} overflow-hidden`}>
+                      <button
+                        type="button"
+                        className="w-full flex items-center justify-between px-4 py-3 text-left"
+                        onClick={() => toggleDcfGroup(group.key)}
+                      >
+                        <span className="text-xs font-semibold uppercase tracking-[0.18em]">{group.label}</span>
+                        <span className="text-lg leading-none">{collapsedDcfGroups[group.key] ? '+' : '-'}</span>
+                      </button>
+                      {!collapsedDcfGroups[group.key] && (
+                        <div className="bg-white px-4 py-3 space-y-3">
+                          {group.rows.filter(row => row.subtotal || row.readOnly).map((row) => (
+                            <div key={`mobile-row-${row.key}`} className={`rounded-lg border px-3 py-2 ${row.subtotal ? 'border-slate-300 bg-slate-50' : 'border-base-200 bg-base-100'}`}>
+                              <div className="flex items-center justify-between gap-3">
+                                <div>
+                                  <div className="text-sm font-semibold text-slate-900">{row.label}</div>
+                                  <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">{row.category}</div>
+                                </div>
+                                <div className="text-right">
+                                  <div className="text-xs text-slate-500">{dcfModel.timing.viewMode === 'monthly' ? 'Current period' : 'Year 1'}</div>
+                                  <div className="text-sm font-semibold text-slate-900">
+                                    {formatMoneyCell(row.readOnly ? getComputedDcfValue(dcfPeriods[0] || {}, row.key) : dcfPeriods[0]?.[row.key])}
+                                  </div>
+                                </div>
+                              </div>
+                              {row.help && <div className="mt-2 text-xs text-slate-500">{row.help}</div>}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="hidden md:block overflow-auto h-full">
+                  <table className="table text-sm min-w-[1200px] border-separate border-spacing-0">
                     <thead>
                       <tr className="bg-base-200/80">
-                        <th className="min-w-[260px] bg-base-200">Line Item</th>
-                        {(dcfModel.timing.viewMode === 'monthly' ? engineVisibleDcfMonths : visibleDcfYears).map((period) => (
-                          <th key={dcfModel.timing.viewMode === 'monthly' ? `month-${period.month}` : `year-${period.year}`} className="text-center bg-base-200 min-w-[140px]">
+                        <th className="sticky left-0 top-0 z-[3] min-w-[280px] bg-base-200 border-b border-base-300">Line Item</th>
+                        {dcfPeriods.map((period) => (
+                          <th key={dcfModel.timing.viewMode === 'monthly' ? `month-${period.month}` : `year-${period.year}`} className="sticky top-0 z-[2] text-center bg-base-200 min-w-[140px] border-b border-base-300">
                             {dcfModel.timing.viewMode === 'monthly' ? `M${period.month}` : `Year ${period.year}`}
                           </th>
                         ))}
                       </tr>
                     </thead>
                     <tbody>
-                      {DCF_ROW_DEFS.map((row) => (
-                        <tr key={row.key} className={row.readOnly ? 'bg-base-200/40' : ''}>
-                          <th className="font-medium whitespace-nowrap">
-                            <div className="flex flex-col">
-                              <span>{row.label}</span>
-                              <span className="text-[10px] uppercase tracking-[0.18em] text-base-content/35">{row.category}</span>
-                            </div>
-                          </th>
-                          {(dcfModel.timing.viewMode === 'monthly' ? engineVisibleDcfMonths : visibleDcfYears).map((period, yearIndex) => {
-                            const computedValue = row.readOnly ? getComputedDcfValue(period, row.key) : null
-                            return (
-                              <td key={`${row.key}-${dcfModel.timing.viewMode === 'monthly' ? period.month : period.year}`} className="align-middle">
-                                {row.readOnly ? (
-                                  <div className="input input-bordered input-md w-full md:text-base cursor-default flex items-center justify-end" style={{ color: '#000', fontWeight: 700 }}>
-                                    {formatMoneyCell(computedValue)}
+                      {groupedDcfRows.map((group) => (
+                        <>
+                          <tr key={`group-${group.key}`} className={`${group.tone}`}>
+                            <th colSpan={dcfPeriods.length + 1} className={`sticky left-0 z-[1] px-0 ${group.tone}`}>
+                              <button
+                                type="button"
+                                className="w-full flex items-center justify-between px-4 py-3 text-left"
+                                onClick={() => toggleDcfGroup(group.key)}
+                              >
+                                <span className="text-xs font-semibold uppercase tracking-[0.18em]">{group.label}</span>
+                                <span className="text-lg leading-none">{collapsedDcfGroups[group.key] ? '+' : '-'}</span>
+                              </button>
+                            </th>
+                          </tr>
+                          {!collapsedDcfGroups[group.key] && group.rows.map((row) => (
+                            <tr key={row.key} className={row.subtotal ? 'bg-slate-100/90' : row.readOnly ? 'bg-base-200/30' : 'bg-white'}>
+                              <th className={`sticky left-0 z-[1] whitespace-nowrap border-b border-base-200 ${row.subtotal ? 'bg-slate-100 font-semibold' : 'bg-white font-medium'}`}>
+                                <div className="flex items-start gap-2">
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-center gap-1">
+                                      <span>{row.label}</span>
+                                      {row.help && (
+                                        <span className="tooltip tooltip-right" data-tip={row.help}>
+                                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-base-300 text-base-content/50 text-[10px] cursor-help">?</span>
+                                        </span>
+                                      )}
+                                    </div>
+                                    <span className="text-[10px] uppercase tracking-[0.18em] text-base-content/35">{row.category}</span>
                                   </div>
-                                ) : (
-                                  <NumericInput
-                                    placeholder="0"
-                                    value={period[row.key]}
-                                    onChange={(value) => dcfModel.timing.viewMode === 'monthly' ? null : updateDcfCell(yearIndex, row.key, value)}
-                                    className="input input-bordered input-md w-full md:text-base text-right"
-                                    style={{ color: '#1d4ed8' }}
-                                    disabled={!isAdmin || dcfModel.timing.viewMode === 'monthly'}
-                                    allowDecimal={false}
-                                  />
-                                )}
-                              </td>
-                            )
-                          })}
-                        </tr>
+                                </div>
+                              </th>
+                              {dcfPeriods.map((period, yearIndex) => {
+                                const computedValue = row.readOnly ? getComputedDcfValue(period, row.key) : null
+                                return (
+                                  <td key={`${row.key}-${dcfModel.timing.viewMode === 'monthly' ? period.month : period.year}`} className={`align-middle border-b border-base-200 ${row.subtotal ? 'bg-slate-100/60' : ''}`}>
+                                    {row.readOnly ? (
+                                      <div className={`input input-bordered input-md w-full md:text-base cursor-default flex items-center justify-end ${row.subtotal ? 'border-slate-400 bg-slate-50 font-bold text-slate-900' : 'border-slate-300 bg-slate-50 font-semibold text-slate-900'}`}>
+                                        {formatMoneyCell(computedValue)}
+                                      </div>
+                                    ) : (
+                                      <NumericInput
+                                        placeholder="0"
+                                        value={period[row.key]}
+                                        onChange={(value) => dcfModel.timing.viewMode === 'monthly' ? null : updateDcfCell(yearIndex, row.key, value)}
+                                        className={`input input-bordered input-md w-full md:text-base text-right ${row.subtotal ? 'border-slate-300 bg-slate-50 font-semibold text-slate-900' : 'border-sky-200 bg-sky-50/60 text-sky-900'}`}
+                                        disabled={!isAdmin || dcfModel.timing.viewMode === 'monthly'}
+                                        allowDecimal={false}
+                                      />
+                                    )}
+                                  </td>
+                                )
+                              })}
+                            </tr>
+                          ))}
+                        </>
                       ))}
                     </tbody>
                   </table>
