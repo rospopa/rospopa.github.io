@@ -1508,23 +1508,43 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   const dscrFromEngine = adjustedNoiValue !== null && annualDebtServiceAmount > 0
     ? (adjustedNoiValue / annualDebtServiceAmount)
     : null
-  const financialInputClass = 'input input-bordered input-md w-full md:text-base border-sky-300 bg-sky-50/60 text-sky-900 focus:border-sky-500 focus:outline-none'
+  const financialInputClass = 'input input-bordered input-md w-full md:text-base border-sky-300 bg-sky-50/70 text-sky-950 focus:border-sky-500 focus:outline-none'
   const financialOutputClass = 'input input-bordered input-md w-full md:text-base cursor-default border-slate-300 bg-slate-100 text-slate-900 font-semibold'
+  const financialFormulaClass = 'input input-bordered input-md w-full md:text-base cursor-default border-slate-400 bg-slate-50 text-slate-900 font-semibold'
+  const financialReferenceClass = 'input input-bordered input-md w-full md:text-base border-zinc-300 bg-zinc-50 text-zinc-700'
+  const financialSelectClass = 'select select-bordered input-md w-full md:text-base border-sky-300 bg-sky-50/70 text-sky-950'
+  const financialReferenceSelectClass = 'select select-bordered input-md w-full md:text-base border-zinc-300 bg-zinc-50 text-zinc-700'
+  const financialCheckboxClass = 'checkbox checkbox-sm border-sky-400 text-sky-600 [--chkbg:theme(colors.sky.500)] [--chkfg:white]'
+  const financialReferenceCheckboxClass = 'checkbox checkbox-sm border-zinc-400 text-zinc-600 [--chkbg:theme(colors.zinc.500)] [--chkfg:white]'
+  const financialToggleLabelClass = 'label-text text-sm font-medium text-sky-900'
+  const financialReferenceLabelClass = 'label-text text-sm font-medium text-zinc-700'
   const sectionHeaderClass = 'text-sm font-semibold uppercase tracking-wide pb-2 border-b'
   const metricTone = {
-    good: 'border-emerald-300 bg-emerald-50 text-emerald-900',
-    caution: 'border-amber-300 bg-amber-50 text-amber-900',
-    danger: 'border-rose-300 bg-rose-50 text-rose-900',
-    neutral: financialOutputClass,
+    good: 'input input-bordered input-md w-full md:text-base cursor-default font-semibold border-emerald-300 bg-emerald-50 text-emerald-900',
+    caution: 'input input-bordered input-md w-full md:text-base cursor-default font-semibold border-amber-300 bg-amber-50 text-amber-900',
+    danger: 'input input-bordered input-md w-full md:text-base cursor-default font-semibold border-rose-300 bg-rose-50 text-rose-900',
+    neutral: financialFormulaClass,
   }
   const dscrTone = dscrFromEngine !== null
     ? dscrFromEngine >= 1.25 ? metricTone.good : dscrFromEngine >= 1 ? metricTone.caution : metricTone.danger
+    : metricTone.neutral
+  const capRateTone = capRateFromEngine !== null
+    ? capRateFromEngine >= 7 ? metricTone.good : capRateFromEngine >= 5 ? metricTone.caution : metricTone.danger
     : metricTone.neutral
   const irrTone = leveredIrr !== null
     ? leveredIrr >= 0.15 ? metricTone.good : leveredIrr >= 0.08 ? metricTone.caution : metricTone.danger
     : metricTone.neutral
   const cashOnCashTone = cashOnCashFromEngine !== null
     ? cashOnCashFromEngine >= 8 ? metricTone.good : cashOnCashFromEngine >= 4 ? metricTone.caution : metricTone.danger
+    : metricTone.neutral
+  const debtYieldTone = debtYield !== null
+    ? debtYield >= 10 ? metricTone.good : debtYield >= 8 ? metricTone.caution : metricTone.danger
+    : metricTone.neutral
+  const yieldOnCostTone = yieldOnCost !== null
+    ? yieldOnCost >= 8 ? metricTone.good : yieldOnCost >= 6 ? metricTone.caution : metricTone.danger
+    : metricTone.neutral
+  const rentToSalesTone = derivedRentToSales !== null
+    ? derivedRentToSales <= 10 ? metricTone.good : derivedRentToSales <= 12 ? metricTone.caution : metricTone.danger
     : metricTone.neutral
   const summarizeScenarioModel = useCallback((scenarioKey, propertyOverrides = {}) => {
     const scenarioProp = buildScenarioProperty(scenarioKey, {}, propertyOverrides)
@@ -2262,6 +2282,17 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
         {/* Financials tab */}
         {tab === 'financials' && (
           <div className="space-y-4">
+              <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Legend</span>
+                  <span className="rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-900">Assumption</span>
+                  <span className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-800">Computed</span>
+                  <span className="rounded-full border border-zinc-300 bg-zinc-50 px-3 py-1 text-xs font-semibold text-zinc-700">Reference</span>
+                  <span className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">Healthy</span>
+                  <span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">Watch</span>
+                  <span className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-800">Risk</span>
+                </div>
+              </div>
               {/* Investment metrics */}
               <div className="space-y-3 pt-2">
                 <div className={`${sectionHeaderClass} text-emerald-700 border-emerald-200`}>Investment Metrics</div>
@@ -2274,7 +2305,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 {/* Cap Rate = NOI / Price */}
                 <Field label="Cap Rate (%)" help={FIELD_HELP.capRate}>
-                  <input readOnly value={capRateFromEngine !== null ? `${capRateFromEngine.toFixed(2)}%` : '—'} className={financialOutputClass} />
+                  <input readOnly value={capRateFromEngine !== null ? `${capRateFromEngine.toFixed(2)}%` : '—'} className={capRateTone} />
                 </Field>
                 {/* Cash-on-Cash = (NOI - Debt Service) / Equity */}
                 <Field label="Cash-on-Cash (%)" help={FIELD_HELP.cashOnCash}>
@@ -2288,27 +2319,27 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <Field label="Unlevered IRR (%)" help={FIELD_HELP.unleveredIrr}>
                   <input readOnly
                     value={unleveredIrr !== null ? `${(unleveredIrr * 100).toFixed(2)}%` : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Levered EMx" help={FIELD_HELP.leveredEmx}>
                   <input readOnly
                     value={leveredEquityMultiple !== null ? `${leveredEquityMultiple.toFixed(2)}x` : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Unlevered EMx" help={FIELD_HELP.unleveredEmx}>
                   <input readOnly
                     value={unleveredEquityMultiple !== null ? `${unleveredEquityMultiple.toFixed(2)}x` : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Levered NPV ($)" help={FIELD_HELP.leveredNpv}>
                   <input readOnly
                     value={leveredNpv !== null ? '$' + leveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Unlevered NPV ($)" help={FIELD_HELP.unleveredNpv}>
                   <input readOnly
                     value={unleveredNpv !== null ? '$' + unleveredNpv.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="NPV Discount Rate (%)" help={FIELD_HELP.discountRate}>
                   <NumericInput placeholder="e.g. 10.0" value={irr} onChange={setIrr}
@@ -2331,11 +2362,11 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <Field label="Rent-to-Sales (%)" help={FIELD_HELP.rentToSales}>
                   <input readOnly
                     value={derivedRentToSales !== null ? `${derivedRentToSales.toFixed(2)}%` : '—'}
-                    className={financialOutputClass} />
+                    className={rentToSalesTone} />
                 </Field>
                 <Field label="# SKUs" help={FIELD_HELP.numSkus}>
                   <NumericInput placeholder="e.g. 500" value={numSkus} onChange={setNumSkus}
-                    className={financialInputClass} disabled={!isAdmin} />
+                    className={financialReferenceClass} disabled={!isAdmin} />
                 </Field>
                 {/* Price/Acre = Price / Lot Size */}
                 <Field label="Price / Acre ($)" help={FIELD_HELP.pricePerAcre}>
@@ -2355,7 +2386,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 <Field label="Management Fee ($/yr)" help={FIELD_HELP.managementFeeDollar}>
                   <input readOnly value={firstYearDcf ? '$' + (parseNum(firstYearDcf.managementFeesDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Insurance ($/yr)" help={FIELD_HELP.insurance}>
                   <NumericInput placeholder="e.g. 12000" value={insurance} onChange={setInsurance}
@@ -2368,7 +2399,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <Field label="Adjusted NOI ($/yr)" help={FIELD_HELP.adjustedNoi}>
                   <input readOnly
                     value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
               </div>
 
@@ -2386,7 +2417,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <Field label="EGI — Effective Gross Income ($/yr)" help={FIELD_HELP.egi}>
                   <input readOnly
                     value={egiAmount !== null ? '$' + egiAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Other Income ($/yr)" help={FIELD_HELP.otherIncome}>
                   <NumericInput placeholder="parking, RUBS, storage" value={otherIncome} onChange={setOtherIncome}
@@ -2403,7 +2434,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <Field label="NOI — Net Operating Income ($/yr)" help={FIELD_HELP.adjustedNoi}>
                   <input readOnly
                     value={adjustedNoiValue !== null ? '$' + adjustedNoiValue.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
               </div>
 
@@ -2422,12 +2453,12 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <Field label="Debt Yield (%)" help={FIELD_HELP.debtYield}>
                   <input readOnly
                     value={debtYield !== null ? `${debtYield.toFixed(2)}%` : '—'}
-                    className={financialOutputClass} />
+                    className={debtYieldTone} />
                 </Field>
                 <Field label="Yield on Cost (%)" help={FIELD_HELP.yieldOnCost}>
                   <input readOnly
                     value={yieldOnCost !== null ? `${yieldOnCost.toFixed(2)}%` : '—'}
-                    className={financialOutputClass} />
+                    className={yieldOnCostTone} />
                 </Field>
               </div>
 
@@ -2441,7 +2472,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <Field label="LTV (%)" help={FIELD_HELP.ltv}>
                   <input readOnly
                     value={derivedLtv !== null ? `${derivedLtv.toFixed(2)}%` : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Interest Rate (%)" help={FIELD_HELP.interestRate}>
                   <NumericInput placeholder="e.g. 6.5" value={interestRate} onChange={setInterestRate}
@@ -2480,7 +2511,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 <Field label="Rate Floor (%)" help={FIELD_HELP.rateFloor}>
                   <NumericInput value={dcfModel.debtTerms.rateFloorPct} onChange={(value) => updateDebtTermField('rateFloorPct', value)}
-                    className="input input-bordered input-md w-full md:text-base" style={{color:'#1d4ed8'}} disabled={!isAdmin} allowDecimal />
+                    className={financialInputClass} disabled={!isAdmin} allowDecimal />
                 </Field>
                 <Field label="Interest Reserve (months)" help={FIELD_HELP.interestReserve}>
                   <NumericInput value={dcfModel.debtTerms.interestReserveMonths} onChange={(value) => updateDebtTermField('interestReserveMonths', value)}
@@ -2493,7 +2524,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <Field label="Annual Debt Service ($/yr)" help={FIELD_HELP.annualDebtService}>
                   <input readOnly
                     value={annualDebtServiceAmount !== null ? '$' + annualDebtServiceAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
               </div>
 
@@ -2508,7 +2539,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   <input readOnly
                     value={price !== '' && landValuePct !== ''
                       ? '$' + (Number(price) * (1 - Number(landValuePct) / 100)).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Cost Seg Bonus (%)" help={FIELD_HELP.costSegBonus}>
                   <NumericInput placeholder="e.g. 30" value={costSegBonusPct} onChange={setCostSegBonusPct}
@@ -2519,7 +2550,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : null
                     const val = depBasis !== null && costSegBonusPct !== ''
                       ? '$' + (depBasis * Number(costSegBonusPct) / 100).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className={financialOutputClass} />
+                    return <input readOnly value={val} className={financialFormulaClass} />
                   })()}
                 </Field>
                 <Field label="Standard Depreciation / 39-yr ($)" help={FIELD_HELP.standardDepreciation}>
@@ -2527,7 +2558,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     const depBasis = price !== '' && landValuePct !== '' ? Number(price) * (1 - Number(landValuePct) / 100) : null
                     const bonus = costSegBonusPct !== '' ? Number(costSegBonusPct) / 100 : 0
                     const val = depBasis !== null ? '$' + (depBasis * (1 - bonus) / 39).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className={financialOutputClass} />
+                    return <input readOnly value={val} className={financialFormulaClass} />
                   })()}
                 </Field>
                 <Field label="Total Year 1 Depreciation ($)" help={FIELD_HELP.totalDepreciation}>
@@ -2536,7 +2567,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     const bonus = costSegBonusPct !== '' ? Number(costSegBonusPct) / 100 : 0
                     const totalDepr = depBasis !== null ? depBasis * bonus + depBasis * (1 - bonus) / 39 : null
                     return <input readOnly value={totalDepr !== null ? '$' + totalDepr.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                      className={financialOutputClass} />
+                      className={financialFormulaClass} />
                   })()}
                 </Field>
                 <Field label="Effective Tax Rate (%)" help={FIELD_HELP.effectiveTaxRate}>
@@ -2583,29 +2614,29 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 <Field label="Entity Type" help={FIELD_HELP.entityType}>
                   <select value={dcfModel.taxModel.entityType} onChange={(e) => updateTaxModelField('entityType', e.target.value)}
-                    className="select select-bordered input-md w-full md:text-base border-rose-300 bg-rose-50/40 text-rose-900" disabled={!isAdmin}>
+                    className={financialReferenceSelectClass} disabled={!isAdmin}>
                     <option value="Direct">Direct</option>
                     <option value="Partnership">Partnership</option>
                     <option value="Corporate">Corporate</option>
                   </select>
                 </Field>
                 <label className="label cursor-pointer justify-start gap-3">
-                  <input type="checkbox" className="checkbox checkbox-sm"
+                  <input type="checkbox" className={financialReferenceCheckboxClass}
                     checked={!!dcfModel.taxModel.enable1031}
                     onChange={(e) => updateTaxModelField('enable1031', e.target.checked)}
                     disabled={!isAdmin} />
-                  <span className="label-text">Apply 1031 exchange deferral on sale</span>
+                  <span className={financialReferenceLabelClass}>Apply 1031 exchange deferral on sale</span>
                 </label>
                 <Field label="Recapture Tax on Exit ($)" help={FIELD_HELP.recaptureTax}>
                   {(() => {
                     const val = holdYearDcf ? '$' + (parseNum(holdYearDcf.recaptureTaxDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className={financialOutputClass} />
+                    return <input readOnly value={val} className={financialFormulaClass} />
                   })()}
                 </Field>
                 <Field label="Capital Gains Tax on Exit ($)" help={FIELD_HELP.capitalGainsTax}>
                   {(() => {
                     const val = holdYearDcf ? '$' + (parseNum(holdYearDcf.capitalGainsTaxDcf) || 0).toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'
-                    return <input readOnly value={val} className={financialOutputClass} />
+                    return <input readOnly value={val} className={financialFormulaClass} />
                   })()}
                 </Field>
               </div>
@@ -2636,22 +2667,22 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <Field label="Exit Value ($)" help={FIELD_HELP.exitValue}>
                   <input readOnly
                     value={exitValueAmount !== null ? '$' + exitValueAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Net Sale Proceeds ($)" help={FIELD_HELP.netSaleProceeds}>
                   <input readOnly
                     value={netSaleProceedsAmount !== null ? '$' + netSaleProceedsAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Loan Balance at Exit ($)" help={FIELD_HELP.loanBalanceAtExit}>
                   <input readOnly
                     value={loanBalanceAtExitAmount !== null ? '$' + loanBalanceAtExitAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
                 <Field label="Net Equity on Exit ($)" help={FIELD_HELP.netEquityOnExit}>
                   <input readOnly
                     value={netEquityOnExitAmount !== null ? '$' + netEquityOnExitAmount.toLocaleString(undefined, { maximumFractionDigits: 0 }) : '—'}
-                    className={financialOutputClass} />
+                    className={financialFormulaClass} />
                 </Field>
               </div>
 
@@ -2680,7 +2711,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 <Field label="Exit Cap Rate (%)" help={FIELD_HELP.exitCapRate}>
                   <NumericInput placeholder="e.g. 6.5" value={exitCapRate} onChange={setExitCapRate}
-                    className={`${financialInputClass} border-amber-300 bg-amber-50/70 text-amber-900`} disabled={!isAdmin} />
+                    className={financialInputClass} disabled={!isAdmin} />
                 </Field>
                 <Field label="Cost of Sale (%)" help={FIELD_HELP.costOfSale}>
                   <NumericInput placeholder="e.g. 2" value={costOfSale} onChange={setCostOfSale}
@@ -2691,19 +2722,19 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
               <div className="space-y-3 pt-2">
                 <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Model Governance</div>
                 <label className="label cursor-pointer justify-start gap-3">
-                  <input type="checkbox" className="checkbox checkbox-sm" checked={!!dcfModel.governance.inputsLocked}
+                <input type="checkbox" className={financialReferenceCheckboxClass} checked={!!dcfModel.governance.inputsLocked}
                     onChange={(e) => updateGovernanceField('inputsLocked', e.target.checked)} disabled={!isAdmin} />
-                  <span className="label-text">Lock manual inputs</span>
+                <span className={financialReferenceLabelClass}>Lock manual inputs</span>
                 </label>
                 <label className="label cursor-pointer justify-start gap-3">
-                  <input type="checkbox" className="checkbox checkbox-sm" checked={!!dcfModel.governance.formulasLocked}
+                <input type="checkbox" className={financialReferenceCheckboxClass} checked={!!dcfModel.governance.formulasLocked}
                     onChange={(e) => updateGovernanceField('formulasLocked', e.target.checked)} disabled={!isAdmin} />
-                  <span className="label-text">Lock formulas / engine outputs</span>
+                <span className={financialReferenceLabelClass}>Lock formulas / engine outputs</span>
                 </label>
                 <label className="label cursor-pointer justify-start gap-3">
-                  <input type="checkbox" className="checkbox checkbox-sm" checked={!!dcfModel.governance.overridesEnabled}
+                <input type="checkbox" className={financialReferenceCheckboxClass} checked={!!dcfModel.governance.overridesEnabled}
                     onChange={(e) => updateGovernanceField('overridesEnabled', e.target.checked)} disabled={!isAdmin} />
-                  <span className="label-text">Allow assumption overrides</span>
+                <span className={financialReferenceLabelClass}>Allow assumption overrides</span>
                 </label>
                 <Field label="Diagnostic Mode" help={FIELD_HELP.diagnosticLevel}>
                   <select value={dcfModel.governance.diagnosticLevel} onChange={(e) => updateGovernanceField('diagnosticLevel', e.target.value)}
