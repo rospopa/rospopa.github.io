@@ -31,9 +31,9 @@ if (!DATABASE_URL) {
 const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 10,                      // max concurrent connections
-  idleTimeoutMillis: 30000,     // close idle connections after 30s
-  connectionTimeoutMillis: 5000 // fail fast if no connection available in 5s
+  max: 10,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 5000
 });
 
 // ─── Simple in-memory cache ──────────────────────────────────────
