@@ -2749,27 +2749,11 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
         {/* ── Right panel: map / DCF ── */}
         {tab === 'financials' ? (
           <div className="hidden md:flex flex-1 border-l border-base-300 bg-base-100 min-h-0 flex-col">
-            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-base-300">
-              <h3 className="font-bold text-xl">
-                {property?.id ? property.address : 'New Property'}
-              </h3>
-              <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
-            </div>
-            {tabs.length > 1 && (
-              <div className="tabs tabs-bordered px-6 pt-2">
-                {tabs.map(t => (
-                  <button key={t} className={`tab ${tab === t ? 'tab-active font-semibold' : ''}`} onClick={() => setTab(t)}>
-                    {tabLabel[t]}
-                  </button>
-                ))}
-              </div>
-            )}
             <div className="flex-1 p-6 overflow-auto">
               <div className="rounded-2xl border border-base-300 overflow-hidden bg-base-100 shadow-sm min-h-full">
                 <div className="px-5 py-4 border-b border-base-300 flex items-center justify-between gap-3 flex-wrap sticky top-0 bg-base-100 z-10">
                   <div>
                     <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
-                    <p className="text-xs text-base-content/50 mt-1">Editable yearly institutional model saved per property. Black rows are formula outputs.</p>
                   </div>
                   <div className="badge badge-outline">{activeHoldPeriod} Year Hold</div>
                 </div>
@@ -2824,21 +2808,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave }) {
           </div>
         ) : (
           <div className="hidden md:flex flex-1 border-l border-base-300 bg-base-100 min-h-0 flex-col">
-            <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-base-300">
-              <h3 className="font-bold text-xl">
-                {property?.id ? property.address : 'New Property'}
-              </h3>
-              <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
-            </div>
-            {tabs.length > 1 && (
-              <div className="tabs tabs-bordered px-6 pt-2">
-                {tabs.map(t => (
-                  <button key={t} className={`tab ${tab === t ? 'tab-active font-semibold' : ''}`} onClick={() => setTab(t)}>
-                    {tabLabel[t]}
-                  </button>
-                ))}
-              </div>
-            )}
             <div className="flex-1 min-h-0">
               <PropertyMap address={address} />
             </div>
