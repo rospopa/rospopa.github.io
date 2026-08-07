@@ -1778,6 +1778,43 @@ app.get('/api/calendar-events', async (req, res) => {
   res.json({ events: [] });
 });
 
+app.get('/api/treasury-yield-10y', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const endDate = new Date();
+  const startDate = new Date(endDate);
+  startDate.setMonth(startDate.getMonth() - 1);
+  const formatDate = (date) => date.toISOString().slice(0, 10);
+  const seriesId = 'DGS10';
+  if (!FRED_API_KEY) {
+    return res.status(500).json({ error: 'FRED_API_KEY is not configured' });
+  }
+
+  try {
+    const url = `https://api.stlouisfed.org/fred/series/observations?series_id=${seriesId}&api_key=${FRED_API_KEY}&file_type=json&sort_order=asc&observation_start=${formatDate(startDate)}&observation_end=${formatDate(endDate)}`;
+    const data = await new Promise((resolve, reject) => {
+      https.get(url, response => {
+        let body = '';
+        response.on('data', chunk => body += chunk);
+        response.on('end', () => {
+          try { resolve(JSON.parse(body)); } catch { reject(new Error('invalid json')); }
+        });
+      }).on('error', reject);
+    });
+
+    const points = (data.observations || [])
+      .filter(obs => obs && obs.value && obs.value !== '.')
+      .map(obs => ({
+        date: obs.date,
+        yield: Number(obs.value)
+      }))
+      .filter(obs => Number.isFinite(obs.yield));
+
+    res.json({ points });
+  } catch (e) {
+    res.status(500).json({ error: 'treasury yield fetch failed' });
+  }
+});
+
 app.get('/api/properties/:id/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
