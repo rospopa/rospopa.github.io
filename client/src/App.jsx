@@ -2591,12 +2591,6 @@ function PropertyDetailModal({ open, property, isAdmin, onClose, onSave, topOffs
   const engineVisibleDcfMonths = Array.isArray(liveDerivedDcfModel.months)
     ? liveDerivedDcfModel.months.slice(0, activeHoldPeriod * 12)
     : []
-  const derivedGovernanceModel = useMemo(() => ({
-    ...(liveDerivedDcfModel.governance || dcfModel.governance || {}),
-    diagnostics: governanceDiagnostics.issues,
-    overrides: governanceDiagnostics.overrides,
-    summary: governanceDiagnostics.summary
-  }), [liveDerivedDcfModel, dcfModel.governance, governanceDiagnostics])
   const dcfYearSummaries = engineVisibleDcfYears.map((yearRow) => {
     const effectiveGrossIncome = getComputedDcfValue(yearRow, 'effectiveGrossIncome') || 0
     const netOperatingIncome = getComputedDcfValue(yearRow, 'netOperatingIncomeDcf') || 0
