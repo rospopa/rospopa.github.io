@@ -1,6 +1,7 @@
-import { useEffect, useState, useRef, Component } from 'react'
+import { useEffect, useState, useRef, Component, useMemo } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 
 // Fix default Leaflet marker icon paths broken by bundlers
 delete L.Icon.Default.prototype._getIconUrl
@@ -127,39 +128,56 @@ function Field({ label, required, children }) {
 
 /* ─── 10Y Treasury Dashboard Widget ───────────────────────────── */
 function TreasuryYieldWidget() {
+  const RANGE_OPTIONS = ['1M', '3M', '6M', '1Y', '5Y']
+  const [range, setRange] = useState('1M')
   const [points, setPoints] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [hoveredPoint, setHoveredPoint] = useState(null)
 
   useEffect(() => {
     setLoading(true)
     setError('')
-    fetch('/api/treasury-yield-10y', { credentials: 'include' })
+    fetch(`/api/treasury-yield-10y?range=${encodeURIComponent(range)}`, { credentials: 'include' })
       .then(async (response) => {
         const data = await response.json().catch(() => ({}))
         if (!response.ok) throw new Error(data.error || 'Failed to load Treasury yields')
         setPoints(data.points || [])
+        setHoveredPoint(null)
       })
       .catch((err) => setError(err.message || 'Failed to load Treasury yields'))
       .finally(() => setLoading(false))
-  }, [])
+  }, [range])
 
   const formatDate = (value) => {
     const date = new Date(`${value}T12:00:00`)
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
   }
   const formatYield = (value) => `${value.toFixed(2)}%`
-  const minYield = points.length ? Math.min(...points.map(p => p.yield)) : 0
-  const maxYield = points.length ? Math.max(...points.map(p => p.yield)) : 0
-  const range = maxYield - minYield || 1
-  const chartPoints = points.map((point, index) => {
-    const x = points.length === 1 ? 0 : (index / (points.length - 1)) * 100
-    const y = 100 - (((point.yield - minYield) / range) * 100)
-    return `${x},${y}`
-  }).join(' ')
   const latest = points[points.length - 1]
   const first = points[0]
   const change = latest && first ? latest.yield - first.yield : 0
+  const activePoint = hoveredPoint || latest || null
+  const chartData = useMemo(() => points.map((point, index) => ({
+    ...point,
+    label: formatDate(point.date),
+    fullLabel: new Date(`${point.date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+    dailyChange: index > 0 ? point.yield - points[index - 1].yield : null
+  })), [points])
+
+  function CustomTooltip({ active, payload }) {
+    if (!active || !payload || !payload.length) return null
+    const point = payload[0].payload
+    return (
+      <div className="rounded-xl border border-base-300 bg-base-100 px-3 py-2 shadow-lg text-sm">
+        <div className="font-semibold">{point.fullLabel}</div>
+        <div className="text-base-content/70">10Y Yield: <span className="font-medium text-base-content">{formatYield(point.yield)}</span></div>
+        <div className={`text-xs ${point.dailyChange === null ? 'text-base-content/40' : point.dailyChange >= 0 ? 'text-success' : 'text-error'}`}>
+          Daily change: {point.dailyChange === null ? '—' : `${point.dailyChange >= 0 ? '+' : ''}${point.dailyChange.toFixed(2)} pts`}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="card bg-base-100 border border-base-300 w-full">
@@ -169,15 +187,28 @@ function TreasuryYieldWidget() {
             <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">U.S. Treasury</h3>
             <p className="text-xl md:text-2xl font-semibold mt-1">10-Year Yield — Past 1 Month</p>
           </div>
-          {!loading && !error && latest && (
+          {!loading && !error && activePoint && (
             <div className="text-right">
-              <div className="text-xs uppercase tracking-widest text-base-content/40">Latest</div>
-              <div className="text-2xl font-bold">{formatYield(latest.yield)}</div>
+              <div className="text-xs uppercase tracking-widest text-base-content/40">{hoveredPoint ? 'Selected' : 'Latest'}</div>
+              <div className="text-2xl font-bold">{formatYield(activePoint.yield)}</div>
+              <div className="text-xs text-base-content/50">{new Date(`${activePoint.date}T12:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
               <div className={`text-sm ${change >= 0 ? 'text-success' : 'text-error'}`}>
                 {change >= 0 ? '+' : ''}{change.toFixed(2)} pts vs start
               </div>
             </div>
           )}
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          {RANGE_OPTIONS.map((option) => (
+            <button
+              key={option}
+              className={`btn btn-sm ${range === option ? 'btn-neutral' : 'btn-outline'}`}
+              onClick={() => setRange(option)}
+            >
+              {option}
+            </button>
+          ))}
         </div>
 
         {loading ? (
@@ -191,26 +222,43 @@ function TreasuryYieldWidget() {
             <div className="rounded-2xl border border-base-300 bg-base-100 p-4 md:p-6">
               <div className="flex items-end justify-between mb-4 text-xs text-base-content/40 uppercase tracking-widest">
                 <span>Yield Chart</span>
-                <span>{points.length} trading days</span>
+                <span>{points.length} trading days · drag/hover to inspect</span>
               </div>
               <div className="h-64 w-full">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full overflow-visible">
-                  {[0, 25, 50, 75, 100].map((line) => (
-                    <line key={line} x1="0" y1={line} x2="100" y2={line} stroke="currentColor" strokeOpacity="0.12" />
-                  ))}
-                  <polyline
-                    fill="none"
-                    stroke="#111111"
-                    strokeWidth="1.5"
-                    vectorEffect="non-scaling-stroke"
-                    points={chartPoints}
-                  />
-                  {points.map((point, index) => {
-                    const x = points.length === 1 ? 0 : (index / (points.length - 1)) * 100
-                    const y = 100 - (((point.yield - minYield) / range) * 100)
-                    return <circle key={point.date} cx={x} cy={y} r="1.4" fill="#111111" />
-                  })}
-                </svg>
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={chartData}
+                    margin={{ top: 8, right: 12, left: 0, bottom: 8 }}
+                    onMouseMove={(state) => setHoveredPoint(state && state.activePayload && state.activePayload[0] ? state.activePayload[0].payload : null)}
+                    onMouseLeave={() => setHoveredPoint(null)}
+                  >
+                    <CartesianGrid stroke="currentColor" strokeOpacity={0.08} vertical={false} />
+                    <XAxis
+                      dataKey="label"
+                      tick={{ fontSize: 12, fill: 'currentColor' }}
+                      tickLine={false}
+                      axisLine={false}
+                      minTickGap={24}
+                    />
+                    <YAxis
+                      domain={['dataMin - 0.1', 'dataMax + 0.1']}
+                      tickFormatter={(value) => `${value.toFixed(2)}%`}
+                      tick={{ fontSize: 12, fill: 'currentColor' }}
+                      tickLine={false}
+                      axisLine={false}
+                      width={72}
+                    />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Line
+                      type="monotone"
+                      dataKey="yield"
+                      stroke="#111111"
+                      strokeWidth={2.5}
+                      dot={false}
+                      activeDot={{ r: 5, fill: '#111111', stroke: '#ffffff', strokeWidth: 2 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
               <div className="flex justify-between text-xs text-base-content/40 mt-3">
                 <span>{points[0] ? formatDate(points[0].date) : ''}</span>
@@ -233,7 +281,7 @@ function TreasuryYieldWidget() {
                     </tr>
                   </thead>
                   <tbody>
-                    {points.slice().reverse().map((point, index, reversed) => {
+                    {points.slice().reverse().map((point) => {
                       const originalIndex = points.findIndex(p => p.date === point.date)
                       const prev = originalIndex > 0 ? points[originalIndex - 1] : null
                       const dailyChange = prev ? point.yield - prev.yield : null
