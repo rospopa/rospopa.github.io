@@ -904,6 +904,50 @@ function PropertiesPage({ user }) {
 }
 
 function LookupPage() {
+  const [email, setEmail] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [notConfigured, setNotConfigured] = useState(false)
+  const [result, setResult] = useState(null)
+
+  async function verifyEmail(e) {
+    e.preventDefault()
+    setError('')
+    setNotConfigured(false)
+    setResult(null)
+    if (!email.trim()) {
+      setError('Email is required')
+      return
+    }
+    setLoading(true)
+    try {
+      const data = await apiFetch('/api/lookup/email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      })
+      setResult(data)
+    } catch (e) {
+      if (e.status === 503) {
+        setNotConfigured(true)
+        return
+      }
+      setError(e.message || 'Verification failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const flags = result?.result ? [
+    { label: 'Disposable', value: result.result.disposable },
+    { label: 'Webmail', value: result.result.webmail },
+    { label: 'Gibberish', value: result.result.gibberish },
+    { label: 'SMTP check', value: result.result.smtp_check },
+    { label: 'Accept-all', value: result.result.accept_all },
+    { label: 'Block', value: result.result.block },
+    { label: 'MX present', value: result.result.mx_records }
+  ] : []
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -916,13 +960,76 @@ function LookupPage() {
       <div className="card bg-base-100 border border-base-300 shadow-sm">
         <div className="card-body p-5 md:p-6 space-y-5">
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold">Lookup tools coming soon</h3>
+            <h3 className="text-lg font-semibold">Email Verification</h3>
             <p className="text-sm text-base-content/55">
-              This admin-only area is reserved for future lookup utilities.
+              Verify an email address with Hunter.io without exposing the API key to the browser.
             </p>
           </div>
+          <form onSubmit={verifyEmail} className="space-y-4">
+            <div className="flex flex-col gap-3 md:flex-row">
+              <input
+                type="email"
+                placeholder="name@example.com"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="input input-bordered flex-1"
+              />
+              <button className="btn btn-primary md:min-w-32" type="submit" disabled={loading}>
+                {loading ? 'Verifying…' : 'Verify'}
+              </button>
+            </div>
+          </form>
+
+          {error && (
+            <div className="rounded-xl border border-base-300 bg-base-200/40 px-4 py-3 text-sm text-error">
+              {error}
+            </div>
+          )}
+
+          {notConfigured && (
+            <div className="rounded-xl border border-dashed border-base-300 bg-base-200/40 px-4 py-4 text-sm text-base-content/60">
+              Hunter.io is not configured on this server yet.
+            </div>
+          )}
+
+          {result?.result && (
+            <div className="rounded-xl border border-base-300 bg-base-200/30 p-4 md:p-5 space-y-4">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-base-content/50">Overall verdict</p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    <span className="badge badge-neutral">{result.result.result || 'unknown'}</span>
+                    {result.result.status && <span className="badge badge-outline">{result.result.status}</span>}
+                  </div>
+                </div>
+                {result.result.score !== null && result.result.score !== undefined && (
+                  <div className="text-sm text-base-content/70">
+                    Score <span className="font-semibold text-base-content">{result.result.score}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                {flags.map(flag => (
+                  <div key={flag.label} className="flex items-center justify-between rounded-lg border border-base-300 px-3 py-2 text-sm">
+                    <span className="text-base-content/70">{flag.label}</span>
+                    <span className={`badge badge-sm ${flag.value ? 'badge-neutral' : 'badge-outline'}`}>
+                      {flag.value ? 'Yes' : 'No'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+
+              {result.result.sources !== null && result.result.sources !== undefined && (
+                <div className="text-sm text-base-content/70">
+                  Source count <span className="font-medium text-base-content">{result.result.sources}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="rounded-xl border border-dashed border-base-300 bg-base-200/40 px-4 py-6 text-sm text-base-content/60">
-            No external verifier is currently configured. Lookup integrations will be added here in a future update.
+            More lookup tools for phone, name, address, and business research can be added here over time.
           </div>
         </div>
       </div>
