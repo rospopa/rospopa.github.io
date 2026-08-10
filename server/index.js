@@ -364,46 +364,6 @@ async function postJson(url, payload) {
     if (text) {
       try { data = JSON.parse(text); } catch { data = { message: text }; }
     }
-
-    async function getJson(url) {
-      if (typeof fetch === 'function') {
-        const response = await fetch(url, {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        });
-        const text = await response.text();
-        let data = null;
-        if (text) {
-          try { data = JSON.parse(text); } catch { data = { message: text }; }
-        }
-        return { ok: response.ok, status: response.status, data };
-      }
-
-      return new Promise((resolve, reject) => {
-        const target = new URL(url);
-        const request = https.request({
-          protocol: target.protocol,
-          hostname: target.hostname,
-          port: target.port || (target.protocol === 'https:' ? 443 : 80),
-          path: `${target.pathname}${target.search}`,
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        }, response => {
-          let raw = '';
-          response.setEncoding('utf8');
-          response.on('data', chunk => { raw += chunk; });
-          response.on('end', () => {
-            let data = null;
-            if (raw) {
-              try { data = JSON.parse(raw); } catch { data = { message: raw }; }
-            }
-            resolve({ ok: response.statusCode >= 200 && response.statusCode < 300, status: response.statusCode || 502, data });
-          });
-        });
-        request.on('error', reject);
-        request.end();
-      });
-    }
     return { ok: response.ok, status: response.status, data };
   }
 
@@ -437,6 +397,56 @@ async function postJson(url, payload) {
     request.write(body);
     request.end();
   });
+}
+
+async function getJson(url) {
+  if (typeof fetch === 'function') {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    });
+    const text = await response.text();
+    let data = null;
+    if (text) {
+      try { data = JSON.parse(text); } catch { data = { message: text }; }
+    }
+    return { ok: response.ok, status: response.status, data };
+  }
+
+  return new Promise((resolve, reject) => {
+    const target = new URL(url);
+    const request = https.request({
+      protocol: target.protocol,
+      hostname: target.hostname,
+      port: target.port || (target.protocol === 'https:' ? 443 : 80),
+      path: `${target.pathname}${target.search}`,
+      method: 'GET',
+      headers: { 'Accept': 'application/json' }
+    }, response => {
+      let raw = '';
+      response.setEncoding('utf8');
+      response.on('data', chunk => { raw += chunk; });
+      response.on('end', () => {
+        let data = null;
+        if (raw) {
+          try { data = JSON.parse(raw); } catch { data = { message: raw }; }
+        }
+        resolve({ ok: response.statusCode >= 200 && response.statusCode < 300, status: response.statusCode || 502, data });
+      });
+    });
+    request.on('error', reject);
+    request.end();
+  });
+}
+
+function extractUpstreamError(data, fallback = 'lookup failed') {
+  const errors = Array.isArray(data?.errors) ? data.errors : [];
+  return errors[0]?.details
+    || errors[0]?.message
+    || data?.message
+    || data?.error
+    || data?.detail
+    || fallback;
 }
 
 /** Verify a reCAPTCHA Enterprise token. Returns { ok, score, reason } */
@@ -582,15 +592,19 @@ app.post('/api/lookup/email', async (req, res) => {
     const url = `https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(email)}&api_key=${encodeURIComponent(hunterApiKey)}`;
     const upstream = await getJson(url);
     if (!upstream.ok) {
-      const message = upstream.data?.errors?.[0]?.details
-        || upstream.data?.errors?.[0]?.message
-        || upstream.data?.message
-        || 'lookup failed';
-      return res.status(502).json({ error: message });
+      const message = extractUpstreamError(upstream.data);
+      return res.status(502).json({
+        error: message,
+        upstream_status: upstream.status
+      });
     }
 
     const verifier = upstream.data?.data;
-    if (!verifier) return res.status(502).json({ error: 'lookup failed' });
+    if (!verifier) {
+      return res.status(502).json({
+        error: extractUpstreamError(upstream.data, 'lookup returned no verification data')
+      });
+    }
 
     const hasMxRecords = Array.isArray(verifier.mx_records) ? verifier.mx_records.length > 0 : !!verifier.mx_records;
     const sourceCount = Array.isArray(verifier.sources) ? verifier.sources.length : (typeof verifier.sources === 'number' ? verifier.sources : null);
@@ -607,11 +621,15 @@ app.post('/api/lookup/email', async (req, res) => {
         disposable: verifier.disposable ?? null,
         webmail: verifier.webmail ?? null,
         mx_records: hasMxRecords,
+        mx_record_count: Array.isArray(verifier.mx_records) ? verifier.mx_records.length : (verifier.mx_records ? 1 : 0),
         smtp_server: verifier.smtp_server ?? null,
         smtp_check: verifier.smtp_check ?? null,
         accept_all: verifier.accept_all ?? null,
         block: verifier.block ?? null,
         sources: sourceCount,
+        domain: verifier.domain ?? null,
+        duration: verifier.duration ?? null,
+        email: verifier.email ?? email,
         raw: verifier
       }
     });
