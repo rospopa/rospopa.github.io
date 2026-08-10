@@ -1026,6 +1026,7 @@ function LookupPage() {
         body: JSON.stringify({ query: groundingQuery })
       })
       setGroundingResult(data)
+      await loadUsage()
     } catch (e) {
       if (e.status === 503) {
         setGroundingNotConfigured(true)
@@ -1055,7 +1056,8 @@ function LookupPage() {
   const isPhoneValid = !!phoneResult?.result?.valid
   const usageCards = [
     { key: 'hunter', label: 'Hunter.io' },
-    { key: 'numverify', label: 'Numverify' }
+    { key: 'numverify', label: 'Numverify' },
+    { key: 'vertex-grounded-search', label: 'Vertex Grounded Search' }
   ]
 
   const getUsagePercent = (providerUsage) => {
@@ -1072,7 +1074,7 @@ function LookupPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
         {usageCards.map(card => {
           const providerUsage = usage?.[card.key]
           const usagePercent = getUsagePercent(providerUsage)
@@ -1086,6 +1088,12 @@ function LookupPage() {
                       ? `${formatCredits(providerUsage.remaining)} remaining / ${formatCredits(providerUsage.limit)} total`
                       : usageError || (usageLoading ? 'Loading usage…' : 'Usage unavailable')}
                   </p>
+                  {providerUsage?.quotaDisplayName && (
+                    <p className="mt-1 text-[11px] text-base-content/45">
+                      {providerUsage.quotaDisplayName}
+                      {providerUsage.quotaDimensionMatch?.value ? ` - ${providerUsage.quotaDimensionMatch.value}` : ''}
+                    </p>
+                  )}
                 </div>
                 {providerUsage && (
                   <span className="text-xs text-base-content/45">
@@ -1103,7 +1111,11 @@ function LookupPage() {
                 {providerUsage && (
                   <div className="flex items-center justify-between text-xs text-base-content/55">
                     <span>{formatCredits(providerUsage.used)} used</span>
-                    <span>{Math.round(usagePercent)}%</span>
+                    <span>
+                      {providerUsage.quotaSource === 'google-cloud' ? 'Google quota' : 'Internal quota'}
+                      {' - '}
+                      {Math.round(usagePercent)}%
+                    </span>
                   </div>
                 )}
               </div>
