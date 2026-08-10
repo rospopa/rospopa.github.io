@@ -497,6 +497,8 @@ export default function ContactsPage() {
   const [refreshKey, setRefreshKey] = useState(0)
   const [onlineStatus, setOnlineStatus] = useState({ online: [], lastLogin: {} })
   const [search, setSearch] = useState('')
+  const [listSort, setListSort] = useState({ col: 'last_name', dir: 'asc' })
+  const [filterRole, setFilterRole] = useState('')
 
   // Persist view selection
   const changeView = (v) => { setView(v); localStorage.setItem('contacts_view', v) }
@@ -543,10 +545,41 @@ export default function ContactsPage() {
   const cq = search.trim().toLowerCase()
   const filteredContacts = cq
     ? contacts.filter(c =>
-        [c.first_name, c.last_name, c.email, c.organization, c.phone_number]
+        [c.first_name, c.last_name, c.email, c.organization, c.phone_number, c.buy_box, c.last_note_text]
           .filter(Boolean).some(v => v.toLowerCase().includes(cq))
       )
     : contacts
+
+  const roleFilteredContacts = filterRole ? filteredContacts.filter(c => c.role === filterRole) : filteredContacts
+
+  function toggleListSort(col) {
+    setListSort(prev => prev.col === col ? { col, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })
+  }
+  function ListSortIcon({ col: c }) {
+    if (listSort.col !== c) return <span className="ml-1 opacity-25">⇅</span>
+    return <span className="ml-1">{listSort.dir === 'asc' ? '↑' : '↓'}</span>
+  }
+
+  const sortedListContacts = [...roleFilteredContacts].sort((a, b) => {
+    const { col, dir } = listSort
+    let av, bv
+    if (col === 'name') {
+      av = ([a.first_name, a.last_name].filter(Boolean).join(' ') || a.email).toLowerCase()
+      bv = ([b.first_name, b.last_name].filter(Boolean).join(' ') || b.email).toLowerCase()
+    } else if (col === 'note_count') {
+      av = a.note_count || 0; bv = b.note_count || 0
+    } else if (col === 'last_note_at') {
+      av = a.last_note_at || ''; bv = b.last_note_at || ''
+    } else if (col === 'last_login') {
+      av = a.last_login || ''; bv = b.last_login || ''
+    } else {
+      av = (a[col] || '').toString().toLowerCase()
+      bv = (b[col] || '').toString().toLowerCase()
+    }
+    if (av < bv) return dir === 'asc' ? -1 : 1
+    if (av > bv) return dir === 'asc' ? 1 : -1
+    return 0
+  })
 
   return (
     <div className="space-y-6">
@@ -565,15 +598,23 @@ export default function ContactsPage() {
             </svg>
             <input
               type="text"
-              placeholder="Search name, email, org…"
+              placeholder="Search name, email, org, notes…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="input input-bordered input-sm pl-8 w-52"
+              className="input input-bordered input-sm pl-8 w-56"
             />
             {search && (
               <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={() => setSearch('')}>✕</button>
             )}
           </div>
+          {/* Role filter (list mode) */}
+          {view === 'list' && (
+            <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="select select-bordered select-sm">
+              <option value="">All Roles</option>
+              <option value="admin">Admin</option>
+              <option value="user">User</option>
+            </select>
+          )}
           {/* View toggles */}
           <div className="flex gap-1">
             {[
@@ -592,16 +633,16 @@ export default function ContactsPage() {
 
       {loading && <div className="text-center py-12 text-base-content/50">Loading contacts…</div>}
 
-      {!loading && contacts.length > 0 && filteredContacts.length === 0 && (
+      {!loading && contacts.length > 0 && roleFilteredContacts.length === 0 && (
         <div className="py-10 text-center text-base-content/30">
-          <p>No contacts match &ldquo;{search}&rdquo;</p>
-          <button className="btn btn-xs btn-ghost mt-2" onClick={() => setSearch('')}>Clear search</button>
+          <p>No contacts match{search ? ` "${search}"` : ''}{filterRole ? ` with role "${filterRole}"` : ''}</p>
+          <button className="btn btn-xs btn-ghost mt-2" onClick={() => { setSearch(''); setFilterRole('') }}>Clear filters</button>
         </div>
       )}
 
       {!loading && view === 'grid' && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {filteredContacts.map(c => (
+          {roleFilteredContacts.map(c => (
             <div key={c.id} onDoubleClick={() => openDetail(c)} className="cursor-pointer select-none">
               <ContactCard contact={c} onViewNotes={openNotes} />
             </div>
@@ -613,21 +654,27 @@ export default function ContactsPage() {
         <div className="rounded-box border border-base-200 overflow-x-auto">
           <table className="table table-zebra w-full">
             <thead>
-              <tr className="text-xs uppercase tracking-wider text-base-content/50">
+              <tr className="text-xs uppercase tracking-wider text-base-content/50 select-none">
                 <th className="w-10">Photo</th>
-                <th>Name</th>
-                <th className="hidden md:table-cell">Email</th>
-                <th className="w-16">Role</th>
-                <th className="hidden lg:table-cell">Organization</th>
-                <th className="hidden sm:table-cell">Phone</th>
-                <th className="hidden xl:table-cell">Buy Box</th>
-                <th className="text-center w-14">Notes</th>
-                <th className="hidden sm:table-cell w-24">Last Login</th>
-                <th className="hidden md:table-cell text-center w-20">Last Note</th>
+                {[
+                  { label: 'Name', col: 'name' },
+                  { label: 'Email', col: 'email', cls: 'hidden md:table-cell' },
+                  { label: 'Role', col: 'role', cls: 'w-16' },
+                  { label: 'Organization', col: 'organization', cls: 'hidden lg:table-cell' },
+                  { label: 'Phone', col: 'phone_number', cls: 'hidden sm:table-cell' },
+                  { label: 'Buy Box', col: 'buy_box', cls: 'hidden xl:table-cell' },
+                  { label: 'Notes', col: 'note_count', cls: 'text-center w-14' },
+                  { label: 'Last Login', col: 'last_login', cls: 'hidden sm:table-cell w-24' },
+                  { label: 'Last Note', col: 'last_note_at', cls: 'hidden md:table-cell text-center w-20' },
+                ].map(({ label, col, cls = '' }) => (
+                  <th key={col} className={`cursor-pointer hover:text-base-content whitespace-nowrap ${cls}`} onClick={() => toggleListSort(col)}>
+                    {label}<ListSortIcon col={col} />
+                  </th>
+                ))}
               </tr>
             </thead>
             <tbody>
-              {filteredContacts.map(c => {
+              {sortedListContacts.map(c => {
                 const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
                 const isOnline = onlineStatus.online.includes(c.id)
                 const lastLogin = onlineStatus.lastLogin[c.id] || c.last_login
