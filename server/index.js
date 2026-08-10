@@ -751,24 +751,25 @@ app.post('/api/lookup/phone', async (req, res) => {
       }
     });
 
-    app.get('/api/lookup/usage', async (req, res) => {
-      if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-      try {
-        const rows = await listProviderUsage();
-        const usage = rows.reduce((acc, row) => {
-          acc[row.provider] = serializeProviderUsageRow(row);
-          return acc;
-        }, {});
-        return res.json({
-          hunter: usage.hunter || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 },
-          numverify: usage.numverify || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 }
-        });
-      } catch (error) {
-        return res.status(500).json({ error: 'failed to load provider usage' });
-      }
-    });
   } catch (error) {
     return res.status(502).json({ error: 'phone lookup provider error' });
+  }
+});
+
+app.get('/api/lookup/usage', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  try {
+    const rows = await listProviderUsage();
+    const usage = rows.reduce((acc, row) => {
+      acc[row.provider] = serializeProviderUsageRow(row);
+      return acc;
+    }, {});
+    return res.json({
+      hunter: usage.hunter || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 },
+      numverify: usage.numverify || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 }
+    });
+  } catch (error) {
+    return res.status(500).json({ error: 'failed to load provider usage' });
   }
 });
 
