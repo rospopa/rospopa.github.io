@@ -277,16 +277,11 @@ async function initializeSchema() {
   await pool.query(`
     INSERT INTO provider_usage (provider, used_credits, credit_limit, credit_cost_per_request, reset_period, reset_anchor, last_reset_at)
     VALUES
-      ('hunter', 0, 50, 0.5, 'monthly', $1, $1),
-      ('numverify', 0, 100, 1, 'monthly', $1, $1),
-      ('vertex-grounded-search', 0, 250, 1, 'daily', $1, $1)
-    ON CONFLICT (provider) DO UPDATE SET
-      credit_limit = EXCLUDED.credit_limit,
-      credit_cost_per_request = EXCLUDED.credit_cost_per_request,
-      reset_period = EXCLUDED.reset_period,
-      reset_anchor = COALESCE(provider_usage.reset_anchor, EXCLUDED.reset_anchor),
-      last_reset_at = COALESCE(provider_usage.last_reset_at, EXCLUDED.last_reset_at)
-  `, [PROVIDER_USAGE_RESET_START.toISOString()]);
+      ('hunter', 0.5, 50, 0.5),
+      ('numverify', 3, 100, 1),
+      ('google-ai-studio-search', 0, 1000, 1)
+    ON CONFLICT (provider) DO NOTHING
+  `);
 
   // Drop and recreate session table with correct schema for connect-pg-simple v8
   await pool.query(`DROP TABLE IF EXISTS "session"`);
@@ -600,8 +595,8 @@ function serializeProviderUsageRow(row) {
 }
 
 async function applyGoogleAiUsagePolicy() {
-  await syncProviderUsageWindow('vertex-grounded-search');
-  return setProviderUsageLimit('vertex-grounded-search', GOOGLE_AI_FREE_TIER_LIMIT);
+  await syncProviderUsageWindow('google-ai-studio-search');
+  return setProviderUsageLimit('google-ai-studio-search', GOOGLE_AI_FREE_TIER_LIMIT);
 }
 
 async function refreshProviderUsagePolicies() {
@@ -611,7 +606,6 @@ async function refreshProviderUsagePolicies() {
     applyGoogleAiUsagePolicy()
   ]);
 }
-
 function sanitizePhone(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -967,7 +961,7 @@ app.post('/api/lookup/grounded-search', async (req, res) => {
         .find(Boolean) || null
       : null;
 
-    await incrementProviderUsage('vertex-grounded-search');
+    await incrementProviderUsage('google-ai-studio-search');
 
     return res.json({
       ok: true,
@@ -997,8 +991,8 @@ app.get('/api/lookup/usage', async (req, res) => {
     return res.json({
       hunter: usage.hunter || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 },
       numverify: usage.numverify || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 },
-      'vertex-grounded-search': {
-        ...(usage['vertex-grounded-search'] || { used: 0, limit: 0, remaining: 0, costPerRequest: 1 }),
+      'google-ai-studio-search': {
+        ...(usage['google-ai-studio-search'] || { used: 0, limit: 0, remaining: 0, costPerRequest: 1 }),
         quotaDisplayName: `Google AI Studio (${GOOGLE_AI_MODEL})`,
         quotaMetric: null,
         quotaDimensions: {},

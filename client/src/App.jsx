@@ -1062,7 +1062,7 @@ function LookupPage() {
   const usageCards = [
     { key: 'hunter', label: 'Hunter.io' },
     { key: 'numverify', label: 'Numverify' },
-    { key: 'vertex-grounded-search', label: 'Google AI Studio Search' }
+    { key: 'google-ai-studio-search', label: 'Google AI Studio Search' }
   ]
 
   const getUsagePercent = (providerUsage) => {
