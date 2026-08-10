@@ -521,6 +521,13 @@ export default function ContactsPage() {
     apiFetch('/api/contacts').then(data => { setContacts(data); setLoading(false) }).catch(() => setLoading(false))
   }, [refreshKey])
 
+  useEffect(() => {
+    const seededQuery = localStorage.getItem('rep_global_contacts_query')
+    if (!seededQuery) return
+    setSearch(seededQuery)
+    localStorage.removeItem('rep_global_contacts_query')
+  }, [])
+
   const openNotes = (c) => setSelectedContact(c)
   const closeNotes = () => setSelectedContact(null)
   const refreshContacts = () => setRefreshKey(k => k + 1)

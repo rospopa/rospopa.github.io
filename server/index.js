@@ -1000,6 +1000,88 @@ app.get('/api/audit-logs', async (req, res) => {
   }
 });
 
+app.get('/api/global-search', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  if (req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+
+  const q = String(req.query.q || '').trim();
+  if (!q) {
+    return res.json({ properties: [], users: [], contacts: [], auditLogs: [] });
+  }
+
+  const pattern = `%${q}%`;
+
+  try {
+    const [propertiesResult, usersResult, contactsResult, auditLogsResult] = await Promise.all([
+      pool.query(
+        `SELECT id, address, pin, county, status, asset_type, updated_at
+         FROM properties
+         WHERE address ILIKE $1
+            OR pin ILIKE $1
+            OR county ILIKE $1
+            OR status ILIKE $1
+            OR asset_type ILIKE $1
+         ORDER BY updated_at DESC NULLS LAST, id DESC
+         LIMIT 5`,
+        [pattern]
+      ),
+      pool.query(
+        `SELECT id, email, first_name, last_name, organization, role, profile_photo
+         FROM users
+         WHERE email ILIKE $1
+            OR first_name ILIKE $1
+            OR last_name ILIKE $1
+            OR organization ILIKE $1
+            OR phone_number ILIKE $1
+         ORDER BY updated_at DESC NULLS LAST, id DESC
+         LIMIT 5`,
+        [pattern]
+      ),
+      pool.query(
+        `SELECT u.id, u.email, u.first_name, u.last_name, u.organization, u.role, u.buy_box, u.profile_photo, latest_note.note_text AS last_note_text
+         FROM users u
+         LEFT JOIN LATERAL (
+           SELECT cn.note_text
+           FROM contact_notes cn
+           WHERE cn.user_id = u.id
+           ORDER BY cn.created_at DESC
+           LIMIT 1
+         ) AS latest_note ON TRUE
+         WHERE u.email ILIKE $1
+            OR u.first_name ILIKE $1
+            OR u.last_name ILIKE $1
+            OR u.organization ILIKE $1
+            OR u.phone_number ILIKE $1
+            OR u.buy_box ILIKE $1
+            OR latest_note.note_text ILIKE $1
+         ORDER BY u.updated_at DESC NULLS LAST, u.id DESC
+         LIMIT 5`,
+        [pattern]
+      ),
+      pool.query(
+        `SELECT id, action, acted_by_email, target_email, created_at, details
+         FROM audit_logs
+         WHERE acted_by_email ILIKE $1
+            OR target_email ILIKE $1
+            OR action ILIKE $1
+            OR details ILIKE $1
+         ORDER BY created_at DESC NULLS LAST, id DESC
+         LIMIT 5`,
+        [pattern]
+      )
+    ]);
+
+    res.json({
+      properties: propertiesResult.rows,
+      users: usersResult.rows,
+      contacts: contactsResult.rows,
+      auditLogs: auditLogsResult.rows
+    });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
 app.post('/api/properties/:id/media', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
