@@ -364,6 +364,46 @@ async function postJson(url, payload) {
     if (text) {
       try { data = JSON.parse(text); } catch { data = { message: text }; }
     }
+
+    async function getJson(url) {
+      if (typeof fetch === 'function') {
+        const response = await fetch(url, {
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        });
+        const text = await response.text();
+        let data = null;
+        if (text) {
+          try { data = JSON.parse(text); } catch { data = { message: text }; }
+        }
+        return { ok: response.ok, status: response.status, data };
+      }
+
+      return new Promise((resolve, reject) => {
+        const target = new URL(url);
+        const request = https.request({
+          protocol: target.protocol,
+          hostname: target.hostname,
+          port: target.port || (target.protocol === 'https:' ? 443 : 80),
+          path: `${target.pathname}${target.search}`,
+          method: 'GET',
+          headers: { 'Accept': 'application/json' }
+        }, response => {
+          let raw = '';
+          response.setEncoding('utf8');
+          response.on('data', chunk => { raw += chunk; });
+          response.on('end', () => {
+            let data = null;
+            if (raw) {
+              try { data = JSON.parse(raw); } catch { data = { message: raw }; }
+            }
+            resolve({ ok: response.statusCode >= 200 && response.statusCode < 300, status: response.statusCode || 502, data });
+          });
+        });
+        request.on('error', reject);
+        request.end();
+      });
+    }
     return { ok: response.ok, status: response.status, data };
   }
 
@@ -525,6 +565,59 @@ app.post('/api/lookup-user', async (req, res) => {
     const { first_name, last_name, profile_photo, login_count } = result.rows[0];
     res.json({ found: true, first_name, last_name, profile_photo, login_count: login_count || 0 });
   } catch { res.json({ found: false }); }
+});
+
+app.post('/api/lookup/email', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const email = sanitizeEmail(req.body?.email);
+  if (!email) return res.status(400).json({ error: 'email required' });
+  if (!isValidEmail(email)) return res.status(400).json({ error: 'valid email required' });
+
+  const hunterApiKey = process.env.HUNTER_API_KEY;
+  if (!hunterApiKey) {
+    return res.status(503).json({ error: 'lookup service not configured', code: 'LOOKUP_NOT_CONFIGURED' });
+  }
+
+  try {
+    const url = `https://api.hunter.io/v2/email-verifier?email=${encodeURIComponent(email)}&api_key=${encodeURIComponent(hunterApiKey)}`;
+    const upstream = await getJson(url);
+    if (!upstream.ok) {
+      const message = upstream.data?.errors?.[0]?.details
+        || upstream.data?.errors?.[0]?.message
+        || upstream.data?.message
+        || 'lookup failed';
+      return res.status(502).json({ error: message });
+    }
+
+    const verifier = upstream.data?.data;
+    if (!verifier) return res.status(502).json({ error: 'lookup failed' });
+
+    const hasMxRecords = Array.isArray(verifier.mx_records) ? verifier.mx_records.length > 0 : !!verifier.mx_records;
+    const sourceCount = Array.isArray(verifier.sources) ? verifier.sources.length : (typeof verifier.sources === 'number' ? verifier.sources : null);
+
+    return res.json({
+      ok: true,
+      input: email,
+      result: {
+        status: verifier.status ?? null,
+        result: verifier.result ?? null,
+        score: verifier.score ?? null,
+        regexp: verifier.regexp ?? null,
+        gibberish: verifier.gibberish ?? null,
+        disposable: verifier.disposable ?? null,
+        webmail: verifier.webmail ?? null,
+        mx_records: hasMxRecords,
+        smtp_server: verifier.smtp_server ?? null,
+        smtp_check: verifier.smtp_check ?? null,
+        accept_all: verifier.accept_all ?? null,
+        block: verifier.block ?? null,
+        sources: sourceCount,
+        raw: verifier
+      }
+    });
+  } catch (error) {
+    return res.status(502).json({ error: error.message || 'lookup failed' });
+  }
 });
 
 /** Send a 6-digit OTP to the user's email for password reset */
