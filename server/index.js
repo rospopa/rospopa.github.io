@@ -22,6 +22,9 @@ const VERTEX_PROJECT_ID = process.env.VERTEX_PROJECT_ID || '';
 const VERTEX_LOCATION = process.env.VERTEX_LOCATION || 'global';
 const VERTEX_MODEL = process.env.VERTEX_MODEL || 'gemini-2.5-flash';
 const GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS || '';
+const GOOGLE_CLOUD_QUOTA_LOCATION = process.env.GOOGLE_CLOUD_QUOTA_LOCATION || 'global';
+const GOOGLE_CLOUD_QUOTA_METRIC = process.env.GOOGLE_CLOUD_QUOTA_METRIC || '';
+const GOOGLE_CLOUD_QUOTA_PREFERRED_DIMENSION = process.env.GOOGLE_CLOUD_QUOTA_PREFERRED_DIMENSION || '';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -271,7 +274,8 @@ async function initializeSchema() {
     INSERT INTO provider_usage (provider, used_credits, credit_limit, credit_cost_per_request)
     VALUES
       ('hunter', 0.5, 50, 0.5),
-      ('numverify', 3, 100, 1)
+      ('numverify', 3, 100, 1),
+      ('vertex-grounded-search', 0, 1000, 1)
     ON CONFLICT (provider) DO NOTHING
   `);
 
@@ -511,6 +515,23 @@ function serializeProviderUsageRow(row) {
   };
 }
 
+async function setProviderUsageLimit(provider, limit) {
+  const numericLimit = Number(limit);
+  if (!Number.isFinite(numericLimit) || numericLimit < 0) {
+    throw new Error(`Invalid provider usage limit for ${provider}`);
+  }
+
+  const result = await pool.query(
+    `UPDATE provider_usage
+     SET credit_limit = $2,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE provider = $1
+     RETURNING provider, used_credits, credit_limit, credit_cost_per_request, updated_at`,
+    [provider, numericLimit]
+  );
+  return result.rows[0] || null;
+}
+
 function sanitizePhone(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -598,6 +619,133 @@ async function getGoogleAccessToken() {
   }
 
   return response.data.access_token;
+}
+
+async function getJsonWithHeaders(url, headers = {}) {
+  if (typeof fetch === 'function') {
+    const response = await fetch(url, {
+      method: 'GET',
+      headers
+    });
+    const text = await response.text();
+    let data = null;
+    if (text) {
+      try { data = JSON.parse(text); } catch { data = { message: text }; }
+    }
+    return { ok: response.ok, status: response.status, data };
+  }
+
+  return new Promise((resolve, reject) => {
+    const target = new URL(url);
+    const request = https.request({
+      protocol: target.protocol,
+      hostname: target.hostname,
+      port: target.port || (target.protocol === 'https:' ? 443 : 80),
+      path: `${target.pathname}${target.search}`,
+      method: 'GET',
+      headers
+    }, response => {
+      let raw = '';
+      response.setEncoding('utf8');
+      response.on('data', chunk => { raw += chunk; });
+      response.on('end', () => {
+        let data = null;
+        if (raw) {
+          try { data = JSON.parse(raw); } catch { data = { message: raw }; }
+        }
+        resolve({ ok: response.statusCode >= 200 && response.statusCode < 300, status: response.statusCode || 502, data });
+      });
+    });
+    request.on('error', reject);
+    request.end();
+  });
+}
+
+function pickQuotaPreferenceDimensions(dimensionInfo = {}) {
+  const details = dimensionInfo.details || {};
+  const preferredKey = GOOGLE_CLOUD_QUOTA_PREFERRED_DIMENSION.trim();
+  const preferredValue = preferredKey ? details[preferredKey] : null;
+  if (preferredValue) {
+    return { key: preferredKey, value: preferredValue };
+  }
+
+  if (details.location) {
+    return { key: 'location', value: details.location };
+  }
+
+  const firstEntry = Object.entries(details).find(([, value]) => value);
+  if (firstEntry) {
+    const [key, value] = firstEntry;
+    return { key, value };
+  }
+
+  return null;
+}
+
+function chooseQuotaInfo(quotaInfos = []) {
+  if (!Array.isArray(quotaInfos) || !quotaInfos.length) return null;
+
+  const withCurrentLimit = quotaInfos.filter(item => Number.isFinite(Number(item?.quotaIncreaseEligibility?.currentLimit)));
+  const candidates = withCurrentLimit.length ? withCurrentLimit : quotaInfos;
+
+  const metricFiltered = GOOGLE_CLOUD_QUOTA_METRIC.trim()
+    ? candidates.filter(item => String(item.metric || '').includes(GOOGLE_CLOUD_QUOTA_METRIC.trim()))
+    : candidates;
+  const metricCandidates = metricFiltered.length ? metricFiltered : candidates;
+
+  const preferredDimensionMatches = metricCandidates.filter(item => {
+    const dimension = pickQuotaPreferenceDimensions(item.dimensionsInfo || {});
+    return dimension && dimension.key === GOOGLE_CLOUD_QUOTA_PREFERRED_DIMENSION.trim();
+  });
+  const dimensionCandidates = preferredDimensionMatches.length ? preferredDimensionMatches : metricCandidates;
+
+  const exactLocationMatches = dimensionCandidates.filter(item => {
+    const dimension = pickQuotaPreferenceDimensions(item.dimensionsInfo || {});
+    return dimension?.value === VERTEX_LOCATION;
+  });
+  const locationCandidates = exactLocationMatches.length ? exactLocationMatches : dimensionCandidates;
+
+  return locationCandidates[0] || null;
+}
+
+function serializeQuotaInfo(quotaInfo) {
+  if (!quotaInfo) return null;
+
+  const limit = Number(quotaInfo?.quotaIncreaseEligibility?.currentLimit);
+  if (!Number.isFinite(limit)) return null;
+
+  const dimension = pickQuotaPreferenceDimensions(quotaInfo.dimensionsInfo || {});
+
+  return {
+    metric: quotaInfo.metric || null,
+    quotaDisplayName: quotaInfo.quotaDisplayName || null,
+    limit,
+    dimensions: quotaInfo.dimensionsInfo?.details || {},
+    preferredDimension: dimension,
+    isPreciseMatch: dimension?.value === VERTEX_LOCATION
+  };
+}
+
+async function getVertexQuotaInfo() {
+  if (!VERTEX_PROJECT_ID || !GOOGLE_APPLICATION_CREDENTIALS) {
+    return null;
+  }
+
+  const accessToken = await getGoogleAccessToken();
+  const parent = `projects/${encodeURIComponent(VERTEX_PROJECT_ID)}/locations/${encodeURIComponent(GOOGLE_CLOUD_QUOTA_LOCATION)}/services/aiplatform.googleapis.com`;
+  const response = await getJsonWithHeaders(`https://cloudquotas.googleapis.com/v1beta/${parent}/quotaInfos?pageSize=200`, {
+    'Accept': 'application/json',
+    'Authorization': `Bearer ${accessToken}`
+  });
+
+  if (!response.ok) {
+    const error = new Error(extractUpstreamError(response.data, 'Failed to load Google Cloud quota information'));
+    error.status = response.status;
+    throw error;
+  }
+
+  const quotaInfo = chooseQuotaInfo(response.data?.quotaInfos || []);
+  return serializeQuotaInfo(quotaInfo);
 }
 
 async function postJsonWithHeaders(url, payload, headers = {}) {
@@ -945,6 +1093,8 @@ app.post('/api/lookup/grounded-search', async (req, res) => {
     const searchEntryPoint = groundingMetadata?.searchEntryPoint || groundingMetadata?.search_entry_point || null;
     const webSearchQueries = groundingMetadata?.webSearchQueries || groundingMetadata?.web_search_queries || [];
 
+    await incrementProviderUsage('vertex-grounded-search');
+
     return res.json({
       ok: true,
       query,
@@ -964,6 +1114,16 @@ app.post('/api/lookup/grounded-search', async (req, res) => {
 app.get('/api/lookup/usage', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   try {
+    let vertexQuota = null;
+    try {
+      vertexQuota = await getVertexQuotaInfo();
+      if (vertexQuota?.limit !== null && vertexQuota?.limit !== undefined) {
+        await setProviderUsageLimit('vertex-grounded-search', vertexQuota.limit);
+      }
+    } catch (quotaError) {
+      console.warn('Vertex quota lookup failed:', quotaError.message);
+    }
+
     const rows = await listProviderUsage();
     const usage = rows.reduce((acc, row) => {
       acc[row.provider] = serializeProviderUsageRow(row);
@@ -971,7 +1131,16 @@ app.get('/api/lookup/usage', async (req, res) => {
     }, {});
     return res.json({
       hunter: usage.hunter || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 },
-      numverify: usage.numverify || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 }
+      numverify: usage.numverify || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 },
+      'vertex-grounded-search': {
+        ...(usage['vertex-grounded-search'] || { used: 0, limit: 0, remaining: 0, costPerRequest: 1 }),
+        quotaDisplayName: vertexQuota?.quotaDisplayName || null,
+        quotaMetric: vertexQuota?.metric || null,
+        quotaDimensions: vertexQuota?.dimensions || {},
+        quotaDimensionMatch: vertexQuota?.preferredDimension || null,
+        quotaSource: vertexQuota ? 'google-cloud' : 'internal-fallback',
+        quotaExactMatch: !!vertexQuota?.isPreciseMatch
+      }
     });
   } catch (error) {
     return res.status(500).json({ error: 'failed to load provider usage' });
