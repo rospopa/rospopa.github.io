@@ -256,6 +256,21 @@ async function initializeSchema() {
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
 
+  await pool.query(`CREATE TABLE IF NOT EXISTS provider_usage (
+    provider TEXT PRIMARY KEY,
+    used_credits NUMERIC NOT NULL DEFAULT 0,
+    credit_limit NUMERIC NOT NULL DEFAULT 0,
+    credit_cost_per_request NUMERIC NOT NULL DEFAULT 1,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+  await pool.query(`
+    INSERT INTO provider_usage (provider, used_credits, credit_limit, credit_cost_per_request)
+    VALUES
+      ('hunter', 0.5, 50, 0.5),
+      ('numverify', 3, 100, 1)
+    ON CONFLICT (provider) DO NOTHING
+  `);
+
   // Drop and recreate session table with correct schema for connect-pg-simple v8
   await pool.query(`DROP TABLE IF EXISTS "session"`);
   await pool.query(`CREATE TABLE "session" (
@@ -449,6 +464,49 @@ function extractUpstreamError(data, fallback = 'lookup failed') {
     || fallback;
 }
 
+async function getProviderUsage(provider) {
+  const result = await pool.query(
+    `SELECT provider, used_credits, credit_limit, credit_cost_per_request, updated_at
+     FROM provider_usage
+     WHERE provider = $1`,
+    [provider]
+  );
+  return result.rows[0] || null;
+}
+
+async function listProviderUsage() {
+  const result = await pool.query(
+    `SELECT provider, used_credits, credit_limit, credit_cost_per_request, updated_at
+     FROM provider_usage
+     ORDER BY provider ASC`
+  );
+  return result.rows;
+}
+
+async function incrementProviderUsage(provider) {
+  const result = await pool.query(
+    `UPDATE provider_usage
+     SET used_credits = used_credits + credit_cost_per_request,
+         updated_at = CURRENT_TIMESTAMP
+     WHERE provider = $1
+     RETURNING provider, used_credits, credit_limit, credit_cost_per_request, updated_at`,
+    [provider]
+  );
+  return result.rows[0] || null;
+}
+
+function serializeProviderUsageRow(row) {
+  const used = Number(row.used_credits || 0);
+  const limit = Number(row.credit_limit || 0);
+  const costPerRequest = Number(row.credit_cost_per_request || 0);
+  return {
+    used,
+    limit,
+    remaining: Math.max(limit - used, 0),
+    costPerRequest
+  };
+}
+
 function sanitizePhone(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
@@ -624,6 +682,8 @@ app.post('/api/lookup/email', async (req, res) => {
     const hasMxRecords = Array.isArray(verifier.mx_records) ? verifier.mx_records.length > 0 : !!verifier.mx_records;
     const sourceCount = Array.isArray(verifier.sources) ? verifier.sources.length : (typeof verifier.sources === 'number' ? verifier.sources : null);
 
+    await incrementProviderUsage('hunter');
+
     return res.json({
       ok: true,
       input: email,
@@ -673,6 +733,7 @@ app.post('/api/lookup/phone', async (req, res) => {
     }
 
     const validation = upstream.data;
+    await incrementProviderUsage('numverify');
     return res.json({
       ok: true,
       input: phone,
@@ -687,6 +748,23 @@ app.post('/api/lookup/phone', async (req, res) => {
         carrier: validation.carrier ?? null,
         line_type: validation.line_type ?? null,
         raw: validation
+      }
+    });
+
+    app.get('/api/lookup/usage', async (req, res) => {
+      if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+      try {
+        const rows = await listProviderUsage();
+        const usage = rows.reduce((acc, row) => {
+          acc[row.provider] = serializeProviderUsageRow(row);
+          return acc;
+        }, {});
+        return res.json({
+          hunter: usage.hunter || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 },
+          numverify: usage.numverify || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 }
+        });
+      } catch (error) {
+        return res.status(500).json({ error: 'failed to load provider usage' });
       }
     });
   } catch (error) {

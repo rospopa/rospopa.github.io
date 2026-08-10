@@ -914,6 +914,25 @@ function LookupPage() {
   const [phoneError, setPhoneError] = useState('')
   const [phoneNotConfigured, setPhoneNotConfigured] = useState(false)
   const [phoneResult, setPhoneResult] = useState(null)
+  const [usage, setUsage] = useState(null)
+
+  const formatCredits = useCallback((value) => {
+    const numeric = Number(value || 0)
+    return Number.isInteger(numeric) ? String(numeric) : numeric.toFixed(1)
+  }, [])
+
+  const loadUsage = useCallback(async () => {
+    try {
+      const data = await apiFetch('/api/lookup/usage')
+      setUsage(data)
+    } catch (e) {
+      if (e.status !== 403) console.error('Failed to load usage:', e.message)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadUsage()
+  }, [loadUsage])
 
   async function verifyEmail(e) {
     e.preventDefault()
@@ -932,6 +951,7 @@ function LookupPage() {
         body: JSON.stringify({ email })
       })
       setResult(data)
+      await loadUsage()
     } catch (e) {
       if (e.status === 503) {
         setNotConfigured(true)
@@ -960,6 +980,7 @@ function LookupPage() {
         body: JSON.stringify({ phone })
       })
       setPhoneResult(data)
+      await loadUsage()
     } catch (e) {
       if (e.status === 503) {
         setPhoneNotConfigured(true)
@@ -987,6 +1008,10 @@ function LookupPage() {
     .filter(Boolean)
     .some(value => positiveVerdicts.includes(String(value).toLowerCase()))
   const isPhoneValid = !!phoneResult?.result?.valid
+  const usageCards = [
+    { key: 'hunter', label: 'Hunter.io' },
+    { key: 'numverify', label: 'Numverify' }
+  ]
 
   return (
     <div className="space-y-6">
@@ -995,6 +1020,31 @@ function LookupPage() {
         <p className="text-sm text-base-content/60 max-w-3xl">
           This admin area will host phone, email, name, address, and business lookup tools.
         </p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
+        {usageCards.map(card => {
+          const providerUsage = usage?.[card.key]
+          return (
+            <div key={card.key} className="rounded-xl border border-base-300 bg-base-100 px-4 py-3 shadow-sm">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm font-semibold">{card.label}</p>
+                  <p className="text-xs text-base-content/55">
+                    {providerUsage
+                      ? `${formatCredits(providerUsage.remaining)} remaining / ${formatCredits(providerUsage.limit)} total`
+                      : 'Loading usage…'}
+                  </p>
+                </div>
+                {providerUsage && (
+                  <span className="text-xs text-base-content/45">
+                    {formatCredits(providerUsage.costPerRequest)} credit / request
+                  </span>
+                )}
+              </div>
+            </div>
+          )
+        })}
       </div>
 
       <div className="card bg-base-100 border border-base-300 shadow-sm">
