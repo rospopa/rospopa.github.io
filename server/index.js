@@ -18,13 +18,11 @@ const RECAPTCHA_PROJECT_ID = 'rospopa-recaptcha';
 const RECAPTCHA_SITE_KEY = '6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv';
 const RECAPTCHA_MIN_SCORE = 0.5;
 const FROM_EMAIL = 'noreply@rospopa.com';
-const VERTEX_PROJECT_ID = process.env.VERTEX_PROJECT_ID || '';
-const VERTEX_LOCATION = process.env.VERTEX_LOCATION || 'global';
-const VERTEX_MODEL = process.env.VERTEX_MODEL || 'gemini-2.5-flash';
-const GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS || '';
-const GOOGLE_CLOUD_QUOTA_LOCATION = process.env.GOOGLE_CLOUD_QUOTA_LOCATION || 'global';
-const GOOGLE_CLOUD_QUOTA_METRIC = process.env.GOOGLE_CLOUD_QUOTA_METRIC || '';
-const GOOGLE_CLOUD_QUOTA_PREFERRED_DIMENSION = process.env.GOOGLE_CLOUD_QUOTA_PREFERRED_DIMENSION || '';
+const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY || process.env.GEMINI_API_KEY || '';
+const GOOGLE_AI_MODEL = process.env.GOOGLE_AI_MODEL || 'gemini-2.5-flash';
+const GOOGLE_AI_FREE_TIER_LIMIT = 250;
+const GOOGLE_AI_FREE_TIER_LABEL = 'Configured free-tier cap';
+const PROVIDER_USAGE_RESET_START = new Date('2026-08-10T00:00:00.000Z');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -268,16 +266,27 @@ async function initializeSchema() {
     used_credits NUMERIC NOT NULL DEFAULT 0,
     credit_limit NUMERIC NOT NULL DEFAULT 0,
     credit_cost_per_request NUMERIC NOT NULL DEFAULT 1,
+    reset_period TEXT NOT NULL DEFAULT 'manual',
+    reset_anchor TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_reset_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   )`);
+  await pool.query(`ALTER TABLE provider_usage ADD COLUMN IF NOT EXISTS reset_period TEXT NOT NULL DEFAULT 'manual'`);
+  await pool.query(`ALTER TABLE provider_usage ADD COLUMN IF NOT EXISTS reset_anchor TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+  await pool.query(`ALTER TABLE provider_usage ADD COLUMN IF NOT EXISTS last_reset_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
   await pool.query(`
-    INSERT INTO provider_usage (provider, used_credits, credit_limit, credit_cost_per_request)
+    INSERT INTO provider_usage (provider, used_credits, credit_limit, credit_cost_per_request, reset_period, reset_anchor, last_reset_at)
     VALUES
-      ('hunter', 0.5, 50, 0.5),
-      ('numverify', 3, 100, 1),
-      ('vertex-grounded-search', 0, 1000, 1)
-    ON CONFLICT (provider) DO NOTHING
-  `);
+      ('hunter', 0, 50, 0.5, 'monthly', $1, $1),
+      ('numverify', 0, 100, 1, 'monthly', $1, $1),
+      ('vertex-grounded-search', 0, 250, 1, 'daily', $1, $1)
+    ON CONFLICT (provider) DO UPDATE SET
+      credit_limit = EXCLUDED.credit_limit,
+      credit_cost_per_request = EXCLUDED.credit_cost_per_request,
+      reset_period = EXCLUDED.reset_period,
+      reset_anchor = COALESCE(provider_usage.reset_anchor, EXCLUDED.reset_anchor),
+      last_reset_at = COALESCE(provider_usage.last_reset_at, EXCLUDED.last_reset_at)
+  `, [PROVIDER_USAGE_RESET_START.toISOString()]);
 
   // Drop and recreate session table with correct schema for connect-pg-simple v8
   await pool.query(`DROP TABLE IF EXISTS "session"`);
@@ -474,7 +483,7 @@ function extractUpstreamError(data, fallback = 'lookup failed') {
 
 async function getProviderUsage(provider) {
   const result = await pool.query(
-    `SELECT provider, used_credits, credit_limit, credit_cost_per_request, updated_at
+    `SELECT provider, used_credits, credit_limit, credit_cost_per_request, reset_period, reset_anchor, last_reset_at, updated_at
      FROM provider_usage
      WHERE provider = $1`,
     [provider]
@@ -484,35 +493,77 @@ async function getProviderUsage(provider) {
 
 async function listProviderUsage() {
   const result = await pool.query(
-    `SELECT provider, used_credits, credit_limit, credit_cost_per_request, updated_at
+    `SELECT provider, used_credits, credit_limit, credit_cost_per_request, reset_period, reset_anchor, last_reset_at, updated_at
      FROM provider_usage
      ORDER BY provider ASC`
   );
   return result.rows;
 }
 
-async function incrementProviderUsage(provider) {
+function addUtcDays(date, days) {
+  const next = new Date(date.getTime());
+  next.setUTCDate(next.getUTCDate() + days);
+  return next;
+}
+
+function addUtcMonths(date, months) {
+  const next = new Date(date.getTime());
+  next.setUTCMonth(next.getUTCMonth() + months);
+  return next;
+}
+
+function calculateNextReset(anchorDate, period, now = new Date()) {
+  if (!(anchorDate instanceof Date) || Number.isNaN(anchorDate.getTime())) return null;
+  if (period !== 'daily' && period !== 'monthly') return null;
+
+  let next = new Date(anchorDate.getTime());
+  while (next <= now) {
+    next = period === 'daily' ? addUtcDays(next, 1) : addUtcMonths(next, 1);
+  }
+  return next;
+}
+
+function shouldResetProviderUsage(row, now = new Date()) {
+  if (!row?.reset_period || row.reset_period === 'manual') return false;
+  const anchor = row.reset_anchor ? new Date(row.reset_anchor) : null;
+  const nextReset = calculateNextReset(anchor, row.reset_period, now);
+  return !!nextReset && now >= nextReset;
+}
+
+async function resetProviderUsage(provider, resetAt) {
   const result = await pool.query(
     `UPDATE provider_usage
-     SET used_credits = used_credits + credit_cost_per_request,
-         updated_at = CURRENT_TIMESTAMP
+     SET used_credits = 0,
+        last_reset_at = $2,
+        updated_at = CURRENT_TIMESTAMP
      WHERE provider = $1
-     RETURNING provider, used_credits, credit_limit, credit_cost_per_request, updated_at`,
-    [provider]
+     RETURNING provider, used_credits, credit_limit, credit_cost_per_request, reset_period, reset_anchor, last_reset_at, updated_at`,
+    [provider, resetAt.toISOString()]
   );
   return result.rows[0] || null;
 }
 
-function serializeProviderUsageRow(row) {
-  const used = Number(row.used_credits || 0);
-  const limit = Number(row.credit_limit || 0);
-  const costPerRequest = Number(row.credit_cost_per_request || 0);
-  return {
-    used,
-    limit,
-    remaining: Math.max(limit - used, 0),
-    costPerRequest
-  };
+async function syncProviderUsageWindow(provider) {
+  const row = await getProviderUsage(provider);
+  if (!row) return null;
+  const now = new Date();
+  if (!shouldResetProviderUsage(row, now)) {
+    return row;
+  }
+  return resetProviderUsage(provider, now);
+}
+
+async function incrementProviderUsage(provider) {
+  await syncProviderUsageWindow(provider);
+  const result = await pool.query(
+    `UPDATE provider_usage
+     SET used_credits = used_credits + credit_cost_per_request,
+     updated_at = CURRENT_TIMESTAMP
+     WHERE provider = $1
+     RETURNING provider, used_credits, credit_limit, credit_cost_per_request, reset_period, reset_anchor, last_reset_at, updated_at`,
+    [provider]
+  );
+  return result.rows[0] || null;
 }
 
 async function setProviderUsageLimit(provider, limit) {
@@ -526,10 +577,39 @@ async function setProviderUsageLimit(provider, limit) {
      SET credit_limit = $2,
          updated_at = CURRENT_TIMESTAMP
      WHERE provider = $1
-     RETURNING provider, used_credits, credit_limit, credit_cost_per_request, updated_at`,
+     RETURNING provider, used_credits, credit_limit, credit_cost_per_request, reset_period, reset_anchor, last_reset_at, updated_at`,
     [provider, numericLimit]
   );
   return result.rows[0] || null;
+}
+
+function serializeProviderUsageRow(row) {
+  const used = Number(row.used_credits || 0);
+  const limit = Number(row.credit_limit || 0);
+  const costPerRequest = Number(row.credit_cost_per_request || 0);
+  return {
+    used,
+    limit,
+    remaining: Math.max(limit - used, 0),
+    costPerRequest,
+    resetPeriod: row.reset_period || 'manual',
+    resetAnchor: row.reset_anchor || null,
+    lastResetAt: row.last_reset_at || null,
+    nextResetAt: calculateNextReset(row.reset_anchor ? new Date(row.reset_anchor) : null, row.reset_period || 'manual')?.toISOString() || null
+  };
+}
+
+async function applyGoogleAiUsagePolicy() {
+  await syncProviderUsageWindow('vertex-grounded-search');
+  return setProviderUsageLimit('vertex-grounded-search', GOOGLE_AI_FREE_TIER_LIMIT);
+}
+
+async function refreshProviderUsagePolicies() {
+  await Promise.all([
+    syncProviderUsageWindow('hunter'),
+    syncProviderUsageWindow('numverify'),
+    applyGoogleAiUsagePolicy()
+  ]);
 }
 
 function sanitizePhone(value) {
@@ -549,203 +629,6 @@ function isNumverifyProviderError(data) {
 
 function sanitizeLookupQuery(value) {
   return typeof value === 'string' ? value.trim() : '';
-}
-
-function base64UrlEncode(value) {
-  return Buffer.from(value)
-    .toString('base64')
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=+$/g, '');
-}
-
-function readGoogleServiceAccount() {
-  if (!GOOGLE_APPLICATION_CREDENTIALS) {
-    throw new Error('Google service account credentials are not configured');
-  }
-  const json = fs.readFileSync(GOOGLE_APPLICATION_CREDENTIALS, 'utf8');
-  return JSON.parse(json);
-}
-
-async function getGoogleAccessToken() {
-  const credentials = readGoogleServiceAccount();
-  const now = Math.floor(Date.now() / 1000);
-  const header = base64UrlEncode(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
-  const claimSet = base64UrlEncode(JSON.stringify({
-    iss: credentials.client_email,
-    scope: 'https://www.googleapis.com/auth/cloud-platform',
-    aud: 'https://oauth2.googleapis.com/token',
-    exp: now + 3600,
-    iat: now
-  }));
-  const signingInput = `${header}.${claimSet}`;
-  const signer = crypto.createSign('RSA-SHA256');
-  signer.update(signingInput);
-  signer.end();
-  const signature = signer.sign(credentials.private_key);
-  const assertion = `${signingInput}.${signature.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')}`;
-
-  const tokenPayload = new URLSearchParams({
-    grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-    assertion
-  }).toString();
-
-  const response = await new Promise((resolve, reject) => {
-    const request = https.request('https://oauth2.googleapis.com/token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Content-Length': Buffer.byteLength(tokenPayload)
-      }
-    }, res => {
-      let raw = '';
-      res.setEncoding('utf8');
-      res.on('data', chunk => { raw += chunk; });
-      res.on('end', () => {
-        let data = null;
-        if (raw) {
-          try { data = JSON.parse(raw); } catch { data = { error: raw }; }
-        }
-        resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode || 502, data });
-      });
-    });
-    request.on('error', reject);
-    request.write(tokenPayload);
-    request.end();
-  });
-
-  if (!response.ok || !response.data?.access_token) {
-    throw new Error(extractUpstreamError(response.data, 'Failed to authenticate with Google Cloud'));
-  }
-
-  return response.data.access_token;
-}
-
-async function getJsonWithHeaders(url, headers = {}) {
-  if (typeof fetch === 'function') {
-    const response = await fetch(url, {
-      method: 'GET',
-      headers
-    });
-    const text = await response.text();
-    let data = null;
-    if (text) {
-      try { data = JSON.parse(text); } catch { data = { message: text }; }
-    }
-    return { ok: response.ok, status: response.status, data };
-  }
-
-  return new Promise((resolve, reject) => {
-    const target = new URL(url);
-    const request = https.request({
-      protocol: target.protocol,
-      hostname: target.hostname,
-      port: target.port || (target.protocol === 'https:' ? 443 : 80),
-      path: `${target.pathname}${target.search}`,
-      method: 'GET',
-      headers
-    }, response => {
-      let raw = '';
-      response.setEncoding('utf8');
-      response.on('data', chunk => { raw += chunk; });
-      response.on('end', () => {
-        let data = null;
-        if (raw) {
-          try { data = JSON.parse(raw); } catch { data = { message: raw }; }
-        }
-        resolve({ ok: response.statusCode >= 200 && response.statusCode < 300, status: response.statusCode || 502, data });
-      });
-    });
-    request.on('error', reject);
-    request.end();
-  });
-}
-
-function pickQuotaPreferenceDimensions(dimensionInfo = {}) {
-  const details = dimensionInfo.details || {};
-  const preferredKey = GOOGLE_CLOUD_QUOTA_PREFERRED_DIMENSION.trim();
-  const preferredValue = preferredKey ? details[preferredKey] : null;
-  if (preferredValue) {
-    return { key: preferredKey, value: preferredValue };
-  }
-
-  if (details.location) {
-    return { key: 'location', value: details.location };
-  }
-
-  const firstEntry = Object.entries(details).find(([, value]) => value);
-  if (firstEntry) {
-    const [key, value] = firstEntry;
-    return { key, value };
-  }
-
-  return null;
-}
-
-function chooseQuotaInfo(quotaInfos = []) {
-  if (!Array.isArray(quotaInfos) || !quotaInfos.length) return null;
-
-  const withCurrentLimit = quotaInfos.filter(item => Number.isFinite(Number(item?.quotaIncreaseEligibility?.currentLimit)));
-  const candidates = withCurrentLimit.length ? withCurrentLimit : quotaInfos;
-
-  const metricFiltered = GOOGLE_CLOUD_QUOTA_METRIC.trim()
-    ? candidates.filter(item => String(item.metric || '').includes(GOOGLE_CLOUD_QUOTA_METRIC.trim()))
-    : candidates;
-  const metricCandidates = metricFiltered.length ? metricFiltered : candidates;
-
-  const preferredDimensionMatches = metricCandidates.filter(item => {
-    const dimension = pickQuotaPreferenceDimensions(item.dimensionsInfo || {});
-    return dimension && dimension.key === GOOGLE_CLOUD_QUOTA_PREFERRED_DIMENSION.trim();
-  });
-  const dimensionCandidates = preferredDimensionMatches.length ? preferredDimensionMatches : metricCandidates;
-
-  const exactLocationMatches = dimensionCandidates.filter(item => {
-    const dimension = pickQuotaPreferenceDimensions(item.dimensionsInfo || {});
-    return dimension?.value === VERTEX_LOCATION;
-  });
-  const locationCandidates = exactLocationMatches.length ? exactLocationMatches : dimensionCandidates;
-
-  return locationCandidates[0] || null;
-}
-
-function serializeQuotaInfo(quotaInfo) {
-  if (!quotaInfo) return null;
-
-  const limit = Number(quotaInfo?.quotaIncreaseEligibility?.currentLimit);
-  if (!Number.isFinite(limit)) return null;
-
-  const dimension = pickQuotaPreferenceDimensions(quotaInfo.dimensionsInfo || {});
-
-  return {
-    metric: quotaInfo.metric || null,
-    quotaDisplayName: quotaInfo.quotaDisplayName || null,
-    limit,
-    dimensions: quotaInfo.dimensionsInfo?.details || {},
-    preferredDimension: dimension,
-    isPreciseMatch: dimension?.value === VERTEX_LOCATION
-  };
-}
-
-async function getVertexQuotaInfo() {
-  if (!VERTEX_PROJECT_ID || !GOOGLE_APPLICATION_CREDENTIALS) {
-    return null;
-  }
-
-  const accessToken = await getGoogleAccessToken();
-  const parent = `projects/${encodeURIComponent(VERTEX_PROJECT_ID)}/locations/${encodeURIComponent(GOOGLE_CLOUD_QUOTA_LOCATION)}/services/aiplatform.googleapis.com`;
-  const response = await getJsonWithHeaders(`https://cloudquotas.googleapis.com/v1beta/${parent}/quotaInfos?pageSize=200`, {
-    'Accept': 'application/json',
-    'Authorization': `Bearer ${accessToken}`
-  });
-
-  if (!response.ok) {
-    const error = new Error(extractUpstreamError(response.data, 'Failed to load Google Cloud quota information'));
-    error.status = response.status;
-    throw error;
-  }
-
-  const quotaInfo = chooseQuotaInfo(response.data?.quotaInfos || []);
-  return serializeQuotaInfo(quotaInfo);
 }
 
 async function postJsonWithHeaders(url, payload, headers = {}) {
@@ -1032,36 +915,28 @@ app.post('/api/lookup/grounded-search', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const query = sanitizeLookupQuery(req.body?.query);
   if (!query) return res.status(400).json({ error: 'query required' });
-  if (!VERTEX_PROJECT_ID || !GOOGLE_APPLICATION_CREDENTIALS) {
+  if (!GOOGLE_API_KEY) {
     return res.status(503).json({ error: 'grounded search is not configured', code: 'LOOKUP_NOT_CONFIGURED' });
   }
 
   try {
-    const accessToken = await getGoogleAccessToken();
-    const url = `https://aiplatform.googleapis.com/v1/projects/${encodeURIComponent(VERTEX_PROJECT_ID)}/locations/${encodeURIComponent(VERTEX_LOCATION)}/publishers/google/models/${encodeURIComponent(VERTEX_MODEL)}:generateContent`;
+    const usageRow = await applyGoogleAiUsagePolicy();
+    const usage = usageRow ? serializeProviderUsageRow(usageRow) : null;
+    if (usage && usage.remaining < usage.costPerRequest) {
+      return res.status(429).json({
+        error: 'Google AI Studio free-tier cap reached',
+        code: 'LOOKUP_LIMIT_REACHED'
+      });
+    }
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/interactions?key=${encodeURIComponent(GOOGLE_API_KEY)}`;
     const upstream = await postJsonWithHeaders(url, {
-      systemInstruction: {
-        role: 'system',
-        parts: [{ text: 'Answer with a concise factual summary grounded in web sources. Prefer business-relevant information and avoid speculation.' }]
-      },
-      contents: [
-        {
-          role: 'user',
-          parts: [{ text: query }]
-        }
-      ],
-      tools: [
-        {
-          googleSearch: {}
-        }
-      ],
-      generationConfig: {
-        temperature: 1,
-        maxOutputTokens: 1024
-      }
+      model: GOOGLE_AI_MODEL,
+      input: query,
+      tools: [{ type: 'google_search' }],
+      systemInstruction: 'Answer with a concise factual summary grounded in web sources. Prefer business-relevant information and avoid speculation.'
     }, {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${accessToken}`
+      'Content-Type': 'application/json'
     });
     if (!upstream.ok) {
       return res.status(502).json({
@@ -1070,28 +945,27 @@ app.post('/api/lookup/grounded-search', async (req, res) => {
       });
     }
 
-    const candidate = upstream.data?.candidates?.[0];
-    const parts = Array.isArray(candidate?.content?.parts) ? candidate.content.parts : [];
-    const text = parts
-      .map(part => part?.text)
-      .filter(Boolean)
-      .join('\n')
-      .trim();
-    const groundingMetadata = candidate?.groundingMetadata || candidate?.grounding_metadata || {};
-    const chunks = Array.isArray(groundingMetadata?.groundingChunks)
-      ? groundingMetadata.groundingChunks
-      : Array.isArray(groundingMetadata?.grounding_chunks)
-        ? groundingMetadata.grounding_chunks
-        : [];
-    const sources = chunks
-      .map(chunk => chunk?.web || chunk?.webSearchResult || chunk)
-      .filter(chunk => chunk?.uri || chunk?.url)
-      .map((chunk, index) => ({
-        title: chunk.title || `Source ${index + 1}`,
-        url: chunk.uri || chunk.url
-      }));
-    const searchEntryPoint = groundingMetadata?.searchEntryPoint || groundingMetadata?.search_entry_point || null;
-    const webSearchQueries = groundingMetadata?.webSearchQueries || groundingMetadata?.web_search_queries || [];
+    const steps = Array.isArray(upstream.data?.steps) ? upstream.data.steps : [];
+    const outputStep = steps.find(step => step?.type === 'model_output') || null;
+    const contentBlocks = Array.isArray(outputStep?.content) ? outputStep.content : [];
+    const textBlock = contentBlocks.find(block => block?.type === 'text') || null;
+    const text = textBlock?.text?.trim() || '';
+    const annotations = Array.isArray(textBlock?.annotations) ? textBlock.annotations : [];
+    const sources = annotations
+      .filter(annotation => annotation?.type === 'url_citation' && annotation?.url)
+      .map((annotation, index) => ({
+        title: annotation.title || `Source ${index + 1}`,
+        url: annotation.url
+      }))
+      .filter((source, index, array) => array.findIndex(item => item.url === source.url) === index);
+    const searchCallStep = steps.find(step => step?.type === 'google_search_call') || null;
+    const webSearchQueries = Array.isArray(searchCallStep?.arguments?.queries) ? searchCallStep.arguments.queries : [];
+    const searchResultStep = steps.find(step => step?.type === 'google_search_result') || null;
+    const renderedContent = Array.isArray(searchResultStep?.result)
+      ? searchResultStep.result
+        .map(entry => entry?.search_suggestions)
+        .find(Boolean) || null
+      : null;
 
     await incrementProviderUsage('vertex-grounded-search');
 
@@ -1102,7 +976,7 @@ app.post('/api/lookup/grounded-search', async (req, res) => {
         text,
         sources,
         webSearchQueries,
-        renderedContent: searchEntryPoint?.renderedContent || searchEntryPoint?.rendered_content || null,
+        renderedContent,
         raw: upstream.data
       }
     });
@@ -1114,16 +988,7 @@ app.post('/api/lookup/grounded-search', async (req, res) => {
 app.get('/api/lookup/usage', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   try {
-    let vertexQuota = null;
-    try {
-      vertexQuota = await getVertexQuotaInfo();
-      if (vertexQuota?.limit !== null && vertexQuota?.limit !== undefined) {
-        await setProviderUsageLimit('vertex-grounded-search', vertexQuota.limit);
-      }
-    } catch (quotaError) {
-      console.warn('Vertex quota lookup failed:', quotaError.message);
-    }
-
+    await refreshProviderUsagePolicies();
     const rows = await listProviderUsage();
     const usage = rows.reduce((acc, row) => {
       acc[row.provider] = serializeProviderUsageRow(row);
@@ -1134,12 +999,13 @@ app.get('/api/lookup/usage', async (req, res) => {
       numverify: usage.numverify || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 },
       'vertex-grounded-search': {
         ...(usage['vertex-grounded-search'] || { used: 0, limit: 0, remaining: 0, costPerRequest: 1 }),
-        quotaDisplayName: vertexQuota?.quotaDisplayName || null,
-        quotaMetric: vertexQuota?.metric || null,
-        quotaDimensions: vertexQuota?.dimensions || {},
-        quotaDimensionMatch: vertexQuota?.preferredDimension || null,
-        quotaSource: vertexQuota ? 'google-cloud' : 'internal-fallback',
-        quotaExactMatch: !!vertexQuota?.isPreciseMatch
+        quotaDisplayName: `Google AI Studio (${GOOGLE_AI_MODEL})`,
+        quotaMetric: null,
+        quotaDimensions: {},
+        quotaDimensionMatch: null,
+        quotaSource: 'backend-config',
+        quotaPolicyLabel: GOOGLE_AI_FREE_TIER_LABEL,
+        quotaExactMatch: false
       }
     });
   } catch (error) {
