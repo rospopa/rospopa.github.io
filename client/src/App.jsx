@@ -904,71 +904,6 @@ function PropertiesPage({ user }) {
 }
 
 function LookupPage() {
-  const [email, setEmail] = useState('')
-  const [loading, setLoading] = useState(false)
-  const [result, setResult] = useState(null)
-  const [error, setError] = useState('')
-  const [serviceUnavailable, setServiceUnavailable] = useState(false)
-
-  const verdicts = useMemo(() => {
-    if (!result?.result) return []
-    const data = result.result
-    const toVerdict = (label, value) => {
-      if (value === true) return { label, value: 'Yes', tone: 'text-success' }
-      if (value === false) return { label, value: 'No', tone: 'text-error' }
-      return { label, value: 'Unknown', tone: 'text-base-content/50' }
-    }
-    return [
-      toVerdict('Syntax', data.syntaxValid),
-      toVerdict('MX', data.hasMx),
-      toVerdict('SMTP', data.smtpOk),
-      toVerdict('Catch-all', data.isCatchAll),
-      toVerdict('Reachable', data.isReachable),
-    ]
-  }, [result])
-
-  async function handleSubmit(e) {
-    e.preventDefault()
-    const trimmed = email.trim()
-    if (!trimmed) {
-      setError('Email is required')
-      setResult(null)
-      setServiceUnavailable(false)
-      return
-    }
-
-    setLoading(true)
-    setError('')
-    setResult(null)
-    setServiceUnavailable(false)
-
-    try {
-      const data = await apiFetch('/api/lookup/email', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: trimmed })
-      })
-      setResult(data)
-      setEmail(data.input || trimmed)
-    } catch (e) {
-      if (e.status === 503) {
-        setServiceUnavailable(true)
-        setError(e.message || 'Lookup service not configured')
-      } else {
-        setError(e.message || 'Lookup failed')
-      }
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  function handleClear() {
-    setEmail('')
-    setResult(null)
-    setError('')
-    setServiceUnavailable(false)
-  }
-
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -981,76 +916,14 @@ function LookupPage() {
       <div className="card bg-base-100 border border-base-300 shadow-sm">
         <div className="card-body p-5 md:p-6 space-y-5">
           <div className="space-y-1">
-            <h3 className="text-lg font-semibold">Email Verification</h3>
-            <p className="text-sm text-base-content/55">Check syntax and upstream reachability signals for an email address.</p>
+            <h3 className="text-lg font-semibold">Lookup tools coming soon</h3>
+            <p className="text-sm text-base-content/55">
+              This admin-only area is reserved for future lookup utilities.
+            </p>
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto_auto] gap-3 items-end">
-              <Field label="Email" required>
-                <input
-                  type="email"
-                  placeholder="name@example.com"
-                  value={email}
-                  onChange={e => setEmail(e.target.value)}
-                  className="input input-bordered w-full"
-                />
-              </Field>
-              <SaveButton
-                type="submit"
-                loading={loading}
-                label="Verify"
-                loadingLabel="Verifying…"
-                className="md:w-auto"
-                disabled={!email.trim()}
-              />
-              <button type="button" className="btn btn-ghost md:w-auto" onClick={handleClear} disabled={loading}>
-                Clear
-              </button>
-            </div>
-          </form>
-
-          {error && (
-            <div className={`alert ${serviceUnavailable ? 'alert-warning' : 'alert-error'} text-sm`}>
-              {serviceUnavailable ? 'Lookup service not configured.' : error}
-            </div>
-          )}
-
-          {!result && !error && (
-            <div className="rounded-xl border border-dashed border-base-300 bg-base-200/40 px-4 py-6 text-sm text-base-content/45">
-              Enter an email to verify deliverability signals.
-            </div>
-          )}
-
-          {result?.result && (
-            <div className="space-y-4 rounded-xl border border-base-300 bg-base-200/30 p-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="text-xs uppercase tracking-[0.2em] text-base-content/40">Result</span>
-                <span className={`badge ${result.result.isReachable ? 'badge-success' : 'badge-ghost'} badge-sm`}>
-                  {result.result.isReachable ? 'Reachable' : 'Unconfirmed'}
-                </span>
-                <span className="text-sm text-base-content/60 break-all">{result.input}</span>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                {verdicts.map(item => (
-                  <div key={item.label} className="rounded-lg border border-base-300 bg-base-100 px-3 py-3">
-                    <div className="text-[11px] uppercase tracking-[0.18em] text-base-content/40">{item.label}</div>
-                    <div className={`mt-1 text-sm font-semibold ${item.tone}`}>{item.value}</div>
-                  </div>
-                ))}
-              </div>
-
-              <details className="collapse collapse-arrow bg-base-100 border border-base-300">
-                <summary className="collapse-title text-sm font-medium min-h-0 py-3">Raw summary</summary>
-                <div className="collapse-content pt-0">
-                  <pre className="text-xs text-base-content/65 whitespace-pre-wrap break-words overflow-x-auto">
-                    {JSON.stringify(result.result.raw, null, 2)}
-                  </pre>
-                </div>
-              </details>
-            </div>
-          )}
+          <div className="rounded-xl border border-dashed border-base-300 bg-base-200/40 px-4 py-6 text-sm text-base-content/60">
+            No external verifier is currently configured. Lookup integrations will be added here in a future update.
+          </div>
         </div>
       </div>
     </div>
