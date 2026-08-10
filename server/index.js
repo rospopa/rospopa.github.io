@@ -279,7 +279,7 @@ async function initializeSchema() {
     VALUES
       ('hunter', 0, 50, 0.5, 'monthly', $1, $1),
       ('numverify', 0, 100, 1, 'monthly', $1, $1),
-      ('vertex-grounded-search', 0, 250, 1, 'daily', $1, $1)
+      ('google-ai-studio-search', 0, 250, 1, 'daily', $1, $1)
     ON CONFLICT (provider) DO UPDATE SET
       credit_limit = EXCLUDED.credit_limit,
       credit_cost_per_request = EXCLUDED.credit_cost_per_request,
@@ -600,8 +600,8 @@ function serializeProviderUsageRow(row) {
 }
 
 async function applyGoogleAiUsagePolicy() {
-  await syncProviderUsageWindow('vertex-grounded-search');
-  return setProviderUsageLimit('vertex-grounded-search', GOOGLE_AI_FREE_TIER_LIMIT);
+  await syncProviderUsageWindow('google-ai-studio-search');
+  return setProviderUsageLimit('google-ai-studio-search', GOOGLE_AI_FREE_TIER_LIMIT);
 }
 
 async function refreshProviderUsagePolicies() {
@@ -967,7 +967,7 @@ app.post('/api/lookup/grounded-search', async (req, res) => {
         .find(Boolean) || null
       : null;
 
-    await incrementProviderUsage('vertex-grounded-search');
+    await incrementProviderUsage('google-ai-studio-search');
 
     return res.json({
       ok: true,
@@ -997,8 +997,8 @@ app.get('/api/lookup/usage', async (req, res) => {
     return res.json({
       hunter: usage.hunter || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 },
       numverify: usage.numverify || { used: 0, limit: 0, remaining: 0, costPerRequest: 0 },
-      'vertex-grounded-search': {
-        ...(usage['vertex-grounded-search'] || { used: 0, limit: 0, remaining: 0, costPerRequest: 1 }),
+      'google-ai-studio-search': {
+        ...(usage['google-ai-studio-search'] || { used: 0, limit: 0, remaining: 0, costPerRequest: 1 }),
         quotaDisplayName: `Google AI Studio (${GOOGLE_AI_MODEL})`,
         quotaMetric: null,
         quotaDimensions: {},
