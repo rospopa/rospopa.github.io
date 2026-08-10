@@ -111,18 +111,26 @@ function AddUserForm({ onCreated }) {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [buyBox, setBuyBox] = useState('')
   const [photo, setPhoto] = useState(null)
+  const [showCropper, setShowCropper] = useState(false)
+  const [cropSrc, setCropSrc] = useState(null)
   const [loading, setLoading] = useState(false)
   const [msg, setMsg] = useState('')
   const [msgType, setMsgType] = useState('success')
 
-  async function handlePhotoChange(e) {
+  function handlePhotoChange(e) {
     const file = e.target.files?.[0]
     if (!file) return
     if (!file.type.startsWith('image/')) { setMsgType('error'); setMsg('Only image files allowed'); return }
     if (file.size > 5 * 1024 * 1024) { setMsgType('error'); setMsg('Photo must be under 5 MB'); return }
     const reader = new FileReader()
-    reader.onload = ev => setPhoto(ev.target.result)
+    reader.onload = ev => { setCropSrc(ev.target.result); setShowCropper(true) }
     reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
+  function onCropSave(dataUrl) {
+    setPhoto(dataUrl)
+    setShowCropper(false)
   }
 
   async function createUser(e) {
@@ -148,6 +156,13 @@ function AddUserForm({ onCreated }) {
 
   return (
     <form onSubmit={createUser} className="space-y-5">
+      {showCropper && cropSrc && (
+        <PhotoCropper
+          src={cropSrc}
+          onSave={onCropSave}
+          onClose={() => setShowCropper(false)}
+        />
+      )}
       {/* Photo upload — required */}
       <Field label="Profile Photo" required>
         <div className="flex items-center gap-5">
