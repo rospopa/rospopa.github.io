@@ -155,7 +155,7 @@ function AddUserForm({ onCreated }) {
   const displayName = [firstName, lastName].filter(Boolean).join(' ') || email || 'New User'
 
   return (
-    <form onSubmit={createUser} className="space-y-5">
+    <form onSubmit={createUser} className="space-y-5" noValidate>
       {showCropper && cropSrc && (
         <PhotoCropper
           src={cropSrc}
