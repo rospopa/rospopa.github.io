@@ -14,6 +14,7 @@ const compression = require('compression');
 const PORT = process.env.PORT || 3000;
 const DATABASE_URL = process.env.DATABASE_URL;
 const RECAPTCHA_API_KEY = process.env.RECAPTCHA_API_KEY;
+const REACHER_API_URL = String(process.env.REACHER_API_URL || '').trim().replace(/\/+$/, '');
 const RECAPTCHA_PROJECT_ID = 'rospopa-recaptcha';
 const RECAPTCHA_SITE_KEY = '6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv';
 const RECAPTCHA_MIN_SCORE = 0.5;
@@ -350,6 +351,70 @@ function clientIp(req) {
   const fwd = req.headers['x-forwarded-for'];
   if (fwd) return fwd.split(',')[0].trim();
   return req.socket?.remoteAddress || null;
+}
+
+function normalizeReacherResult(raw) {
+  const reachability = raw?.is_reachable ?? raw?.isReachable ?? raw?.reachable;
+  const syntax = raw?.is_syntax_valid ?? raw?.syntax_valid ?? raw?.syntaxValid;
+  const mx = raw?.has_mx ?? raw?.mx ?? raw?.mx_found ?? raw?.hasMx;
+  const smtp = raw?.can_connect_smtp ?? raw?.smtp_ok ?? raw?.smtpOk;
+  const catchAll = raw?.is_catch_all ?? raw?.isCatchAll ?? raw?.catch_all;
+
+  return {
+    isReachable: typeof reachability === 'boolean' ? reachability : null,
+    syntaxValid: typeof syntax === 'boolean' ? syntax : null,
+    hasMx: typeof mx === 'boolean' ? mx : null,
+    smtpOk: typeof smtp === 'boolean' ? smtp : null,
+    isCatchAll: typeof catchAll === 'boolean' ? catchAll : null,
+    raw
+  };
+}
+
+async function postJson(url, payload) {
+  if (typeof fetch === 'function') {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const text = await response.text();
+    let data = null;
+    if (text) {
+      try { data = JSON.parse(text); } catch { data = { message: text }; }
+    }
+    return { ok: response.ok, status: response.status, data };
+  }
+
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify(payload);
+    const target = new URL(url);
+    const request = https.request({
+      protocol: target.protocol,
+      hostname: target.hostname,
+      port: target.port || (target.protocol === 'https:' ? 443 : 80),
+      path: `${target.pathname}${target.search}`,
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'Content-Length': Buffer.byteLength(body)
+      }
+    }, response => {
+      let raw = '';
+      response.setEncoding('utf8');
+      response.on('data', chunk => { raw += chunk; });
+      response.on('end', () => {
+        let data = null;
+        if (raw) {
+          try { data = JSON.parse(raw); } catch { data = { message: raw }; }
+        }
+        resolve({ ok: response.statusCode >= 200 && response.statusCode < 300, status: response.statusCode || 502, data });
+      });
+    });
+    request.on('error', reject);
+    request.write(body);
+    request.end();
+  });
 }
 
 /** Verify a reCAPTCHA Enterprise token. Returns { ok, score, reason } */
@@ -996,6 +1061,36 @@ app.get('/api/audit-logs', async (req, res) => {
     res.json({ logs: listResult.rows, total: countResult.rows[0].total });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.post('/api/lookup/email', async (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  if (req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+
+  let { email } = req.body || {};
+  email = sanitizeEmail(email);
+
+  if (!email) return res.status(400).json({ error: 'email required' });
+  if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
+  if (!REACHER_API_URL) {
+    return res.status(503).json({ error: 'lookup service not configured', code: 'LOOKUP_NOT_CONFIGURED' });
+  }
+
+  try {
+    const upstream = await postJson(`${REACHER_API_URL}/check_email`, { to_email: email });
+    if (!upstream.ok) {
+      const message = upstream.data?.error || upstream.data?.message || `upstream ${upstream.status}`;
+      return res.status(502).json({ error: `lookup upstream error: ${message}` });
+    }
+
+    return res.json({
+      ok: true,
+      input: email,
+      result: normalizeReacherResult(upstream.data)
+    });
+  } catch (e) {
+    return res.status(502).json({ error: `lookup upstream error: ${e.message || 'request failed'}` });
   }
 });
 
