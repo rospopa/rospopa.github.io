@@ -1089,7 +1089,7 @@ function LookupPage() {
                 type="tel"
                 placeholder="+1 555 123 4567"
                 value={phone}
-                onChange={e => setPhone(e.target.value)}
+                onChange={e => setPhone(formatPhone(e.target.value))}
                 className="input input-bordered flex-1"
               />
               <button className="btn btn-primary md:min-w-32" type="submit" disabled={phoneLoading}>
