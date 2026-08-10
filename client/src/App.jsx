@@ -1077,6 +1077,19 @@ function LookupPage() {
     return ''
   }
 
+  const formatResetDate = (providerUsage) => {
+    if (!providerUsage?.nextResetAt) return ''
+    const date = new Date(providerUsage.nextResetAt)
+    if (Number.isNaN(date.getTime())) return ''
+    return date.toLocaleString([], {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    })
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -1114,6 +1127,11 @@ function LookupPage() {
                   {formatResetWindow(providerUsage) && (
                     <p className="mt-1 text-[11px] text-base-content/45">
                       {formatResetWindow(providerUsage)}
+                    </p>
+                  )}
+                  {formatResetDate(providerUsage) && (
+                    <p className="mt-1 text-[11px] text-base-content/45">
+                      Resets on {formatResetDate(providerUsage)}
                     </p>
                   )}
                 </div>
