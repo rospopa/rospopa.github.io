@@ -909,6 +909,11 @@ function LookupPage() {
   const [error, setError] = useState('')
   const [notConfigured, setNotConfigured] = useState(false)
   const [result, setResult] = useState(null)
+  const [phone, setPhone] = useState('')
+  const [phoneLoading, setPhoneLoading] = useState(false)
+  const [phoneError, setPhoneError] = useState('')
+  const [phoneNotConfigured, setPhoneNotConfigured] = useState(false)
+  const [phoneResult, setPhoneResult] = useState(null)
 
   async function verifyEmail(e) {
     e.preventDefault()
@@ -938,6 +943,34 @@ function LookupPage() {
     }
   }
 
+  async function validatePhone(e) {
+    e.preventDefault()
+    setPhoneError('')
+    setPhoneNotConfigured(false)
+    setPhoneResult(null)
+    if (!phone.trim()) {
+      setPhoneError('Phone number is required')
+      return
+    }
+    setPhoneLoading(true)
+    try {
+      const data = await apiFetch('/api/lookup/phone', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone })
+      })
+      setPhoneResult(data)
+    } catch (e) {
+      if (e.status === 503) {
+        setPhoneNotConfigured(true)
+        return
+      }
+      setPhoneError(e.message || 'Validation failed')
+    } finally {
+      setPhoneLoading(false)
+    }
+  }
+
   const flags = result?.result ? [
     { label: 'Disposable', value: result.result.disposable },
     { label: 'Webmail', value: result.result.webmail },
@@ -953,6 +986,7 @@ function LookupPage() {
   const isPositiveVerdict = [verdictValue, verdictStatus]
     .filter(Boolean)
     .some(value => positiveVerdicts.includes(String(value).toLowerCase()))
+  const isPhoneValid = !!phoneResult?.result?.valid
 
   return (
     <div className="space-y-6">
@@ -1038,10 +1072,83 @@ function LookupPage() {
               )}
             </div>
           )}
+        </div>
+      </div>
 
-          <div className="rounded-xl border border-dashed border-base-300 bg-base-200/40 px-4 py-6 text-sm text-base-content/60">
-            More lookup tools for phone, name, address, and business research can be added here over time.
+      <div className="card bg-base-100 border border-base-300 shadow-sm">
+        <div className="card-body p-5 md:p-6 space-y-5">
+          <div className="space-y-1">
+            <h3 className="text-lg font-semibold">Phone Validation</h3>
+            <p className="text-sm text-base-content/55">
+              Validate a phone number with Numverify while keeping the API key on the server.
+            </p>
           </div>
+          <form onSubmit={validatePhone} className="space-y-4">
+            <div className="flex flex-col gap-3 md:flex-row">
+              <input
+                type="tel"
+                placeholder="+1 555 123 4567"
+                value={phone}
+                onChange={e => setPhone(e.target.value)}
+                className="input input-bordered flex-1"
+              />
+              <button className="btn btn-primary md:min-w-32" type="submit" disabled={phoneLoading}>
+                {phoneLoading ? 'Validating…' : 'Validate'}
+              </button>
+            </div>
+          </form>
+
+          {phoneError && (
+            <div className="rounded-xl border border-base-300 bg-base-200/40 px-4 py-3 text-sm text-error">
+              {phoneError}
+            </div>
+          )}
+
+          {phoneNotConfigured && (
+            <div className="rounded-xl border border-dashed border-base-300 bg-base-200/40 px-4 py-4 text-sm text-base-content/60">
+              Numverify is not configured on this server yet.
+            </div>
+          )}
+
+          {phoneResult?.result && (
+            <div className="rounded-xl border border-base-300 bg-base-200/30 p-4 md:p-5 space-y-4">
+              <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p className="text-xs uppercase tracking-widest text-base-content/50">Validation result</p>
+                  <div className="mt-1 flex flex-wrap items-center gap-2">
+                    {isPhoneValid && (
+                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-success/30 bg-success/12 text-sm font-semibold leading-none text-success">
+                        ✓
+                      </span>
+                    )}
+                    <span className={`badge ${isPhoneValid ? 'badge-success' : 'badge-neutral'}`}>{isPhoneValid ? 'valid' : 'invalid'}</span>
+                    {phoneResult.result.line_type && <span className="badge badge-outline">{phoneResult.result.line_type}</span>}
+                  </div>
+                </div>
+                {phoneResult.result.international_format && (
+                  <div className="text-sm text-base-content/70">
+                    <span className="font-semibold text-base-content">{phoneResult.result.international_format}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-3">
+                {[
+                  { label: 'Country', value: phoneResult.result.country_name || phoneResult.result.country_code || '—' },
+                  { label: 'Location', value: phoneResult.result.location || '—' },
+                  { label: 'Carrier', value: phoneResult.result.carrier || '—' },
+                  { label: 'Line type', value: phoneResult.result.line_type || '—' },
+                  { label: 'International format', value: phoneResult.result.international_format || '—' },
+                  { label: 'Local format', value: phoneResult.result.local_format || '—' }
+                ].map(field => (
+                  <div key={field.label} className="rounded-lg border border-base-300 px-3 py-2 text-sm">
+                    <p className="text-xs uppercase tracking-widest text-base-content/45">{field.label}</p>
+                    <p className="mt-1 font-medium text-base-content">{field.value}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
