@@ -382,6 +382,151 @@ function EditUserModal({ open, user, onClose, onSave }) {
   )
 }
 
+function ProfilePage({ currentUser, onUpdate }) {
+  const [firstName, setFirstName] = useState(currentUser.first_name || '')
+  const [lastName, setLastName] = useState(currentUser.last_name || '')
+  const [organization, setOrganization] = useState(currentUser.organization || '')
+  const [phoneNumber, setPhoneNumber] = useState(currentUser.phone_number || '')
+  const [buyBox, setBuyBox] = useState(currentUser.buy_box || '')
+  const [photo, setPhoto] = useState(currentUser.profile_photo || null)
+  const [showCropper, setShowCropper] = useState(false)
+  const [cropSrc, setCropSrc] = useState(null)
+  const [saving, setSaving] = useState(false)
+  const [savedSignal, setSavedSignal] = useState(0)
+  const [err, setErr] = useState('')
+
+  useEffect(() => {
+    setFirstName(currentUser.first_name || '')
+    setLastName(currentUser.last_name || '')
+    setOrganization(currentUser.organization || '')
+    setPhoneNumber(currentUser.phone_number || '')
+    setBuyBox(currentUser.buy_box || '')
+    setPhoto(currentUser.profile_photo || null)
+    setErr('')
+  }, [currentUser])
+
+  function handlePhotoChange(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (!file.type.startsWith('image/')) { setErr('Only image files allowed'); return }
+    if (file.size > 5 * 1024 * 1024) { setErr('Photo must be under 5 MB'); return }
+    const reader = new FileReader()
+    reader.onload = ev => { setCropSrc(ev.target.result); setShowCropper(true) }
+    reader.readAsDataURL(file)
+    e.target.value = ''
+  }
+
+  async function handleSave() {
+    setSaving(true)
+    setErr('')
+    try {
+      const updatedUser = await apiFetch(`/api/users/${currentUser.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          first_name: firstName || null,
+          last_name: lastName || null,
+          organization: organization || null,
+          phone_number: phoneNumber || null,
+          buy_box: buyBox || null,
+          profile_photo: photo || null
+        })
+      })
+      onUpdate(updatedUser.user || updatedUser)
+      setSavedSignal(s => s + 1)
+    } catch (e) {
+      setErr(e.message || 'Save failed')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const displayName = [firstName, lastName].filter(Boolean).join(' ') || currentUser.email
+
+  return (
+    <div className="space-y-6">
+      {showCropper && cropSrc && (
+        <PhotoCropper
+          src={cropSrc}
+          onSave={dataUrl => { setPhoto(dataUrl); setShowCropper(false) }}
+          onClose={() => setShowCropper(false)}
+        />
+      )}
+
+      <div className="card bg-base-100 border border-base-300">
+        <div className="card-body p-5 md:p-8 space-y-6">
+          <div className="flex flex-col lg:flex-row gap-6 lg:items-start">
+            <div className="flex items-center gap-4 min-w-0 flex-1">
+              <div className="relative flex-shrink-0">
+                <Avatar src={photo} name={displayName} size="lg" />
+                <label className="absolute -bottom-1 -right-1 btn btn-xs btn-circle btn-primary cursor-pointer" title="Upload photo">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                  <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
+                </label>
+              </div>
+              <div className="min-w-0 space-y-1">
+                <div className="flex flex-wrap items-center gap-2">
+                  <h2 className="text-2xl font-bold truncate">{displayName}</h2>
+                  <span className={`badge ${currentUser.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{currentUser.role}</span>
+                </div>
+                <p className="text-sm text-base-content/60 break-all">{currentUser.email}</p>
+                {phoneNumber && <p className="text-sm text-base-content/60">{phoneNumber}</p>}
+                {organization && <p className="text-sm text-base-content/60">{organization}</p>}
+                {buyBox && <p className="text-sm text-base-content/60 line-clamp-2">{buyBox}</p>}
+              </div>
+            </div>
+            <div className="text-xs text-base-content/40 space-y-1 lg:text-right">
+              {currentUser.created_at && <div>Member since {new Date(currentUser.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>}
+              {currentUser.updated_at && <div>Last updated {new Date(currentUser.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>}
+            </div>
+          </div>
+
+          <div className="divider my-0" />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <Field label="First Name">
+              <input type="text" placeholder="First name" value={firstName} onChange={e => setFirstName(e.target.value)} className="input input-bordered w-full" />
+            </Field>
+            <Field label="Last Name">
+              <input type="text" placeholder="Last name" value={lastName} onChange={e => setLastName(e.target.value)} className="input input-bordered w-full" />
+            </Field>
+            <Field label="Organization">
+              <input type="text" placeholder="Company or firm" value={organization} onChange={e => setOrganization(e.target.value)} className="input input-bordered w-full" />
+            </Field>
+            <Field label="Phone Number">
+              <input type="tel" placeholder="+1 (000) 000-0000" value={phoneNumber} onChange={e => setPhoneNumber(formatPhone(e.target.value))} className="input input-bordered w-full" />
+            </Field>
+            <div className="md:col-span-2">
+              <Field label="Buy Box">
+                <textarea
+                  value={buyBox}
+                  onChange={e => setBuyBox(e.target.value)}
+                  className="textarea textarea-bordered w-full min-h-[120px]"
+                  placeholder="Describe target criteria, markets, asset types, budget, or notes"
+                />
+              </Field>
+            </div>
+          </div>
+
+          {photo && (
+            <div className="flex justify-start">
+              <button className="btn btn-xs btn-ghost text-error" onClick={() => setPhoto(null)}>Remove photo</button>
+            </div>
+          )}
+
+          {err && <div className="alert alert-error text-sm">{err}</div>}
+
+          <div className="flex justify-end">
+            <SaveButton onClick={handleSave} loading={saving} savedSignal={savedSignal} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ─── Properties Page ─────────────────────────────────────────── */
 
 function PropertiesPage({ user }) {
