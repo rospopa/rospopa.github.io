@@ -1,5 +1,5 @@
-import { lazy, Suspense, useState, useEffect, useRef } from 'react'
-import { apiFetch, downloadAttachment, fmtLastLogin, fmtLastNote, SaveButton, Avatar } from './shared'
+import { lazy, Suspense, useState, useEffect, useRef, useMemo } from 'react'
+import { apiFetch, downloadAttachment, fmtLastLogin, fmtLastNote, SaveButton, Avatar, useSharedOnlineStatus, useDebounce, prefetchPropertyDetail, getPrefetchedProperty } from './shared'
 
 const LazyPropertyDetailModal = lazy(() => import('./PropertyDetailModal'))
 
@@ -257,8 +257,13 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
 
   const openPropertyModal = async (propId) => {
     try {
-      const full = await apiFetch(`/api/properties/${propId}`)
-      setViewProp(full)
+      const prefetched = getPrefetchedProperty(propId)
+      if (prefetched) {
+        setViewProp(prefetched)
+      } else {
+        const full = await apiFetch(`/api/properties/${propId}`)
+        setViewProp(full)
+      }
       setPropModalOpen(true)
     } catch { /* ignore */ }
   }
@@ -387,6 +392,7 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
                 <button
                   key={p.id}
                   onClick={() => openPropertyModal(p.id)}
+                  onMouseEnter={() => prefetchPropertyDetail(p.id)}
                   className="w-full text-left flex items-start justify-between gap-3 p-3 rounded-lg bg-base-200/60 hover:bg-base-200 transition-colors cursor-pointer"
                 >
                   <div className="flex-1 min-w-0">
@@ -495,7 +501,7 @@ export default function ContactsPage() {
     return saved ? Number(saved) : null
   })
   const [refreshKey, setRefreshKey] = useState(0)
-  const [onlineStatus, setOnlineStatus] = useState({ online: [], lastLogin: {} })
+  const onlineStatus = useSharedOnlineStatus()
   const [search, setSearch] = useState('')
   const [listSort, setListSort] = useState({ col: 'last_name', dir: 'asc' })
   const [filterRole, setFilterRole] = useState('')
@@ -515,17 +521,14 @@ export default function ContactsPage() {
     apiFetch('/api/contacts').then(data => { setContacts(data); setLoading(false) }).catch(() => setLoading(false))
   }, [refreshKey])
 
-  useEffect(() => {
-    apiFetch('/api/online-status').then(d => setOnlineStatus(d)).catch(() => {})
-    const t = setInterval(() => apiFetch('/api/online-status').then(d => setOnlineStatus(d)).catch(() => {}), 30000)
-    return () => clearInterval(t)
-  }, [])
-
   const openNotes = (c) => setSelectedContact(c)
   const closeNotes = () => setSelectedContact(null)
   const refreshContacts = () => setRefreshKey(k => k + 1)
   const openDetail = (c) => setDetailId(c.id)
   const closeDetail = () => setDetailId(null)
+
+  // Debounce search input
+  const debouncedSearch = useDebounce(search, 200)
 
   // If a contact detail is open, render full-page view instead
   if (detailId) {
@@ -542,15 +545,21 @@ export default function ContactsPage() {
   const userContacts = contacts.filter(c => c.role === 'user')
   const otherContacts = contacts.filter(c => c.role !== 'admin' && c.role !== 'user')
 
-  const cq = search.trim().toLowerCase()
-  const filteredContacts = cq
-    ? contacts.filter(c =>
-        [c.first_name, c.last_name, c.email, c.organization, c.phone_number, c.buy_box, c.last_note_text]
-          .filter(Boolean).some(v => v.toLowerCase().includes(cq))
-      )
-    : contacts
+  const cq = debouncedSearch.trim().toLowerCase()
+  const filteredContacts = useMemo(() => 
+    cq
+      ? contacts.filter(c =>
+          [c.first_name, c.last_name, c.email, c.organization, c.phone_number, c.buy_box, c.last_note_text]
+            .filter(Boolean).some(v => v.toLowerCase().includes(cq))
+        )
+      : contacts,
+    [contacts, cq]
+  )
 
-  const roleFilteredContacts = filterRole ? filteredContacts.filter(c => c.role === filterRole) : filteredContacts
+  const roleFilteredContacts = useMemo(() =>
+    filterRole ? filteredContacts.filter(c => c.role === filterRole) : filteredContacts,
+    [filteredContacts, filterRole]
+  )
 
   function toggleListSort(col) {
     setListSort(prev => prev.col === col ? { col, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })
@@ -560,26 +569,29 @@ export default function ContactsPage() {
     return <span className="ml-1">{listSort.dir === 'asc' ? '↑' : '↓'}</span>
   }
 
-  const sortedListContacts = [...roleFilteredContacts].sort((a, b) => {
-    const { col, dir } = listSort
-    let av, bv
-    if (col === 'name') {
-      av = ([a.first_name, a.last_name].filter(Boolean).join(' ') || a.email).toLowerCase()
-      bv = ([b.first_name, b.last_name].filter(Boolean).join(' ') || b.email).toLowerCase()
-    } else if (col === 'note_count') {
-      av = a.note_count || 0; bv = b.note_count || 0
-    } else if (col === 'last_note_at') {
-      av = a.last_note_at || ''; bv = b.last_note_at || ''
-    } else if (col === 'last_login') {
-      av = a.last_login || ''; bv = b.last_login || ''
-    } else {
-      av = (a[col] || '').toString().toLowerCase()
-      bv = (b[col] || '').toString().toLowerCase()
-    }
-    if (av < bv) return dir === 'asc' ? -1 : 1
-    if (av > bv) return dir === 'asc' ? 1 : -1
-    return 0
-  })
+  const sortedListContacts = useMemo(() => {
+    const sorted = [...roleFilteredContacts].sort((a, b) => {
+      const { col, dir } = listSort
+      let av, bv
+      if (col === 'name') {
+        av = ([a.first_name, a.last_name].filter(Boolean).join(' ') || a.email).toLowerCase()
+        bv = ([b.first_name, b.last_name].filter(Boolean).join(' ') || b.email).toLowerCase()
+      } else if (col === 'note_count') {
+        av = a.note_count || 0; bv = b.note_count || 0
+      } else if (col === 'last_note_at') {
+        av = a.last_note_at || ''; bv = b.last_note_at || ''
+      } else if (col === 'last_login') {
+        av = a.last_login || ''; bv = b.last_login || ''
+      } else {
+        av = (a[col] || '').toString().toLowerCase()
+        bv = (b[col] || '').toString().toLowerCase()
+      }
+      if (av < bv) return dir === 'asc' ? -1 : 1
+      if (av > bv) return dir === 'asc' ? 1 : -1
+      return 0
+    })
+    return sorted
+  }, [roleFilteredContacts, listSort])
 
   return (
     <div className="space-y-6">

@@ -1,5 +1,5 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Field, NumericInput, SaveButton, Avatar, Modal, PropertyCardCarousel, apiFetch, formatPhone, PhotoCropper, Logo, RecaptchaShield, getRecaptchaToken, ForgotPasswordModal, ErrorBoundary, fmtLastLogin } from './shared'
+import { Field, NumericInput, SaveButton, Avatar, Modal, PropertyCardCarousel, apiFetch, formatPhone, PhotoCropper, Logo, RecaptchaShield, getRecaptchaToken, ForgotPasswordModal, ErrorBoundary, fmtLastLogin, useSharedOnlineStatus, useDebounce } from './shared'
 
 const PropertyDetailModal = lazy(() => import('./PropertyDetailModal'))
 const ContactsPage = lazy(() => import('./ContactsPage'))
@@ -12,24 +12,19 @@ function UsersTable({ users, onReload, onEdit }) {
   const [perPage, setPerPage] = useState(10)
   const [page, setPage] = useState(1)
   const [loading, setLoading] = useState(false)
-  const [onlineStatus, setOnlineStatus] = useState({ online: [], lastLogin: {} })
+  const onlineStatus = useSharedOnlineStatus()
+  const debouncedQuery = useDebounce(query, 200)
 
   async function fetchUsers() {
     setLoading(true)
     try {
-      const data = await apiFetch(`/api/users?q=${encodeURIComponent(query)}&perPage=${perPage}&page=${page}`)
+      const data = await apiFetch(`/api/users?q=${encodeURIComponent(debouncedQuery)}&perPage=${perPage}&page=${page}`)
       if (data.users) onReload(data.users)
     } catch (e) { console.error('Fetch failed:', e.message) }
     finally { setLoading(false) }
   }
 
-  useEffect(() => {
-    apiFetch('/api/online-status').then(d => setOnlineStatus(d)).catch(() => {})
-    const t = setInterval(() => apiFetch('/api/online-status').then(d => setOnlineStatus(d)).catch(() => {}), 30000)
-    return () => clearInterval(t)
-  }, [])
-
-  useEffect(() => { fetchUsers() }, [page, perPage])
+  useEffect(() => { fetchUsers() }, [page, perPage, debouncedQuery])
 
   return (
     <div className="space-y-4">

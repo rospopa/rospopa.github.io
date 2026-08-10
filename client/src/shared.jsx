@@ -975,3 +975,64 @@ export function fmtLastNote(ts) {
   if (diffD < 7)    return `${diffD}d ago`
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: diffD > 365 ? 'numeric' : undefined })
 }
+
+// Debounce utility for search and filter inputs
+export function useDebounce(value, delay = 200) {
+  const [debouncedValue, setDebouncedValue] = useState(value)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedValue(value), delay)
+    return () => clearTimeout(timer)
+  }, [value, delay])
+
+  return debouncedValue
+}
+
+// Simple prefetch cache for modal data
+const prefetchCache = new Map()
+export function prefetchPropertyDetail(propId) {
+  if (prefetchCache.has(propId)) return
+  prefetchCache.set(propId, 'loading')
+  apiFetch(`/api/properties/${propId}`).then(data => {
+    prefetchCache.set(propId, data)
+  }).catch(() => {
+    prefetchCache.delete(propId)
+  })
+}
+
+export function getPrefetchedProperty(propId) {
+  const cached = prefetchCache.get(propId)
+  return cached !== 'loading' ? cached : null
+}
+
+// Shared online-status polling hook for all components
+let sharedOnlineStatus = { online: [], lastLogin: {} }
+let sharedOnlineStatusSubscribers = new Set()
+let sharedOnlineStatusInterval = null
+
+function startSharedOnlineStatusPolling() {
+ if (sharedOnlineStatusInterval) return
+ const fetchStatus = async () => {
+   try {
+     const data = await apiFetch('/api/online-status')
+     sharedOnlineStatus = data
+     sharedOnlineStatusSubscribers.forEach(callback => callback(data))
+   } catch (e) {}
+ }
+ fetchStatus()
+ sharedOnlineStatusInterval = setInterval(fetchStatus, 30000)
+}
+
+export function useSharedOnlineStatus() {
+ const [status, setStatus] = useState(sharedOnlineStatus)
+
+ useEffect(() => {
+   startSharedOnlineStatusPolling()
+   sharedOnlineStatusSubscribers.add(setStatus)
+   return () => {
+     sharedOnlineStatusSubscribers.delete(setStatus)
+   }
+ }, [])
+
+ return status
+}
