@@ -449,6 +449,21 @@ function extractUpstreamError(data, fallback = 'lookup failed') {
     || fallback;
 }
 
+function sanitizePhone(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function isPlausiblePhone(value) {
+  if (!value) return false;
+  if (value.length < 7 || value.length > 32) return false;
+  const digits = value.replace(/\D/g, '');
+  return digits.length >= 7 && digits.length <= 15 && /^[\d\s+().-]+$/.test(value);
+}
+
+function isNumverifyProviderError(data) {
+  return data?.success === false || !!data?.error;
+}
+
 /** Verify a reCAPTCHA Enterprise token. Returns { ok, score, reason } */
 async function verifyRecaptcha(token, action) {
   if (!RECAPTCHA_API_KEY) return { ok: true, score: 1, reason: 'no_api_key_configured' };
@@ -635,6 +650,47 @@ app.post('/api/lookup/email', async (req, res) => {
     });
   } catch (error) {
     return res.status(502).json({ error: error.message || 'lookup failed' });
+  }
+});
+
+app.post('/api/lookup/phone', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const phone = sanitizePhone(req.body?.phone);
+  if (!phone) return res.status(400).json({ error: 'phone required' });
+  if (!isPlausiblePhone(phone)) return res.status(400).json({ error: 'valid phone required' });
+
+  const numverifyApiKey = process.env.NUMVERIFY_API_KEY;
+  if (!numverifyApiKey) {
+    return res.status(503).json({ error: 'lookup service not configured', code: 'LOOKUP_NOT_CONFIGURED' });
+  }
+
+  try {
+    const url = `https://apilayer.net/api/validate?access_key=${encodeURIComponent(numverifyApiKey)}&number=${encodeURIComponent(phone)}`;
+    const upstream = await getJson(url);
+
+    if (!upstream.ok || isNumverifyProviderError(upstream.data)) {
+      return res.status(502).json({ error: 'phone lookup provider error' });
+    }
+
+    const validation = upstream.data;
+    return res.json({
+      ok: true,
+      input: phone,
+      result: {
+        valid: validation.valid ?? false,
+        international_format: validation.international_format ?? null,
+        local_format: validation.local_format ?? null,
+        country_prefix: validation.country_prefix ?? null,
+        country_code: validation.country_code ?? null,
+        country_name: validation.country_name ?? null,
+        location: validation.location ?? null,
+        carrier: validation.carrier ?? null,
+        line_type: validation.line_type ?? null,
+        raw: validation
+      }
+    });
+  } catch (error) {
+    return res.status(502).json({ error: 'phone lookup provider error' });
   }
 });
 
