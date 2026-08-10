@@ -1028,6 +1028,11 @@ function LookupPage() {
       setGroundingResult(data)
       await loadUsage()
     } catch (e) {
+      if (e.status === 429) {
+        setGroundingError(e.message || 'Google AI Studio free-tier cap reached')
+        await loadUsage()
+        return
+      }
       if (e.status === 503) {
         setGroundingNotConfigured(true)
         return
@@ -1057,12 +1062,19 @@ function LookupPage() {
   const usageCards = [
     { key: 'hunter', label: 'Hunter.io' },
     { key: 'numverify', label: 'Numverify' },
-    { key: 'vertex-grounded-search', label: 'Vertex Grounded Search' }
+    { key: 'vertex-grounded-search', label: 'Google AI Studio Search' }
   ]
 
   const getUsagePercent = (providerUsage) => {
     if (!providerUsage?.limit) return 0
     return Math.min((providerUsage.used / providerUsage.limit) * 100, 100)
+  }
+
+  const formatResetWindow = (providerUsage) => {
+    if (!providerUsage?.resetPeriod) return ''
+    if (providerUsage.resetPeriod === 'monthly') return 'Resets monthly'
+    if (providerUsage.resetPeriod === 'daily') return 'Resets daily'
+    return ''
   }
 
   return (
@@ -1094,6 +1106,16 @@ function LookupPage() {
                       {providerUsage.quotaDimensionMatch?.value ? ` - ${providerUsage.quotaDimensionMatch.value}` : ''}
                     </p>
                   )}
+                  {providerUsage?.quotaPolicyLabel && (
+                    <p className="mt-1 text-[11px] text-base-content/45">
+                      {providerUsage.quotaPolicyLabel}
+                    </p>
+                  )}
+                  {formatResetWindow(providerUsage) && (
+                    <p className="mt-1 text-[11px] text-base-content/45">
+                      {formatResetWindow(providerUsage)}
+                    </p>
+                  )}
                 </div>
                 {providerUsage && (
                   <span className="text-xs text-base-content/45">
@@ -1112,7 +1134,11 @@ function LookupPage() {
                   <div className="flex items-center justify-between text-xs text-base-content/55">
                     <span>{formatCredits(providerUsage.used)} used</span>
                     <span>
-                      {providerUsage.quotaSource === 'google-cloud' ? 'Google quota' : 'Internal quota'}
+                      {providerUsage.quotaSource === 'google-cloud'
+                        ? 'Google quota'
+                        : providerUsage.quotaSource === 'backend-config'
+                          ? 'Backend cap'
+                          : 'Internal quota'}
                       {' - '}
                       {Math.round(usagePercent)}%
                     </span>
