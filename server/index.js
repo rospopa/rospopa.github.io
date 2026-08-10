@@ -793,7 +793,8 @@ app.get('/api/contacts', async (req, res) => {
       SELECT u.id, u.email, u.role, u.first_name, u.last_name, u.organization, u.phone_number,
              u.buy_box, u.profile_photo, u.created_at, u.updated_at, u.last_login,
              COUNT(cn.id)::int AS note_count,
-             MAX(cn.created_at) AS last_note_at
+             MAX(cn.created_at) AS last_note_at,
+             (SELECT cn2.note_text FROM contact_notes cn2 WHERE cn2.user_id = u.id ORDER BY cn2.created_at DESC LIMIT 1) AS last_note_text
       FROM users u
       LEFT JOIN contact_notes cn ON cn.user_id = u.id
       GROUP BY u.id

@@ -374,6 +374,9 @@ function PropertiesPage({ user }) {
   const [loading, setLoading] = useState(false)
   const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list' | 'kanban'
   const [search, setSearch] = useState('')
+  const [listSort, setListSort] = useState({ col: 'updated_at', dir: 'desc' })
+  const [filterStatus, setFilterStatus] = useState('')
+  const [filterAssetType, setFilterAssetType] = useState('')
   const isAdmin = user.role === 'admin'
 
   useEffect(() => {
@@ -429,14 +432,43 @@ function PropertiesPage({ user }) {
   const fmt = (n) => n != null ? `$${Number(n).toLocaleString()}` : null
 
   const q = search.trim().toLowerCase()
-  const filteredProperties = q
-    ? properties.filter(p =>
-        (p.address || '').toLowerCase().includes(q) ||
-        (p.pin || '').toLowerCase().includes(q) ||
-        (p.county || '').toLowerCase().includes(q) ||
-        (p.status || '').toLowerCase().includes(q)
-      )
-    : properties
+  const allAssetTypes = useMemo(() => [...new Set(properties.map(p => p.asset_type).filter(Boolean))].sort(), [properties])
+
+  const filteredProperties = useMemo(() => {
+    let list = q
+      ? properties.filter(p =>
+          (p.address || '').toLowerCase().includes(q) ||
+          (p.pin || '').toLowerCase().includes(q) ||
+          (p.county || '').toLowerCase().includes(q) ||
+          (p.status || '').toLowerCase().includes(q) ||
+          (p.asset_type || '').toLowerCase().includes(q)
+        )
+      : properties
+    if (filterStatus) list = list.filter(p => (p.status || 'New') === filterStatus)
+    if (filterAssetType) list = list.filter(p => (p.asset_type || '') === filterAssetType)
+    return list
+  }, [properties, q, filterStatus, filterAssetType])
+
+  const sortedListProperties = useMemo(() => {
+    const { col, dir } = listSort
+    return [...filteredProperties].sort((a, b) => {
+      let av = a[col], bv = b[col]
+      if (av == null) av = col === 'price' || col === 'square_feet' || col === 'year_built' ? -Infinity : ''
+      if (bv == null) bv = col === 'price' || col === 'square_feet' || col === 'year_built' ? -Infinity : ''
+      if (av < bv) return dir === 'asc' ? -1 : 1
+      if (av > bv) return dir === 'asc' ? 1 : -1
+      return 0
+    })
+  }, [filteredProperties, listSort])
+
+  function toggleSort(col) {
+    setListSort(prev => prev.col === col ? { col, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })
+  }
+
+  function SortIcon({ col: c }) {
+    if (listSort.col !== c) return <span className="ml-1 opacity-25">⇅</span>
+    return <span className="ml-1">{listSort.dir === 'asc' ? '↑' : '↓'}</span>
+  }
 
   const kanbanColumns = [
     { label: 'New',          color: 'badge-neutral', status: 'New' },
@@ -462,15 +494,33 @@ function PropertiesPage({ user }) {
             </svg>
             <input
               type="text"
-              placeholder="Search address, PIN, county…"
+              placeholder="Search address, PIN, county, type…"
               value={search}
               onChange={e => setSearch(e.target.value)}
-              className="input input-bordered input-sm pl-8 w-56"
+              className="input input-bordered input-sm pl-8 w-60"
             />
             {search && (
               <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={() => setSearch('')}>✕</button>
             )}
           </div>
+          {/* List-mode filters */}
+          {effectiveView === 'list' && (
+            <>
+              <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="select select-bordered select-sm">
+                <option value="">All Statuses</option>
+                {['New','Under Review','Active','Other'].map(s => <option key={s} value={s}>{s}</option>)}
+              </select>
+              {allAssetTypes.length > 0 && (
+                <select value={filterAssetType} onChange={e => setFilterAssetType(e.target.value)} className="select select-bordered select-sm">
+                  <option value="">All Types</option>
+                  {allAssetTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              )}
+              {(filterStatus || filterAssetType) && (
+                <button className="btn btn-xs btn-ghost" onClick={() => { setFilterStatus(''); setFilterAssetType('') }}>Clear filters</button>
+              )}
+            </>
+          )}
         </div>
 
         {/* View toggle — admin only */}
@@ -568,27 +618,37 @@ function PropertiesPage({ user }) {
         <div className="overflow-x-auto rounded-lg border border-base-300">
           <table className="table table-zebra w-full">
             <thead>
-              <tr className="text-xs text-base-content/50 uppercase tracking-wide">
-                <th>Address</th>
-                <th>County</th>
-                <th>PIN</th>
-                <th>Price</th>
-                <th>Sq Ft</th>
-                <th>Year Built</th>
-                <th>Updated</th>
+              <tr className="text-xs text-base-content/50 uppercase tracking-wide select-none">
+                {[
+                  { label: 'Address', col: 'address' },
+                  { label: 'County', col: 'county' },
+                  { label: 'PIN', col: 'pin' },
+                  { label: 'Status', col: 'status' },
+                  { label: 'Type', col: 'asset_type' },
+                  { label: 'Price', col: 'price' },
+                  { label: 'Sq Ft', col: 'square_feet' },
+                  { label: 'Year Built', col: 'year_built' },
+                  { label: 'Updated', col: 'updated_at' },
+                ].map(({ label, col }) => (
+                  <th key={col} className="cursor-pointer hover:text-base-content whitespace-nowrap" onClick={() => toggleSort(col)}>
+                    {label}<SortIcon col={col} />
+                  </th>
+                ))}
                 <th></th>
               </tr>
             </thead>
             <tbody>
-              {filteredProperties.map((prop, i) => (
+              {sortedListProperties.map((prop, i) => (
                 <tr key={i} className="hover cursor-pointer" onClick={() => openProperty(prop)}>
                   <td className="font-medium max-w-xs truncate">{prop.address}</td>
                   <td className="text-sm text-base-content/60">{prop.county}</td>
                   <td className="font-mono text-xs text-base-content/50">{prop.pin}</td>
+                  <td className="text-xs"><span className="badge badge-xs badge-outline">{prop.status || 'New'}</span></td>
+                  <td className="text-xs text-base-content/60">{prop.asset_type || <span className="text-base-content/30">—</span>}</td>
                   <td className="text-sm">{fmt(prop.price) || <span className="text-base-content/30">—</span>}</td>
                   <td className="text-sm">{prop.square_feet ? Number(prop.square_feet).toLocaleString() : <span className="text-base-content/30">—</span>}</td>
                   <td className="text-sm">{prop.year_built || <span className="text-base-content/30">—</span>}</td>
-                  <td className="text-xs text-base-content/40">
+                  <td className="text-xs text-base-content/40 whitespace-nowrap">
                     {prop.updated_at ? new Date(prop.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                   </td>
                   <td onClick={e => e.stopPropagation()}>
