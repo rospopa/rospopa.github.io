@@ -15,6 +15,14 @@ function UsersTable({ users, onReload, onEdit }) {
   const onlineStatus = useSharedOnlineStatus()
   const debouncedQuery = useDebounce(query, 200)
 
+  useEffect(() => {
+    const seededQuery = localStorage.getItem('rep_global_users_query')
+    if (!seededQuery) return
+    setQuery(seededQuery)
+    setPage(1)
+    localStorage.removeItem('rep_global_users_query')
+  }, [])
+
   async function fetchUsers() {
     setLoading(true)
     try {
@@ -416,6 +424,16 @@ function PropertiesPage({ user }) {
 
   useEffect(() => { fetchProperties() }, [user.role])
 
+  useEffect(() => {
+    if (!properties.length) return
+    const seededId = Number(localStorage.getItem('rep_global_property_id'))
+    if (!Number.isFinite(seededId) || seededId <= 0) return
+    const matchedProperty = properties.find(prop => prop.id === seededId)
+    if (!matchedProperty) return
+    openProperty(matchedProperty)
+    localStorage.removeItem('rep_global_property_id')
+  }, [properties])
+
   async function saveProperty(prop) {
     try {
       const method = prop.id ? 'PUT' : 'POST'
@@ -758,6 +776,12 @@ export default function App() {
   const [showEditUserModal, setShowEditUserModal] = useState(false)
   const [showForgot, setShowForgot] = useState(false)
   const [contactsKey, setContactsKey] = useState(0)
+  const [globalSearch, setGlobalSearch] = useState('')
+  const [globalResults, setGlobalResults] = useState({ properties: [], users: [], contacts: [], auditLogs: [] })
+  const [globalLoading, setGlobalLoading] = useState(false)
+  const [globalOpen, setGlobalOpen] = useState(false)
+  const debouncedGlobalSearch = useDebounce(globalSearch, 250)
+  const globalSearchRef = useRef(null)
 
   // Show/hide reCAPTCHA badge based on whether user is identified
   useEffect(() => {
@@ -768,10 +792,81 @@ export default function App() {
     }
   }, [currentUser, loginPreview])
 
+  useEffect(() => {
+    function handleOutsideClick(event) {
+      if (!globalSearchRef.current?.contains(event.target)) setGlobalOpen(false)
+    }
+    document.addEventListener('mousedown', handleOutsideClick)
+    return () => document.removeEventListener('mousedown', handleOutsideClick)
+  }, [])
+
+  useEffect(() => {
+    if (!currentUser || currentUser.role !== 'admin') {
+      setGlobalResults({ properties: [], users: [], contacts: [], auditLogs: [] })
+      setGlobalLoading(false)
+      setGlobalOpen(false)
+      return
+    }
+    const trimmed = debouncedGlobalSearch.trim()
+    if (trimmed.length < 2) {
+      setGlobalResults({ properties: [], users: [], contacts: [], auditLogs: [] })
+      setGlobalLoading(false)
+      if (!trimmed) setGlobalOpen(false)
+      return
+    }
+    let cancelled = false
+    setGlobalLoading(true)
+    setGlobalOpen(true)
+    apiFetch(`/api/global-search?q=${encodeURIComponent(trimmed)}`)
+      .then(data => {
+        if (!cancelled) setGlobalResults({
+          properties: data.properties || [],
+          users: data.users || [],
+          contacts: data.contacts || [],
+          auditLogs: data.auditLogs || []
+        })
+      })
+      .catch(() => {
+        if (!cancelled) setGlobalResults({ properties: [], users: [], contacts: [], auditLogs: [] })
+      })
+      .finally(() => {
+        if (!cancelled) setGlobalLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [currentUser, debouncedGlobalSearch])
+
   function navigateTo(p) {
     if ((p === 'users' || p === 'audit') && currentUser?.role !== 'admin') return
     if (p === 'contacts') setContactsKey(k => k + 1) // reset ContactsPage state
     setPage(p); localStorage.setItem('rep_page', p)
+  }
+
+  function closeGlobalSearch() {
+    setGlobalOpen(false)
+  }
+
+  function clearGlobalSearch() {
+    setGlobalSearch('')
+    setGlobalResults({ properties: [], users: [], contacts: [], auditLogs: [] })
+    setGlobalOpen(false)
+  }
+
+  function handleGlobalResultClick(type, item) {
+    if (type === 'property') {
+      localStorage.setItem('rep_global_property_id', String(item.id))
+      navigateTo('properties')
+    } else if (type === 'user') {
+      localStorage.setItem('rep_global_users_query', item.email || [item.first_name, item.last_name].filter(Boolean).join(' '))
+      navigateTo('users')
+    } else if (type === 'contact') {
+      localStorage.setItem('rep_global_contacts_query', item.email || [item.first_name, item.last_name].filter(Boolean).join(' '))
+      navigateTo('contacts')
+    } else if (type === 'audit') {
+      localStorage.setItem('rep_global_audit_query', item.target_email || item.acted_by_email || item.action || '')
+      navigateTo('audit')
+    }
+    clearGlobalSearch()
+    setMobileMenuOpen(false)
   }
 
   // Restore session on page load/refresh
@@ -940,6 +1035,13 @@ export default function App() {
   )
 
   const displayName = [currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email
+  const globalSections = [
+    { key: 'properties', label: 'Properties' },
+    { key: 'users', label: 'Users' },
+    { key: 'contacts', label: 'Contacts' },
+    { key: 'auditLogs', label: 'Audit Logs' }
+  ]
+  const globalHasResults = globalSections.some(section => (globalResults[section.key] || []).length > 0)
 
   function toggleDarkMode() {
     const next = !darkMode
@@ -961,6 +1063,76 @@ export default function App() {
     </svg>
   )
 
+  const renderGlobalSearch = (mobile = false) => (
+    <div ref={mobile ? undefined : globalSearchRef} className={`relative ${mobile ? 'w-full' : 'w-[360px]'}`}>
+      <div className="relative">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+        </svg>
+        <input
+          type="text"
+          placeholder="Search properties, users, contacts, logs…"
+          value={globalSearch}
+          onChange={e => { setGlobalSearch(e.target.value); setGlobalOpen(!!e.target.value.trim()) }}
+          onFocus={() => { if (globalSearch.trim().length >= 2) setGlobalOpen(true) }}
+          className={`input input-bordered ${mobile ? 'input-sm w-full' : 'input-sm'} pl-9 pr-9 w-full`}
+        />
+        {globalSearch && (
+          <button className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={clearGlobalSearch}>✕</button>
+        )}
+      </div>
+      {globalOpen && (
+        <div className={`absolute ${mobile ? 'left-0 right-0 top-full mt-2' : 'right-0 top-full mt-2'} rounded-xl border border-base-300 bg-base-100 shadow-2xl overflow-hidden z-50`}>
+          <div className="max-h-[70vh] overflow-y-auto">
+            {globalLoading && <div className="px-4 py-6 text-sm text-base-content/50 text-center">Searching…</div>}
+            {!globalLoading && !globalHasResults && debouncedGlobalSearch.trim().length >= 2 && (
+              <div className="px-4 py-6 text-sm text-base-content/50 text-center">No matches found</div>
+            )}
+            {!globalLoading && globalSections.map(section => {
+              const items = globalResults[section.key] || []
+              if (!items.length) return null
+              return (
+                <div key={section.key} className="border-t first:border-t-0 border-base-300">
+                  <div className="px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-base-content/40 bg-base-200/60">{section.label}</div>
+                  <div className="divide-y divide-base-300/70">
+                    {section.key === 'properties' && items.map(item => (
+                      <button key={`property-${item.id}`} className="w-full text-left px-4 py-3 hover:bg-base-200 transition-colors" onClick={() => handleGlobalResultClick('property', item)}>
+                        <div className="text-sm font-medium truncate">{item.address}</div>
+                        <div className="text-xs text-base-content/55 truncate">{item.county} · {item.asset_type || '—'} · {item.status || '—'}</div>
+                        <div className="text-[11px] text-base-content/35 font-mono truncate">PIN: {item.pin}</div>
+                      </button>
+                    ))}
+                    {section.key === 'users' && items.map(item => (
+                      <button key={`user-${item.id}`} className="w-full text-left px-4 py-3 hover:bg-base-200 transition-colors" onClick={() => handleGlobalResultClick('user', item)}>
+                        <div className="text-sm font-medium truncate">{[item.first_name, item.last_name].filter(Boolean).join(' ') || item.email}</div>
+                        <div className="text-xs text-base-content/55 truncate">{item.email}</div>
+                        <div className="text-[11px] text-base-content/35 truncate">{item.organization || item.role || '—'}</div>
+                      </button>
+                    ))}
+                    {section.key === 'contacts' && items.map(item => (
+                      <button key={`contact-${item.id}`} className="w-full text-left px-4 py-3 hover:bg-base-200 transition-colors" onClick={() => handleGlobalResultClick('contact', item)}>
+                        <div className="text-sm font-medium truncate">{[item.first_name, item.last_name].filter(Boolean).join(' ') || item.email}</div>
+                        <div className="text-xs text-base-content/55 truncate">{item.email}</div>
+                        <div className="text-[11px] text-base-content/35 truncate">{item.last_note_text || item.buy_box || item.organization || 'No recent note'}</div>
+                      </button>
+                    ))}
+                    {section.key === 'auditLogs' && items.map(item => (
+                      <button key={`audit-${item.id}`} className="w-full text-left px-4 py-3 hover:bg-base-200 transition-colors" onClick={() => handleGlobalResultClick('audit', item)}>
+                        <div className="text-sm font-medium truncate">{item.action}</div>
+                        <div className="text-xs text-base-content/55 truncate">{item.acted_by_email || 'system'} → {item.target_email || '—'}</div>
+                        <div className="text-[11px] text-base-content/35 truncate">{item.details || new Date(item.created_at).toLocaleString()}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+
   return (
     <div className="min-h-screen bg-base-200" data-theme={darkMode ? 'monochrome-dark' : 'monochrome'}>
       {/* Navbar */}
@@ -977,6 +1149,7 @@ export default function App() {
 
         {/* Desktop right side */}
         <div className="hidden md:flex flex-none items-center gap-2">
+          {currentUser.role === 'admin' && renderGlobalSearch()}
           <button className="btn btn-sm btn-ghost" onClick={toggleDarkMode} title={darkMode ? 'Day mode' : 'Night mode'}>
             {darkMode ? <SunIcon /> : <MoonIcon />}
           </button>
@@ -1021,6 +1194,7 @@ export default function App() {
       {/* Mobile dropdown menu */}
       {mobileMenuOpen && (
         <div data-mobile-nav-menu="true" className="md:hidden bg-base-100 border-b border-base-300 px-4 py-3 flex flex-col gap-1 sticky top-[64px] z-40 shadow-md">
+          {currentUser.role === 'admin' && <div className="mb-2">{renderGlobalSearch(true)}</div>}
           {navLinks.map(({ id, label }) => navBtn(id, label))}
           <div className="divider my-1" />
           <button className="btn btn-sm btn-ghost w-full justify-start gap-2" onClick={toggleDarkMode}>

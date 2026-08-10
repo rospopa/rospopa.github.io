@@ -48,6 +48,18 @@ export default function AuditLogs() {
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
 
+  useEffect(() => {
+    const seededQuery = localStorage.getItem('rep_global_audit_query')
+    if (!seededQuery) return
+    setQ(seededQuery)
+    setPage(1)
+    localStorage.removeItem('rep_global_audit_query')
+  }, [])
+
+  useEffect(() => {
+    fetchLogs(1)
+  }, [q])
+
   async function fetchLogs(pg = page) {
     setLoading(true)
     try {
