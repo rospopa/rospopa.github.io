@@ -592,8 +592,7 @@ app.post('/api/login', async (req, res) => {
       logAudit(row.id, row.email, 'login_failed', { reason: 'wrong password', ip: clientIp(req) }, null, row.email, clientIp(req));
       return res.status(401).json({ error: 'invalid credentials' });
     }
-    // Note: profile_photo intentionally excluded from session to keep session size small
-    const userObj = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
+    const userObj = { id: row.id, email: row.email, role: row.role || 'user', first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box, profile_photo: row.profile_photo };
     req.session.user = userObj;
     req.session.save(err => {
       if (err) {
@@ -774,7 +773,7 @@ app.put('/api/users/:id', async (req, res) => {
     const changedFields = Object.keys(changes);
     await logAudit(userId, req.session.user.email, 'edit_user', { changed_fields: changedFields, changes: Object.keys(changes).length ? changes : undefined }, id, row.email, clientIp(req));
     if (userId === id) {
-      req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box };
+      req.session.user = { id: row.id, email: row.email, role: row.role, first_name: row.first_name, last_name: row.last_name, organization: row.organization, phone_number: row.phone_number, buy_box: row.buy_box, profile_photo: row.profile_photo };
     }
     res.json(row);
   } catch (e) {
