@@ -914,6 +914,11 @@ function LookupPage() {
   const [phoneError, setPhoneError] = useState('')
   const [phoneNotConfigured, setPhoneNotConfigured] = useState(false)
   const [phoneResult, setPhoneResult] = useState(null)
+  const [groundingQuery, setGroundingQuery] = useState('')
+  const [groundingLoading, setGroundingLoading] = useState(false)
+  const [groundingError, setGroundingError] = useState('')
+  const [groundingNotConfigured, setGroundingNotConfigured] = useState(false)
+  const [groundingResult, setGroundingResult] = useState(null)
   const [usage, setUsage] = useState(null)
   const [usageLoading, setUsageLoading] = useState(true)
   const [usageError, setUsageError] = useState('')
@@ -1001,6 +1006,34 @@ function LookupPage() {
       setPhoneError(e.message || 'Validation failed')
     } finally {
       setPhoneLoading(false)
+    }
+  }
+
+  async function runGroundedSearch(e) {
+    e.preventDefault()
+    setGroundingError('')
+    setGroundingNotConfigured(false)
+    setGroundingResult(null)
+    if (!groundingQuery.trim()) {
+      setGroundingError('Search query is required')
+      return
+    }
+    setGroundingLoading(true)
+    try {
+      const data = await apiFetch('/api/lookup/grounded-search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: groundingQuery })
+      })
+      setGroundingResult(data)
+    } catch (e) {
+      if (e.status === 503) {
+        setGroundingNotConfigured(true)
+        return
+      }
+      setGroundingError(e.message || 'Grounded search failed')
+    } finally {
+      setGroundingLoading(false)
     }
   }
 
@@ -1150,6 +1183,88 @@ function LookupPage() {
               {result.result.sources !== null && result.result.sources !== undefined && (
                 <div className="text-sm text-base-content/70">
                   Source count <span className="font-medium text-base-content">{result.result.sources}</span>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="card bg-base-100 border border-base-300 shadow-sm">
+        <div className="card-body p-5 md:p-6 space-y-5">
+          <div className="space-y-1">
+            <h3 className="text-lg font-semibold">Grounded Google Search</h3>
+            <p className="text-sm text-base-content/55">
+              Research a person, company, or topic with Google-grounded Gemini results and source citations.
+            </p>
+          </div>
+          <form onSubmit={runGroundedSearch} className="space-y-4">
+            <div className="flex flex-col gap-3">
+              <textarea
+                placeholder="Search the public web for current facts about a person, company, email, or topic..."
+                value={groundingQuery}
+                onChange={e => setGroundingQuery(e.target.value)}
+                className="textarea textarea-bordered min-h-28 w-full"
+              />
+              <div className="flex justify-end">
+                <button className="btn btn-primary md:min-w-40" type="submit" disabled={groundingLoading}>
+                  {groundingLoading ? 'Searching…' : 'Run grounded search'}
+                </button>
+              </div>
+            </div>
+          </form>
+
+          {groundingError && (
+            <div className="rounded-xl border border-base-300 bg-base-200/40 px-4 py-3 text-sm text-error">
+              {groundingError}
+            </div>
+          )}
+
+          {groundingNotConfigured && (
+            <div className="rounded-xl border border-dashed border-base-300 bg-base-200/40 px-4 py-4 text-sm text-base-content/60">
+              Grounded Google Search is not configured on this server yet.
+            </div>
+          )}
+
+          {groundingResult?.result && (
+            <div className="rounded-xl border border-base-300 bg-base-200/30 p-4 md:p-5 space-y-4">
+              <div className="space-y-2">
+                <p className="text-xs uppercase tracking-widest text-base-content/50">Grounded summary</p>
+                <div className="whitespace-pre-wrap text-sm leading-6 text-base-content">
+                  {groundingResult.result.text || 'No grounded response returned.'}
+                </div>
+              </div>
+
+              {Array.isArray(groundingResult.result.sources) && groundingResult.result.sources.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-widest text-base-content/50">Sources</p>
+                  <div className="space-y-2">
+                    {groundingResult.result.sources.map((source, index) => (
+                      <a
+                        key={`${source.url}-${index}`}
+                        href={source.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block rounded-lg border border-base-300 bg-base-100 px-3 py-3 text-sm hover:border-primary/35 hover:bg-base-100/90"
+                      >
+                        <p className="font-medium text-base-content">{source.title || `Source ${index + 1}`}</p>
+                        <p className="mt-1 break-all text-xs text-base-content/60">{source.url}</p>
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {Array.isArray(groundingResult.result.webSearchQueries) && groundingResult.result.webSearchQueries.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs uppercase tracking-widest text-base-content/50">Google search suggestions</p>
+                  <div className="flex flex-wrap gap-2">
+                    {groundingResult.result.webSearchQueries.map(query => (
+                      <span key={query} className="badge badge-outline">
+                        {query}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

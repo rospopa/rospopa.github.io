@@ -18,6 +18,10 @@ const RECAPTCHA_PROJECT_ID = 'rospopa-recaptcha';
 const RECAPTCHA_SITE_KEY = '6LerA3ctAAAAAKpS3caYCY9pDLR26TQY060EFpYv';
 const RECAPTCHA_MIN_SCORE = 0.5;
 const FROM_EMAIL = 'noreply@rospopa.com';
+const VERTEX_PROJECT_ID = process.env.VERTEX_PROJECT_ID || '';
+const VERTEX_LOCATION = process.env.VERTEX_LOCATION || 'global';
+const VERTEX_MODEL = process.env.VERTEX_MODEL || 'gemini-2.5-flash';
+const GOOGLE_APPLICATION_CREDENTIALS = process.env.GOOGLE_APPLICATION_CREDENTIALS || '';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -522,6 +526,126 @@ function isNumverifyProviderError(data) {
   return data?.success === false || !!data?.error;
 }
 
+function sanitizeLookupQuery(value) {
+  return typeof value === 'string' ? value.trim() : '';
+}
+
+function base64UrlEncode(value) {
+  return Buffer.from(value)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
+}
+
+function readGoogleServiceAccount() {
+  if (!GOOGLE_APPLICATION_CREDENTIALS) {
+    throw new Error('Google service account credentials are not configured');
+  }
+  const json = fs.readFileSync(GOOGLE_APPLICATION_CREDENTIALS, 'utf8');
+  return JSON.parse(json);
+}
+
+async function getGoogleAccessToken() {
+  const credentials = readGoogleServiceAccount();
+  const now = Math.floor(Date.now() / 1000);
+  const header = base64UrlEncode(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+  const claimSet = base64UrlEncode(JSON.stringify({
+    iss: credentials.client_email,
+    scope: 'https://www.googleapis.com/auth/cloud-platform',
+    aud: 'https://oauth2.googleapis.com/token',
+    exp: now + 3600,
+    iat: now
+  }));
+  const signingInput = `${header}.${claimSet}`;
+  const signer = crypto.createSign('RSA-SHA256');
+  signer.update(signingInput);
+  signer.end();
+  const signature = signer.sign(credentials.private_key);
+  const assertion = `${signingInput}.${signature.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '')}`;
+
+  const tokenPayload = new URLSearchParams({
+    grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+    assertion
+  }).toString();
+
+  const response = await new Promise((resolve, reject) => {
+    const request = https.request('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Content-Length': Buffer.byteLength(tokenPayload)
+      }
+    }, res => {
+      let raw = '';
+      res.setEncoding('utf8');
+      res.on('data', chunk => { raw += chunk; });
+      res.on('end', () => {
+        let data = null;
+        if (raw) {
+          try { data = JSON.parse(raw); } catch { data = { error: raw }; }
+        }
+        resolve({ ok: res.statusCode >= 200 && res.statusCode < 300, status: res.statusCode || 502, data });
+      });
+    });
+    request.on('error', reject);
+    request.write(tokenPayload);
+    request.end();
+  });
+
+  if (!response.ok || !response.data?.access_token) {
+    throw new Error(extractUpstreamError(response.data, 'Failed to authenticate with Google Cloud'));
+  }
+
+  return response.data.access_token;
+}
+
+async function postJsonWithHeaders(url, payload, headers = {}) {
+  if (typeof fetch === 'function') {
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(payload)
+    });
+    const text = await response.text();
+    let data = null;
+    if (text) {
+      try { data = JSON.parse(text); } catch { data = { message: text }; }
+    }
+    return { ok: response.ok, status: response.status, data };
+  }
+
+  return new Promise((resolve, reject) => {
+    const body = JSON.stringify(payload);
+    const target = new URL(url);
+    const request = https.request({
+      protocol: target.protocol,
+      hostname: target.hostname,
+      port: target.port || (target.protocol === 'https:' ? 443 : 80),
+      path: `${target.pathname}${target.search}`,
+      method: 'POST',
+      headers: {
+        ...headers,
+        'Content-Length': Buffer.byteLength(body)
+      }
+    }, response => {
+      let raw = '';
+      response.setEncoding('utf8');
+      response.on('data', chunk => { raw += chunk; });
+      response.on('end', () => {
+        let data = null;
+        if (raw) {
+          try { data = JSON.parse(raw); } catch { data = { message: raw }; }
+        }
+        resolve({ ok: response.statusCode >= 200 && response.statusCode < 300, status: response.statusCode || 502, data });
+      });
+    });
+    request.on('error', reject);
+    request.write(body);
+    request.end();
+  });
+}
+
 /** Verify a reCAPTCHA Enterprise token. Returns { ok, score, reason } */
 async function verifyRecaptcha(token, action) {
   if (!RECAPTCHA_API_KEY) return { ok: true, score: 1, reason: 'no_api_key_configured' };
@@ -753,6 +877,87 @@ app.post('/api/lookup/phone', async (req, res) => {
 
   } catch (error) {
     return res.status(502).json({ error: 'phone lookup provider error' });
+  }
+});
+
+app.post('/api/lookup/grounded-search', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const query = sanitizeLookupQuery(req.body?.query);
+  if (!query) return res.status(400).json({ error: 'query required' });
+  if (!VERTEX_PROJECT_ID || !GOOGLE_APPLICATION_CREDENTIALS) {
+    return res.status(503).json({ error: 'grounded search is not configured', code: 'LOOKUP_NOT_CONFIGURED' });
+  }
+
+  try {
+    const accessToken = await getGoogleAccessToken();
+    const url = `https://aiplatform.googleapis.com/v1/projects/${encodeURIComponent(VERTEX_PROJECT_ID)}/locations/${encodeURIComponent(VERTEX_LOCATION)}/publishers/google/models/${encodeURIComponent(VERTEX_MODEL)}:generateContent`;
+    const upstream = await postJsonWithHeaders(url, {
+      systemInstruction: {
+        role: 'system',
+        parts: [{ text: 'Answer with a concise factual summary grounded in web sources. Prefer business-relevant information and avoid speculation.' }]
+      },
+      contents: [
+        {
+          role: 'user',
+          parts: [{ text: query }]
+        }
+      ],
+      tools: [
+        {
+          googleSearch: {}
+        }
+      ],
+      generationConfig: {
+        temperature: 1,
+        maxOutputTokens: 1024
+      }
+    }, {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${accessToken}`
+    });
+    if (!upstream.ok) {
+      return res.status(502).json({
+        error: extractUpstreamError(upstream.data, 'grounded search failed'),
+        upstream_status: upstream.status
+      });
+    }
+
+    const candidate = upstream.data?.candidates?.[0];
+    const parts = Array.isArray(candidate?.content?.parts) ? candidate.content.parts : [];
+    const text = parts
+      .map(part => part?.text)
+      .filter(Boolean)
+      .join('\n')
+      .trim();
+    const groundingMetadata = candidate?.groundingMetadata || candidate?.grounding_metadata || {};
+    const chunks = Array.isArray(groundingMetadata?.groundingChunks)
+      ? groundingMetadata.groundingChunks
+      : Array.isArray(groundingMetadata?.grounding_chunks)
+        ? groundingMetadata.grounding_chunks
+        : [];
+    const sources = chunks
+      .map(chunk => chunk?.web || chunk?.webSearchResult || chunk)
+      .filter(chunk => chunk?.uri || chunk?.url)
+      .map((chunk, index) => ({
+        title: chunk.title || `Source ${index + 1}`,
+        url: chunk.uri || chunk.url
+      }));
+    const searchEntryPoint = groundingMetadata?.searchEntryPoint || groundingMetadata?.search_entry_point || null;
+    const webSearchQueries = groundingMetadata?.webSearchQueries || groundingMetadata?.web_search_queries || [];
+
+    return res.json({
+      ok: true,
+      query,
+      result: {
+        text,
+        sources,
+        webSearchQueries,
+        renderedContent: searchEntryPoint?.renderedContent || searchEntryPoint?.rendered_content || null,
+        raw: upstream.data
+      }
+    });
+  } catch (error) {
+    return res.status(502).json({ error: error.message || 'grounded search failed' });
   }
 });
 
