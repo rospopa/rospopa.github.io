@@ -947,6 +947,12 @@ function LookupPage() {
     { label: 'Block', value: result.result.block },
     { label: 'MX present', value: result.result.mx_records }
   ] : []
+  const verdictValue = result?.result?.result
+  const verdictStatus = result?.result?.status
+  const positiveVerdicts = ['deliverable', 'valid', 'reachable', 'accept_all']
+  const isPositiveVerdict = [verdictValue, verdictStatus]
+    .filter(Boolean)
+    .some(value => positiveVerdicts.includes(String(value).toLowerCase()))
 
   return (
     <div className="space-y-6">
@@ -998,7 +1004,12 @@ function LookupPage() {
                 <div>
                   <p className="text-xs uppercase tracking-widest text-base-content/50">Overall verdict</p>
                   <div className="mt-1 flex flex-wrap items-center gap-2">
-                    <span className="badge badge-neutral">{result.result.result || 'unknown'}</span>
+                    {isPositiveVerdict && (
+                      <span className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-success/30 bg-success/12 text-sm font-semibold leading-none text-success">
+                        ✓
+                      </span>
+                    )}
+                    <span className={`badge ${isPositiveVerdict ? 'badge-success' : 'badge-neutral'}`}>{verdictValue || 'unknown'}</span>
                     {result.result.status && <span className="badge badge-outline">{result.result.status}</span>}
                   </div>
                 </div>
