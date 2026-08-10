@@ -915,6 +915,8 @@ function LookupPage() {
   const [phoneNotConfigured, setPhoneNotConfigured] = useState(false)
   const [phoneResult, setPhoneResult] = useState(null)
   const [usage, setUsage] = useState(null)
+  const [usageLoading, setUsageLoading] = useState(true)
+  const [usageError, setUsageError] = useState('')
 
   const formatCredits = useCallback((value) => {
     const numeric = Number(value || 0)
@@ -922,11 +924,21 @@ function LookupPage() {
   }, [])
 
   const loadUsage = useCallback(async () => {
+    setUsageLoading(true)
+    setUsageError('')
     try {
       const data = await apiFetch('/api/lookup/usage')
       setUsage(data)
     } catch (e) {
-      if (e.status !== 403) console.error('Failed to load usage:', e.message)
+      setUsage(null)
+      if (e.status === 403) {
+        setUsageError('Usage is only available to admins')
+      } else {
+        setUsageError(e.message || 'Failed to load usage')
+        console.error('Failed to load usage:', e.message)
+      }
+    } finally {
+      setUsageLoading(false)
     }
   }, [])
 
@@ -1013,6 +1025,11 @@ function LookupPage() {
     { key: 'numverify', label: 'Numverify' }
   ]
 
+  const getUsagePercent = (providerUsage) => {
+    if (!providerUsage?.limit) return 0
+    return Math.min((providerUsage.used / providerUsage.limit) * 100, 100)
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -1025,6 +1042,7 @@ function LookupPage() {
       <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {usageCards.map(card => {
           const providerUsage = usage?.[card.key]
+          const usagePercent = getUsagePercent(providerUsage)
           return (
             <div key={card.key} className="rounded-xl border border-base-300 bg-base-100 px-4 py-3 shadow-sm">
               <div className="flex items-start justify-between gap-3">
@@ -1033,13 +1051,27 @@ function LookupPage() {
                   <p className="text-xs text-base-content/55">
                     {providerUsage
                       ? `${formatCredits(providerUsage.remaining)} remaining / ${formatCredits(providerUsage.limit)} total`
-                      : 'Loading usage…'}
+                      : usageError || (usageLoading ? 'Loading usage…' : 'Usage unavailable')}
                   </p>
                 </div>
                 {providerUsage && (
                   <span className="text-xs text-base-content/45">
                     {formatCredits(providerUsage.costPerRequest)} credit / request
                   </span>
+                )}
+              </div>
+              <div className="mt-3 space-y-2">
+                <div className="h-2 overflow-hidden rounded-full bg-base-200">
+                  <div
+                    className="h-full rounded-full bg-primary transition-all"
+                    style={{ width: `${usagePercent}%` }}
+                  />
+                </div>
+                {providerUsage && (
+                  <div className="flex items-center justify-between text-xs text-base-content/55">
+                    <span>{formatCredits(providerUsage.used)} used</span>
+                    <span>{Math.round(usagePercent)}%</span>
+                  </div>
                 )}
               </div>
             </div>
