@@ -52,9 +52,17 @@ function cacheSet(key, data) {
   _cache.set(key, { data, etag, ts: Date.now() });
   return etag;
 }
-function cacheInvalidate(pattern) {
-  for (const key of _cache.keys()) {
-    if (key.startsWith(pattern)) _cache.delete(key);
+function cacheInvalidate(patternOrKeys, isExact = false) {
+  if (Array.isArray(patternOrKeys)) {
+    for (const key of patternOrKeys) {
+      _cache.delete(key);
+    }
+  } else if (isExact) {
+    _cache.delete(patternOrKeys);
+  } else {
+    for (const key of _cache.keys()) {
+      if (key.startsWith(patternOrKeys)) _cache.delete(key);
+    }
   }
 }
 
@@ -256,6 +264,14 @@ async function initializeSchema() {
     expire TIMESTAMP(6) NOT NULL
   )`);
   await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_session_expire" ON "session" ("expire")`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_properties_status" ON properties (status)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_properties_asset_type" ON properties (asset_type)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_properties_updated_at" ON properties (updated_at DESC)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_property_assignments_user_assigned" ON property_assignments (user_id, assigned_at DESC)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_property_assignments_property_id" ON property_assignments (property_id)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_contact_notes_user_created" ON contact_notes (user_id, created_at DESC)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_users_created_at" ON users (created_at DESC)`);
+  await pool.query(`CREATE INDEX IF NOT EXISTS "IDX_users_email_lower" ON users (LOWER(email))`);
 }
 
 const app = express();
@@ -794,12 +810,16 @@ app.get('/api/contacts', async (req, res) => {
              u.buy_box, u.profile_photo, u.created_at, u.updated_at, u.last_login,
              COUNT(cn.id)::int AS note_count,
              MAX(cn.created_at) AS last_note_at,
-             (SELECT cn2.note_text FROM contact_notes cn2 WHERE cn2.user_id = u.id ORDER BY cn2.created_at DESC LIMIT 1) AS last_note_text
+             latest_note.note_text AS last_note_text
       FROM users u
       LEFT JOIN contact_notes cn ON cn.user_id = u.id
-      GROUP BY u.id
+      LEFT JOIN LATERAL (
+        SELECT cn2.note_text FROM contact_notes cn2 WHERE cn2.user_id = u.id ORDER BY cn2.created_at DESC LIMIT 1
+      ) AS latest_note ON TRUE
+      GROUP BY u.id, latest_note.note_text
       ORDER BY u.created_at DESC
     `);
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
     res.json(result.rows);
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -1241,7 +1261,7 @@ app.get('/api/properties', async (req, res) => {
               tenant_gross_sales, tenant_base_rent,
               management_fee_pct, insurance, property_taxes,
               land_value_pct, cost_seg_bonus_pct, effective_tax_rate, depreciation_recapture_rate,
-              refi_ltv, refi_rate, refi_year, dcf_model,
+              refi_ltv, refi_rate, refi_year,
               created_by, created_at, updated_at
        FROM properties ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
@@ -1249,6 +1269,7 @@ app.get('/api/properties', async (req, res) => {
     const payload = { properties: listResult.rows || [], total: countResult.rows[0].total };
     const etag = cacheSet(cacheKey, payload);
     res.set('ETag', etag);
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
     res.json(payload);
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -1289,6 +1310,7 @@ app.get('/api/properties/:id', async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const etag = cacheSet(cacheKey, result.rows[0]);
     res.set('ETag', etag);
+    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
     res.json(result.rows[0]);
   } catch (e) {
     res.status(500).json({ error: 'db error' });
