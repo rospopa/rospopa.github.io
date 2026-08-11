@@ -557,6 +557,25 @@ function getMarketSymbolSuggestions(query) {
     }));
 }
 
+function normalizeTradingViewExchange(exchange) {
+  const value = String(exchange || '').trim().toUpperCase();
+  if (!value) return '';
+  const aliases = {
+    NMS: 'NASDAQ',
+    NAS: 'NASDAQ',
+    NASDAQGS: 'NASDAQ',
+    NYQ: 'NYSE',
+    NYC: 'NYSE',
+    ASE: 'AMEX',
+    PCX: 'AMEX',
+    BATS: 'CBOE',
+    BTS: 'CBOE',
+    FGI: 'INDEX',
+    CCC: 'CRYPTO'
+  };
+  return aliases[value] || value;
+}
+
 async function getYahooFinanceSymbolSuggestions(query) {
   const trimmed = String(query || '').trim();
   if (!trimmed) return [];
@@ -573,10 +592,12 @@ async function getYahooFinanceSymbolSuggestions(query) {
     .slice(0, 8)
     .map(item => ({
       symbol: String(item.symbol || '').toUpperCase(),
-      exchange: String(item.exchange || item.exchDisp || '').toUpperCase(),
+      exchange: normalizeTradingViewExchange(item.exchange || item.exchDisp || ''),
       display_name: String(item.shortname || item.longname || item.symbol || '').trim(),
       type: String(item.quoteType || item.typeDisp || '').toLowerCase(),
-      fullSymbol: item.exchange ? `${String(item.exchange).toUpperCase()}:${String(item.symbol).toUpperCase()}` : String(item.symbol || '').toUpperCase()
+      fullSymbol: normalizeTradingViewExchange(item.exchange || item.exchDisp || '')
+        ? `${normalizeTradingViewExchange(item.exchange || item.exchDisp || '')}:${String(item.symbol || '').toUpperCase()}`
+        : String(item.symbol || '').toUpperCase()
     }));
 }
 
