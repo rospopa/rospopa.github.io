@@ -2195,6 +2195,17 @@ export default function App() {
               {(currentUser.login_count || 0) > 1 ? 'Welcome back, ' : 'Welcome, '}
               {[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email.split('@')[0]}
             </h1>
+            <div className="card bg-base-100 border border-base-300 shadow-sm">
+              <div className="card-body p-5 md:p-6 space-y-4">
+                <div className="space-y-1">
+                  <h2 className="text-lg font-semibold">10 Year US Treasury</h2>
+                  <p className="text-sm text-base-content/55">
+                    Live TradingView chart for the benchmark US10Y yield.
+                  </p>
+                </div>
+                <TradingViewEmbed symbol="TVC:US10Y" />
+              </div>
+            </div>
           </div>
         )}
 
