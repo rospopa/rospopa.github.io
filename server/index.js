@@ -51,7 +51,7 @@ const MARKET_SYMBOL_SUGGESTIONS = [
   { symbol: 'EURUSD', exchange: 'FX', display_name: 'Euro / U.S. Dollar', type: 'forex' },
   { symbol: 'GBPUSD', exchange: 'FX', display_name: 'British Pound / U.S. Dollar', type: 'forex' },
   { symbol: 'USDJPY', exchange: 'FX', display_name: 'U.S. Dollar / Japanese Yen', type: 'forex' },
-  { symbol: 'TNX', exchange: 'TVC', display_name: 'U.S. 10 Year Treasury Yield', type: 'bond' }
+  { symbol: 'ZN1!', exchange: 'CBOT', display_name: 'U.S. 10 Year Treasury Note Futures', type: 'bond' }
 ];
 
 const resend = new Resend(process.env.RESEND_API_KEY);
