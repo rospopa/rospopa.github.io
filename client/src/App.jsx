@@ -980,25 +980,20 @@ function MarketsPage() {
     const handle = window.setTimeout(async () => {
       setSuggestionsLoading(true)
       try {
-        const url = `https://symbol-search.tradingview.com/symbol_search/?text=${encodeURIComponent(trimmed)}&hl=1&exchange=&lang=en&type=&domain=production`
-        const response = await fetch(url, { signal: controller.signal })
-        if (!response.ok) {
-          throw new Error(`TradingView search failed (${response.status})`)
-        }
-        const data = await response.json()
-        const nextSuggestions = Array.isArray(data) ? data.slice(0, 8).map((item, index) => ({
+        const data = await apiFetch(`/api/markets/symbol-search?q=${encodeURIComponent(trimmed)}`)
+        const nextSuggestions = Array.isArray(data.suggestions) ? data.suggestions.map((item, index) => ({
           id: `${item.symbol || trimmed}-${item.exchange || 'exchange'}-${index}`,
           symbol: item.symbol || '',
           exchange: item.exchange || '',
-          displayName: item.description || item.symbol || '',
+          displayName: item.display_name || item.symbol || '',
           type: item.type || '',
-          fullSymbol: item.exchange ? `${item.exchange}:${item.symbol}` : (item.symbol || '')
+          fullSymbol: item.fullSymbol || (item.exchange ? `${item.exchange}:${item.symbol}` : (item.symbol || ''))
         })) : []
         setSuggestions(nextSuggestions)
       } catch (e) {
         if (e.name !== 'AbortError') {
           setSuggestions([])
-          setError('TradingView suggestions are currently unavailable')
+          setError(e.message || 'Symbol suggestions are currently unavailable')
         }
       } finally {
         setSuggestionsLoading(false)

@@ -24,6 +24,32 @@ const GOOGLE_AI_FREE_TIER_LIMIT = 250;
 const GOOGLE_AI_FREE_TIER_LABEL = 'Configured free-tier cap';
 const PROVIDER_USAGE_RESET_START = new Date('2026-08-10T00:00:00.000Z');
 const TRADINGVIEW_WEBHOOK_SECRET = process.env.TRADINGVIEW_WEBHOOK_SECRET || '';
+const MARKET_SYMBOL_SUGGESTIONS = [
+  { symbol: 'AAPL', exchange: 'NASDAQ', display_name: 'Apple Inc.', type: 'stock' },
+  { symbol: 'MSFT', exchange: 'NASDAQ', display_name: 'Microsoft Corporation', type: 'stock' },
+  { symbol: 'NVDA', exchange: 'NASDAQ', display_name: 'NVIDIA Corporation', type: 'stock' },
+  { symbol: 'TSLA', exchange: 'NASDAQ', display_name: 'Tesla, Inc.', type: 'stock' },
+  { symbol: 'AMZN', exchange: 'NASDAQ', display_name: 'Amazon.com, Inc.', type: 'stock' },
+  { symbol: 'META', exchange: 'NASDAQ', display_name: 'Meta Platforms, Inc.', type: 'stock' },
+  { symbol: 'GOOGL', exchange: 'NASDAQ', display_name: 'Alphabet Inc. Class A', type: 'stock' },
+  { symbol: 'GOOG', exchange: 'NASDAQ', display_name: 'Alphabet Inc. Class C', type: 'stock' },
+  { symbol: 'PLTR', exchange: 'NASDAQ', display_name: 'Palantir Technologies Inc.', type: 'stock' },
+  { symbol: 'CBRS', exchange: 'NASDAQ', display_name: 'Cerebras Systems Inc.', type: 'stock' },
+  { symbol: 'SPY', exchange: 'AMEX', display_name: 'SPDR S&P 500 ETF Trust', type: 'etf' },
+  { symbol: 'QQQ', exchange: 'NASDAQ', display_name: 'Invesco QQQ Trust', type: 'etf' },
+  { symbol: 'IWM', exchange: 'AMEX', display_name: 'iShares Russell 2000 ETF', type: 'etf' },
+  { symbol: 'DIA', exchange: 'AMEX', display_name: 'SPDR Dow Jones Industrial Average ETF Trust', type: 'etf' },
+  { symbol: 'VTI', exchange: 'AMEX', display_name: 'Vanguard Total Stock Market ETF', type: 'etf' },
+  { symbol: 'GLD', exchange: 'AMEX', display_name: 'SPDR Gold Shares', type: 'etf' },
+  { symbol: 'SLV', exchange: 'AMEX', display_name: 'iShares Silver Trust', type: 'etf' },
+  { symbol: 'BTCUSD', exchange: 'INDEX', display_name: 'Bitcoin / U.S. Dollar', type: 'crypto' },
+  { symbol: 'ETHUSD', exchange: 'INDEX', display_name: 'Ethereum / U.S. Dollar', type: 'crypto' },
+  { symbol: 'SOLUSD', exchange: 'INDEX', display_name: 'Solana / U.S. Dollar', type: 'crypto' },
+  { symbol: 'EURUSD', exchange: 'FX', display_name: 'Euro / U.S. Dollar', type: 'forex' },
+  { symbol: 'GBPUSD', exchange: 'FX', display_name: 'British Pound / U.S. Dollar', type: 'forex' },
+  { symbol: 'USDJPY', exchange: 'FX', display_name: 'U.S. Dollar / Japanese Yen', type: 'forex' },
+  { symbol: 'US10Y', exchange: 'TVC', display_name: 'U.S. 10 Year Treasury Yield', type: 'bond' }
+];
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -507,6 +533,25 @@ function extractUpstreamError(data, fallback = 'lookup failed') {
     || data?.error
     || data?.detail
     || fallback;
+}
+
+function getMarketSymbolSuggestions(query) {
+  const trimmed = String(query || '').trim().toUpperCase();
+  if (!trimmed) return [];
+  const normalized = trimmed.replace(/[^A-Z0-9:.]/g, '');
+  return MARKET_SYMBOL_SUGGESTIONS
+    .filter(item => {
+      const fullSymbol = `${item.exchange}:${item.symbol}`.toUpperCase();
+      const displayName = item.display_name.toUpperCase();
+      return item.symbol.includes(normalized)
+        || fullSymbol.includes(normalized)
+        || displayName.includes(trimmed);
+    })
+    .slice(0, 8)
+    .map(item => ({
+      ...item,
+      fullSymbol: `${item.exchange}:${item.symbol}`
+    }));
 }
 
 async function getProviderUsage(provider) {
@@ -1244,6 +1289,13 @@ app.get('/api/markets/symbols', async (req, res) => {
   } catch (e) {
     res.status(500).json({ error: 'db error' });
   }
+});
+
+app.get('/api/markets/symbol-search', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const query = String(req.query.q || '').trim();
+  if (!query) return res.json({ suggestions: [] });
+  res.json({ suggestions: getMarketSymbolSuggestions(query) });
 });
 
 app.post('/api/markets/symbols', async (req, res) => {
