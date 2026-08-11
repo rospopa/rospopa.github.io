@@ -2203,7 +2203,7 @@ export default function App() {
                     Live TradingView chart for the benchmark 10-year Treasury yield.
                   </p>
                 </div>
-                <TradingViewEmbed symbol="CBOE:TNX" />
+                <TradingViewEmbed symbol="TVC:TNX" />
               </div>
             </div>
           </div>
