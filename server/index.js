@@ -628,6 +628,14 @@ function normalizeTradingViewExchange(exchange) {
   };
   return aliases[value] || value;
 }
+function normalizeMarketSymbolRow(row) {
+  if (!row) return row;
+  return {
+    ...row,
+    symbol: String(row.symbol || '').toUpperCase(),
+    exchange: normalizeTradingViewExchange(row.exchange || '')
+  };
+}
 async function getYahooFinanceSymbolSuggestions(query) {
   const trimmed = String(query || '').trim();
   if (!trimmed) return [];
@@ -1381,7 +1389,7 @@ app.get('/api/markets/symbols', async (req, res) => {
        FROM market_symbols
        ORDER BY updated_at DESC, id DESC`
     );
-    res.json({ symbols: result.rows || [] });
+    res.json({ symbols: (result.rows || []).map(normalizeMarketSymbolRow) });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
   }
@@ -1404,7 +1412,7 @@ app.post('/api/markets/symbols', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const symbol = String(req.body?.symbol || '').trim().toUpperCase();
   const displayName = String(req.body?.display_name || '').trim();
-  const exchange = String(req.body?.exchange || '').trim().toUpperCase();
+  const exchange = normalizeTradingViewExchange(req.body?.exchange || '');
   const note = String(req.body?.note || '').trim();
   if (!symbol) return res.status(400).json({ error: 'symbol required' });
 
@@ -1415,7 +1423,7 @@ app.post('/api/markets/symbols', async (req, res) => {
        RETURNING id, symbol, display_name, exchange, note, created_at, updated_at`,
       [symbol, displayName || null, exchange || null, note || null, req.session.user.id]
     );
-    res.json({ symbol: result.rows[0] });
+    res.json({ symbol: normalizeMarketSymbolRow(result.rows[0]) });
   } catch (e) {
     if (e.code === '23505') return res.status(409).json({ error: 'symbol already saved' });
     res.status(500).json({ error: 'db error' });
@@ -1429,7 +1437,7 @@ app.put('/api/markets/symbols/:id', async (req, res) => {
 
   const symbol = String(req.body?.symbol || '').trim().toUpperCase();
   const displayName = String(req.body?.display_name || '').trim();
-  const exchange = String(req.body?.exchange || '').trim().toUpperCase();
+  const exchange = normalizeTradingViewExchange(req.body?.exchange || '');
   const note = String(req.body?.note || '').trim();
   if (!symbol) return res.status(400).json({ error: 'symbol required' });
 
@@ -1446,7 +1454,7 @@ app.put('/api/markets/symbols/:id', async (req, res) => {
       [symbol, displayName || null, exchange || null, note || null, id]
     );
     if (!result.rows.length) return res.status(404).json({ error: 'not found' });
-    res.json({ symbol: result.rows[0] });
+    res.json({ symbol: normalizeMarketSymbolRow(result.rows[0]) });
   } catch (e) {
     if (e.code === '23505') return res.status(409).json({ error: 'symbol already saved' });
     res.status(500).json({ error: 'db error' });
