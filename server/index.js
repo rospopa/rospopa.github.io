@@ -630,11 +630,28 @@ function normalizeTradingViewExchange(exchange) {
 }
 function normalizeMarketSymbolRow(row) {
   if (!row) return row;
+  const normalizedType = String(row.note || '').trim().toLowerCase();
+  const normalizedExchange = normalizeTradingViewExchange(row.exchange || '');
+  const normalizedSymbol = normalizeTradingViewSymbol(row.symbol || '', normalizedExchange, normalizedType);
   return {
     ...row,
-    symbol: String(row.symbol || '').toUpperCase(),
-    exchange: normalizeTradingViewExchange(row.exchange || '')
+    symbol: normalizedSymbol,
+    exchange: normalizedExchange
   };
+}
+
+function normalizeTradingViewSymbol(symbol, exchange, type = '') {
+  const normalizedSymbol = String(symbol || '').trim().toUpperCase();
+  const normalizedExchange = normalizeTradingViewExchange(exchange || '');
+  const normalizedType = String(type || '').trim().toLowerCase();
+
+  if (!normalizedSymbol) return '';
+
+  if ((normalizedType === 'cryptocurrency' || normalizedType === 'crypto') && normalizedSymbol.includes('-')) {
+    return normalizedSymbol.replace(/-/g, '');
+  }
+
+  return normalizedSymbol;
 }
 async function getYahooFinanceSymbolSuggestions(query) {
   const trimmed = String(query || '').trim();
@@ -650,13 +667,18 @@ async function getYahooFinanceSymbolSuggestions(query) {
   return quotes
     .filter(item => item?.symbol && item?.quoteType !== 'ALTSYMBOL')
     .slice(0, 8)
-    .map(item => ({
-      symbol: String(item.symbol || '').toUpperCase(),
-      exchange: String(item.exchange || item.exchDisp || '').toUpperCase(),
-      display_name: String(item.shortname || item.longname || item.symbol || '').trim(),
-      type: String(item.quoteType || item.typeDisp || '').toLowerCase(),
-      fullSymbol: item.exchange ? `${String(item.exchange).toUpperCase()}:${String(item.symbol).toUpperCase()}` : String(item.symbol || '').toUpperCase()
-    }));
+    .map(item => {
+      const exchange = normalizeTradingViewExchange(item.exchange || item.exchDisp || '');
+      const type = String(item.quoteType || item.typeDisp || '').toLowerCase();
+      const symbol = normalizeTradingViewSymbol(item.symbol || '', exchange, type);
+      return {
+        symbol,
+        exchange,
+        display_name: String(item.shortname || item.longname || item.symbol || '').trim(),
+        type,
+        fullSymbol: exchange ? `${exchange}:${symbol}` : symbol
+      };
+    });
 }
 
 async function getProviderUsage(provider) {
