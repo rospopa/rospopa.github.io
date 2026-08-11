@@ -905,10 +905,11 @@ function PropertiesPage({ user }) {
 
 function TradingViewEmbed({ symbol }) {
   const encodedSymbol = encodeURIComponent(symbol || 'NASDAQ:AAPL')
+  const widgetState = encodeURIComponent(JSON.stringify({ range: 'all' }))
   return (
     <iframe
       title={`TradingView chart for ${symbol}`}
-      src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_${encodedSymbol}&symbol=${encodedSymbol}&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=F1F3F6&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies=[]&overrides={}&enabled_features=[]&disabled_features=[]&locale=en#%7B%7D`}
+      src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_${encodedSymbol}&symbol=${encodedSymbol}&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=F1F3F6&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies=[]&overrides={}&enabled_features=[]&disabled_features=[]&locale=en#${widgetState}`}
       className="h-[480px] w-full rounded-xl border border-base-300 bg-base-100"
     />
   )
