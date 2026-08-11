@@ -557,6 +557,29 @@ function getMarketSymbolSuggestions(query) {
     }));
 }
 
+async function getYahooFinanceSymbolSuggestions(query) {
+  const trimmed = String(query || '').trim();
+  if (!trimmed) return [];
+
+  const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(trimmed)}&quotesCount=8&newsCount=0`;
+  const upstream = await getJson(url);
+  if (!upstream.ok) {
+    throw new Error(`Yahoo Finance search failed (${upstream.status})`);
+  }
+
+  const quotes = Array.isArray(upstream.data?.quotes) ? upstream.data.quotes : [];
+  return quotes
+    .filter(item => item?.symbol && item?.quoteType !== 'ALTSYMBOL')
+    .slice(0, 8)
+    .map(item => ({
+      symbol: String(item.symbol || '').toUpperCase(),
+      exchange: String(item.exchange || item.exchDisp || '').toUpperCase(),
+      display_name: String(item.shortname || item.longname || item.symbol || '').trim(),
+      type: String(item.quoteType || item.typeDisp || '').toLowerCase(),
+      fullSymbol: item.exchange ? `${String(item.exchange).toUpperCase()}:${String(item.symbol).toUpperCase()}` : String(item.symbol || '').toUpperCase()
+    }));
+}
+
 async function getProviderUsage(provider) {
   const result = await pool.query(
     `SELECT provider, used_credits, credit_limit, credit_cost_per_request, reset_period, reset_anchor, last_reset_at, updated_at
@@ -1298,7 +1321,13 @@ app.get('/api/markets/symbol-search', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const query = String(req.query.q || '').trim();
   if (!query) return res.json({ suggestions: [] });
-  res.json({ suggestions: getMarketSymbolSuggestions(query) });
+  try {
+    const yahooSuggestions = await getYahooFinanceSymbolSuggestions(query);
+    if (yahooSuggestions.length) {
+      return res.json({ suggestions: yahooSuggestions, source: 'yahoo-finance' });
+    }
+  } catch {}
+  res.json({ suggestions: getMarketSymbolSuggestions(query), source: 'fallback' });
 });
 
 app.post('/api/markets/symbols', async (req, res) => {
