@@ -922,7 +922,11 @@ function MarketsPage() {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [activeSymbolId, setActiveSymbolId] = useState(null)
-  const [form, setForm] = useState({ symbol: '', display_name: '', exchange: '', note: '' })
+  const [query, setQuery] = useState('')
+  const [selectedSuggestion, setSelectedSuggestion] = useState(null)
+  const [suggestions, setSuggestions] = useState([])
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
+  const [suggestionsOpen, setSuggestionsOpen] = useState(false)
 
   const activeSymbol = useMemo(() => {
     if (!symbols.length) return null
@@ -964,30 +968,74 @@ function MarketsPage() {
     loadAlerts()
   }, [loadAlerts])
 
+  useEffect(() => {
+    const trimmed = query.trim()
+    if (!trimmed) {
+      setSuggestions([])
+      setSuggestionsLoading(false)
+      return
+    }
+
+    const controller = new AbortController()
+    const handle = window.setTimeout(async () => {
+      setSuggestionsLoading(true)
+      try {
+        const url = `https://symbol-search.tradingview.com/symbol_search/?text=${encodeURIComponent(trimmed)}&hl=1&exchange=&lang=en&type=&domain=production`
+        const response = await fetch(url, { signal: controller.signal })
+        if (!response.ok) {
+          throw new Error(`TradingView search failed (${response.status})`)
+        }
+        const data = await response.json()
+        const nextSuggestions = Array.isArray(data) ? data.slice(0, 8).map((item, index) => ({
+          id: `${item.symbol || trimmed}-${item.exchange || 'exchange'}-${index}`,
+          symbol: item.symbol || '',
+          exchange: item.exchange || '',
+          displayName: item.description || item.symbol || '',
+          type: item.type || '',
+          fullSymbol: item.exchange ? `${item.exchange}:${item.symbol}` : (item.symbol || '')
+        })) : []
+        setSuggestions(nextSuggestions)
+      } catch (e) {
+        if (e.name !== 'AbortError') {
+          setSuggestions([])
+          setError('TradingView suggestions are currently unavailable')
+        }
+      } finally {
+        setSuggestionsLoading(false)
+      }
+    }, 250)
+
+    return () => {
+      controller.abort()
+      window.clearTimeout(handle)
+    }
+  }, [query])
+
   async function saveSymbol(e) {
     e.preventDefault()
     setError('')
-    if (!form.symbol.trim()) {
-      setError('Symbol is required')
+    if (!selectedSuggestion?.symbol) {
+      setError('Select a TradingView symbol suggestion first')
       return
     }
 
     setSaving(true)
     try {
       const payload = {
-        symbol: form.symbol,
-        display_name: form.display_name,
-        exchange: form.exchange,
-        note: form.note
+        symbol: selectedSuggestion.symbol,
+        display_name: selectedSuggestion.displayName,
+        exchange: selectedSuggestion.exchange,
+        note: selectedSuggestion.type || ''
       }
-      const endpoint = activeSymbolId ? `/api/markets/symbols/${activeSymbolId}` : '/api/markets/symbols'
-      const method = activeSymbolId ? 'PUT' : 'POST'
-      await apiFetch(endpoint, {
-        method,
+      await apiFetch('/api/markets/symbols', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-      setForm({ symbol: '', display_name: '', exchange: '', note: '' })
+      setQuery('')
+      setSelectedSuggestion(null)
+      setSuggestions([])
+      setSuggestionsOpen(false)
       setActiveSymbolId(null)
       await loadSymbols()
     } catch (e) {
@@ -1003,7 +1051,6 @@ function MarketsPage() {
       await apiFetch(`/api/markets/symbols/${id}`, { method: 'DELETE' })
       if (activeSymbolId === id) {
         setActiveSymbolId(null)
-        setForm({ symbol: '', display_name: '', exchange: '', note: '' })
       }
       await loadSymbols()
     } catch (e) {
@@ -1011,19 +1058,12 @@ function MarketsPage() {
     }
   }
 
-  function editSymbol(item) {
-    setActiveSymbolId(item.id)
-    setForm({
-      symbol: item.symbol || '',
-      display_name: item.display_name || '',
-      exchange: item.exchange || '',
-      note: item.note || ''
-    })
-  }
-
   function startNewSymbol() {
     setActiveSymbolId(null)
-    setForm({ symbol: '', display_name: '', exchange: '', note: '' })
+    setQuery('')
+    setSelectedSuggestion(null)
+    setSuggestions([])
+    setSuggestionsOpen(false)
   }
 
   const chartSymbol = activeSymbol?.exchange
@@ -1044,42 +1084,64 @@ function MarketsPage() {
           <div className="card bg-base-100 border border-base-300 shadow-sm">
             <div className="card-body p-5 md:p-6 space-y-4">
               <div className="flex items-center justify-between gap-3">
-                <h3 className="text-lg font-semibold">{activeSymbolId ? 'Edit symbol' : 'Add symbol'}</h3>
+                <h3 className="text-lg font-semibold">Add symbol</h3>
                 <button className="btn btn-ghost btn-sm" type="button" onClick={startNewSymbol}>
                   New
                 </button>
               </div>
 
               <form onSubmit={saveSymbol} className="space-y-3">
-                <input
-                  type="text"
-                  placeholder="AAPL"
-                  value={form.symbol}
-                  onChange={e => setForm(current => ({ ...current, symbol: e.target.value.toUpperCase() }))}
-                  className="input input-bordered w-full"
-                />
-                <input
-                  type="text"
-                  placeholder="Apple Inc."
-                  value={form.display_name}
-                  onChange={e => setForm(current => ({ ...current, display_name: e.target.value }))}
-                  className="input input-bordered w-full"
-                />
-                <input
-                  type="text"
-                  placeholder="NASDAQ"
-                  value={form.exchange}
-                  onChange={e => setForm(current => ({ ...current, exchange: e.target.value.toUpperCase() }))}
-                  className="input input-bordered w-full"
-                />
-                <textarea
-                  placeholder="Optional note"
-                  value={form.note}
-                  onChange={e => setForm(current => ({ ...current, note: e.target.value }))}
-                  className="textarea textarea-bordered min-h-24 w-full"
-                />
+                <div className="space-y-2">
+                  <input
+                    type="text"
+                    placeholder="Search TradingView symbols"
+                    value={query}
+                    onChange={e => {
+                      setQuery(e.target.value)
+                      setSelectedSuggestion(null)
+                      setSuggestionsOpen(true)
+                      setError('')
+                    }}
+                    onFocus={() => setSuggestionsOpen(true)}
+                    className="input input-bordered w-full"
+                  />
+                  {selectedSuggestion && (
+                    <div className="rounded-xl border border-base-300 bg-base-200/30 px-3 py-2 text-sm">
+                      <div className="font-semibold">{selectedSuggestion.fullSymbol}</div>
+                      <div className="text-base-content/60">{selectedSuggestion.displayName}</div>
+                    </div>
+                  )}
+                  {suggestionsOpen && (suggestionsLoading || suggestions.length > 0) && (
+                    <div className="rounded-xl border border-base-300 bg-base-100 shadow-sm">
+                      {suggestionsLoading ? (
+                        <div className="px-3 py-2 text-sm text-base-content/60">Loading suggestions…</div>
+                      ) : (
+                        <div className="max-h-72 overflow-y-auto py-1">
+                          {suggestions.map(item => (
+                            <button
+                              key={item.id}
+                              type="button"
+                              className="flex w-full items-start justify-between gap-3 px-3 py-2 text-left hover:bg-base-200/60"
+                              onClick={() => {
+                                setSelectedSuggestion(item)
+                                setQuery(item.fullSymbol || item.symbol)
+                                setSuggestionsOpen(false)
+                              }}
+                            >
+                              <div className="min-w-0">
+                                <div className="font-semibold">{item.fullSymbol || item.symbol}</div>
+                                <div className="truncate text-sm text-base-content/60">{item.displayName}</div>
+                              </div>
+                              {item.type && <div className="badge badge-outline badge-sm">{item.type}</div>}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
                 <button className="btn btn-primary w-full" type="submit" disabled={saving}>
-                  {saving ? 'Saving…' : activeSymbolId ? 'Update symbol' : 'Save symbol'}
+                  {saving ? 'Saving…' : 'Save symbol'}
                 </button>
               </form>
 
@@ -1111,7 +1173,6 @@ function MarketsPage() {
                           {item.note && <div className="mt-1 text-xs text-base-content/50 line-clamp-2">{item.note}</div>}
                         </button>
                         <div className="flex gap-2">
-                          <button className="btn btn-ghost btn-xs" type="button" onClick={() => editSymbol(item)}>Edit</button>
                           <button className="btn btn-ghost btn-xs text-error" type="button" onClick={() => removeSymbol(item.id)}>Delete</button>
                         </div>
                       </div>
