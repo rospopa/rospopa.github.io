@@ -1074,7 +1074,7 @@ function MarketsPage() {
         </p>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[360px,minmax(0,1fr)]">
+      <div className="grid gap-6 lg:grid-cols-[360px,minmax(0,1fr)] lg:items-start">
         <div className="space-y-4">
           <div className="card bg-base-100 border border-base-300 shadow-sm">
             <div className="card-body p-5 md:p-6 space-y-4">

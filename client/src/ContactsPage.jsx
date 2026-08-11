@@ -537,17 +537,6 @@ export default function ContactsPage() {
   // Debounce search input
   const debouncedSearch = useDebounce(search, 200)
 
-  // If a contact detail is open, render full-page view instead
-  if (detailId) {
-    return (
-      <ContactDetailPage
-        contactId={detailId}
-        onBack={closeDetail}
-        isAdmin
-      />
-    )
-  }
-
   const adminContacts = contacts.filter(c => c.role === 'admin')
   const userContacts = contacts.filter(c => c.role === 'user')
   const otherContacts = contacts.filter(c => c.role !== 'admin' && c.role !== 'user')
@@ -599,6 +588,17 @@ export default function ContactsPage() {
     })
     return sorted
   }, [roleFilteredContacts, listSort])
+
+  // If a contact detail is open, render full-page view instead
+  if (detailId) {
+    return (
+      <ContactDetailPage
+        contactId={detailId}
+        onBack={closeDetail}
+        isAdmin
+      />
+    )
+  }
 
   return (
     <div className="space-y-6">
