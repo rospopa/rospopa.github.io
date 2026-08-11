@@ -33,9 +33,12 @@ const MARKET_SYMBOL_SUGGESTIONS = [
   { symbol: 'META', exchange: 'NASDAQ', display_name: 'Meta Platforms, Inc.', type: 'stock' },
   { symbol: 'GOOGL', exchange: 'NASDAQ', display_name: 'Alphabet Inc. Class A', type: 'stock' },
   { symbol: 'GOOG', exchange: 'NASDAQ', display_name: 'Alphabet Inc. Class C', type: 'stock' },
+<<<<<<< HEAD
   { symbol: 'UBER', exchange: 'NYSE', display_name: 'Uber Technologies, Inc.', type: 'stock' },
   { symbol: 'CRM', exchange: 'NYSE', display_name: 'Salesforce, Inc.', type: 'stock' },
   { symbol: 'GDRX', exchange: 'NASDAQ', display_name: 'GoodRx Holdings, Inc.', type: 'stock' },
+=======
+>>>>>>> origin/master
   { symbol: 'PLTR', exchange: 'NASDAQ', display_name: 'Palantir Technologies Inc.', type: 'stock' },
   { symbol: 'CBRS', exchange: 'NASDAQ', display_name: 'Cerebras Systems Inc.', type: 'stock' },
   { symbol: 'SPY', exchange: 'AMEX', display_name: 'SPDR S&P 500 ETF Trust', type: 'etf' },
@@ -631,7 +634,6 @@ function normalizeTradingViewExchange(exchange) {
   };
   return aliases[value] || value;
 }
-
 function normalizeMarketSymbolRow(row) {
   if (!row) return row;
   const normalizedType = String(row.note || '').trim().toLowerCase();
@@ -657,7 +659,6 @@ function normalizeTradingViewSymbol(symbol, exchange, type = '') {
 
   return normalizedSymbol;
 }
-
 async function getYahooFinanceSymbolSuggestions(query) {
   const trimmed = String(query || '').trim();
   if (!trimmed) return [];
@@ -816,7 +817,10 @@ async function refreshProviderUsagePolicies() {
     applyGoogleAiUsagePolicy()
   ]);
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> origin/master
 function sanitizePhone(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
