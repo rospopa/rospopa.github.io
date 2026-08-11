@@ -2200,10 +2200,10 @@ export default function App() {
                 <div className="space-y-1">
                   <h2 className="text-lg font-semibold">10 Year US Treasury</h2>
                   <p className="text-sm text-base-content/55">
-                    Live TradingView chart for the benchmark 10-year Treasury yield.
+                    Live TradingView chart for the front-month 10-year Treasury futures contract.
                   </p>
                 </div>
-                <TradingViewEmbed symbol="TVC:TNX" />
+                <TradingViewEmbed symbol="CBOT:ZN1!" />
               </div>
             </div>
           </div>
