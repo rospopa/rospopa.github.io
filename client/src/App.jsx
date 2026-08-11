@@ -903,6 +903,280 @@ function PropertiesPage({ user }) {
   )
 }
 
+function TradingViewEmbed({ symbol }) {
+  const encodedSymbol = encodeURIComponent(symbol || 'NASDAQ:AAPL')
+  return (
+    <iframe
+      title={`TradingView chart for ${symbol}`}
+      src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_${encodedSymbol}&symbol=${encodedSymbol}&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=F1F3F6&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies=[]&overrides={}&enabled_features=[]&disabled_features=[]&locale=en#%7B%7D`}
+      className="h-[480px] w-full rounded-xl border border-base-300 bg-base-100"
+    />
+  )
+}
+
+function MarketsPage() {
+  const [symbols, setSymbols] = useState([])
+  const [alerts, setAlerts] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [alertsLoading, setAlertsLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [activeSymbolId, setActiveSymbolId] = useState(null)
+  const [form, setForm] = useState({ symbol: '', display_name: '', exchange: '', note: '' })
+
+  const activeSymbol = useMemo(() => {
+    if (!symbols.length) return null
+    return symbols.find(item => item.id === activeSymbolId) || symbols[0]
+  }, [symbols, activeSymbolId])
+
+  const loadSymbols = useCallback(async () => {
+    setLoading(true)
+    setError('')
+    try {
+      const data = await apiFetch('/api/markets/symbols')
+      const nextSymbols = data.symbols || []
+      setSymbols(nextSymbols)
+      setActiveSymbolId(current => current ?? nextSymbols[0]?.id ?? null)
+    } catch (e) {
+      setError(e.message || 'Failed to load market symbols')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadSymbols()
+  }, [loadSymbols])
+
+  const loadAlerts = useCallback(async () => {
+    setAlertsLoading(true)
+    try {
+      const data = await apiFetch('/api/markets/alerts')
+      setAlerts(data.alerts || [])
+    } catch (e) {
+      setError(e.message || 'Failed to load alert history')
+    } finally {
+      setAlertsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    loadAlerts()
+  }, [loadAlerts])
+
+  async function saveSymbol(e) {
+    e.preventDefault()
+    setError('')
+    if (!form.symbol.trim()) {
+      setError('Symbol is required')
+      return
+    }
+
+    setSaving(true)
+    try {
+      const payload = {
+        symbol: form.symbol,
+        display_name: form.display_name,
+        exchange: form.exchange,
+        note: form.note
+      }
+      const endpoint = activeSymbolId ? `/api/markets/symbols/${activeSymbolId}` : '/api/markets/symbols'
+      const method = activeSymbolId ? 'PUT' : 'POST'
+      await apiFetch(endpoint, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      setForm({ symbol: '', display_name: '', exchange: '', note: '' })
+      setActiveSymbolId(null)
+      await loadSymbols()
+    } catch (e) {
+      setError(e.message || 'Failed to save symbol')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  async function removeSymbol(id) {
+    setError('')
+    try {
+      await apiFetch(`/api/markets/symbols/${id}`, { method: 'DELETE' })
+      if (activeSymbolId === id) {
+        setActiveSymbolId(null)
+        setForm({ symbol: '', display_name: '', exchange: '', note: '' })
+      }
+      await loadSymbols()
+    } catch (e) {
+      setError(e.message || 'Failed to delete symbol')
+    }
+  }
+
+  function editSymbol(item) {
+    setActiveSymbolId(item.id)
+    setForm({
+      symbol: item.symbol || '',
+      display_name: item.display_name || '',
+      exchange: item.exchange || '',
+      note: item.note || ''
+    })
+  }
+
+  function startNewSymbol() {
+    setActiveSymbolId(null)
+    setForm({ symbol: '', display_name: '', exchange: '', note: '' })
+  }
+
+  const chartSymbol = activeSymbol?.exchange
+    ? `${activeSymbol.exchange}:${activeSymbol.symbol}`
+    : activeSymbol?.symbol || 'NASDAQ:AAPL'
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <h2 className="text-2xl font-bold">Markets</h2>
+        <p className="text-sm text-base-content/60 max-w-3xl">
+          Save ticker symbols and review live TradingView charts from one admin workspace.
+        </p>
+      </div>
+
+      <div className="grid gap-6 xl:grid-cols-[360px,minmax(0,1fr)]">
+        <div className="space-y-4">
+          <div className="card bg-base-100 border border-base-300 shadow-sm">
+            <div className="card-body p-5 md:p-6 space-y-4">
+              <div className="flex items-center justify-between gap-3">
+                <h3 className="text-lg font-semibold">{activeSymbolId ? 'Edit symbol' : 'Add symbol'}</h3>
+                <button className="btn btn-ghost btn-sm" type="button" onClick={startNewSymbol}>
+                  New
+                </button>
+              </div>
+
+              <form onSubmit={saveSymbol} className="space-y-3">
+                <input
+                  type="text"
+                  placeholder="AAPL"
+                  value={form.symbol}
+                  onChange={e => setForm(current => ({ ...current, symbol: e.target.value.toUpperCase() }))}
+                  className="input input-bordered w-full"
+                />
+                <input
+                  type="text"
+                  placeholder="Apple Inc."
+                  value={form.display_name}
+                  onChange={e => setForm(current => ({ ...current, display_name: e.target.value }))}
+                  className="input input-bordered w-full"
+                />
+                <input
+                  type="text"
+                  placeholder="NASDAQ"
+                  value={form.exchange}
+                  onChange={e => setForm(current => ({ ...current, exchange: e.target.value.toUpperCase() }))}
+                  className="input input-bordered w-full"
+                />
+                <textarea
+                  placeholder="Optional note"
+                  value={form.note}
+                  onChange={e => setForm(current => ({ ...current, note: e.target.value }))}
+                  className="textarea textarea-bordered min-h-24 w-full"
+                />
+                <button className="btn btn-primary w-full" type="submit" disabled={saving}>
+                  {saving ? 'Saving…' : activeSymbolId ? 'Update symbol' : 'Save symbol'}
+                </button>
+              </form>
+
+              {error && (
+                <div className="rounded-xl border border-base-300 bg-base-200/40 px-4 py-3 text-sm text-error">
+                  {error}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="card bg-base-100 border border-base-300 shadow-sm">
+            <div className="card-body p-5 md:p-6 space-y-4">
+              <h3 className="text-lg font-semibold">Saved symbols</h3>
+              {loading ? (
+                <div className="text-sm text-base-content/60">Loading symbols…</div>
+              ) : symbols.length ? (
+                <div className="space-y-2">
+                  {symbols.map(item => (
+                    <div key={item.id} className="rounded-xl border border-base-300 p-3">
+                      <div className="flex items-start justify-between gap-3">
+                        <button
+                          className="min-w-0 text-left"
+                          type="button"
+                          onClick={() => setActiveSymbolId(item.id)}
+                        >
+                          <div className="font-semibold">{item.exchange ? `${item.exchange}:${item.symbol}` : item.symbol}</div>
+                          <div className="text-sm text-base-content/60 truncate">{item.display_name || 'Saved symbol'}</div>
+                          {item.note && <div className="mt-1 text-xs text-base-content/50 line-clamp-2">{item.note}</div>}
+                        </button>
+                        <div className="flex gap-2">
+                          <button className="btn btn-ghost btn-xs" type="button" onClick={() => editSymbol(item)}>Edit</button>
+                          <button className="btn btn-ghost btn-xs text-error" type="button" onClick={() => removeSymbol(item.id)}>Delete</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-base-content/60">No saved symbols yet.</div>
+              )}
+            </div>
+          </div>
+
+          <div className="card bg-base-100 border border-base-300 shadow-sm">
+            <div className="card-body p-5 md:p-6 space-y-4">
+              <div className="space-y-1">
+                <h3 className="text-lg font-semibold">Webhook alerts</h3>
+                <p className="text-sm text-base-content/55">
+                  Recent TradingView webhook payloads stored by the backend.
+                </p>
+              </div>
+              {alertsLoading ? (
+                <div className="text-sm text-base-content/60">Loading alerts…</div>
+              ) : alerts.length ? (
+                <div className="space-y-2">
+                  {alerts.slice(0, 8).map(alert => (
+                    <div key={alert.id} className="rounded-xl border border-base-300 p-3 text-sm">
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <div className="font-semibold">
+                            {[alert.exchange, alert.symbol].filter(Boolean).join(':') || 'Webhook event'}
+                          </div>
+                          <div className="text-xs text-base-content/55">
+                            {[alert.alert_name, alert.direction, alert.timeframe].filter(Boolean).join(' · ') || 'Stored payload'}
+                          </div>
+                        </div>
+                        <div className="text-[11px] text-base-content/45">
+                          {alert.received_at ? new Date(alert.received_at).toLocaleString() : ''}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-sm text-base-content/60">No webhook alerts received yet.</div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <div className="card bg-base-100 border border-base-300 shadow-sm">
+          <div className="card-body p-5 md:p-6 space-y-4">
+            <div className="space-y-1">
+              <h3 className="text-lg font-semibold">Chart</h3>
+              <p className="text-sm text-base-content/55">
+                Embedded TradingView widget for the currently selected symbol.
+              </p>
+            </div>
+            <TradingViewEmbed symbol={chartSymbol} />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function LookupPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -1486,7 +1760,7 @@ export default function App() {
   }, [currentUser, debouncedGlobalSearch])
 
   function navigateTo(p) {
-    if ((p === 'users' || p === 'audit' || p === 'contacts' || p === 'lookup') && currentUser?.role !== 'admin') return
+    if ((p === 'users' || p === 'audit' || p === 'contacts' || p === 'lookup' || p === 'markets') && currentUser?.role !== 'admin') return
     if (p === 'contacts') setContactsKey(k => k + 1) // reset ContactsPage state
     setPage(p); localStorage.setItem('rep_page', p)
   }
@@ -1527,7 +1801,7 @@ export default function App() {
         if (data.user) {
           setCurrentUser(data.user)
           const saved = localStorage.getItem('rep_page')
-          const adminPages = ['users', 'contacts', 'audit', 'lookup']
+          const adminPages = ['users', 'contacts', 'audit', 'lookup', 'markets']
           const validPages = ['dashboard', 'properties', 'profile', ...( data.user.role === 'admin' ? adminPages : [])]
           setPage(saved && validPages.includes(saved) ? saved : 'dashboard')
         }
@@ -1671,7 +1945,7 @@ export default function App() {
   const navLinks = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'properties', label: 'Properties' },
-    ...(currentUser.role === 'admin' ? [{ id: 'users', label: 'Users' }, { id: 'contacts', label: 'Contacts' }, { id: 'audit', label: 'Audit Logs' }, { id: 'lookup', label: 'Lookup' }] : []),
+    ...(currentUser.role === 'admin' ? [{ id: 'users', label: 'Users' }, { id: 'contacts', label: 'Contacts' }, { id: 'audit', label: 'Audit Logs' }, { id: 'lookup', label: 'Lookup' }, { id: 'markets', label: 'Markets' }] : []),
   ]
 
   const navBtn = (id, label) => (
@@ -1920,6 +2194,10 @@ export default function App() {
 
         {page === 'lookup' && currentUser.role === 'admin' && (
           <LookupPage />
+        )}
+
+        {page === 'markets' && currentUser.role === 'admin' && (
+          <MarketsPage />
         )}
 
         {page === 'profile' && (
