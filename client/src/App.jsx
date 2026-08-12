@@ -925,6 +925,7 @@ function TradingViewEmbed({ symbol }) {
       autosize: true,
       symbol: resolvedSymbol,
       interval: 'D',
+      range: 'ALL',
       timezone: 'Etc/UTC',
       theme: 'light',
       style: '1',
