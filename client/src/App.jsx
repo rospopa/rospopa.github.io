@@ -904,12 +904,46 @@ function PropertiesPage({ user }) {
 }
 
 function TradingViewEmbed({ symbol }) {
-  const encodedSymbol = encodeURIComponent(symbol || 'NASDAQ:AAPL')
+  const containerRef = useRef(null)
+  const resolvedSymbol = symbol || 'NASDAQ:AAPL'
+
+  useEffect(() => {
+    const container = containerRef.current
+    if (!container) return
+
+    container.innerHTML = ''
+
+    const widgetHost = document.createElement('div')
+    widgetHost.className = 'tradingview-widget-container__widget h-full w-full'
+    container.appendChild(widgetHost)
+
+    const script = document.createElement('script')
+    script.type = 'text/javascript'
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js'
+    script.async = true
+    script.innerHTML = JSON.stringify({
+      autosize: true,
+      symbol: resolvedSymbol,
+      interval: 'D',
+      timezone: 'Etc/UTC',
+      theme: 'light',
+      style: '1',
+      locale: 'en',
+      withdateranges: true,
+      hide_side_toolbar: true,
+      allow_symbol_change: true,
+      support_host: 'https://www.tradingview.com'
+    })
+    container.appendChild(script)
+
+    return () => { container.innerHTML = '' }
+  }, [resolvedSymbol])
+
   return (
-    <iframe
-      title={`TradingView chart for ${symbol}`}
-      src={`https://s.tradingview.com/widgetembed/?frameElementId=tradingview_${encodedSymbol}&symbol=${encodedSymbol}&interval=D&hidesidetoolbar=1&symboledit=1&saveimage=1&toolbarbg=F1F3F6&theme=light&style=1&timezone=Etc%2FUTC&withdateranges=1&hideideas=1&studies=[]&overrides={}&enabled_features=[]&disabled_features=[]&locale=en#%7B%7D`}
-      className="h-[480px] w-full rounded-xl border border-base-300 bg-base-100"
+    <div
+      ref={containerRef}
+      title={`TradingView chart for ${resolvedSymbol}`}
+      className="tradingview-widget-container h-[480px] w-full overflow-hidden rounded-xl border border-base-300 bg-base-100"
     />
   )
 }
@@ -2200,10 +2234,10 @@ export default function App() {
                 <div className="space-y-1">
                   <h2 className="text-lg font-semibold">10 Year US Treasury</h2>
                   <p className="text-sm text-base-content/55">
-                    Live TradingView chart for the front-month 10-year Treasury futures contract.
+                    Live TradingView chart for the benchmark 10-year Treasury yield.
                   </p>
                 </div>
-                <TradingViewEmbed symbol="CBOT:ZN1!" />
+                <TradingViewEmbed symbol="TVC:US10Y" />
               </div>
             </div>
           </div>
