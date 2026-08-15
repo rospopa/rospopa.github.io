@@ -949,6 +949,98 @@ function TradingViewEmbed({ symbol }) {
   )
 }
 
+const TESTIMONIALS = [
+  { id: 1, name: 'Amanda Chen', role: 'Multifamily Investor', location: 'Seattle, WA', photo: 4, quote: 'The underwriting tools cut my deal review time in half. I can screen a property, pull comps, and share a summary with my partners before lunch.' },
+  { id: 2, name: 'Marcus Whitfield', role: 'Portfolio Manager', location: 'Atlanta, GA', photo: 12, quote: 'Having the whole portfolio in one dashboard changed how I run my week. No more spreadsheets scattered across three laptops.' },
+  { id: 3, name: 'Priya Raman', role: 'Commercial Broker', location: 'Chicago, IL', photo: 20, quote: 'My clients notice the difference. The property packages look polished and I send them out in minutes instead of hours.' },
+  { id: 4, name: 'Daniel Ortiz', role: 'Private Lender', location: 'Miami, FL', photo: 33, quote: 'The market data pulls are fast and accurate. I trust the numbers enough to make lending decisions off them directly.' },
+  { id: 5, name: 'Sarah Lindqvist', role: 'Asset Manager', location: 'Denver, CO', photo: 5, quote: 'Contact management finally clicks. Everything about a relationship lives in one place, including notes from calls two years ago.' },
+  { id: 6, name: 'James Okafor', role: 'Development Partner', location: 'Houston, TX', photo: 15, quote: 'Onboarding my team took an afternoon. The permissions model is simple enough that I did not need to call anyone for help.' },
+  { id: 7, name: 'Nicole Barrett', role: 'Acquisitions Lead', location: 'Phoenix, AZ', photo: 9, quote: 'I have used four platforms in this space. This is the first one that did not slow down once my database grew past a few thousand records.' },
+  { id: 8, name: 'Ethan Kowalski', role: 'REIT Analyst', location: 'New York, NY', photo: 51, quote: 'The charting integration is genuinely useful. I track rate movements next to my holdings without opening another tab.' },
+  { id: 9, name: 'Grace Yamamoto', role: 'Investment Advisor', location: 'San Francisco, CA', photo: 24, quote: 'Clean interface, no clutter, and it works just as well on my phone between showings as it does at my desk.' },
+  { id: 10, name: 'Robert Falana', role: 'Property Owner', location: 'Charlotte, NC', photo: 60, quote: 'Support answered a question on a Saturday and shipped the fix the following week. That kind of responsiveness is rare.' },
+  { id: 11, name: 'Isabella Moreau', role: 'Leasing Director', location: 'Boston, MA', photo: 45, quote: 'The document handling alone justified the switch. Everything is searchable and I stopped losing files in email threads.' },
+  { id: 12, name: 'Kevin Doyle', role: 'Syndicator', location: 'Nashville, TN', photo: 53, quote: 'Reporting to my investors used to take a full day each quarter. Now it is a few clicks and the numbers are already correct.' },
+  { id: 13, name: 'Layla Haddad', role: 'Capital Markets', location: 'Dallas, TX', photo: 32, quote: 'It handles the tedious parts so I can spend my time on the conversations that actually close deals.' },
+  { id: 14, name: 'Thomas Berezny', role: 'Fund Principal', location: 'Portland, OR', photo: 68, quote: 'I was skeptical about moving off our internal tools. Six months in, nobody on the team wants to go back.' },
+  { id: 15, name: 'Renee Caldwell', role: 'Real Estate Attorney', location: 'Philadelphia, PA', photo: 41, quote: 'Audit trails are thorough and easy to read, which makes my job considerably less painful during due diligence.' },
+  { id: 16, name: 'Omar Siddiqui', role: 'Buy-Side Analyst', location: 'Minneapolis, MN', photo: 65, quote: 'The saved searches and alerts mean opportunities come to me. I have sourced two deals this year I would have otherwise missed.' }
+]
+
+function StarRating({ rating = 5, name }) {
+  return (
+    <div className="flex items-center gap-0.5" role="img" aria-label={`${rating} out of 5 stars${name ? ` from ${name}` : ''}`}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <svg
+          key={i}
+          viewBox="0 0 20 20"
+          aria-hidden="true"
+          className={`w-4 h-4 ${i < rating ? 'text-warning' : 'text-base-300'}`}
+          fill="currentColor"
+        >
+          <path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.78l-5.2 2.73.99-5.79-4.21-4.1 5.82-.85L10 1.5z" />
+        </svg>
+      ))}
+    </div>
+  )
+}
+
+function TestimonialCard({ testimonial }) {
+  const [imageFailed, setImageFailed] = useState(false)
+  const initials = testimonial.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+
+  return (
+    <div className="card bg-base-100 border border-base-300 shadow-sm h-full">
+      <div className="card-body p-5 gap-4">
+        <StarRating rating={5} name={testimonial.name} />
+        <blockquote className="text-sm leading-relaxed text-base-content/80 flex-1">
+          &ldquo;{testimonial.quote}&rdquo;
+        </blockquote>
+        <div className="flex items-center gap-3 pt-1 border-t border-base-200">
+          {imageFailed ? (
+            <div className="w-10 h-10 mt-3 rounded-full bg-base-300 flex items-center justify-center text-sm font-semibold text-base-content/60 flex-shrink-0">
+              {initials}
+            </div>
+          ) : (
+            <img
+              src={`https://i.pravatar.cc/160?img=${testimonial.photo}`}
+              alt=""
+              loading="lazy"
+              onError={() => setImageFailed(true)}
+              className="w-10 h-10 mt-3 rounded-full object-cover border border-base-300 flex-shrink-0"
+            />
+          )}
+          <div className="mt-3 min-w-0">
+            <div className="text-sm font-semibold truncate">{testimonial.name}</div>
+            <div className="text-xs text-base-content/55 truncate">
+              {testimonial.role} &middot; {testimonial.location}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function TestimonialsSection() {
+  return (
+    <section className="space-y-4">
+      <div className="space-y-1">
+        <h2 className="text-xl md:text-2xl font-bold">What our clients say</h2>
+        <p className="text-sm text-base-content/55">
+          Trusted by investors, brokers, and owners across the country.
+        </p>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {TESTIMONIALS.map(testimonial => (
+          <TestimonialCard key={testimonial.id} testimonial={testimonial} />
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function MarketsPage() {
   const [symbols, setSymbols] = useState([])
   const [alerts, setAlerts] = useState([])
@@ -2230,6 +2322,7 @@ export default function App() {
               {(currentUser.login_count || 0) > 1 ? 'Welcome back, ' : 'Welcome, '}
               {[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email.split('@')[0]}
             </h1>
+            <TestimonialsSection />
           </div>
         )}
 
