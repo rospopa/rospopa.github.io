@@ -1,6 +1,28 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Field, NumericInput, SaveButton, Avatar, Modal, PropertyCardCarousel, apiFetch, formatPhone, PhotoCropper, Logo, RecaptchaShield, getRecaptchaToken, ForgotPasswordModal, ErrorBoundary, fmtLastLogin, useSharedOnlineStatus, useDebounce } from './shared'
 
+const CONTACT_ROLE_OPTIONS = [
+  { value: 'admin', label: 'Admin' },
+  { value: 'user', label: 'User' },
+  { value: 'investor', label: 'Investor' },
+  { value: 'colleague', label: 'Colleague' },
+  { value: 'family', label: 'Family' },
+  { value: 'partner', label: 'Partner' },
+]
+
+function getRoleBadgeClass(role) {
+  const normalized = String(role || 'user').toLowerCase()
+  const classes = {
+    admin: 'badge-error',
+    user: 'badge-primary',
+    investor: 'badge-info',
+    colleague: 'badge-secondary',
+    family: 'badge-warning',
+    partner: 'badge-success',
+  }
+  return classes[normalized] || 'badge-ghost'
+}
+
 const PropertyDetailModal = lazy(() => import('./PropertyDetailModal'))
 const ContactsPage = lazy(() => import('./ContactsPage'))
 const AuditLogs = lazy(() => import('./AuditLogs'))
@@ -74,7 +96,7 @@ function UsersTable({ users, onReload, onEdit }) {
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4"><span className="badge badge-primary badge-sm">{u.role}</span></td>
+                    <td className="py-3 px-4"><span className={`badge ${getRoleBadgeClass(u.role)} badge-sm`}>{u.role}</span></td>
                     <td className="py-3 px-4">{u.organization || <span className="text-base-content/30">—</span>}</td>
                     <td className="py-3 px-4">{u.phone_number || <span className="text-base-content/30">—</span>}</td>
                     <td className="py-3 px-4 text-xs">
@@ -215,8 +237,9 @@ function AddUserForm({ onCreated }) {
         </Field>
         <Field label="Role">
           <select value={role} onChange={e => setRole(e.target.value)} className="select select-bordered w-full">
-            <option value="user">User</option>
-            <option value="admin">Admin</option>
+            {CONTACT_ROLE_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
           </select>
         </Field>
         <Field label="Birthday">
@@ -377,8 +400,9 @@ function EditUserModal({ open, user, onClose, onSave }) {
 
           <Field label="Role">
             <select value={role} onChange={e => setRole(e.target.value)} className="select select-bordered w-full">
-              <option value="user">User</option>
-              <option value="admin">Admin</option>
+              {CONTACT_ROLE_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
             </select>
           </Field>
 
@@ -485,7 +509,7 @@ function ProfilePage({ currentUser, onUpdate }) {
               <div className="min-w-0 space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="text-2xl font-bold truncate">{displayName}</h2>
-                  <span className={`badge ${currentUser.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{currentUser.role}</span>
+                  <span className={`badge ${getRoleBadgeClass(currentUser.role)}`}>{currentUser.role}</span>
                 </div>
                 <p className="text-sm text-base-content/60 break-all">{currentUser.email}</p>
                 {phoneNumber && <p className="text-sm text-base-content/60">{phoneNumber}</p>}

@@ -24,6 +24,7 @@ const GOOGLE_AI_FREE_TIER_LIMIT = 250;
 const GOOGLE_AI_FREE_TIER_LABEL = 'Configured free-tier cap';
 const PROVIDER_USAGE_RESET_START = new Date('2026-08-10T00:00:00.000Z');
 const TRADINGVIEW_WEBHOOK_SECRET = process.env.TRADINGVIEW_WEBHOOK_SECRET || '';
+const VALID_USER_ROLES = ['admin', 'user', 'investor', 'colleague', 'family', 'partner'];
 const MARKET_SYMBOL_SUGGESTIONS = [
   { symbol: 'AAPL', exchange: 'NASDAQ', display_name: 'Apple Inc.', type: 'stock' },
   { symbol: 'MSFT', exchange: 'NASDAQ', display_name: 'Microsoft Corporation', type: 'stock' },
@@ -1564,7 +1565,7 @@ app.post('/api/users/:id/role', async (req, res) => {
   const id = Number(req.params.id);
   if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
   const { role } = req.body || {};
-  if (!['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
+  if (!VALID_USER_ROLES.includes(role)) return res.status(400).json({ error: 'invalid role' });
   if (adminId === id && role !== 'admin') return res.status(400).json({ error: 'cannot change own role' });
 
   try {
@@ -1587,7 +1588,7 @@ app.post('/api/users', async (req, res) => {
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
   if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
-  if (role && !['admin', 'user'].includes(role)) return res.status(400).json({ error: 'invalid role' });
+  if (role && !VALID_USER_ROLES.includes(role)) return res.status(400).json({ error: 'invalid role' });
   if (!profile_photo) return res.status(400).json({ error: 'profile photo is required' });
   const normalizedBirthday = normalizeBirthday(birthday);
   if (normalizedBirthday === undefined) return res.status(400).json({ error: 'invalid birthday' });
@@ -1633,8 +1634,7 @@ app.put('/api/users/:id', async (req, res) => {
   }
   if (profile_photo !== undefined) { updates.push(`profile_photo = $${updates.length + 1}`); values.push(profile_photo || null); }
   if (role !== undefined && userRole === 'admin') {
-    const validRoles = ['user', 'admin'];
-    if (!validRoles.includes(role)) return res.status(400).json({ error: 'invalid role' });
+    if (!VALID_USER_ROLES.includes(role)) return res.status(400).json({ error: 'invalid role' });
     updates.push(`role = $${updates.length + 1}`); values.push(role);
   }
 

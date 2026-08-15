@@ -1,6 +1,28 @@
 import { lazy, Suspense, useState, useEffect, useRef, useMemo } from 'react'
 import { apiFetch, downloadAttachment, fmtLastLogin, fmtLastNote, fmtBirthday, birthdayAge, daysUntilBirthday, SaveButton, Avatar, useSharedOnlineStatus, useDebounce, prefetchPropertyDetail, getPrefetchedProperty } from './shared'
 
+const CONTACT_ROLE_OPTIONS = [
+  { value: 'admin', label: 'Admin' },
+  { value: 'user', label: 'User' },
+  { value: 'investor', label: 'Investor' },
+  { value: 'colleague', label: 'Colleague' },
+  { value: 'family', label: 'Family' },
+  { value: 'partner', label: 'Partner' },
+]
+
+function getRoleBadgeClass(role) {
+  const normalized = String(role || 'user').toLowerCase()
+  const classes = {
+    admin: 'badge-error',
+    user: 'badge-primary',
+    investor: 'badge-info',
+    colleague: 'badge-secondary',
+    family: 'badge-warning',
+    partner: 'badge-success',
+  }
+  return classes[normalized] || 'badge-ghost'
+}
+
 const LazyPropertyDetailModal = lazy(() => import('./PropertyDetailModal'))
 
 function PhoneLink({ phone }) {
@@ -60,7 +82,7 @@ function ContactCard({ contact, onViewNotes }) {
           <div className="flex-1 min-w-0">
             <div className="font-semibold text-base leading-tight">{fullName}</div>
             <EmailLink email={contact.email} />
-            <span className={`badge badge-xs mt-1 ${contact.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{contact.role}</span>
+            <span className={`badge badge-xs mt-1 ${getRoleBadgeClass(contact.role)}`}>{contact.role}</span>
           </div>
         </div>
         {/* Details */}
@@ -414,7 +436,7 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
             <div className="flex-1 min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-2xl font-bold">{fullName}</h2>
-                <span className={`badge ${user.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{user.role}</span>
+                <span className={`badge ${getRoleBadgeClass(user.role)}`}>{user.role}</span>
               </div>
               <EmailLink email={user.email} />
               {user.phone_number && <div className="text-sm"><PhoneLink phone={user.phone_number} /></div>}
@@ -611,7 +633,7 @@ export default function ContactsPage() {
 
   const adminContacts = contacts.filter(c => c.role === 'admin')
   const userContacts = contacts.filter(c => c.role === 'user')
-  const otherContacts = contacts.filter(c => c.role !== 'admin' && c.role !== 'user')
+  const otherContacts = contacts.filter(c => !['admin', 'user', 'investor', 'colleague', 'family', 'partner'].includes(c.role))
 
   const cq = debouncedSearch.trim().toLowerCase()
   const filteredContacts = useMemo(() => 
@@ -706,8 +728,9 @@ export default function ContactsPage() {
           {view === 'list' && (
             <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="select select-bordered select-sm">
               <option value="">All Roles</option>
-              <option value="admin">Admin</option>
-              <option value="user">User</option>
+              {CONTACT_ROLE_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
             </select>
           )}
           {/* View toggles */}
@@ -787,7 +810,7 @@ export default function ContactsPage() {
                       <div className="md:hidden mt-0.5"><EmailLink email={c.email} /></div>
                     </td>
                     <td className="hidden md:table-cell text-sm"><EmailLink email={c.email} /></td>
-                    <td><span className={`badge badge-sm ${c.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{c.role}</span></td>
+                    <td><span className={`badge badge-sm ${getRoleBadgeClass(c.role)}`}>{c.role}</span></td>
                     <td className="hidden lg:table-cell text-sm">{c.organization || <span className="text-base-content/30">—</span>}</td>
                     <td className="hidden sm:table-cell text-sm"><PhoneLink phone={c.phone_number} /></td>
                     <td className="hidden lg:table-cell text-sm"><BirthdayText birthday={c.birthday} /></td>
@@ -812,15 +835,22 @@ export default function ContactsPage() {
       )}
 
       {!loading && view === 'kanban' && (() => {
-        const fAdmin = filteredContacts.filter(c => c.role === 'admin')
-        const fUser = filteredContacts.filter(c => c.role === 'user')
-        const fOther = filteredContacts.filter(c => c.role !== 'admin' && c.role !== 'user')
+        const roleGroups = CONTACT_ROLE_OPTIONS.map(({ value, label }) => ({
+          label,
+          value,
+          items: filteredContacts.filter(c => c.role === value),
+          badgeCls: getRoleBadgeClass(value),
+        }))
+        const otherItems = filteredContacts.filter(c => !CONTACT_ROLE_OPTIONS.some(option => option.value === c.role))
+        if (otherItems.length) {
+          roleGroups.push({ label: 'Other', value: 'other', items: otherItems, badgeCls: 'badge-ghost' })
+        }
         return (
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {[['Admin', fAdmin, 'badge-error'], ['User', fUser, 'badge-primary'], ['Archived', fOther, 'badge-ghost']].map(([col, items, badgeCls]) => (
-            <div key={col} className="bg-base-200 rounded-box p-4 flex flex-col gap-3 min-h-[200px]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+          {roleGroups.map(({ label, items, badgeCls }) => (
+            <div key={label} className="bg-base-200 rounded-box p-4 flex flex-col gap-3 min-h-[200px]">
               <div className="flex items-center gap-2">
-                <h3 className="font-bold text-sm uppercase tracking-widest">{col}</h3>
+                <h3 className="font-bold text-sm uppercase tracking-widest">{label}</h3>
                 <span className={`badge badge-sm ${badgeCls}`}>{items.length}</span>
               </div>
               {items.length === 0 && <div className="text-sm text-base-content/40 text-center py-6">Empty</div>}
@@ -908,7 +938,7 @@ export default function ContactsPage() {
                         {c.last_note_at && <span className="text-[10px] text-base-content/30">· {fmtLastNote(c.last_note_at)}</span>}
                       </div>
                     </div>
-                    <span className={`badge badge-xs flex-shrink-0 ${c.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{c.role}</span>
+                    <span className={`badge badge-xs flex-shrink-0 ${getRoleBadgeClass(c.role)}`}>{c.role}</span>
                   </button>
                 )
               })}
