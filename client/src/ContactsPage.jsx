@@ -1,5 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useRef, useMemo } from 'react'
-import { apiFetch, downloadAttachment, fmtLastLogin, fmtLastNote, SaveButton, Avatar, useSharedOnlineStatus, useDebounce, prefetchPropertyDetail, getPrefetchedProperty } from './shared'
+import { apiFetch, downloadAttachment, fmtLastLogin, fmtLastNote, fmtBirthday, birthdayAge, daysUntilBirthday, SaveButton, Avatar, useSharedOnlineStatus, useDebounce, prefetchPropertyDetail, getPrefetchedProperty } from './shared'
 
 const LazyPropertyDetailModal = lazy(() => import('./PropertyDetailModal'))
 
@@ -31,6 +31,24 @@ function ContactAvatar({ contact, size = 'md' }) {
     : <div className={`${sz} rounded-full bg-primary flex items-center justify-center text-primary-content font-bold flex-shrink-0`}>{initials}</div>
 }
 
+function BirthdayText({ birthday, className = '' }) {
+  const label = fmtBirthday(birthday)
+  if (!label) return <span className="text-base-content/40">—</span>
+  const age = birthdayAge(birthday)
+  const days = daysUntilBirthday(birthday)
+  const soon = days !== null && days <= 30
+  return (
+    <span className={`whitespace-nowrap ${className}`}>
+      🎂 {label}{age !== null ? ` (${age})` : ''}
+      {soon && (
+        <span className="badge badge-xs badge-warning ml-1 align-middle">
+          {days === 0 ? 'Today!' : `in ${days}d`}
+        </span>
+      )}
+    </span>
+  )
+}
+
 function ContactCard({ contact, onViewNotes }) {
   const fullName = [contact.first_name, contact.last_name].filter(Boolean).join(' ') || contact.email
   return (
@@ -51,6 +69,9 @@ function ContactCard({ contact, onViewNotes }) {
             <div className="text-base-content/70 truncate">{contact.organization}</div>
           )}
           <div><PhoneLink phone={contact.phone_number} /></div>
+          {contact.birthday && (
+            <div className="text-xs text-base-content/60"><BirthdayText birthday={contact.birthday} /></div>
+          )}
           {contact.buy_box && (
             <div className="text-xs text-base-content/60 line-clamp-2">{contact.buy_box}</div>
           )}
@@ -242,6 +263,54 @@ function BuyBoxEditor({ userId, initialValue }) {
   )
 }
 
+function BirthdayEditor({ userId, initialValue, onSaved }) {
+  const [value, setValue] = useState(initialValue || '')
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [savedSignal, setSavedSignal] = useState(0)
+
+  useEffect(() => { setValue(initialValue || '') }, [initialValue])
+
+  const handleSave = async () => {
+    setSaving(true); setError('')
+    try {
+      await apiFetch(`/api/contacts/${userId}/birthday`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ birthday: value || null })
+      })
+      setSavedSignal(s => s + 1)
+      setEditing(false)
+      if (onSaved) onSaved(value || null)
+    } catch (e) { setError(e.message || 'Failed to save birthday') }
+    setSaving(false)
+  }
+
+  if (!editing) return (
+    <div className="group relative">
+      <p className="text-sm text-base-content/70 min-h-[24px]">
+        {value ? <BirthdayText birthday={value} /> : <span className="text-base-content/30 italic">Not set — click to add</span>}
+      </p>
+      <button className="btn btn-xs btn-ghost mt-1 opacity-60 group-hover:opacity-100" onClick={() => setEditing(true)}>
+        ✏️ Edit
+      </button>
+    </div>
+  )
+
+  return (
+    <div className="space-y-2">
+      <input type="date" className="input input-bordered input-sm w-full max-w-[200px]"
+        max={new Date().toISOString().slice(0, 10)} min="1900-01-01"
+        value={value} onChange={e => setValue(e.target.value)} autoFocus />
+      {error && <p className="text-error text-xs">{error}</p>}
+      <div className="flex gap-2">
+        <SaveButton onClick={handleSave} loading={saving} savedSignal={savedSignal} label="Save" className="btn-sm" />
+        <button className="btn btn-sm btn-ghost" onClick={() => { setValue(initialValue || ''); setError(''); setEditing(false) }}>Cancel</button>
+      </div>
+    </div>
+  )
+}
+
 function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = false }) {
   const [data, setData] = useState(null)
   const [notes, setNotes] = useState([])
@@ -350,6 +419,7 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
               <EmailLink email={user.email} />
               {user.phone_number && <div className="text-sm"><PhoneLink phone={user.phone_number} /></div>}
               {user.organization && <div className="text-sm text-base-content/60">{user.organization}</div>}
+              {user.birthday && <div className="text-sm text-base-content/60"><BirthdayText birthday={user.birthday} /></div>}
             </div>
             <div className="text-xs text-base-content/40 text-right flex-shrink-0 space-y-0.5">
               <div>Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>
@@ -360,18 +430,20 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
               </div>
             </div>
           </div>
-          {user.buy_box && (
-            <div className="mt-4 pt-4 border-t border-base-200">
+          <div className="mt-4 pt-4 border-t border-base-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-1">Buy Box</p>
-              <BuyBoxEditor userId={user.id} initialValue={user.buy_box} />
+              <BuyBoxEditor userId={user.id} initialValue={user.buy_box || ''} />
             </div>
-          )}
-          {!user.buy_box && (
-            <div className="mt-4 pt-4 border-t border-base-200">
-              <p className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-1">Buy Box</p>
-              <BuyBoxEditor userId={user.id} initialValue="" />
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-1">Birthday</p>
+              <BirthdayEditor
+                userId={user.id}
+                initialValue={user.birthday || ''}
+                onSaved={birthday => setData(prev => prev ? { ...prev, user: { ...prev.user, birthday } } : prev)}
+              />
             </div>
-          )}
+          </div>
         </div>
       </div>
 
@@ -545,7 +617,7 @@ export default function ContactsPage() {
   const filteredContacts = useMemo(() => 
     cq
       ? contacts.filter(c =>
-          [c.first_name, c.last_name, c.email, c.organization, c.phone_number, c.buy_box, c.last_note_text]
+          [c.first_name, c.last_name, c.email, c.organization, c.phone_number, c.buy_box, c.last_note_text, fmtBirthday(c.birthday)]
             .filter(Boolean).some(v => v.toLowerCase().includes(cq))
         )
       : contacts,
@@ -578,6 +650,10 @@ export default function ContactsPage() {
         av = a.last_note_at || ''; bv = b.last_note_at || ''
       } else if (col === 'last_login') {
         av = a.last_login || ''; bv = b.last_login || ''
+      } else if (col === 'birthday') {
+        // Sort by upcoming birthday; contacts without a birthday sort last
+        const ad = daysUntilBirthday(a.birthday), bd = daysUntilBirthday(b.birthday)
+        av = ad === null ? Infinity : ad; bv = bd === null ? Infinity : bd
       } else {
         av = (a[col] || '').toString().toLowerCase()
         bv = (b[col] || '').toString().toLowerCase()
@@ -681,6 +757,7 @@ export default function ContactsPage() {
                   { label: 'Role', col: 'role', cls: 'w-16' },
                   { label: 'Organization', col: 'organization', cls: 'hidden lg:table-cell' },
                   { label: 'Phone', col: 'phone_number', cls: 'hidden sm:table-cell' },
+                  { label: 'Birthday', col: 'birthday', cls: 'hidden lg:table-cell' },
                   { label: 'Buy Box', col: 'buy_box', cls: 'hidden xl:table-cell' },
                   { label: 'Notes', col: 'note_count', cls: 'text-center w-14' },
                   { label: 'Last Login', col: 'last_login', cls: 'hidden sm:table-cell w-24' },
@@ -713,6 +790,7 @@ export default function ContactsPage() {
                     <td><span className={`badge badge-sm ${c.role === 'admin' ? 'badge-error' : 'badge-primary'}`}>{c.role}</span></td>
                     <td className="hidden lg:table-cell text-sm">{c.organization || <span className="text-base-content/30">—</span>}</td>
                     <td className="hidden sm:table-cell text-sm"><PhoneLink phone={c.phone_number} /></td>
+                    <td className="hidden lg:table-cell text-sm"><BirthdayText birthday={c.birthday} /></td>
                     <td className="hidden xl:table-cell text-sm max-w-[180px]">
                       <span className="line-clamp-2 text-base-content/60">{c.buy_box || <span className="text-base-content/30">—</span>}</span>
                     </td>
@@ -770,6 +848,9 @@ export default function ContactsPage() {
                        )}
                        {c.phone_number && (
                          <div className="text-xs"><PhoneLink phone={c.phone_number} /></div>
+                       )}
+                       {c.birthday && (
+                         <div className="text-xs text-base-content/60"><BirthdayText birthday={c.birthday} /></div>
                        )}
                        <div className="flex flex-col gap-0.5 pt-1 border-t border-base-200">
                          <span className="badge badge-ghost badge-xs">{c.note_count} {c.note_count === 1 ? 'note' : 'notes'}</span>

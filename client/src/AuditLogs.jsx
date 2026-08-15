@@ -13,7 +13,7 @@ const ACTION_LABELS = {
   edit_user:          (d, t) => {
     const fields = d?.changed_fields
     if (!fields?.length) return `Updated profile of ${t || 'user'}`
-    const USER_FIELD_LABELS = { first_name: 'First Name', last_name: 'Last Name', organization: 'Organization', phone_number: 'Phone', buy_box: 'Buy Box', role: 'Role' }
+    const USER_FIELD_LABELS = { first_name: 'First Name', last_name: 'Last Name', organization: 'Organization', phone_number: 'Phone', buy_box: 'Buy Box', birthday: 'Birthday', role: 'Role' }
     return `Updated profile of ${t || 'user'} — ${fields.map(f => USER_FIELD_LABELS[f] || f).join(', ')}`
   },
   delete_user:        (d, t) => `Deleted user ${t || ''}`,
@@ -113,7 +113,7 @@ export default function AuditLogs() {
                   population_density: 'Population Density', logistics_hubs: 'Logistics Hubs',
                   landmarks: 'Landmarks', water_sources: 'Water Sources', military_bases: 'Military Bases',
                   first_name: 'First Name', last_name: 'Last Name', organization: 'Organization',
-                  phone_number: 'Phone', buy_box: 'Buy Box', role: 'Role',
+                  phone_number: 'Phone', buy_box: 'Buy Box', birthday: 'Birthday', role: 'Role',
                   asset_type: 'Asset Type', grm: 'GRM', cap_rate: 'Cap Rate (%)', cash_on_cash: 'Cash-on-Cash (%)',
                   irr: 'IRR (%)', price_per_unit: 'Price/Unit ($)', price_per_sqft: 'Price/SqFt ($)',
                   rent_to_sales_ratio: 'Rent-to-Sales Ratio (%)', num_skus: '# SKUs',
