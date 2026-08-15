@@ -2,26 +2,26 @@ import { lazy, Suspense, useState, useEffect, useRef, useMemo } from 'react'
 import * as XLSX from 'xlsx'
 import { apiFetch, downloadAttachment, fmtLastLogin, fmtLastNote, fmtBirthday, birthdayAge, daysUntilBirthday, SaveButton, Avatar, useSharedOnlineStatus, useDebounce, prefetchPropertyDetail, getPrefetchedProperty } from './shared'
 
-const CONTACT_ROLE_OPTIONS = [
-  { value: 'admin', label: 'Admin' },
-  { value: 'user', label: 'User' },
+const CONTACT_TYPE_OPTIONS = [
   { value: 'investor', label: 'Investor' },
   { value: 'colleague', label: 'Colleague' },
   { value: 'family', label: 'Family' },
   { value: 'partner', label: 'Partner' },
 ]
 
-function getRoleBadgeClass(role) {
-  const normalized = String(role || 'user').toLowerCase()
+function getTypeBadgeClass(type) {
   const classes = {
-    admin: 'badge-error',
-    user: 'badge-primary',
     investor: 'badge-info',
     colleague: 'badge-secondary',
     family: 'badge-warning',
     partner: 'badge-success',
   }
-  return classes[normalized] || 'badge-ghost'
+  return classes[String(type || '').toLowerCase()] || 'badge-ghost'
+}
+
+function typeLabel(type) {
+  const opt = CONTACT_TYPE_OPTIONS.find(o => o.value === String(type || '').toLowerCase())
+  return opt ? opt.label : null
 }
 
 const LazyPropertyDetailModal = lazy(() => import('./PropertyDetailModal'))
@@ -83,7 +83,9 @@ function ContactCard({ contact, onViewNotes }) {
           <div className="flex-1 min-w-0">
             <div className="font-semibold text-base leading-tight">{fullName}</div>
             <EmailLink email={contact.email} />
-            <span className={`badge badge-xs mt-1 ${getRoleBadgeClass(contact.role)}`}>{contact.role}</span>
+            {contact.contact_type && (
+              <span className={`badge badge-xs mt-1 ${getTypeBadgeClass(contact.contact_type)}`}>{typeLabel(contact.contact_type)}</span>
+            )}
           </div>
         </div>
         {/* Details */}
@@ -495,22 +497,27 @@ function BirthdayEditor({ userId, initialValue, onSaved }) {
   )
 }
 
-function RoleSelector({ userId, role, isAdmin, onChanged }) {
+function TypeSelector({ userId, contactType, isAdmin, onChanged }) {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const value = String(contactType || '').toLowerCase()
 
-  if (!isAdmin) return <span className={`badge ${getRoleBadgeClass(role)}`}>{role}</span>
+  if (!isAdmin) {
+    return value
+      ? <span className={`badge ${getTypeBadgeClass(value)}`}>{typeLabel(value)}</span>
+      : null
+  }
 
   const handleChange = async (e) => {
     const next = e.target.value
-    if (next === role) return
+    if (next === value) return
     setSaving(true); setError('')
     try {
-      await apiFetch(`/api/users/${userId}/role`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: next })
+      await apiFetch(`/api/contacts/${userId}/type`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contact_type: next || null })
       })
-      if (onChanged) onChanged(next)
+      if (onChanged) onChanged(next || null)
     } catch (err) { setError(err.message || 'Failed to update type') }
     setSaving(false)
   }
@@ -519,12 +526,13 @@ function RoleSelector({ userId, role, isAdmin, onChanged }) {
     <span className="inline-flex items-center gap-1.5">
       <select
         className={`select select-xs select-bordered font-semibold ${saving ? 'opacity-60' : ''}`}
-        value={role}
+        value={value}
         onChange={handleChange}
         disabled={saving}
         title="Contact type"
       >
-        {CONTACT_ROLE_OPTIONS.map(opt => (
+        <option value="">No type</option>
+        {CONTACT_TYPE_OPTIONS.map(opt => (
           <option key={opt.value} value={opt.value}>{opt.label}</option>
         ))}
       </select>
@@ -636,11 +644,11 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
             <div className="flex-1 min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-2xl font-bold">{fullName}</h2>
-                <RoleSelector
+                <TypeSelector
                   userId={user.id}
-                  role={user.role}
+                  contactType={user.contact_type}
                   isAdmin={isAdmin}
-                  onChanged={role => setData(prev => prev ? { ...prev, user: { ...prev.user, role } } : prev)}
+                  onChanged={contact_type => setData(prev => prev ? { ...prev, user: { ...prev.user, contact_type } } : prev)}
                 />
               </div>
               <EmailLink email={user.email} />
@@ -803,7 +811,7 @@ export default function ContactsPage() {
   const onlineStatus = useSharedOnlineStatus()
   const [search, setSearch] = useState('')
   const [listSort, setListSort] = useState({ col: 'last_name', dir: 'asc' })
-  const [filterRole, setFilterRole] = useState('')
+  const [filterType, setFilterType] = useState('')
 
   // Persist view selection
   const changeView = (v) => { setView(v); localStorage.setItem('contacts_view', v) }
@@ -836,10 +844,6 @@ export default function ContactsPage() {
   // Debounce search input
   const debouncedSearch = useDebounce(search, 200)
 
-  const adminContacts = contacts.filter(c => c.role === 'admin')
-  const userContacts = contacts.filter(c => c.role === 'user')
-  const otherContacts = contacts.filter(c => !['admin', 'user', 'investor', 'colleague', 'family', 'partner'].includes(c.role))
-
   const cq = debouncedSearch.trim().toLowerCase()
   const filteredContacts = useMemo(() => 
     cq
@@ -852,8 +856,8 @@ export default function ContactsPage() {
   )
 
   const roleFilteredContacts = useMemo(() =>
-    filterRole ? filteredContacts.filter(c => c.role === filterRole) : filteredContacts,
-    [filteredContacts, filterRole]
+    filterType ? filteredContacts.filter(c => String(c.contact_type || '').toLowerCase() === filterType) : filteredContacts,
+    [filteredContacts, filterType]
   )
 
   function toggleListSort(col) {
@@ -929,11 +933,11 @@ export default function ContactsPage() {
               <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={() => setSearch('')}>✕</button>
             )}
           </div>
-          {/* Role filter (list mode) */}
+          {/* Type filter (list mode) */}
           {view === 'list' && (
-            <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="select select-bordered select-sm">
-              <option value="">All Roles</option>
-              {CONTACT_ROLE_OPTIONS.map(opt => (
+            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="select select-bordered select-sm">
+              <option value="">All Types</option>
+              {CONTACT_TYPE_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>
@@ -959,8 +963,8 @@ export default function ContactsPage() {
 
       {!loading && contacts.length > 0 && roleFilteredContacts.length === 0 && (
         <div className="py-10 text-center text-base-content/30">
-          <p>No contacts match{search ? ` "${search}"` : ''}{filterRole ? ` with role "${filterRole}"` : ''}</p>
-          <button className="btn btn-xs btn-ghost mt-2" onClick={() => { setSearch(''); setFilterRole('') }}>Clear filters</button>
+          <p>No contacts match{search ? ` "${search}"` : ''}{filterType ? ` with type "${filterType}"` : ''}</p>
+          <button className="btn btn-xs btn-ghost mt-2" onClick={() => { setSearch(''); setFilterType('') }}>Clear filters</button>
         </div>
       )}
 
@@ -983,7 +987,7 @@ export default function ContactsPage() {
                 {[
                   { label: 'Name', col: 'name' },
                   { label: 'Email', col: 'email', cls: 'hidden md:table-cell' },
-                  { label: 'Role', col: 'role', cls: 'w-16' },
+                  { label: 'Type', col: 'contact_type', cls: 'w-16' },
                   { label: 'Organization', col: 'organization', cls: 'hidden lg:table-cell' },
                   { label: 'Phone', col: 'phone_number', cls: 'hidden sm:table-cell' },
                   { label: 'Birthday', col: 'birthday', cls: 'hidden lg:table-cell' },
@@ -1016,7 +1020,7 @@ export default function ContactsPage() {
                       <div className="md:hidden mt-0.5"><EmailLink email={c.email} /></div>
                     </td>
                     <td className="hidden md:table-cell text-sm"><EmailLink email={c.email} /></td>
-                    <td><span className={`badge badge-sm ${getRoleBadgeClass(c.role)}`}>{c.role}</span></td>
+                    <td>{c.contact_type ? <span className={`badge badge-sm ${getTypeBadgeClass(c.contact_type)}`}>{typeLabel(c.contact_type)}</span> : <span className="text-base-content/30">—</span>}</td>
                     <td className="hidden lg:table-cell text-sm">{c.organization || <span className="text-base-content/30">—</span>}</td>
                     <td className="hidden sm:table-cell text-sm"><PhoneLink phone={c.phone_number} /></td>
                     <td className="hidden lg:table-cell text-sm"><BirthdayText birthday={c.birthday} /></td>
@@ -1041,19 +1045,19 @@ export default function ContactsPage() {
       )}
 
       {!loading && view === 'kanban' && (() => {
-        const roleGroups = CONTACT_ROLE_OPTIONS.map(({ value, label }) => ({
+        const typeGroups = CONTACT_TYPE_OPTIONS.map(({ value, label }) => ({
           label,
           value,
-          items: filteredContacts.filter(c => c.role === value),
-          badgeCls: getRoleBadgeClass(value),
+          items: filteredContacts.filter(c => String(c.contact_type || '').toLowerCase() === value),
+          badgeCls: getTypeBadgeClass(value),
         }))
-        const otherItems = filteredContacts.filter(c => !CONTACT_ROLE_OPTIONS.some(option => option.value === c.role))
+        const otherItems = filteredContacts.filter(c => !CONTACT_TYPE_OPTIONS.some(option => option.value === String(c.contact_type || '').toLowerCase()))
         if (otherItems.length) {
-          roleGroups.push({ label: 'Other', value: 'other', items: otherItems, badgeCls: 'badge-ghost' })
+          typeGroups.push({ label: 'No Type', value: 'other', items: otherItems, badgeCls: 'badge-ghost' })
         }
         return (
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-          {roleGroups.map(({ label, items, badgeCls }) => (
+          {typeGroups.map(({ label, items, badgeCls }) => (
             <div key={label} className="bg-base-200 rounded-box p-4 flex flex-col gap-3 min-h-[200px]">
               <div className="flex items-center gap-2">
                 <h3 className="font-bold text-sm uppercase tracking-widest">{label}</h3>
@@ -1144,7 +1148,7 @@ export default function ContactsPage() {
                         {c.last_note_at && <span className="text-[10px] text-base-content/30">· {fmtLastNote(c.last_note_at)}</span>}
                       </div>
                     </div>
-                    <span className={`badge badge-xs flex-shrink-0 ${getRoleBadgeClass(c.role)}`}>{c.role}</span>
+                    {c.contact_type && <span className={`badge badge-xs flex-shrink-0 ${getTypeBadgeClass(c.contact_type)}`}>{typeLabel(c.contact_type)}</span>}
                   </button>
                 )
               })}

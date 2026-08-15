@@ -4,6 +4,9 @@ import { Field, NumericInput, SaveButton, Avatar, Modal, PropertyCardCarousel, a
 const CONTACT_ROLE_OPTIONS = [
   { value: 'admin', label: 'Admin' },
   { value: 'user', label: 'User' },
+]
+
+const CONTACT_TYPE_OPTIONS = [
   { value: 'investor', label: 'Investor' },
   { value: 'colleague', label: 'Colleague' },
   { value: 'family', label: 'Family' },
@@ -15,10 +18,6 @@ function getRoleBadgeClass(role) {
   const classes = {
     admin: 'badge-error',
     user: 'badge-primary',
-    investor: 'badge-info',
-    colleague: 'badge-secondary',
-    family: 'badge-warning',
-    partner: 'badge-success',
   }
   return classes[normalized] || 'badge-ghost'
 }
@@ -96,7 +95,10 @@ function UsersTable({ users, onReload, onEdit }) {
                         </div>
                       </div>
                     </td>
-                    <td className="py-3 px-4"><span className={`badge ${getRoleBadgeClass(u.role)} badge-sm`}>{u.role}</span></td>
+                    <td className="py-3 px-4">
+                      <span className={`badge ${getRoleBadgeClass(u.role)} badge-sm`}>{u.role}</span>
+                      {u.contact_type && <span className="badge badge-ghost badge-sm ml-1">{u.contact_type}</span>}
+                    </td>
                     <td className="py-3 px-4">{u.organization || <span className="text-base-content/30">—</span>}</td>
                     <td className="py-3 px-4">{u.phone_number || <span className="text-base-content/30">—</span>}</td>
                     <td className="py-3 px-4 text-xs">
@@ -135,6 +137,7 @@ function AddUserForm({ onCreated }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('user')
+  const [contactType, setContactType] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [organization, setOrganization] = useState('')
@@ -173,9 +176,9 @@ function AddUserForm({ onCreated }) {
       const data = await apiFetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, birthday: birthday || null, profile_photo: photo })
+        body: JSON.stringify({ email, password, role, contact_type: contactType || null, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, birthday: birthday || null, profile_photo: photo })
       })
-      setEmail(''); setPassword(''); setRole('user')
+      setEmail(''); setPassword(''); setRole('user'); setContactType('')
       setFirstName(''); setLastName(''); setOrganization(''); setPhoneNumber(''); setBuyBox(''); setBirthday(''); setPhoto(null)
       setMsgType('success'); setMsg('User created')
       if (onCreated) onCreated()
@@ -242,6 +245,14 @@ function AddUserForm({ onCreated }) {
             ))}
           </select>
         </Field>
+        <Field label="Contact Type">
+          <select value={contactType} onChange={e => setContactType(e.target.value)} className="select select-bordered w-full">
+            <option value="">No type</option>
+            {CONTACT_TYPE_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </Field>
         <Field label="Birthday">
           <input type="date" value={birthday} max={new Date().toISOString().slice(0, 10)} min="1900-01-01"
             onChange={e => setBirthday(e.target.value)} className="input input-bordered w-full" />
@@ -263,6 +274,7 @@ function EditUserModal({ open, user, onClose, onSave }) {
   const [organization, setOrganization] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [role, setRole] = useState('user')
+  const [contactType, setContactType] = useState('')
   const [buyBox, setBuyBox] = useState('')
   const [birthday, setBirthday] = useState('')
   const [photo, setPhoto] = useState(null)
@@ -279,6 +291,7 @@ function EditUserModal({ open, user, onClose, onSave }) {
       setOrganization(user.organization || '')
       setPhoneNumber(user.phone_number || '')
       setRole(user.role || 'user')
+      setContactType(user.contact_type || '')
       setBuyBox(user.buy_box || '')
       setBirthday((user.birthday || '').slice(0, 10))
       setPhoto(user.profile_photo || null)
@@ -307,6 +320,7 @@ function EditUserModal({ open, user, onClose, onSave }) {
           organization: organization || null,
           phone_number: phoneNumber || null,
           role,
+          contact_type: contactType || null,
           buy_box: buyBox || null,
           birthday: birthday || null,
           profile_photo: photo || null
@@ -401,6 +415,15 @@ function EditUserModal({ open, user, onClose, onSave }) {
           <Field label="Role">
             <select value={role} onChange={e => setRole(e.target.value)} className="select select-bordered w-full">
               {CONTACT_ROLE_OPTIONS.map(opt => (
+                <option key={opt.value} value={opt.value}>{opt.label}</option>
+              ))}
+            </select>
+          </Field>
+
+          <Field label="Contact Type">
+            <select value={contactType} onChange={e => setContactType(e.target.value)} className="select select-bordered w-full">
+              <option value="">No type</option>
+              {CONTACT_TYPE_OPTIONS.map(opt => (
                 <option key={opt.value} value={opt.value}>{opt.label}</option>
               ))}
             </select>

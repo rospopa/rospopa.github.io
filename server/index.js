@@ -24,7 +24,8 @@ const GOOGLE_AI_FREE_TIER_LIMIT = 250;
 const GOOGLE_AI_FREE_TIER_LABEL = 'Configured free-tier cap';
 const PROVIDER_USAGE_RESET_START = new Date('2026-08-10T00:00:00.000Z');
 const TRADINGVIEW_WEBHOOK_SECRET = process.env.TRADINGVIEW_WEBHOOK_SECRET || '';
-const VALID_USER_ROLES = ['admin', 'user', 'investor', 'colleague', 'family', 'partner'];
+const VALID_USER_ROLES = ['admin', 'user'];
+const VALID_CONTACT_TYPES = ['investor', 'colleague', 'family', 'partner'];
 const DEFAULT_BULK_IMPORT_PASSWORD = 'ContactImport2026!';
 const MARKET_SYMBOL_SUGGESTIONS = [
   { symbol: 'AAPL', exchange: 'NASDAQ', display_name: 'Apple Inc.', type: 'stock' },
@@ -126,6 +127,12 @@ async function initializeSchema() {
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS login_count INTEGER NOT NULL DEFAULT 0`);
   await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS birthday DATE`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS contact_type TEXT`);
+  // One-time migration: contact types were briefly stored in role — move them to contact_type
+  await pool.query(`
+    UPDATE users SET contact_type = role, role = 'user'
+    WHERE role IN ('investor', 'colleague', 'family', 'partner')
+  `).catch(() => {});
   // Backfill last_login from audit_logs for users who logged in before column existed
   await pool.query(`
     UPDATE users u SET last_login = sub.last_login
@@ -1414,7 +1421,7 @@ app.get('/api/users', async (req, res) => {
     listParams.push(limit, offset);
     const countResult = await pool.query(`SELECT COUNT(*)::int as total FROM users ${where}`, countParams);
     const listResult = await pool.query(
-      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, to_char(birthday, 'YYYY-MM-DD') AS birthday, profile_photo, created_at, updated_at, last_login FROM users ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
+      `SELECT id, email, role, contact_type, first_name, last_name, organization, phone_number, buy_box, to_char(birthday, 'YYYY-MM-DD') AS birthday, profile_photo, created_at, updated_at, last_login FROM users ${where} ORDER BY id DESC LIMIT $${listParams.length - 1} OFFSET $${listParams.length}`,
       listParams
     );
     res.json({ users: listResult.rows, total: countResult.rows[0].total });
@@ -1672,12 +1679,13 @@ app.post('/api/users/:id/role', async (req, res) => {
 
 app.post('/api/users', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  let { email, password, role, first_name, last_name, organization, phone_number, buy_box, birthday, profile_photo } = req.body || {};
+  let { email, password, role, contact_type, first_name, last_name, organization, phone_number, buy_box, birthday, profile_photo } = req.body || {};
   email = sanitizeEmail(email);
   if (!email || !password) return res.status(400).json({ error: 'email and password required' });
   if (!isValidEmail(email)) return res.status(400).json({ error: 'invalid email' });
   if (!isValidPassword(password)) return res.status(400).json({ error: 'password must be 8-128 characters' });
   if (role && !VALID_USER_ROLES.includes(role)) return res.status(400).json({ error: 'invalid role' });
+  if (contact_type && !VALID_CONTACT_TYPES.includes(contact_type)) return res.status(400).json({ error: 'invalid contact type' });
   if (!profile_photo) return res.status(400).json({ error: 'profile photo is required' });
   const normalizedBirthday = normalizeBirthday(birthday);
   if (normalizedBirthday === undefined) return res.status(400).json({ error: 'invalid birthday' });
@@ -1685,12 +1693,12 @@ app.post('/api/users', async (req, res) => {
   try {
     const hashed = await bcrypt.hash(password, 10);
     const result = await pool.query(
-      'INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box, birthday, profile_photo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
-      [email, hashed, role || 'user', first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null, normalizedBirthday, profile_photo]
+      'INSERT INTO users (email, password, role, contact_type, first_name, last_name, organization, phone_number, buy_box, birthday, profile_photo) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id',
+      [email, hashed, role || 'user', contact_type || null, first_name || null, last_name || null, organization || null, phone_number || null, buy_box || null, normalizedBirthday, profile_photo]
     );
     const id = result.rows[0].id;
-    await logAudit(req.session.user.id, req.session.user.email, 'create_user', { role: role || 'user' }, id, email, clientIp(req));
-    res.json({ id, email, role: role || 'user', first_name, last_name, organization, phone_number, buy_box, birthday: normalizedBirthday });
+    await logAudit(req.session.user.id, req.session.user.email, 'create_user', { role: role || 'user', contact_type: contact_type || null }, id, email, clientIp(req));
+    res.json({ id, email, role: role || 'user', contact_type: contact_type || null, first_name, last_name, organization, phone_number, buy_box, birthday: normalizedBirthday });
   } catch (e) {
     if (e.code === '23505') return res.status(409).json({ error: 'email exists' });
     res.status(500).json({ error: 'server error' });
@@ -1707,7 +1715,7 @@ app.put('/api/users/:id', async (req, res) => {
   if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
   if (userRole !== 'admin' && userId !== id) return res.status(403).json({ error: 'forbidden' });
 
-  const { first_name, last_name, organization, phone_number, buy_box, birthday, profile_photo, role } = req.body || {};
+  const { first_name, last_name, organization, phone_number, buy_box, birthday, profile_photo, role, contact_type } = req.body || {};
   const updates = [];
   const values = [];
 
@@ -1726,6 +1734,10 @@ app.put('/api/users/:id', async (req, res) => {
     if (!VALID_USER_ROLES.includes(role)) return res.status(400).json({ error: 'invalid role' });
     updates.push(`role = $${updates.length + 1}`); values.push(role);
   }
+  if (contact_type !== undefined && userRole === 'admin') {
+    if (contact_type !== null && contact_type !== '' && !VALID_CONTACT_TYPES.includes(contact_type)) return res.status(400).json({ error: 'invalid contact type' });
+    updates.push(`contact_type = $${updates.length + 1}`); values.push(contact_type || null);
+  }
 
   if (updates.length === 0) {
     return res.status(400).json({ error: 'no fields to update' });
@@ -1736,17 +1748,17 @@ app.put('/api/users/:id', async (req, res) => {
 
   try {
     // Fetch current values before update for before/after diff
-    const preResult = await pool.query('SELECT first_name,last_name,organization,phone_number,buy_box,to_char(birthday, \'YYYY-MM-DD\') AS birthday,role,email FROM users WHERE id=$1', [id]);
+    const preResult = await pool.query('SELECT first_name,last_name,organization,phone_number,buy_box,to_char(birthday, \'YYYY-MM-DD\') AS birthday,role,contact_type,email FROM users WHERE id=$1', [id]);
     if (preResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const pre = preResult.rows[0];
 
     const updateResult = await pool.query(`UPDATE users SET ${updates.join(', ')} WHERE id = $${values.length}`, values);
     if (updateResult.rowCount === 0) return res.status(404).json({ error: 'not found' });
-    const userResult = await pool.query('SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, to_char(birthday, \'YYYY-MM-DD\') AS birthday, profile_photo, created_at, updated_at FROM users WHERE id = $1', [id]);
+    const userResult = await pool.query('SELECT id, email, role, contact_type, first_name, last_name, organization, phone_number, buy_box, to_char(birthday, \'YYYY-MM-DD\') AS birthday, profile_photo, created_at, updated_at FROM users WHERE id = $1', [id]);
     if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const row = userResult.rows[0];
     // Build before/after diff for loggable fields
-    const trackFields = ['first_name','last_name','organization','phone_number','buy_box','birthday','role'];
+    const trackFields = ['first_name','last_name','organization','phone_number','buy_box','birthday','role','contact_type'];
     const changes = {};
     for (const f of trackFields) {
       if (req.body[f] !== undefined && String(req.body[f] ?? '') !== String(pre[f] ?? '')) {
@@ -1788,7 +1800,7 @@ app.get('/api/contacts', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   try {
     const result = await pool.query(`
-      SELECT u.id, u.email, u.role, u.first_name, u.last_name, u.organization, u.phone_number,
+      SELECT u.id, u.email, u.role, u.contact_type, u.first_name, u.last_name, u.organization, u.phone_number,
              u.buy_box, to_char(u.birthday, 'YYYY-MM-DD') AS birthday, u.profile_photo, u.created_at, u.updated_at, u.last_login,
              COUNT(cn.id)::int AS note_count,
              MAX(cn.created_at) AS last_note_at,
@@ -1814,7 +1826,7 @@ app.get('/api/contacts/:id', async (req, res) => {
   if (!Number.isFinite(userId)) return res.status(400).json({ error: 'invalid id' });
   try {
     const userResult = await pool.query(
-      `SELECT id, email, role, first_name, last_name, organization, phone_number, buy_box, to_char(birthday, 'YYYY-MM-DD') AS birthday, profile_photo, created_at, updated_at, last_login FROM users WHERE id = $1`,
+      `SELECT id, email, role, contact_type, first_name, last_name, organization, phone_number, buy_box, to_char(birthday, 'YYYY-MM-DD') AS birthday, profile_photo, created_at, updated_at, last_login FROM users WHERE id = $1`,
       [userId]
     );
     if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
@@ -1831,6 +1843,23 @@ app.get('/api/contacts/:id', async (req, res) => {
     );
 
     res.json({ user, properties: propsResult.rows });
+  } catch (e) {
+    res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.patch('/api/contacts/:id/type', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  const userId = Number(req.params.id);
+  if (!Number.isFinite(userId)) return res.status(400).json({ error: 'invalid id' });
+  const raw = (req.body || {}).contact_type;
+  const contact_type = raw ? String(raw).toLowerCase() : null;
+  if (contact_type !== null && !VALID_CONTACT_TYPES.includes(contact_type)) return res.status(400).json({ error: 'invalid contact type' });
+  try {
+    const result = await pool.query('UPDATE users SET contact_type=$1, updated_at=CURRENT_TIMESTAMP WHERE id=$2', [contact_type, userId]);
+    if (result.rowCount === 0) return res.status(404).json({ error: 'not found' });
+    await logAudit(req.session.user.id, req.session.user.email, 'edit_user', { changed_fields: ['contact_type'], contact_type }, userId, null, clientIp(req));
+    res.json({ ok: true, contact_type });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
   }
