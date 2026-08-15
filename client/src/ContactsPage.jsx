@@ -495,6 +495,44 @@ function BirthdayEditor({ userId, initialValue, onSaved }) {
   )
 }
 
+function RoleSelector({ userId, role, isAdmin, onChanged }) {
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  if (!isAdmin) return <span className={`badge ${getRoleBadgeClass(role)}`}>{role}</span>
+
+  const handleChange = async (e) => {
+    const next = e.target.value
+    if (next === role) return
+    setSaving(true); setError('')
+    try {
+      await apiFetch(`/api/users/${userId}/role`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ role: next })
+      })
+      if (onChanged) onChanged(next)
+    } catch (err) { setError(err.message || 'Failed to update type') }
+    setSaving(false)
+  }
+
+  return (
+    <span className="inline-flex items-center gap-1.5">
+      <select
+        className={`select select-xs select-bordered font-semibold ${saving ? 'opacity-60' : ''}`}
+        value={role}
+        onChange={handleChange}
+        disabled={saving}
+        title="Contact type"
+      >
+        {CONTACT_ROLE_OPTIONS.map(opt => (
+          <option key={opt.value} value={opt.value}>{opt.label}</option>
+        ))}
+      </select>
+      {error && <span className="text-error text-xs">{error}</span>}
+    </span>
+  )
+}
+
 function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = false }) {
   const [data, setData] = useState(null)
   const [notes, setNotes] = useState([])
@@ -598,7 +636,12 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
             <div className="flex-1 min-w-0 space-y-1">
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-2xl font-bold">{fullName}</h2>
-                <span className={`badge ${getRoleBadgeClass(user.role)}`}>{user.role}</span>
+                <RoleSelector
+                  userId={user.id}
+                  role={user.role}
+                  isAdmin={isAdmin}
+                  onChanged={role => setData(prev => prev ? { ...prev, user: { ...prev.user, role } } : prev)}
+                />
               </div>
               <EmailLink email={user.email} />
               {user.phone_number && <div className="text-sm"><PhoneLink phone={user.phone_number} /></div>}
