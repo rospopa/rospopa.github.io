@@ -1457,15 +1457,12 @@ app.post('/api/contacts/bulk-import', async (req, res) => {
     if (seenEmails.has(email)) continue;
     seenEmails.add(email);
 
-    const birthday = normalizeBirthday(rawBirthday);
-    if (birthday === undefined) {
-      return res.status(400).json({ error: `Invalid birthday for ${email}` });
-    }
+    // Tolerate bad cell values: fall back to null rather than failing the whole batch
+    const normalizedBirthday = normalizeBirthday(rawBirthday);
+    const birthday = normalizedBirthday === undefined ? null : normalizedBirthday;
 
-    const phone_number = rawPhone ? sanitizePhone(rawPhone) : null;
-    if (rawPhone && !isPlausiblePhone(phone_number)) {
-      return res.status(400).json({ error: `Invalid phone number for ${email}` });
-    }
+    let phone_number = rawPhone ? sanitizePhone(rawPhone) : null;
+    if (phone_number && !isPlausiblePhone(phone_number)) phone_number = null;
 
     normalized.push({
       email,

@@ -243,7 +243,34 @@ function ContactNotesDrawer({ contact, onClose, onRefreshContacts }) {
   )
 }
 
-function normalizeBulkImportRow(row) {
+const BULK_IMPORT_MONTHS = {
+  january: 1, february: 2, march: 3, april: 4, may: 5, june: 6,
+  july: 7, august: 8, september: 9, october: 10, november: 11, december: 12,
+  jan: 1, feb: 2, mar: 3, apr: 4, jun: 6, jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12,
+}
+
+function slugifyForEmail(input) {
+  return String(input || '')
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '.')
+    .replace(/^\.+|\.+$/g, '')
+    .replace(/\.{2,}/g, '.')
+}
+
+function createSyntheticEmail(firstName, lastName, usedSet, index) {
+  const base = slugifyForEmail([firstName, lastName].filter(Boolean).join(' ')) || `contact${index}`
+  let candidate = `${base}@contact.local`
+  let suffix = 2
+  while (usedSet.has(candidate)) {
+    candidate = `${base}${suffix}@contact.local`
+    suffix += 1
+  }
+  return candidate
+}
+
+function normalizeBulkImportRow(row, seenEmails, index) {
   if (!row || typeof row !== 'object') return null
 
   const normalizeKey = (key) => String(key ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, '')
@@ -265,29 +292,49 @@ function normalizeBulkImportRow(row) {
   const phone = getCell('phone', 'phone number', 'phonenumber', 'mobile', 'mobile phone')
   const birthdayRaw = getCell('birthday', 'happy birthday', 'birthdate', 'date of birth', 'dob')
 
-  if (!email) return null
+  if (!firstName && !lastName && !email && !phone) return null
 
-  const emailValue = email.toLowerCase()
+  const emailValue = (email || createSyntheticEmail(firstName, lastName, seenEmails, index)).toLowerCase()
+  seenEmails.add(emailValue)
   const first = firstName || ''
   const last = lastName || ''
   const phoneValue = phone ? phone.replace(/[^\d+]/g, '').replace(/\+(?=\d)/, '+').replace(/^\+?1(?=\d{10}$)/, '+1') : ''
 
   let birthdayValue = ''
   if (birthdayRaw) {
-    const asNum = Number(birthdayRaw)
-    if (!Number.isNaN(asNum) && asNum > 0) {
-      const date = XLSX.SSF.parse_date_code(asNum)
-      if (date) {
-        const yyyy = String(date.y)
-        const mm = String(date.m).padStart(2, '0')
-        const dd = String(date.d).padStart(2, '0')
-        birthdayValue = `${yyyy}-${mm}-${dd}`
+    if (/^\d{4}-\d{2}-\d{2}$/.test(birthdayRaw)) {
+      birthdayValue = birthdayRaw
+    }
+    if (!birthdayValue) {
+      // "April 11th", "Oct 3" — month/day only, use the current year
+      const md = birthdayRaw.match(/^([A-Za-z]+)\.?\s+(\d{1,2})(?:st|nd|rd|th)?$/i)
+      if (md) {
+        const month = BULK_IMPORT_MONTHS[md[1].toLowerCase()]
+        const day = Number(md[2])
+        if (month && day >= 1 && day <= 31) {
+          let year = new Date().getFullYear()
+          const candidate = new Date(year, month - 1, day)
+          if (candidate.getTime() > Date.now()) year -= 1
+          birthdayValue = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+        }
+      }
+    }
+    if (!birthdayValue) {
+      const asNum = Number(birthdayRaw)
+      if (!Number.isNaN(asNum) && asNum > 0) {
+        const date = XLSX.SSF.parse_date_code(asNum)
+        if (date) {
+          birthdayValue = `${date.y}-${String(date.m).padStart(2, '0')}-${String(date.d).padStart(2, '0')}`
+        }
       }
     }
     if (!birthdayValue) {
       const parsed = new Date(birthdayRaw)
       if (!Number.isNaN(parsed.getTime())) {
-        birthdayValue = parsed.toISOString().slice(0, 10)
+        const y = parsed.getFullYear()
+        if (y >= 1900 && y <= new Date().getFullYear()) {
+          birthdayValue = `${y}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`
+        }
       }
     }
   }
@@ -318,7 +365,8 @@ function BulkImportButton({ onImported }) {
       const workbook = XLSX.read(arrayBuffer, { type: 'array' })
       const sheet = workbook.Sheets[workbook.SheetNames[0]]
       const rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false })
-      const contacts = rows.map(normalizeBulkImportRow).filter(Boolean)
+      const seenEmails = new Set()
+      const contacts = rows.map((row, i) => normalizeBulkImportRow(row, seenEmails, i + 1)).filter(Boolean)
 
       if (!contacts.length) {
         throw new Error('No valid contacts were found in that file. Use columns like First Name, Last Name, Phone Number, Email, Birthday.')
