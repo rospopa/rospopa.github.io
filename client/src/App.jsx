@@ -118,6 +118,7 @@ function AddUserForm({ onCreated }) {
   const [organization, setOrganization] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [buyBox, setBuyBox] = useState('')
+  const [birthday, setBirthday] = useState('')
   const [photo, setPhoto] = useState(null)
   const [showCropper, setShowCropper] = useState(false)
   const [cropSrc, setCropSrc] = useState(null)
@@ -150,10 +151,10 @@ function AddUserForm({ onCreated }) {
       const data = await apiFetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, role, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, profile_photo: photo })
+        body: JSON.stringify({ email, password, role, first_name: firstName, last_name: lastName, organization, phone_number: phoneNumber, buy_box: buyBox, birthday: birthday || null, profile_photo: photo })
       })
       setEmail(''); setPassword(''); setRole('user')
-      setFirstName(''); setLastName(''); setOrganization(''); setPhoneNumber(''); setBuyBox(''); setPhoto(null)
+      setFirstName(''); setLastName(''); setOrganization(''); setPhoneNumber(''); setBuyBox(''); setBirthday(''); setPhoto(null)
       setMsgType('success'); setMsg('User created')
       if (onCreated) onCreated()
     } catch (e) { setMsgType('error'); setMsg(e.message || 'Create failed') }
@@ -218,6 +219,10 @@ function AddUserForm({ onCreated }) {
             <option value="admin">Admin</option>
           </select>
         </Field>
+        <Field label="Birthday">
+          <input type="date" value={birthday} max={new Date().toISOString().slice(0, 10)} min="1900-01-01"
+            onChange={e => setBirthday(e.target.value)} className="input input-bordered w-full" />
+        </Field>
       </div>
       {msg && <div className={`alert ${msgType === 'error' ? 'alert-error' : 'alert-success'} text-sm`}>{msg}</div>}
       <button className="btn btn-primary w-full" type="submit" disabled={loading || !photo}>
@@ -236,6 +241,7 @@ function EditUserModal({ open, user, onClose, onSave }) {
   const [phoneNumber, setPhoneNumber] = useState('')
   const [role, setRole] = useState('user')
   const [buyBox, setBuyBox] = useState('')
+  const [birthday, setBirthday] = useState('')
   const [photo, setPhoto] = useState(null)
   const [showCropper, setShowCropper] = useState(false)
   const [cropSrc, setCropSrc] = useState(null)
@@ -251,6 +257,7 @@ function EditUserModal({ open, user, onClose, onSave }) {
       setPhoneNumber(user.phone_number || '')
       setRole(user.role || 'user')
       setBuyBox(user.buy_box || '')
+      setBirthday((user.birthday || '').slice(0, 10))
       setPhoto(user.profile_photo || null)
       setErr('')
     }
@@ -278,6 +285,7 @@ function EditUserModal({ open, user, onClose, onSave }) {
           phone_number: phoneNumber || null,
           role,
           buy_box: buyBox || null,
+          birthday: birthday || null,
           profile_photo: photo || null
         })
       })
@@ -362,6 +370,11 @@ function EditUserModal({ open, user, onClose, onSave }) {
               onChange={e => setPhoneNumber(formatPhone(e.target.value))} className="input input-bordered w-full" />
           </Field>
 
+          <Field label="Birthday">
+            <input type="date" value={birthday} max={new Date().toISOString().slice(0, 10)} min="1900-01-01"
+              onChange={e => setBirthday(e.target.value)} className="input input-bordered w-full" />
+          </Field>
+
           <Field label="Role">
             <select value={role} onChange={e => setRole(e.target.value)} className="select select-bordered w-full">
               <option value="user">User</option>
@@ -388,6 +401,7 @@ function ProfilePage({ currentUser, onUpdate }) {
   const [organization, setOrganization] = useState(currentUser.organization || '')
   const [phoneNumber, setPhoneNumber] = useState(currentUser.phone_number || '')
   const [buyBox, setBuyBox] = useState(currentUser.buy_box || '')
+  const [birthday, setBirthday] = useState((currentUser.birthday || '').slice(0, 10))
   const [photo, setPhoto] = useState(currentUser.profile_photo || null)
   const [showCropper, setShowCropper] = useState(false)
   const [cropSrc, setCropSrc] = useState(null)
@@ -401,6 +415,7 @@ function ProfilePage({ currentUser, onUpdate }) {
     setOrganization(currentUser.organization || '')
     setPhoneNumber(currentUser.phone_number || '')
     setBuyBox(currentUser.buy_box || '')
+    setBirthday((currentUser.birthday || '').slice(0, 10))
     setPhoto(currentUser.profile_photo || null)
     setErr('')
   }, [currentUser])
@@ -429,6 +444,7 @@ function ProfilePage({ currentUser, onUpdate }) {
           organization: organization || null,
           phone_number: phoneNumber || null,
           buy_box: buyBox || null,
+          birthday: birthday || null,
           profile_photo: photo || null
         })
       })
@@ -497,6 +513,10 @@ function ProfilePage({ currentUser, onUpdate }) {
             </Field>
             <Field label="Phone Number">
               <input type="tel" placeholder="+1 (000) 000-0000" value={phoneNumber} onChange={e => setPhoneNumber(formatPhone(e.target.value))} className="input input-bordered w-full" />
+            </Field>
+            <Field label="Birthday">
+              <input type="date" value={birthday} max={new Date().toISOString().slice(0, 10)} min="1900-01-01"
+                onChange={e => setBirthday(e.target.value)} className="input input-bordered w-full" />
             </Field>
             <div className="md:col-span-2">
               <Field label="Buy Box">

@@ -976,6 +976,41 @@ export function fmtLastNote(ts) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: diffD > 365 ? 'numeric' : undefined })
 }
 
+// Birthday helpers — birthdays are stored/transported as plain 'YYYY-MM-DD' strings
+export function fmtBirthday(value, { withYear = true } = {}) {
+  if (!value) return null
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value))
+  if (!m) return null
+  const d = new Date(Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3])))
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', ...(withYear ? { year: 'numeric' } : {}), timeZone: 'UTC' })
+}
+
+// Whole years old on the next/most recent birthday boundary
+export function birthdayAge(value) {
+  if (!value) return null
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value))
+  if (!m) return null
+  const [y, mo, d] = [Number(m[1]), Number(m[2]), Number(m[3])]
+  const now = new Date()
+  let age = now.getFullYear() - y
+  const beforeBirthday = now.getMonth() + 1 < mo || (now.getMonth() + 1 === mo && now.getDate() < d)
+  if (beforeBirthday) age -= 1
+  return age >= 0 ? age : null
+}
+
+// Days until the next occurrence of the birthday (0 = today)
+export function daysUntilBirthday(value) {
+  if (!value) return null
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(value))
+  if (!m) return null
+  const mo = Number(m[2]), d = Number(m[3])
+  const now = new Date()
+  const today = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate())
+  let next = Date.UTC(now.getFullYear(), mo - 1, d)
+  if (next < today) next = Date.UTC(now.getFullYear() + 1, mo - 1, d)
+  return Math.round((next - today) / 86400000)
+}
+
 // Debounce utility for search and filter inputs
 export function useDebounce(value, delay = 200) {
   const [debouncedValue, setDebouncedValue] = useState(value)
