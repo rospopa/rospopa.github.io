@@ -855,10 +855,13 @@ export default function ContactsPage() {
     [contacts, cq]
   )
 
-  const roleFilteredContacts = useMemo(() =>
-    filterType ? filteredContacts.filter(c => String(c.contact_type || '').toLowerCase() === filterType) : filteredContacts,
-    [filteredContacts, filterType]
-  )
+  const roleFilteredContacts = useMemo(() => {
+    if (!filterType) return filteredContacts
+    if (filterType === 'none') {
+      return filteredContacts.filter(c => !CONTACT_TYPE_OPTIONS.some(o => o.value === String(c.contact_type || '').toLowerCase()))
+    }
+    return filteredContacts.filter(c => String(c.contact_type || '').toLowerCase() === filterType)
+  }, [filteredContacts, filterType])
 
   function toggleListSort(col) {
     setListSort(prev => prev.col === col ? { col, dir: prev.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'asc' })
@@ -933,15 +936,14 @@ export default function ContactsPage() {
               <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={() => setSearch('')}>✕</button>
             )}
           </div>
-          {/* Type filter (list mode) */}
-          {view === 'list' && (
-            <select value={filterType} onChange={e => setFilterType(e.target.value)} className="select select-bordered select-sm">
-              <option value="">All Types</option>
-              {CONTACT_TYPE_OPTIONS.map(opt => (
-                <option key={opt.value} value={opt.value}>{opt.label}</option>
-              ))}
-            </select>
-          )}
+          {/* Type filter */}
+          <select value={filterType} onChange={e => setFilterType(e.target.value)} className="select select-bordered select-sm">
+            <option value="">All Types</option>
+            {CONTACT_TYPE_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+            <option value="none">No Type</option>
+          </select>
           <BulkImportButton onImported={refreshContacts} />
           {/* View toggles */}
           <div className="flex gap-1">
@@ -1048,10 +1050,10 @@ export default function ContactsPage() {
         const typeGroups = CONTACT_TYPE_OPTIONS.map(({ value, label }) => ({
           label,
           value,
-          items: filteredContacts.filter(c => String(c.contact_type || '').toLowerCase() === value),
+          items: roleFilteredContacts.filter(c => String(c.contact_type || '').toLowerCase() === value),
           badgeCls: getTypeBadgeClass(value),
         }))
-        const otherItems = filteredContacts.filter(c => !CONTACT_TYPE_OPTIONS.some(option => option.value === String(c.contact_type || '').toLowerCase()))
+        const otherItems = roleFilteredContacts.filter(c => !CONTACT_TYPE_OPTIONS.some(option => option.value === String(c.contact_type || '').toLowerCase()))
         if (otherItems.length) {
           typeGroups.push({ label: 'No Type', value: 'other', items: otherItems, badgeCls: 'badge-ghost' })
         }
@@ -1118,11 +1120,11 @@ export default function ContactsPage() {
           <div className="w-72 flex-shrink-0 border-r border-base-200 flex flex-col bg-base-100 overflow-hidden">
             <div className="px-3 py-2 border-b border-base-200 bg-base-200/40">
               <span className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
-                {filteredContacts.length}{filteredContacts.length !== contacts.length ? `/${contacts.length}` : ''} Contacts
+                {roleFilteredContacts.length}{roleFilteredContacts.length !== contacts.length ? `/${contacts.length}` : ''} Contacts
               </span>
             </div>
             <div className="flex-1 overflow-y-auto">
-              {filteredContacts.map(c => {
+              {roleFilteredContacts.map(c => {
                 const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
                 const isActive = splitDetailId === c.id
                 const isOnline = onlineStatus.online.includes(c.id)
