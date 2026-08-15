@@ -1,11 +1,15 @@
+require('dotenv').config();
+
 const fs = require('fs');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const sqlite3 = require('sqlite3').verbose();
+const { Pool } = require('pg');
 const XLSX = require('xlsx');
 
 const DEFAULT_PASSWORD = 'ContactImport2026!';
-const DB_PATH = path.join(__dirname, '..', 'users.db');
+const DATABASE_URL = process.env.DATABASE_URL;
+const DB_PATH = process.env.DB_PATH || path.join(__dirname, '..', 'users.db');
 const DEFAULT_XLSX_PATH = path.join(process.env.USERPROFILE || process.env.HOME || '', '.copilot', 'workspaces', '530f8536-ccb2-46e7-a70c-e85900d93f49', 'attachments', '7b5d2e00-bbea-4c1f-9499-100184077592-Master.xlsx');
 const workbookPath = process.argv[2] || DEFAULT_XLSX_PATH;
 
@@ -100,11 +104,83 @@ function createSyntheticEmail(firstName, lastName, usedSet, index) {
   return candidate.toLowerCase();
 }
 
-function runImport() {
-  ensureFileExists(workbookPath);
-  const passwordHash = bcrypt.hashSync(DEFAULT_PASSWORD, 10);
-  const contacts = readContacts(workbookPath);
+async function ensurePostgresSchema(pool) {
+  await pool.query(`CREATE TABLE IF NOT EXISTS users (
+    id SERIAL PRIMARY KEY,
+    email TEXT UNIQUE NOT NULL,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL DEFAULT 'user',
+    first_name TEXT,
+    last_name TEXT,
+    organization TEXT,
+    phone_number TEXT,
+    buy_box TEXT,
+    birthday DATE,
+    profile_photo TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_login TIMESTAMP,
+    login_count INTEGER NOT NULL DEFAULT 0
+  )`);
 
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS profile_photo TEXT`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TIMESTAMP`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS login_count INTEGER NOT NULL DEFAULT 0`);
+  await pool.query(`ALTER TABLE users ADD COLUMN IF NOT EXISTS birthday DATE`);
+}
+
+async function runPostgresImport(contacts, passwordHash) {
+  if (!DATABASE_URL) {
+    throw new Error('DATABASE_URL is not set. Postgres import is unavailable.');
+  }
+
+  const pool = new Pool({
+    connectionString: DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+  });
+
+  try {
+    await ensurePostgresSchema(pool);
+    let inserted = 0;
+    for (const contact of contacts) {
+      await pool.query(
+        `INSERT INTO users (
+          email, password, role, first_name, last_name, organization, phone_number, buy_box, birthday,
+          profile_photo, created_at, updated_at, last_login, login_count
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, NULL, NOW(), NOW(), NULL, 0)
+        ON CONFLICT (email) DO UPDATE SET
+          password = EXCLUDED.password,
+          role = EXCLUDED.role,
+          first_name = EXCLUDED.first_name,
+          last_name = EXCLUDED.last_name,
+          organization = EXCLUDED.organization,
+          phone_number = EXCLUDED.phone_number,
+          buy_box = EXCLUDED.buy_box,
+          birthday = EXCLUDED.birthday,
+          updated_at = NOW()`,
+        [
+          contact.email,
+          passwordHash,
+          contact.role,
+          contact.first_name,
+          contact.last_name,
+          contact.organization,
+          contact.phone_number,
+          contact.buy_box,
+          contact.birthday
+        ]
+      );
+      inserted += 1;
+    }
+    console.log(`Imported ${inserted} contacts into Postgres database`);
+  } finally {
+    await pool.end();
+  }
+}
+
+function runSqliteImport(contacts, passwordHash) {
   const db = new sqlite3.Database(DB_PATH);
   db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS users (
@@ -196,4 +272,20 @@ function runImport() {
   });
 }
 
-runImport();
+async function runImport() {
+  ensureFileExists(workbookPath);
+  const passwordHash = bcrypt.hashSync(DEFAULT_PASSWORD, 10);
+  const contacts = readContacts(workbookPath);
+
+  if (DATABASE_URL) {
+    await runPostgresImport(contacts, passwordHash);
+    return;
+  }
+
+  runSqliteImport(contacts, passwordHash);
+}
+
+runImport().catch((error) => {
+  console.error('Contact import failed:', error.message);
+  process.exit(1);
+});
