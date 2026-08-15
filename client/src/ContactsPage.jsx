@@ -1,4 +1,5 @@
 import { lazy, Suspense, useState, useEffect, useRef, useMemo } from 'react'
+import * as XLSX from 'xlsx'
 import { apiFetch, downloadAttachment, fmtLastLogin, fmtLastNote, fmtBirthday, birthdayAge, daysUntilBirthday, SaveButton, Avatar, useSharedOnlineStatus, useDebounce, prefetchPropertyDetail, getPrefetchedProperty } from './shared'
 
 const CONTACT_ROLE_OPTIONS = [
@@ -239,6 +240,119 @@ function ContactNotesDrawer({ contact, onClose, onRefreshContacts }) {
         </form>
       </div>
     </div>
+  )
+}
+
+function normalizeBulkImportRow(row) {
+  if (!row || typeof row !== 'object') return null
+
+  const normalizeKey = (key) => String(key ?? '').trim().toLowerCase().replace(/[^a-z0-9]/g, '')
+  const keyMap = Object.fromEntries(Object.entries(row).map(([key, value]) => [normalizeKey(key), value]))
+
+  const getCell = (...candidates) => {
+    for (const candidate of candidates) {
+      const normalized = normalizeKey(candidate)
+      if (keyMap[normalized] !== undefined && keyMap[normalized] !== null && String(keyMap[normalized]).trim() !== '') {
+        return String(keyMap[normalized]).trim()
+      }
+    }
+    return ''
+  }
+
+  const firstName = getCell('first name', 'firstname', 'first_name', 'first')
+  const lastName = getCell('last name', 'lastname', 'last_name', 'last')
+  const email = getCell('email', 'email address', 'emailaddress', 'e mail')
+  const phone = getCell('phone', 'phone number', 'phonenumber', 'mobile', 'mobile phone')
+  const birthdayRaw = getCell('birthday', 'happy birthday', 'birthdate', 'date of birth', 'dob')
+
+  if (!email) return null
+
+  const emailValue = email.toLowerCase()
+  const first = firstName || ''
+  const last = lastName || ''
+  const phoneValue = phone ? phone.replace(/[^\d+]/g, '').replace(/\+(?=\d)/, '+').replace(/^\+?1(?=\d{10}$)/, '+1') : ''
+
+  let birthdayValue = ''
+  if (birthdayRaw) {
+    const asNum = Number(birthdayRaw)
+    if (!Number.isNaN(asNum) && asNum > 0) {
+      const date = XLSX.SSF.parse_date_code(asNum)
+      if (date) {
+        const yyyy = String(date.y)
+        const mm = String(date.m).padStart(2, '0')
+        const dd = String(date.d).padStart(2, '0')
+        birthdayValue = `${yyyy}-${mm}-${dd}`
+      }
+    }
+    if (!birthdayValue) {
+      const parsed = new Date(birthdayRaw)
+      if (!Number.isNaN(parsed.getTime())) {
+        birthdayValue = parsed.toISOString().slice(0, 10)
+      }
+    }
+  }
+
+  return {
+    first_name: first || null,
+    last_name: last || null,
+    email: emailValue,
+    phone_number: phoneValue || null,
+    birthday: birthdayValue || null,
+  }
+}
+
+function BulkImportButton({ onImported }) {
+  const fileInputRef = useRef(null)
+  const [importing, setImporting] = useState(false)
+  const [status, setStatus] = useState({ type: '', message: '' })
+
+  const handleFile = async (event) => {
+    const file = event.target.files && event.target.files[0]
+    if (!file) return
+
+    setImporting(true)
+    setStatus({ type: '', message: '' })
+
+    try {
+      const arrayBuffer = await file.arrayBuffer()
+      const workbook = XLSX.read(arrayBuffer, { type: 'array' })
+      const sheet = workbook.Sheets[workbook.SheetNames[0]]
+      const rows = XLSX.utils.sheet_to_json(sheet, { defval: '', raw: false })
+      const contacts = rows.map(normalizeBulkImportRow).filter(Boolean)
+
+      if (!contacts.length) {
+        throw new Error('No valid contacts were found in that file. Use columns like First Name, Last Name, Phone Number, Email, Birthday.')
+      }
+
+      const response = await apiFetch('/api/contacts/bulk-import', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contacts })
+      })
+
+      const importedCount = response?.imported ?? contacts.length
+      setStatus({ type: 'success', message: `Imported ${importedCount} contact${importedCount === 1 ? '' : 's'}.` })
+      if (onImported) onImported()
+    } catch (error) {
+      setStatus({ type: 'error', message: error.message || 'Bulk import failed.' })
+    } finally {
+      setImporting(false)
+      event.target.value = ''
+    }
+  }
+
+  return (
+    <>
+      <button type="button" className="btn btn-sm btn-primary" onClick={() => fileInputRef.current?.click()} disabled={importing}>
+        {importing ? 'Importing…' : 'Bulk Import'}
+      </button>
+      <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFile} />
+      {status.message && (
+        <div className={`text-xs ${status.type === 'error' ? 'text-error' : 'text-success'}`}>
+          {status.message}
+        </div>
+      )}
+    </>
   )
 }
 
@@ -733,6 +847,7 @@ export default function ContactsPage() {
               ))}
             </select>
           )}
+          <BulkImportButton onImported={refreshContacts} />
           {/* View toggles */}
           <div className="flex gap-1">
             {[

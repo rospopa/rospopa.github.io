@@ -25,6 +25,7 @@ const GOOGLE_AI_FREE_TIER_LABEL = 'Configured free-tier cap';
 const PROVIDER_USAGE_RESET_START = new Date('2026-08-10T00:00:00.000Z');
 const TRADINGVIEW_WEBHOOK_SECRET = process.env.TRADINGVIEW_WEBHOOK_SECRET || '';
 const VALID_USER_ROLES = ['admin', 'user', 'investor', 'colleague', 'family', 'partner'];
+const DEFAULT_BULK_IMPORT_PASSWORD = 'ContactImport2026!';
 const MARKET_SYMBOL_SUGGESTIONS = [
   { symbol: 'AAPL', exchange: 'NASDAQ', display_name: 'Apple Inc.', type: 'stock' },
   { symbol: 'MSFT', exchange: 'NASDAQ', display_name: 'Microsoft Corporation', type: 'stock' },
@@ -1419,6 +1420,97 @@ app.get('/api/users', async (req, res) => {
     res.json({ users: listResult.rows, total: countResult.rows[0].total });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
+  }
+});
+
+app.post('/api/contacts/bulk-import', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+
+  const payload = Array.isArray(req.body) ? req.body : (req.body && Array.isArray(req.body.contacts) ? req.body.contacts : []);
+  if (!payload.length) return res.status(400).json({ error: 'No contacts provided' });
+
+  const defaultPasswordHash = await bcrypt.hash(DEFAULT_BULK_IMPORT_PASSWORD, 10);
+  const normalized = [];
+  const seenEmails = new Set();
+
+  for (const row of payload) {
+    if (!row || typeof row !== 'object') continue;
+
+    const pickValue = (...keys) => {
+      for (const key of keys) {
+        if (key === undefined || key === null) continue;
+        const value = row[key] ?? row[String(key).toLowerCase()] ?? row[String(key).toUpperCase()];
+        if (value !== undefined && value !== null && String(value).trim() !== '') return String(value).trim();
+      }
+      return '';
+    };
+
+    const first_name = pickValue('First Name', 'first_name', 'firstName', 'First', 'first');
+    const last_name = pickValue('Last Name', 'last_name', 'lastName', 'Last', 'last');
+    const rawEmail = pickValue('Email', 'Email Address', 'email', 'EmailAddress', 'email_address');
+    const rawPhone = pickValue('Phone', 'Phone Number', 'phone', 'phone_number', 'phoneNumber');
+    const rawBirthday = pickValue('Birthday', 'Happy Birthday', 'birthday', 'birthdate', 'Birthdate');
+
+    if (!rawEmail) continue;
+    const email = sanitizeEmail(rawEmail);
+    if (!isValidEmail(email)) continue;
+    if (seenEmails.has(email)) continue;
+    seenEmails.add(email);
+
+    const birthday = normalizeBirthday(rawBirthday);
+    if (birthday === undefined) {
+      return res.status(400).json({ error: `Invalid birthday for ${email}` });
+    }
+
+    const phone_number = rawPhone ? sanitizePhone(rawPhone) : null;
+    if (rawPhone && !isPlausiblePhone(phone_number)) {
+      return res.status(400).json({ error: `Invalid phone number for ${email}` });
+    }
+
+    normalized.push({
+      email,
+      password: defaultPasswordHash,
+      role: 'user',
+      first_name: first_name || null,
+      last_name: last_name || null,
+      organization: null,
+      phone_number: phone_number || null,
+      buy_box: null,
+      birthday,
+      profile_photo: null
+    });
+  }
+
+  if (!normalized.length) {
+    return res.status(400).json({ error: 'No valid contacts found in the file' });
+  }
+
+  try {
+    let imported = 0;
+    for (const contact of normalized) {
+      await pool.query(
+        `INSERT INTO users (email, password, role, first_name, last_name, organization, phone_number, buy_box, birthday, profile_photo, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
+         ON CONFLICT (email) DO UPDATE SET
+           password = COALESCE(users.password, EXCLUDED.password),
+           role = COALESCE(users.role, EXCLUDED.role),
+           first_name = EXCLUDED.first_name,
+           last_name = EXCLUDED.last_name,
+           organization = COALESCE(EXCLUDED.organization, users.organization),
+           phone_number = EXCLUDED.phone_number,
+           buy_box = COALESCE(EXCLUDED.buy_box, users.buy_box),
+           birthday = EXCLUDED.birthday,
+           profile_photo = COALESCE(EXCLUDED.profile_photo, users.profile_photo),
+           updated_at = NOW()`,
+        [contact.email, contact.password, contact.role, contact.first_name, contact.last_name, contact.organization, contact.phone_number, contact.buy_box, contact.birthday, contact.profile_photo]
+      );
+      imported += 1;
+    }
+    await logAudit(req.session.user.id, req.session.user.email, 'bulk_import_contacts', { imported_count: imported }, null, null, clientIp(req));
+    res.json({ ok: true, imported: imported, total: normalized.length });
+  } catch (e) {
+    console.error('bulk-import error:', e.message);
+    res.status(500).json({ error: 'server error' });
   }
 });
 
