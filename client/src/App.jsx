@@ -2380,7 +2380,7 @@ export default function App() {
       )}
 
       {/* Main content */}
-      <main className="container mx-auto px-4 md:px-6 py-6 md:py-10 max-w-6xl">
+      <main className={`container mx-auto px-4 md:px-6 py-6 md:py-10 ${page === 'contacts' ? 'max-w-[1700px]' : 'max-w-6xl'}`}>
         <ErrorBoundary key={page}>
 
         {page === 'dashboard' && (

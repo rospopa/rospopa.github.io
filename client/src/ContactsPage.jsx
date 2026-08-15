@@ -982,21 +982,21 @@ export default function ContactsPage() {
 
       {!loading && view === 'list' && (
         <div className="rounded-box border border-base-200 overflow-x-auto">
-          <table className="table table-zebra table-sm w-full">
+          <table className="table table-zebra table-sm w-full table-fixed">
             <thead>
               <tr className="text-xs uppercase tracking-wider text-base-content/50 select-none">
-                <th className="w-10">Photo</th>
+                <th className="w-12">Photo</th>
                 {[
                   { label: 'Name', col: 'name' },
                   { label: 'Email', col: 'email', cls: 'hidden md:table-cell' },
-                  { label: 'Type', col: 'contact_type', cls: 'w-16' },
+                  { label: 'Type', col: 'contact_type', cls: 'w-24' },
                   { label: 'Organization', col: 'organization', cls: 'hidden lg:table-cell' },
-                  { label: 'Phone', col: 'phone_number', cls: 'hidden sm:table-cell' },
-                  { label: 'Birthday', col: 'birthday', cls: 'hidden xl:table-cell' },
+                  { label: 'Phone', col: 'phone_number', cls: 'hidden sm:table-cell w-[130px]' },
+                  { label: 'Birthday', col: 'birthday', cls: 'hidden xl:table-cell w-[110px]' },
                   { label: 'Buy Box', col: 'buy_box', cls: 'hidden 2xl:table-cell' },
-                  { label: 'Notes', col: 'note_count', cls: 'text-center w-12' },
-                  { label: 'Last Login', col: 'last_login', cls: 'hidden lg:table-cell w-20' },
-                  { label: 'Last Note', col: 'last_note_at', cls: 'hidden xl:table-cell text-center w-16' },
+                  { label: 'Notes', col: 'note_count', cls: 'text-center w-14' },
+                  { label: 'Last Login', col: 'last_login', cls: 'hidden lg:table-cell w-24' },
+                  { label: 'Last Note', col: 'last_note_at', cls: 'hidden xl:table-cell text-center w-20' },
                 ].map(({ label, col, cls = '' }) => (
                   <th key={col} className={`cursor-pointer hover:text-base-content whitespace-nowrap ${cls}`} onClick={() => toggleListSort(col)}>
                     {label}<ListSortIcon col={col} />
@@ -1017,26 +1017,26 @@ export default function ContactsPage() {
                         <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} />
                       </div>
                     </td>
-                    <td className="max-w-[150px]">
+                    <td>
                       <div className="font-medium truncate">{fullName}</div>
                       <div className="md:hidden mt-0.5 truncate"><EmailLink email={c.email} /></div>
                     </td>
-                    <td className="hidden md:table-cell text-sm max-w-[190px]"><div className="truncate"><EmailLink email={c.email} /></div></td>
+                    <td className="hidden md:table-cell text-sm"><div className="truncate"><EmailLink email={c.email} /></div></td>
                     <td>{c.contact_type ? <span className={`badge badge-sm ${getTypeBadgeClass(c.contact_type)}`}>{typeLabel(c.contact_type)}</span> : <span className="text-base-content/30">—</span>}</td>
-                    <td className="hidden lg:table-cell text-sm max-w-[130px]"><div className="truncate">{c.organization || <span className="text-base-content/30">—</span>}</div></td>
-                    <td className="hidden sm:table-cell text-sm whitespace-nowrap"><PhoneLink phone={c.phone_number} /></td>
-                    <td className="hidden xl:table-cell text-sm whitespace-nowrap"><BirthdayText birthday={c.birthday} /></td>
-                    <td className="hidden 2xl:table-cell text-sm max-w-[180px]">
+                    <td className="hidden lg:table-cell text-sm"><div className="truncate">{c.organization || <span className="text-base-content/30">—</span>}</div></td>
+                    <td className="hidden sm:table-cell text-sm"><div className="truncate"><PhoneLink phone={c.phone_number} /></div></td>
+                    <td className="hidden xl:table-cell text-sm"><div className="truncate"><BirthdayText birthday={c.birthday} /></div></td>
+                    <td className="hidden 2xl:table-cell text-sm">
                       <span className="line-clamp-2 text-base-content/60">{c.buy_box || <span className="text-base-content/30">—</span>}</span>
                     </td>
                     <td className="text-center"><span className="badge badge-ghost badge-sm">{c.note_count}</span></td>
-                    <td className="hidden lg:table-cell text-xs whitespace-nowrap">
-                      <span className={isOnline ? 'text-green-600 font-medium' : 'text-base-content/50'}>
+                    <td className="hidden lg:table-cell text-xs">
+                      <div className={`truncate ${isOnline ? 'text-green-600 font-medium' : 'text-base-content/50'}`}>
                         {isOnline ? '● Online' : fmtLastLogin(lastLogin)}
-                      </span>
+                      </div>
                     </td>
-                    <td className="hidden xl:table-cell text-center text-xs text-base-content/50 whitespace-nowrap">
-                      {fmtLastNote(c.last_note_at) || <span className="text-base-content/25">—</span>}
+                    <td className="hidden xl:table-cell text-center text-xs text-base-content/50">
+                      <div className="truncate">{fmtLastNote(c.last_note_at) || <span className="text-base-content/25">—</span>}</div>
                     </td>
                   </tr>
                 )
