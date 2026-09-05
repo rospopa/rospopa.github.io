@@ -1108,325 +1108,6 @@ function TestimonialsSection() {
   )
 }
 
-function MarketsPage() {
-  const [symbols, setSymbols] = useState([])
-  const [alerts, setAlerts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [alertsLoading, setAlertsLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
-  const [error, setError] = useState('')
-  const [activeSymbolId, setActiveSymbolId] = useState(null)
-  const [query, setQuery] = useState('')
-  const [selectedSuggestion, setSelectedSuggestion] = useState(null)
-  const [suggestions, setSuggestions] = useState([])
-  const [suggestionsLoading, setSuggestionsLoading] = useState(false)
-  const [suggestionsOpen, setSuggestionsOpen] = useState(false)
-
-  const activeSymbol = useMemo(() => {
-    if (!symbols.length) return null
-    return symbols.find(item => item.id === activeSymbolId) || symbols[0]
-  }, [symbols, activeSymbolId])
-
-  const loadSymbols = useCallback(async () => {
-    setLoading(true)
-    setError('')
-    try {
-      const data = await apiFetch('/api/markets/symbols')
-      const nextSymbols = data.symbols || []
-      setSymbols(nextSymbols)
-      setActiveSymbolId(current => current ?? nextSymbols[0]?.id ?? null)
-    } catch (e) {
-      setError(e.message || 'Failed to load market symbols')
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    loadSymbols()
-  }, [loadSymbols])
-
-  const loadAlerts = useCallback(async () => {
-    setAlertsLoading(true)
-    try {
-      const data = await apiFetch('/api/markets/alerts')
-      setAlerts(data.alerts || [])
-    } catch (e) {
-      setError(e.message || 'Failed to load alert history')
-    } finally {
-      setAlertsLoading(false)
-    }
-  }, [])
-
-  useEffect(() => {
-    loadAlerts()
-  }, [loadAlerts])
-
-  useEffect(() => {
-    const trimmed = query.trim()
-    if (!trimmed) {
-      setSuggestions([])
-      setSuggestionsLoading(false)
-      return
-    }
-
-    const controller = new AbortController()
-    const handle = window.setTimeout(async () => {
-      setSuggestionsLoading(true)
-      try {
-        const data = await apiFetch(`/api/markets/symbol-search?q=${encodeURIComponent(trimmed)}`)
-        const nextSuggestions = Array.isArray(data.suggestions) ? data.suggestions.map((item, index) => ({
-          id: `${item.symbol || trimmed}-${item.exchange || 'exchange'}-${index}`,
-          symbol: item.symbol || '',
-          exchange: item.exchange || '',
-          displayName: item.display_name || item.symbol || '',
-          type: item.type || '',
-          fullSymbol: item.fullSymbol || (item.exchange ? `${item.exchange}:${item.symbol}` : (item.symbol || ''))
-        })) : []
-        setSuggestions(nextSuggestions)
-      } catch (e) {
-        if (e.name !== 'AbortError') {
-          setSuggestions([])
-          setError(e.message || 'Symbol suggestions are currently unavailable')
-        }
-      } finally {
-        setSuggestionsLoading(false)
-      }
-    }, 250)
-
-    return () => {
-      controller.abort()
-      window.clearTimeout(handle)
-    }
-  }, [query])
-
-  async function saveSymbol(e) {
-    e.preventDefault()
-    setError('')
-    if (!selectedSuggestion?.symbol) {
-      setError('Select a TradingView symbol suggestion first')
-      return
-    }
-
-    setSaving(true)
-    try {
-      const payload = {
-        symbol: selectedSuggestion.symbol,
-        display_name: selectedSuggestion.displayName,
-        exchange: selectedSuggestion.exchange,
-        note: selectedSuggestion.type || ''
-      }
-      await apiFetch('/api/markets/symbols', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      })
-      setQuery('')
-      setSelectedSuggestion(null)
-      setSuggestions([])
-      setSuggestionsOpen(false)
-      setActiveSymbolId(null)
-      await loadSymbols()
-    } catch (e) {
-      setError(e.message || 'Failed to save symbol')
-    } finally {
-      setSaving(false)
-    }
-  }
-
-  async function removeSymbol(id) {
-    setError('')
-    try {
-      await apiFetch(`/api/markets/symbols/${id}`, { method: 'DELETE' })
-      if (activeSymbolId === id) {
-        setActiveSymbolId(null)
-      }
-      await loadSymbols()
-    } catch (e) {
-      setError(e.message || 'Failed to delete symbol')
-    }
-  }
-
-  function startNewSymbol() {
-    setActiveSymbolId(null)
-    setQuery('')
-    setSelectedSuggestion(null)
-    setSuggestions([])
-    setSuggestionsOpen(false)
-  }
-
-  const chartSymbol = activeSymbol?.exchange
-    ? `${activeSymbol.exchange}:${activeSymbol.symbol}`
-    : activeSymbol?.symbol || 'NASDAQ:AAPL'
-
-  return (
-    <div className="space-y-6">
-      <div className="space-y-2">
-        <h2 className="text-2xl font-bold">Markets</h2>
-        <p className="text-sm text-base-content/60 max-w-3xl">
-          Save ticker symbols and review live TradingView charts from one admin workspace.
-        </p>
-      </div>
-
-      <div className="grid gap-6 lg:grid-cols-[360px,minmax(0,1fr)] lg:items-start">
-        <div className="space-y-4">
-          <div className="card bg-base-100 border border-base-300 shadow-sm">
-            <div className="card-body p-5 md:p-6 space-y-4">
-              <div className="flex items-center justify-between gap-3">
-                <h3 className="text-lg font-semibold">Add symbol</h3>
-                <button className="btn btn-ghost btn-sm" type="button" onClick={startNewSymbol}>
-                  New
-                </button>
-              </div>
-
-              <form onSubmit={saveSymbol} className="space-y-3">
-                <div className="space-y-2">
-                  <input
-                    type="text"
-                    placeholder="Search TradingView symbols"
-                    value={query}
-                    onChange={e => {
-                      setQuery(e.target.value)
-                      setSelectedSuggestion(null)
-                      setSuggestionsOpen(true)
-                      setError('')
-                    }}
-                    onFocus={() => setSuggestionsOpen(true)}
-                    className="input input-bordered w-full"
-                  />
-                  {selectedSuggestion && (
-                    <div className="rounded-xl border border-base-300 bg-base-200/30 px-3 py-2 text-sm">
-                      <div className="font-semibold">{selectedSuggestion.fullSymbol}</div>
-                      <div className="text-base-content/60">{selectedSuggestion.displayName}</div>
-                    </div>
-                  )}
-                  {suggestionsOpen && (suggestionsLoading || suggestions.length > 0) && (
-                    <div className="rounded-xl border border-base-300 bg-base-100 shadow-sm">
-                      {suggestionsLoading ? (
-                        <div className="px-3 py-2 text-sm text-base-content/60">Loading suggestions…</div>
-                      ) : (
-                        <div className="max-h-72 overflow-y-auto py-1">
-                          {suggestions.map(item => (
-                            <button
-                              key={item.id}
-                              type="button"
-                              className="flex w-full items-start justify-between gap-3 px-3 py-2 text-left hover:bg-base-200/60"
-                              onClick={() => {
-                                setSelectedSuggestion(item)
-                                setQuery(item.fullSymbol || item.symbol)
-                                setSuggestionsOpen(false)
-                              }}
-                            >
-                              <div className="min-w-0">
-                                <div className="font-semibold">{item.fullSymbol || item.symbol}</div>
-                                <div className="truncate text-sm text-base-content/60">{item.displayName}</div>
-                              </div>
-                              {item.type && <div className="badge badge-outline badge-sm">{item.type}</div>}
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-                <button className="btn btn-primary w-full" type="submit" disabled={saving}>
-                  {saving ? 'Saving…' : 'Save symbol'}
-                </button>
-              </form>
-
-              {error && (
-                <div className="rounded-xl border border-base-300 bg-base-200/40 px-4 py-3 text-sm text-error">
-                  {error}
-                </div>
-              )}
-            </div>
-          </div>
-
-          <div className="card bg-base-100 border border-base-300 shadow-sm">
-            <div className="card-body p-5 md:p-6 space-y-4">
-              <h3 className="text-lg font-semibold">Saved symbols</h3>
-              {loading ? (
-                <div className="text-sm text-base-content/60">Loading symbols…</div>
-              ) : symbols.length ? (
-                <div className="space-y-2">
-                  {symbols.map(item => (
-                    <div key={item.id} className="rounded-xl border border-base-300 p-3">
-                      <div className="flex items-start justify-between gap-3">
-                        <button
-                          className="min-w-0 text-left"
-                          type="button"
-                          onClick={() => setActiveSymbolId(item.id)}
-                        >
-                          <div className="font-semibold">{item.exchange ? `${item.exchange}:${item.symbol}` : item.symbol}</div>
-                          <div className="text-sm text-base-content/60 truncate">{item.display_name || 'Saved symbol'}</div>
-                          {item.note && <div className="mt-1 text-xs text-base-content/50 line-clamp-2">{item.note}</div>}
-                        </button>
-                        <div className="flex gap-2">
-                          <button className="btn btn-ghost btn-xs text-error" type="button" onClick={() => removeSymbol(item.id)}>Delete</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-sm text-base-content/60">No saved symbols yet.</div>
-              )}
-            </div>
-          </div>
-
-          <div className="card bg-base-100 border border-base-300 shadow-sm">
-            <div className="card-body p-5 md:p-6 space-y-4">
-              <div className="space-y-1">
-                <h3 className="text-lg font-semibold">Webhook alerts</h3>
-                <p className="text-sm text-base-content/55">
-                  Recent TradingView webhook payloads stored by the backend.
-                </p>
-              </div>
-              {alertsLoading ? (
-                <div className="text-sm text-base-content/60">Loading alerts…</div>
-              ) : alerts.length ? (
-                <div className="space-y-2">
-                  {alerts.slice(0, 8).map(alert => (
-                    <div key={alert.id} className="rounded-xl border border-base-300 p-3 text-sm">
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <div className="font-semibold">
-                            {[alert.exchange, alert.symbol].filter(Boolean).join(':') || 'Webhook event'}
-                          </div>
-                          <div className="text-xs text-base-content/55">
-                            {[alert.alert_name, alert.direction, alert.timeframe].filter(Boolean).join(' · ') || 'Stored payload'}
-                          </div>
-                        </div>
-                        <div className="text-[11px] text-base-content/45">
-                          {alert.received_at ? new Date(alert.received_at).toLocaleString() : ''}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-sm text-base-content/60">No webhook alerts received yet.</div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        <div className="card bg-base-100 border border-base-300 shadow-sm">
-          <div className="card-body p-5 md:p-6 space-y-4">
-            <div className="space-y-1">
-              <h3 className="text-lg font-semibold">Chart</h3>
-              <p className="text-sm text-base-content/55">
-                Embedded TradingView widget for the currently selected symbol.
-              </p>
-            </div>
-            <TradingViewEmbed symbol={chartSymbol} />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
 function LookupPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
@@ -2010,7 +1691,7 @@ export default function App() {
   }, [currentUser, debouncedGlobalSearch])
 
   function navigateTo(p) {
-    if ((p === 'users' || p === 'audit' || p === 'contacts' || p === 'lookup' || p === 'markets') && currentUser?.role !== 'admin') return
+    if ((p === 'users' || p === 'audit' || p === 'contacts' || p === 'lookup') && currentUser?.role !== 'admin') return
     if (p === 'contacts') setContactsKey(k => k + 1) // reset ContactsPage state
     setPage(p); localStorage.setItem('rep_page', p)
   }
@@ -2051,7 +1732,7 @@ export default function App() {
         if (data.user) {
           setCurrentUser(data.user)
           const saved = localStorage.getItem('rep_page')
-          const adminPages = ['users', 'contacts', 'audit', 'lookup', 'markets']
+          const adminPages = ['users', 'contacts', 'audit', 'lookup']
           const validPages = ['dashboard', 'properties', 'profile', ...( data.user.role === 'admin' ? adminPages : [])]
           setPage(saved && validPages.includes(saved) ? saved : 'dashboard')
         }
@@ -2195,7 +1876,7 @@ export default function App() {
   const navLinks = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'properties', label: 'Properties' },
-    ...(currentUser.role === 'admin' ? [{ id: 'users', label: 'Users' }, { id: 'contacts', label: 'Contacts' }, { id: 'audit', label: 'Audit Logs' }, { id: 'lookup', label: 'Lookup' }, { id: 'markets', label: 'Markets' }] : []),
+    ...(currentUser.role === 'admin' ? [{ id: 'users', label: 'Users' }, { id: 'contacts', label: 'Contacts' }, { id: 'audit', label: 'Audit Logs' }, { id: 'lookup', label: 'Lookup' }] : []),
   ]
 
   const navBtn = (id, label) => (
@@ -2447,10 +2128,6 @@ export default function App() {
           <LookupPage />
         )}
 
-        {page === 'markets' && currentUser.role === 'admin' && (
-          <MarketsPage />
-        )}
-
         {page === 'profile' && (
           <ProfilePage currentUser={currentUser} onUpdate={u => setCurrentUser(u)} />
         )}
@@ -2462,3 +2139,6 @@ export default function App() {
     </div>
   )
 }
+
+
+

@@ -23,7 +23,6 @@ const GOOGLE_AI_MODEL = process.env.GOOGLE_AI_MODEL || 'gemini-2.5-flash';
 const GOOGLE_AI_FREE_TIER_LIMIT = 250;
 const GOOGLE_AI_FREE_TIER_LABEL = 'Configured free-tier cap';
 const PROVIDER_USAGE_RESET_START = new Date('2026-08-10T00:00:00.000Z');
-const TRADINGVIEW_WEBHOOK_SECRET = process.env.TRADINGVIEW_WEBHOOK_SECRET || '';
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
 const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
@@ -1518,143 +1517,6 @@ app.post('/api/contacts/bulk-import', async (req, res) => {
   } catch (e) {
     console.error('bulk-import error:', e.message);
     res.status(500).json({ error: 'server error' });
-  }
-});
-
-app.get('/api/markets/symbols', async (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  try {
-    const result = await pool.query(
-      `SELECT id, symbol, display_name, exchange, note, created_at, updated_at
-       FROM market_symbols
-       ORDER BY updated_at DESC, id DESC`
-    );
-    res.json({ symbols: (result.rows || []).map(normalizeMarketSymbolRow) });
-  } catch (e) {
-    res.status(500).json({ error: 'db error' });
-  }
-});
-
-app.get('/api/markets/symbol-search', async (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  const query = String(req.query.q || '').trim();
-  if (!query) return res.json({ suggestions: [] });
-  try {
-    const yahooSuggestions = await getYahooFinanceSymbolSuggestions(query);
-    if (yahooSuggestions.length) {
-      return res.json({ suggestions: yahooSuggestions, source: 'yahoo-finance' });
-    }
-  } catch {}
-  res.json({ suggestions: getMarketSymbolSuggestions(query), source: 'fallback' });
-});
-
-app.post('/api/markets/symbols', async (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  const symbol = String(req.body?.symbol || '').trim().toUpperCase();
-  const displayName = String(req.body?.display_name || '').trim();
-  const exchange = normalizeTradingViewExchange(req.body?.exchange || '');
-  const note = String(req.body?.note || '').trim();
-  if (!symbol) return res.status(400).json({ error: 'symbol required' });
-
-  try {
-    const result = await pool.query(
-      `INSERT INTO market_symbols (symbol, display_name, exchange, note, created_by)
-       VALUES ($1, $2, $3, $4, $5)
-       RETURNING id, symbol, display_name, exchange, note, created_at, updated_at`,
-      [symbol, displayName || null, exchange || null, note || null, req.session.user.id]
-    );
-    res.json({ symbol: normalizeMarketSymbolRow(result.rows[0]) });
-  } catch (e) {
-    if (e.code === '23505') return res.status(409).json({ error: 'symbol already saved' });
-    res.status(500).json({ error: 'db error' });
-  }
-});
-
-app.put('/api/markets/symbols/:id', async (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  const id = Number(req.params.id);
-  if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
-
-  const symbol = String(req.body?.symbol || '').trim().toUpperCase();
-  const displayName = String(req.body?.display_name || '').trim();
-  const exchange = normalizeTradingViewExchange(req.body?.exchange || '');
-  const note = String(req.body?.note || '').trim();
-  if (!symbol) return res.status(400).json({ error: 'symbol required' });
-
-  try {
-    const result = await pool.query(
-      `UPDATE market_symbols
-       SET symbol = $1,
-           display_name = $2,
-           exchange = $3,
-           note = $4,
-           updated_at = CURRENT_TIMESTAMP
-       WHERE id = $5
-       RETURNING id, symbol, display_name, exchange, note, created_at, updated_at`,
-      [symbol, displayName || null, exchange || null, note || null, id]
-    );
-    if (!result.rows.length) return res.status(404).json({ error: 'not found' });
-    res.json({ symbol: normalizeMarketSymbolRow(result.rows[0]) });
-  } catch (e) {
-    if (e.code === '23505') return res.status(409).json({ error: 'symbol already saved' });
-    res.status(500).json({ error: 'db error' });
-  }
-});
-
-app.delete('/api/markets/symbols/:id', async (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  const id = Number(req.params.id);
-  if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
-
-  try {
-    const result = await pool.query('DELETE FROM market_symbols WHERE id = $1', [id]);
-    if (!result.rowCount) return res.status(404).json({ error: 'not found' });
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ error: 'db error' });
-  }
-});
-
-app.get('/api/markets/alerts', async (req, res) => {
-  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
-  try {
-    const result = await pool.query(
-      `SELECT id, symbol, exchange, alert_name, timeframe, direction, payload, raw_body, received_at
-       FROM market_alert_events
-       ORDER BY received_at DESC, id DESC
-       LIMIT 100`
-    );
-    res.json({ alerts: result.rows || [] });
-  } catch (e) {
-    res.status(500).json({ error: 'db error' });
-  }
-});
-
-app.post('/api/markets/tradingview-webhook', async (req, res) => {
-  const providedSecret = String(req.headers['x-webhook-secret'] || req.query.secret || req.body?.secret || '').trim();
-  if (!TRADINGVIEW_WEBHOOK_SECRET) {
-    return res.status(503).json({ error: 'tradingview webhook is not configured' });
-  }
-  if (!providedSecret || providedSecret !== TRADINGVIEW_WEBHOOK_SECRET) {
-    return res.status(401).json({ error: 'invalid webhook secret' });
-  }
-
-  const payload = req.body && typeof req.body === 'object' ? req.body : {};
-  const symbol = String(payload.symbol || payload.ticker || '').trim().toUpperCase() || null;
-  const exchange = String(payload.exchange || '').trim().toUpperCase() || null;
-  const alertName = String(payload.alert_name || payload.name || payload.title || '').trim() || null;
-  const timeframe = String(payload.timeframe || payload.interval || '').trim() || null;
-  const direction = String(payload.direction || payload.side || payload.action || '').trim() || null;
-
-  try {
-    await pool.query(
-      `INSERT INTO market_alert_events (symbol, exchange, alert_name, timeframe, direction, payload, raw_body)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-      [symbol, exchange, alertName, timeframe, direction, JSON.stringify(payload), JSON.stringify(req.body || {})]
-    );
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ error: 'db error' });
   }
 });
 
@@ -3202,3 +3064,5 @@ app.use((err, req, res, next) => {
     process.exit(1);
   }
 })();
+
+
