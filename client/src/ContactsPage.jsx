@@ -541,7 +541,7 @@ function TypeSelector({ userId, contactType, isAdmin, onChanged }) {
   )
 }
 
-function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = false }) {
+function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = false, onDeleted }) {
   const [data, setData] = useState(null)
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -550,6 +550,9 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
   const [files, setFiles] = useState([])
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState('')
   const fileInputRef = useRef(null)
   const [viewProp, setViewProp] = useState(null)     // full property object for modal
   const [propModalOpen, setPropModalOpen] = useState(false)
@@ -616,6 +619,19 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
     } catch { setError('Failed to delete note') }
   }
 
+  const handleDeleteContact = async () => {
+    setDeleting(true); setDeleteError('')
+    try {
+      await apiFetch(`/api/users/${contactId}`, { method: 'DELETE' })
+      setConfirmDelete(false)
+      if (onDeleted) onDeleted()
+      else onBack()
+    } catch (e) {
+      setDeleteError(e.message || 'Failed to delete contact')
+    }
+    setDeleting(false)
+  }
+
   if (loading) return <div className="flex justify-center py-20 text-base-content/40">Loading…</div>
   if (!data) return <div className="text-center py-20 text-error">Contact not found</div>
 
@@ -663,6 +679,14 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
                 <span className={`w-2 h-2 rounded-full ${user.last_login ? 'bg-red-400' : 'bg-base-300'}`} />
                 <span>Last login: {fmtLastLogin(user.last_login)}</span>
               </div>
+              {isAdmin && (
+                <div className="pt-2">
+                  <button className="btn btn-xs btn-outline btn-error gap-1" onClick={() => { setDeleteError(''); setConfirmDelete(true) }}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Delete Contact
+                  </button>
+                </div>
+              )}
             </div>
           </div>
           <div className="mt-4 pt-4 border-t border-base-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -791,6 +815,26 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
           onSave={() => { setPropModalOpen(false); setViewProp(null) }}
         />
       </Suspense>
+
+      {/* Delete contact confirmation */}
+      {confirmDelete && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-sm">
+            <h3 className="font-bold text-lg">Delete Contact</h3>
+            <p className="py-3 text-sm">
+              Permanently delete <span className="font-semibold">{fullName}</span>? This removes the contact along with their notes and cannot be undone.
+            </p>
+            {deleteError && <div className="alert alert-error text-sm mb-2">{deleteError}</div>}
+            <div className="modal-action">
+              <button className="btn btn-ghost" onClick={() => setConfirmDelete(false)} disabled={deleting}>Cancel</button>
+              <button className="btn btn-error" onClick={handleDeleteContact} disabled={deleting}>
+                {deleting ? 'Deleting…' : 'Delete'}
+              </button>
+            </div>
+          </div>
+          <div className="modal-backdrop" onClick={() => !deleting && setConfirmDelete(false)} />
+        </div>
+      )}
     </div>
   )
 }
@@ -906,6 +950,7 @@ export default function ContactsPage() {
         contactId={detailId}
         onBack={closeDetail}
         isAdmin
+        onDeleted={() => { closeDetail(); refreshContacts() }}
       />
     )
   }
@@ -1167,6 +1212,7 @@ export default function ContactsPage() {
                   onBack={() => selectSplit(null)}
                   splitMode
                   isAdmin
+                  onDeleted={() => { selectSplit(null); refreshContacts() }}
                 />
               </div>
             ) : (
