@@ -10,6 +10,7 @@ const https = require('https');
 const { Resend } = require('resend');
 const { rateLimit } = require('express-rate-limit');
 const compression = require('compression');
+const { createCalendarModule } = require('./calendar');
 
 const PORT = process.env.PORT || 3000;
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -1073,6 +1074,22 @@ app.post('/api/sms/send', async (req, res) => {
 });
 
 /* ─── Contacts API ──────────────────────────────────────────────── */
+
+const calendar = createCalendarModule({
+  pool,
+  logAudit,
+  clientIp,
+  resend,
+  fromEmail: FROM_EMAIL,
+  twilio: {
+    configured: twilioConfigured,
+    authHeader: twilioAuthHeader,
+    accountSid: () => TWILIO_ACCOUNT_SID,
+    fromNumber: () => TWILIO_PHONE_NUMBER,
+    toE164,
+  },
+});
+calendar.registerRoutes(app);
 
 app.get('/api/contacts', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
@@ -2378,6 +2395,8 @@ app.use((err, req, res, next) => {
 (async () => {
   try {
     await initializeSchema();
+    await calendar.initSchema();
+    calendar.startScheduler();
     await initializeAdminUser();
     await initializeSessionMiddleware();
     app.listen(PORT, () => console.log(`Server listening on port ${PORT} [session: ${sessionStoreType}]`));

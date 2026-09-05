@@ -25,6 +25,7 @@ function getRoleBadgeClass(role) {
 const PropertyDetailModal = lazy(() => import('./PropertyDetailModal'))
 const ContactsPage = lazy(() => import('./ContactsPage'))
 const AuditLogs = lazy(() => import('./AuditLogs'))
+const CalendarPage = lazy(() => import('./CalendarPage'))
 
 export { ErrorBoundary } from './shared'
 
@@ -1186,7 +1187,7 @@ export default function App() {
   }, [currentUser, debouncedGlobalSearch])
 
   function navigateTo(p) {
-    if ((p === 'users' || p === 'audit' || p === 'contacts') && currentUser?.role !== 'admin') return
+    if ((p === 'users' || p === 'audit' || p === 'contacts' || p === 'calendar') && currentUser?.role !== 'admin') return
     if (p === 'contacts') setContactsKey(k => k + 1) // reset ContactsPage state
     setPage(p); localStorage.setItem('rep_page', p)
   }
@@ -1227,7 +1228,7 @@ export default function App() {
         if (data.user) {
           setCurrentUser(data.user)
           const saved = localStorage.getItem('rep_page')
-          const adminPages = ['users', 'contacts', 'audit']
+          const adminPages = ['users', 'contacts', 'audit', 'calendar']
           const validPages = ['dashboard', 'properties', 'profile', ...( data.user.role === 'admin' ? adminPages : [])]
           setPage(saved && validPages.includes(saved) ? saved : 'dashboard')
         }
@@ -1371,7 +1372,7 @@ export default function App() {
   const navLinks = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'properties', label: 'Properties' },
-    ...(currentUser.role === 'admin' ? [{ id: 'users', label: 'Users' }, { id: 'contacts', label: 'Contacts' }, { id: 'audit', label: 'Audit Logs' }] : []),
+    ...(currentUser.role === 'admin' ? [{ id: 'users', label: 'Users' }, { id: 'contacts', label: 'Contacts' }, { id: 'calendar', label: 'Calendar' }, { id: 'audit', label: 'Audit Logs' }] : []),
   ]
 
   const navBtn = (id, label) => (
@@ -1607,6 +1608,12 @@ export default function App() {
         {page === 'contacts' && currentUser.role === 'admin' && (
           <Suspense fallback={<div className="flex items-center justify-center h-full"><span className="loading loading-spinner loading-lg" /></div>}>
             <ContactsPage key={contactsKey} />
+          </Suspense>
+        )}
+
+        {page === 'calendar' && currentUser.role === 'admin' && (
+          <Suspense fallback={<div className="flex items-center justify-center h-full"><span className="loading loading-spinner loading-lg" /></div>}>
+            <CalendarPage />
           </Suspense>
         )}
 
