@@ -541,6 +541,90 @@ function TypeSelector({ userId, contactType, isAdmin, onChanged }) {
   )
 }
 
+function SmsModal({ contact, onClose }) {
+  const [config, setConfig] = useState(null)
+  const [from, setFrom] = useState('')
+  const [body, setBody] = useState('')
+  const [sending, setSending] = useState(false)
+  const [error, setError] = useState('')
+  const [sent, setSent] = useState(false)
+
+  useEffect(() => {
+    apiFetch('/api/sms/config')
+      .then(c => {
+        setConfig(c)
+        if (c.default_from) setFrom(c.default_from)
+        else if (c.numbers && c.numbers[0]) setFrom(c.numbers[0].phone_number)
+      })
+      .catch(() => setConfig({ configured: false, numbers: [] }))
+  }, [])
+
+  const send = async () => {
+    setSending(true); setError('')
+    try {
+      await apiFetch('/api/sms/send', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ to: contact.phone_number, from, body, contact_id: contact.id })
+      })
+      setSent(true)
+      setTimeout(onClose, 1200)
+    } catch (e) { setError(e.message || 'Failed to send SMS') }
+    setSending(false)
+  }
+
+  const name = [contact.first_name, contact.last_name].filter(Boolean).join(' ') || contact.email
+
+  return (
+    <div className="modal modal-open">
+      <div className="modal-box max-w-md">
+        <h3 className="font-bold text-lg">Send SMS</h3>
+        <p className="text-sm text-base-content/60 mt-1">To {name} · {contact.phone_number}</p>
+        {!config && <div className="py-6 text-center text-base-content/40">Loading…</div>}
+        {config && !config.configured && (
+          <div className="alert alert-warning text-sm mt-3">
+            SMS is not configured. Set <code>TWILIO_ACCOUNT_SID</code>, <code>TWILIO_AUTH_TOKEN</code>, and <code>TWILIO_PHONE_NUMBER</code> on the server.
+          </div>
+        )}
+        {config && config.configured && (
+          <div className="space-y-3 mt-3">
+            {config.numbers.length > 1 && (
+              <label className="form-control">
+                <span className="label-text text-xs mb-1">From</span>
+                <select className="select select-bordered select-sm w-full" value={from} onChange={e => setFrom(e.target.value)}>
+                  {config.numbers.map(n => (
+                    <option key={n.phone_number} value={n.phone_number}>
+                      {n.friendly_name && n.friendly_name !== n.phone_number ? `${n.friendly_name} (${n.phone_number})` : n.phone_number}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            )}
+            {config.numbers.length === 1 && (
+              <p className="text-xs text-base-content/50">From {config.numbers[0].phone_number}</p>
+            )}
+            <textarea
+              className="textarea textarea-bordered w-full text-sm" rows={4} maxLength={1600}
+              placeholder="Type your message…" value={body} onChange={e => setBody(e.target.value)} autoFocus
+            />
+            <div className="text-xs text-base-content/40 text-right">{body.length}/1600</div>
+            {error && <div className="alert alert-error text-sm">{error}</div>}
+            {sent && <div className="alert alert-success text-sm">Message sent!</div>}
+          </div>
+        )}
+        <div className="modal-action">
+          <button className="btn btn-ghost" onClick={onClose} disabled={sending}>Cancel</button>
+          {config && config.configured && (
+            <button className="btn btn-primary" onClick={send} disabled={sending || sent || !body.trim() || !from}>
+              {sending ? 'Sending…' : 'Send SMS'}
+            </button>
+          )}
+        </div>
+      </div>
+      <div className="modal-backdrop" onClick={() => !sending && onClose()} />
+    </div>
+  )
+}
+
 function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = false, onDeleted }) {
   const [data, setData] = useState(null)
   const [notes, setNotes] = useState([])
@@ -553,6 +637,7 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
   const [confirmDelete, setConfirmDelete] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
+  const [smsOpen, setSmsOpen] = useState(false)
   const fileInputRef = useRef(null)
   const [viewProp, setViewProp] = useState(null)     // full property object for modal
   const [propModalOpen, setPropModalOpen] = useState(false)
@@ -668,7 +753,17 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
                 />
               </div>
               <EmailLink email={user.email} />
-              {user.phone_number && <div className="text-sm"><PhoneLink phone={user.phone_number} /></div>}
+              {user.phone_number && (
+                <div className="text-sm flex items-center gap-2">
+                  <PhoneLink phone={user.phone_number} />
+                  {isAdmin && (
+                    <button className="btn btn-xs btn-outline gap-1" onClick={() => setSmsOpen(true)} title="Send SMS via Twilio">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                      SMS
+                    </button>
+                  )}
+                </div>
+              )}
               {user.organization && <div className="text-sm text-base-content/60">{user.organization}</div>}
               {user.birthday && <div className="text-sm text-base-content/60"><BirthdayText birthday={user.birthday} /></div>}
             </div>
@@ -815,6 +910,9 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
           onSave={() => { setPropModalOpen(false); setViewProp(null) }}
         />
       </Suspense>
+
+      {/* SMS modal */}
+      {smsOpen && <SmsModal contact={user} onClose={() => setSmsOpen(false)} />}
 
       {/* Delete contact confirmation */}
       {confirmDelete && (

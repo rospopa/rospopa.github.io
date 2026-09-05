@@ -24,6 +24,9 @@ const GOOGLE_AI_FREE_TIER_LIMIT = 250;
 const GOOGLE_AI_FREE_TIER_LABEL = 'Configured free-tier cap';
 const PROVIDER_USAGE_RESET_START = new Date('2026-08-10T00:00:00.000Z');
 const TRADINGVIEW_WEBHOOK_SECRET = process.env.TRADINGVIEW_WEBHOOK_SECRET || '';
+const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
+const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
+const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
 const VALID_USER_ROLES = ['admin', 'user'];
 const VALID_CONTACT_TYPES = ['investor', 'colleague', 'family', 'partner'];
 const DEFAULT_BULK_IMPORT_PASSWORD = 'ContactImport2026!';
@@ -1791,6 +1794,97 @@ app.delete('/api/users/:id', async (req, res) => {
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ error: 'db error' });
+  }
+});
+
+/* ─── SMS (Twilio) ──────────────────────────────────────────────── */
+
+function twilioConfigured() {
+  return Boolean(TWILIO_ACCOUNT_SID && TWILIO_AUTH_TOKEN);
+}
+
+function twilioAuthHeader() {
+  return 'Basic ' + Buffer.from(`${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN}`).toString('base64');
+}
+
+// Normalize a US-style phone number to E.164; returns null if not usable
+function toE164(phone) {
+  if (!phone) return null;
+  const raw = String(phone).trim();
+  if (/^\+\d{8,15}$/.test(raw)) return raw;
+  const digits = raw.replace(/\D/g, '');
+  if (digits.length === 10) return `+1${digits}`;
+  if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+  return null;
+}
+
+let twilioNumbersCache = { numbers: null, fetchedAt: 0 };
+
+app.get('/api/sms/config', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  if (!twilioConfigured()) return res.json({ configured: false, numbers: [] });
+  try {
+    if (!twilioNumbersCache.numbers || Date.now() - twilioNumbersCache.fetchedAt > 10 * 60 * 1000) {
+      const resp = await fetch(
+        `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/IncomingPhoneNumbers.json?PageSize=50`,
+        { headers: { Authorization: twilioAuthHeader() } }
+      );
+      if (!resp.ok) throw new Error(`twilio ${resp.status}`);
+      const data = await resp.json();
+      twilioNumbersCache = {
+        numbers: (data.incoming_phone_numbers || [])
+          .filter(n => n.capabilities && n.capabilities.sms)
+          .map(n => ({ phone_number: n.phone_number, friendly_name: n.friendly_name })),
+        fetchedAt: Date.now(),
+      };
+    }
+    let numbers = twilioNumbersCache.numbers;
+    if ((!numbers || numbers.length === 0) && TWILIO_PHONE_NUMBER) {
+      numbers = [{ phone_number: TWILIO_PHONE_NUMBER, friendly_name: TWILIO_PHONE_NUMBER }];
+    }
+    res.json({ configured: true, numbers, default_from: TWILIO_PHONE_NUMBER || (numbers[0] && numbers[0].phone_number) || null });
+  } catch (e) {
+    // Numbers list is a convenience; still allow sending with the configured default
+    const numbers = TWILIO_PHONE_NUMBER ? [{ phone_number: TWILIO_PHONE_NUMBER, friendly_name: TWILIO_PHONE_NUMBER }] : [];
+    res.json({ configured: true, numbers, default_from: TWILIO_PHONE_NUMBER || null });
+  }
+});
+
+app.post('/api/sms/send', async (req, res) => {
+  if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
+  if (!twilioConfigured()) return res.status(503).json({ error: 'SMS is not configured (set TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN)' });
+
+  const { to, body, from, contact_id } = req.body || {};
+  const toNumber = toE164(to);
+  if (!toNumber) return res.status(400).json({ error: 'invalid destination phone number' });
+  const message = String(body || '').trim();
+  if (!message) return res.status(400).json({ error: 'message body is required' });
+  if (message.length > 1600) return res.status(400).json({ error: 'message too long (max 1600 characters)' });
+  const fromNumber = toE164(from) || toE164(TWILIO_PHONE_NUMBER);
+  if (!fromNumber) return res.status(400).json({ error: 'no from number available (set TWILIO_PHONE_NUMBER or pass from)' });
+
+  try {
+    const params = new URLSearchParams({ To: toNumber, From: fromNumber, Body: message });
+    const resp = await fetch(
+      `https://api.twilio.com/2010-04-01/Accounts/${TWILIO_ACCOUNT_SID}/Messages.json`,
+      {
+        method: 'POST',
+        headers: { Authorization: twilioAuthHeader(), 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params.toString(),
+      }
+    );
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      return res.status(502).json({ error: data.message || `Twilio error (${resp.status})` });
+    }
+    await logAudit(
+      req.session.user.id, req.session.user.email, 'send_sms',
+      { to: toNumber, from: fromNumber, sid: data.sid, length: message.length },
+      Number(contact_id) || null, null, clientIp(req)
+    );
+    res.json({ ok: true, sid: data.sid, status: data.status });
+  } catch (e) {
+    res.status(500).json({ error: 'failed to send SMS' });
   }
 });
 
