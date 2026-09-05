@@ -8,6 +8,12 @@
  * ------------------------------------------------------------------ */
 
 const VALID_CHANNELS = ['call', 'email', 'sms'];
+
+// When set, these take precedence over anything stored in the database, so the
+// calendar can be wired up purely through deploy secrets.
+const ENV_ICS_URL = (process.env.GOOGLE_CALENDAR_ICS_URL || '').trim();
+const ENV_CALENDAR_ID = (process.env.GOOGLE_CALENDAR_ID || '').trim();
+const ENV_TIME_ZONE = (process.env.GOOGLE_CALENDAR_TIME_ZONE || '').trim();
 const ICS_CACHE_TTL_MS = 5 * 60 * 1000;
 const SCHEDULER_INTERVAL_MS = 60 * 1000;
 // A rule fires when the event is this close to starting (minus its lead time).
@@ -256,10 +262,28 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
   }
 
   async function getSettings() {
-    const result = await pool.query(
+    const stored = await getStoredSettings();
+    return {
+      ics_url: ENV_ICS_URL || stored.ics_url || null,
+      embed_calendar_id: ENV_CALENDAR_ID || stored.embed_calendar_id || null,
+      time_zone: ENV_TIME_ZONE || stored.time_zone || null,
+      updated_at: stored.updated_at || null,
+      source: ENV_ICS_URL ? 'env' : (stored.ics_url ? 'database' : null),
+    };
+  }
+
+  async function getStoredSettings() {
+    const empty = { ics_url: null, embed_calendar_id: null, time_zone: null, updated_at: null };
+    try {
+      const result = await pool.query(
       `SELECT ics_url, embed_calendar_id, time_zone, updated_at FROM calendar_settings WHERE id = 1`
-    );
-    return result.rows[0] || { ics_url: null, embed_calendar_id: null, time_zone: null };
+      );
+      return result.rows[0] || empty;
+    } catch (error) {
+      // Table may not exist yet on a cold boot; env-based config still works.
+      if (ENV_ICS_URL) return empty;
+      throw error;
+    }
   }
 
   async function fetchIcs(url, { force = false } = {}) {
@@ -451,6 +475,8 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
           embed_calendar_id: settings.embed_calendar_id || null,
           time_zone: settings.time_zone || null,
           updated_at: settings.updated_at || null,
+          source: settings.source,
+          env_managed: settings.source === 'env',
           channels: {
             sms: twilio.configured() && Boolean(twilio.fromNumber()),
             call: twilio.configured() && Boolean(twilio.fromNumber()),
@@ -464,10 +490,22 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
 
     app.put('/api/calendar/settings', async (req, res) => {
       if (!requireAdmin(req, res)) return;
+      if (ENV_ICS_URL) {
+        return res.status(409).json({ error: 'The calendar is configured through the GOOGLE_CALENDAR_ICS_URL environment variable. Change it there and redeploy.' });
+      }
       const { ics_url, embed_calendar_id, time_zone } = req.body || {};
       const url = typeof ics_url === 'string' ? ics_url.trim() : '';
+      const embedId = typeof embed_calendar_id === 'string' ? embed_calendar_id.trim() : '';
       if (url && !/^https?:\/\//i.test(url)) {
         return res.status(400).json({ error: 'iCal address must be an http(s) URL' });
+      }
+      if (!url && !embedId) {
+        const current = await getStoredSettings();
+        return res.status(400).json({
+          error: current.ics_url
+            ? 'Nothing to update - paste a new iCal address or calendar ID.'
+            : 'Paste the secret iCal address from Google Calendar to connect.',
+        });
       }
       try {
         if (url) await fetchIcs(url, { force: true });
@@ -496,6 +534,9 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
 
     app.delete('/api/calendar/settings', async (req, res) => {
       if (!requireAdmin(req, res)) return;
+      if (ENV_ICS_URL) {
+        return res.status(409).json({ error: 'The calendar is configured through the GOOGLE_CALENDAR_ICS_URL environment variable. Remove it there and redeploy.' });
+      }
       try {
         await pool.query(
           `UPDATE calendar_settings SET ics_url = NULL, embed_calendar_id = NULL, updated_at = CURRENT_TIMESTAMP WHERE id = 1`

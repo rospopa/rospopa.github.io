@@ -52,6 +52,7 @@ function fmtDayHeading(key) {
 /* ─── Connect panel ─────────────────────────────────────────────── */
 
 function ConnectPanel({ settings, onSaved }) {
+  const envManaged = Boolean(settings?.env_managed)
   const [icsUrl, setIcsUrl] = useState('')
   const [embedId, setEmbedId] = useState(settings?.embed_calendar_id || '')
   const [saving, setSaving] = useState(false)
@@ -62,6 +63,7 @@ function ConnectPanel({ settings, onSaved }) {
     try {
       await apiFetch('/api/calendar/settings', {
         method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ics_url: icsUrl.trim(), embed_calendar_id: embedId.trim() }),
       })
       setIcsUrl('')
@@ -90,50 +92,78 @@ function ConnectPanel({ settings, onSaved }) {
     <div className="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm space-y-4">
       <div>
         <h3 className="font-semibold">Google Calendar connection</h3>
-        <p className="text-sm text-base-content/60 mt-1">
-          In Google Calendar open <strong>Settings → Settings for my calendars → your calendar → Integrate calendar</strong>,
-          then copy the <strong>Secret address in iCal format</strong> and paste it below. Keep it private — anyone with
-          that link can read the calendar.
-        </p>
+        {envManaged ? (
+          <p className="text-sm text-base-content/60 mt-1">
+            This calendar is configured through deploy secrets. Point{' '}
+            <code className="text-xs">GOOGLE_CALENDAR_ICS_URL</code> at your calendar's{' '}
+            <strong>Secret address in iCal format</strong>, and optionally set{' '}
+            <code className="text-xs">GOOGLE_CALENDAR_ID</code> for the embedded month view.
+            Change them in your host and redeploy.
+          </p>
+        ) : (
+          <p className="text-sm text-base-content/60 mt-1">
+            In Google Calendar open <strong>Settings &rarr; Settings for my calendars &rarr; your calendar &rarr; Integrate calendar</strong>,
+            then copy the <strong>Secret address in iCal format</strong> and paste it below. Keep it private &mdash;
+            anyone with that link can read the calendar. You can also set it as the{' '}
+            <code className="text-xs">GOOGLE_CALENDAR_ICS_URL</code> environment variable instead.
+          </p>
+        )}
       </div>
 
-      <label className="form-control">
-        <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Secret iCal address</span>
-        <input
-          type="password"
-          className="input input-bordered w-full"
-          placeholder={settings?.connected ? settings.ics_url_preview || 'Connected' : 'https://calendar.google.com/calendar/ical/.../basic.ics'}
-          value={icsUrl}
-          onChange={e => setIcsUrl(e.target.value)}
-          autoComplete="off"
-        />
-      </label>
+      {envManaged ? (
+        <div className="rounded-lg bg-base-200 px-3 py-2 space-y-1">
+          <p className="text-sm">
+            <span className="badge badge-success badge-sm mr-2">Connected</span>
+            via <code className="text-xs">GOOGLE_CALENDAR_ICS_URL</code>
+          </p>
+          <p className="text-xs text-base-content/55 break-all">{settings.ics_url_preview}</p>
+          {settings.embed_calendar_id && (
+            <p className="text-xs text-base-content/55">Embedded view: {settings.embed_calendar_id}</p>
+          )}
+        </div>
+      ) : (
+        <>
+          <label className="form-control">
+            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Secret iCal address</span>
+            <input
+              type="password"
+              className="input input-bordered w-full"
+              placeholder={settings?.connected ? settings.ics_url_preview || 'Connected' : 'https://calendar.google.com/calendar/ical/.../basic.ics'}
+              value={icsUrl}
+              onChange={e => setIcsUrl(e.target.value)}
+              autoComplete="off"
+            />
+          </label>
 
-      <label className="form-control">
-        <span className="label-text text-xs uppercase tracking-widest text-base-content/50">
-          Calendar ID for the embedded view (optional)
-        </span>
-        <input
-          className="input input-bordered w-full"
-          placeholder="you@gmail.com"
-          value={embedId}
-          onChange={e => setEmbedId(e.target.value)}
-        />
-      </label>
+          <label className="form-control">
+            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">
+              Calendar ID for the embedded view (optional)
+            </span>
+            <input
+              className="input input-bordered w-full"
+              placeholder="you@gmail.com"
+              value={embedId}
+              onChange={e => setEmbedId(e.target.value)}
+            />
+          </label>
+        </>
+      )}
 
       {error && <div className="alert alert-error text-sm py-2">{error}</div>}
 
-      <div className="flex flex-wrap gap-2">
-        <button className="btn btn-primary btn-sm" onClick={save} disabled={saving || (!icsUrl.trim() && !settings?.connected)}>
-          {saving ? <span className="loading loading-spinner loading-xs" /> : null}
-          {settings?.connected ? 'Update connection' : 'Connect calendar'}
-        </button>
-        {settings?.connected && (
-          <button className="btn btn-ghost btn-sm text-error" onClick={disconnect} disabled={saving}>
-            Disconnect
+      {!envManaged && (
+        <div className="flex flex-wrap gap-2">
+          <button className="btn btn-primary btn-sm" onClick={save} disabled={saving || (!icsUrl.trim() && !embedId.trim())}>
+            {saving ? <span className="loading loading-spinner loading-xs" /> : null}
+            {settings?.connected ? 'Update connection' : 'Connect calendar'}
           </button>
-        )}
-      </div>
+          {settings?.connected && (
+            <button className="btn btn-ghost btn-sm text-error" onClick={disconnect} disabled={saving}>
+              Disconnect
+            </button>
+          )}
+        </div>
+      )}
     </div>
   )
 }
@@ -169,6 +199,7 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
     try {
       await apiFetch('/api/calendar/notifications', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           event_uid: event.uid,
           event_title: event.title,
@@ -374,6 +405,7 @@ export default function CalendarPage() {
   async function toggleRule(rule) {
     await apiFetch(`/api/calendar/notifications/${rule.id}`, {
       method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ enabled: !rule.enabled }),
     })
     loadRules()
