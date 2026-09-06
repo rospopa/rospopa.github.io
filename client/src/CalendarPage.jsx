@@ -59,6 +59,8 @@ function ConnectPanel({ settings, onSaved }) {
   const [embedId, setEmbedId] = useState(settings?.embed_calendar_id || '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [testing, setTesting] = useState(false)
+  const [testResult, setTestResult] = useState(null)
 
   async function save() {
     setSaving(true); setError('')
@@ -74,6 +76,18 @@ function ConnectPanel({ settings, onSaved }) {
       setError(e.message || 'Could not save those calendar settings')
     } finally {
       setSaving(false)
+    }
+  }
+
+  async function testConnection() {
+    setTesting(true); setTestResult(null); setError('')
+    try {
+      const r = await apiFetch('/api/calendar/test-connection', { method: 'POST' })
+      setTestResult({ ok: true, message: r.message || 'Connected.' })
+    } catch (e) {
+      setTestResult({ ok: false, message: e.message || 'Could not reach the calendar' })
+    } finally {
+      setTesting(false)
     }
   }
 
@@ -204,6 +218,17 @@ function ConnectPanel({ settings, onSaved }) {
           </details>
         </>
       )}
+
+      <div className="flex items-center gap-3 flex-wrap">
+        <button className="btn btn-sm btn-outline" onClick={testConnection} disabled={testing}>
+          {testing ? 'Testing…' : 'Test connection'}
+        </button>
+        {testResult && (
+          <span className={`text-sm ${testResult.ok ? 'text-success' : 'text-error'}`}>
+            {testResult.message}
+          </span>
+        )}
+      </div>
 
       {error && <div className="alert alert-error text-sm py-2">{error}</div>}
 

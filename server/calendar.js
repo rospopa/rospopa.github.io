@@ -589,6 +589,39 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
       }
     });
 
+    app.post('/api/calendar/test-connection', async (req, res) => {
+      if (!requireAdmin(req, res)) return;
+      const settings = await getSettings();
+      try {
+        if (googleMode) {
+          if (!settings.embed_calendar_id) {
+            return res.status(400).json({
+              ok: false,
+              error: 'Set GOOGLE_CALENDAR_ID to the calendar you want to read (usually your Gmail address).',
+            });
+          }
+          await google.verify(settings.embed_calendar_id);
+          return res.json({
+            ok: true,
+            provider: googleMode,
+            message: googleMode === 'service_account'
+              ? `Reached ${settings.embed_calendar_id} as ${google.serviceAccountEmail}.`
+              : `Reached ${settings.embed_calendar_id} with the API key.`,
+          });
+        }
+        if (!settings.ics_url) {
+          return res.status(400).json({ ok: false, error: 'No calendar is configured yet.' });
+        }
+        const result = await loadEvents({ daysAhead: 7, daysBack: 1, force: true });
+        return res.json({
+          ok: true,
+          provider: 'ics',
+          message: `Read the calendar feed (${result.events.length} event(s) in the next week).`,
+        });
+      } catch (error) {
+        return res.status(502).json({ ok: false, error: error.message || 'could not reach the calendar' });
+      }
+    });
     app.get('/api/calendar/events', async (req, res) => {
       if (!requireAdmin(req, res)) return;
       const daysAhead = Math.min(365, Math.max(1, parseInt(req.query.days, 10) || 90));
