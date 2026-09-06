@@ -204,9 +204,12 @@ function ConnectPanel({ settings, onSaved }) {
                   grant nothing on your calendar. Download its JSON key.
                 </li>
                 <li>
-                  Set <code className="text-xs">GOOGLE_SERVICE_ACCOUNT_EMAIL</code> and{' '}
-                  <code className="text-xs">GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY</code> from that file, plus{' '}
-                  <code className="text-xs">GOOGLE_CALENDAR_ID</code>.
+                  From that JSON file, set <code className="text-xs">GOOGLE_SERVICE_ACCOUNT_EMAIL</code>{' '}
+                  to its <code className="text-xs">client_email</code> and{' '}
+                  <code className="text-xs">GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY</code> to its{' '}
+                  <code className="text-xs">private_key</code> (the whole value, BEGIN and END lines
+                  included). Set <code className="text-xs">GOOGLE_CALENDAR_ID</code> to your own Gmail
+                  address &mdash; that is the calendar being read, not the service account.
                 </li>
                 <li>
                   In Google Calendar, share the calendar with the service account address
