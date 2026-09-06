@@ -36,8 +36,74 @@ function fmtEventTime(event) {
   return start.toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })
 }
 
-function dayKey(iso) {
-  return new Date(iso).toISOString().slice(0, 10)
+function dayKey(iso, allDay = false) {
+  const date = new Date(iso)
+  // All-day events are stored as UTC midnight, so reading them in local time
+  // would shift them a day west of Greenwich. Timed events are the opposite:
+  // they must be read locally or a late evening event lands on tomorrow.
+  if (allDay) return date.toISOString().slice(0, 10)
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000)
+  return local.toISOString().slice(0, 10)
+}
+
+function todayKey() {
+  return dayKey(new Date().toISOString())
+}
+
+function addMonths(key, delta) {
+  const [y, m] = key.split('-').map(Number)
+  const date = new Date(Date.UTC(y, m - 1 + delta, 1))
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, '0')}`
+}
+
+function monthLabel(key) {
+  const [y, m] = key.split('-').map(Number)
+  return new Date(Date.UTC(y, m - 1, 1))
+    .toLocaleDateString(undefined, { month: 'long', year: 'numeric', timeZone: 'UTC' })
+}
+
+// The six-week grid the month is drawn on, starting on Sunday.
+function monthGridDays(monthKey) {
+  const [y, m] = monthKey.split('-').map(Number)
+  const first = new Date(Date.UTC(y, m - 1, 1))
+  const start = new Date(first)
+  start.setUTCDate(1 - first.getUTCDay())
+  const days = []
+  for (let i = 0; i < 42; i += 1) {
+    const date = new Date(start)
+    date.setUTCDate(start.getUTCDate() + i)
+    days.push({
+      key: date.toISOString().slice(0, 10),
+      dayOfMonth: date.getUTCDate(),
+      inMonth: date.getUTCMonth() === m - 1,
+    })
+  }
+  return days
+}
+
+function fmtChipTime(event) {
+  if (event.all_day) return 'All day'
+  return new Date(event.start)
+    .toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })
+    .replace(':00', '')
+}
+
+// Google returns descriptions as HTML. Rendering it as markup would be an
+// injection risk, so it is flattened to readable text instead.
+function plainText(html) {
+  if (!html) return ''
+  return String(html)
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/(p|div|li)>/gi, '\n')
+    .replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
 }
 
 function fmtDayHeading(key) {
@@ -258,6 +324,141 @@ function ConnectPanel({ settings, onSaved }) {
 
 /* ─── Notification rule editor ──────────────────────────────────── */
 
+/* ─── Month grid ────────────────────────────────────────────────── */
+
+const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
+export function MonthGrid({ monthKey, onMonthChange, eventsByDay, selectedDay, onSelectDay, onOpenEvent }) {
+  const days = useMemo(() => monthGridDays(monthKey), [monthKey])
+  const today = todayKey()
+
+  return (
+    <div className="rounded-xl border border-base-300 bg-base-100 shadow-sm overflow-hidden">
+      <div className="flex items-center justify-between gap-2 border-b border-base-300 px-3 py-2">
+        <h3 className="font-semibold">{monthLabel(monthKey)}</h3>
+        <div className="join">
+          <button
+            className="btn btn-xs join-item"
+            onClick={() => onMonthChange(addMonths(monthKey, -1))}
+            aria-label="Previous month"
+          >‹</button>
+          <button className="btn btn-xs join-item" onClick={() => onMonthChange(today.slice(0, 7))}>Today</button>
+          <button
+            className="btn btn-xs join-item"
+            onClick={() => onMonthChange(addMonths(monthKey, 1))}
+            aria-label="Next month"
+          >›</button>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-7 border-b border-base-300 bg-base-200/50">
+        {WEEKDAY_LABELS.map(label => (
+          <div key={label} className="px-1 py-1 text-center text-[11px] font-semibold uppercase tracking-wide text-base-content/50">
+            <span className="hidden sm:inline">{label}</span>
+            <span className="sm:hidden">{label[0]}</span>
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7">
+        {days.map(day => {
+          const dayEvents = eventsByDay.get(day.key) || []
+          const isToday = day.key === today
+          const isSelected = day.key === selectedDay
+          return (
+            <div
+              key={day.key}
+              role="button"
+              tabIndex={0}
+              onClick={() => onSelectDay(day.key)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelectDay(day.key) }
+              }}
+              className={[
+                // min-w-0 lets the cell shrink so long titles truncate instead
+                // of pushing the seven columns wider than the viewport.
+                'flex min-w-0 flex-col min-h-[64px] sm:min-h-[92px] border-b border-r border-base-200 p-1',
+                'cursor-pointer transition-colors hover:bg-base-200/60 focus:outline-none focus-visible:ring focus-visible:ring-primary/40',
+                day.inMonth ? '' : 'bg-base-200/30 text-base-content/35',
+                isSelected ? 'bg-primary/10' : '',
+              ].join(' ')}
+            >
+              <span
+                className={[
+                  'inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px]',
+                  isToday ? 'bg-primary font-bold text-primary-content' : 'text-base-content/70',
+                ].join(' ')}
+              >
+                {day.dayOfMonth}
+              </span>
+
+              {/* Phones have no room for labels, so the day shows a density dot. */}
+              <span className="mt-1 flex gap-0.5 sm:hidden">
+                {dayEvents.slice(0, 3).map(event => (
+                  <span key={event.occurrence_id} className="h-1.5 w-1.5 rounded-full bg-primary" />
+                ))}
+              </span>
+
+              <span className="mt-1 hidden min-w-0 flex-col gap-0.5 sm:flex">
+                {dayEvents.slice(0, 3).map(event => (
+                  <button
+                    key={event.occurrence_id}
+                    type="button"
+                    title={event.title}
+                    onClick={e => { e.stopPropagation(); onOpenEvent(event) }}
+                    className="block w-full truncate rounded bg-primary/15 px-1 py-[1px] text-left text-[11px] leading-tight text-primary hover:bg-primary/30"
+                  >
+                    {event.all_day ? '' : `${fmtChipTime(event)} `}{event.title}
+                  </button>
+                ))}
+                {dayEvents.length > 3 && (
+                  <span className="px-1 text-[10px] text-base-content/50">+{dayEvents.length - 3} more</span>
+                )}
+              </span>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
+/* ─── Event details ─────────────────────────────────────────────── */
+
+function EventDetailModal({ event, rules, onClose, onAddNotification }) {
+  if (!event) return null
+  const description = plainText(event.description)
+  return (
+    <div className="modal modal-open" onClick={onClose}>
+      <div className="modal-box max-w-lg" onClick={e => e.stopPropagation()}>
+        <h3 className="text-lg font-bold">{event.title}</h3>
+        <p className="mt-1 text-sm text-base-content/70">{fmtEventTime(event)}</p>
+        {event.location && <p className="mt-1 text-sm text-base-content/60">📍 {event.location}</p>}
+        {event.recurring && <p className="mt-1 text-xs text-base-content/45">Repeats</p>}
+        {description && (
+          <p className="mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap text-sm text-base-content/75">{description}</p>
+        )}
+        {rules.length > 0 && (
+          <div className="mt-4">
+            <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">Notifications</p>
+            <div className="mt-1 flex flex-wrap gap-1">
+              {rules.map(rule => (
+                <span key={rule.id} className={`badge badge-sm gap-1 ${rule.enabled ? 'badge-primary badge-outline' : 'badge-ghost'}`}>
+                  {channelMeta(rule.channel).icon} {leadLabel(rule.minutes_before)}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="modal-action">
+          <button className="btn btn-sm" onClick={onClose}>Close</button>
+          <button className="btn btn-sm btn-primary" onClick={() => onAddNotification(event)}>+ Notification</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function NotificationModal({ open, event, contacts, channels, onClose, onSaved }) {
   const [channel, setChannel] = useState('sms')
   const [minutesBefore, setMinutesBefore] = useState(15)
@@ -446,7 +647,9 @@ export default function CalendarPage() {
 
   const loadEvents = useCallback(async (force = false) => {
     try {
-      const data = await apiFetch(`/api/calendar/events?days=120${force ? '&refresh=1' : ''}`)
+      // The month grid can be paged in either direction, so load the widest
+      // window the API allows rather than just the upcoming few months.
+      const data = await apiFetch(`/api/calendar/events?days=365&days_back=90${force ? '&refresh=1' : ''}`)
       setEvents(data.events || [])
       setError('')
     } catch (e) {
@@ -526,38 +729,40 @@ export default function CalendarPage() {
     const upcoming = events.filter(e => new Date(e.end || e.start).getTime() >= now)
     const map = new Map()
     for (const event of upcoming) {
-      const key = dayKey(event.start)
+      const key = dayKey(event.start, event.all_day)
       if (!map.has(key)) map.set(key, [])
       map.get(key).push(event)
     }
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]))
   }, [events])
 
-  const [isNarrow, setIsNarrow] = useState(
-    typeof window !== 'undefined' ? window.innerWidth < 768 : false
-  )
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || !window.matchMedia) return undefined
-    const mq = window.matchMedia('(max-width: 767px)')
-    const onChange = e => setIsNarrow(e.matches)
-    setIsNarrow(mq.matches)
-    // Safari below 14 only has the deprecated addListener.
-    if (mq.addEventListener) {
-      mq.addEventListener('change', onChange)
-      return () => mq.removeEventListener('change', onChange)
+  const eventsByDay = useMemo(() => {
+    const map = new Map()
+    for (const event of events) {
+      const key = dayKey(event.start, event.all_day)
+      if (!map.has(key)) map.set(key, [])
+      map.get(key).push(event)
     }
-    mq.addListener(onChange)
-    return () => mq.removeListener(onChange)
+    for (const list of map.values()) list.sort((a, b) => new Date(a.start) - new Date(b.start))
+    return map
+  }, [events])
+
+  const [monthKey, setMonthKey] = useState(() => todayKey().slice(0, 7))
+  const [selectedDay, setSelectedDay] = useState(() => todayKey())
+  const [detailEvent, setDetailEvent] = useState(null)
+
+  const selectedDayEvents = eventsByDay.get(selectedDay) || []
+
+  // Matches the window loadEvents requests, so an empty month can say whether
+  // it is genuinely empty or simply outside the data that was fetched.
+  const loadedRange = useMemo(() => {
+    const day = 86400000
+    return {
+      from: dayKey(new Date(Date.now() - 90 * day).toISOString()).slice(0, 7),
+      to: dayKey(new Date(Date.now() + 365 * day).toISOString()).slice(0, 7),
+    }
   }, [])
-
-  const embedMode = isNarrow ? 'AGENDA' : 'MONTH'
-
-  const embedSrc = settings?.embed_calendar_id
-    ? `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(settings.embed_calendar_id)}` +
-      `&mode=${embedMode}&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showNav=1` +
-      (settings.time_zone ? `&ctz=${encodeURIComponent(settings.time_zone)}` : '')
-    : null
+  const outsideLoadedRange = monthKey < loadedRange.from || monthKey > loadedRange.to
 
   if (loading) {
     return <div className="flex items-center justify-center h-64"><span className="loading loading-spinner loading-lg" /></div>
@@ -599,17 +804,49 @@ export default function CalendarPage() {
 
       {settings?.connected && (
         <>
-        {embedSrc && (
-          <div className="rounded-xl border border-base-300 bg-base-100 p-2 shadow-sm mb-6">
-            <iframe
-              title="Google Calendar"
-              src={embedSrc}
-              className="w-full rounded-lg border-0 h-[70vh] min-h-[420px] max-h-[900px]"
-              loading="lazy"
-            />
-          </div>
-        )}
+        <div className="mb-6 space-y-3">
+          <MonthGrid
+            monthKey={monthKey}
+            onMonthChange={setMonthKey}
+            eventsByDay={eventsByDay}
+            selectedDay={selectedDay}
+            onSelectDay={setSelectedDay}
+            onOpenEvent={setDetailEvent}
+          />
 
+          <div className="rounded-xl border border-base-300 bg-base-100 p-3 shadow-sm">
+            {outsideLoadedRange && (
+              <p className="mb-2 text-xs text-base-content/50">
+                This month is outside the range loaded from your calendar, so it may look empty.
+              </p>
+            )}
+            <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">
+              {fmtDayHeading(selectedDay)}
+            </p>
+            {selectedDayEvents.length === 0 ? (
+              <p className="mt-2 text-sm text-base-content/50">Nothing scheduled.</p>
+            ) : (
+              <div className="mt-2 space-y-1">
+                {selectedDayEvents.map(event => (
+                  <button
+                    key={event.occurrence_id}
+                    type="button"
+                    onClick={() => setDetailEvent(event)}
+                    className="flex w-full items-baseline gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-base-200"
+                  >
+                    <span className="w-20 shrink-0 text-xs text-base-content/55">{fmtChipTime(event)}</span>
+                    <span className="min-w-0 flex-1 truncate text-sm">{event.title}</span>
+                    {(rulesByEvent.get(event.uid) || []).length > 0 && (
+                      <span className="text-xs text-base-content/45">
+                        {(rulesByEvent.get(event.uid) || []).map(r => channelMeta(r.channel).icon).join('')}
+                      </span>
+                    )}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <div className="space-y-4">
             <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">Upcoming events</h3>
@@ -626,11 +863,15 @@ export default function CalendarPage() {
                   return (
                     <div key={event.occurrence_id} className="rounded-xl border border-base-300 bg-base-100 px-4 py-3 shadow-sm">
                       <div className="flex flex-wrap items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <p className="font-medium truncate">{event.title}</p>
+                        <button
+                          type="button"
+                          className="min-w-0 text-left"
+                          onClick={() => setDetailEvent(event)}
+                        >
+                          <p className="font-medium truncate hover:underline">{event.title}</p>
                           <p className="text-xs text-base-content/60">{fmtEventTime(event)}</p>
                           {event.location && <p className="text-xs text-base-content/45 truncate">{event.location}</p>}
-                        </div>
+                        </button>
                         <button className="btn btn-xs btn-outline" onClick={() => setModalEvent(event)}>
                           + Notification
                         </button>
@@ -699,6 +940,13 @@ export default function CalendarPage() {
         </div>
         </>
       )}
+
+      <EventDetailModal
+        event={detailEvent}
+        rules={detailEvent ? (rulesByEvent.get(detailEvent.uid) || []) : []}
+        onClose={() => setDetailEvent(null)}
+        onAddNotification={event => { setDetailEvent(null); setModalEvent(event) }}
+      />
 
       <NotificationModal
         open={Boolean(modalEvent)}
