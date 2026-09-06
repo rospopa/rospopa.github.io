@@ -22,6 +22,10 @@ const ENV_TIME_ZONE = (process.env.GOOGLE_CALENDAR_TIME_ZONE || '').trim();
 const ICS_CACHE_TTL_MS = 5 * 60 * 1000;
 const ICS_REQUEST_TIMEOUT_MS = 15 * 1000;
 const SCHEDULER_INTERVAL_MS = 60 * 1000;
+// How long a synced copy of the events is served without asking Google again,
+// and how often the background sync refreshes it.
+const EVENTS_CACHE_TTL_MS = 5 * 60 * 1000;
+const EVENTS_SYNC_INTERVAL_MS = 5 * 60 * 1000;
 // A rule fires when the event is this close to starting (minus its lead time).
 const DISPATCH_TOLERANCE_MS = 5 * 60 * 1000;
 
@@ -345,8 +349,7 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
     return text;
   }
 
-  async function loadEvents({ daysBack = 7, daysAhead = 90, force = false } = {}) {
-    const settings = await getSettings();
+  async function fetchEventsLive(settings, { daysBack, daysAhead, force }) {
     const now = Date.now();
     const windowStart = new Date(now - daysBack * 24 * 60 * 60 * 1000);
     const windowEnd = new Date(now + daysAhead * 24 * 60 * 60 * 1000);
@@ -364,6 +367,41 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
     if (!settings.ics_url) return { configured: false, events: [], provider: null };
     const text = await fetchIcs(settings.ics_url, { force });
     return { configured: true, events: parseIcs(text, windowStart, windowEnd), provider: 'ics' };
+  }
+
+  // Requests are answered from this synced copy, so a page load never waits on
+  // a round trip to Google, and a Google outage degrades to slightly stale
+  // data with a sync_error note instead of an error page.
+  const eventsCache = new Map(); // source+window -> { fetchedAt, payload }
+
+  async function loadEvents({ daysBack = 7, daysAhead = 90, force = false } = {}) {
+    const settings = await getSettings();
+    const source = googleMode && settings.embed_calendar_id
+      ? `${googleMode}:${settings.embed_calendar_id}`
+      : `ics:${settings.ics_url || ''}`;
+    const key = `${source}:${daysBack}:${daysAhead}`;
+    const cached = eventsCache.get(key);
+
+    if (cached && !force && Date.now() - cached.fetchedAt < EVENTS_CACHE_TTL_MS) {
+      return { ...cached.payload, synced_at: cached.fetchedAt };
+    }
+
+    try {
+      const payload = await fetchEventsLive(settings, { daysBack, daysAhead, force });
+      const fetchedAt = Date.now();
+      if (payload.configured) {
+        if (eventsCache.size > 20) eventsCache.clear();
+        eventsCache.set(key, { fetchedAt, payload });
+      }
+      return { ...payload, synced_at: fetchedAt };
+    } catch (error) {
+      // Yesterday's calendar beats no calendar: keep serving the last good
+      // copy for as long as the process lives, labelled with what is wrong.
+      if (cached) {
+        return { ...cached.payload, synced_at: cached.fetchedAt, sync_error: String(error.message || error) };
+      }
+      throw error;
+    }
   }
 
   /* ─── Delivery ──────────────────────────────────────────────────── */
@@ -505,10 +543,26 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
     }
   }
 
+  // Keeps the synced copy warm so the first page load after a quiet spell is
+  // answered from memory instead of waiting on Google. Uses the same window
+  // the calendar page requests.
+  let eventsSyncTimer = null;
+  async function syncEventsCache() {
+    try {
+      const result = await loadEvents({ daysBack: 90, daysAhead: 365, force: true });
+      if (result.sync_error) console.error('[calendar] background sync kept stale data:', result.sync_error);
+    } catch (error) {
+      console.error('[calendar] background sync failed:', error.message);
+    }
+  }
+
   function startScheduler() {
     if (schedulerTimer) return;
     schedulerTimer = setInterval(runDispatchCycle, SCHEDULER_INTERVAL_MS);
     if (schedulerTimer.unref) schedulerTimer.unref();
+    syncEventsCache();
+    eventsSyncTimer = setInterval(syncEventsCache, EVENTS_SYNC_INTERVAL_MS);
+    if (eventsSyncTimer.unref) eventsSyncTimer.unref();
   }
 
   /* ─── Routes ────────────────────────────────────────────────────── */
@@ -641,7 +695,8 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
           message: `Read the calendar feed (${result.events.length} event(s) in the next week).`,
         });
       } catch (error) {
-        return res.status(502).json({ ok: false, error: error.message || 'could not reach the calendar' });
+        // 424, not 502: Cloudflare replaces origin 502 bodies with its own page.
+        return res.status(424).json({ ok: false, error: error.message || 'could not reach the calendar' });
       }
     });
     app.get('/api/calendar/events', async (req, res) => {
@@ -649,12 +704,14 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
       const daysAhead = Math.min(365, Math.max(1, parseInt(req.query.days, 10) || 90));
       const daysBack = Math.min(90, Math.max(0, parseInt(req.query.days_back, 10) || 7));
       try {
-        const { configured, events, provider } = await loadEvents({
+        const result = await loadEvents({
           daysAhead, daysBack, force: req.query.refresh === '1',
         });
-        res.json({ configured, events, provider });
+        res.json(result);
       } catch (error) {
-        res.status(502).json({ error: error.message || 'failed to read the calendar feed' });
+        // Not 502: Cloudflare swaps the body of an origin 502/504 for its own
+        // error page, which hides this message from the client entirely.
+        res.status(424).json({ error: error.message || 'failed to read the calendar feed' });
       }
     });
 
@@ -814,7 +871,8 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
           { rule_id: id, channel: rule.channel }, null, null, clientIp(req));
         res.json({ ok: true, ...outcome });
       } catch (error) {
-        res.status(502).json({ error: error.message || 'test delivery failed' });
+        // 424, not 502: Cloudflare replaces origin 502 bodies with its own page.
+        res.status(424).json({ error: error.message || 'test delivery failed' });
       }
     });
   }

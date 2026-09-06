@@ -655,8 +655,10 @@ export default function CalendarPage() {
       // window the API allows rather than just the upcoming few months.
       const data = await apiFetch(`/api/calendar/events?days=365&days_back=90${force ? '&refresh=1' : ''}`)
       setEvents(data.events || [])
-      setLastSynced(Date.now())
-      setError('')
+      setLastSynced(data.synced_at || Date.now())
+      // The server keeps serving its last good copy when Google stops
+      // answering; say so rather than silently showing stale days.
+      setError(data.sync_error ? `Google sync is failing: ${data.sync_error}` : '')
     } catch (e) {
       setEvents([])
       setError(e.message || 'Could not read the calendar feed')
@@ -670,12 +672,16 @@ export default function CalendarPage() {
       try {
         const s = await loadSettings()
         if (cancelled) return
-        await loadRules()
-        if (s.connected) await loadEvents()
-        try {
-          const contactData = await apiFetch('/api/contacts')
-          if (!cancelled) setContacts(Array.isArray(contactData) ? contactData : (contactData.contacts || []))
-        } catch { /* contacts are optional for the picker */ }
+        // None of these depend on each other, so don't load them in single file.
+        await Promise.all([
+          loadRules(),
+          s.connected ? loadEvents() : Promise.resolve(),
+          apiFetch('/api/contacts')
+            .then(contactData => {
+              if (!cancelled) setContacts(Array.isArray(contactData) ? contactData : (contactData.contacts || []))
+            })
+            .catch(() => { /* contacts are optional for the picker */ }),
+        ])
       } catch (e) {
         if (!cancelled) setError(e.message || 'Could not load the calendar')
       } finally {
