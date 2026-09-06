@@ -103,7 +103,7 @@ export function PropertyMap({ address }) {
 // practice means the reply came from the host or proxy rather than the app.
 function describeHttpError(status) {
   if (status === 502 || status === 503 || status === 504) {
-    return `The server is not responding (HTTP ${status}). It may be starting up or a request timed out - wait a moment and try again.`
+    return 'The server is restarting after an update. This usually clears within a minute - reload the page.'
   }
   if (status === 401) return 'Your session has expired. Sign in again.'
   if (status === 403) return 'You do not have access to that.'
@@ -112,13 +112,45 @@ function describeHttpError(status) {
   return `Something went wrong (HTTP ${status}).`
 }
 
+// A restarting or cold-starting server is a normal, temporary condition, not
+// something the user should have to notice and retry by hand. Only reads are
+// retried: replaying a POST could duplicate whatever it created.
+const RETRY_STATUSES = [502, 503, 504]
+const RETRY_DELAYS_MS = [1000, 3000, 6000]
+
+function isRetryableMethod(method) {
+  const verb = String(method || 'GET').toUpperCase()
+  return verb === 'GET' || verb === 'HEAD'
+}
+
+function isRetryable(method, status) {
+  return isRetryableMethod(method) && RETRY_STATUSES.includes(status)
+}
+
 export async function apiFetch(url, options = {}) {
-  const res = await fetch(url, { credentials: 'include', ...options })
-  if (!res.ok) {
+  for (let attempt = 0; ; attempt += 1) {
+    let res
+    try {
+      res = await fetch(url, { credentials: 'include', ...options })
+    } catch (networkError) {
+      // A dropped connection during a redeploy looks the same as being offline.
+      if (isRetryableMethod(options.method) && attempt < RETRY_DELAYS_MS.length) {
+        await new Promise(r => setTimeout(r, RETRY_DELAYS_MS[attempt]))
+        continue
+      }
+      throw networkError
+    }
+
+    if (res.ok) return res.json()
+
+    if (isRetryable(options.method, res.status) && attempt < RETRY_DELAYS_MS.length) {
+      await new Promise(r => setTimeout(r, RETRY_DELAYS_MS[attempt]))
+      continue
+    }
+
     const data = await res.json().catch(() => ({}))
     throw Object.assign(new Error(data.error || describeHttpError(res.status)), { status: res.status })
   }
-  return res.json()
 }
 
 export const FIELD_HELP = {
