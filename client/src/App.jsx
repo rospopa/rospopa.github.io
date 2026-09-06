@@ -1378,7 +1378,7 @@ export default function App() {
   const navBtn = (id, label) => (
     <button
       key={id}
-      className={`btn btn-sm ${page === id ? 'btn-primary' : 'btn-ghost'}`}
+      className={`btn btn-sm whitespace-nowrap ${page === id ? 'btn-primary' : 'btn-ghost'}`}
       onClick={() => { navigateTo(id); setMobileMenuOpen(false) }}
     >
       {label}
@@ -1415,7 +1415,7 @@ export default function App() {
   )
 
   const renderGlobalSearch = (mobile = false) => (
-    <div ref={mobile ? undefined : globalSearchRef} className={`relative ${mobile ? 'w-full' : 'w-[360px]'}`}>
+    <div ref={mobile ? undefined : globalSearchRef} className={`relative ${mobile ? 'w-full' : 'w-[200px] xl:w-[300px] 2xl:w-[360px]'}`}>
       <div className="relative">
         <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
@@ -1494,12 +1494,12 @@ export default function App() {
         </div>
 
         {/* Desktop nav links */}
-        <div className="hidden md:flex flex-1 gap-1 ml-4">
+        <div className="hidden lg:flex flex-1 min-w-0 flex-wrap gap-1 ml-4">
           {navLinks.map(({ id, label }) => navBtn(id, label))}
         </div>
 
         {/* Desktop right side */}
-        <div className="hidden md:flex flex-none items-center gap-2">
+        <div className="hidden lg:flex flex-none items-center gap-2 ml-2">
           {currentUser.role === 'admin' && renderGlobalSearch()}
           <button className="btn btn-sm btn-ghost" onClick={toggleDarkMode} title={darkMode ? 'Day mode' : 'Night mode'}>
             {darkMode ? <SunIcon /> : <MoonIcon />}
@@ -1509,7 +1509,7 @@ export default function App() {
             onClick={() => navigateTo('profile')}
           >
             <Avatar src={currentUser.profile_photo} name={displayName} size="sm" />
-            <div className="flex flex-col items-start leading-tight">
+            <div className="hidden xl:flex flex-col items-start leading-tight">
               <span className="text-xs text-base-content/50 font-normal">
                 {(currentUser.login_count || 0) > 1 ? 'Welcome back,' : 'Welcome,'}
               </span>
@@ -1522,7 +1522,7 @@ export default function App() {
         </div>
 
         {/* Mobile: avatar + hamburger */}
-        <div className="flex md:hidden flex-1 justify-end items-center gap-2">
+        <div className="flex lg:hidden flex-1 justify-end items-center gap-2">
           <button
             className={`btn btn-sm btn-ghost p-1 ${page === 'profile' ? 'btn-primary' : ''}`}
             onClick={() => { navigateTo('profile'); setMobileMenuOpen(false) }}
@@ -1544,7 +1544,7 @@ export default function App() {
 
       {/* Mobile dropdown menu */}
       {mobileMenuOpen && (
-        <div data-mobile-nav-menu="true" className="md:hidden bg-base-100 border-b border-base-300 px-4 py-3 flex flex-col gap-1 sticky top-[64px] z-40 shadow-md">
+        <div data-mobile-nav-menu="true" className="lg:hidden bg-base-100 border-b border-base-300 px-4 py-3 flex flex-col gap-1 sticky top-[64px] z-40 shadow-md">
           {currentUser.role === 'admin' && <div className="mb-2">{renderGlobalSearch(true)}</div>}
           {navLinks.map(({ id, label }) => navBtn(id, label))}
           <div className="divider my-1" />

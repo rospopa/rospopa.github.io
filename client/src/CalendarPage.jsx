@@ -538,12 +538,17 @@ export default function CalendarPage() {
   )
 
   useEffect(() => {
-    if (typeof window === 'undefined') return undefined
+    if (typeof window === 'undefined' || !window.matchMedia) return undefined
     const mq = window.matchMedia('(max-width: 767px)')
     const onChange = e => setIsNarrow(e.matches)
     setIsNarrow(mq.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
+    // Safari below 14 only has the deprecated addListener.
+    if (mq.addEventListener) {
+      mq.addEventListener('change', onChange)
+      return () => mq.removeEventListener('change', onChange)
+    }
+    mq.addListener(onChange)
+    return () => mq.removeListener(onChange)
   }, [])
 
   const embedMode = isNarrow ? 'AGENDA' : 'MONTH'
