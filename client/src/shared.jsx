@@ -99,11 +99,24 @@ export function PropertyMap({ address }) {
   )
 }
 
+// Reached only when the response carries no JSON error of its own, which in
+// practice means the reply came from the host or proxy rather than the app.
+function describeHttpError(status) {
+  if (status === 502 || status === 503 || status === 504) {
+    return `The server is not responding (HTTP ${status}). It may be starting up or a request timed out - wait a moment and try again.`
+  }
+  if (status === 401) return 'Your session has expired. Sign in again.'
+  if (status === 403) return 'You do not have access to that.'
+  if (status === 413) return 'That upload is too large.'
+  if (status === 429) return 'Too many requests - wait a moment and try again.'
+  return `Something went wrong (HTTP ${status}).`
+}
+
 export async function apiFetch(url, options = {}) {
   const res = await fetch(url, { credentials: 'include', ...options })
   if (!res.ok) {
     const data = await res.json().catch(() => ({}))
-    throw Object.assign(new Error(data.error || `HTTP ${res.status}`), { status: res.status })
+    throw Object.assign(new Error(data.error || describeHttpError(res.status)), { status: res.status })
   }
   return res.json()
 }
