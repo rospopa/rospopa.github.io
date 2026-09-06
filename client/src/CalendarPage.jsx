@@ -53,6 +53,8 @@ function fmtDayHeading(key) {
 
 function ConnectPanel({ settings, onSaved }) {
   const envManaged = Boolean(settings?.env_managed)
+  const googleMode = settings?.google_mode || null
+  const apiMode = Boolean(googleMode)
   const [icsUrl, setIcsUrl] = useState('')
   const [embedId, setEmbedId] = useState(settings?.embed_calendar_id || '')
   const [saving, setSaving] = useState(false)
@@ -92,25 +94,50 @@ function ConnectPanel({ settings, onSaved }) {
     <div className="rounded-xl border border-base-300 bg-base-100 p-5 shadow-sm space-y-4">
       <div>
         <h3 className="font-semibold">Google Calendar connection</h3>
-        {envManaged ? (
+        {apiMode ? (
+          <p className="text-sm text-base-content/60 mt-1">
+            Connected through the Google Calendar API using{' '}
+            {googleMode === 'service_account' ? 'a service account' : 'an API key'}. Configured entirely
+            through environment variables &mdash; change them in your host and redeploy.
+          </p>
+        ) : envManaged ? (
           <p className="text-sm text-base-content/60 mt-1">
             This calendar is configured through deploy secrets. Point{' '}
             <code className="text-xs">GOOGLE_CALENDAR_ICS_URL</code> at your calendar's{' '}
             <strong>Secret address in iCal format</strong>, and optionally set{' '}
             <code className="text-xs">GOOGLE_CALENDAR_ID</code> for the embedded month view.
-            Change them in your host and redeploy.
           </p>
         ) : (
           <p className="text-sm text-base-content/60 mt-1">
-            In Google Calendar open <strong>Settings &rarr; Settings for my calendars &rarr; your calendar &rarr; Integrate calendar</strong>,
-            then copy the <strong>Secret address in iCal format</strong> and paste it below. Keep it private &mdash;
-            anyone with that link can read the calendar. You can also set it as the{' '}
-            <code className="text-xs">GOOGLE_CALENDAR_ICS_URL</code> environment variable instead.
+            Paste the <strong>Secret address in iCal format</strong> below, or configure the Google Calendar
+            API instead with a service account &mdash; see the setup notes below.
           </p>
         )}
       </div>
 
-      {envManaged ? (
+      {apiMode ? (
+        <div className="rounded-lg bg-base-200 px-3 py-2 space-y-1">
+          <p className="text-sm">
+            <span className={`badge badge-sm mr-2 ${settings.connected ? 'badge-success' : 'badge-warning'}`}>
+              {settings.connected ? 'Connected' : 'Needs calendar ID'}
+            </span>
+            via {googleMode === 'service_account' ? 'service account' : 'API key'}
+          </p>
+          {settings.service_account_email && (
+            <p className="text-xs text-base-content/55 break-all">
+              Share your calendar with <code>{settings.service_account_email}</code>
+            </p>
+          )}
+          {settings.embed_calendar_id && (
+            <p className="text-xs text-base-content/55">Calendar: {settings.embed_calendar_id}</p>
+          )}
+          {settings.needs_calendar_id && (
+            <p className="text-xs text-warning">
+              Set <code>GOOGLE_CALENDAR_ID</code> to the calendar you want to read.
+            </p>
+          )}
+        </div>
+      ) : envManaged ? (
         <div className="rounded-lg bg-base-200 px-3 py-2 space-y-1">
           <p className="text-sm">
             <span className="badge badge-success badge-sm mr-2">Connected</span>
@@ -146,12 +173,41 @@ function ConnectPanel({ settings, onSaved }) {
               onChange={e => setEmbedId(e.target.value)}
             />
           </label>
+
+          <details className="text-sm">
+            <summary className="cursor-pointer text-base-content/70">
+              Prefer API credentials instead of an iCal link?
+            </summary>
+            <div className="mt-2 space-y-2 text-base-content/60">
+              <p>
+                An API key alone can only read <strong>public</strong> calendars. For a private calendar,
+                use a service account &mdash; still just environment variables, no browser sign-in:
+              </p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>In Google Cloud, enable the <strong>Google Calendar API</strong>.</li>
+                <li>Create a service account and download its JSON key.</li>
+                <li>
+                  Set <code className="text-xs">GOOGLE_SERVICE_ACCOUNT_EMAIL</code> and{' '}
+                  <code className="text-xs">GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY</code> from that file, plus{' '}
+                  <code className="text-xs">GOOGLE_CALENDAR_ID</code>.
+                </li>
+                <li>
+                  In Google Calendar, share the calendar with the service account address
+                  (<em>Share with specific people</em>, See all event details).
+                </li>
+              </ol>
+              <p>
+                For a public calendar you can instead set{' '}
+                <code className="text-xs">GOOGLE_CALENDAR_API_KEY</code>.
+              </p>
+            </div>
+          </details>
         </>
       )}
 
       {error && <div className="alert alert-error text-sm py-2">{error}</div>}
 
-      {!envManaged && (
+      {!envManaged && !apiMode && (
         <div className="flex flex-wrap gap-2">
           <button className="btn btn-primary btn-sm" onClick={save} disabled={saving || (!icsUrl.trim() && !embedId.trim())}>
             {saving ? <span className="loading loading-spinner loading-xs" /> : null}

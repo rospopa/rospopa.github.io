@@ -7,11 +7,16 @@
  * registration is required.
  * ------------------------------------------------------------------ */
 
+const { createGoogleCalendarClient } = require('./googleCalendar');
+
 const VALID_CHANNELS = ['call', 'email', 'sms'];
 
 // When set, these take precedence over anything stored in the database, so the
 // calendar can be wired up purely through deploy secrets.
 const ENV_ICS_URL = (process.env.GOOGLE_CALENDAR_ICS_URL || '').trim();
+const ENV_SA_EMAIL = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || '').trim();
+const ENV_SA_KEY = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY || '';
+const ENV_API_KEY = (process.env.GOOGLE_CALENDAR_API_KEY || '').trim();
 const ENV_CALENDAR_ID = (process.env.GOOGLE_CALENDAR_ID || '').trim();
 const ENV_TIME_ZONE = (process.env.GOOGLE_CALENDAR_TIME_ZONE || '').trim();
 const ICS_CACHE_TTL_MS = 5 * 60 * 1000;
@@ -225,6 +230,12 @@ function parseIcs(text, windowStart, windowEnd) {
 
 function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twilio }) {
   const icsCache = new Map(); // url -> { fetchedAt, text }
+  const google = createGoogleCalendarClient({
+    serviceAccountEmail: ENV_SA_EMAIL,
+    serviceAccountPrivateKey: ENV_SA_KEY,
+    apiKey: ENV_API_KEY,
+  });
+  const googleMode = google.mode();
 
   async function initSchema() {
     await pool.query(`CREATE TABLE IF NOT EXISTS calendar_settings (
@@ -269,6 +280,8 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
       time_zone: ENV_TIME_ZONE || stored.time_zone || null,
       updated_at: stored.updated_at || null,
       source: ENV_ICS_URL ? 'env' : (stored.ics_url ? 'database' : null),
+      google_mode: googleMode,
+      service_account_email: google.serviceAccountEmail || null,
     };
   }
 
@@ -281,7 +294,7 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
       return result.rows[0] || empty;
     } catch (error) {
       // Table may not exist yet on a cold boot; env-based config still works.
-      if (ENV_ICS_URL) return empty;
+      if (ENV_ICS_URL || ENV_SA_EMAIL || ENV_API_KEY) return empty;
       throw error;
     }
   }
@@ -312,12 +325,23 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
 
   async function loadEvents({ daysBack = 7, daysAhead = 90, force = false } = {}) {
     const settings = await getSettings();
-    if (!settings.ics_url) return { configured: false, events: [] };
     const now = Date.now();
     const windowStart = new Date(now - daysBack * 24 * 60 * 60 * 1000);
     const windowEnd = new Date(now + daysAhead * 24 * 60 * 60 * 1000);
+
+    // API credentials win over an ICS feed: Google expands recurrence for us
+    // and the data is fresher than a cached .ics file.
+    if (googleMode && settings.embed_calendar_id) {
+      const events = await google.listEvents(settings.embed_calendar_id, {
+        timeMin: windowStart,
+        timeMax: windowEnd,
+      });
+      return { configured: true, events, provider: googleMode };
+    }
+
+    if (!settings.ics_url) return { configured: false, events: [], provider: null };
     const text = await fetchIcs(settings.ics_url, { force });
-    return { configured: true, events: parseIcs(text, windowStart, windowEnd) };
+    return { configured: true, events: parseIcs(text, windowStart, windowEnd), provider: 'ics' };
   }
 
   /* ─── Delivery ──────────────────────────────────────────────────── */
@@ -481,14 +505,18 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
       try {
         const settings = await getSettings();
         res.json({
-          connected: Boolean(settings.ics_url),
+          connected: Boolean(googleMode ? settings.embed_calendar_id : settings.ics_url),
+          provider: googleMode || (settings.ics_url ? 'ics' : null),
+          google_mode: settings.google_mode,
+          service_account_email: settings.service_account_email,
+          needs_calendar_id: Boolean(googleMode && !settings.embed_calendar_id),
           // Never echo the secret feed URL back in full.
           ics_url_preview: settings.ics_url ? `${String(settings.ics_url).slice(0, 42)}…` : null,
           embed_calendar_id: settings.embed_calendar_id || null,
           time_zone: settings.time_zone || null,
           updated_at: settings.updated_at || null,
           source: settings.source,
-          env_managed: settings.source === 'env',
+          env_managed: settings.source === 'env' || Boolean(googleMode),
           channels: {
             sms: twilio.configured() && Boolean(twilio.fromNumber()),
             call: twilio.configured() && Boolean(twilio.fromNumber()),
@@ -502,8 +530,8 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
 
     app.put('/api/calendar/settings', async (req, res) => {
       if (!requireAdmin(req, res)) return;
-      if (ENV_ICS_URL) {
-        return res.status(409).json({ error: 'The calendar is configured through the GOOGLE_CALENDAR_ICS_URL environment variable. Change it there and redeploy.' });
+      if (ENV_ICS_URL || googleMode) {
+        return res.status(409).json({ error: 'The calendar is configured through environment variables. Change them in your host and redeploy.' });
       }
       const { ics_url, embed_calendar_id, time_zone } = req.body || {};
       const url = typeof ics_url === 'string' ? ics_url.trim() : '';
@@ -546,8 +574,8 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
 
     app.delete('/api/calendar/settings', async (req, res) => {
       if (!requireAdmin(req, res)) return;
-      if (ENV_ICS_URL) {
-        return res.status(409).json({ error: 'The calendar is configured through the GOOGLE_CALENDAR_ICS_URL environment variable. Remove it there and redeploy.' });
+      if (ENV_ICS_URL || googleMode) {
+        return res.status(409).json({ error: 'The calendar is configured through environment variables. Remove them in your host and redeploy.' });
       }
       try {
         await pool.query(
@@ -566,10 +594,10 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
       const daysAhead = Math.min(365, Math.max(1, parseInt(req.query.days, 10) || 90));
       const daysBack = Math.min(90, Math.max(0, parseInt(req.query.days_back, 10) || 7));
       try {
-        const { configured, events } = await loadEvents({
+        const { configured, events, provider } = await loadEvents({
           daysAhead, daysBack, force: req.query.refresh === '1',
         });
-        res.json({ configured, events });
+        res.json({ configured, events, provider });
       } catch (error) {
         res.status(502).json({ error: error.message || 'failed to read the calendar feed' });
       }
