@@ -20,6 +20,9 @@ const crypto = require('crypto');
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
 const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
 const TOKEN_SKEW_MS = 60 * 1000;
+// Without this a hung request to Google keeps the HTTP request open until the
+// hosting proxy gives up, which surfaces as an opaque 502 instead of a real error.
+const REQUEST_TIMEOUT_MS = 15 * 1000;
 
 function base64Url(input) {
   return Buffer.from(input)
@@ -51,7 +54,25 @@ function createGoogleCalendarClient({
   const email = String(serviceAccountEmail || '').trim();
   const privateKey = normalizePrivateKey(serviceAccountPrivateKey);
   const key = String(apiKey || '').trim();
-  const doFetch = (...args) => (fetchImpl || globalThis.fetch)(...args);
+  const doFetch = async (url, options = {}) => {
+    const impl = fetchImpl || globalThis.fetch;
+    if (typeof impl !== 'function') {
+      throw new Error('this Node version has no global fetch; upgrade Node to 18 or newer');
+    }
+    if (typeof AbortController !== 'function') return impl(url, options);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+    try {
+      return await impl(url, { ...options, signal: controller.signal });
+    } catch (error) {
+      if (error && (error.name === 'AbortError' || /abort/i.test(error.message || ''))) {
+        throw new Error(`Google did not respond within ${REQUEST_TIMEOUT_MS / 1000}s`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timer);
+    }
+  };
 
   let tokenCache = { token: null, expiresAt: 0 };
 
@@ -95,11 +116,16 @@ function createGoogleCalendarClient({
       grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
       assertion: signAssertion(),
     });
-    const resp = await doFetch(TOKEN_ENDPOINT, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: body.toString(),
-    });
+    let resp;
+    try {
+      resp = await doFetch(TOKEN_ENDPOINT, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: body.toString(),
+      });
+    } catch (error) {
+      throw new Error(`could not reach Google to sign in (${error.message})`);
+    }
     const data = await resp.json().catch(() => ({}));
     if (!resp.ok || !data.access_token) {
       const detail = data.error_description || data.error || `HTTP ${resp.status}`;

@@ -20,6 +20,7 @@ const ENV_API_KEY = (process.env.GOOGLE_CALENDAR_API_KEY || '').trim();
 const ENV_CALENDAR_ID = (process.env.GOOGLE_CALENDAR_ID || '').trim();
 const ENV_TIME_ZONE = (process.env.GOOGLE_CALENDAR_TIME_ZONE || '').trim();
 const ICS_CACHE_TTL_MS = 5 * 60 * 1000;
+const ICS_REQUEST_TIMEOUT_MS = 15 * 1000;
 const SCHEDULER_INTERVAL_MS = 60 * 1000;
 // A rule fires when the event is this close to starting (minus its lead time).
 const DISPATCH_TOLERANCE_MS = 5 * 60 * 1000;
@@ -299,6 +300,24 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
     }
   }
 
+  // A hung feed would otherwise hold the request open until the hosting proxy
+  // times out, which reaches the browser as an opaque 502.
+  async function fetchWithTimeout(url, options = {}) {
+    if (typeof AbortController !== 'function') return fetch(url, options);
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), ICS_REQUEST_TIMEOUT_MS);
+    try {
+      return await fetch(url, { ...options, signal: controller.signal });
+    } catch (error) {
+      if (error && (error.name === 'AbortError' || /abort/i.test(error.message || ''))) {
+        throw new Error(`the calendar feed did not respond within ${ICS_REQUEST_TIMEOUT_MS / 1000}s`);
+      }
+      throw error;
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+
   async function fetchIcs(url, { force = false } = {}) {
     const cached = icsCache.get(url);
     if (!force && cached && Date.now() - cached.fetchedAt < ICS_CACHE_TTL_MS) return cached.text;
@@ -310,7 +329,10 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
 
     let resp;
     try {
-      resp = await fetch(url, { headers: { Accept: 'text/calendar, text/plain' }, redirect: 'follow' });
+      resp = await fetchWithTimeout(url, {
+        headers: { Accept: 'text/calendar, text/plain' },
+        redirect: 'follow',
+      });
     } catch (error) {
       throw new Error(`could not reach that URL (${error.message})`);
     }

@@ -533,8 +533,25 @@ export default function CalendarPage() {
     return [...map.entries()].sort((a, b) => a[0].localeCompare(b[0]))
   }, [events])
 
+  const [isNarrow, setIsNarrow] = useState(
+    typeof window !== 'undefined' ? window.innerWidth < 768 : false
+  )
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined
+    const mq = window.matchMedia('(max-width: 767px)')
+    const onChange = e => setIsNarrow(e.matches)
+    setIsNarrow(mq.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [])
+
+  const embedMode = isNarrow ? 'AGENDA' : 'MONTH'
+
   const embedSrc = settings?.embed_calendar_id
-    ? `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(settings.embed_calendar_id)}&mode=MONTH&showTitle=0&showPrint=0&showTabs=0&showCalendars=0`
+    ? `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(settings.embed_calendar_id)}` +
+      `&mode=${embedMode}&showTitle=0&showPrint=0&showTabs=0&showCalendars=0&showNav=1` +
+      (settings.time_zone ? `&ctz=${encodeURIComponent(settings.time_zone)}` : '')
     : null
 
   if (loading) {
@@ -576,6 +593,18 @@ export default function CalendarPage() {
       {error && <div className="alert alert-warning text-sm">{error}</div>}
 
       {settings?.connected && (
+        <>
+        {embedSrc && (
+          <div className="rounded-xl border border-base-300 bg-base-100 p-2 shadow-sm mb-6">
+            <iframe
+              title="Google Calendar"
+              src={embedSrc}
+              className="w-full rounded-lg border-0 h-[70vh] min-h-[420px] max-h-[900px]"
+              loading="lazy"
+            />
+          </div>
+        )}
+
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <div className="space-y-4">
             <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">Upcoming events</h3>
@@ -622,16 +651,6 @@ export default function CalendarPage() {
           </div>
 
           <div className="space-y-6">
-            {embedSrc && (
-              <div className="rounded-xl border border-base-300 bg-base-100 p-2 shadow-sm">
-                <iframe
-                  title="Google Calendar"
-                  src={embedSrc}
-                  className="w-full rounded-lg"
-                  style={{ height: 420, border: 0 }}
-                />
-              </div>
-            )}
 
             <div className="space-y-3">
               <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">
@@ -673,6 +692,7 @@ export default function CalendarPage() {
             </div>
           </div>
         </div>
+        </>
       )}
 
       <NotificationModal
