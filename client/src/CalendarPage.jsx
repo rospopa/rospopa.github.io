@@ -199,7 +199,10 @@ function ConnectPanel({ settings, onSaved }) {
               </p>
               <ol className="list-decimal list-inside space-y-1">
                 <li>In Google Cloud, enable the <strong>Google Calendar API</strong>.</li>
-                <li>Create a service account and download its JSON key.</li>
+                <li>
+                  Create a service account, then <strong>skip the optional IAM role step</strong> &mdash; roles
+                  grant nothing on your calendar. Download its JSON key.
+                </li>
                 <li>
                   Set <code className="text-xs">GOOGLE_SERVICE_ACCOUNT_EMAIL</code> and{' '}
                   <code className="text-xs">GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY</code> from that file, plus{' '}
@@ -207,7 +210,8 @@ function ConnectPanel({ settings, onSaved }) {
                 </li>
                 <li>
                   In Google Calendar, share the calendar with the service account address
-                  (<em>Share with specific people</em>, See all event details).
+                  (<em>Share with specific people</em>). Choose <strong>See all event details</strong> &mdash;
+                  free/busy hides event titles. This sharing step is what grants access.
                 </li>
               </ol>
               <p>
