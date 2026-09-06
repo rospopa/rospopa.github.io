@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { apiFetch, formatPhone } from './shared'
 
 const CHANNELS = [
@@ -628,6 +628,7 @@ export default function CalendarPage() {
   const [contacts, setContacts] = useState([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [lastSynced, setLastSynced] = useState(null)
   const [error, setError] = useState('')
   const [showSettings, setShowSettings] = useState(false)
   const [modalEvent, setModalEvent] = useState(null)
@@ -645,12 +646,16 @@ export default function CalendarPage() {
     setRules(Array.isArray(data) ? data : [])
   }, [])
 
+  const lastFetchRef = useRef(0)
+
   const loadEvents = useCallback(async (force = false) => {
+    lastFetchRef.current = Date.now()
     try {
       // The month grid can be paged in either direction, so load the widest
       // window the API allows rather than just the upcoming few months.
       const data = await apiFetch(`/api/calendar/events?days=365&days_back=90${force ? '&refresh=1' : ''}`)
       setEvents(data.events || [])
+      setLastSynced(Date.now())
       setError('')
     } catch (e) {
       setEvents([])
@@ -680,13 +685,36 @@ export default function CalendarPage() {
     return () => { cancelled = true }
   }, [loadSettings, loadRules, loadEvents])
 
+  // Google is the source of truth, so an event added there has to appear here
+  // without the user having to know that a Refresh button exists.
+  useEffect(() => {
+    if (!settings?.connected) return undefined
+    const SYNC_INTERVAL_MS = 5 * 60 * 1000
+    const MIN_GAP_MS = 60 * 1000
+
+    const sync = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return
+      if (Date.now() - lastFetchRef.current < MIN_GAP_MS) return
+      loadEvents(true)
+    }
+
+    const timer = setInterval(sync, SYNC_INTERVAL_MS)
+    // Coming back to the tab is the moment a stale calendar is most obvious.
+    window.addEventListener('focus', sync)
+    document.addEventListener('visibilitychange', sync)
+    return () => {
+      clearInterval(timer)
+      window.removeEventListener('focus', sync)
+      document.removeEventListener('visibilitychange', sync)
+    }
+  }, [settings?.connected, loadEvents])
+
   async function refresh() {
     setRefreshing(true)
     await loadEvents(true)
     await loadRules()
     setRefreshing(false)
   }
-
   async function removeRule(id) {
     if (!confirm('Delete this notification?')) return
     await apiFetch(`/api/calendar/notifications/${id}`, { method: 'DELETE' })
@@ -776,6 +804,15 @@ export default function CalendarPage() {
           <p className="text-sm text-base-content/60">
             Your Google Calendar, with Call, Email and SMS notifications you can target at any contact.
           </p>
+          {settings?.connected && (
+            <p className="text-xs text-base-content/45 mt-1">
+              {error
+                ? 'Could not reach your calendar — the days below may be out of date.'
+                : lastSynced
+                  ? `Synced ${new Date(lastSynced).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })} · updates automatically`
+                  : 'Syncing…'}
+            </p>
+          )}
         </div>
         <div className="flex gap-2">
           {settings?.connected && (
@@ -805,6 +842,20 @@ export default function CalendarPage() {
       {settings?.connected && (
         <>
         <div className="mb-6 space-y-3">
+          {!error && events.length === 0 && (
+            <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm">
+              <p className="font-medium">Your calendar was read, but it returned no events.</p>
+              <p className="mt-1 text-base-content/70">
+                {settings.embed_calendar_id
+                  ? <>Reading <code className="text-xs">{settings.embed_calendar_id}</code>. If your events live on a different calendar, point <code className="text-xs">GOOGLE_CALENDAR_ID</code> at that one.</>
+                  : <>No calendar ID is set. Point <code className="text-xs">GOOGLE_CALENDAR_ID</code> at the calendar you want to read.</>}
+                {settings.service_account_email && (
+                  <> It also has to be shared with <code className="text-xs break-all">{settings.service_account_email}</code> using <strong>See all event details</strong>.</>
+                )}
+              </p>
+            </div>
+          )}
+
           <MonthGrid
             monthKey={monthKey}
             onMonthChange={setMonthKey}
@@ -824,7 +875,9 @@ export default function CalendarPage() {
               {fmtDayHeading(selectedDay)}
             </p>
             {selectedDayEvents.length === 0 ? (
-              <p className="mt-2 text-sm text-base-content/50">Nothing scheduled.</p>
+              <p className="mt-2 text-sm text-base-content/50">
+                {error ? 'Your calendar could not be read, so nothing can be shown here.' : 'Nothing scheduled.'}
+              </p>
             ) : (
               <div className="mt-2 space-y-1">
                 {selectedDayEvents.map(event => (
