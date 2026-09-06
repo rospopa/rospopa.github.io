@@ -613,8 +613,8 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
 
     app.post('/api/calendar/test-connection', async (req, res) => {
       if (!requireAdmin(req, res)) return;
-      const settings = await getSettings();
       try {
+        const settings = await getSettings();
         if (googleMode) {
           if (!settings.embed_calendar_id) {
             return res.status(400).json({

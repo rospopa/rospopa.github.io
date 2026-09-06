@@ -311,6 +311,25 @@ app.use((req, res, next) => {
   next();
 });
 
+// The port is opened before the database schema, admin user and session store
+// are ready, so that a cold boot answers requests instead of refusing the
+// connection. A refused connection reaches the browser as a bare 502 from the
+// hosting proxy with no explanation; this says what is actually happening.
+let appReady = false;
+app.get(_healthPath, (req, res) => {
+  res
+    .status(appReady ? 200 : 503)
+    .json({ ready: appReady, uptime: Math.round(process.uptime()) });
+});
+app.use((req, res, next) => {
+  if (appReady) return next();
+  if (!req.path.startsWith('/api/')) return next(); // static files need no database
+  res.set('Retry-After', '10');
+  res.status(503).json({
+    error: 'The server is still starting up and will be ready in a few seconds. Please try again.',
+  });
+});
+
 app.use(express.json({ limit: '60mb' }));
 app.use(express.urlencoded({ limit: '60mb', extended: true }));
 
@@ -2392,6 +2411,14 @@ app.use((err, req, res, next) => {
   }
 });
 
+// A rejected promise that nobody catches would otherwise terminate the process
+// silently, and every request during the restart becomes an unexplained 502.
+process.on('unhandledRejection', (reason) => {
+  console.error('Unhandled promise rejection:', reason && reason.stack ? reason.stack : reason);
+});
+
+app.listen(PORT, () => console.log(`Server listening on port ${PORT} (warming up)`));
+
 (async () => {
   try {
     await initializeSchema();
@@ -2399,7 +2426,8 @@ app.use((err, req, res, next) => {
     calendar.startScheduler();
     await initializeAdminUser();
     await initializeSessionMiddleware();
-    app.listen(PORT, () => console.log(`Server listening on port ${PORT} [session: ${sessionStoreType}]`));
+    appReady = true;
+    console.log(`Server ready [session: ${sessionStoreType}]`);
   } catch (err) {
     console.error('Failed to start server:', err && err.stack ? err.stack : err);
     process.exit(1);

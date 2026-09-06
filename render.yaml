@@ -7,5 +7,6 @@ services:
     buildCommand: "cd client && npm install && npm run build && cd ../server && npm install"
     startCommand: "cd server && npm start"
     autoDeploy: true
+    healthCheckPath: "/healthz"
     repo: "rospopa/rospopa.github.io"
     branch: "master"
