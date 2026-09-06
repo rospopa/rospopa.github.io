@@ -290,10 +290,22 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
     const cached = icsCache.get(url);
     if (!force && cached && Date.now() - cached.fetchedAt < ICS_CACHE_TTL_MS) return cached.text;
 
-    const resp = await fetch(url, { headers: { Accept: 'text/calendar, text/plain' }, redirect: 'follow' });
+    const isPublicUrl = /\/public\//.test(url);
+    const publicHint = isPublicUrl
+      ? ' This looks like the public iCal address, which only works if the calendar is shared publicly. Use the Secret address in iCal format instead.'
+      : '';
+
+    let resp;
+    try {
+      resp = await fetch(url, { headers: { Accept: 'text/calendar, text/plain' }, redirect: 'follow' });
+    } catch (error) {
+      throw new Error(`could not reach that URL (${error.message})`);
+    }
+    if (resp.status === 404) throw new Error(`the calendar feed was not found (404).${publicHint || ' Check the address was copied in full.'}`);
+    if (resp.status === 401 || resp.status === 403) throw new Error(`access to that calendar feed was denied (${resp.status}).${publicHint}`);
     if (!resp.ok) throw new Error(`calendar feed returned ${resp.status}`);
     const text = await resp.text();
-    if (!text.includes('BEGIN:VCALENDAR')) throw new Error('the URL did not return an iCal feed');
+    if (!text.includes('BEGIN:VCALENDAR')) throw new Error(`the URL did not return an iCal feed.${publicHint || ' Make sure it ends in .ics'}`);
     icsCache.set(url, { fetchedAt: Date.now(), text });
     return text;
   }
