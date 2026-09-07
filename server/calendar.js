@@ -7,7 +7,7 @@
  * registration is required.
  * ------------------------------------------------------------------ */
 
-const { createGoogleCalendarClient } = require('./googleCalendar');
+const { createGoogleCalendarClient, normalizeEvent } = require('./googleCalendar');
 
 const VALID_CHANNELS = ['call', 'email', 'sms'];
 
@@ -19,6 +19,10 @@ const ENV_SA_KEY = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY || '';
 const ENV_API_KEY = (process.env.GOOGLE_CALENDAR_API_KEY || '').trim();
 const ENV_CALENDAR_ID = (process.env.GOOGLE_CALENDAR_ID || '').trim();
 const ENV_TIME_ZONE = (process.env.GOOGLE_CALENDAR_TIME_ZONE || '').trim();
+// A second, read-only calendar (e.g. a published Outlook/Office 365 feed)
+// merged into the same view and tagged so the UI can tell the two apart.
+const ENV_WORK_ICS_URL = (process.env.WORK_CALENDAR_ICS_URL || '').trim();
+const ENV_WORK_LABEL = (process.env.WORK_CALENDAR_LABEL || 'Work').trim() || 'Work';
 const ICS_CACHE_TTL_MS = 5 * 60 * 1000;
 const ICS_REQUEST_TIMEOUT_MS = 15 * 1000;
 const SCHEDULER_INTERVAL_MS = 60 * 1000;
@@ -28,6 +32,35 @@ const EVENTS_CACHE_TTL_MS = 5 * 60 * 1000;
 const EVENTS_SYNC_INTERVAL_MS = 5 * 60 * 1000;
 // A rule fires when the event is this close to starting (minus its lead time).
 const DISPATCH_TOLERANCE_MS = 5 * 60 * 1000;
+
+/* ─── Contacts-on-events ──────────────────────────────────────────────
+ * Contacts attached to an event are stored platform-side and mirrored to
+ * Google. Real guest invites are attempted first, but Google forbids them
+ * for service accounts without Workspace domain-wide delegation, so the
+ * fallback writes a clearly-marked block into the event description. */
+const CONTACTS_MARKER = '=== Contacts (synced from rospopa.com) ===';
+// Google may HTML-ify the description after edits in its UI, so tolerate <br>s.
+const CONTACTS_BLOCK_RE = /(?:\s|<br\s*\/?>)*={3,} Contacts \(synced from rospopa\.com\) ={3,}[\s\S]*$/;
+
+function contactLabel(row) {
+  const name = [row.first_name, row.last_name].filter(Boolean).join(' ').trim();
+  return name || row.email || `contact #${row.id}`;
+}
+
+function buildContactsBlock(rows) {
+  if (!rows.length) return '';
+  const lines = rows.map(row => {
+    const bits = [contactLabel(row)];
+    if (row.email) bits.push(row.email);
+    if (row.organization) bits.push(row.organization);
+    return `• ${bits.join(' — ')}`;
+  });
+  return `${CONTACTS_MARKER}\n${lines.join('\n')}`;
+}
+
+function stripContactsBlock(description) {
+  return String(description || '').replace(CONTACTS_BLOCK_RE, '').trim();
+}
 
 /* ─── ICS parsing ─────────────────────────────────────────────────── */
 
@@ -61,8 +94,74 @@ function parseIcsLine(line) {
 }
 
 // Converts an ICS date/date-time value to a JS Date (UTC based).
-// Floating times and TZID times are treated as UTC-ish; Google's secret ICS
-// feed emits UTC (`Z`) for timed events, which is the common case.
+// Google's secret ICS feed emits UTC (`Z`); Outlook's published feed emits
+// wall-clock times tagged with Windows timezone names, which are resolved
+// through the map below. Unknown zones fall back to UTC.
+const WINDOWS_TZ_TO_IANA = {
+  'Eastern Standard Time': 'America/New_York',
+  'Central Standard Time': 'America/Chicago',
+  'Mountain Standard Time': 'America/Denver',
+  'US Mountain Standard Time': 'America/Phoenix',
+  'Pacific Standard Time': 'America/Los_Angeles',
+  'Alaskan Standard Time': 'America/Anchorage',
+  'Hawaiian Standard Time': 'Pacific/Honolulu',
+  'Atlantic Standard Time': 'America/Halifax',
+  'SA Pacific Standard Time': 'America/Bogota',
+  'Argentina Standard Time': 'America/Argentina/Buenos_Aires',
+  'GMT Standard Time': 'Europe/London',
+  'W. Europe Standard Time': 'Europe/Berlin',
+  'Central Europe Standard Time': 'Europe/Budapest',
+  'Central European Standard Time': 'Europe/Warsaw',
+  'Romance Standard Time': 'Europe/Paris',
+  'FLE Standard Time': 'Europe/Kyiv',
+  'GTB Standard Time': 'Europe/Bucharest',
+  'E. Europe Standard Time': 'Europe/Chisinau',
+  'Russian Standard Time': 'Europe/Moscow',
+  'Israel Standard Time': 'Asia/Jerusalem',
+  'Arabian Standard Time': 'Asia/Dubai',
+  'India Standard Time': 'Asia/Kolkata',
+  'SE Asia Standard Time': 'Asia/Bangkok',
+  'China Standard Time': 'Asia/Shanghai',
+  'Singapore Standard Time': 'Asia/Singapore',
+  'Tokyo Standard Time': 'Asia/Tokyo',
+  'Korea Standard Time': 'Asia/Seoul',
+  'AUS Eastern Standard Time': 'Australia/Sydney',
+  'New Zealand Standard Time': 'Pacific/Auckland',
+  'UTC': 'UTC',
+  'Coordinated Universal Time': 'UTC',
+};
+
+function resolveTzid(tzid) {
+  const raw = String(tzid || '').trim();
+  if (!raw) return null;
+  if (WINDOWS_TZ_TO_IANA[raw]) return WINDOWS_TZ_TO_IANA[raw];
+  // Some feeds already use IANA names (e.g. America/New_York).
+  if (raw.includes('/')) {
+    try {
+      new Intl.DateTimeFormat('en-US', { timeZone: raw });
+      return raw;
+    } catch { return null; }
+  }
+  return null;
+}
+
+// Interprets wall-clock components in a zone and returns the UTC instant.
+// Two passes converge across DST boundaries.
+function zonedTimeToUtc(year, month, day, hour, minute, second, ianaZone) {
+  let utc = Date.UTC(year, month - 1, day, hour, minute, second);
+  for (let i = 0; i < 2; i += 1) {
+    const dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: ianaZone, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false,
+    });
+    const parts = {};
+    for (const part of dtf.formatToParts(new Date(utc))) parts[part.type] = part.value;
+    const asUtc = Date.UTC(+parts.year, +parts.month - 1, +parts.day, (+parts.hour) % 24, +parts.minute, +parts.second);
+    utc += Date.UTC(year, month - 1, day, hour, minute, second) - asUtc;
+  }
+  return new Date(utc);
+}
+
 function parseIcsDate(value, params = {}) {
   if (!value) return null;
   const v = value.trim();
@@ -71,14 +170,24 @@ function parseIcsDate(value, params = {}) {
     return {
       date: new Date(Date.UTC(+dateOnly[1], +dateOnly[2] - 1, +dateOnly[3])),
       allDay: true,
+      wallDate: new Date(Date.UTC(+dateOnly[1], +dateOnly[2] - 1, +dateOnly[3])),
     };
   }
   const dateTime = /^(\d{4})(\d{2})(\d{2})T(\d{2})(\d{2})(\d{2})(Z)?$/.exec(v);
   if (dateTime) {
+    const [, y, mo, d, h, mi, s, z] = dateTime;
+    const wallDate = new Date(Date.UTC(+y, +mo - 1, +d));
+    if (!z && params.TZID) {
+      const iana = resolveTzid(params.TZID);
+      if (iana) {
+        return { date: zonedTimeToUtc(+y, +mo, +d, +h, +mi, +s, iana), allDay: false, tzid: params.TZID, wallDate };
+      }
+    }
     return {
-      date: new Date(Date.UTC(+dateTime[1], +dateTime[2] - 1, +dateTime[3], +dateTime[4], +dateTime[5], +dateTime[6])),
+      date: new Date(Date.UTC(+y, +mo - 1, +d, +h, +mi, +s)),
       allDay: false,
-      tzid: params.TZID || (dateTime[7] ? 'UTC' : null),
+      tzid: params.TZID || (z ? 'UTC' : null),
+      wallDate,
     };
   }
   const parsed = new Date(v);
@@ -186,12 +295,14 @@ function parseIcs(text, windowStart, windowEnd) {
     else if (name === 'LOCATION') current.location = unescapeIcsText(value);
     else if (name === 'STATUS') current.status = value.trim().toUpperCase();
     else if (name === 'RRULE') current.rrule = parseRRule(value);
+    // Outlook marks all-day events with this instead of VALUE=DATE.
+    else if (name === 'X-MICROSOFT-CDO-ALLDAYEVENT') current.msAllDay = /^TRUE$/i.test(value.trim());
     else if (name === 'DTSTART') {
       const d = parseIcsDate(value, params);
-      if (d) { current.start = d.date; current.allDay = d.allDay; }
+      if (d) { current.start = d.date; current.allDay = d.allDay; current.wallStart = d.wallDate || null; }
     } else if (name === 'DTEND') {
       const d = parseIcsDate(value, params);
-      if (d) current.end = d.date;
+      if (d) { current.end = d.date; current.wallEnd = d.wallDate || null; }
     } else if (name === 'EXDATE') {
       for (const piece of value.split(',')) {
         const d = parseIcsDate(piece, params);
@@ -203,6 +314,15 @@ function parseIcs(text, windowStart, windowEnd) {
   const expanded = [];
   for (const event of events) {
     if (event.status === 'CANCELLED') continue;
+
+    // Outlook all-day events arrive as midnight-to-midnight TZID times; snap
+    // them to their wall-clock dates so they render as true all-day entries.
+    if (event.msAllDay && !event.allDay && event.wallStart) {
+      event.allDay = true;
+      event.start = event.wallStart;
+      if (event.wallEnd) event.end = event.wallEnd;
+    }
+
     const durationMs = event.end && event.end > event.start
       ? event.end.getTime() - event.start.getTime()
       : (event.allDay ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000);
@@ -275,6 +395,17 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
     )`);
     await pool.query(`CREATE INDEX IF NOT EXISTS calendar_notifications_uid_idx
       ON calendar_event_notifications (event_uid)`);
+
+    await pool.query(`CREATE TABLE IF NOT EXISTS calendar_event_contacts (
+      id SERIAL PRIMARY KEY,
+      event_uid TEXT NOT NULL,
+      contact_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      added_by INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE (event_uid, contact_id)
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS calendar_event_contacts_uid_idx
+      ON calendar_event_contacts (event_uid)`);
   }
 
   async function getSettings() {
@@ -354,24 +485,67 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
     const windowStart = new Date(now - daysBack * 24 * 60 * 60 * 1000);
     const windowEnd = new Date(now + daysAhead * 24 * 60 * 60 * 1000);
 
-    // API credentials win over an ICS feed: Google expands recurrence for us
-    // and the data is fresher than a cached .ics file.
-    if (googleMode && settings.embed_calendar_id) {
-      const result = await google.listEvents(settings.embed_calendar_id, {
-        timeMin: windowStart,
-        timeMax: windowEnd,
-      });
-      return {
-        configured: true,
-        events: result.events,
-        provider: googleMode,
-        details_hidden: result.detailsHidden || false,
-      };
+    const tag = (events, calendar, editable) =>
+      events.map(event => ({ ...event, calendar, editable }));
+
+    // Personal calendar: API credentials win over an ICS feed - Google expands
+    // recurrence for us and the data is fresher than a cached .ics file.
+    const loadPersonal = async () => {
+      if (googleMode && settings.embed_calendar_id) {
+        const result = await google.listEvents(settings.embed_calendar_id, {
+          timeMin: windowStart,
+          timeMax: windowEnd,
+        });
+        return {
+          events: tag(result.events, 'personal', googleMode === 'service_account'),
+          provider: googleMode,
+          details_hidden: result.detailsHidden || false,
+        };
+      }
+      if (!settings.ics_url) return null;
+      const text = await fetchIcs(settings.ics_url, { force });
+      return { events: tag(parseIcs(text, windowStart, windowEnd), 'personal', false), provider: 'ics', details_hidden: false };
+    };
+
+    // Work calendar: a published Outlook feed is read-only by nature.
+    const loadWork = async () => {
+      if (!ENV_WORK_ICS_URL) return null;
+      const text = await fetchIcs(ENV_WORK_ICS_URL, { force });
+      return { events: tag(parseIcs(text, windowStart, windowEnd), 'work', false) };
+    };
+
+    const [personal, work] = await Promise.allSettled([loadPersonal(), loadWork()]);
+
+    // Both sources broken (or the only configured one): a real error.
+    if (personal.status === 'rejected' && (work.status === 'rejected' || !ENV_WORK_ICS_URL)) {
+      throw personal.reason;
+    }
+    if (personal.status === 'fulfilled' && personal.value === null && work.status === 'rejected') {
+      throw new Error(`the work calendar feed failed: ${work.reason.message}`);
     }
 
-    if (!settings.ics_url) return { configured: false, events: [], provider: null };
-    const text = await fetchIcs(settings.ics_url, { force });
-    return { configured: true, events: parseIcs(text, windowStart, windowEnd), provider: 'ics' };
+    const personalValue = personal.status === 'fulfilled' ? personal.value : null;
+    const workValue = work.status === 'fulfilled' ? work.value : null;
+    const configured = Boolean(personalValue || workValue || ENV_WORK_ICS_URL);
+    if (!personalValue && !workValue) return { configured: false, events: [], provider: null };
+
+    const events = [...(personalValue ? personalValue.events : []), ...(workValue ? workValue.events : [])]
+      .sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    // One side failing degrades to a labelled partial view, not an error page.
+    let syncError = null;
+    if (personal.status === 'rejected') syncError = `the personal calendar failed: ${personal.reason.message}`;
+    else if (work.status === 'rejected') syncError = `the ${ENV_WORK_LABEL} calendar feed failed: ${work.reason.message}`;
+
+    return {
+      configured,
+      events,
+      provider: personalValue ? personalValue.provider : 'ics',
+      details_hidden: Boolean(personalValue && personalValue.details_hidden),
+      work_calendar: Boolean(ENV_WORK_ICS_URL),
+      work_label: ENV_WORK_ICS_URL ? ENV_WORK_LABEL : null,
+      ...(syncError ? { sync_error: syncError } : {}),
+    };
   }
 
   // Requests are answered from this synced copy, so a page load never waits on
@@ -409,9 +583,54 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
     }
   }
 
-  /* ─── Delivery ──────────────────────────────────────────────────── */
+  /** Mirror an event's contact list to Google: real guests when allowed,
+   *  otherwise a marked block in the description. Never throws. */
+  async function syncContactsToGoogle(calendarId, eventId, contactRows) {
+    let current;
+    try {
+      current = await google.getEvent(calendarId, eventId);
+    } catch (error) {
+      return { synced: false, method: null, reason: `could not read the event from Google (${error.message})` };
+    }
 
-  function describeEvent(rule, startsAt) {
+    const base = stripContactsBlock(current.description);
+    const block = buildContactsBlock(contactRows);
+    const description = block ? `${base}${base ? '\n\n' : ''}${block}` : base;
+
+    // Only ever ADD guests: removing one that was invited directly in Google
+    // Calendar is not ours to do.
+    const existing = Array.isArray(current.attendees) ? current.attendees : [];
+    const have = new Set(existing.map(a => String(a.email || '').toLowerCase()));
+    const additions = contactRows
+      .filter(row => row.email && !have.has(String(row.email).toLowerCase()))
+      .map(row => ({ email: row.email, displayName: contactLabel(row) }));
+
+    if (additions.length) {
+      try {
+        await google.patchEvent(calendarId, eventId, { description, attendees: [...existing, ...additions] });
+        return { synced: true, method: 'attendees', reason: null };
+      } catch (error) {
+        if (error.code !== 'attendees_forbidden') {
+          return { synced: false, method: null, reason: error.message };
+        }
+        // Fall back to the description block below.
+      }
+    }
+    try {
+      await google.patchEvent(calendarId, eventId, { description });
+      return {
+        synced: true,
+        method: 'description',
+        reason: additions.length
+          ? 'Google blocks robot accounts from sending guest invites, so the contacts were written into the event description instead.'
+          : null,
+      };
+    } catch (error) {
+      return { synced: false, method: null, reason: error.message };
+    }
+  }
+
+  /* ─── Delivery ──────────────────────────────────────────────────── */  function describeEvent(rule, startsAt) {
     const when = startsAt
       ? new Date(startsAt).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'UTC' }) + ' UTC'
       : 'soon';
@@ -586,7 +805,10 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
       try {
         const settings = await getSettings();
         res.json({
-          connected: Boolean(googleMode ? settings.embed_calendar_id : settings.ics_url),
+          connected: Boolean(googleMode ? settings.embed_calendar_id : settings.ics_url) || Boolean(ENV_WORK_ICS_URL),
+          work_calendar: Boolean(ENV_WORK_ICS_URL),
+          work_label: ENV_WORK_ICS_URL ? ENV_WORK_LABEL : null,
+          work_ics_url_preview: ENV_WORK_ICS_URL ? `${ENV_WORK_ICS_URL.slice(0, 42)}…` : null,
           provider: googleMode || (settings.ics_url ? 'ics' : null),
           google_mode: settings.google_mode,
           service_account_email: settings.service_account_email,
@@ -672,41 +894,66 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
 
     app.post('/api/calendar/test-connection', async (req, res) => {
       if (!requireAdmin(req, res)) return;
+      let settings;
       try {
-        const settings = await getSettings();
-        if (googleMode) {
-          if (!settings.embed_calendar_id) {
-            return res.status(400).json({
-              ok: false,
-              error: 'Set GOOGLE_CALENDAR_ID to the calendar you want to read (usually your Gmail address).',
-            });
-          }
-          const verified = await google.verify(settings.embed_calendar_id);
-          const freeBusyNote = verified.accessRole === 'freeBusyReader'
-            ? ' However, the calendar is shared as free/busy only, so event titles are hidden - change the share to "See all event details".'
-            : '';
-          return res.json({
-            ok: true,
-            provider: googleMode,
-            access_role: verified.accessRole || null,
-            message: (googleMode === 'service_account'
-              ? `Reached ${settings.embed_calendar_id} as ${google.serviceAccountEmail}.`
-              : `Reached ${settings.embed_calendar_id} with the API key.`) + freeBusyNote,
-          });
-        }
-        if (!settings.ics_url) {
-          return res.status(400).json({ ok: false, error: 'No calendar is configured yet.' });
-        }
-        const result = await loadEvents({ daysAhead: 7, daysBack: 1, force: true });
-        return res.json({
-          ok: true,
-          provider: 'ics',
-          message: `Read the calendar feed (${result.events.length} event(s) in the next week).`,
-        });
+        settings = await getSettings();
       } catch (error) {
         // 424, not 502: Cloudflare replaces origin 502 bodies with its own page.
-        return res.status(424).json({ ok: false, error: error.message || 'could not reach the calendar' });
+        return res.status(424).json({ ok: false, error: error.message || 'could not load calendar settings' });
       }
+
+      // Each configured source is tested independently so one broken feed
+      // doesn't hide the other's status.
+      const results = [];
+      let accessRole = null;
+
+      if (googleMode) {
+        if (!settings.embed_calendar_id) {
+          results.push({ ok: false, message: 'Personal: set GOOGLE_CALENDAR_ID to the calendar you want to read (usually your Gmail address).' });
+        } else {
+          try {
+            const verified = await google.verify(settings.embed_calendar_id);
+            accessRole = verified.accessRole || null;
+            const freeBusyNote = verified.accessRole === 'freeBusyReader'
+              ? ' However, the calendar is shared as free/busy only, so event titles are hidden - change the share to "See all event details".'
+              : '';
+            results.push({
+              ok: true,
+              message: (googleMode === 'service_account'
+                ? `Personal: reached ${settings.embed_calendar_id} as ${google.serviceAccountEmail}.`
+                : `Personal: reached ${settings.embed_calendar_id} with the API key.`) + freeBusyNote,
+            });
+          } catch (error) {
+            results.push({ ok: false, message: `Personal: ${error.message}` });
+          }
+        }
+      } else if (settings.ics_url) {
+        try {
+          const text = await fetchIcs(settings.ics_url, { force: true });
+          const events = parseIcs(text, new Date(Date.now() - 86400000), new Date(Date.now() + 7 * 86400000));
+          results.push({ ok: true, message: `Personal: read the calendar feed (${events.length} event(s) in the next week).` });
+        } catch (error) {
+          results.push({ ok: false, message: `Personal: ${error.message}` });
+        }
+      }
+
+      if (ENV_WORK_ICS_URL) {
+        try {
+          const text = await fetchIcs(ENV_WORK_ICS_URL, { force: true });
+          const events = parseIcs(text, new Date(Date.now() - 86400000), new Date(Date.now() + 7 * 86400000));
+          results.push({ ok: true, message: `${ENV_WORK_LABEL}: read the published feed (${events.length} event(s) in the next week).` });
+        } catch (error) {
+          results.push({ ok: false, message: `${ENV_WORK_LABEL}: ${error.message}` });
+        }
+      }
+
+      if (!results.length) {
+        return res.status(400).json({ ok: false, error: 'No calendar is configured yet.' });
+      }
+      const ok = results.some(r => r.ok);
+      const message = results.map(r => `${r.ok ? '✓' : '✗'} ${r.message}`).join('  ');
+      if (!ok) return res.status(424).json({ ok: false, error: message });
+      return res.json({ ok: true, provider: googleMode || 'ics', access_role: accessRole, message });
     });
     app.get('/api/calendar/events', async (req, res) => {
       if (!requireAdmin(req, res)) return;
@@ -721,6 +968,150 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
         // Not 502: Cloudflare swaps the body of an origin 502/504 for its own
         // error page, which hides this message from the client entirely.
         res.status(424).json({ error: error.message || 'failed to read the calendar feed' });
+      }
+    });
+
+    // Edit an event in place. Requires the calendar to be shared with the
+    // service account as "Make changes to events".
+    app.patch('/api/calendar/events/:eventId', async (req, res) => {
+      if (!requireAdmin(req, res)) return;
+      const eventId = String(req.params.eventId || '').trim();
+      if (!eventId || eventId.length > 1024) return res.status(400).json({ error: 'invalid event id' });
+      if ((req.body || {}).calendar === 'work') {
+        return res.status(409).json({ error: `The ${ENV_WORK_LABEL} calendar is a published read-only feed - edit that event in Outlook.` });
+      }
+      try {
+        const settings = await getSettings();
+        if (!(googleMode === 'service_account' && settings.embed_calendar_id)) {
+          return res.status(409).json({
+            error: googleMode
+              ? 'Editing needs the service account connection with GOOGLE_CALENDAR_ID set.'
+              : 'Editing events needs the Google API connection - a read-only iCal feed cannot be written to.',
+          });
+        }
+        const body = req.body || {};
+        const patch = {};
+        if (typeof body.title === 'string') {
+          const title = body.title.trim();
+          if (!title) return res.status(400).json({ error: 'the event needs a title' });
+          patch.summary = title;
+        }
+        if (typeof body.description === 'string') patch.description = body.description;
+        if (typeof body.location === 'string') patch.location = body.location.trim();
+        if (body.start || body.end) {
+          if (!body.start || !body.end) return res.status(400).json({ error: 'start and end must be set together' });
+          if (body.all_day) {
+            const dateOnly = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateOnly.test(body.start) || !dateOnly.test(body.end)) {
+              return res.status(400).json({ error: 'all-day times must be YYYY-MM-DD dates' });
+            }
+            if (body.end <= body.start) return res.status(400).json({ error: 'the event must end after it starts' });
+            // Google's all-day end date is exclusive; the client sends it that way.
+            patch.start = { date: body.start };
+            patch.end = { date: body.end };
+          } else {
+            const start = new Date(body.start);
+            const end = new Date(body.end);
+            if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+              return res.status(400).json({ error: 'unreadable start or end time' });
+            }
+            if (end <= start) return res.status(400).json({ error: 'the event must end after it starts' });
+            patch.start = { dateTime: start.toISOString() };
+            patch.end = { dateTime: end.toISOString() };
+          }
+        }
+        if (Object.keys(patch).length === 0) return res.status(400).json({ error: 'nothing to update' });
+
+        // The description carries the synced contacts block; rebuild it from
+        // the stored contact list so an edit can't silently erase it.
+        if (typeof patch.description === 'string') {
+          const uid = String(body.uid || eventId);
+          const rows = (await pool.query(
+            `SELECT u.id, u.first_name, u.last_name, u.email, u.organization
+             FROM calendar_event_contacts ec JOIN users u ON u.id = ec.contact_id
+             WHERE ec.event_uid = $1 ORDER BY u.first_name, u.last_name`,
+            [uid]
+          )).rows;
+          const base = stripContactsBlock(patch.description);
+          const block = buildContactsBlock(rows);
+          patch.description = block ? `${base}${base ? '\n\n' : ''}${block}` : base;
+        }
+
+        const updated = await google.patchEvent(settings.embed_calendar_id, eventId, patch);
+        eventsCache.clear();
+        await logAudit(req.session.user.id, req.session.user.email, 'calendar_event_edited',
+          { event_id: eventId, fields: Object.keys(patch) }, null, null, clientIp(req));
+        res.json({ ok: true, event: normalizeEvent(updated) });
+      } catch (error) {
+        res.status(424).json({ error: error.message || 'could not update the event' });
+      }
+    });
+
+    app.get('/api/calendar/event-contacts', async (req, res) => {
+      if (!requireAdmin(req, res)) return;
+      try {
+        const result = await pool.query(
+          `SELECT ec.event_uid, ec.contact_id, u.first_name, u.last_name, u.email, u.organization
+           FROM calendar_event_contacts ec
+           JOIN users u ON u.id = ec.contact_id
+           ORDER BY u.first_name, u.last_name`
+        );
+        res.json(result.rows);
+      } catch (error) {
+        res.status(500).json({ error: 'failed to load event contacts' });
+      }
+    });
+
+    // Replace the set of contacts on an event (keyed by series uid so it
+    // covers every occurrence), then mirror the list to Google.
+    app.put('/api/calendar/events/:uid/contacts', async (req, res) => {
+      if (!requireAdmin(req, res)) return;
+      const uid = String(req.params.uid || '').trim();
+      if (!uid || uid.length > 1024) return res.status(400).json({ error: 'invalid event id' });
+      const ids = Array.from(new Set(
+        (Array.isArray(req.body && req.body.contact_ids) ? req.body.contact_ids : [])
+          .map(Number).filter(n => Number.isInteger(n) && n > 0)
+      ));
+      try {
+        const contactRows = ids.length
+          ? (await pool.query(
+              `SELECT id, first_name, last_name, email, organization FROM users WHERE id = ANY($1::int[])`,
+              [ids]
+            )).rows
+          : [];
+        if (contactRows.length !== ids.length) {
+          return res.status(400).json({ error: 'one of those contacts no longer exists' });
+        }
+
+        await pool.query(`DELETE FROM calendar_event_contacts WHERE event_uid = $1`, [uid]);
+        for (const row of contactRows) {
+          await pool.query(
+            `INSERT INTO calendar_event_contacts (event_uid, contact_id, added_by)
+             VALUES ($1, $2, $3) ON CONFLICT (event_uid, contact_id) DO NOTHING`,
+            [uid, row.id, req.session.user.id]
+          );
+        }
+
+        const settings = await getSettings();
+        let googleSync = {
+          synced: false, method: null,
+          reason: 'The calendar is connected through a read-only feed, so Google was not updated.',
+        };
+        if (String((req.body || {}).source || '') === 'work') {
+          googleSync = {
+            synced: false, method: null,
+            reason: `The ${ENV_WORK_LABEL} calendar is a read-only published feed, so contacts are saved on the platform only.`,
+          };
+        } else if (googleMode === 'service_account' && settings.embed_calendar_id) {
+          googleSync = await syncContactsToGoogle(settings.embed_calendar_id, uid, contactRows);
+          if (googleSync.synced) eventsCache.clear();
+        }
+
+        await logAudit(req.session.user.id, req.session.user.email, 'calendar_event_contacts_updated',
+          { event_uid: uid, contact_ids: ids, google: googleSync.method || 'not_synced' }, null, null, clientIp(req));
+        res.json({ ok: true, contacts: contactRows, google: googleSync });
+      } catch (error) {
+        res.status(424).json({ error: error.message || 'could not update the event contacts' });
       }
     });
 

@@ -18,7 +18,9 @@
 const crypto = require('crypto');
 
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
-const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.readonly';
+// Read/write on events (not full calendar admin): needed so events can be
+// edited in-app. Reads still work on a view-only share; writes then 403.
+const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events';
 const TOKEN_SKEW_MS = 60 * 1000;
 // Without this a hung request to Google keeps the HTTP request open until the
 // hosting proxy gives up, which surfaces as an opaque 502 instead of a real error.
@@ -223,7 +225,64 @@ function createGoogleCalendarClient({
     return { accessRole };
   }
 
-  return { mode, hasServiceAccount, hasApiKey, listEvents, verify, getAccessToken, serviceAccountEmail: email };
+  async function getEvent(calendarId, eventId) {
+    const params = new URLSearchParams();
+    if (!hasServiceAccount && hasApiKey) params.set('key', key);
+    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}?${params}`;
+    const headers = { Accept: 'application/json' };
+    if (hasServiceAccount) headers.Authorization = `****** getAccessToken()}`;
+    let resp;
+    try {
+      resp = await doFetch(url, { headers });
+    } catch (error) {
+      throw new Error(`could not reach the Google Calendar API (${error.message})`);
+    }
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) throw new Error(describeApiError(resp.status, data, calendarId));
+    return data;
+  }
+
+  /** Partial update. Throws err.code='attendees_forbidden' when Google blocks
+   *  robot invites, so the caller can fall back to the description. */
+  async function patchEvent(calendarId, eventId, patch) {
+    if (!hasServiceAccount) {
+      throw new Error('editing events needs the service account credentials - an API key is read-only');
+    }
+    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}`;
+    let resp;
+    try {
+      resp = await doFetch(url, {
+        method: 'PATCH',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `****** getAccessToken()}`,
+        },
+        body: JSON.stringify(patch),
+      });
+    } catch (error) {
+      throw new Error(`could not reach the Google Calendar API (${error.message})`);
+    }
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      const reason = data?.error?.message || `HTTP ${resp.status}`;
+      if (/cannot invite attendees|Domain-Wide Delegation/i.test(reason)) {
+        const err = new Error('Google blocks service accounts from inviting guests without Workspace domain-wide delegation.');
+        err.code = 'attendees_forbidden';
+        throw err;
+      }
+      if (resp.status === 403) {
+        throw new Error(
+          `Google refused the change: the calendar is shared view-only with ${email}. In Google Calendar sharing, change its permission to "Make changes to events". (${reason})`
+        );
+      }
+      if (resp.status === 404) throw new Error(describeApiError(404, data, calendarId));
+      throw new Error(`Google Calendar API error: ${reason}`);
+    }
+    return data;
+  }
+
+  return { mode, hasServiceAccount, hasApiKey, listEvents, verify, getEvent, patchEvent, getAccessToken, serviceAccountEmail: email };
 }
 
 /** Map a Calendar API resource onto the same shape the ICS parser produces. */

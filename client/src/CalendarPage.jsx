@@ -115,6 +115,32 @@ function fmtDayHeading(key) {
   return date.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', timeZone: 'UTC' })
 }
 
+// Mirrors the server's managed contacts block so it can be hidden from the
+// description text (contacts get their own chips instead).
+const CONTACTS_BLOCK_RE = /(?:\s|<br\s*\/?>)*={3,} Contacts \(synced from rospopa\.com\) ={3,}[\s\S]*$/
+
+function displayDescription(event) {
+  return plainText(String(event.description || '').replace(CONTACTS_BLOCK_RE, ''))
+}
+
+function contactName(c) {
+  const name = [c.first_name, c.last_name].filter(Boolean).join(' ').trim()
+  return name || c.email || `contact #${c.contact_id || c.id}`
+}
+
+// datetime-local inputs want local wall-clock "YYYY-MM-DDTHH:mm".
+function toLocalInputValue(iso) {
+  const d = new Date(iso)
+  const p = n => String(n).padStart(2, '0')
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`
+}
+
+function addDaysDateOnly(dateStr, n) {
+  const d = new Date(`${dateStr}T00:00:00Z`)
+  d.setUTCDate(d.getUTCDate() + n)
+  return d.toISOString().slice(0, 10)
+}
+
 /* ─── Connect panel ─────────────────────────────────────────────── */
 
 function ConnectPanel({ settings, onSaved }) {
@@ -287,9 +313,25 @@ function ConnectPanel({ settings, onSaved }) {
                 For a public calendar you can instead set{' '}
                 <code className="text-xs">GOOGLE_CALENDAR_API_KEY</code>.
               </p>
+              <p>
+                To merge a <strong>work calendar</strong> (Outlook / Office 365), publish it in Outlook
+                (Settings → Calendar → Shared calendars → Publish, "Can view all details") and set{' '}
+                <code className="text-xs">WORK_CALENDAR_ICS_URL</code> to the published ICS address. It
+                appears alongside your personal events, read-only.
+              </p>
             </div>
           </details>
         </>
+      )}
+
+      {settings?.work_calendar && (
+        <div className="rounded-lg bg-base-200 px-3 py-2 space-y-1">
+          <p className="text-sm">
+            <span className="badge badge-success badge-sm mr-2">Connected</span>
+            {settings.work_label || 'Work'} calendar via <code className="text-xs">WORK_CALENDAR_ICS_URL</code> · read-only feed
+          </p>
+          <p className="text-xs text-base-content/55 break-all">{settings.work_ics_url_preview}</p>
+        </div>
       )}
 
       <div className="flex items-center gap-3 flex-wrap">
@@ -395,7 +437,7 @@ export function MonthGrid({ monthKey, onMonthChange, eventsByDay, selectedDay, o
               {/* Phones have no room for labels, so the day shows a density dot. */}
               <span className="mt-1 flex gap-0.5 sm:hidden">
                 {dayEvents.slice(0, 3).map(event => (
-                  <span key={event.occurrence_id} className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  <span key={event.occurrence_id} className={`h-1.5 w-1.5 rounded-full ${event.calendar === 'work' ? 'bg-secondary' : 'bg-primary'}`} />
                 ))}
               </span>
 
@@ -406,7 +448,11 @@ export function MonthGrid({ monthKey, onMonthChange, eventsByDay, selectedDay, o
                     type="button"
                     title={event.title}
                     onClick={e => { e.stopPropagation(); onOpenEvent(event) }}
-                    className="block w-full truncate rounded bg-primary/15 px-1 py-[1px] text-left text-[11px] leading-tight text-primary hover:bg-primary/30"
+                    className={`block w-full truncate rounded px-1 py-[1px] text-left text-[11px] leading-tight ${
+                      event.calendar === 'work'
+                        ? 'bg-secondary/15 text-secondary hover:bg-secondary/30'
+                        : 'bg-primary/15 text-primary hover:bg-primary/30'
+                    }`}
                   >
                     {event.all_day ? '' : `${fmtChipTime(event)} `}{event.title}
                   </button>
@@ -425,35 +471,273 @@ export function MonthGrid({ monthKey, onMonthChange, eventsByDay, selectedDay, o
 
 /* ─── Event details ─────────────────────────────────────────────── */
 
-function EventDetailModal({ event, rules, onClose, onAddNotification }) {
-  if (!event) return null
-  const description = plainText(event.description)
+function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNotification, onSaved }) {
+  // Field edits go to Google, so they need the writable connection; the work
+  // calendar is a published read-only feed. Contacts are always editable -
+  // they live on the platform and sync to Google only when possible.
+  const isWork = event ? event.calendar === 'work' : false
+  const fieldsEditable = event ? (!isWork && event.editable !== false) : false
+
+  const [editing, setEditing] = useState(false)
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const [search, setSearch] = useState('')
+
+  // The parent remounts this modal per event (key=occurrence_id), so state
+  // initializers run fresh for each event. No effect-based reset: it would
+  // wipe in-progress edits when the page re-renders mid-edit (auto-sync).
+  const initialRef = useRef(null)
+  if (event && !initialRef.current) {
+    initialRef.current = {
+      title: event.title === '(no title)' ? '' : event.title,
+      location: event.location || '',
+      description: displayDescription(event),
+      allDay: Boolean(event.all_day),
+      startLocal: event.all_day ? '' : toLocalInputValue(event.start),
+      endLocal: event.all_day ? '' : toLocalInputValue(event.end),
+      startDate: String(event.start).slice(0, 10),
+      // Google's all-day end is exclusive; humans expect the last day inclusive.
+      endDate: event.all_day ? addDaysDateOnly(String(event.end).slice(0, 10), -1) : String(event.end || event.start).slice(0, 10),
+      ids: new Set((attached || []).map(c => c.contact_id)),
+    }
+  }
+  const initial = initialRef.current
+
+  const [form, setForm] = useState(initial)
+  const [selectedIds, setSelectedIds] = useState(() => (initial ? new Set(initial.ids) : new Set()))
+
+  if (!event || !form) return null
+
+  const description = displayDescription(event)
+  const set = patch => setForm(f => ({ ...f, ...patch }))
+  const toggleContact = id => setSelectedIds(prev => {
+    const next = new Set(prev)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  })
+
+  const eligibleContacts = (contacts || []).filter(c => {
+    const q = search.trim().toLowerCase()
+    if (!q) return true
+    return [c.first_name, c.last_name, c.email, c.organization].filter(Boolean).join(' ').toLowerCase().includes(q)
+  })
+
+  const fieldsDirty = fieldsEditable && (
+    form.title !== initial.title ||
+    form.location !== initial.location ||
+    form.description !== initial.description
+  )
+  const timesDirty = fieldsEditable && (
+    form.allDay !== initial.allDay ||
+    (form.allDay
+      ? (form.startDate !== initial.startDate || form.endDate !== initial.endDate)
+      : (form.startLocal !== initial.startLocal || form.endLocal !== initial.endLocal))
+  )
+  const contactsDirty = selectedIds.size !== initial.ids.size || [...selectedIds].some(id => !initial.ids.has(id))
+  const dirty = fieldsDirty || timesDirty || contactsDirty
+
+  async function save() {
+    setSaving(true); setError('')
+    try {
+      let updatedEvent = null
+      let googleSync = null
+
+      if (fieldsDirty || timesDirty) {
+        const payload = { calendar: event.calendar, uid: event.uid }
+        if (form.title !== initial.title) payload.title = form.title
+        if (form.location !== initial.location) payload.location = form.location
+        if (form.description !== initial.description) payload.description = form.description
+        if (timesDirty) {
+          payload.all_day = form.allDay
+          if (form.allDay) {
+            payload.start = form.startDate
+            payload.end = addDaysDateOnly(form.endDate, 1)
+          } else {
+            payload.start = new Date(form.startLocal).toISOString()
+            payload.end = new Date(form.endLocal).toISOString()
+          }
+        }
+        const r = await apiFetch(`/api/calendar/events/${encodeURIComponent(event.occurrence_id)}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        })
+        updatedEvent = r.event
+      }
+
+      if (contactsDirty) {
+        const r = await apiFetch(`/api/calendar/events/${encodeURIComponent(event.uid)}/contacts`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ contact_ids: [...selectedIds], source: event.calendar }),
+        })
+        googleSync = r.google
+      }
+
+      onSaved({ updatedEvent, googleSync })
+      onClose()
+    } catch (e) {
+      setError(e.message || 'Could not save the event')
+    } finally {
+      setSaving(false)
+    }
+  }
+
   return (
     <div className="modal modal-open" onClick={onClose}>
       <div className="modal-box max-w-lg" onClick={e => e.stopPropagation()}>
-        <h3 className="text-lg font-bold">{event.title}</h3>
-        <p className="mt-1 text-sm text-base-content/70">{fmtEventTime(event)}</p>
-        {event.location && <p className="mt-1 text-sm text-base-content/60">📍 {event.location}</p>}
-        {event.recurring && <p className="mt-1 text-xs text-base-content/45">Repeats</p>}
-        {description && (
-          <p className="mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap text-sm text-base-content/75">{description}</p>
-        )}
-        {rules.length > 0 && (
-          <div className="mt-4">
-            <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">Notifications</p>
-            <div className="mt-1 flex flex-wrap gap-1">
-              {rules.map(rule => (
-                <span key={rule.id} className={`badge badge-sm gap-1 ${rule.enabled ? 'badge-primary badge-outline' : 'badge-ghost'}`}>
-                  {channelMeta(rule.channel).icon} {leadLabel(rule.minutes_before)}
-                </span>
-              ))}
+        {!editing ? (
+          <>
+            <div className="flex items-start justify-between gap-2">
+              <h3 className="text-lg font-bold">{event.title}</h3>
+              {isWork && <span className="badge badge-secondary badge-outline badge-sm shrink-0">Work</span>}
             </div>
-          </div>
+            <p className="mt-1 text-sm text-base-content/70">{fmtEventTime(event)}</p>
+            {event.location && <p className="mt-1 text-sm text-base-content/60">📍 {event.location}</p>}
+            {event.recurring && <p className="mt-1 text-xs text-base-content/45">Repeats</p>}
+            {description && (
+              <p className="mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap text-sm text-base-content/75">{description}</p>
+            )}
+            {(attached || []).length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">Contacts</p>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {attached.map(c => (
+                    <span key={c.contact_id} className="badge badge-sm badge-outline gap-1">
+                      {contactName(c)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {rules.length > 0 && (
+              <div className="mt-4">
+                <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">Notifications</p>
+                <div className="mt-1 flex flex-wrap gap-1">
+                  {rules.map(rule => (
+                    <span key={rule.id} className={`badge badge-sm gap-1 ${rule.enabled ? 'badge-primary badge-outline' : 'badge-ghost'}`}>
+                      {channelMeta(rule.channel).icon} {leadLabel(rule.minutes_before)}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            <div className="modal-action flex-wrap">
+              <button className="btn btn-sm" onClick={onClose}>Close</button>
+              <button className="btn btn-sm btn-outline" onClick={() => setEditing(true)}>
+                {fieldsEditable ? 'Edit' : 'Contacts'}
+              </button>
+              <button className="btn btn-sm btn-primary" onClick={() => onAddNotification(event)}>+ Notification</button>
+            </div>
+          </>
+        ) : (
+          <>
+            <h3 className="text-lg font-bold">{fieldsEditable ? 'Edit event' : 'Event contacts'}</h3>
+            {!fieldsEditable && (
+              <p className="mt-1 text-xs text-base-content/55">
+                {isWork
+                  ? 'This event comes from the read-only work feed - change its details in Outlook. Contacts are saved on the platform.'
+                  : 'This connection is read-only, so event details cannot be changed here. Contacts are saved on the platform.'}
+              </p>
+            )}
+
+            {fieldsEditable && (
+              <div className="mt-3 space-y-3">
+                <label className="form-control">
+                  <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Title</span>
+                  <input className="input input-bordered input-sm w-full" value={form.title}
+                    onChange={e => set({ title: e.target.value })} />
+                </label>
+
+                <label className="flex items-center gap-2 text-sm">
+                  <input type="checkbox" className="checkbox checkbox-sm" checked={form.allDay}
+                    onChange={e => set({ allDay: e.target.checked })} />
+                  All day
+                </label>
+
+                {form.allDay ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <label className="form-control">
+                      <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Starts</span>
+                      <input type="date" className="input input-bordered input-sm w-full" value={form.startDate}
+                        onChange={e => set({ startDate: e.target.value })} />
+                    </label>
+                    <label className="form-control">
+                      <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Ends</span>
+                      <input type="date" className="input input-bordered input-sm w-full" value={form.endDate}
+                        onChange={e => set({ endDate: e.target.value })} />
+                    </label>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                    <label className="form-control">
+                      <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Starts</span>
+                      <input type="datetime-local" className="input input-bordered input-sm w-full" value={form.startLocal}
+                        onChange={e => set({ startLocal: e.target.value })} />
+                    </label>
+                    <label className="form-control">
+                      <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Ends</span>
+                      <input type="datetime-local" className="input input-bordered input-sm w-full" value={form.endLocal}
+                        onChange={e => set({ endLocal: e.target.value })} />
+                    </label>
+                  </div>
+                )}
+
+                <label className="form-control">
+                  <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Location</span>
+                  <input className="input input-bordered input-sm w-full" value={form.location}
+                    onChange={e => set({ location: e.target.value })} />
+                </label>
+
+                <label className="form-control">
+                  <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Description</span>
+                  <textarea className="textarea textarea-bordered w-full" rows={3} value={form.description}
+                    onChange={e => set({ description: e.target.value })} />
+                </label>
+              </div>
+            )}
+
+            <div className="mt-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">
+                Contacts on this event {selectedIds.size > 0 && `(${selectedIds.size})`}
+              </p>
+              <input className="input input-bordered input-sm mt-2 w-full" placeholder="Search contacts…"
+                value={search} onChange={e => setSearch(e.target.value)} />
+              <div className="mt-2 max-h-44 space-y-1 overflow-y-auto rounded-lg border border-base-200 p-2">
+                {eligibleContacts.length === 0 && (
+                  <p className="p-1 text-sm text-base-content/50">No contacts match.</p>
+                )}
+                {eligibleContacts.map(c => (
+                  <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-sm hover:bg-base-200">
+                    <input type="checkbox" className="checkbox checkbox-xs" checked={selectedIds.has(c.id)}
+                      onChange={() => toggleContact(c.id)} />
+                    <span className="min-w-0 flex-1 truncate">
+                      {contactName(c)}
+                      {c.organization && <span className="text-base-content/45"> · {c.organization}</span>}
+                    </span>
+                    {c.email && <span className="hidden truncate text-xs text-base-content/40 sm:inline">{c.email}</span>}
+                  </label>
+                ))}
+              </div>
+              <p className="mt-1 text-[11px] text-base-content/45">
+                {isWork
+                  ? 'Saved on the platform. The work feed itself is read-only.'
+                  : 'Saved here and synced onto the Google Calendar event.'}
+              </p>
+            </div>
+
+            {error && <div className="alert alert-warning mt-3 py-2 text-sm">{error}</div>}
+
+            <div className="modal-action">
+              <button className="btn btn-sm" onClick={() => { setForm(initial); setSelectedIds(new Set(initial.ids)); setEditing(false); setError('') }} disabled={saving}>
+                Cancel
+              </button>
+              <button className="btn btn-sm btn-primary" onClick={save} disabled={saving || !dirty}>
+                {saving ? <span className="loading loading-spinner loading-xs" /> : null} Save
+              </button>
+            </div>
+          </>
         )}
-        <div className="modal-action">
-          <button className="btn btn-sm" onClick={onClose}>Close</button>
-          <button className="btn btn-sm btn-primary" onClick={() => onAddNotification(event)}>+ Notification</button>
-        </div>
       </div>
     </div>
   )
@@ -647,6 +931,19 @@ export default function CalendarPage() {
     setRules(Array.isArray(data) ? data : [])
   }, [])
 
+  const [eventContacts, setEventContacts] = useState(new Map())
+  const loadEventContacts = useCallback(async () => {
+    try {
+      const rows = await apiFetch('/api/calendar/event-contacts')
+      const map = new Map()
+      for (const row of (Array.isArray(rows) ? rows : [])) {
+        if (!map.has(row.event_uid)) map.set(row.event_uid, [])
+        map.get(row.event_uid).push(row)
+      }
+      setEventContacts(map)
+    } catch { /* contact chips are optional */ }
+  }, [])
+
   const lastFetchRef = useRef(0)
 
   const loadEvents = useCallback(async (force = false) => {
@@ -660,7 +957,7 @@ export default function CalendarPage() {
       setLastSynced(data.synced_at || Date.now())
       // The server keeps serving its last good copy when Google stops
       // answering; say so rather than silently showing stale days.
-      setError(data.sync_error ? `Google sync is failing: ${data.sync_error}` : '')
+      setError(data.sync_error ? `Calendar sync is degraded: ${data.sync_error}` : '')
     } catch (e) {
       setEvents([])
       setError(e.message || 'Could not read the calendar feed')
@@ -678,6 +975,7 @@ export default function CalendarPage() {
         await Promise.all([
           loadRules(),
           s.connected ? loadEvents() : Promise.resolve(),
+          s.connected ? loadEventContacts() : Promise.resolve(),
           apiFetch('/api/contacts')
             .then(contactData => {
               if (!cancelled) setContacts(Array.isArray(contactData) ? contactData : (contactData.contacts || []))
@@ -691,7 +989,7 @@ export default function CalendarPage() {
       }
     })()
     return () => { cancelled = true }
-  }, [loadSettings, loadRules, loadEvents])
+  }, [loadSettings, loadRules, loadEvents, loadEventContacts])
 
   // Google is the source of truth, so an event added there has to appear here
   // without the user having to know that a Refresh button exists.
@@ -877,6 +1175,13 @@ export default function CalendarPage() {
             </div>
           )}
 
+          {settings.work_calendar && (
+            <div className="flex items-center gap-4 text-xs text-base-content/55">
+              <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" /> Personal</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-secondary" /> {settings.work_label || 'Work'}</span>
+            </div>
+          )}
+
           <MonthGrid
             monthKey={monthKey}
             onMonthChange={setMonthKey}
@@ -909,6 +1214,7 @@ export default function CalendarPage() {
                     className="flex w-full items-baseline gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-base-200"
                   >
                     <span className="w-20 shrink-0 text-xs text-base-content/55">{fmtChipTime(event)}</span>
+                    <span className={`h-2 w-2 shrink-0 self-center rounded-full ${event.calendar === 'work' ? 'bg-secondary' : 'bg-primary'}`} />
                     <span className="min-w-0 flex-1 truncate text-sm">{event.title}</span>
                     {(rulesByEvent.get(event.uid) || []).length > 0 && (
                       <span className="text-xs text-base-content/45">
@@ -942,9 +1248,17 @@ export default function CalendarPage() {
                           className="min-w-0 text-left"
                           onClick={() => setDetailEvent(event)}
                         >
-                          <p className="font-medium truncate hover:underline">{event.title}</p>
+                          <p className="font-medium truncate hover:underline">
+                            {event.calendar === 'work' && <span className="badge badge-secondary badge-outline badge-xs mr-1.5 align-middle">Work</span>}
+                            {event.title}
+                          </p>
                           <p className="text-xs text-base-content/60">{fmtEventTime(event)}</p>
                           {event.location && <p className="text-xs text-base-content/45 truncate">{event.location}</p>}
+                          {(eventContacts.get(event.uid) || []).length > 0 && (
+                            <p className="text-xs text-base-content/45 truncate">
+                              👥 {(eventContacts.get(event.uid) || []).map(contactName).join(', ')}
+                            </p>
+                          )}
                         </button>
                         <button className="btn btn-xs btn-outline" onClick={() => setModalEvent(event)}>
                           + Notification
@@ -1016,10 +1330,36 @@ export default function CalendarPage() {
       )}
 
       <EventDetailModal
+        key={detailEvent ? detailEvent.occurrence_id : 'none'}
         event={detailEvent}
         rules={detailEvent ? (rulesByEvent.get(detailEvent.uid) || []) : []}
+        contacts={contacts}
+        attached={detailEvent ? (eventContacts.get(detailEvent.uid) || []) : []}
         onClose={() => setDetailEvent(null)}
         onAddNotification={event => { setDetailEvent(null); setModalEvent(event) }}
+        onSaved={({ updatedEvent, googleSync }) => {
+          if (updatedEvent) {
+            // Show the change immediately; the forced refetch below confirms it.
+            setEvents(evts => evts.map(e => (
+              e.occurrence_id === updatedEvent.occurrence_id
+                ? { ...e, ...updatedEvent, calendar: e.calendar, editable: e.editable }
+                : e
+            )))
+          }
+          loadEvents(true)
+          loadEventContacts()
+          const note = googleSync
+            ? (googleSync.synced
+                ? (googleSync.method === 'attendees'
+                    ? 'Saved. Contacts added as guests on the Google Calendar event.'
+                    : (googleSync.reason || 'Saved. Contacts synced onto the Google Calendar event.'))
+                : `Saved on the platform. ${googleSync.reason || 'Google was not updated.'}`)
+            : (updatedEvent ? 'Event updated on Google Calendar.' : '')
+          if (note) {
+            setToast(note)
+            setTimeout(() => setToast(''), 8000)
+          }
+        }}
       />
 
       <NotificationModal
