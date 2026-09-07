@@ -230,7 +230,7 @@ function createGoogleCalendarClient({
     if (!hasServiceAccount && hasApiKey) params.set('key', key);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}?${params}`;
     const headers = { Accept: 'application/json' };
-    if (hasServiceAccount) headers.Authorization = `****** getAccessToken()}`;
+    if (hasServiceAccount) headers.Authorization = `Bearer ${await getAccessToken()}`;
     let resp;
     try {
       resp = await doFetch(url, { headers });
@@ -256,7 +256,7 @@ function createGoogleCalendarClient({
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
-          Authorization: `****** getAccessToken()}`,
+          Authorization: `Bearer ${await getAccessToken()}`,
         },
         body: JSON.stringify(patch),
       });
