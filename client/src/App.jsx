@@ -269,7 +269,8 @@ function AddUserForm({ onCreated }) {
 
 /* ─── Audit Logs ──────────────────────────────────────────────── */
 
-function EditUserModal({ open, user, onClose, onSave }) {
+export function EditUserModal({ open, user, onClose, onSave }) {
+  const [email, setEmail] = useState('')
   const [firstName, setFirstName] = useState('')
   const [lastName, setLastName] = useState('')
   const [organization, setOrganization] = useState('')
@@ -287,6 +288,7 @@ function EditUserModal({ open, user, onClose, onSave }) {
 
   useEffect(() => {
     if (open && user) {
+      setEmail(user.email || '')
       setFirstName(user.first_name || '')
       setLastName(user.last_name || '')
       setOrganization(user.organization || '')
@@ -312,20 +314,26 @@ function EditUserModal({ open, user, onClose, onSave }) {
   async function handleSave() {
     setSaving(true); setErr('')
     try {
+      const payload = {
+        first_name: firstName || null,
+        last_name: lastName || null,
+        organization: organization || null,
+        phone_number: phoneNumber || null,
+        role,
+        contact_type: contactType || null,
+        buy_box: buyBox || null,
+        birthday: birthday || null,
+        profile_photo: photo || null
+      }
+      // Email is the login identity: only send it when actually changed, so
+      // the server's admin check and duplicate check run only when needed.
+      if (email.trim().toLowerCase() !== String(user.email || '').toLowerCase()) {
+        payload.email = email.trim()
+      }
       await apiFetch(`/api/users/${user.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          first_name: firstName || null,
-          last_name: lastName || null,
-          organization: organization || null,
-          phone_number: phoneNumber || null,
-          role,
-          contact_type: contactType || null,
-          buy_box: buyBox || null,
-          birthday: birthday || null,
-          profile_photo: photo || null
-        })
+        body: JSON.stringify(payload)
       })
       setSavedSignal(s => s + 1)
       setTimeout(() => { onSave(); onClose() }, 1200)
@@ -356,11 +364,14 @@ function EditUserModal({ open, user, onClose, onSave }) {
         </div>
 
         <div className="space-y-4">
-          {/* Email (read-only identifier) */}
-          <div className="text-sm text-base-content/50 pb-1 border-b border-base-300">
-            <p className="font-medium text-base-content">{user.email}</p>
-            <p className="text-xs">ID: {user.id}</p>
-          </div>
+          {/* Email doubles as the login identity */}
+          <Field label="Email">
+            <input type="email" placeholder="name@example.com" value={email}
+              onChange={e => setEmail(e.target.value)} className="input input-bordered w-full" />
+          </Field>
+          <p className="text-xs text-base-content/50 -mt-2">
+            ID: {user.id} · changing the email changes what this user signs in with
+          </p>
 
           {/* Profile photo */}
           <div className="flex items-center gap-4">
