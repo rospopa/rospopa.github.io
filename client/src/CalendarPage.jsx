@@ -1022,7 +1022,7 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
         {!recipientId && meta.needs === 'phone' && (
           <label className="form-control">
             <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Phone number</span>
-            <input className="input input-bordered" placeholder="+1 407 972 4041" value={manualPhone} onChange={e => setManualPhone(e.target.value)} />
+            <input className="input input-bordered" placeholder="+1 555 123 4567" value={manualPhone} onChange={e => setManualPhone(e.target.value)} />
           </label>
         )}
         {!recipientId && meta.needs === 'email' && (

@@ -664,7 +664,8 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
     if (!twilio.configured()) throw new Error('Voice calls are not configured');
     const to = twilio.toE164(rule.recipient_phone);
     if (!to) throw new Error('recipient has no usable phone number');
-    const from = twilio.toE164(twilio.fromNumber());
+    // Calls may present a verified personal caller ID; SMS cannot.
+    const from = twilio.toE164((twilio.callerId && twilio.callerId()) || twilio.fromNumber());
     if (!from) throw new Error('no Twilio from-number configured');
     const spoken = body.replace(/[<>&]/g, ' ');
     const twiml = `<Response><Say voice="alice">${spoken}</Say><Pause length="1"/><Say voice="alice">${spoken}</Say></Response>`;

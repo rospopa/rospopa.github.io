@@ -22,6 +22,10 @@ const FROM_EMAIL = 'noreply@rospopa.com';
 const TWILIO_ACCOUNT_SID = process.env.TWILIO_ACCOUNT_SID || '';
 const TWILIO_AUTH_TOKEN = process.env.TWILIO_AUTH_TOKEN || '';
 const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
+// Optional separate caller ID for voice calls (e.g. your own cell, after
+// verifying it in Twilio). SMS cannot use it - Twilio requires SMS to come
+// from a Twilio-owned number, so texts keep using TWILIO_PHONE_NUMBER.
+const TWILIO_CALLER_ID = process.env.TWILIO_CALLER_ID || '';
 const VALID_USER_ROLES = ['admin', 'user'];
 const VALID_CONTACT_TYPES = ['investor', 'colleague', 'family', 'partner'];
 const DEFAULT_BULK_IMPORT_PASSWORD = 'ContactImport2026!';
@@ -1116,6 +1120,7 @@ const calendar = createCalendarModule({
     authHeader: twilioAuthHeader,
     accountSid: () => TWILIO_ACCOUNT_SID,
     fromNumber: () => TWILIO_PHONE_NUMBER,
+    callerId: () => TWILIO_CALLER_ID || TWILIO_PHONE_NUMBER,
     toE164,
   },
 });
