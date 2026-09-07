@@ -70,15 +70,26 @@
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
 }
 
-/* Ensure inputs and textareas are always interactive */
+/* Ensure form controls are always interactive, with the right cursor for
+   each kind: I-beam only where you can type, pointer where you click. */
 input:not([disabled]),
 textarea:not([disabled]),
 select:not([disabled]) {
   pointer-events: auto;
-  cursor: text;
   color: var(--color-base-content);
 }
-select:not([disabled]) { cursor: pointer; }
+textarea:not([disabled]),
+input:not([disabled]):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="color"]) {
+  cursor: text;
+}
+select:not([disabled]),
+input[type="checkbox"]:not([disabled]),
+input[type="radio"]:not([disabled]),
+input[type="range"]:not([disabled]),
+input[type="file"]:not([disabled]),
+input[type="color"]:not([disabled]) {
+  cursor: pointer;
+}
 
 /* Hide reCAPTCHA badge until user is identified on login */
 .recaptcha-hidden .grecaptcha-badge {
