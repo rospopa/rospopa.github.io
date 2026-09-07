@@ -150,6 +150,81 @@ const CAL_CHIP = { personal: 'cal-chip-personal', work: 'cal-chip-work' }
 const CAL_DOT = { personal: 'cal-dot-personal', work: 'cal-dot-work' }
 const CAL_BADGE = { personal: 'cal-badge-personal', work: 'cal-badge-work' }
 
+/* ─── Contact multi-picker ──────────────────────────────────────────
+ * The one picker used everywhere contacts are chosen: search, checklist,
+ * removable chips and a running count, so every modal behaves the same. */
+function ContactMultiPicker({
+  label,
+  contacts,
+  selectedIds,
+  onToggle,
+  metaOf = c => c.email || '',
+  searchPlaceholder = 'Search contacts by name, email or organization…',
+  emptyText = 'No contacts yet.',
+  footnote = null,
+}) {
+  const [search, setSearch] = useState('')
+
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return contacts
+    return contacts.filter(c =>
+      [c.first_name, c.last_name, c.email, c.organization, c.phone_number]
+        .filter(Boolean).join(' ').toLowerCase().includes(q)
+    )
+  }, [contacts, search])
+
+  const selected = useMemo(
+    () => contacts.filter(c => selectedIds.has(c.id)),
+    [contacts, selectedIds]
+  )
+
+  return (
+    <div className="flex flex-col gap-1">
+      <span className="label-text text-xs uppercase tracking-widest text-base-content/50">
+        {label} {selectedIds.size > 0 && `(${selectedIds.size} selected)`}
+      </span>
+      <input
+        className="input input-bordered input-sm w-full"
+        placeholder={searchPlaceholder}
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+      />
+      {selected.length > 0 && (
+        <div className="mt-1 flex flex-wrap gap-1">
+          {selected.map(c => (
+            <span key={c.id} className="badge badge-primary badge-outline gap-1">
+              {contactName(c)}
+              <button type="button" className="ml-0.5 leading-none" aria-label={`Remove ${contactName(c)}`}
+                onClick={() => onToggle(c.id)}>✕</button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="mt-1 max-h-44 space-y-0.5 overflow-y-auto rounded-lg border border-base-200 p-1.5">
+        {contacts.length === 0 && (
+          <p className="p-1.5 text-sm text-base-content/50">{emptyText}</p>
+        )}
+        {contacts.length > 0 && visible.length === 0 && (
+          <p className="p-1.5 text-sm text-base-content/50">No contacts match "{search.trim()}".</p>
+        )}
+        {visible.map(c => (
+          <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-sm hover:bg-base-200">
+            <input type="checkbox" className="checkbox checkbox-xs" checked={selectedIds.has(c.id)}
+              onChange={() => onToggle(c.id)} />
+            <span className="min-w-0 flex-1 truncate">
+              {contactName(c)}
+              {c.organization && <span className="text-base-content/45"> · {c.organization}</span>}
+            </span>
+            {metaOf(c) && <span className="hidden shrink-0 text-xs text-base-content/40 sm:inline">{metaOf(c)}</span>}
+          </label>
+        ))}
+      </div>
+      {footnote && <p className="text-[11px] text-base-content/45">{footnote}</p>}
+    </div>
+  )
+}
+
 /* ─── Connect panel ─────────────────────────────────────────────── */
 
 function ConnectPanel({ settings, onSaved }) {
@@ -486,7 +561,6 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
   const [editing, setEditing] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
-  const [search, setSearch] = useState('')
 
   // The parent remounts this modal per event (key=occurrence_id), so state
   // initializers run fresh for each event. No effect-based reset: it would
@@ -519,12 +593,6 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
     const next = new Set(prev)
     if (next.has(id)) next.delete(id); else next.add(id)
     return next
-  })
-
-  const eligibleContacts = (contacts || []).filter(c => {
-    const q = search.trim().toLowerCase()
-    if (!q) return true
-    return [c.first_name, c.last_name, c.email, c.organization].filter(Boolean).join(' ').toLowerCase().includes(q)
   })
 
   const fieldsDirty = fieldsEditable && (
@@ -703,32 +771,15 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
             )}
 
             <div className="mt-4">
-              <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">
-                Contacts on this event {selectedIds.size > 0 && `(${selectedIds.size})`}
-              </p>
-              <input className="input input-bordered input-sm mt-2 w-full" placeholder="Search contacts…"
-                value={search} onChange={e => setSearch(e.target.value)} />
-              <div className="mt-2 max-h-44 space-y-1 overflow-y-auto rounded-lg border border-base-200 p-2">
-                {eligibleContacts.length === 0 && (
-                  <p className="p-1 text-sm text-base-content/50">No contacts match.</p>
-                )}
-                {eligibleContacts.map(c => (
-                  <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-sm hover:bg-base-200">
-                    <input type="checkbox" className="checkbox checkbox-xs" checked={selectedIds.has(c.id)}
-                      onChange={() => toggleContact(c.id)} />
-                    <span className="min-w-0 flex-1 truncate">
-                      {contactName(c)}
-                      {c.organization && <span className="text-base-content/45"> · {c.organization}</span>}
-                    </span>
-                    {c.email && <span className="hidden truncate text-xs text-base-content/40 sm:inline">{c.email}</span>}
-                  </label>
-                ))}
-              </div>
-              <p className="mt-1 text-[11px] text-base-content/45">
-                {isWork
+              <ContactMultiPicker
+                label="Contacts on this event"
+                contacts={contacts || []}
+                selectedIds={selectedIds}
+                onToggle={toggleContact}
+                footnote={isWork
                   ? 'Saved on the platform. The work feed itself is read-only.'
                   : 'Saved here and synced onto the Google Calendar event.'}
-              </p>
+              />
             </div>
 
             {error && <div className="alert alert-warning mt-3 py-2 text-sm">{error}</div>}
@@ -767,7 +818,6 @@ function EventCreateModal({ contacts, defaultDay, onClose, onCreated }) {
     title: '', location: '', description: '', allDay: false, ...init,
   })
   const [selectedIds, setSelectedIds] = useState(new Set())
-  const [search, setSearch] = useState('')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const set = patch => setForm(f => ({ ...f, ...patch }))
@@ -775,11 +825,6 @@ function EventCreateModal({ contacts, defaultDay, onClose, onCreated }) {
     const next = new Set(prev)
     if (next.has(id)) next.delete(id); else next.add(id)
     return next
-  })
-  const eligibleContacts = (contacts || []).filter(c => {
-    const q = search.trim().toLowerCase()
-    if (!q) return true
-    return [c.first_name, c.last_name, c.email, c.organization].filter(Boolean).join(' ').toLowerCase().includes(q)
   })
 
   async function save() {
@@ -871,32 +916,13 @@ function EventCreateModal({ contacts, defaultDay, onClose, onCreated }) {
               onChange={e => set({ description: e.target.value })} />
           </label>
 
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">
-              Contacts on this event {selectedIds.size > 0 && `(${selectedIds.size})`}
-            </p>
-            <input className="input input-bordered input-sm mt-2 w-full" placeholder="Search contacts…"
-              value={search} onChange={e => setSearch(e.target.value)} />
-            <div className="mt-2 max-h-40 space-y-1 overflow-y-auto rounded-lg border border-base-200 p-2">
-              {eligibleContacts.length === 0 && (
-                <p className="p-1 text-sm text-base-content/50">No contacts match.</p>
-              )}
-              {eligibleContacts.map(c => (
-                <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-sm hover:bg-base-200">
-                  <input type="checkbox" className="checkbox checkbox-xs" checked={selectedIds.has(c.id)}
-                    onChange={() => toggleContact(c.id)} />
-                  <span className="min-w-0 flex-1 truncate">
-                    {contactName(c)}
-                    {c.organization && <span className="text-base-content/45"> · {c.organization}</span>}
-                  </span>
-                  {c.email && <span className="hidden truncate text-xs text-base-content/40 sm:inline">{c.email}</span>}
-                </label>
-              ))}
-            </div>
-            <p className="mt-1 text-[11px] text-base-content/45">
-              Saved here and synced onto the Google Calendar event.
-            </p>
-          </div>
+          <ContactMultiPicker
+            label="Contacts on this event"
+            contacts={contacts || []}
+            selectedIds={selectedIds}
+            onToggle={toggleContact}
+            footnote="Saved here and synced onto the Google Calendar event."
+          />
         </div>
 
         {error && <div className="alert alert-warning mt-3 py-2 text-sm">{error}</div>}
@@ -916,7 +942,6 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
   const [channel, setChannel] = useState('sms')
   const [minutesBefore, setMinutesBefore] = useState(15)
   const [selectedIds, setSelectedIds] = useState(new Set())
-  const [search, setSearch] = useState('')
   const [manualEmail, setManualEmail] = useState('')
   const [manualPhone, setManualPhone] = useState('')
   const [message, setMessage] = useState('')
@@ -925,7 +950,7 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
 
   useEffect(() => {
     if (open) {
-      setChannel('sms'); setMinutesBefore(15); setSelectedIds(new Set()); setSearch('')
+      setChannel('sms'); setMinutesBefore(15); setSelectedIds(new Set())
       setManualEmail(''); setManualPhone(''); setMessage(''); setError('')
     }
   }, [open])
@@ -935,15 +960,6 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
   const eligible = useMemo(() => contacts.filter(c => (
     meta.needs === 'phone' ? Boolean(c.phone_number) : Boolean(c.email)
   )), [contacts, meta.needs])
-
-  const visible = useMemo(() => {
-    const q = search.trim().toLowerCase()
-    if (!q) return eligible
-    return eligible.filter(c =>
-      [c.first_name, c.last_name, c.email, c.organization, c.phone_number]
-        .filter(Boolean).join(' ').toLowerCase().includes(q)
-    )
-  }, [eligible, search])
 
   const selectedContacts = useMemo(
     () => contacts.filter(c => selectedIds.has(c.id)),
@@ -1056,51 +1072,15 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
           </select>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">
-            Who to notify {selectedIds.size > 0 && `(${selectedIds.size} selected)`}
-          </span>
-          <input
-            className="input input-bordered input-sm w-full"
-            placeholder={`Search contacts by name, email${meta.needs === 'phone' ? ', phone' : ''} or organization…`}
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          {selectedContacts.length > 0 && (
-            <div className="mt-1 flex flex-wrap gap-1">
-              {selectedContacts.map(c => (
-                <span key={c.id} className="badge badge-primary badge-outline gap-1">
-                  {contactName(c)}
-                  <button type="button" className="ml-0.5 leading-none" aria-label={`Remove ${contactName(c)}`}
-                    onClick={() => toggleContact(c.id)}>✕</button>
-                </span>
-              ))}
-            </div>
-          )}
-          <div className="mt-1 max-h-44 space-y-0.5 overflow-y-auto rounded-lg border border-base-200 p-1.5">
-            {eligible.length === 0 && (
-              <p className="p-1.5 text-sm text-base-content/50">
-                No contacts have a {meta.needs === 'phone' ? 'phone number' : 'email address'} on file.
-              </p>
-            )}
-            {eligible.length > 0 && visible.length === 0 && (
-              <p className="p-1.5 text-sm text-base-content/50">No contacts match "{search.trim()}".</p>
-            )}
-            {visible.map(c => (
-              <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-sm hover:bg-base-200">
-                <input type="checkbox" className="checkbox checkbox-xs" checked={selectedIds.has(c.id)}
-                  onChange={() => toggleContact(c.id)} />
-                <span className="min-w-0 flex-1 truncate">
-                  {contactName(c)}
-                  {c.organization && <span className="text-base-content/45"> · {c.organization}</span>}
-                </span>
-                <span className="hidden shrink-0 text-xs text-base-content/40 sm:inline">
-                  {meta.needs === 'phone' ? formatPhone(c.phone_number) : c.email}
-                </span>
-              </label>
-            ))}
-          </div>
-        </div>
+        <ContactMultiPicker
+          label="Who to notify"
+          contacts={eligible}
+          selectedIds={selectedIds}
+          onToggle={toggleContact}
+          metaOf={c => (meta.needs === 'phone' ? formatPhone(c.phone_number) : c.email)}
+          searchPlaceholder={`Search contacts by name, email${meta.needs === 'phone' ? ', phone' : ''} or organization…`}
+          emptyText={`No contacts have a ${meta.needs === 'phone' ? 'phone number' : 'email address'} on file.`}
+        />
 
         <div className="flex flex-col gap-1">
           <span className="label-text text-xs uppercase tracking-widest text-base-content/50">
