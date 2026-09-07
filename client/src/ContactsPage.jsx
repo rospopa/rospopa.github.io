@@ -625,6 +625,83 @@ function SmsModal({ contact, onClose }) {
   )
 }
 
+function ProfileEditor({ user, onSaved, onCancel }) {
+  const [form, setForm] = useState({
+    first_name: user.first_name || '',
+    last_name: user.last_name || '',
+    email: user.email || '',
+    phone_number: user.phone_number || '',
+    organization: user.organization || '',
+  })
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const set = patch => setForm(f => ({ ...f, ...patch }))
+
+  async function save() {
+    // Send only what changed so the audit log records a true diff.
+    const payload = {}
+    if (form.first_name.trim() !== (user.first_name || '')) payload.first_name = form.first_name.trim()
+    if (form.last_name.trim() !== (user.last_name || '')) payload.last_name = form.last_name.trim()
+    if (form.email.trim().toLowerCase() !== (user.email || '')) payload.email = form.email.trim()
+    if (form.phone_number.trim() !== (user.phone_number || '')) payload.phone_number = form.phone_number.trim()
+    if (form.organization.trim() !== (user.organization || '')) payload.organization = form.organization.trim()
+    if (Object.keys(payload).length === 0) { onCancel(); return }
+
+    setSaving(true); setError('')
+    try {
+      const row = await apiFetch(`/api/users/${user.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      onSaved(row)
+    } catch (e) {
+      setError(e.message || 'Could not save the contact')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="w-full space-y-2">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+        <label className="form-control">
+          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">First name</span>
+          <input className="input input-bordered input-sm w-full" value={form.first_name}
+            onChange={e => set({ first_name: e.target.value })} autoFocus />
+        </label>
+        <label className="form-control">
+          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Last name</span>
+          <input className="input input-bordered input-sm w-full" value={form.last_name}
+            onChange={e => set({ last_name: e.target.value })} />
+        </label>
+        <label className="form-control">
+          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Email</span>
+          <input type="email" className="input input-bordered input-sm w-full" value={form.email}
+            onChange={e => set({ email: e.target.value })} />
+        </label>
+        <label className="form-control">
+          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Phone</span>
+          <input type="tel" className="input input-bordered input-sm w-full" value={form.phone_number}
+            onChange={e => set({ phone_number: e.target.value })} />
+        </label>
+        <label className="form-control sm:col-span-2">
+          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Organization</span>
+          <input className="input input-bordered input-sm w-full" value={form.organization}
+            onChange={e => set({ organization: e.target.value })} />
+        </label>
+      </div>
+      {error && <p className="text-error text-xs">{error}</p>}
+      <div className="flex gap-2">
+        <button className="btn btn-sm btn-primary" onClick={save} disabled={saving}>
+          {saving ? <span className="loading loading-spinner loading-xs" /> : null} Save
+        </button>
+        <button className="btn btn-sm btn-ghost" onClick={onCancel} disabled={saving}>Cancel</button>
+      </div>
+    </div>
+  )
+}
+
 function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = false, onDeleted }) {
   const [data, setData] = useState(null)
   const [notes, setNotes] = useState([])
@@ -638,6 +715,7 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState('')
   const [smsOpen, setSmsOpen] = useState(false)
+  const [editingProfile, setEditingProfile] = useState(false)
   const fileInputRef = useRef(null)
   const [viewProp, setViewProp] = useState(null)     // full property object for modal
   const [propModalOpen, setPropModalOpen] = useState(false)
@@ -743,6 +821,17 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
               : <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-primary flex items-center justify-center text-primary-content font-bold text-3xl flex-shrink-0">{initials}</div>
             }
             <div className="flex-1 min-w-0 space-y-1">
+              {editingProfile ? (
+                <ProfileEditor
+                  user={user}
+                  onSaved={row => {
+                    setData(prev => (prev ? { ...prev, user: { ...prev.user, ...row } } : prev))
+                    setEditingProfile(false)
+                  }}
+                  onCancel={() => setEditingProfile(false)}
+                />
+              ) : (
+                <>
               <div className="flex flex-wrap items-center gap-2">
                 <h2 className="text-2xl font-bold">{fullName}</h2>
                 <TypeSelector
@@ -751,6 +840,11 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
                   isAdmin={isAdmin}
                   onChanged={contact_type => setData(prev => prev ? { ...prev, user: { ...prev.user, contact_type } } : prev)}
                 />
+                {isAdmin && (
+                  <button className="btn btn-xs btn-ghost gap-1" onClick={() => setEditingProfile(true)} title="Edit name, email, phone and organization">
+                    ✏️ Edit
+                  </button>
+                )}
               </div>
               <EmailLink email={user.email} />
               {user.phone_number && (
@@ -766,6 +860,8 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
               )}
               {user.organization && <div className="text-sm text-base-content/60">{user.organization}</div>}
               {user.birthday && <div className="text-sm text-base-content/60"><BirthdayText birthday={user.birthday} /></div>}
+                </>
+              )}
             </div>
             <div className="text-xs text-base-content/40 text-right flex-shrink-0 space-y-0.5">
               <div>Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>

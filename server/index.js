@@ -922,10 +922,17 @@ app.put('/api/users/:id', async (req, res) => {
   if (!Number.isFinite(id) || id <= 0) return res.status(400).json({ error: 'invalid id' });
   if (userRole !== 'admin' && userId !== id) return res.status(403).json({ error: 'forbidden' });
 
-  const { first_name, last_name, organization, phone_number, buy_box, birthday, profile_photo, role, contact_type } = req.body || {};
+  const { first_name, last_name, organization, phone_number, buy_box, birthday, profile_photo, role, contact_type, email } = req.body || {};
   const updates = [];
   const values = [];
 
+  if (email !== undefined) {
+    // The email is the login identity, so only admins may change it.
+    if (userRole !== 'admin') return res.status(403).json({ error: 'only an admin can change an email address' });
+    const cleaned = sanitizeEmail(email);
+    if (!isValidEmail(cleaned)) return res.status(400).json({ error: 'that email address is not valid' });
+    updates.push(`email = $${updates.length + 1}`); values.push(cleaned);
+  }
   if (first_name !== undefined) { updates.push(`first_name = $${updates.length + 1}`); values.push(first_name || null); }
   if (last_name !== undefined) { updates.push(`last_name = $${updates.length + 1}`); values.push(last_name || null); }
   if (organization !== undefined) { updates.push(`organization = $${updates.length + 1}`); values.push(organization || null); }
@@ -965,7 +972,7 @@ app.put('/api/users/:id', async (req, res) => {
     if (userResult.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const row = userResult.rows[0];
     // Build before/after diff for loggable fields
-    const trackFields = ['first_name','last_name','organization','phone_number','buy_box','birthday','role','contact_type'];
+    const trackFields = ['first_name','last_name','organization','phone_number','buy_box','birthday','role','contact_type','email'];
     const changes = {};
     for (const f of trackFields) {
       if (req.body[f] !== undefined && String(req.body[f] ?? '') !== String(pre[f] ?? '')) {
@@ -979,6 +986,10 @@ app.put('/api/users/:id', async (req, res) => {
     }
     res.json(row);
   } catch (e) {
+    // Unique-violation on users.email: name the conflict instead of "db error".
+    if (e && e.code === '23505') {
+      return res.status(409).json({ error: 'that email address is already used by another contact' });
+    }
     res.status(500).json({ error: 'db error' });
   }
 });
