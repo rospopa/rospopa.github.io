@@ -169,6 +169,7 @@ function createGoogleCalendarClient({
     const collected = [];
     let pageToken = null;
     let pages = 0;
+    let accessRole = null;
 
     do {
       const params = new URLSearchParams({
@@ -194,29 +195,39 @@ function createGoogleCalendarClient({
       const data = await resp.json().catch(() => ({}));
       if (!resp.ok) throw new Error(describeApiError(resp.status, data, calendarId));
 
+      accessRole = data.accessRole || accessRole;
       collected.push(...(data.items || []));
       pageToken = data.nextPageToken || null;
       pages += 1;
     } while (pageToken && pages < 10 && collected.length < maxResults);
 
-    return collected.filter(item => item.status !== 'cancelled').map(normalizeEvent);
+    // Shared as "See only free/busy (hide details)": Google strips every
+    // title, so say that instead of pretending the events are unnamed.
+    const detailsHidden = accessRole === 'freeBusyReader';
+    return {
+      accessRole,
+      detailsHidden,
+      events: collected
+        .filter(item => item.status !== 'cancelled')
+        .map(item => normalizeEvent(item, { detailsHidden })),
+    };
   }
 
   async function verify(calendarId) {
     const now = Date.now();
-    await listEvents(calendarId, {
+    const { accessRole } = await listEvents(calendarId, {
       timeMin: new Date(now - 24 * 60 * 60 * 1000),
       timeMax: new Date(now + 24 * 60 * 60 * 1000),
       maxResults: 1,
     });
-    return true;
+    return { accessRole };
   }
 
   return { mode, hasServiceAccount, hasApiKey, listEvents, verify, getAccessToken, serviceAccountEmail: email };
 }
 
 /** Map a Calendar API resource onto the same shape the ICS parser produces. */
-function normalizeEvent(item) {
+function normalizeEvent(item, { detailsHidden = false } = {}) {
   const allDay = Boolean(item.start && item.start.date && !item.start.dateTime);
   const startRaw = item.start?.dateTime || item.start?.date;
   const endRaw = item.end?.dateTime || item.end?.date;
@@ -230,7 +241,7 @@ function normalizeEvent(item) {
   return {
     uid: seriesId,
     occurrence_id: item.id,
-    title: item.summary || '(no title)',
+    title: item.summary || (detailsHidden ? 'Busy (details hidden)' : '(no title)'),
     description: item.description || '',
     location: item.location || '',
     all_day: allDay,

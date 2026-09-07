@@ -357,11 +357,16 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
     // API credentials win over an ICS feed: Google expands recurrence for us
     // and the data is fresher than a cached .ics file.
     if (googleMode && settings.embed_calendar_id) {
-      const events = await google.listEvents(settings.embed_calendar_id, {
+      const result = await google.listEvents(settings.embed_calendar_id, {
         timeMin: windowStart,
         timeMax: windowEnd,
       });
-      return { configured: true, events, provider: googleMode };
+      return {
+        configured: true,
+        events: result.events,
+        provider: googleMode,
+        details_hidden: result.detailsHidden || false,
+      };
     }
 
     if (!settings.ics_url) return { configured: false, events: [], provider: null };
@@ -676,13 +681,17 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
               error: 'Set GOOGLE_CALENDAR_ID to the calendar you want to read (usually your Gmail address).',
             });
           }
-          await google.verify(settings.embed_calendar_id);
+          const verified = await google.verify(settings.embed_calendar_id);
+          const freeBusyNote = verified.accessRole === 'freeBusyReader'
+            ? ' However, the calendar is shared as free/busy only, so event titles are hidden - change the share to "See all event details".'
+            : '';
           return res.json({
             ok: true,
             provider: googleMode,
-            message: googleMode === 'service_account'
+            access_role: verified.accessRole || null,
+            message: (googleMode === 'service_account'
               ? `Reached ${settings.embed_calendar_id} as ${google.serviceAccountEmail}.`
-              : `Reached ${settings.embed_calendar_id} with the API key.`,
+              : `Reached ${settings.embed_calendar_id} with the API key.`) + freeBusyNote,
           });
         }
         if (!settings.ics_url) {

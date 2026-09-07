@@ -629,6 +629,7 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [lastSynced, setLastSynced] = useState(null)
+  const [detailsHidden, setDetailsHidden] = useState(false)
   const [error, setError] = useState('')
   const [showSettings, setShowSettings] = useState(false)
   const [modalEvent, setModalEvent] = useState(null)
@@ -655,6 +656,7 @@ export default function CalendarPage() {
       // window the API allows rather than just the upcoming few months.
       const data = await apiFetch(`/api/calendar/events?days=365&days_back=90${force ? '&refresh=1' : ''}`)
       setEvents(data.events || [])
+      setDetailsHidden(Boolean(data.details_hidden))
       setLastSynced(data.synced_at || Date.now())
       // The server keeps serving its last good copy when Google stops
       // answering; say so rather than silently showing stale days.
@@ -848,6 +850,19 @@ export default function CalendarPage() {
       {settings?.connected && (
         <>
         <div className="mb-6 space-y-3">
+          {detailsHidden && (
+            <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm">
+              <p className="font-medium">Events are syncing, but Google is hiding their names.</p>
+              <p className="mt-1 text-base-content/70">
+                The calendar is shared with{' '}
+                <code className="text-xs break-all">{settings.service_account_email || 'the service account'}</code>{' '}
+                as <strong>See only free/busy (hide details)</strong>. In Google Calendar open{' '}
+                <strong>Settings → Share with specific people</strong>, find that address, and change its
+                permission to <strong>See all event details</strong>. Titles appear on the next sync.
+              </p>
+            </div>
+          )}
+
           {!error && events.length === 0 && (
             <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm">
               <p className="font-medium">Your calendar was read, but it returned no events.</p>
