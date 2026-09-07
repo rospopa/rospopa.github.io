@@ -915,7 +915,8 @@ function EventCreateModal({ contacts, defaultDay, onClose, onCreated }) {
 function NotificationModal({ open, event, contacts, channels, onClose, onSaved }) {
   const [channel, setChannel] = useState('sms')
   const [minutesBefore, setMinutesBefore] = useState(15)
-  const [recipientId, setRecipientId] = useState('')
+  const [selectedIds, setSelectedIds] = useState(new Set())
+  const [search, setSearch] = useState('')
   const [manualEmail, setManualEmail] = useState('')
   const [manualPhone, setManualPhone] = useState('')
   const [message, setMessage] = useState('')
@@ -924,48 +925,97 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
 
   useEffect(() => {
     if (open) {
-      setChannel('sms'); setMinutesBefore(15); setRecipientId('')
+      setChannel('sms'); setMinutesBefore(15); setSelectedIds(new Set()); setSearch('')
       setManualEmail(''); setManualPhone(''); setMessage(''); setError('')
     }
   }, [open])
 
   const meta = channelMeta(channel)
-  const selected = contacts.find(c => String(c.id) === String(recipientId))
 
   const eligible = useMemo(() => contacts.filter(c => (
     meta.needs === 'phone' ? Boolean(c.phone_number) : Boolean(c.email)
   )), [contacts, meta.needs])
 
+  const visible = useMemo(() => {
+    const q = search.trim().toLowerCase()
+    if (!q) return eligible
+    return eligible.filter(c =>
+      [c.first_name, c.last_name, c.email, c.organization, c.phone_number]
+        .filter(Boolean).join(' ').toLowerCase().includes(q)
+    )
+  }, [eligible, search])
+
+  const selectedContacts = useMemo(
+    () => contacts.filter(c => selectedIds.has(c.id)),
+    [contacts, selectedIds]
+  )
+
+  function switchChannel(next) {
+    setChannel(next)
+    // Keep whoever is still reachable on the new channel, drop the rest.
+    const needs = channelMeta(next).needs
+    setSelectedIds(prev => new Set(
+      contacts.filter(c => prev.has(c.id) && (needs === 'phone' ? c.phone_number : c.email)).map(c => c.id)
+    ))
+  }
+
+  function toggleContact(id) {
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id); else next.add(id)
+      return next
+    })
+  }
+
   async function save() {
     setSaving(true); setError('')
-    try {
-      await apiFetch('/api/calendar/notifications', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event_uid: event.uid,
-          event_title: event.title,
-          event_start: event.start,
-          channel,
-          minutes_before: Number(minutesBefore),
-          recipient_user_id: recipientId ? Number(recipientId) : null,
-          recipient_email: recipientId ? null : manualEmail.trim() || null,
-          recipient_phone: recipientId ? null : manualPhone.trim() || null,
-          message: message.trim() || null,
-        }),
-      })
-      onSaved()
+    const recipients = [
+      ...selectedContacts.map(c => ({ recipient_user_id: c.id, label: contactName(c) })),
+      ...(meta.needs === 'phone' && manualPhone.trim()
+        ? [{ recipient_phone: manualPhone.trim(), label: manualPhone.trim() }] : []),
+      ...(meta.needs === 'email' && manualEmail.trim()
+        ? [{ recipient_email: manualEmail.trim(), label: manualEmail.trim() }] : []),
+    ]
+    const failed = []
+    for (const r of recipients) {
+      try {
+        await apiFetch('/api/calendar/notifications', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            event_uid: event.uid,
+            event_title: event.title,
+            event_start: event.start,
+            channel,
+            minutes_before: Number(minutesBefore),
+            recipient_user_id: r.recipient_user_id || null,
+            recipient_email: r.recipient_email || null,
+            recipient_phone: r.recipient_phone || null,
+            message: message.trim() || null,
+          }),
+        })
+        // A created rule shouldn't be re-sent if a later one fails.
+        if (r.recipient_user_id) {
+          setSelectedIds(prev => { const next = new Set(prev); next.delete(r.recipient_user_id); return next })
+        } else if (r.recipient_phone) setManualPhone('')
+        else if (r.recipient_email) setManualEmail('')
+      } catch (e) {
+        failed.push(`${r.label}: ${e.message || 'failed'}`)
+      }
+    }
+    setSaving(false)
+    onSaved()
+    if (failed.length === 0) {
       onClose()
-    } catch (e) {
-      setError(e.message || 'Could not create that notification')
-    } finally {
-      setSaving(false)
+    } else {
+      setError(`Created ${recipients.length - failed.length} of ${recipients.length}. Not created — ${failed.join('; ')}`)
     }
   }
 
   if (!open || !event) return null
 
-  const canSave = Boolean(recipientId) || (meta.needs === 'phone' ? manualPhone.trim() : manualEmail.trim())
+  const manualFilled = meta.needs === 'phone' ? manualPhone.trim() : manualEmail.trim()
+  const recipientCount = selectedIds.size + (manualFilled ? 1 : 0)
 
   return (
     <div className="modal modal-open">
@@ -984,7 +1034,7 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
                 key={c.value}
                 type="button"
                 className={`btn btn-sm join-item flex-1 ${channel === c.value ? 'btn-primary' : 'btn-outline'}`}
-                onClick={() => { setChannel(c.value); setRecipientId('') }}
+                onClick={() => switchChannel(c.value)}
               >
                 <span aria-hidden>{c.icon}</span> {c.label}
               </button>
@@ -999,61 +1049,87 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
           )}
         </div>
 
-        <label className="form-control">
+        <div className="flex flex-col gap-1">
           <span className="label-text text-xs uppercase tracking-widest text-base-content/50">When</span>
-          <select className="select select-bordered" value={minutesBefore} onChange={e => setMinutesBefore(e.target.value)}>
+          <select className="select select-bordered select-sm w-full" value={minutesBefore} onChange={e => setMinutesBefore(e.target.value)}>
             {LEAD_TIMES.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
           </select>
-        </label>
+        </div>
 
-        <label className="form-control">
-          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Who to notify</span>
-          <select className="select select-bordered" value={recipientId} onChange={e => setRecipientId(e.target.value)}>
-            <option value="">— Enter manually —</option>
-            {eligible.map(c => (
-              <option key={c.id} value={c.id}>
-                {[c.first_name, c.last_name].filter(Boolean).join(' ') || c.email}
-                {meta.needs === 'phone' ? ` · ${formatPhone(c.phone_number)}` : ` · ${c.email}`}
-              </option>
-            ))}
-          </select>
-          {eligible.length === 0 && (
-            <span className="text-xs text-base-content/50 mt-1">
-              No contacts have a {meta.needs === 'phone' ? 'phone number' : 'email address'} on file.
-            </span>
-          )}
-        </label>
-
-        {!recipientId && meta.needs === 'phone' && (
-          <label className="form-control">
-            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Phone number</span>
-            <input className="input input-bordered" placeholder="+1 555 123 4567" value={manualPhone} onChange={e => setManualPhone(e.target.value)} />
-          </label>
-        )}
-        {!recipientId && meta.needs === 'email' && (
-          <label className="form-control">
-            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Email address</span>
-            <input className="input input-bordered" placeholder="name@example.com" value={manualEmail} onChange={e => setManualEmail(e.target.value)} />
-          </label>
-        )}
-
-        <label className="form-control">
+        <div className="flex flex-col gap-1">
           <span className="label-text text-xs uppercase tracking-widest text-base-content/50">
-            Custom message (optional)
+            Who to notify {selectedIds.size > 0 && `(${selectedIds.size} selected)`}
           </span>
+          <input
+            className="input input-bordered input-sm w-full"
+            placeholder={`Search contacts by name, email${meta.needs === 'phone' ? ', phone' : ''} or organization…`}
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+          />
+          {selectedContacts.length > 0 && (
+            <div className="mt-1 flex flex-wrap gap-1">
+              {selectedContacts.map(c => (
+                <span key={c.id} className="badge badge-primary badge-outline gap-1">
+                  {contactName(c)}
+                  <button type="button" className="ml-0.5 leading-none" aria-label={`Remove ${contactName(c)}`}
+                    onClick={() => toggleContact(c.id)}>✕</button>
+                </span>
+              ))}
+            </div>
+          )}
+          <div className="mt-1 max-h-44 space-y-0.5 overflow-y-auto rounded-lg border border-base-200 p-1.5">
+            {eligible.length === 0 && (
+              <p className="p-1.5 text-sm text-base-content/50">
+                No contacts have a {meta.needs === 'phone' ? 'phone number' : 'email address'} on file.
+              </p>
+            )}
+            {eligible.length > 0 && visible.length === 0 && (
+              <p className="p-1.5 text-sm text-base-content/50">No contacts match "{search.trim()}".</p>
+            )}
+            {visible.map(c => (
+              <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-sm hover:bg-base-200">
+                <input type="checkbox" className="checkbox checkbox-xs" checked={selectedIds.has(c.id)}
+                  onChange={() => toggleContact(c.id)} />
+                <span className="min-w-0 flex-1 truncate">
+                  {contactName(c)}
+                  {c.organization && <span className="text-base-content/45"> · {c.organization}</span>}
+                </span>
+                <span className="hidden shrink-0 text-xs text-base-content/40 sm:inline">
+                  {meta.needs === 'phone' ? formatPhone(c.phone_number) : c.email}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">
+            {meta.needs === 'phone' ? 'Also notify a phone number (optional)' : 'Also notify an email address (optional)'}
+          </span>
+          {meta.needs === 'phone' ? (
+            <input className="input input-bordered input-sm w-full" placeholder="+1 555 123 4567"
+              value={manualPhone} onChange={e => setManualPhone(e.target.value)} />
+          ) : (
+            <input className="input input-bordered input-sm w-full" placeholder="name@example.com"
+              value={manualEmail} onChange={e => setManualEmail(e.target.value)} />
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Custom message (optional)</span>
           <textarea
-            className="textarea textarea-bordered"
+            className="textarea textarea-bordered w-full"
             rows={3}
             placeholder={`Reminder: "${event.title}" starts soon.`}
             value={message}
             onChange={e => setMessage(e.target.value)}
           />
-        </label>
+        </div>
 
-        {selected && (
+        {recipientCount > 0 && !error && (
           <p className="text-xs text-base-content/60">
-            Will reach {[selected.first_name, selected.last_name].filter(Boolean).join(' ') || selected.email} at{' '}
-            {meta.needs === 'phone' ? formatPhone(selected.phone_number) : selected.email}.
+            Will create {recipientCount} {meta.label.toLowerCase()} notification{recipientCount > 1 ? 's' : ''}
+            {' '}{leadLabel(Number(minutesBefore)).toLowerCase()}.
           </p>
         )}
 
@@ -1061,9 +1137,9 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
 
         <div className="flex justify-end gap-2">
           <button className="btn btn-ghost btn-sm" onClick={onClose}>Cancel</button>
-          <button className="btn btn-primary btn-sm" onClick={save} disabled={saving || !canSave}>
+          <button className="btn btn-primary btn-sm" onClick={save} disabled={saving || recipientCount === 0}>
             {saving ? <span className="loading loading-spinner loading-xs" /> : null}
-            Add notification
+            {recipientCount > 1 ? `Add ${recipientCount} notifications` : 'Add notification'}
           </button>
         </div>
       </div>
