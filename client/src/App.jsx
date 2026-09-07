@@ -29,10 +29,11 @@ const CalendarPage = lazy(() => import('./CalendarPage'))
 
 export { ErrorBoundary } from './shared'
 
-function UsersTable({ users, onReload, onEdit }) {
+export function UsersTable({ users, onReload, onEdit }) {
   const [query, setQuery] = useState('')
   const [perPage, setPerPage] = useState(10)
   const [page, setPage] = useState(1)
+  const [total, setTotal] = useState(null)
   const [loading, setLoading] = useState(false)
   const onlineStatus = useSharedOnlineStatus()
   const debouncedQuery = useDebounce(query, 200)
@@ -48,13 +49,18 @@ function UsersTable({ users, onReload, onEdit }) {
   async function fetchUsers() {
     setLoading(true)
     try {
-      const data = await apiFetch(`/api/users?q=${encodeURIComponent(debouncedQuery)}&perPage=${perPage}&page=${page}`)
+      // The API paginates with limit/offset, not page numbers.
+      const offset = (page - 1) * perPage
+      const data = await apiFetch(`/api/users?q=${encodeURIComponent(debouncedQuery)}&limit=${perPage}&offset=${offset}`)
       if (data.users) onReload(data.users)
+      if (typeof data.total === 'number') setTotal(data.total)
     } catch (e) { console.error('Fetch failed:', e.message) }
     finally { setLoading(false) }
   }
 
   useEffect(() => { fetchUsers() }, [page, perPage, debouncedQuery])
+
+  const lastPage = total !== null ? Math.max(1, Math.ceil(total / perPage)) : null
 
   return (
     <div className="space-y-4">
@@ -124,10 +130,15 @@ function UsersTable({ users, onReload, onEdit }) {
             <option value={25}>25</option>
             <option value={50}>50</option>
           </select>
+          {total !== null && total > 0 && (
+            <span className="text-xs text-base-content/50">
+              {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}
+            </span>
+          )}
         </div>
         <div className="flex gap-2">
           <button className="btn btn-sm btn-ghost" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading}>← Prev</button>
-          <button className="btn btn-sm btn-ghost" onClick={() => setPage(p => p + 1)} disabled={loading}>Next →</button>
+          <button className="btn btn-sm btn-ghost" onClick={() => setPage(p => p + 1)} disabled={loading || (lastPage !== null && page >= lastPage)}>Next →</button>
         </div>
       </div>
     </div>
@@ -1499,9 +1510,17 @@ export default function App() {
     <div className="min-h-screen bg-base-200" data-theme={darkMode ? 'monochrome-dark' : 'monochrome'}>
       {/* Navbar */}
       <nav className="navbar bg-base-100 border-b border-base-300 sticky top-0 z-50 px-4 md:px-6 gap-2">
-        {/* Logo */}
+        {/* Logo — takes you home */}
         <div className="flex-none">
-          <Logo />
+          <button
+            type="button"
+            className="cursor-pointer border-0 bg-transparent p-0"
+            onClick={() => { navigateTo('dashboard'); setMobileMenuOpen(false) }}
+            title="Go to Dashboard"
+            aria-label="Go to Dashboard"
+          >
+            <Logo />
+          </button>
         </div>
 
         {/* Desktop nav links */}

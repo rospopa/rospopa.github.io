@@ -645,16 +645,15 @@ export function Logo() {
         <img src="/apple-touch-icon.png" alt="Logo" className="w-9 h-9 object-contain" />
       </div>
       <div className="flex flex-col leading-none gap-0.5">
-        <span style={{
+        <span className="text-base-content" style={{
           fontFamily: "'Cormorant Garamond', serif",
           fontWeight: 800,
           fontSize: '1.1rem',
           letterSpacing: '0.08em',
-          color: '#111111',
         }}>
           ROSPOPA
         </span>
-        <span style={{
+        <span className="text-base-content" style={{
           fontFamily: "'Cormorant Garamond', serif",
           fontWeight: 600,
           fontSize: '0.7rem',
@@ -705,7 +704,10 @@ export function formatPhone(raw) {
   return `+1 (${d.slice(0,3)}) ${d.slice(3,6)}-${d.slice(6)}`
 }
 
-export function PhotoCropper({ src, onSave, onCancel }) {
+export function PhotoCropper({ src, onSave, onCancel, onClose }) {
+  // Callers pass either name; being strict here is how "Cancel does nothing"
+  // shipped in the first place.
+  const cancel = onCancel || onClose || (() => {})
   const canvasRef = useRef(null)
   const [scale, setScale] = useState(1)
   const [offsetX, setOffsetX] = useState(0)
@@ -752,6 +754,14 @@ export function PhotoCropper({ src, onSave, onCancel }) {
 
   useEffect(() => { draw(imgRef.current, scale, offsetX, offsetY) }, [scale, offsetX, offsetY])
 
+  // Being stuck behind a full-screen overlay is the worst failure mode, so
+  // Escape always works no matter which button wiring a caller used.
+  useEffect(() => {
+    const onKey = e => { if (e.key === 'Escape') cancel() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [cancel])
+
   function onMouseDown(e) {
     setDragging(true)
     setDragStart({ x: e.clientX - offsetX, y: e.clientY - offsetY })
@@ -790,9 +800,20 @@ export function PhotoCropper({ src, onSave, onCancel }) {
     onSave(out.toDataURL('image/jpeg', 0.85))
   }
 
+  const backdropArmed = useRef(false)
+
   return (
-    <div className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4">
-      <div className="bg-base-100 rounded-2xl p-6 space-y-4 w-full max-w-sm shadow-2xl">
+    <div
+      className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4"
+      onMouseDown={e => { backdropArmed.current = e.target === e.currentTarget }}
+      onClick={e => {
+        // Only a click that began on the backdrop closes; a photo-drag that
+        // ends outside the card must not throw the adjustment away.
+        if (backdropArmed.current && e.target === e.currentTarget) cancel()
+        backdropArmed.current = false
+      }}
+    >
+      <div className="bg-base-100 rounded-2xl p-6 space-y-4 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
         <h3 className="font-bold text-lg text-center">Adjust Profile Photo</h3>
         <p className="text-xs text-base-content/50 text-center">Drag to reposition · Scroll or slider to zoom</p>
 
@@ -814,7 +835,7 @@ export function PhotoCropper({ src, onSave, onCancel }) {
         </div>
 
         <div className="flex gap-3">
-          <button className="btn btn-outline flex-1" onClick={onCancel}>Cancel</button>
+          <button className="btn btn-outline flex-1" onClick={cancel}>Cancel</button>
           <button className="btn btn-primary flex-1" onClick={handleSave}>Use Photo</button>
         </div>
       </div>
