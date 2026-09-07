@@ -29,7 +29,7 @@ const CalendarPage = lazy(() => import('./CalendarPage'))
 
 export { ErrorBoundary } from './shared'
 
-export function UsersTable({ users, onReload, onEdit }) {
+export function UsersTable({ users, onReload, onEdit, reloadKey = 0 }) {
   const [query, setQuery] = useState('')
   const [perPage, setPerPage] = useState(10)
   const [page, setPage] = useState(1)
@@ -58,7 +58,9 @@ export function UsersTable({ users, onReload, onEdit }) {
     finally { setLoading(false) }
   }
 
-  useEffect(() => { fetchUsers() }, [page, perPage, debouncedQuery])
+  // reloadKey lets the parent force a refetch (user created/edited) without
+  // resetting the admin's current page, rows-per-page or search.
+  useEffect(() => { fetchUsers() }, [page, perPage, debouncedQuery, reloadKey])
 
   const lastPage = total !== null ? Math.max(1, Math.ceil(total / perPage)) : null
 
@@ -295,7 +297,7 @@ export function EditUserModal({ open, user, onClose, onSave }) {
   const [cropSrc, setCropSrc] = useState(null)
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState('')
-  const [savedSignal, setSavedSignal] = useState(0)
+  const [savedSignal] = useState(0)
 
   useEffect(() => {
     if (open && user) {
@@ -346,8 +348,10 @@ export function EditUserModal({ open, user, onClose, onSave }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-      setSavedSignal(s => s + 1)
-      setTimeout(() => { onSave(); onClose() }, 1200)
+      // Refresh the table and close immediately - making the admin watch a
+      // success animation for 1.2s before the modal closes is pure lag.
+      onSave()
+      onClose()
     } catch (e) {
       setErr(e.message || 'Save failed')
     } finally {
@@ -1147,6 +1151,7 @@ export default function App() {
   const [loginStatus, setLoginStatus] = useState(null)
   const [editingUser, setEditingUser] = useState(null)
   const [showEditUserModal, setShowEditUserModal] = useState(false)
+  const [usersVersion, setUsersVersion] = useState(0)
   const [showForgot, setShowForgot] = useState(false)
   const [contactsKey, setContactsKey] = useState(0)
   const [globalSearch, setGlobalSearch] = useState('')
@@ -1606,22 +1611,19 @@ export default function App() {
             <div className="card bg-base-100 border border-base-300">
               <div className="card-body p-4 md:p-8">
                 <h3 className="text-base font-semibold uppercase tracking-widest text-base-content/50 mb-6">Create New User</h3>
-                <AddUserForm onCreated={() => { }} />
+                <AddUserForm onCreated={() => setUsersVersion(v => v + 1)} />
               </div>
             </div>
             <div>
               <h3 className="text-base font-semibold uppercase tracking-widest text-base-content/50 mb-4">All Users</h3>
-              <UsersTable users={users} onReload={setUsers} onEdit={u => { setEditingUser(u); setShowEditUserModal(true) }} />
+              <UsersTable users={users} onReload={setUsers} reloadKey={usersVersion} onEdit={u => { setEditingUser(u); setShowEditUserModal(true) }} />
             </div>
 
             <EditUserModal
               open={showEditUserModal}
               user={editingUser}
               onClose={() => setShowEditUserModal(false)}
-              onSave={async () => {
-                const data = await apiFetch('/api/users')
-                setUsers(data.users || [])
-              }}
+              onSave={() => setUsersVersion(v => v + 1)}
             />
           </div>
         )}

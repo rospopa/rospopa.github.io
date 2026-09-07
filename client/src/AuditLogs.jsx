@@ -13,7 +13,7 @@ const ACTION_LABELS = {
   edit_user:          (d, t) => {
     const fields = d?.changed_fields
     if (!fields?.length) return `Updated profile of ${t || 'user'}`
-    const USER_FIELD_LABELS = { first_name: 'First Name', last_name: 'Last Name', organization: 'Organization', phone_number: 'Phone', buy_box: 'Buy Box', birthday: 'Birthday', role: 'Role' }
+    const USER_FIELD_LABELS = { first_name: 'First Name', last_name: 'Last Name', organization: 'Organization', phone_number: 'Phone', buy_box: 'Buy Box', birthday: 'Birthday', role: 'Role', email: 'Email', contact_type: 'Contact Type' }
     return `Updated profile of ${t || 'user'} — ${fields.map(f => USER_FIELD_LABELS[f] || f).join(', ')}`
   },
   delete_user:        (d, t) => `Deleted user ${t || ''}`,
@@ -91,8 +91,6 @@ export default function AuditLogs() {
           {logs.length === 0
             ? <p className="text-center py-8 text-base-content/40">No activity found</p>
             : logs.map((log) => {
-                let details = {}
-                try { details = JSON.parse(log.details || '{}') } catch {}
                 const actor = log.acted_by_email || log.target_email || '(system)'
                 const text = formatLog(log)
                 const ts = new Date(log.created_at).toLocaleString()

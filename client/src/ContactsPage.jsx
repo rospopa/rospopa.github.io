@@ -1,5 +1,7 @@
 import { lazy, Suspense, useState, useEffect, useRef, useMemo } from 'react'
-import * as XLSX from 'xlsx'
+// xlsx is ~400KB and only needed when an admin actually imports a
+// spreadsheet, so it is loaded on demand rather than with the page.
+let XLSX = null
 import { apiFetch, downloadAttachment, fmtLastLogin, fmtLastNote, fmtBirthday, birthdayAge, daysUntilBirthday, SaveButton, Avatar, useSharedOnlineStatus, useDebounce, prefetchPropertyDetail, getPrefetchedProperty } from './shared'
 
 const CONTACT_TYPE_OPTIONS = [
@@ -363,6 +365,7 @@ function BulkImportButton({ onImported }) {
     setStatus({ type: '', message: '' })
 
     try {
+      if (!XLSX) XLSX = await import('xlsx')
       const arrayBuffer = await file.arrayBuffer()
       const workbook = XLSX.read(arrayBuffer, { type: 'array' })
       const sheet = workbook.Sheets[workbook.SheetNames[0]]
