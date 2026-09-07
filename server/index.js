@@ -28,7 +28,6 @@ const TWILIO_PHONE_NUMBER = process.env.TWILIO_PHONE_NUMBER || '';
 const TWILIO_CALLER_ID = process.env.TWILIO_CALLER_ID || '';
 const VALID_USER_ROLES = ['admin', 'user'];
 const VALID_CONTACT_TYPES = ['investor', 'colleague', 'family', 'partner'];
-const DEFAULT_BULK_IMPORT_PASSWORD = 'ContactImport2026!';
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // In-memory set of currently logged-in user IDs
@@ -784,7 +783,10 @@ app.post('/api/contacts/bulk-import', async (req, res) => {
   const payload = Array.isArray(req.body) ? req.body : (req.body && Array.isArray(req.body.contacts) ? req.body.contacts : []);
   if (!payload.length) return res.status(400).json({ error: 'No contacts provided' });
 
-  const defaultPasswordHash = await bcrypt.hash(DEFAULT_BULK_IMPORT_PASSWORD, 10);
+  // Imported contacts are CRM records, not invited users. The batch gets a
+  // random password that is hashed and immediately discarded, so no publicly
+  // known credential can ever sign in as an imported contact.
+  const defaultPasswordHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
   const normalized = [];
   const seenEmails = new Set();
 
@@ -1439,6 +1441,17 @@ app.get('/api/global-search', async (req, res) => {
   }
 });
 
+/* Non-admins may only read properties they are assigned to. Write routes are
+ * already admin-only; this closes the read side (details, media, documents). */
+async function canAccessProperty(req, propertyId) {
+  if (req.session.user && req.session.user.role === 'admin') return true;
+  const result = await pool.query(
+    'SELECT 1 FROM property_assignments WHERE property_id = $1 AND user_id = $2 LIMIT 1',
+    [propertyId, req.session.user.id]
+  );
+  return result.rows.length > 0;
+}
+
 app.post('/api/properties/:id/media', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
@@ -1467,6 +1480,7 @@ app.get('/api/properties/:id/media', async (req, res) => {
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
 
   try {
+    if (!(await canAccessProperty(req, propId))) return res.status(403).json({ error: 'forbidden' });
     const result = await pool.query('SELECT id, filename, media_type, uploaded_at FROM property_media WHERE property_id = $1 ORDER BY uploaded_at DESC', [propId]);
     res.json({ media: result.rows || [] });
   } catch (e) {
@@ -1481,6 +1495,7 @@ app.get('/api/properties/:id/media/:mediaId', async (req, res) => {
   if (!Number.isFinite(propId) || !Number.isFinite(mediaId)) return res.status(400).json({ error: 'invalid ids' });
 
   try {
+    if (!(await canAccessProperty(req, propId))) return res.status(403).json({ error: 'forbidden' });
     const result = await pool.query('SELECT file_path, media_type FROM property_media WHERE id = $1 AND property_id = $2', [mediaId, propId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const row = result.rows[0];
@@ -1496,7 +1511,8 @@ app.get('/api/properties/:id/media/:mediaId', async (req, res) => {
     const base64 = dataUrl.substring(base64Index + 1);
     const buffer = Buffer.from(base64, 'base64');
     res.set('Content-Type', row.media_type);
-    res.set('Cache-Control', 'public, max-age=86400');
+    // Access is per-user now, so shared caches must not hold it.
+    res.set('Cache-Control', 'private, max-age=86400');
     res.send(buffer);
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -1547,6 +1563,7 @@ app.get('/api/properties/:id/documents', async (req, res) => {
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
   try {
+    if (!(await canAccessProperty(req, propId))) return res.status(403).json({ error: 'forbidden' });
     const result = await pool.query(
       `SELECT d.id, d.filename, d.file_type, d.uploaded_at, u.email AS uploaded_by_email
        FROM property_documents d LEFT JOIN users u ON d.uploaded_by = u.id
@@ -1561,6 +1578,7 @@ app.get('/api/properties/:id/documents/:docId', async (req, res) => {
   const docId = Number(req.params.docId);
   if (!Number.isFinite(propId) || !Number.isFinite(docId)) return res.status(400).json({ error: 'invalid ids' });
   try {
+    if (!(await canAccessProperty(req, propId))) return res.status(403).json({ error: 'forbidden' });
     const result = await pool.query('SELECT filename, file_type, file_data FROM property_documents WHERE id=$1 AND property_id=$2', [docId, propId]);
     if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const { filename, file_type, file_data } = result.rows[0];
@@ -1720,15 +1738,20 @@ app.get('/api/properties/:id', async (req, res) => {
   const propId = Number(req.params.id);
   if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid id' });
 
-  const cacheKey = `props:item:${propId}`;
-  const cached = cacheGet(cacheKey);
-  if (cached) {
-    if (req.headers['if-none-match'] === cached.etag) return res.status(304).end();
-    res.set('ETag', cached.etag);
-    return res.json(cached.data);
-  }
-
   try {
+    // Authorization must run before the cache short-circuit, or the cache
+    // would hand out data the requester is not allowed to see.
+    if (!(await canAccessProperty(req, propId))) return res.status(403).json({ error: 'forbidden' });
+
+    const cacheKey = `props:item:${propId}`;
+    const cached = cacheGet(cacheKey);
+    if (cached) {
+      if (req.headers['if-none-match'] === cached.etag) return res.status(304).end();
+      res.set('ETag', cached.etag);
+      res.set('Cache-Control', 'private, max-age=60, must-revalidate');
+      return res.json(cached.data);
+    }
+
     const result = await pool.query(
       `SELECT id, pin, address, county, price, square_feet, lot_size, year_built,
               on_major_road, traffic_vpd, on_corner_lot, direct_water_access, next_to_public_land,
@@ -1749,7 +1772,7 @@ app.get('/api/properties/:id', async (req, res) => {
     if (result.rows.length === 0) return res.status(404).json({ error: 'not found' });
     const etag = cacheSet(cacheKey, result.rows[0]);
     res.set('ETag', etag);
-    res.set('Cache-Control', 'public, max-age=60, must-revalidate');
+    res.set('Cache-Control', 'private, max-age=60, must-revalidate');
     res.json(result.rows[0]);
   } catch (e) {
     res.status(500).json({ error: 'db error' });
@@ -2435,6 +2458,35 @@ process.on('unhandledRejection', (reason) => {
 
 app.listen(PORT, () => console.log(`Server listening on port ${PORT} (warming up)`));
 
+/* Earlier bulk imports gave every contact the same password, and that string
+ * sat in this public repository. Any row still carrying it gets an unknowable
+ * random password instead. Runs once (marker row), in the background so a
+ * slow bcrypt sweep can never delay readiness. */
+async function rotateLegacyImportPasswords() {
+  const MARKER = 'rotate_bulk_import_password_1';
+  await pool.query(`CREATE TABLE IF NOT EXISTS app_migrations (
+    key TEXT PRIMARY KEY,
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  )`);
+  const done = await pool.query(`SELECT 1 FROM app_migrations WHERE key = $1`, [MARKER]);
+  if (done.rows.length) return;
+  // The retired shared password. Kept only so rows still carrying it can be
+  // found (bcrypt hashes cannot be searched); new code never assigns it.
+  const LEGACY = 'ContactImport2026!';
+  const result = await pool.query(`SELECT id, password FROM users WHERE role = 'user' AND password IS NOT NULL`);
+  let rotated = 0;
+  for (const row of result.rows) {
+    let matches = false;
+    try { matches = await bcrypt.compare(LEGACY, row.password); } catch { matches = false; }
+    if (!matches) continue;
+    const newHash = await bcrypt.hash(crypto.randomBytes(32).toString('hex'), 10);
+    await pool.query(`UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2`, [newHash, row.id]);
+    rotated += 1;
+  }
+  await pool.query(`INSERT INTO app_migrations (key) VALUES ($1) ON CONFLICT (key) DO NOTHING`, [MARKER]);
+  if (rotated > 0) console.log(`[migrate] rotated ${rotated} account(s) off the legacy import password`);
+}
+
 (async () => {
   try {
     await initializeSchema();
@@ -2444,6 +2496,9 @@ app.listen(PORT, () => console.log(`Server listening on port ${PORT} (warming up
     await initializeSessionMiddleware();
     appReady = true;
     console.log(`Server ready [session: ${sessionStoreType}]`);
+    rotateLegacyImportPasswords().catch(err =>
+      console.error('[migrate] legacy password rotation failed:', err && err.message)
+    );
   } catch (err) {
     console.error('Failed to start server:', err && err.stack ? err.stack : err);
     process.exit(1);
