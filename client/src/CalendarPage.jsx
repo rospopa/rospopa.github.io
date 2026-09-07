@@ -141,6 +141,15 @@ function addDaysDateOnly(dateStr, n) {
   return d.toISOString().slice(0, 10)
 }
 
+// One source of truth for the calendar's color coding: personal = blue,
+// work = amber (actual hues live in index.css, per theme).
+function calKind(event) {
+  return event && event.calendar === 'work' ? 'work' : 'personal'
+}
+const CAL_CHIP = { personal: 'cal-chip-personal', work: 'cal-chip-work' }
+const CAL_DOT = { personal: 'cal-dot-personal', work: 'cal-dot-work' }
+const CAL_BADGE = { personal: 'cal-badge-personal', work: 'cal-badge-work' }
+
 /* ─── Connect panel ─────────────────────────────────────────────── */
 
 function ConnectPanel({ settings, onSaved }) {
@@ -437,7 +446,7 @@ export function MonthGrid({ monthKey, onMonthChange, eventsByDay, selectedDay, o
               {/* Phones have no room for labels, so the day shows a density dot. */}
               <span className="mt-1 flex gap-0.5 sm:hidden">
                 {dayEvents.slice(0, 3).map(event => (
-                  <span key={event.occurrence_id} className={`h-1.5 w-1.5 rounded-full ${event.calendar === 'work' ? 'bg-secondary' : 'bg-primary'}`} />
+                  <span key={event.occurrence_id} className={`h-1.5 w-1.5 rounded-full ${CAL_DOT[calKind(event)]}`} />
                 ))}
               </span>
 
@@ -448,11 +457,7 @@ export function MonthGrid({ monthKey, onMonthChange, eventsByDay, selectedDay, o
                     type="button"
                     title={event.title}
                     onClick={e => { e.stopPropagation(); onOpenEvent(event) }}
-                    className={`block w-full truncate rounded px-1 py-[1px] text-left text-[11px] leading-tight ${
-                      event.calendar === 'work'
-                        ? 'bg-secondary/15 text-secondary hover:bg-secondary/30'
-                        : 'bg-primary/15 text-primary hover:bg-primary/30'
-                    }`}
+                    className={`block w-full truncate rounded px-1 py-[1px] text-left text-[11px] leading-tight ${CAL_CHIP[calKind(event)]}`}
                   >
                     {event.all_day ? '' : `${fmtChipTime(event)} `}{event.title}
                   </button>
@@ -590,7 +595,7 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
           <>
             <div className="flex items-start justify-between gap-2">
               <h3 className="text-lg font-bold">{event.title}</h3>
-              {isWork && <span className="badge badge-secondary badge-outline badge-sm shrink-0">Work</span>}
+              {isWork && <span className={`badge badge-outline badge-sm shrink-0 ${CAL_BADGE.work}`}>Work</span>}
             </div>
             <p className="mt-1 text-sm text-base-content/70">{fmtEventTime(event)}</p>
             {event.location && <p className="mt-1 text-sm text-base-content/60">📍 {event.location}</p>}
@@ -1345,8 +1350,8 @@ export default function CalendarPage() {
 
           {settings.work_calendar && (
             <div className="flex items-center gap-4 text-xs text-base-content/55">
-              <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-primary" /> Personal</span>
-              <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-secondary" /> {settings.work_label || 'Work'}</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full cal-dot-personal" /> Personal</span>
+              <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full cal-dot-work" /> {settings.work_label || 'Work'}</span>
             </div>
           )}
 
@@ -1382,7 +1387,7 @@ export default function CalendarPage() {
                     className="flex w-full items-baseline gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-base-200"
                   >
                     <span className="w-20 shrink-0 text-xs text-base-content/55">{fmtChipTime(event)}</span>
-                    <span className={`h-2 w-2 shrink-0 self-center rounded-full ${event.calendar === 'work' ? 'bg-secondary' : 'bg-primary'}`} />
+                    <span className={`h-2 w-2 shrink-0 self-center rounded-full ${CAL_DOT[calKind(event)]}`} />
                     <span className="min-w-0 flex-1 truncate text-sm">{event.title}</span>
                     {(rulesByEvent.get(event.uid) || []).length > 0 && (
                       <span className="text-xs text-base-content/45">
@@ -1417,7 +1422,8 @@ export default function CalendarPage() {
                           onClick={() => setDetailEvent(event)}
                         >
                           <p className="font-medium truncate hover:underline">
-                            {event.calendar === 'work' && <span className="badge badge-secondary badge-outline badge-xs mr-1.5 align-middle">Work</span>}
+                            <span className={`mr-1.5 inline-block h-2 w-2 rounded-full align-middle ${CAL_DOT[calKind(event)]}`} />
+                            {event.calendar === 'work' && <span className={`badge badge-outline badge-xs mr-1.5 align-middle ${CAL_BADGE.work}`}>Work</span>}
                             {event.title}
                           </p>
                           <p className="text-xs text-base-content/60">{fmtEventTime(event)}</p>

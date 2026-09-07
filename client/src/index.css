@@ -91,6 +91,40 @@ input[type="color"]:not([disabled]) {
   cursor: pointer;
 }
 
+/* ─── Calendar color coding ────────────────────────────────────────
+   Personal = blue, Work = amber. Defined per theme so both stay readable
+   on white and on the dark navbar greys. */
+[data-theme="monochrome"] {
+  --cal-personal: #1d4ed8;
+  --cal-personal-bg: rgba(37, 99, 235, 0.10);
+  --cal-personal-bg-hover: rgba(37, 99, 235, 0.22);
+  --cal-personal-dot: #2563eb;
+  --cal-work: #b45309;
+  --cal-work-bg: rgba(217, 119, 6, 0.12);
+  --cal-work-bg-hover: rgba(217, 119, 6, 0.26);
+  --cal-work-dot: #d97706;
+}
+[data-theme="monochrome-dark"] {
+  --cal-personal: #93c5fd;
+  --cal-personal-bg: rgba(96, 165, 250, 0.16);
+  --cal-personal-bg-hover: rgba(96, 165, 250, 0.30);
+  --cal-personal-dot: #60a5fa;
+  --cal-work: #fcd34d;
+  --cal-work-bg: rgba(251, 191, 36, 0.14);
+  --cal-work-bg-hover: rgba(251, 191, 36, 0.28);
+  --cal-work-dot: #fbbf24;
+}
+.cal-chip-personal { background: var(--cal-personal-bg); color: var(--cal-personal); }
+.cal-chip-personal:hover { background: var(--cal-personal-bg-hover); }
+.cal-chip-work { background: var(--cal-work-bg); color: var(--cal-work); }
+.cal-chip-work:hover { background: var(--cal-work-bg-hover); }
+.cal-dot-personal { background: var(--cal-personal-dot); }
+.cal-dot-work { background: var(--cal-work-dot); }
+.cal-text-personal { color: var(--cal-personal); }
+.cal-text-work { color: var(--cal-work); }
+.cal-badge-personal { border-color: var(--cal-personal-dot); color: var(--cal-personal); background: var(--cal-personal-bg); }
+.cal-badge-work { border-color: var(--cal-work-dot); color: var(--cal-work); background: var(--cal-work-bg); }
+
 /* Hide reCAPTCHA badge until user is identified on login */
 .recaptcha-hidden .grecaptcha-badge {
   visibility: hidden !important;
