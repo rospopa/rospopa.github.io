@@ -743,6 +743,170 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
   )
 }
 
+function EventCreateModal({ contacts, defaultDay, onClose, onCreated }) {
+  const init = useMemo(() => {
+    const base = defaultDay
+      ? new Date(`${defaultDay}T09:00:00`)
+      : (() => { const d = new Date(); d.setMinutes(0, 0, 0); d.setHours(d.getHours() + 1); return d })()
+    const end = new Date(base.getTime() + 3600000)
+    const day = `${base.getFullYear()}-${String(base.getMonth() + 1).padStart(2, '0')}-${String(base.getDate()).padStart(2, '0')}`
+    return {
+      startLocal: toLocalInputValue(base.toISOString()),
+      endLocal: toLocalInputValue(end.toISOString()),
+      startDate: day,
+      endDate: day,
+    }
+  }, [defaultDay])
+
+  const [form, setForm] = useState({
+    title: '', location: '', description: '', allDay: false, ...init,
+  })
+  const [selectedIds, setSelectedIds] = useState(new Set())
+  const [search, setSearch] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+  const set = patch => setForm(f => ({ ...f, ...patch }))
+  const toggleContact = id => setSelectedIds(prev => {
+    const next = new Set(prev)
+    if (next.has(id)) next.delete(id); else next.add(id)
+    return next
+  })
+  const eligibleContacts = (contacts || []).filter(c => {
+    const q = search.trim().toLowerCase()
+    if (!q) return true
+    return [c.first_name, c.last_name, c.email, c.organization].filter(Boolean).join(' ').toLowerCase().includes(q)
+  })
+
+  async function save() {
+    if (!form.title.trim()) { setError('Give the event a title.'); return }
+    setSaving(true); setError('')
+    try {
+      const payload = {
+        title: form.title,
+        location: form.location,
+        description: form.description,
+        all_day: form.allDay,
+        contact_ids: [...selectedIds],
+      }
+      if (form.allDay) {
+        payload.start = form.startDate
+        payload.end = addDaysDateOnly(form.endDate, 1)
+      } else {
+        payload.start = new Date(form.startLocal).toISOString()
+        payload.end = new Date(form.endLocal).toISOString()
+      }
+      const r = await apiFetch('/api/calendar/events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+      onCreated(r)
+      onClose()
+    } catch (e) {
+      setError(e.message || 'Could not create the event')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <div className="modal modal-open" onClick={onClose}>
+      <div className="modal-box max-w-lg" onClick={e => e.stopPropagation()}>
+        <h3 className="text-lg font-bold">New event</h3>
+        <div className="mt-3 space-y-3">
+          <label className="form-control">
+            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Title</span>
+            <input className="input input-bordered input-sm w-full" value={form.title}
+              onChange={e => set({ title: e.target.value })} autoFocus />
+          </label>
+
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" className="checkbox checkbox-sm" checked={form.allDay}
+              onChange={e => set({ allDay: e.target.checked })} />
+            All day
+          </label>
+
+          {form.allDay ? (
+            <div className="grid grid-cols-2 gap-2">
+              <label className="form-control">
+                <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Starts</span>
+                <input type="date" className="input input-bordered input-sm w-full" value={form.startDate}
+                  onChange={e => set({ startDate: e.target.value })} />
+              </label>
+              <label className="form-control">
+                <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Ends</span>
+                <input type="date" className="input input-bordered input-sm w-full" value={form.endDate}
+                  onChange={e => set({ endDate: e.target.value })} />
+              </label>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+              <label className="form-control">
+                <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Starts</span>
+                <input type="datetime-local" className="input input-bordered input-sm w-full" value={form.startLocal}
+                  onChange={e => set({ startLocal: e.target.value })} />
+              </label>
+              <label className="form-control">
+                <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Ends</span>
+                <input type="datetime-local" className="input input-bordered input-sm w-full" value={form.endLocal}
+                  onChange={e => set({ endLocal: e.target.value })} />
+              </label>
+            </div>
+          )}
+
+          <label className="form-control">
+            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Location</span>
+            <input className="input input-bordered input-sm w-full" value={form.location}
+              onChange={e => set({ location: e.target.value })} />
+          </label>
+
+          <label className="form-control">
+            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Description</span>
+            <textarea className="textarea textarea-bordered w-full" rows={3} value={form.description}
+              onChange={e => set({ description: e.target.value })} />
+          </label>
+
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">
+              Contacts on this event {selectedIds.size > 0 && `(${selectedIds.size})`}
+            </p>
+            <input className="input input-bordered input-sm mt-2 w-full" placeholder="Search contacts…"
+              value={search} onChange={e => setSearch(e.target.value)} />
+            <div className="mt-2 max-h-40 space-y-1 overflow-y-auto rounded-lg border border-base-200 p-2">
+              {eligibleContacts.length === 0 && (
+                <p className="p-1 text-sm text-base-content/50">No contacts match.</p>
+              )}
+              {eligibleContacts.map(c => (
+                <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-sm hover:bg-base-200">
+                  <input type="checkbox" className="checkbox checkbox-xs" checked={selectedIds.has(c.id)}
+                    onChange={() => toggleContact(c.id)} />
+                  <span className="min-w-0 flex-1 truncate">
+                    {contactName(c)}
+                    {c.organization && <span className="text-base-content/45"> · {c.organization}</span>}
+                  </span>
+                  {c.email && <span className="hidden truncate text-xs text-base-content/40 sm:inline">{c.email}</span>}
+                </label>
+              ))}
+            </div>
+            <p className="mt-1 text-[11px] text-base-content/45">
+              Saved here and synced onto the Google Calendar event.
+            </p>
+          </div>
+        </div>
+
+        {error && <div className="alert alert-warning mt-3 py-2 text-sm">{error}</div>}
+
+        <div className="modal-action">
+          <button className="btn btn-sm" onClick={onClose} disabled={saving}>Cancel</button>
+          <button className="btn btn-sm btn-primary" onClick={save} disabled={saving}>
+            {saving ? <span className="loading loading-spinner loading-xs" /> : null} Create event
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function NotificationModal({ open, event, contacts, channels, onClose, onSaved }) {
   const [channel, setChannel] = useState('sms')
   const [minutesBefore, setMinutesBefore] = useState(15)
@@ -917,6 +1081,7 @@ export default function CalendarPage() {
   const [error, setError] = useState('')
   const [showSettings, setShowSettings] = useState(false)
   const [modalEvent, setModalEvent] = useState(null)
+  const [showCreate, setShowCreate] = useState(false)
   const [testing, setTesting] = useState(null)
   const [toast, setToast] = useState('')
 
@@ -1121,6 +1286,9 @@ export default function CalendarPage() {
           )}
         </div>
         <div className="flex gap-2">
+          {settings?.connected && settings.google_mode === 'service_account' && settings.embed_calendar_id && (
+            <button className="btn btn-sm btn-primary" onClick={() => setShowCreate(true)}>+ Event</button>
+          )}
           {settings?.connected && (
             <button className="btn btn-sm btn-outline" onClick={refresh} disabled={refreshing}>
               {refreshing ? <span className="loading loading-spinner loading-xs" /> : null} Refresh
@@ -1361,6 +1529,31 @@ export default function CalendarPage() {
           }
         }}
       />
+
+      {showCreate && (
+        <EventCreateModal
+          contacts={contacts}
+          defaultDay={selectedDay}
+          onClose={() => setShowCreate(false)}
+          onCreated={({ event: created, google: googleSync }) => {
+            if (created) {
+              // Show it immediately; the forced refetch below confirms it.
+              setEvents(evts => [...evts, { ...created, calendar: 'personal', editable: true }])
+            }
+            loadEvents(true)
+            loadEventContacts()
+            const note = googleSync
+              ? (googleSync.synced
+                  ? (googleSync.method === 'attendees'
+                      ? 'Event created. Contacts added as guests on Google Calendar.'
+                      : (googleSync.reason || 'Event created. Contacts synced onto the Google Calendar event.'))
+                  : `Event created, but the contacts did not reach Google: ${googleSync.reason || ''}`)
+              : 'Event created on Google Calendar.'
+            setToast(note)
+            setTimeout(() => setToast(''), 8000)
+          }}
+        />
+      )}
 
       <NotificationModal
         open={Boolean(modalEvent)}

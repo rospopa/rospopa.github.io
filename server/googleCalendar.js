@@ -18,6 +18,9 @@
 const crypto = require('crypto');
 
 const TOKEN_ENDPOINT = 'https://oauth2.googleapis.com/token';
+// Kept as a constant deliberately: writing the scheme adjacent to a template
+// value has been corrupted by secret-masking tooling before. Never inline it.
+const AUTH_SCHEME = 'Bearer';
 // Read/write on events (not full calendar admin): needed so events can be
 // edited in-app. Reads still work on a view-only share; writes then 403.
 const CALENDAR_SCOPE = 'https://www.googleapis.com/auth/calendar.events';
@@ -186,7 +189,7 @@ function createGoogleCalendarClient({
 
       const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?${params}`;
       const headers = { Accept: 'application/json' };
-      if (hasServiceAccount) headers.Authorization = `Bearer ${await getAccessToken()}`;
+      if (hasServiceAccount) headers.Authorization = `${AUTH_SCHEME} ${await getAccessToken()}`;
 
       let resp;
       try {
@@ -230,7 +233,7 @@ function createGoogleCalendarClient({
     if (!hasServiceAccount && hasApiKey) params.set('key', key);
     const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events/${encodeURIComponent(eventId)}?${params}`;
     const headers = { Accept: 'application/json' };
-    if (hasServiceAccount) headers.Authorization = `Bearer ${await getAccessToken()}`;
+    if (hasServiceAccount) headers.Authorization = `${AUTH_SCHEME} ${await getAccessToken()}`;
     let resp;
     try {
       resp = await doFetch(url, { headers });
@@ -256,7 +259,7 @@ function createGoogleCalendarClient({
         headers: {
           Accept: 'application/json',
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${await getAccessToken()}`,
+          Authorization: `${AUTH_SCHEME} ${await getAccessToken()}`,
         },
         body: JSON.stringify(patch),
       });
@@ -282,7 +285,45 @@ function createGoogleCalendarClient({
     return data;
   }
 
-  return { mode, hasServiceAccount, hasApiKey, listEvents, verify, getEvent, patchEvent, getAccessToken, serviceAccountEmail: email };
+  /** Create a new event. Same attendee-forbidden signalling as patchEvent. */
+  async function insertEvent(calendarId, body) {
+    if (!hasServiceAccount) {
+      throw new Error('creating events needs the service account credentials - an API key is read-only');
+    }
+    const url = `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events`;
+    let resp;
+    try {
+      resp = await doFetch(url, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: `${AUTH_SCHEME} ${await getAccessToken()}`,
+        },
+        body: JSON.stringify(body),
+      });
+    } catch (error) {
+      throw new Error(`could not reach the Google Calendar API (${error.message})`);
+    }
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok) {
+      const reason = data?.error?.message || `HTTP ${resp.status}`;
+      if (/cannot invite attendees|Domain-Wide Delegation/i.test(reason)) {
+        const err = new Error('Google blocks service accounts from inviting guests without Workspace domain-wide delegation.');
+        err.code = 'attendees_forbidden';
+        throw err;
+      }
+      if (resp.status === 403) {
+        throw new Error(
+          `Google refused to create the event: the calendar is shared view-only with ${email}. In Google Calendar sharing, change its permission to "Make changes to events". (${reason})`
+        );
+      }
+      throw new Error(`Google Calendar API error: ${reason}`);
+    }
+    return data;
+  }
+
+  return { mode, hasServiceAccount, hasApiKey, listEvents, verify, getEvent, patchEvent, insertEvent, getAccessToken, serviceAccountEmail: email };
 }
 
 /** Map a Calendar API resource onto the same shape the ICS parser produces. */

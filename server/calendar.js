@@ -971,6 +971,86 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
       }
     });
 
+    // Create a new event on the Google calendar, optionally with contacts.
+    app.post('/api/calendar/events', async (req, res) => {
+      if (!requireAdmin(req, res)) return;
+      try {
+        const settings = await getSettings();
+        if (!(googleMode === 'service_account' && settings.embed_calendar_id)) {
+          return res.status(409).json({
+            error: googleMode
+              ? 'Creating events needs the service account connection with GOOGLE_CALENDAR_ID set.'
+              : 'Creating events needs the Google API connection - a read-only iCal feed cannot be written to.',
+          });
+        }
+        const body = req.body || {};
+        const title = String(body.title || '').trim();
+        if (!title) return res.status(400).json({ error: 'the event needs a title' });
+        if (!body.start || !body.end) return res.status(400).json({ error: 'start and end are required' });
+
+        const insert = { summary: title };
+        if (typeof body.description === 'string' && body.description.trim()) insert.description = body.description;
+        if (typeof body.location === 'string' && body.location.trim()) insert.location = body.location.trim();
+        if (body.all_day) {
+          const dateOnly = /^\d{4}-\d{2}-\d{2}$/;
+          if (!dateOnly.test(body.start) || !dateOnly.test(body.end)) {
+            return res.status(400).json({ error: 'all-day times must be YYYY-MM-DD dates' });
+          }
+          if (body.end <= body.start) return res.status(400).json({ error: 'the event must end after it starts' });
+          insert.start = { date: body.start };
+          insert.end = { date: body.end };
+        } else {
+          const start = new Date(body.start);
+          const end = new Date(body.end);
+          if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+            return res.status(400).json({ error: 'unreadable start or end time' });
+          }
+          if (end <= start) return res.status(400).json({ error: 'the event must end after it starts' });
+          insert.start = { dateTime: start.toISOString() };
+          insert.end = { dateTime: end.toISOString() };
+        }
+
+        // Validate contacts before touching Google so a bad id can't leave a
+        // half-created event.
+        const ids = Array.from(new Set(
+          (Array.isArray(body.contact_ids) ? body.contact_ids : [])
+            .map(Number).filter(n => Number.isInteger(n) && n > 0)
+        ));
+        const contactRows = ids.length
+          ? (await pool.query(
+              `SELECT id, first_name, last_name, email, organization FROM users WHERE id = ANY($1::int[])`,
+              [ids]
+            )).rows
+          : [];
+        if (contactRows.length !== ids.length) {
+          return res.status(400).json({ error: 'one of those contacts no longer exists' });
+        }
+
+        const created = await google.insertEvent(settings.embed_calendar_id, insert);
+        eventsCache.clear();
+
+        let googleSync = null;
+        if (contactRows.length) {
+          const uid = created.recurringEventId || created.id;
+          for (const row of contactRows) {
+            await pool.query(
+              `INSERT INTO calendar_event_contacts (event_uid, contact_id, added_by)
+               VALUES ($1, $2, $3) ON CONFLICT (event_uid, contact_id) DO NOTHING`,
+              [uid, row.id, req.session.user.id]
+            );
+          }
+          googleSync = await syncContactsToGoogle(settings.embed_calendar_id, created.id, contactRows);
+          if (googleSync.synced) eventsCache.clear();
+        }
+
+        await logAudit(req.session.user.id, req.session.user.email, 'calendar_event_created',
+          { event_id: created.id, title, contact_ids: ids }, null, null, clientIp(req));
+        res.json({ ok: true, event: normalizeEvent(created), google: googleSync });
+      } catch (error) {
+        res.status(424).json({ error: error.message || 'could not create the event' });
+      }
+    });
+
     // Edit an event in place. Requires the calendar to be shared with the
     // service account as "Make changes to events".
     app.patch('/api/calendar/events/:eventId', async (req, res) => {
