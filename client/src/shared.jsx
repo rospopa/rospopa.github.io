@@ -274,16 +274,20 @@ export const FIELD_HELP = {
 }
 
 export function Field({ label, required, help, children }) {
+  const [helpOpen, setHelpOpen] = useState(false)
   return (
-    <div className="flex flex-col gap-1">
-      <label className="text-xs font-semibold uppercase tracking-widest text-base-content/60 flex items-center gap-1">
+    <div className="flex min-w-0 flex-col gap-1">
+      <label className="text-xs font-semibold uppercase tracking-widest text-base-content/60 flex flex-wrap items-center gap-1">
         {label}{required && <span className="text-base-content ml-0.5">*</span>}
         {help && (
-          <span className="tooltip tooltip-right normal-case font-normal tracking-normal" data-tip={help}>
-            <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-base-300 text-base-content/50 text-[9px] cursor-help select-none leading-none">?</span>
-          </span>
+          <button type="button" aria-label={`Help for ${label}`} aria-expanded={helpOpen}
+            onClick={() => setHelpOpen(open => !open)}
+            className="inline-flex shrink-0 items-center justify-center w-3.5 h-3.5 rounded-full bg-base-300 text-base-content/50 text-[9px] select-none leading-none">
+            ?
+          </button>
         )}
       </label>
+      {help && helpOpen && <p className="text-xs text-base-content/60 [overflow-wrap:anywhere]">{help}</p>}
       {children}
     </div>
   )
@@ -733,24 +737,28 @@ export function PhotoCropper({ src, onSave, onCancel, onClose }) {
 
   function onMouseDown(e) {
     setDragging(true)
-    setDragStart({ x: e.clientX - offsetX, y: e.clientY - offsetY })
+    const ratio = SIZE / e.currentTarget.getBoundingClientRect().width
+    setDragStart({ x: e.clientX * ratio - offsetX, y: e.clientY * ratio - offsetY })
   }
   function onMouseMove(e) {
     if (!dragging) return
-    setOffsetX(e.clientX - dragStart.x)
-    setOffsetY(e.clientY - dragStart.y)
+    const ratio = SIZE / e.currentTarget.getBoundingClientRect().width
+    setOffsetX(e.clientX * ratio - dragStart.x)
+    setOffsetY(e.clientY * ratio - dragStart.y)
   }
   function onMouseUp() { setDragging(false) }
 
   // Touch support
   function onTouchStart(e) {
     const t = e.touches[0]
-    setDragging(true); setDragStart({ x: t.clientX - offsetX, y: t.clientY - offsetY })
+    const ratio = SIZE / e.currentTarget.getBoundingClientRect().width
+    setDragging(true); setDragStart({ x: t.clientX * ratio - offsetX, y: t.clientY * ratio - offsetY })
   }
   function onTouchMove(e) {
     if (!dragging) return
     const t = e.touches[0]
-    setOffsetX(t.clientX - dragStart.x); setOffsetY(t.clientY - dragStart.y)
+    const ratio = SIZE / e.currentTarget.getBoundingClientRect().width
+    setOffsetX(t.clientX * ratio - dragStart.x); setOffsetY(t.clientY * ratio - dragStart.y)
   }
 
   function handleSave() {
@@ -772,7 +780,8 @@ export function PhotoCropper({ src, onSave, onCancel, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4"
+      data-photo-cropper
+      className="fixed inset-0 z-[300] bg-black/80 flex items-center justify-center p-4 overflow-y-auto"
       onMouseDown={e => { backdropArmed.current = e.target === e.currentTarget }}
       onClick={e => {
         // Only a click that began on the backdrop closes; a photo-drag that
@@ -781,14 +790,14 @@ export function PhotoCropper({ src, onSave, onCancel, onClose }) {
         backdropArmed.current = false
       }}
     >
-      <div className="bg-base-100 rounded-2xl p-6 space-y-4 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
+      <div className="bg-base-100 rounded-2xl p-4 sm:p-6 space-y-4 w-full min-w-0 max-w-sm max-h-full overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
         <h3 className="font-bold text-lg text-center">Adjust Profile Photo</h3>
         <p className="text-xs text-base-content/50 text-center">Drag to reposition · Scroll or slider to zoom</p>
         {imageError && <p role="alert" className="text-error text-sm text-center">{imageError}</p>}
 
         <div className="flex justify-center">
           <canvas ref={canvasRef} width={SIZE} height={SIZE}
-            className="rounded-full cursor-grab active:cursor-grabbing"
+            className="max-w-full h-auto rounded-full cursor-grab active:cursor-grabbing"
             style={{ touchAction: 'none' }}
             onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
             onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onMouseUp}

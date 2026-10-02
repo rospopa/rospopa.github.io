@@ -131,8 +131,8 @@ export function UsersTable({ users, onReload, onEdit, reloadKey = 0 }) {
           </tbody>
         </table>
       </div>
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
+      <div className="flex flex-wrap gap-3 justify-between items-center">
+        <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs text-base-content/50 uppercase tracking-widest">Rows</span>
           <select value={perPage} onChange={e => { setPerPage(Number(e.target.value)); setPage(1) }} className="select select-bordered select-sm">
             <option value={10}>10</option>

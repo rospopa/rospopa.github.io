@@ -2193,9 +2193,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   return (
     <div className="modal modal-open" style={{ zIndex: 30, paddingTop: `${topOffset}px` }}>
       {/* Wide container: left form + right map */}
-      <div className="modal-box p-0 w-screen max-w-none max-h-none rounded-none flex flex-col overflow-hidden" style={{ height: `calc(100vh - ${topOffset}px)` }}>
+      <div className="property-modal-box modal-box p-0 w-full min-w-0 max-w-none max-h-none rounded-none flex flex-col overflow-hidden" style={{ '--property-top-offset': `${topOffset}px` }}>
         <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-base-300 md:hidden">
-          <h3 className="font-bold text-xl">
+          <h3 className="min-w-0 [overflow-wrap:anywhere] font-bold text-xl">
             {property?.id ? property.address : 'New Property'}
           </h3>
           <button className="btn btn-sm btn-ghost" onClick={onClose} disabled={saving}>✕</button>
@@ -2211,11 +2211,11 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
           </div>
         )}
 
-        <div className="flex flex-col md:flex-row overflow-hidden min-h-0 flex-1 md:pt-0">
+        <div className="flex min-w-0 flex-col md:flex-row overflow-hidden min-h-0 flex-1 md:pt-0">
         {/* ── Left panel: form ── */}
-        <div className="flex flex-col w-full md:w-[480px] md:flex-shrink-0 overflow-y-auto max-h-screen">
+        <div className="flex min-w-0 min-h-0 flex-col w-full md:w-[480px] md:flex-shrink-0">
           <div className="hidden md:flex items-center justify-between px-6 py-2 border-b border-base-300 sticky top-0 bg-base-100 z-[2]">
-            <h3 className="font-bold text-xl">
+            <h3 className="min-w-0 [overflow-wrap:anywhere] font-bold text-xl">
               {property?.id ? property.address : 'New Property'}
             </h3>
             <button className="btn btn-sm btn-ghost" onClick={onClose} disabled={saving}>✕</button>
@@ -2232,7 +2232,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
             </div>
           )}
 
-          <div className="flex-1 px-6 py-5 overflow-y-auto">
+          <div className="min-w-0 min-h-0 flex-1 px-4 sm:px-6 py-5 overflow-y-auto">
           {saveError && <div role="alert" className="alert alert-error text-sm mb-4">{saveError}</div>}
           {assignError && <div role="alert" className="alert alert-error text-sm mb-4">{assignError}</div>}
 
@@ -2479,7 +2479,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
               <div className="md:hidden space-y-4">
                 <div className="rounded-2xl border border-base-300 overflow-hidden bg-base-100 shadow-sm">
                   <div className="px-4 py-3 border-b border-base-300 space-y-3">
-                    <div className="flex items-start justify-between gap-3">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
                       <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
                       <div className="badge badge-outline whitespace-nowrap">{activeHoldPeriod} Year Hold</div>
                     </div>
@@ -2487,7 +2487,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                       <select
                         value={dcfModel.timing.viewMode || 'yearly'}
                         onChange={(e) => { updateTimingField('viewMode', e.target.value); setDcfColumnStart(0) }}
-                        className="select select-bordered select-sm flex-1"
+                        className="select select-bordered select-sm flex-1 min-w-0"
                         disabled={!isAdmin}
                       >
                         <option value="yearly">Yearly View</option>
@@ -3748,8 +3748,8 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
         {/* ── Right panel: map / DCF ── */}
         {tab === 'financials' ? (
-          <div className="hidden md:flex flex-1 border-l border-base-300 bg-base-100 min-h-0 flex-col">
-            <div className="flex-1 p-6 overflow-auto">
+          <div className="hidden md:flex min-w-0 flex-1 border-l border-base-300 bg-base-100 min-h-0 flex-col">
+            <div className="min-w-0 flex-1 p-6 overflow-y-auto">
               <div className="rounded-2xl border border-base-300 overflow-hidden bg-base-100 shadow-sm min-h-full">
                 <div className="px-5 py-4 border-b border-base-300 sticky top-0 bg-base-100 z-[1] space-y-3">
                   <div className="flex items-start justify-between gap-3 flex-wrap">
@@ -3793,7 +3793,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     </div>
                   </div>
                 </div>
-                <div className="hidden md:block overflow-auto h-full">
+                <div className="dcf-table-scroll hidden md:block overflow-x-auto">
                   <table className="table text-sm min-w-[860px] border-separate border-spacing-0 table-fixed">
                     <thead>
                       <tr className="bg-base-200/80">
@@ -3828,7 +3828,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                                     <div className="flex items-center gap-1">
                                       <span>{row.label}</span>
                                       {row.help && (
-                                        <span className="tooltip tooltip-right" data-tip={row.help}>
+                                        <span title={row.help}>
                                           <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-base-300 text-base-content/50 text-[10px] cursor-help">?</span>
                                         </span>
                                       )}
@@ -3870,7 +3870,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
             </div>
           </div>
         ) : (
-          <div className="hidden md:flex flex-1 border-l border-base-300 bg-base-100 min-h-0 flex-col">
+          <div className="hidden md:flex min-w-0 flex-1 border-l border-base-300 bg-base-100 min-h-0 flex-col">
             <div className="flex-1 min-h-0">
               <PropertyMap address={address} />
             </div>
@@ -3884,7 +3884,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
       {/* Contact detail overlay ? opened from Assign Users tab */}
       {viewContactId && (
         <div className="modal modal-open" style={{ zIndex: 60 }}>
-          <div className="modal-box p-0 w-screen h-screen max-w-none max-h-none rounded-none overflow-y-auto">
+          <div className="modal-box p-0 w-full min-w-0 h-screen supports-[height:100dvh]:h-dvh max-w-none max-h-none rounded-none overflow-y-auto">
             <Suspense fallback={<div />}>
               <LazyContactDetailPage
                 contactId={viewContactId}

@@ -41,7 +41,7 @@ function PhoneLink({ phone }) {
 function EmailLink({ email }) {
   if (!email) return <span className="text-base-content/40">—</span>
   return (
-    <a href={`mailto:${email}`} className="text-blue-600 underline underline-offset-2 hover:text-blue-800 truncate">
+    <a href={`mailto:${email}`} title={email} className="inline-block max-w-full align-bottom text-blue-600 underline underline-offset-2 hover:text-blue-800 truncate">
       {email}
     </a>
   )
@@ -83,7 +83,7 @@ function ContactCard({ contact, onViewNotes }) {
         <div className="flex items-start gap-3">
           <ContactAvatar contact={contact} size="lg" />
           <div className="flex-1 min-w-0">
-            <div className="font-semibold text-base leading-tight">{fullName}</div>
+            <div className="font-semibold text-base leading-tight [overflow-wrap:anywhere]">{fullName}</div>
             <EmailLink email={contact.email} />
             {contact.contact_type && (
               <span className={`badge badge-xs mt-1 ${getTypeBadgeClass(contact.contact_type)}`}>{typeLabel(contact.contact_type)}</span>
@@ -1400,9 +1400,9 @@ export default function ContactsPage() {
       })()}
 
       {!loading && view === 'split' && (
-        <div className="flex gap-0 border border-base-200 rounded-box overflow-hidden" style={{ height: 'calc(100vh - 180px)', minHeight: '500px' }}>
+        <div className="flex min-w-0 gap-0 border border-base-200 rounded-box overflow-hidden" style={{ height: 'calc(100vh - 180px)', minHeight: '500px' }}>
           {/* Left: contact list */}
-          <div className="w-72 flex-shrink-0 border-r border-base-200 flex flex-col bg-base-100 overflow-hidden">
+          <div className={`${splitDetailId ? 'hidden md:flex' : 'flex'} min-w-0 w-full md:w-64 lg:w-72 flex-shrink-0 md:border-r border-base-200 flex-col bg-base-100 overflow-hidden`}>
             <div className="px-3 py-2 border-b border-base-200 bg-base-200/40">
               <span className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
                 {roleFilteredContacts.length}{roleFilteredContacts.length !== contacts.length ? `/${contacts.length}` : ''} Contacts
@@ -1443,9 +1443,10 @@ export default function ContactsPage() {
           </div>
 
           {/* Right: detail panel */}
-          <div className="flex-1 overflow-y-auto bg-base-50">
+          <div className={`${splitDetailId ? 'block' : 'hidden md:block'} min-w-0 flex-1 overflow-y-auto bg-base-50`}>
             {splitDetailId ? (
               <div className="p-4 md:p-6">
+                <button className="btn btn-sm btn-ghost mb-3 md:hidden" onClick={() => selectSplit(null)}>Back to Contacts</button>
                 <ContactDetailPage
                   key={splitDetailId}
                   contactId={splitDetailId}

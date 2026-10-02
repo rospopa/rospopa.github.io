@@ -72,6 +72,16 @@
 
 /* Ensure form controls are always interactive, with the right cursor for
    each kind: I-beam only where you can type, pointer where you click. */
+.input, .select, .textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.property-modal-box {
+  height: calc(100vh - var(--property-top-offset, 0px));
+  height: calc(100dvh - var(--property-top-offset, 0px));
+}
+
 input:not([disabled]),
 textarea:not([disabled]),
 select:not([disabled]) {

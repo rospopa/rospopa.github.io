@@ -1372,7 +1372,7 @@ export default function CalendarPage() {
             </p>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {settings?.connected && settings.google_mode === 'service_account' && settings.embed_calendar_id && (
             <button className="btn btn-sm btn-primary" onClick={() => setShowCreate(true)}>+ Event</button>
           )}
