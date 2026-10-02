@@ -69,24 +69,42 @@ function isRetryable(method, status) {
   return isRetryableMethod(method) && RETRY_STATUSES.includes(status)
 }
 
+function waitForRetry(delay, signal) {
+  return new Promise((resolve, reject) => {
+    signal?.throwIfAborted()
+    const timer = setTimeout(() => {
+      signal?.removeEventListener('abort', abort)
+      resolve()
+    }, delay)
+    function abort() {
+      clearTimeout(timer)
+      signal.removeEventListener('abort', abort)
+      reject(signal.reason)
+    }
+    signal?.addEventListener('abort', abort, { once: true })
+  })
+}
+
 export async function apiFetch(url, options = {}) {
   for (let attempt = 0; ; attempt += 1) {
+    options.signal?.throwIfAborted()
     let res
     try {
       res = await fetch(url, { credentials: 'include', ...options })
     } catch (networkError) {
+      if (options.signal?.aborted) throw networkError
       // A dropped connection during a redeploy looks the same as being offline.
       if (isRetryableMethod(options.method) && attempt < RETRY_DELAYS_MS.length) {
-        await new Promise(r => setTimeout(r, RETRY_DELAYS_MS[attempt]))
+        await waitForRetry(RETRY_DELAYS_MS[attempt], options.signal)
         continue
       }
       throw networkError
     }
 
-    if (res.ok) return res.json()
+    if (res.ok) return res.status === 204 ? null : res.json()
 
     if (isRetryable(options.method, res.status) && attempt < RETRY_DELAYS_MS.length) {
-      await new Promise(r => setTimeout(r, RETRY_DELAYS_MS[attempt]))
+      await waitForRetry(RETRY_DELAYS_MS[attempt], options.signal)
       continue
     }
 
@@ -636,7 +654,7 @@ export function Avatar({ src, name, size = 'md' }) {
 }
 
 export function formatPhone(raw) {
-  const digits = raw.replace(/\D/g, '').slice(0, 11)
+  const digits = String(raw ?? '').replace(/\D/g, '').slice(0, 11)
   if (digits.length === 0) return ''
   // Strip leading 1
   const local = digits.startsWith('1') ? digits.slice(1) : digits
@@ -652,6 +670,9 @@ export function PhotoCropper({ src, onSave, onCancel, onClose }) {
   const cancel = onCancel || onClose || (() => {})
   const canvasRef = useRef(null)
   const [scale, setScale] = useState(1)
+  const [fitScale, setFitScale] = useState(1)
+  const [imageReady, setImageReady] = useState(false)
+  const [imageError, setImageError] = useState('')
   const [offsetX, setOffsetX] = useState(0)
   const [offsetY, setOffsetY] = useState(0)
   const [dragging, setDragging] = useState(false)
@@ -661,19 +682,25 @@ export function PhotoCropper({ src, onSave, onCancel, onClose }) {
 
   useEffect(() => {
     const img = imgRef.current
+    setImageReady(false)
+    setImageError('')
     img.onload = () => {
       // Auto-fit: scale to fill the square
       const fit = Math.max(SIZE / img.naturalWidth, SIZE / img.naturalHeight)
+      setFitScale(fit)
       setScale(fit)
+      setImageReady(true)
       setOffsetX(0); setOffsetY(0)
       draw(img, fit, 0, 0)
     }
+    img.onerror = () => setImageError('Could not read that image. Choose another photo.')
     img.src = src
+    return () => { img.onload = null; img.onerror = null }
   }, [src])
 
   function draw(img, s, ox, oy) {
     const canvas = canvasRef.current
-    if (!canvas) return
+    if (!canvas || !img.naturalWidth || !img.naturalHeight) return
     const ctx = canvas.getContext('2d')
     ctx.clearRect(0, 0, SIZE, SIZE)
     const w = img.naturalWidth * s
@@ -727,7 +754,6 @@ export function PhotoCropper({ src, onSave, onCancel, onClose }) {
   }
 
   function handleSave() {
-    const canvas = canvasRef.current
     // Draw final clean circle crop
     const out = document.createElement('canvas')
     out.width = SIZE; out.height = SIZE
@@ -758,6 +784,7 @@ export function PhotoCropper({ src, onSave, onCancel, onClose }) {
       <div className="bg-base-100 rounded-2xl p-6 space-y-4 w-full max-w-sm shadow-2xl" onClick={e => e.stopPropagation()}>
         <h3 className="font-bold text-lg text-center">Adjust Profile Photo</h3>
         <p className="text-xs text-base-content/50 text-center">Drag to reposition · Scroll or slider to zoom</p>
+        {imageError && <p role="alert" className="text-error text-sm text-center">{imageError}</p>}
 
         <div className="flex justify-center">
           <canvas ref={canvasRef} width={SIZE} height={SIZE}
@@ -765,20 +792,20 @@ export function PhotoCropper({ src, onSave, onCancel, onClose }) {
             style={{ touchAction: 'none' }}
             onMouseDown={onMouseDown} onMouseMove={onMouseMove} onMouseUp={onMouseUp} onMouseLeave={onMouseUp}
             onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onMouseUp}
-            onWheel={e => { e.preventDefault(); setScale(s => Math.max(0.5, Math.min(5, s - e.deltaY * 0.001))) }}
+            onWheel={e => { e.preventDefault(); setScale(s => Math.max(fitScale, Math.min(fitScale * 5, s - e.deltaY * fitScale * 0.001))) }}
           />
         </div>
 
         <div className="flex items-center gap-3">
           <span className="text-xs text-base-content/40">Zoom</span>
-          <input type="range" min="0.5" max="5" step="0.01" value={scale}
+          <input type="range" min={fitScale} max={fitScale * 5} step={fitScale / 100} value={scale} disabled={!imageReady}
             onChange={e => setScale(Number(e.target.value))}
             className="range range-xs flex-1" />
         </div>
 
         <div className="flex gap-3">
           <button className="btn btn-outline flex-1" onClick={cancel}>Cancel</button>
-          <button className="btn btn-primary flex-1" onClick={handleSave}>Use Photo</button>
+          <button className="btn btn-primary flex-1" onClick={handleSave} disabled={!imageReady}>Use Photo</button>
         </div>
       </div>
     </div>

@@ -216,7 +216,7 @@ function ContactMultiPicker({
               {contactName(c)}
               {c.organization && <span className="text-base-content/45"> · {c.organization}</span>}
             </span>
-            {metaOf(c) && <span className="hidden shrink-0 text-xs text-base-content/40 sm:inline">{metaOf(c)}</span>}
+            {metaOf(c) && <span className="hidden max-w-[45%] truncate text-xs text-base-content/40 sm:inline" title={metaOf(c)}>{metaOf(c)}</span>}
           </label>
         ))}
       </div>
@@ -247,7 +247,7 @@ function ConnectPanel({ settings, onSaved }) {
         body: JSON.stringify({ ics_url: icsUrl.trim(), embed_calendar_id: embedId.trim() }),
       })
       setIcsUrl('')
-      onSaved()
+      await onSaved()
     } catch (e) {
       setError(e.message || 'Could not save those calendar settings')
     } finally {
@@ -272,7 +272,7 @@ function ConnectPanel({ settings, onSaved }) {
     setSaving(true)
     try {
       await apiFetch('/api/calendar/settings', { method: 'DELETE' })
-      onSaved()
+      await onSaved()
     } catch (e) {
       setError(e.message || 'Could not disconnect')
     } finally {
@@ -657,8 +657,8 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
   }
 
   return (
-    <div className="modal modal-open" onClick={onClose}>
-      <div className="modal-box max-w-lg" onClick={e => e.stopPropagation()}>
+    <div className="modal modal-open" onClick={() => { if (!saving) onClose() }}>
+      <fieldset disabled={saving} className="modal-box max-w-lg min-w-0" onClick={e => e.stopPropagation()}>
         {!editing ? (
           <>
             <div className="flex items-start justify-between gap-2">
@@ -794,7 +794,7 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
             </div>
           </>
         )}
-      </div>
+      </fieldset>
     </div>
   )
 }
@@ -860,8 +860,8 @@ function EventCreateModal({ contacts, defaultDay, onClose, onCreated }) {
   }
 
   return (
-    <div className="modal modal-open" onClick={onClose}>
-      <div className="modal-box max-w-lg" onClick={e => e.stopPropagation()}>
+    <div className="modal modal-open" onClick={() => { if (!saving) onClose() }}>
+      <fieldset disabled={saving} className="modal-box max-w-lg min-w-0" onClick={e => e.stopPropagation()}>
         <h3 className="text-lg font-bold">New event</h3>
         <div className="mt-3 space-y-3">
           <label className="form-control">
@@ -933,7 +933,7 @@ function EventCreateModal({ contacts, defaultDay, onClose, onCreated }) {
             {saving ? <span className="loading loading-spinner loading-xs" /> : null} Create event
           </button>
         </div>
-      </div>
+      </fieldset>
     </div>
   )
 }
@@ -984,6 +984,7 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
   }
 
   async function save() {
+    if (saving) return
     setSaving(true); setError('')
     const recipients = [
       ...selectedContacts.map(c => ({ recipient_user_id: c.id, label: contactName(c) })),
@@ -1019,8 +1020,14 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
         failed.push(`${r.label}: ${e.message || 'failed'}`)
       }
     }
+    try {
+      await onSaved()
+    } catch (e) {
+      setError(`Created ${recipients.length - failed.length} of ${recipients.length}. ${failed.join('; ')} Could not refresh notifications: ${e.message || 'Refresh failed'}`)
+      setSaving(false)
+      return
+    }
     setSaving(false)
-    onSaved()
     if (failed.length === 0) {
       onClose()
     } else {
@@ -1035,7 +1042,7 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
 
   return (
     <div className="modal modal-open">
-      <div className="modal-box max-w-lg space-y-4">
+      <fieldset disabled={saving} className="modal-box max-w-lg min-w-0 space-y-4">
         <h3 className="font-bold text-lg">Add notification</h3>
         <div className="rounded-lg bg-base-200 px-3 py-2">
           <p className="font-medium">{event.title}</p>
@@ -1122,8 +1129,8 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
             {recipientCount > 1 ? `Add ${recipientCount} notifications` : 'Add notification'}
           </button>
         </div>
-      </div>
-      <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
+      </fieldset>
+      <form method="dialog" className="modal-backdrop" onClick={() => { if (!saving) onClose() }}><button disabled={saving}>close</button></form>
     </div>
   )
 }
@@ -1144,6 +1151,8 @@ export default function CalendarPage() {
   const [modalEvent, setModalEvent] = useState(null)
   const [showCreate, setShowCreate] = useState(false)
   const [testing, setTesting] = useState(null)
+  const busyRules = useRef(new Set())
+  const [pendingRules, setPendingRules] = useState(new Set())
   const [toast, setToast] = useState('')
 
   const loadSettings = useCallback(async () => {
@@ -1185,7 +1194,6 @@ export default function CalendarPage() {
       // answering; say so rather than silently showing stale days.
       setError(data.sync_error ? `Calendar sync is degraded: ${data.sync_error}` : '')
     } catch (e) {
-      setEvents([])
       setError(e.message || 'Could not read the calendar feed')
     }
   }, [])
@@ -1243,23 +1251,41 @@ export default function CalendarPage() {
 
   async function refresh() {
     setRefreshing(true)
-    await loadEvents(true)
-    await loadRules()
-    setRefreshing(false)
+    try {
+      await loadEvents(true)
+      await loadRules()
+    } catch (e) {
+      setError(e.message || 'Could not refresh notifications')
+    } finally {
+      setRefreshing(false)
+    }
+  }
+
+  async function updateRule(id, options) {
+    if (busyRules.current.has(id)) return
+    busyRules.current.add(id)
+    setPendingRules(new Set(busyRules.current))
+    try {
+      await apiFetch(`/api/calendar/notifications/${id}`, options)
+      await loadRules()
+    } catch (e) {
+      setError(e.message || 'Could not update notification')
+    } finally {
+      busyRules.current.delete(id)
+      setPendingRules(new Set(busyRules.current))
+    }
   }
   async function removeRule(id) {
     if (!confirm('Delete this notification?')) return
-    await apiFetch(`/api/calendar/notifications/${id}`, { method: 'DELETE' })
-    loadRules()
+    await updateRule(id, { method: 'DELETE' })
   }
 
   async function toggleRule(rule) {
-    await apiFetch(`/api/calendar/notifications/${rule.id}`, {
+    await updateRule(rule.id, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ enabled: !rule.enabled }),
     })
-    loadRules()
   }
 
   async function testRule(rule) {
@@ -1541,15 +1567,16 @@ export default function CalendarPage() {
                       type="checkbox"
                       className="toggle toggle-sm toggle-primary"
                       checked={Boolean(rule.enabled)}
+                      disabled={pendingRules.has(rule.id)}
                       onChange={() => toggleRule(rule)}
                       title={rule.enabled ? 'Enabled' : 'Disabled'}
                     />
                   </div>
                   <div className="flex gap-2">
-                    <button className="btn btn-xs btn-ghost" onClick={() => testRule(rule)} disabled={testing === rule.id}>
+                    <button className="btn btn-xs btn-ghost" onClick={() => testRule(rule)} disabled={testing !== null || pendingRules.has(rule.id)}>
                       {testing === rule.id ? <span className="loading loading-spinner loading-xs" /> : null} Send test
                     </button>
-                    <button className="btn btn-xs btn-ghost text-error" onClick={() => removeRule(rule.id)}>Delete</button>
+                    <button className="btn btn-xs btn-ghost text-error" onClick={() => removeRule(rule.id)} disabled={pendingRules.has(rule.id)}>Delete</button>
                   </div>
                 </div>
               ))}

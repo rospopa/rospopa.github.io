@@ -1244,6 +1244,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   const [refiYear, setRefiYear] = useState('')
   const [dcfModel, setDcfModel] = useState(defaultDcfModel())
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [savedSignal, setSavedSignal] = useState(0)
   const [media, setMedia] = useState([])
   const [mediaLoading, setMediaLoading] = useState(false)
@@ -1257,6 +1258,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   // Assignment state
   const [allUsers, setAllUsers] = useState([])
   const [assignLoading, setAssignLoading] = useState(false)
+  const [assignError, setAssignError] = useState('')
   const [viewContactId, setViewContactId] = useState(null)
 
   function loadProperty(p) {
@@ -1326,6 +1328,12 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   }
 
   useEffect(() => {
+    if (open) {
+      setSaveError('')
+      setUploadError('')
+      setDocUploadError('')
+      setAssignError('')
+    }
     if (open && property) {
       loadProperty(property)
       setTab('details')
@@ -1730,6 +1738,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
   useEffect(() => {
     if (open && property?.id) {
+      setMedia([])
+      setDocs([])
+      setAllUsers([])
       fetchMedia()
       fetchDocs()
       if (isAdmin) fetchUsers()
@@ -1741,7 +1752,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
     try {
       const data = await apiFetch(`/api/properties/${property.id}/media`)
       setMedia(data.media || [])
-    } catch (e) { console.error('Failed to fetch media', e.message) }
+    } catch (e) { setUploadError(e.message || 'Could not load media') }
     finally { setMediaLoading(false) }
   }
 
@@ -1750,7 +1761,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
     try {
       const data = await apiFetch(`/api/properties/${property.id}/documents`)
       setDocs(data.documents || [])
-    } catch (e) { console.error('Failed to fetch documents', e.message) }
+    } catch (e) { setDocUploadError(e.message || 'Could not load documents') }
     finally { setDocsLoading(false) }
   }
 
@@ -1764,8 +1775,8 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
     for (const file of files) {
       if (!allowed.includes(file.type)) { setDocUploadError(`${file.name}: unsupported type`); continue }
       if (file.size > 25 * 1024 * 1024) { setDocUploadError(`${file.name} exceeds 25MB limit`); continue }
-      const fileData = await toBase64(file)
       try {
+        const fileData = await toBase64(file)
         await apiFetch(`/api/properties/${property.id}/documents`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1779,21 +1790,28 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
   async function deleteDoc(docId) {
     if (!confirm('Delete this document?')) return
-    await apiFetch(`/api/properties/${property.id}/documents/${docId}`, { method: 'DELETE' })
-    fetchDocs()
+    setDocUploadError('')
+    try {
+      await apiFetch(`/api/properties/${property.id}/documents/${docId}`, { method: 'DELETE' })
+      await fetchDocs()
+    } catch (e) {
+      setDocUploadError(e.message || 'Could not delete document')
+    }
   }
 
   async function fetchUsers() {
     try {
       const data = await apiFetch(`/api/properties/${property.id}/users`)
       setAllUsers(data.users || [])
-    } catch (e) { console.error('Failed to fetch users', e.message) }
+    } catch (e) { setAssignError(e.message || 'Could not load assignments') }
   }
 
   async function handleSave() {
+    if (saving) return
     if (!pin.trim() || !address.trim() || !county.trim()) { alert('PIN, Address and County are required'); return }
     setSaving(true)
-    await onSave({
+    setSaveError('')
+    const draft = {
       ...property, pin, address, county,
       price: price !== '' ? Number(price) : null,
       square_feet: sqft !== '' ? Number(sqft) : null,
@@ -2065,10 +2083,16 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
           nonRecoverableExpensePct: parseNum(row.nonRecoverableExpensePct),
         }))
       },
-    })
-    setSaving(false)
-    setSavedSignal(s => s + 1)
-    if (!property?.id) onClose()
+    }
+    try {
+      await onSave(draft)
+      setSavedSignal(s => s + 1)
+      if (!property?.id) onClose()
+    } catch (e) {
+      setSaveError(e.message || 'Could not save property')
+    } finally {
+      setSaving(false)
+    }
   }
 
   function addInterstate() { setInterstates(prev => [...prev, { name: '', distance: '' }]) }
@@ -2107,8 +2131,8 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
     for (const file of files) {
       const maxMB = file.type.startsWith('video/') ? 50 : 10
       if (file.size > maxMB * 1024 * 1024) { setUploadError(`${file.name} exceeds ${maxMB}MB limit`); continue }
-      const base64Data = await toBase64(file)
       try {
+        const base64Data = await toBase64(file)
         await apiFetch(`/api/properties/${property.id}/media`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -2130,12 +2154,19 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   }
 
   async function deleteMedia(mediaId) {
-    await apiFetch(`/api/properties/${property.id}/media/${mediaId}`, { method: 'DELETE' })
-    fetchMedia()
+    setUploadError('')
+    try {
+      await apiFetch(`/api/properties/${property.id}/media/${mediaId}`, { method: 'DELETE' })
+      await fetchMedia()
+    } catch (e) {
+      setUploadError(e.message || 'Could not delete media')
+    }
   }
 
   async function toggleAssign(userId, currentlyAssigned) {
+    if (assignLoading) return
     setAssignLoading(true)
+    setAssignError('')
     try {
       if (currentlyAssigned) {
         await apiFetch(`/api/properties/${property.id}/assign/${userId}`, { method: 'DELETE' })
@@ -2147,7 +2178,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
         })
       }
       await fetchUsers()
-    } catch { console.error('Assign failed') }
+    } catch (e) { setAssignError(e.message || 'Could not update assignment') }
     finally { setAssignLoading(false) }
   }
 
@@ -2167,7 +2198,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
           <h3 className="font-bold text-xl">
             {property?.id ? property.address : 'New Property'}
           </h3>
-          <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
+          <button className="btn btn-sm btn-ghost" onClick={onClose} disabled={saving}>✕</button>
         </div>
 
         {tabs.length > 1 && (
@@ -2187,7 +2218,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
             <h3 className="font-bold text-xl">
               {property?.id ? property.address : 'New Property'}
             </h3>
-            <button className="btn btn-sm btn-ghost" onClick={onClose}>✕</button>
+            <button className="btn btn-sm btn-ghost" onClick={onClose} disabled={saving}>✕</button>
           </div>
 
           {/* Tabs */}
@@ -2202,6 +2233,8 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
           )}
 
           <div className="flex-1 px-6 py-5 overflow-y-auto">
+          {saveError && <div role="alert" className="alert alert-error text-sm mb-4">{saveError}</div>}
+          {assignError && <div role="alert" className="alert alert-error text-sm mb-4">{assignError}</div>}
 
         {/* Details tab */}
         {tab === 'details' && (
@@ -3608,9 +3641,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   Choose Files
                   <input type="file" className="hidden" multiple accept="image/*,video/*" onChange={handleFileUpload} />
                 </label>
-                {uploadError && <p className="text-error text-sm mt-2">{uploadError}</p>}
               </div>
             )}
+            {uploadError && <p role="alert" className="text-error text-sm">{uploadError}</p>}
             {mediaLoading
               ? <p className="text-center text-base-content/40 py-6">Loading…</p>
               : media.length === 0
@@ -3650,9 +3683,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,image/*"
                     onChange={handleDocUpload} />
                 </label>
-                {docUploadError && <p className="text-error text-sm mt-2">{docUploadError}</p>}
               </div>
             )}
+            {docUploadError && <p role="alert" className="text-error text-sm">{docUploadError}</p>}
             {docsLoading
               ? <p className="text-center text-base-content/40 py-6">Loading…</p>
               : docs.length === 0
@@ -3846,7 +3879,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
       </div>
       </div>
-      <form method="dialog" className="modal-backdrop" onClick={onClose}><button>close</button></form>
+      <form method="dialog" className="modal-backdrop" onClick={() => { if (!saving) onClose() }}><button disabled={saving}>close</button></form>
 
       {/* Contact detail overlay ? opened from Assign Users tab */}
       {viewContactId && (

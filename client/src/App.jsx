@@ -35,6 +35,8 @@ export function UsersTable({ users, onReload, onEdit, reloadKey = 0 }) {
   const [page, setPage] = useState(1)
   const [total, setTotal] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [refreshVersion, setRefreshVersion] = useState(0)
   const onlineStatus = useSharedOnlineStatus()
   const debouncedQuery = useDebounce(query, 200)
 
@@ -46,21 +48,25 @@ export function UsersTable({ users, onReload, onEdit, reloadKey = 0 }) {
     localStorage.removeItem('rep_global_users_query')
   }, [])
 
-  async function fetchUsers() {
+  useEffect(() => {
+    const controller = new AbortController()
+    let active = true
     setLoading(true)
-    try {
-      // The API paginates with limit/offset, not page numbers.
-      const offset = (page - 1) * perPage
-      const data = await apiFetch(`/api/users?q=${encodeURIComponent(debouncedQuery)}&limit=${perPage}&offset=${offset}`)
-      if (data.users) onReload(data.users)
-      if (typeof data.total === 'number') setTotal(data.total)
-    } catch (e) { console.error('Fetch failed:', e.message) }
-    finally { setLoading(false) }
-  }
-
-  // reloadKey lets the parent force a refetch (user created/edited) without
-  // resetting the admin's current page, rows-per-page or search.
-  useEffect(() => { fetchUsers() }, [page, perPage, debouncedQuery, reloadKey])
+    setError('')
+    const offset = (page - 1) * perPage
+    apiFetch(`/api/users?q=${encodeURIComponent(debouncedQuery)}&limit=${perPage}&offset=${offset}`, { signal: controller.signal })
+      .then(data => {
+        if (!active) return
+        onReload(data.users || [])
+        if (typeof data.total === 'number') {
+          setTotal(data.total)
+          setPage(p => Math.min(p, Math.max(1, Math.ceil(data.total / perPage))))
+        }
+      })
+      .catch(e => { if (active) setError(e.message || 'Could not load users') })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false; controller.abort() }
+  }, [page, perPage, debouncedQuery, reloadKey, refreshVersion, onReload])
 
   const lastPage = total !== null ? Math.max(1, Math.ceil(total / perPage)) : null
 
@@ -68,9 +74,10 @@ export function UsersTable({ users, onReload, onEdit, reloadKey = 0 }) {
     <div className="space-y-4">
       <div className="flex gap-3">
         <input type="text" placeholder="Search by email…" value={query}
-          onChange={e => setQuery(e.target.value)} className="input input-bordered flex-1" />
-        <button className="btn btn-primary" onClick={() => { setPage(1); fetchUsers() }}>Search</button>
+          onChange={e => { setQuery(e.target.value); setPage(1) }} className="input input-bordered flex-1 min-w-0" />
+        <button className="btn btn-primary" onClick={() => { setPage(1); setRefreshVersion(v => v + 1) }}>Search</button>
       </div>
+      {error && <div role="alert" className="alert alert-error text-sm">{error}</div>}
       <div className="overflow-x-auto rounded border border-base-300">
         <table className="table table-zebra w-full">
           <thead>
@@ -629,6 +636,7 @@ function PropertiesPage({ user }) {
   const [showPropertyModal, setShowPropertyModal] = useState(false)
   const [propertyModalTopOffset, setPropertyModalTopOffset] = useState(64)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [viewMode, setViewMode] = useState('grid') // 'grid' | 'list' | 'kanban'
   const [search, setSearch] = useState('')
   const [listSort, setListSort] = useState({ col: 'updated_at', dir: 'desc' })
@@ -653,11 +661,12 @@ function PropertiesPage({ user }) {
 
   async function fetchProperties() {
     setLoading(true)
+    setError('')
     try {
       const endpoint = user.role === 'admin' ? '/api/properties?allProps=true' : '/api/me/properties'
       const data = await apiFetch(endpoint)
       setProperties(data.properties || [])
-    } catch (e) { console.error('Failed to fetch properties:', e.message) }
+    } catch (e) { setError(e.message || 'Could not load properties') }
     finally { setLoading(false) }
   }
 
@@ -674,12 +683,10 @@ function PropertiesPage({ user }) {
   }, [properties])
 
   async function saveProperty(prop) {
-    try {
-      const method = prop.id ? 'PUT' : 'POST'
-      const endpoint = prop.id ? `/api/properties/${prop.id}` : '/api/properties'
-      await apiFetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(prop) })
-      await fetchProperties()
-    } catch (e) { console.error('Failed to save property:', e.message) }
+    const method = prop.id ? 'PUT' : 'POST'
+    const endpoint = prop.id ? `/api/properties/${prop.id}` : '/api/properties'
+    await apiFetch(endpoint, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(prop) })
+    await fetchProperties()
   }
 
   async function deleteProperty(id) {
@@ -687,7 +694,7 @@ function PropertiesPage({ user }) {
     try {
       await apiFetch(`/api/properties/${id}`, { method: 'DELETE' })
       await fetchProperties()
-    } catch (e) { console.error('Delete failed:', e.message) }
+    } catch (e) { setError(e.message || 'Could not delete property') }
   }
 
   function openProperty(prop) {
@@ -820,6 +827,7 @@ function PropertiesPage({ user }) {
 
       <Suspense fallback={<div className="flex items-center justify-center h-full"><span className="loading loading-spinner loading-lg" /></div>}>
         <PropertyDetailModal
+          key={selectedProperty?.id || 'new'}
           open={showPropertyModal}
           property={selectedProperty}
           isAdmin={user.role === 'admin'}
@@ -830,6 +838,7 @@ function PropertiesPage({ user }) {
       </Suspense>
 
       {loading && <p className="text-base-content/40 text-sm">Loading…</p>}
+      {error && <div role="alert" className="alert alert-error text-sm">{error}</div>}
 
       {!loading && properties.length === 0 && (
         <div className="py-16 text-center text-base-content/30">
@@ -972,7 +981,7 @@ function PropertiesPage({ user }) {
                                     body: JSON.stringify({ status: newStatus })
                                   })
                                   fetchProperties()
-                                } catch {}
+                                } catch (e) { setError(e.message || 'Could not change property status') }
                               }}
                               className="select select-bordered select-xs flex-1 min-w-0"
                             >
@@ -1043,98 +1052,6 @@ function TradingViewEmbed({ symbol }) {
   )
 }
 
-const TESTIMONIALS = [
-  { id: 1, name: 'Amanda Chen', role: 'Multifamily Investor', location: 'Seattle, WA', photo: 4, quote: 'The underwriting tools cut my deal review time in half. I can screen a property, pull comps, and share a summary with my partners before lunch.' },
-  { id: 2, name: 'Marcus Whitfield', role: 'Portfolio Manager', location: 'Atlanta, GA', photo: 12, quote: 'Having the whole portfolio in one dashboard changed how I run my week. No more spreadsheets scattered across three laptops.' },
-  { id: 3, name: 'Priya Raman', role: 'Commercial Broker', location: 'Chicago, IL', photo: 20, quote: 'My clients notice the difference. The property packages look polished and I send them out in minutes instead of hours.' },
-  { id: 4, name: 'Daniel Ortiz', role: 'Private Lender', location: 'Miami, FL', photo: 33, quote: 'The market data pulls are fast and accurate. I trust the numbers enough to make lending decisions off them directly.' },
-  { id: 5, name: 'Sarah Lindqvist', role: 'Asset Manager', location: 'Denver, CO', photo: 5, quote: 'Contact management finally clicks. Everything about a relationship lives in one place, including notes from calls two years ago.' },
-  { id: 6, name: 'James Okafor', role: 'Development Partner', location: 'Houston, TX', photo: 15, quote: 'Onboarding my team took an afternoon. The permissions model is simple enough that I did not need to call anyone for help.' },
-  { id: 7, name: 'Nicole Barrett', role: 'Acquisitions Lead', location: 'Phoenix, AZ', photo: 9, quote: 'I have used four platforms in this space. This is the first one that did not slow down once my database grew past a few thousand records.' },
-  { id: 8, name: 'Ethan Kowalski', role: 'REIT Analyst', location: 'New York, NY', photo: 51, quote: 'The charting integration is genuinely useful. I track rate movements next to my holdings without opening another tab.' },
-  { id: 9, name: 'Grace Yamamoto', role: 'Investment Advisor', location: 'San Francisco, CA', photo: 24, quote: 'Clean interface, no clutter, and it works just as well on my phone between showings as it does at my desk.' },
-  { id: 10, name: 'Robert Falana', role: 'Property Owner', location: 'Charlotte, NC', photo: 60, quote: 'Support answered a question on a Saturday and shipped the fix the following week. That kind of responsiveness is rare.' },
-  { id: 11, name: 'Isabella Moreau', role: 'Leasing Director', location: 'Boston, MA', photo: 45, quote: 'The document handling alone justified the switch. Everything is searchable and I stopped losing files in email threads.' },
-  { id: 12, name: 'Kevin Doyle', role: 'Syndicator', location: 'Nashville, TN', photo: 53, quote: 'Reporting to my investors used to take a full day each quarter. Now it is a few clicks and the numbers are already correct.' },
-  { id: 13, name: 'Layla Haddad', role: 'Capital Markets', location: 'Dallas, TX', photo: 32, quote: 'It handles the tedious parts so I can spend my time on the conversations that actually close deals.' },
-  { id: 14, name: 'Thomas Berezny', role: 'Fund Principal', location: 'Portland, OR', photo: 68, quote: 'I was skeptical about moving off our internal tools. Six months in, nobody on the team wants to go back.' },
-  { id: 15, name: 'Renee Caldwell', role: 'Real Estate Attorney', location: 'Philadelphia, PA', photo: 41, quote: 'Audit trails are thorough and easy to read, which makes my job considerably less painful during due diligence.' },
-  { id: 16, name: 'Omar Siddiqui', role: 'Buy-Side Analyst', location: 'Minneapolis, MN', photo: 65, quote: 'The saved searches and alerts mean opportunities come to me. I have sourced two deals this year I would have otherwise missed.' }
-]
-
-function StarRating({ rating = 5, name }) {
-  return (
-    <div className="flex items-center gap-0.5" role="img" aria-label={`${rating} out of 5 stars${name ? ` from ${name}` : ''}`}>
-      {Array.from({ length: 5 }, (_, i) => (
-        <svg
-          key={i}
-          viewBox="0 0 20 20"
-          aria-hidden="true"
-          className={`w-4 h-4 ${i < rating ? 'text-warning' : 'text-base-300'}`}
-          fill="currentColor"
-        >
-          <path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.78l-5.2 2.73.99-5.79-4.21-4.1 5.82-.85L10 1.5z" />
-        </svg>
-      ))}
-    </div>
-  )
-}
-
-function TestimonialCard({ testimonial }) {
-  const [imageFailed, setImageFailed] = useState(false)
-  const initials = testimonial.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
-
-  return (
-    <div className="card bg-base-100 border border-base-300 shadow-sm h-full">
-      <div className="card-body p-5 gap-4">
-        <StarRating rating={5} name={testimonial.name} />
-        <blockquote className="text-sm leading-relaxed text-base-content/80 flex-1">
-          &ldquo;{testimonial.quote}&rdquo;
-        </blockquote>
-        <div className="flex items-center gap-3 pt-1 border-t border-base-200">
-          {imageFailed ? (
-            <div className="w-10 h-10 mt-3 rounded-full bg-base-300 flex items-center justify-center text-sm font-semibold text-base-content/60 flex-shrink-0">
-              {initials}
-            </div>
-          ) : (
-            <img
-              src={`https://i.pravatar.cc/160?img=${testimonial.photo}`}
-              alt=""
-              loading="lazy"
-              onError={() => setImageFailed(true)}
-              className="w-10 h-10 mt-3 rounded-full object-cover border border-base-300 flex-shrink-0"
-            />
-          )}
-          <div className="mt-3 min-w-0">
-            <div className="text-sm font-semibold truncate">{testimonial.name}</div>
-            <div className="text-xs text-base-content/55 truncate">
-              {testimonial.role} &middot; {testimonial.location}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function TestimonialsSection() {
-  return (
-    <section className="space-y-4">
-      <div className="space-y-1">
-        <h2 className="text-xl md:text-2xl font-bold">What our clients say</h2>
-        <p className="text-sm text-base-content/55">
-          Trusted by investors, brokers, and owners across the country.
-        </p>
-      </div>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {TESTIMONIALS.map(testimonial => (
-          <TestimonialCard key={testimonial.id} testimonial={testimonial} />
-        ))}
-      </div>
-    </section>
-  )
-}
-
 export default function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [users, setUsers] = useState([])
@@ -1145,6 +1062,8 @@ export default function App() {
   const [msg, setMsg] = useState('')
   const [modal, setModal] = useState({ open: false, title: '', message: '', onConfirm: null })
   const [authChecked, setAuthChecked] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
+  const [authError, setAuthError] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('rep_theme') === 'dark')
   const [loginPreview, setLoginPreview] = useState(null)
@@ -1157,6 +1076,7 @@ export default function App() {
   const [globalSearch, setGlobalSearch] = useState('')
   const [globalResults, setGlobalResults] = useState({ properties: [], users: [], contacts: [], auditLogs: [] })
   const [globalLoading, setGlobalLoading] = useState(false)
+  const [globalError, setGlobalError] = useState('')
   const [globalOpen, setGlobalOpen] = useState(false)
   const debouncedGlobalSearch = useDebounce(globalSearch, 250)
   const globalSearchRef = useRef(null)
@@ -1179,6 +1099,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    setGlobalError('')
     if (!currentUser || currentUser.role !== 'admin') {
       setGlobalResults({ properties: [], users: [], contacts: [], auditLogs: [] })
       setGlobalLoading(false)
@@ -1193,9 +1114,10 @@ export default function App() {
       return
     }
     let cancelled = false
+    const controller = new AbortController()
     setGlobalLoading(true)
     setGlobalOpen(true)
-    apiFetch(`/api/global-search?q=${encodeURIComponent(trimmed)}`)
+    apiFetch(`/api/global-search?q=${encodeURIComponent(trimmed)}`, { signal: controller.signal })
       .then(data => {
         if (!cancelled) setGlobalResults({
           properties: data.properties || [],
@@ -1204,13 +1126,16 @@ export default function App() {
           auditLogs: data.auditLogs || []
         })
       })
-      .catch(() => {
-        if (!cancelled) setGlobalResults({ properties: [], users: [], contacts: [], auditLogs: [] })
+      .catch(e => {
+        if (!cancelled) {
+          setGlobalResults({ properties: [], users: [], contacts: [], auditLogs: [] })
+          setGlobalError(e.message || 'Could not search. Please try again.')
+        }
       })
       .finally(() => {
         if (!cancelled) setGlobalLoading(false)
       })
-    return () => { cancelled = true }
+    return () => { cancelled = true; controller.abort() }
   }, [currentUser, debouncedGlobalSearch])
 
   function navigateTo(p) {
@@ -1249,8 +1174,7 @@ export default function App() {
 
   // Restore session on page load/refresh
   useEffect(() => {
-    fetch('/api/me', { credentials: 'include' })
-      .then(r => r.json())
+    apiFetch('/api/me')
       .then(data => {
         if (data.user) {
           setCurrentUser(data.user)
@@ -1260,7 +1184,7 @@ export default function App() {
           setPage(saved && validPages.includes(saved) ? saved : 'dashboard')
         }
       })
-      .catch(() => {})
+      .catch(e => { if (e.status !== 401) setMsg(e.message || 'Could not restore your session') })
       .finally(() => setAuthChecked(true))
   }, [])
 
@@ -1310,7 +1234,19 @@ export default function App() {
   }
 
   async function logout() {
-    await fetch('/api/logout', { method: 'POST', credentials: 'include' }).catch(() => {})
+    if (signingOut) return
+    setSigningOut(true)
+    setAuthError('')
+    try {
+      await apiFetch('/api/logout', { method: 'POST' })
+    } catch (e) {
+      if (e.status !== 401) {
+        setAuthError(e.message || 'Could not sign out. Please try again.')
+        return
+      }
+    } finally {
+      setSigningOut(false)
+    }
     localStorage.removeItem('rep_page')
     setCurrentUser(null); setPage('login'); setEmail(''); setPassword(''); setLoginPreview(null)
   }
@@ -1463,7 +1399,8 @@ export default function App() {
         <div className={`absolute ${mobile ? 'left-0 right-0 top-full mt-2' : 'right-0 top-full mt-2'} rounded-xl border border-base-300 bg-base-100 shadow-2xl overflow-hidden z-50`}>
           <div className="max-h-[70vh] overflow-y-auto">
             {globalLoading && <div className="px-4 py-6 text-sm text-base-content/50 text-center">Searching…</div>}
-            {!globalLoading && !globalHasResults && debouncedGlobalSearch.trim().length >= 2 && (
+            {!globalLoading && globalError && <div role="alert" className="px-4 py-6 text-sm text-error">{globalError}</div>}
+            {!globalLoading && !globalError && !globalHasResults && debouncedGlobalSearch.trim().length >= 2 && (
               <div className="px-4 py-6 text-sm text-base-content/50 text-center">No matches found</div>
             )}
             {!globalLoading && globalSections.map(section => {
@@ -1553,7 +1490,7 @@ export default function App() {
               </span>
             </div>
           </button>
-          <button className="btn btn-sm btn-outline" onClick={logout}>Sign Out</button>
+          <button className="btn btn-sm btn-outline" onClick={logout} disabled={signingOut}>Sign Out</button>
         </div>
 
         {/* Mobile: avatar + hamburger */}
@@ -1587,21 +1524,21 @@ export default function App() {
             {darkMode ? <SunIcon /> : <MoonIcon />}
             {darkMode ? 'Day Mode' : 'Night Mode'}
           </button>
-          <button className="btn btn-sm btn-outline w-full" onClick={() => { logout(); setMobileMenuOpen(false) }}>Sign Out</button>
+          <button className="btn btn-sm btn-outline w-full" onClick={() => { logout(); setMobileMenuOpen(false) }} disabled={signingOut}>Sign Out</button>
         </div>
       )}
 
       {/* Main content */}
       <main className={`container mx-auto px-4 md:px-6 py-6 md:py-10 ${page === 'contacts' ? 'max-w-[1700px]' : 'max-w-6xl'}`}>
+        {authError && <div role="alert" className="alert alert-error text-sm mb-4">{authError}</div>}
         <ErrorBoundary key={page}>
 
         {page === 'dashboard' && (
           <div className="space-y-6 py-6">
             <h1 className="text-2xl md:text-3xl font-bold">
-              {(currentUser.login_count || 0) > 1 ? 'Welcome back, ' : 'Welcome, '}
+              {'Welcome back, '}
               {[currentUser.first_name, currentUser.last_name].filter(Boolean).join(' ') || currentUser.email.split('@')[0]}
             </h1>
-            <TestimonialsSection />
           </div>
         )}
 
@@ -1669,6 +1606,3 @@ export default function App() {
     </div>
   )
 }
-
-
-

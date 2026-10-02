@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 
@@ -12,32 +12,41 @@ L.Icon.Default.mergeOptions({
 
 function MapRecenter({ lat, lon }) {
   const map = useMap()
-  useEffect(() => { map.setView([lat, lon], 14) }, [lat, lon])
+  useEffect(() => { map.setView([lat, lon], 14) }, [map, lat, lon])
   return null
 }
 
 export default function PropertyMap({ address }) {
   const [coords, setCoords] = useState(null)
   const [error, setError] = useState(false)
-  const prevAddress = useRef(null)
-
   useEffect(() => {
-    if (!address || address === prevAddress.current) return
-    prevAddress.current = address
     setCoords(null); setError(false)
+    if (!address) return
+    let active = true
+    const controller = new AbortController()
     const encoded = encodeURIComponent(address)
-    fetch(`https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=1`, {
-      headers: { 'Accept-Language': 'en', 'User-Agent': 'CREPortal/1.0' }
-    })
-      .then(r => r.json())
+    const timer = setTimeout(() => {
+      fetch(`https://nominatim.openstreetmap.org/search?q=${encoded}&format=json&limit=1`, {
+        headers: { 'Accept-Language': 'en' },
+        signal: controller.signal,
+      })
+      .then(r => {
+        if (!r.ok) throw new Error('Could not look up location')
+        return r.json()
+      })
       .then(data => {
-        if (data.length > 0) {
-          setCoords({ lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) })
+        if (!active) return
+        const lat = Number.parseFloat(data[0]?.lat)
+        const lon = Number.parseFloat(data[0]?.lon)
+        if (Number.isFinite(lat) && Number.isFinite(lon) && Math.abs(lat) <= 90 && Math.abs(lon) <= 180) {
+          setCoords({ lat, lon })
         } else {
           setError(true)
         }
       })
-      .catch(() => setError(true))
+      .catch(() => { if (active) setError(true) })
+    }, 350)
+    return () => { active = false; clearTimeout(timer); controller.abort() }
   }, [address])
 
   if (!address) return (

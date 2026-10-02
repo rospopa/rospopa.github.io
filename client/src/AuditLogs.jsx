@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { apiFetch } from './shared'
+import { apiFetch, useDebounce } from './shared'
 
 const ACTION_LABELS = {
   register:           (d, t) => `New account registered (${t || d?.email || ''})`,
@@ -47,6 +47,9 @@ export default function AuditLogs() {
   const [perPage] = useState(25)
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [refreshVersion, setRefreshVersion] = useState(0)
+  const debouncedQuery = useDebounce(q, 200)
 
   useEffect(() => {
     const seededQuery = localStorage.getItem('rep_global_audit_query')
@@ -57,20 +60,21 @@ export default function AuditLogs() {
   }, [])
 
   useEffect(() => {
-    fetchLogs(1)
-  }, [q])
-
-  async function fetchLogs(pg = page) {
+    const controller = new AbortController()
+    let active = true
     setLoading(true)
-    try {
-      const data = await apiFetch(`/api/audit-logs?q=${encodeURIComponent(q)}&limit=${perPage}&offset=${(pg - 1) * perPage}`)
-      setLogs(data.logs || [])
-      setTotal(data.total || 0)
-    } catch (e) { console.error('Fetch logs failed:', e.message) }
-    finally { setLoading(false) }
-  }
-
-  useEffect(() => { fetchLogs() }, [page])
+    setError('')
+    apiFetch(`/api/audit-logs?q=${encodeURIComponent(debouncedQuery)}&limit=${perPage}&offset=${(page - 1) * perPage}`, { signal: controller.signal })
+      .then(data => {
+        if (!active) return
+        setLogs(data.logs || [])
+        setTotal(data.total || 0)
+        setPage(p => Math.min(p, Math.max(1, Math.ceil((data.total || 0) / perPage))))
+      })
+      .catch(e => { if (active) setError(e.message || 'Could not load activity') })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false; controller.abort() }
+  }, [page, perPage, debouncedQuery, refreshVersion])
 
   const totalPages = Math.max(1, Math.ceil(total / perPage))
 
@@ -78,12 +82,13 @@ export default function AuditLogs() {
     <div className="space-y-4">
       <div className="flex gap-3 flex-wrap">
         <input type="text" placeholder="Search by email or action…" value={q}
-          onChange={e => setQ(e.target.value)}
-          onKeyDown={e => e.key === 'Enter' && (setPage(1), fetchLogs(1))}
+          onChange={e => { setQ(e.target.value); setPage(1) }}
+          onKeyDown={e => { if (e.key === 'Enter') { setPage(1); setRefreshVersion(v => v + 1) } }}
           className="input input-bordered flex-1 min-w-0" />
-        <button className="btn btn-primary" onClick={() => { setPage(1); fetchLogs(1) }}>Search</button>
+        <button className="btn btn-primary" onClick={() => { setPage(1); setRefreshVersion(v => v + 1) }}>Search</button>
       </div>
 
+      {error && <div role="alert" className="alert alert-error text-sm">{error}</div>}
       {loading && <div className="flex justify-center py-6"><span className="loading loading-spinner" /></div>}
 
       {!loading && (
@@ -198,7 +203,7 @@ export default function AuditLogs() {
         <div className="flex items-center gap-2">
           <button className="btn btn-xs btn-ghost" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading}>← Prev</button>
           <span className="text-xs text-base-content/60">Page {page} of {totalPages}</span>
-          <button className="btn btn-xs btn-ghost" onClick={() => setPage(p => { const np = Math.min(totalPages, p + 1); fetchLogs(np); return np })} disabled={page >= totalPages || loading}>Next →</button>
+          <button className="btn btn-xs btn-ghost" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages || loading}>Next →</button>
         </div>
       </div>
     </div>

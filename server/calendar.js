@@ -194,6 +194,12 @@ function parseIcsDate(value, params = {}) {
   return Number.isNaN(parsed.getTime()) ? null : { date: parsed, allDay: false };
 }
 
+function isValidDateOnly(value) {
+  if (typeof value !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const date = new Date(`${value}T00:00:00.000Z`);
+  return !Number.isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
 function parseRRule(value) {
   const rule = {};
   for (const part of String(value).split(';')) {
@@ -755,9 +761,9 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
         } catch (error) {
           await pool.query(
             `UPDATE calendar_event_notifications
-             SET last_error = $1, last_sent_for_start = $2, updated_at = CURRENT_TIMESTAMP
-             WHERE id = $3`,
-            [String(error.message || error).slice(0, 500), target.start, rule.id]
+             SET last_error = $1, updated_at = CURRENT_TIMESTAMP
+             WHERE id = $2`,
+            [String(error.message || error).slice(0, 500), rule.id]
           );
         }
       }
@@ -959,7 +965,10 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
     app.get('/api/calendar/events', async (req, res) => {
       if (!requireAdmin(req, res)) return;
       const daysAhead = Math.min(365, Math.max(1, parseInt(req.query.days, 10) || 90));
-      const daysBack = Math.min(90, Math.max(0, parseInt(req.query.days_back, 10) || 7));
+      const requestedDaysBack = parseInt(req.query.days_back, 10);
+      const daysBack = Number.isNaN(requestedDaysBack)
+        ? 7
+        : Math.min(90, Math.max(0, requestedDaysBack));
       try {
         const result = await loadEvents({
           daysAhead, daysBack, force: req.query.refresh === '1',
@@ -993,8 +1002,7 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
         if (typeof body.description === 'string' && body.description.trim()) insert.description = body.description;
         if (typeof body.location === 'string' && body.location.trim()) insert.location = body.location.trim();
         if (body.all_day) {
-          const dateOnly = /^\d{4}-\d{2}-\d{2}$/;
-          if (!dateOnly.test(body.start) || !dateOnly.test(body.end)) {
+          if (!isValidDateOnly(body.start) || !isValidDateOnly(body.end)) {
             return res.status(400).json({ error: 'all-day times must be YYYY-MM-DD dates' });
           }
           if (body.end <= body.start) return res.status(400).json({ error: 'the event must end after it starts' });
@@ -1082,8 +1090,7 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
         if (body.start || body.end) {
           if (!body.start || !body.end) return res.status(400).json({ error: 'start and end must be set together' });
           if (body.all_day) {
-            const dateOnly = /^\d{4}-\d{2}-\d{2}$/;
-            if (!dateOnly.test(body.start) || !dateOnly.test(body.end)) {
+            if (!isValidDateOnly(body.start) || !isValidDateOnly(body.end)) {
               return res.status(400).json({ error: 'all-day times must be YYYY-MM-DD dates' });
             }
             if (body.end <= body.start) return res.status(400).json({ error: 'the event must end after it starts' });
@@ -1242,6 +1249,10 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
       const minutesBefore = Math.min(10080, Math.max(0, parseInt(body.minutes_before, 10) || 0));
 
       try {
+        const eventStart = body.event_start ? new Date(body.event_start) : null;
+        if (eventStart && Number.isNaN(eventStart.getTime())) {
+          return res.status(400).json({ error: 'event_start must be a valid date and time' });
+        }
         const recipient = await resolveRecipient(body);
         if (!recipient.recipientUserId && !recipient.email && !recipient.phone) {
           return res.status(400).json({ error: 'pick a recipient or provide an email/phone' });
@@ -1262,7 +1273,7 @@ function createCalendarModule({ pool, logAudit, clientIp, resend, fromEmail, twi
           [
             eventUid,
             String(body.event_title || '').trim() || null,
-            body.event_start ? new Date(body.event_start) : null,
+            eventStart,
             channel,
             minutesBefore,
             recipient.recipientUserId,

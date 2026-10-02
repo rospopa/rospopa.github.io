@@ -1605,6 +1605,10 @@ app.delete('/api/properties/:id/documents/:docId', async (req, res) => {
   } catch (e) { res.status(500).json({ error: 'db error' }); }
 });
 
+function nullablePropertyValue(value) {
+  return value === '' || value === undefined ? null : value;
+}
+
 app.post('/api/properties', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const {
@@ -1647,29 +1651,29 @@ app.post('/api/properties', async (req, res) => {
         refi_ltv, refi_rate, refi_year, dcf_model)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23,$24,$25,$26,$27,$28,$29,$30,$31,$32,$33,$34,$35,$36,$37,$38,$39,$40,$41,$42,$43,$44,$45,$46,$47,$48,$49,$50,$51,$52,$53,$54,$55,$56,$57,$58,$59,$60,$61,$62,$63) RETURNING id`,
       [pin.trim(), address.trim(), county.trim(), req.session.user.id,
-       price || null, square_feet || null, lot_size || null, year_built || null,
-       on_major_road || false, traffic_vpd || null, on_corner_lot || false,
+       nullablePropertyValue(price), nullablePropertyValue(square_feet), nullablePropertyValue(lot_size), nullablePropertyValue(year_built),
+       on_major_road || false, nullablePropertyValue(traffic_vpd), on_corner_lot || false,
        direct_water_access || false, next_to_public_land || false,
        JSON.stringify(major_interstates || []),
-       household_income_min || null, household_income_max || null, population_density || null,
+       nullablePropertyValue(household_income_min), nullablePropertyValue(household_income_max), nullablePropertyValue(population_density),
        JSON.stringify(logistics_hubs || []), JSON.stringify(landmarks || []),
        JSON.stringify(water_sources || []), JSON.stringify(military_bases || []),
-       grm || null, cap_rate || null, cash_on_cash || null, irr || null,
-       price_per_unit || null, price_per_sqft || null,
-       rent_to_sales_ratio || null, num_skus || null, price_per_acre || null,
-       electrical_voltage || null, electrical_amperage || null,
-       asset_type || null,
-       gross_scheduled_rent || null, vacancy_rate || null, other_income || null,
-       operating_expenses || null, reserves_capex || null,
-       loan_amount || null, ltv || null, interest_rate || null,
-       amortization_term || null, interest_only_period || null,
-       unit_count || null, closing_costs || null, hold_period || null,
-       rent_growth || null, expense_growth || null, exit_cap_rate || null, cost_of_sale || null,
-       tenant_gross_sales || null, tenant_base_rent || null,
-       management_fee_pct || null, insurance || null, property_taxes || null,
-       land_value_pct || null, cost_seg_bonus_pct || null, effective_tax_rate || null,
-       depreciation_recapture_rate || null,
-       refi_ltv || null, refi_rate || null, refi_year || null,
+       nullablePropertyValue(grm), nullablePropertyValue(cap_rate), nullablePropertyValue(cash_on_cash), nullablePropertyValue(irr),
+       nullablePropertyValue(price_per_unit), nullablePropertyValue(price_per_sqft),
+       nullablePropertyValue(rent_to_sales_ratio), nullablePropertyValue(num_skus), nullablePropertyValue(price_per_acre),
+       nullablePropertyValue(electrical_voltage), nullablePropertyValue(electrical_amperage),
+       nullablePropertyValue(asset_type),
+       nullablePropertyValue(gross_scheduled_rent), nullablePropertyValue(vacancy_rate), nullablePropertyValue(other_income),
+       nullablePropertyValue(operating_expenses), nullablePropertyValue(reserves_capex),
+       nullablePropertyValue(loan_amount), nullablePropertyValue(ltv), nullablePropertyValue(interest_rate),
+       nullablePropertyValue(amortization_term), nullablePropertyValue(interest_only_period),
+       nullablePropertyValue(unit_count), nullablePropertyValue(closing_costs), nullablePropertyValue(hold_period),
+       nullablePropertyValue(rent_growth), nullablePropertyValue(expense_growth), nullablePropertyValue(exit_cap_rate), nullablePropertyValue(cost_of_sale),
+       nullablePropertyValue(tenant_gross_sales), nullablePropertyValue(tenant_base_rent),
+       nullablePropertyValue(management_fee_pct), nullablePropertyValue(insurance), nullablePropertyValue(property_taxes),
+       nullablePropertyValue(land_value_pct), nullablePropertyValue(cost_seg_bonus_pct), nullablePropertyValue(effective_tax_rate),
+       nullablePropertyValue(depreciation_recapture_rate),
+       nullablePropertyValue(refi_ltv), nullablePropertyValue(refi_rate), nullablePropertyValue(refi_year),
        JSON.stringify(dcf_model || {})]
     );
     await logAudit(req.session.user.id, req.session.user.email, 'create_property', { pin, address, county }, null, null, clientIp(req));
@@ -1829,40 +1833,40 @@ app.put('/api/properties/:id', async (req, res) => {
 
     const newVals = {
       pin: pin.trim(), address: address.trim(), county: county.trim(),
-      price: price || null, square_feet: square_feet || null, lot_size: lot_size || null, year_built: year_built || null,
+      price: nullablePropertyValue(price), square_feet: nullablePropertyValue(square_feet), lot_size: nullablePropertyValue(lot_size), year_built: nullablePropertyValue(year_built),
       on_major_road: on_major_road === true || on_major_road === 'true',
-      traffic_vpd: traffic_vpd || null,
+      traffic_vpd: nullablePropertyValue(traffic_vpd),
       on_corner_lot: on_corner_lot === true || on_corner_lot === 'true',
       direct_water_access: direct_water_access === true || direct_water_access === 'true',
       next_to_public_land: next_to_public_land === true || next_to_public_land === 'true',
       major_interstates: JSON.stringify(major_interstates || []),
-      household_income_min: household_income_min || null, household_income_max: household_income_max || null,
-      population_density: population_density || null,
+      household_income_min: nullablePropertyValue(household_income_min), household_income_max: nullablePropertyValue(household_income_max),
+      population_density: nullablePropertyValue(population_density),
       logistics_hubs: JSON.stringify(logistics_hubs || []), landmarks: JSON.stringify(landmarks || []),
       water_sources: JSON.stringify(water_sources || []), military_bases: JSON.stringify(military_bases || []),
       status: ['New','Under Review','Active','Other'].includes(status) ? status : 'New',
-      grm: grm || null, cap_rate: cap_rate || null, cash_on_cash: cash_on_cash || null, irr: irr || null,
-      price_per_unit: price_per_unit || null, price_per_sqft: price_per_sqft || null,
-      rent_to_sales_ratio: rent_to_sales_ratio || null, num_skus: num_skus || null,
-      price_per_acre: price_per_acre || null,
-      electrical_voltage: electrical_voltage || null, electrical_amperage: electrical_amperage || null,
-      asset_type: asset_type || null,
-      gross_scheduled_rent: gross_scheduled_rent || null, vacancy_rate: vacancy_rate || null,
-      other_income: other_income || null, operating_expenses: operating_expenses || null,
-      reserves_capex: reserves_capex || null,
-      loan_amount: loan_amount || null, ltv: ltv || null, interest_rate: interest_rate || null,
-      amortization_term: amortization_term || null, interest_only_period: interest_only_period || null,
-      unit_count: unit_count || null, closing_costs: closing_costs || null,
-      hold_period: hold_period || null, rent_growth: rent_growth || null,
-      expense_growth: expense_growth || null, exit_cap_rate: exit_cap_rate || null,
-      cost_of_sale: cost_of_sale || null,
-      tenant_gross_sales: tenant_gross_sales || null, tenant_base_rent: tenant_base_rent || null,
-      management_fee_pct: management_fee_pct || null, insurance: insurance || null,
-      property_taxes: property_taxes || null,
-      land_value_pct: land_value_pct || null, cost_seg_bonus_pct: cost_seg_bonus_pct || null,
-      effective_tax_rate: effective_tax_rate || null,
-      depreciation_recapture_rate: depreciation_recapture_rate || null,
-      refi_ltv: refi_ltv || null, refi_rate: refi_rate || null, refi_year: refi_year || null,
+      grm: nullablePropertyValue(grm), cap_rate: nullablePropertyValue(cap_rate), cash_on_cash: nullablePropertyValue(cash_on_cash), irr: nullablePropertyValue(irr),
+      price_per_unit: nullablePropertyValue(price_per_unit), price_per_sqft: nullablePropertyValue(price_per_sqft),
+      rent_to_sales_ratio: nullablePropertyValue(rent_to_sales_ratio), num_skus: nullablePropertyValue(num_skus),
+      price_per_acre: nullablePropertyValue(price_per_acre),
+      electrical_voltage: nullablePropertyValue(electrical_voltage), electrical_amperage: nullablePropertyValue(electrical_amperage),
+      asset_type: nullablePropertyValue(asset_type),
+      gross_scheduled_rent: nullablePropertyValue(gross_scheduled_rent), vacancy_rate: nullablePropertyValue(vacancy_rate),
+      other_income: nullablePropertyValue(other_income), operating_expenses: nullablePropertyValue(operating_expenses),
+      reserves_capex: nullablePropertyValue(reserves_capex),
+      loan_amount: nullablePropertyValue(loan_amount), ltv: nullablePropertyValue(ltv), interest_rate: nullablePropertyValue(interest_rate),
+      amortization_term: nullablePropertyValue(amortization_term), interest_only_period: nullablePropertyValue(interest_only_period),
+      unit_count: nullablePropertyValue(unit_count), closing_costs: nullablePropertyValue(closing_costs),
+      hold_period: nullablePropertyValue(hold_period), rent_growth: nullablePropertyValue(rent_growth),
+      expense_growth: nullablePropertyValue(expense_growth), exit_cap_rate: nullablePropertyValue(exit_cap_rate),
+      cost_of_sale: nullablePropertyValue(cost_of_sale),
+      tenant_gross_sales: nullablePropertyValue(tenant_gross_sales), tenant_base_rent: nullablePropertyValue(tenant_base_rent),
+      management_fee_pct: nullablePropertyValue(management_fee_pct), insurance: nullablePropertyValue(insurance),
+      property_taxes: nullablePropertyValue(property_taxes),
+      land_value_pct: nullablePropertyValue(land_value_pct), cost_seg_bonus_pct: nullablePropertyValue(cost_seg_bonus_pct),
+      effective_tax_rate: nullablePropertyValue(effective_tax_rate),
+      depreciation_recapture_rate: nullablePropertyValue(depreciation_recapture_rate),
+      refi_ltv: nullablePropertyValue(refi_ltv), refi_rate: nullablePropertyValue(refi_rate), refi_year: nullablePropertyValue(refi_year),
       dcf_model: JSON.stringify(dcf_model || {})
     };
 
@@ -2037,7 +2041,9 @@ app.patch('/api/properties/:id/status', async (req, res) => {
 app.post('/api/properties/:id/assign', async (req, res) => {
   if (!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({ error: 'forbidden' });
   const propId = Number(req.params.id);
-  if (!Number.isFinite(propId)) return res.status(400).json({ error: 'invalid property id' });
+  if (!Number.isSafeInteger(propId) || propId <= 0 || propId > 2147483647) {
+    return res.status(400).json({ error: 'invalid property id' });
+  }
   const { userIds } = req.body || {};
   if (!Array.isArray(userIds) || userIds.length === 0) return res.status(400).json({ error: 'userIds array required' });
 
@@ -2045,16 +2051,22 @@ app.post('/api/properties/:id/assign', async (req, res) => {
     const propertyResult = await pool.query('SELECT id FROM properties WHERE id = $1', [propId]);
     if (propertyResult.rows.length === 0) return res.status(404).json({ error: 'property not found' });
 
-    let assigned = 0;
-    for (const uid of userIds) {
-      const userId = Number(uid);
-      if (!Number.isFinite(userId)) continue;
-      const result = await pool.query(
-        'INSERT INTO property_assignments (property_id, user_id, assigned_by) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING',
-        [propId, userId, req.session.user.id]
-      );
-      if (result.rowCount > 0) assigned++;
+    const parsedUserIds = userIds.map(Number);
+    if (parsedUserIds.some(id => !Number.isSafeInteger(id) || id <= 0 || id > 2147483647)) {
+      return res.status(400).json({ error: 'userIds must contain positive integer IDs' });
     }
+    const uniqueUserIds = [...new Set(parsedUserIds)];
+    const usersResult = await pool.query('SELECT id FROM users WHERE id = ANY($1::int[])', [uniqueUserIds]);
+    if (usersResult.rows.length !== uniqueUserIds.length) {
+      return res.status(400).json({ error: 'one or more users were not found' });
+    }
+    const assignmentResult = await pool.query(
+      `INSERT INTO property_assignments (property_id, user_id, assigned_by)
+       SELECT $1, user_id, $3 FROM unnest($2::int[]) AS input(user_id)
+       ON CONFLICT DO NOTHING`,
+      [propId, uniqueUserIds, req.session.user.id]
+    );
+    const assigned = assignmentResult.rowCount || 0;
 
     await logAudit(req.session.user.id, req.session.user.email, 'assign_property', { property_id: propId, user_count: assigned, user_ids: userIds }, null, null, clientIp(req));
     res.json({ ok: true, assigned });
@@ -2504,5 +2516,3 @@ async function rotateLegacyImportPasswords() {
     process.exit(1);
   }
 })();
-
-

@@ -710,6 +710,7 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
   const [notes, setNotes] = useState([])
   const [loading, setLoading] = useState(true)
   const [notesLoading, setNotesLoading] = useState(true)
+  const [notesError, setNotesError] = useState('')
   const [noteText, setNoteText] = useState('')
   const [files, setFiles] = useState([])
   const [saving, setSaving] = useState(false)
@@ -722,8 +723,10 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
   const fileInputRef = useRef(null)
   const [viewProp, setViewProp] = useState(null)     // full property object for modal
   const [propModalOpen, setPropModalOpen] = useState(false)
+  const [propertyError, setPropertyError] = useState('')
 
   const openPropertyModal = async (propId) => {
+    setPropertyError('')
     try {
       const prefetched = getPrefetchedProperty(propId)
       if (prefetched) {
@@ -733,21 +736,28 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
         setViewProp(full)
       }
       setPropModalOpen(true)
-    } catch { /* ignore */ }
+    } catch (e) { setPropertyError(e.message || 'Could not open property') }
   }
 
   useEffect(() => {
+    let active = true
+    const controller = new AbortController()
     setLoading(true)
-    apiFetch(`/api/contacts/${contactId}`)
-      .then(d => { setData(d); setLoading(false) })
-      .catch(() => setLoading(false))
+    setData(null)
+    setError('')
+    apiFetch(`/api/contacts/${contactId}`, { signal: controller.signal })
+      .then(d => { if (active) setData(d) })
+      .catch(e => { if (active) setError(e.message || 'Could not load contact') })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false; controller.abort() }
   }, [contactId])
 
   const loadNotes = () => {
     setNotesLoading(true)
+    setNotesError('')
     apiFetch(`/api/contacts/${contactId}/notes`)
       .then(d => { setNotes(d); setNotesLoading(false) })
-      .catch(() => setNotesLoading(false))
+      .catch(e => { setNotesError(e.message || 'Could not load notes'); setNotesLoading(false) })
   }
   useEffect(loadNotes, [contactId])
 
@@ -799,7 +809,12 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
   }
 
   if (loading) return <div className="flex justify-center py-20 text-base-content/40">Loading…</div>
-  if (!data) return <div className="text-center py-20 text-error">Contact not found</div>
+  if (!data) return (
+    <div className="text-center py-20 space-y-3">
+      <p role="alert" className="text-error">{error || 'Contact not found'}</p>
+      <button className="btn btn-sm btn-ghost" onClick={onBack}>Back to Contacts</button>
+    </div>
+  )
 
   const { user, properties } = data
   const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ') || user.email
@@ -807,6 +822,7 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
 
   return (
     <div className="space-y-6">
+      {propertyError && <div role="alert" className="alert alert-error text-sm">{propertyError}</div>}
       {/* Back button — hidden in split mode */}
       {!splitMode && (
         <button className="btn btn-ghost btn-sm gap-2" onClick={onBack}>
@@ -948,7 +964,8 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
             {/* Notes thread */}
             <div className="flex-1 overflow-y-auto space-y-2 max-h-[280px] pr-1">
               {notesLoading && <div className="text-center py-4 text-base-content/40 text-sm">Loading…</div>}
-              {!notesLoading && notes.length === 0 && <div className="text-center py-4 text-base-content/40 text-sm">No notes yet</div>}
+              {notesError && <div role="alert" className="text-error text-sm">{notesError}</div>}
+              {!notesLoading && !notesError && notes.length === 0 && <div className="text-center py-4 text-base-content/40 text-sm">No notes yet</div>}
               {notes.map(note => (
                 <div key={note.id} className="bg-base-200 rounded-lg p-3 space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
@@ -1002,11 +1019,23 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
       {/* Property detail modal */}
       <Suspense fallback={<div className="flex items-center justify-center h-full"><span className="loading loading-spinner loading-lg" /></div>}>
         <LazyPropertyDetailModal
+          key={viewProp?.id || 'none'}
           open={propModalOpen}
           property={viewProp}
           isAdmin={isAdmin}
           onClose={() => { setPropModalOpen(false); setViewProp(null) }}
-          onSave={() => { setPropModalOpen(false); setViewProp(null) }}
+          onSave={async updated => {
+            await apiFetch(`/api/properties/${updated.id}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(updated),
+            })
+            setData(prev => prev ? {
+              ...prev,
+              properties: prev.properties.map(p => p.id === updated.id ? { ...p, ...updated } : p),
+            } : prev)
+            setPropModalOpen(false); setViewProp(null)
+          }}
         />
       </Suspense>
 
@@ -1041,6 +1070,7 @@ export { ContactDetailPage }
 export default function ContactsPage() {
   const [contacts, setContacts] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
   const [view, setView] = useState(() => localStorage.getItem('contacts_view') || 'split')
   const [selectedContact, setSelectedContact] = useState(null)
   const [detailId, setDetailId] = useState(null)
@@ -1065,8 +1095,15 @@ export default function ContactsPage() {
   }
 
   useEffect(() => {
+    let active = true
+    const controller = new AbortController()
     setLoading(true)
-    apiFetch('/api/contacts').then(data => { setContacts(data); setLoading(false) }).catch(() => setLoading(false))
+    setError('')
+    apiFetch('/api/contacts', { signal: controller.signal })
+      .then(data => { if (active) setContacts(data) })
+      .catch(e => { if (active) setError(e.message || 'Could not load contacts') })
+      .finally(() => { if (active) setLoading(false) })
+    return () => { active = false; controller.abort() }
   }, [refreshKey])
 
   useEffect(() => {
@@ -1154,6 +1191,12 @@ export default function ContactsPage() {
 
   return (
     <div className="space-y-6">
+      {error && (
+        <div role="alert" className="alert alert-error text-sm">
+          <span>{error}</span>
+          <button className="btn btn-sm" onClick={refreshContacts}>Retry</button>
+        </div>
+      )}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold">Contacts</h2>
