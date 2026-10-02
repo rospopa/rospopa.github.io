@@ -6,3 +6,13 @@ exclude:
   - .gitignore
   - tracked_files.txt
   - DEPLOY.md
+  - README.md
+  - render.yaml
+  - archive
+  - audit-client-before.json
+  - audit-server-after1.json
+  - audit-server-full-after.json
+  - audit-server-full-before.json
+  - audit-server-latest.json
+  - client_output.log
+  - run-31012424458-logs.zip

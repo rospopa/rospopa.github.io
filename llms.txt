@@ -1,0 +1,17 @@
+# ROSPOPA public resources
+
+> Educational guides to Chicago commercial and industrial real estate research, leasing, and investment due diligence.
+
+These pages are not listings, market forecasts, legal or tax advice, or evidence of professional credentials. Verify property-specific information with the relevant authorities and qualified advisers. The secure workspace is private and is not part of this library.
+
+## Public guides
+
+- [Resource directory](https://rospopa.com/): Overview and reading paths.
+- [Chicago commercial real estate research](https://rospopa.com/resources/chicago-commercial-real-estate/): Property types, jurisdiction, zoning, tax, and building research.
+- [Chicago industrial real estate](https://rospopa.com/resources/chicago-industrial-real-estate/): Warehouse, logistics, manufacturing, and flex-space evaluation.
+- [Commercial leasing](https://rospopa.com/resources/commercial-leasing/): Occupancy costs, lease terms, and a tour checklist.
+- [Commercial investment](https://rospopa.com/resources/commercial-investment/): Acquisition diligence, cash flow, and financing risks.
+
+## Scope
+
+This file is an optional reading directory, not an indexing instruction or a guarantee of inclusion in AI systems. robots.txt and page-level indexing directives are separate.

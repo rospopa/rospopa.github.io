@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+
+# The private workspace sends noindex in its HTML and X-Robots-Tag header.
+# Allow fetching so crawlers can observe those directives; authentication
+# and the origin guard, not robots.txt, enforce access control.

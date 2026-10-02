@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /client/
+Disallow: /server/
+
+Sitemap: https://rospopa.com/sitemap.xml

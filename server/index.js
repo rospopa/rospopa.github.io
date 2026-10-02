@@ -293,6 +293,12 @@ async function initializeSchema() {
 
 const app = express();
 
+// This host serves the private workspace, never the public resource site.
+app.use((req, res, next) => {
+  res.set('X-Robots-Tag', 'noindex, nofollow, noarchive');
+  next();
+});
+
 // Gzip all responses ≥ 1KB
 app.use(compression({ threshold: 1024 }));
 
@@ -323,6 +329,10 @@ app.get(_healthPath, (req, res) => {
   res
     .status(appReady ? 200 : 503)
     .json({ ready: appReady, uptime: Math.round(process.uptime()) });
+});
+app.get('/robots.txt', (req, res) => {
+  // Crawlers must be able to fetch responses to observe the noindex directive.
+  res.type('text/plain').send('User-agent: *\nAllow: /\n');
 });
 app.use((req, res, next) => {
   if (appReady) return next();
@@ -2449,7 +2459,12 @@ if (require('fs').existsSync(clientDist)) {
   }));
   // Everything else (index.html, favicon, etc.) — no-cache so updates are picked up
   app.use(express.static(clientDist, { maxAge: 0, etag: true }));
-  app.use((req, res) => res.sendFile(path.join(clientDist, 'index.html')));
+  app.use((req, res) => {
+    if (req.method === 'GET' && req.path === '/') {
+      return res.sendFile(path.join(clientDist, 'index.html'));
+    }
+    res.status(404).type('text/plain').send('Not found');
+  });
 }
 
 app.use((err, req, res, next) => {
