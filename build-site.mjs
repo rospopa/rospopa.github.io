@@ -12,12 +12,17 @@ const ORIGIN = 'https://rospopa.com';
 const AUTHOR = { name: 'Pavlo Rospopa', url: `${ORIGIN}/` };
 const PAGES = [
   'index.html',
-  'resources/chicago-commercial-real-estate/index.html',
+  'resources/index.html',
+  'resources/industrial-building-types/index.html',
   'resources/chicago-industrial-real-estate/index.html',
+  'resources/industrial-due-diligence/index.html',
+  'resources/chicagoland-industrial-submarkets/index.html',
   'resources/chicagoland-industrial-real-estate/index.html',
+  'resources/illinois-industrial-property-taxes/index.html',
   'resources/selling-industrial-property/index.html',
-  'resources/commercial-leasing/index.html',
   'resources/commercial-investment/index.html',
+  'resources/commercial-leasing/index.html',
+  'resources/chicago-commercial-real-estate/index.html',
   'resources/glossary/index.html',
 ];
 const MAX_TEXT = 1400;
@@ -100,24 +105,27 @@ function renderNews(news) {
 }
 
 // ---- markdown conversion for llms-full.txt ----------------------------------
+const T = name => `<${name}(?=[\\s>])[^>]*>`;   // opening tag matcher that does not bleed into <picture>, <path>, <link>, …
 function toMarkdown(mainHtml) {
-  let h = mainHtml
+  let h = mainHtml.replace(/\r\n?/g, '\n')
     .replace(/<nav class="(toc|breadcrumbs|chips)"[\s\S]*?<\/nav>/gi, '')
     .replace(/<form[\s\S]*?<\/form>/gi, '')
+    .replace(/<svg[\s\S]*?<\/svg>/gi, '')
+    .replace(/<(picture|source|img)(?=[\s>])[^>]*>/gi, '')
     .replace(/<span class="credit">[\s\S]*?<\/span>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<section class="news"[\s\S]*?<\/section>/gi, '');
-  h = h.replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, t) => `\n# ${plain(t)}\n`)
-    .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, t) => `\n## ${plain(t)}\n`)
-    .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, t) => `\n### ${plain(t)}\n`)
+  h = h.replace(new RegExp(`${T('h1')}([\\s\\S]*?)<\\/h1>`, 'gi'), (_, t) => `\n# ${plain(t)}\n`)
+    .replace(new RegExp(`${T('h2')}([\\s\\S]*?)<\\/h2>`, 'gi'), (_, t) => `\n## ${plain(t)}\n`)
+    .replace(new RegExp(`${T('h3')}([\\s\\S]*?)<\\/h3>`, 'gi'), (_, t) => `\n### ${plain(t)}\n`)
     .replace(/<caption>([\s\S]*?)<\/caption>/gi, (_, t) => `\n**${plain(t)}**\n`)
-    .replace(/<tr>([\s\S]*?)<\/tr>/gi, (_, row) => { const cells = [...row.matchAll(/<t[hd][^>]*>([\s\S]*?)<\/t[hd]>/gi)].map(m => plain(m[1])); return cells.length ? `- ${cells.join(': ')}\n` : ''; })
-    .replace(/<dt[^>]*>([\s\S]*?)<\/dt>\s*<dd>([\s\S]*?)<\/dd>/gi, (_, t, d) => `- **${plain(t)}**: ${plain(d)}\n`)
-    .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, t) => `- ${plain(t)}\n`)
+    .replace(new RegExp(`${T('tr')}([\\s\\S]*?)<\\/tr>`, 'gi'), (_, row) => { const cells = [...row.matchAll(/<t[hd](?=[\s>])[^>]*>([\s\S]*?)<\/t[hd]>/gi)].map(m => plain(m[1])); return cells.length ? `- ${cells.join(': ')}\n` : ''; })
+    .replace(new RegExp(`${T('dt')}([\\s\\S]*?)<\\/dt>\\s*${T('dd')}([\\s\\S]*?)<\\/dd>`, 'gi'), (_, t, d) => `- **${plain(t)}**: ${plain(d)}\n`)
+    .replace(new RegExp(`${T('li')}([\\s\\S]*?)<\\/li>`, 'gi'), (_, t) => `- ${plain(t)}\n`)
     .replace(/<figcaption>([\s\S]*?)<\/figcaption>/gi, (_, t) => `\n_${plain(t)}_\n`)
     .replace(/<(?:aside|div) class="note"(?: role="note")?>([\s\S]*?)<\/(?:aside|div)>/gi, (_, t) => `\n> ${plain(t)}\n`)
-    .replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, (_, t) => { const s = plain(t); return s ? `\n${s}\n` : ''; });
-  return decode(h.replace(/<[^>]+>/g, '')).replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    .replace(new RegExp(`${T('p')}([\\s\\S]*?)<\\/p>`, 'gi'), (_, t) => { const s = plain(t); return s ? `\n${s}\n` : ''; });
+  return decode(h.replace(/<[^>]+>/g, '')).split('\n').map(l => l.trim()).join('\n').replace(/\n{3,}/g, '\n\n').replace(/(^- .*)\n\n(?=- )/gm, '$1\n').trim();
 }
 
 // ---- main ------------------------------------------------------------------
@@ -207,7 +215,7 @@ await writeFile('feed.xml', feed);
 
 // llms-full.txt — the complete text of every public guide in Markdown
 const full = [`# ROSPOPA public guides — full text`, '',
-  `> ${AUTHOR.name} specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois. This file contains the complete text of the public guides at ${ORIGIN}/ for reading by assistants and tools. Definitions and checklists are general education, not legal, tax, engineering, or investment advice. Generated ${today}.`, '',
+  `> ${AUTHOR.name} specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois. This file contains the complete text of the public guides at ${ORIGIN}/ for reading by assistants and tools. Definitions and checklists are general education, not legal, tax, engineering, or investment advice. Guides last updated ${latest}.`, '',
   ...pages.map(p => `---\n\nSource: ${ORIGIN}${p.url}\nPublished: ${p.published} · Updated: ${p.modified}\n\n${p.markdown}\n`)].join('\n');
 await writeFile('llms-full.txt', full);
 

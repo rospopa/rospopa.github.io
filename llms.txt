@@ -6,11 +6,16 @@ These pages are not listings, market forecasts, legal or tax advice, or evidence
 
 ## Public guides
 
-- [Home: Chicagoland industrial investment sales](https://rospopa.com/): Pavlo Rospopa specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across the nine Illinois counties below; the page also indexes the research guides. Professional profiles: [LinkedIn](https://www.linkedin.com/in/prospopa) and [Marcus & Millichap advisor page](https://www.marcusmillichap.com/advisors/pavlo-rospopa).
-- [Chicago commercial real estate research](https://rospopa.com/resources/chicago-commercial-real-estate/): Property types, jurisdiction, zoning, tax, and building research.
-- [Chicago industrial real estate](https://rospopa.com/resources/chicago-industrial-real-estate/): Warehouse, logistics, manufacturing, and flex-space evaluation.
+- [Home: Chicagoland industrial investment sales](https://rospopa.com/): Pavlo Rospopa specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across the nine Illinois counties below; the page also indexes the research guides and a daily list of Chicago industrial news headlines. Professional profiles: [LinkedIn](https://www.linkedin.com/in/prospopa) and [Marcus & Millichap advisor page](https://www.marcusmillichap.com/advisors/pavlo-rospopa).
+- [All guides](https://rospopa.com/resources/): Directory of every guide below.
+- [Industrial building types and specifications](https://rospopa.com/resources/industrial-building-types/): Warehouse/distribution, light industrial, manufacturing, flex, cold storage, truck terminals, industrial outdoor storage, rail-served buildings, and what clear height, loading, power, slab, and fire protection specifications mean.
+- [Chicago industrial real estate](https://rospopa.com/resources/chicago-industrial-real-estate/): Warehouse, logistics, manufacturing, and flex-space evaluation checklist.
+- [Industrial property due diligence](https://rospopa.com/resources/industrial-due-diligence/): Environmental assessments (Phase I/II), property condition, title and survey, zoning and permits, utilities, and how findings translate into price, credits, escrows, or repairs.
+- [Chicagoland industrial submarkets and logistics corridors](https://rospopa.com/resources/chicagoland-industrial-submarkets/): Geography of the region's industrial clusters, highways, tollways, airports, and intermodal terminals; no market statistics.
 - [Chicagoland industrial real estate: nine Illinois counties](https://rospopa.com/resources/chicagoland-industrial-real-estate/): Distinct county research paths and official planning, zoning, parcel, and assessment sources for Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois, USA.
+- [Property taxes on Illinois industrial real estate](https://rospopa.com/resources/illinois-industrial-property-taxes/): Assessment, equalization, levies, bills, appeals, Cook County incentive classifications, enterprise zones and TIF, and taxes in underwriting and leases.
 - [Selling an industrial property](https://rospopa.com/resources/selling-industrial-property/): Common buyer types for 10,000–100,000 SF buildings, how buyers underwrite, what drives value, the document checklist, pricing approach, and the sale process.
+- [Chicago commercial real estate research](https://rospopa.com/resources/chicago-commercial-real-estate/): Property types, jurisdiction, zoning, tax, and building research.
 - [Commercial leasing](https://rospopa.com/resources/commercial-leasing/): Occupancy costs, lease terms, and a tour checklist.
 - [Commercial investment](https://rospopa.com/resources/commercial-investment/): Acquisition diligence, cash flow, and financing risks.
 - [Industrial and investment glossary](https://rospopa.com/resources/glossary/): Plain-English definitions of building, lease, underwriting, and Illinois property-records terms, each with a stable anchor link.

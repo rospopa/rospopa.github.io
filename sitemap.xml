@@ -10,13 +10,12 @@
     </image:image>
   </url>
   <url>
-    <loc>https://rospopa.com/resources/chicago-commercial-real-estate/</loc>
+    <loc>https://rospopa.com/resources/</loc>
     <lastmod>2026-10-03</lastmod>
-    <image:image>
-      <image:loc>https://rospopa.com/resources/images/chicago-skyline-1600.jpg</image:loc>
-      <image:title>The downtown Chicago skyline seen across the lakefront, with Willis Tower rising above the Loop.</image:title>
-      <image:caption>Chicago’s Loop from the lakefront. City records cover the city; suburban and unincorporated parcels have their own authorities.</image:caption>
-    </image:image>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/industrial-building-types/</loc>
+    <lastmod>2026-10-03</lastmod>
   </url>
   <url>
     <loc>https://rospopa.com/resources/chicago-industrial-real-estate/</loc>
@@ -28,6 +27,14 @@
     </image:image>
   </url>
   <url>
+    <loc>https://rospopa.com/resources/industrial-due-diligence/</loc>
+    <lastmod>2026-10-03</lastmod>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/chicagoland-industrial-submarkets/</loc>
+    <lastmod>2026-10-03</lastmod>
+  </url>
+  <url>
     <loc>https://rospopa.com/resources/chicagoland-industrial-real-estate/</loc>
     <lastmod>2026-10-03</lastmod>
     <image:image>
@@ -37,12 +44,25 @@
     </image:image>
   </url>
   <url>
+    <loc>https://rospopa.com/resources/illinois-industrial-property-taxes/</loc>
+    <lastmod>2026-10-03</lastmod>
+  </url>
+  <url>
     <loc>https://rospopa.com/resources/selling-industrial-property/</loc>
     <lastmod>2026-10-03</lastmod>
     <image:image>
       <image:loc>https://rospopa.com/resources/images/industrial-facade-1600.jpg</image:loc>
       <image:title>Clean corrugated-metal industrial building facade with a large roll-up door, a personnel door, and trimmed shrubs on either side.</image:title>
       <image:caption>A well-kept industrial facade. Buyers read maintenance from the outside before they read the rent roll.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/commercial-investment/</loc>
+    <lastmod>2026-10-03</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/cicero-intermodal-terminal-1600.jpg</image:loc>
+      <image:title>Rows of container chassis and stacked intermodal containers at the BNSF rail terminal in Cicero, Illinois, under an overcast sky.</image:title>
+      <image:caption>BNSF intermodal terminal in Cicero, Cook County. Freight infrastructure shapes demand, but a building’s own access still has to be verified.</image:caption>
     </image:image>
   </url>
   <url>
@@ -55,12 +75,12 @@
     </image:image>
   </url>
   <url>
-    <loc>https://rospopa.com/resources/commercial-investment/</loc>
+    <loc>https://rospopa.com/resources/chicago-commercial-real-estate/</loc>
     <lastmod>2026-10-03</lastmod>
     <image:image>
-      <image:loc>https://rospopa.com/resources/images/cicero-intermodal-terminal-1600.jpg</image:loc>
-      <image:title>Rows of container chassis and stacked intermodal containers at the BNSF rail terminal in Cicero, Illinois, under an overcast sky.</image:title>
-      <image:caption>BNSF intermodal terminal in Cicero, Cook County. Freight infrastructure shapes demand, but a building’s own access still has to be verified.</image:caption>
+      <image:loc>https://rospopa.com/resources/images/chicago-skyline-1600.jpg</image:loc>
+      <image:title>The downtown Chicago skyline seen across the lakefront, with Willis Tower rising above the Loop.</image:title>
+      <image:caption>Chicago’s Loop from the lakefront. City records cover the city; suburban and unincorporated parcels have their own authorities.</image:caption>
     </image:image>
   </url>
   <url>
