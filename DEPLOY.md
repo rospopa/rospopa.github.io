@@ -25,6 +25,27 @@ security protections. These external settings were inspected, not changed.
 Security-preserving Cloudflare configuration
 -------------------------------------------
 
+Automation, search engines, and generated files
+-----------------------------------------------
+
+- `.github/workflows/update-news.yml` runs daily (11:17 UTC) and on demand. It
+  executes `node build-site.mjs --news`, which refreshes `resources/news.json`
+  from public news feeds, regenerates the homepage news section, the search
+  index, `sitemap.xml`, `feed.xml`, and `llms-full.txt`, and commits with
+  `[skip render]` so Render does not redeploy the private app. GitHub Pages
+  redeploys from the bot commit (verified). GitHub disables scheduled workflows
+  after 60 days without repository activity; re-enable from the Actions tab.
+- IndexNow key file: `e129f7456b6092356f7ab9e99a4830d6.txt` at the site root.
+  Submit URL changes with a POST to `https://api.indexnow.org/indexnow`
+  (host `rospopa.com`, the key, and `urlList`); the key is intentionally
+  public. Google does not use IndexNow; use Search Console there.
+- Pages carry a `Content-Security-Policy` meta tag. It allows the site's own
+  scripts, Google Fonts, and Cloudflare Web Analytics
+  (`static.cloudflareinsights.com` / `cloudflareinsights.com`). Any new
+  third-party script or font must be added to the policy in every page.
+- `robots.txt` explicitly welcomes AI assistants and blocks only internal
+  search result queries and the two JSON data files. `/search/` is `noindex`.
+
 Keep the public library and private workspace on separate origins:
 
 | Hostname | Origin | Access |
