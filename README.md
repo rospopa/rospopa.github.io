@@ -2,18 +2,26 @@
 
 Public Chicago commercial and industrial real estate resources live in the
 root `index.html` and `resources\` directory. They are plain HTML and CSS;
-reading and crawling need no JavaScript. Two small scripts enhance the pages:
-`resources\theme.js` (day/night preference) and `resources\search.js`
-(client-side search over `resources\search-index.json`).
+reading and crawling need no JavaScript. Three small scripts enhance the pages:
+`resources\theme.js` (day/night preference), `resources\search.js`
+(client-side search over `resources\search-index.json`) and
+`resources\interactive.js` (calculators, remembered checklists, glossary
+filter, county picker, table-of-contents tracking, news carousel).
 
-After changing any public page, regenerate the search index from the repo root:
+After changing any public page, regenerate the generated files from the repo root:
 
-    node build-search-index.mjs
+    node build-site.mjs          # search index, sitemap.xml (with images), feed.xml, llms-full.txt, news section
+    node build-site.mjs --news   # also refresh resources/news.json from the news feeds
 
-The script lists the indexed pages at its top; add new guides there, in
-`sitemap.xml`, and in `llms.txt`. The shared header/footer markup is identical
-on every page—edit all pages together when changing navigation. `/search/` is
-`noindex` and deliberately absent from the sitemap.
+`.github\workflows\update-news.yml` runs the `--news` variant daily and commits
+the result with `[skip render]` so only GitHub Pages redeploys. GitHub pauses
+scheduled workflows after 60 days without repository activity; re-enable it
+from the Actions tab if the carousel stops updating. The script lists the
+indexed pages at its top; add new guides there and in `llms.txt`. The shared
+header/footer markup is identical on every page—edit all pages together when
+changing navigation. `/search/` is `noindex` and deliberately absent from the
+sitemap. `robots.txt` explicitly welcomes AI assistants; `llms.txt` and
+`llms-full.txt` give them a Markdown directory and full text.
 
 The private React workspace in `client\` is built and served by the Node
 service in `server\`, separately from GitHub Pages. See `DEPLOY.md` for hosting,

@@ -1,13 +1,70 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <url>
-        <loc>https://rospopa.com/</loc>
-    </url>
-    <url><loc>https://rospopa.com/resources/chicago-commercial-real-estate/</loc></url>
-    <url><loc>https://rospopa.com/resources/chicago-industrial-real-estate/</loc></url>
-    <url><loc>https://rospopa.com/resources/chicagoland-industrial-real-estate/</loc><lastmod>2026-10-03</lastmod></url>
-    <url><loc>https://rospopa.com/resources/selling-industrial-property/</loc><lastmod>2026-10-03</lastmod></url>
-    <url><loc>https://rospopa.com/resources/commercial-leasing/</loc></url>
-    <url><loc>https://rospopa.com/resources/commercial-investment/</loc></url>
-    <url><loc>https://rospopa.com/resources/glossary/</loc><lastmod>2026-10-03</lastmod></url>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+  <url>
+    <loc>https://rospopa.com/</loc>
+    <lastmod>2026-10-03</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/chicago-industrial-river-1600.jpg</image:loc>
+      <image:title>Industrial buildings and a power plant along the South Branch of the Chicago River at dusk, with the downtown Chicago skyline behind them.</image:title>
+      <image:caption>Industrial corridor on the South Branch of the Chicago River, with the Loop beyond.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/chicago-commercial-real-estate/</loc>
+    <lastmod>2026-10-03</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/chicago-skyline-1600.jpg</image:loc>
+      <image:title>The downtown Chicago skyline seen across the lakefront, with Willis Tower rising above the Loop.</image:title>
+      <image:caption>Chicago’s Loop from the lakefront. City records cover the city; suburban and unincorporated parcels have their own authorities.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/chicago-industrial-real-estate/</loc>
+    <lastmod>2026-10-03</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/warehouse-pallet-racking-1600.jpg</image:loc>
+      <image:title>Interior of a high-bay warehouse with tall pallet racking, skylights, and forklifts moving palletized goods.</image:title>
+      <image:caption>Warehouse interior with selective pallet racking: clear height, column spacing, lighting, and floor condition all affect how a building works.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/chicagoland-industrial-real-estate/</loc>
+    <lastmod>2026-10-03</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/elk-grove-village-aerial-1600.jpg</image:loc>
+      <image:title>Aerial view of rows of single-story industrial and warehouse buildings with truck courts and parking in Elk Grove Village, Illinois.</image:title>
+      <image:caption>Small- and mid-bay industrial buildings in Elk Grove Village, in Cook and DuPage counties—typical of the 10,000–100,000 SF segment.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/selling-industrial-property/</loc>
+    <lastmod>2026-10-03</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/industrial-facade-1600.jpg</image:loc>
+      <image:title>Clean corrugated-metal industrial building facade with a large roll-up door, a personnel door, and trimmed shrubs on either side.</image:title>
+      <image:caption>A well-kept industrial facade. Buyers read maintenance from the outside before they read the rent roll.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/commercial-leasing/</loc>
+    <lastmod>2026-10-03</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/loading-dock-trailers-1600.jpg</image:loc>
+      <image:title>Loading dock of a warehouse with a shipping container on a chassis and a trailer backed up to dock doors.</image:title>
+      <image:caption>Dock positions, levelers, and trailer staging are lease terms as much as building features—confirm who may use them and when.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/commercial-investment/</loc>
+    <lastmod>2026-10-03</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/cicero-intermodal-terminal-1600.jpg</image:loc>
+      <image:title>Rows of container chassis and stacked intermodal containers at the BNSF rail terminal in Cicero, Illinois, under an overcast sky.</image:title>
+      <image:caption>BNSF intermodal terminal in Cicero, Cook County. Freight infrastructure shapes demand, but a building’s own access still has to be verified.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/glossary/</loc>
+    <lastmod>2026-10-03</lastmod>
+  </url>
 </urlset>

@@ -20,4 +20,13 @@ These pages are not listings, market forecasts, legal or tax advice, or evidence
 
 The regional industrial hub covers these nine Illinois counties, not an exhaustive or official definition of Chicagoland. Indiana and Wisconsin are outside this guide. Lake County refers to Illinois, not Indiana. County records and municipal permitting authority must be checked separately.
 
+## Full text and feeds
+
+- [llms-full.txt](https://rospopa.com/llms-full.txt): The complete text of every public guide in Markdown, regenerated whenever the guides change.
+- [feed.xml](https://rospopa.com/feed.xml): Atom feed of the guides with publication and update dates.
+- [sitemap.xml](https://rospopa.com/sitemap.xml): Canonical page list with last-modified dates and the photograph on each page.
+- The homepage also carries a daily-refreshed list of recent Chicago industrial real estate headlines from public news feeds; those headlines belong to their publishers and are not part of this library's content.
+
+The guides include interactive calculators (cap rate and value, debt service coverage, occupancy cost over a lease term, 1031 exchange deadlines). They are illustrative arithmetic on user-entered figures, not market data or advice.
+
 This file is an optional reading directory, not an indexing instruction or a guarantee of inclusion in AI systems. robots.txt and page-level indexing directives are separate.

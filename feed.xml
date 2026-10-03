@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>ROSPOPA — Chicagoland industrial real estate guides</title>
+  <subtitle>Guides to industrial property research, selling, leasing, and investment across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties, Illinois.</subtitle>
+  <link href="https://rospopa.com/feed.xml" rel="self" type="application/atom+xml"/>
+  <link href="https://rospopa.com/" rel="alternate" type="text/html"/>
+  <id>https://rospopa.com/</id>
+  <updated>2026-10-03T00:00:00Z</updated>
+  <author><name>Pavlo Rospopa</name><uri>https://rospopa.com/</uri></author>
+  <entry>
+    <title>Researching Chicago commercial real estate</title>
+    <link href="https://rospopa.com/resources/chicago-commercial-real-estate/" rel="alternate" type="text/html"/>
+    <id>https://rospopa.com/resources/chicago-commercial-real-estate/</id>
+    <published>2026-10-02T00:00:00Z</published>
+    <updated>2026-10-03T00:00:00Z</updated>
+    <summary>Research Chicago commercial property with a practical checklist for use, jurisdiction, zoning, building records, property taxes, and lease or purchase decisions.</summary>
+  </entry>
+  <entry>
+    <title>Evaluating Chicago industrial real estate</title>
+    <link href="https://rospopa.com/resources/chicago-industrial-real-estate/" rel="alternate" type="text/html"/>
+    <id>https://rospopa.com/resources/chicago-industrial-real-estate/</id>
+    <published>2026-10-02T00:00:00Z</published>
+    <updated>2026-10-03T00:00:00Z</updated>
+    <summary>Evaluate Chicago-area industrial, warehouse, logistics, and flex space with checks for loading, clear height, truck access, power, zoning, and environmental risk.</summary>
+  </entry>
+  <entry>
+    <title>Chicagoland industrial real estate: nine Illinois counties</title>
+    <link href="https://rospopa.com/resources/chicagoland-industrial-real-estate/" rel="alternate" type="text/html"/>
+    <id>https://rospopa.com/resources/chicagoland-industrial-real-estate/</id>
+    <published>2026-10-03T00:00:00Z</published>
+    <updated>2026-10-03T00:00:00Z</updated>
+    <summary>Research industrial, warehouse, manufacturing, and flex property in Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties, Illinois.</summary>
+  </entry>
+  <entry>
+    <title>Selling an industrial property in Chicagoland</title>
+    <link href="https://rospopa.com/resources/selling-industrial-property/" rel="alternate" type="text/html"/>
+    <id>https://rospopa.com/resources/selling-industrial-property/</id>
+    <published>2026-10-03T00:00:00Z</published>
+    <updated>2026-10-03T00:00:00Z</updated>
+    <summary>Plain-English guide for owners preparing to sell a 10,000–100,000 SF industrial property in Chicagoland, Illinois.</summary>
+  </entry>
+  <entry>
+    <title>Comparing commercial leases in Chicago</title>
+    <link href="https://rospopa.com/resources/commercial-leasing/" rel="alternate" type="text/html"/>
+    <id>https://rospopa.com/resources/commercial-leasing/</id>
+    <published>2026-10-02T00:00:00Z</published>
+    <updated>2026-10-03T00:00:00Z</updated>
+    <summary>Compare Chicago commercial and industrial leases with a guide to gross and net rent, occupancy costs, tenant improvements, repair obligations, and lease review.</summary>
+  </entry>
+  <entry>
+    <title>Commercial investment and purchase diligence</title>
+    <link href="https://rospopa.com/resources/commercial-investment/" rel="alternate" type="text/html"/>
+    <id>https://rospopa.com/resources/commercial-investment/</id>
+    <published>2026-10-02T00:00:00Z</published>
+    <updated>2026-10-03T00:00:00Z</updated>
+    <summary>A Chicago commercial and industrial property purchase checklist covering income, leases, expenses, capital repairs, financing, title, and environmental diligence.</summary>
+  </entry>
+  <entry>
+    <title>Industrial real estate &amp; investment glossary</title>
+    <link href="https://rospopa.com/resources/glossary/" rel="alternate" type="text/html"/>
+    <id>https://rospopa.com/resources/glossary/</id>
+    <published>2026-10-03T00:00:00Z</published>
+    <updated>2026-10-03T00:00:00Z</updated>
+    <summary>Plain-English glossary of industrial real estate, lease, underwriting, investment, and Illinois local-record terms.</summary>
+  </entry>
+</feed>

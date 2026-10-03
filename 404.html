@@ -2,28 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; form-action 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="icon" href="/css/favicons/unnamed-32x32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="/css/favicons/unnamed-16x16.png" sizes="16x16" type="image/png">
   <link rel="apple-touch-icon" href="/css/favicons/unnamed-180x180.png" sizes="180x180">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="alternate" type="application/atom+xml" title="ROSPOPA guides" href="/feed.xml">
   <meta name="robots" content="noindex, follow">
   <title>Page not found | ROSPOPA</title>
   <meta name="description" content="This page is not available. Browse the public Chicago commercial real estate resource directory.">
   <meta name="theme-color" content="#ffffff">
-  <script src="/resources/theme.js?v=20261003b"></script>
+  <script src="/resources/theme.js?v=20261003c"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/resources/resources.css?v=20261003b">
-  <script src="/resources/search.js?v=20261003b" defer></script>
+  <link rel="stylesheet" href="/resources/resources.css?v=20261003c">
+  <script src="/resources/search.js?v=20261003c" defer></script>
+  <script src="/resources/interactive.js?v=20261003c" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header">
     <a class="brand" href="/" aria-label="ROSPOPA home"><img src="/css/favicons/unnamed-180x180.png" width="36" height="36" alt=""><span class="brand-wordmark"><span class="brand-name">ROSPOPA</span><span class="brand-given">PAVLO</span></span></a>
     <nav class="site-nav" aria-label="Guides"><ul><li><a href="/resources/chicago-commercial-real-estate/">Research</a></li><li><a href="/resources/chicago-industrial-real-estate/">Industrial</a></li><li><a href="/resources/chicagoland-industrial-real-estate/">Counties</a></li><li><a href="/resources/selling-industrial-property/">Selling</a></li><li><a href="/resources/commercial-leasing/">Leasing</a></li><li><a href="/resources/commercial-investment/">Investing</a></li><li><a href="/resources/glossary/">Glossary</a></li></ul></nav>
-    <form class="site-search" role="search" action="/search/" method="get">
+    <form class="site-search" role="search" aria-label="Site search" action="/search/" method="get">
       <label for="site-search-input" class="visually-hidden">Search the guides</label>
-      <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
       <input id="site-search-input" class="search-input" type="text" name="q" placeholder="Search guides…" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="search" enterkeyhint="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="site-search-results" aria-haspopup="listbox">
+      <button type="submit" class="search-submit" aria-label="Search"><svg class="search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg></button>
       <div id="site-search-results" class="search-results" role="listbox" aria-label="Search suggestions" hidden></div>
       <span class="search-status visually-hidden" aria-live="polite"></span>
     </form>
