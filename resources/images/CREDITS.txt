@@ -1,0 +1,47 @@
+Public-site photographs — sources, licenses, and modifications
+
+Every image below was obtained from Wikimedia Commons under an open license.
+Modifications to each: cropped, resized, converted to monochrome, and re-encoded as WebP/JPEG.
+Adaptations of CC BY-SA images are made available under the same CC BY-SA license.
+
+chicago-industrial-river-{1600,800}.{webp,jpg}, chicago-industrial-river-social.jpg
+  Original: Industrial Chicago (15537030296).jpg
+  Author: edward stojakovic from Portland, OR, United States
+  Source: https://commons.wikimedia.org/wiki/File:Industrial_Chicago_(15537030296).jpg
+  License: CC BY 2.0 — https://creativecommons.org/licenses/by/2.0
+
+elk-grove-village-aerial-{1600,800}.{webp,jpg}, elk-grove-village-aerial-social.jpg
+  Original: Aerial view of warehouses in Elk Grove Village, IL.jpg
+  Author: SounderBruce
+  Source: https://commons.wikimedia.org/wiki/File:Aerial_view_of_warehouses_in_Elk_Grove_Village,_IL.jpg
+  License: CC BY-SA 4.0 — https://creativecommons.org/licenses/by-sa/4.0
+
+warehouse-pallet-racking-{1600,800}.{webp,jpg}, warehouse-pallet-racking-social.jpg
+  Original: Modern warehouse with pallet rack storage system.jpg
+  Author: Axisadman
+  Source: https://commons.wikimedia.org/wiki/File:Modern_warehouse_with_pallet_rack_storage_system.jpg
+  License: CC BY-SA 3.0 — https://creativecommons.org/licenses/by-sa/3.0
+
+industrial-facade-{1600,800}.{webp,jpg}, industrial-facade-social.jpg
+  Original: Zürich, Switzerland (Unsplash 2xVNV8gJ3Zk).jpg
+  Author: Samuel Zeller samuelzeller
+  Source: https://commons.wikimedia.org/wiki/File:Z%C3%BCrich,_Switzerland_(Unsplash_2xVNV8gJ3Zk).jpg
+  License: CC0 — http://creativecommons.org/publicdomain/zero/1.0/deed.en
+
+loading-dock-trailers-{1600,800}.{webp,jpg}, loading-dock-trailers-social.jpg
+  Original: Truck trailer loading dock - Flickr - Joost J. Bakker IJmuiden.jpg
+  Author: Joost J. Bakker
+  Source: https://commons.wikimedia.org/wiki/File:Truck_trailer_loading_dock_-_Flickr_-_Joost_J._Bakker_IJmuiden.jpg
+  License: CC BY 2.0 — https://creativecommons.org/licenses/by/2.0
+
+cicero-intermodal-terminal-{1600,800}.{webp,jpg}, cicero-intermodal-terminal-social.jpg
+  Original: 20030531 10 BNSF Cicero Intermodal Terminal (5837455491).jpg
+  Author: David Wilson from Oak Park, Illinois, USA
+  Source: https://commons.wikimedia.org/wiki/File:20030531_10_BNSF_Cicero_Intermodal_Terminal_(5837455491).jpg
+  License: CC BY 2.0 — https://creativecommons.org/licenses/by/2.0
+
+chicago-skyline-{1600,800}.{webp,jpg}, chicago-skyline-social.jpg
+  Original: Chicago skyline (4592585863).jpg
+  Author: Ryan from Toronto, Canada
+  Source: https://commons.wikimedia.org/wiki/File:Chicago_skyline_(4592585863).jpg
+  License: CC BY 2.0 — https://creativecommons.org/licenses/by/2.0

@@ -16,3 +16,5 @@ exclude:
   - audit-server-latest.json
   - client_output.log
   - run-31012424458-logs.zip
+  - build-search-index.mjs
+  - resources/icons/README.md

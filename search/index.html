@@ -7,15 +7,15 @@
   <link rel="apple-touch-icon" href="/css/favicons/unnamed-180x180.png" sizes="180x180">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex, follow">
-  <title>Page not found | ROSPOPA</title>
-  <meta name="description" content="This page is not available. Browse the public Chicago commercial real estate resource directory.">
+  <title>Search the guides | ROSPOPA</title>
+  <meta name="description" content="Search the ROSPOPA industrial and commercial real estate guides for Chicago and the nine-county Chicagoland region.">
   <meta name="theme-color" content="#ffffff">
   <script src="/resources/theme.js?v=20261003b"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/resources/resources.css?v=20261003b">
   <script src="/resources/search.js?v=20261003b" defer></script>
 </head>
-<body>
+<body class="has-search-page">
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header">
     <a class="brand" href="/" aria-label="ROSPOPA home"><img src="/css/favicons/unnamed-180x180.png" width="36" height="36" alt=""><span class="brand-wordmark"><span class="brand-name">ROSPOPA</span><span class="brand-given">PAVLO</span></span></a>
@@ -33,10 +33,30 @@
     </div>
   </header>
   <main id="main" class="reading">
-    <p class="eyebrow">404 · Page not found</p>
-    <h1>This page is not available.</h1>
-    <p>The address may be incorrect, or the page may have been removed. Older archived pages are no longer published.</p>
-    <p><a href="/">Browse Chicago commercial real estate resources</a></p>
+    <p class="eyebrow">Search</p>
+    <h1 id="search-heading">Search the guides</h1>
+    <form class="search-page-form" role="search" action="/search/" method="get">
+      <label for="search-page-input">Search every guide, county section, and glossary term</label>
+      <div class="search-page-row">
+        <input id="search-page-input" class="search-input" type="search" name="q" placeholder="For example: clear height, cap rate, Will County, estoppel" autocomplete="off" enterkeyhint="search" minlength="2" required>
+        <button type="submit">Search</button>
+      </div>
+    </form>
+    <div id="search-results-page" class="search-results-page" aria-live="polite">
+      <noscript><p>Search needs JavaScript. Browse the guides below instead, or use your browser’s find-in-page on any guide.</p></noscript>
+    </div>
+    <section id="browse" aria-labelledby="browse-heading">
+      <h2 id="browse-heading">Browse all guides</h2>
+      <ul class="guide-list">
+        <li><a href="/resources/chicago-commercial-real-estate/">Researching Chicago commercial real estate</a> — jurisdiction, zoning, building records, and taxes.</li>
+        <li><a href="/resources/chicago-industrial-real-estate/">Evaluating industrial, warehouse &amp; flex buildings</a> — loading, clear height, power, fire protection, access.</li>
+        <li><a href="/resources/chicagoland-industrial-real-estate/">Chicagoland industrial: nine Illinois counties</a> — county-by-county authorities and official sources.</li>
+        <li><a href="/resources/selling-industrial-property/">Selling an industrial property</a> — buyers, underwriting, documents, pricing, and the sale process.</li>
+        <li><a href="/resources/commercial-leasing/">Comparing commercial leases</a> — occupancy cost, gross vs. net terms, lease review.</li>
+        <li><a href="/resources/commercial-investment/">Investment &amp; purchase diligence</a> — income, financing, downside, and closing checklists.</li>
+        <li><a href="/resources/glossary/">Industrial &amp; investment glossary</a> — plain-English definitions of building, lease, and underwriting terms.</li>
+      </ul>
+    </section>
   </main>
   <footer class="site-footer">
     <div class="footer-grid">
