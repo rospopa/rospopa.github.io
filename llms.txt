@@ -1,17 +1,20 @@
 # ROSPOPA public resources
 
-> Educational guides to Chicago commercial and industrial real estate research, leasing, and investment due diligence.
+> Educational guides to Chicago commercial and nine-county Chicagoland industrial real estate research, leasing, and investment due diligence.
 
 These pages are not listings, market forecasts, legal or tax advice, or evidence of professional credentials. Verify property-specific information with the relevant authorities and qualified advisers. The secure workspace is private and is not part of this library.
 
 ## Public guides
 
-- [Resource directory](https://rospopa.com/): Overview and reading paths.
+- [Home: Chicagoland industrial investment sales](https://rospopa.com/): Pavlo Rospopa specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across the nine Illinois counties below; the page also indexes the research guides.
 - [Chicago commercial real estate research](https://rospopa.com/resources/chicago-commercial-real-estate/): Property types, jurisdiction, zoning, tax, and building research.
 - [Chicago industrial real estate](https://rospopa.com/resources/chicago-industrial-real-estate/): Warehouse, logistics, manufacturing, and flex-space evaluation.
+- [Chicagoland industrial real estate: nine Illinois counties](https://rospopa.com/resources/chicagoland-industrial-real-estate/): Distinct county research paths and official planning, zoning, and parcel sources for Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois, USA.
 - [Commercial leasing](https://rospopa.com/resources/commercial-leasing/): Occupancy costs, lease terms, and a tour checklist.
 - [Commercial investment](https://rospopa.com/resources/commercial-investment/): Acquisition diligence, cash flow, and financing risks.
 
 ## Scope
+
+The regional industrial hub covers these nine Illinois counties, not an exhaustive or official definition of Chicagoland. Indiana and Wisconsin are outside this guide. Lake County refers to Illinois, not Indiana. County records and municipal permitting authority must be checked separately.
 
 This file is an optional reading directory, not an indexing instruction or a guarantee of inclusion in AI systems. robots.txt and page-level indexing directives are separate.
