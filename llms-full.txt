@@ -15,7 +15,6 @@ I specialize in the investment sales of industrial assets ranging from 10,000 to
 
 The guides below are free resources I maintain for owners, buyers, and tenants in this market: the questions to ask, the records to check, and the official offices to check them with. Search the guides for a term, a county, or a topic.
 
-
 Connect on LinkedIn Marcus & Millichap advisor page
 
 _Industrial corridor on the South Branch of the Chicago River, with the Loop beyond._ ## Where to start - Thinking about selling? The selling guide covers who buys buildings in this size range, how they underwrite, what to assemble, and how a sale runs. - Buying for your business or as an investment? Pair the building checklist with the purchase-diligence guide ; suitability and value are separate questions. - Leasing space? Compare total occupancy cost on the same basis, not advertised rent. - Researching a specific county? The nine-county hub links each county’s planning, zoning, parcel, and assessment offices. ## Guides ## Selling an industrial property Buyer types, underwriting, what drives value, the document checklist, pricing, and the sale process from preparation to closing.
@@ -65,16 +64,11 @@ Published: 2026-10-02 · Updated: 2026-10-03
 
 Research guide
 
-    
-
 # Researching Chicago commercial real estate
-
 
 A commercial property search becomes more useful when it starts with a proposed use and a verification plan. An address, an asking price, and a listing description are not enough to establish whether a building can support your business or investment.
 
-
 Published October 2, 2026 · Educational guide, not a market report.
-
 
 ## In brief
 
@@ -86,11 +80,8 @@ Published October 2, 2026 · Educational guide, not a market report.
 
       - Compare options on the same basis: area definition, total cost, timing, and verified evidence.
 
-    
-
 _Chicago’s Loop from the lakefront. City records cover the city; suburban and unincorporated parcels have their own authorities._ ## 1. Define what the property must do Record the intended activity, required occupancy date, usable area, budget, and non-negotiable physical requirements. Separate “must have” constraints from preferences. When considering a property for sale, state whether it is intended for owner occupancy, rental income, or redevelopment; each requires a different underwriting approach.
 
-      
         - **Office**: Consider floor layout, accessibility, telecommunications, commuting, and the cost of adapting space to the team.
 
         - **Retail and service space**: Examine customer access, visibility, delivery arrangements, permitted activity, and any business-specific licensing or buildout requirements.
@@ -99,11 +90,7 @@ _Chicago’s Loop from the lakefront. City records cover the city; suburban and 
 
         - **Flex and mixed-use property**: Identify each actual use and its share of the building. A “flex” label does not confirm that manufacturing, retail, laboratory, or assembly activities are permitted.
 
-      
-    
-
 ## 2. Confirm the jurisdiction and parcel
-
 
 “Chicago area” can describe the city or a much larger metropolitan region. Identify the municipality, county, address, and every property index number (PIN) involved. A marketing address can represent multiple parcels; a mailing address alone does not establish which zoning authority applies.
 
@@ -111,37 +98,27 @@ _Chicago’s Loop from the lakefront. City records cover the city; suburban and 
 - For a suburban property, check that municipality’s planning and building departments. If it is unincorporated, confirm the responsible county authority.
 - Use the correct county’s assessor and treasurer. Cook County records should not be assumed to cover property in DuPage, Lake, Will, Kane, or other counties.
 
-
 Keep a research log: source, retrieval date, parcel or address searched, result, and unresolved question. Retain the underlying documents rather than relying on a screenshot or search snippet.
-
 
 For industrial property beyond the city, use the nine-county Chicagoland industrial hub . It covers Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois with county-specific planning, zoning, and parcel sources, while keeping municipal authority distinct.
 
-    
-
 ## 3. Verify use, condition, and obligations
-
 
 ### Zoning is a starting point
 
 Locate the zoning designation, then describe the proposed operation to the relevant authority. Confirm whether additional approvals, special uses, parking or loading provisions, or restrictions apply. Existing occupancy and a prior tenant’s business do not automatically establish permission for a new operation.
 
-
 ### Building records need interpretation
 
 Review available permit and violation information, then ask qualified advisers to investigate unresolved items. Public records may be incomplete or may not establish the condition of the roof, structure, electrical system, fire protection, or other components. Arrange inspections appropriate to the property and intended use.
-
 
 ### Taxes are not a fixed listing number
 
 Match the bill and assessment to the correct PINs and tax year. Distinguish assessed value from a tax bill and from market value. Ask a qualified tax adviser how reassessment, appeals, incentives, and a change in use or ownership could affect the budget; do not assume last year’s bill is the future expense.
 
-
 ### Access and environmental questions can change the decision
 
 Check documented access rights, easements, drainage, and flood information. Past industrial activity can warrant environmental diligence even if the present use appears ordinary. The purchase-diligence guide explains how these checks fit into an acquisition.
-
-    
 
 ## 4. Put each option on the same basis
 
@@ -150,10 +127,7 @@ Check documented access rights, easements, drainage, and flood information. Past
 - Timing: account for possession, approvals, construction, and equipment installation—not only the proposed closing or lease date.
 - Evidence: distinguish verified facts from representations and estimates. Asking terms are not proof of completed transactions or market value.
 
-
 For rental decisions, continue to comparing commercial leases . For an acquisition, continue to investment and purchase diligence .
-
-    
 
 ## Official research sources
 
@@ -167,8 +141,6 @@ For rental decisions, continue to comparing commercial leases . For an acquisiti
 
       - FEMA Flood Map Service Center — official flood-hazard mapping; maps do not capture every possible water or drainage problem.
 
-    
-
 > This guide provides a research process, not a determination that any property is legal, safe, available, or suitable. Consult qualified legal, tax, design, and inspection professionals for the specific transaction.
 
 ---
@@ -178,16 +150,11 @@ Published: 2026-10-02 · Updated: 2026-10-03
 
 Operations & property suitability
 
-    
-
 # Evaluating Chicago industrial real estate
-
 
 Industrial space has to work for the operation inside it. Before comparing a warehouse for lease or an industrial building for sale, translate storage, production, loading, and staffing needs into a written building checklist.
 
-
 Published October 2, 2026 · No current inventory or market statistics are represented.
-
 
 ## In brief
 
@@ -199,14 +166,9 @@ Published October 2, 2026 · No current inventory or market statistics are repre
 
       - Review flood exposure and environmental history, and commission diligence appropriate to the transaction.
 
-    
-
 _Warehouse interior with selective pallet racking: clear height, column spacing, lighting, and floor condition all affect how a building works._ ## Match the actual use—not just the label - **Warehouse and distribution**: Storage layout, throughput, racking, fire protection, dock capacity, and trailer circulation matter alongside building size. - **Logistics and last-mile operations**: Test routes to actual customers or destinations, vehicle access, dispatch patterns, parking, and permitted operating hours. Straight-line distance does not establish delivery time. - **Manufacturing**: Equipment loads, process utilities, ventilation, wastewater, vibration, noise, and any required permits should be reviewed by qualified specialists. - **Flex space**: Office and industrial areas can have different physical and code requirements. Confirm the permitted activity, buildout scope, and whether the mix can support the intended business. Write down pallet or equipment dimensions, inventory type, peak daily vehicle movements, shifts, and growth assumptions. Special storage or processes may introduce requirements that a generic listing does not address.
 
-    
-
 ## A building-fit checklist
-
 
 **Items to verify before leasing or purchasing**
 - Feature: What to verify
@@ -227,27 +189,17 @@ _Warehouse interior with selective pallet racking: clear height, column spacing,
 
         - People and access: Check employee and visitor parking, accessible facilities, restrooms, office needs, ventilation, and safe separation of pedestrian and vehicle activity.
 
-      
-
 Do not infer suitability from an advertised clear height, number of docks, or power rating. Request supporting information and confirm it through measurements and professional review.
-
-    
 
 ## Research the location as an operating network
 
-
 For Chicago-area industrial property, evaluate the actual routes between the building, suppliers, customers, freight facilities, and employees. Check local truck restrictions, bridge or clearance constraints, highway access, and traffic at relevant operating times. Proximity to an airport, rail terminal, or expressway does not prove practical freight access.
-
 
 Compare local research paths in the Chicagoland industrial real estate hub : Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois, USA. Each county section connects operational questions with official jurisdiction, planning, zoning, or parcel sources. This defined scope does not include Indiana or Wisconsin.
 
-
 Confirm the municipality and county before researching zoning. Outdoor storage, truck parking, production, and extended hours need property-specific review. Use the commercial property research guide to organize zoning, tax, and building-record checks.
 
-
 Review flood and drainage exposure and historical property uses. Commission environmental diligence appropriate to the transaction; a clean-looking warehouse does not establish that the land is free from contamination.
-
-    
 
 ## Bring these questions to the tour
 
@@ -258,10 +210,7 @@ Review flood and drainage exposure and historical property uses. Commission envi
 - Who maintains and replaces the roof, structure, docks, pavement, and fire-protection system?
 - What limits expansion, assignment, subleasing, or later resale?
 
-
 For a lease, use the occupancy-cost and lease checklist . For a purchase, review acquisition diligence and financing risk . A low quoted rent or purchase price may not offset a costly operational mismatch.
-
-    
 
 ## Official sources for follow-up
 
@@ -273,8 +222,6 @@ For a lease, use the occupancy-cost and lease checklist . For a purchase, review
 
       - EPA: All Appropriate Inquiries — environmental due-diligence background for acquisitions, not a property clearance.
 
-    
-
 > This is a general evaluation framework, not engineering, fire-code, environmental, or legal advice. Obtain property-specific advice before committing to equipment, construction, a lease, or a purchase.
 
 ---
@@ -284,16 +231,11 @@ Published: 2026-10-03 · Updated: 2026-10-03
 
 Illinois, USA · County-by-county research
 
-    
-
 # Chicagoland industrial real estate: nine Illinois counties
-
 
 Use this regional hub to investigate warehouse, distribution, manufacturing, and flex property in Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties. Start with the parcel and the operation, then identify the authority and records that actually apply.
 
-
 Published October 3, 2026 · Educational research, not listings or current market statistics.
-
 
 ## In brief
 
@@ -305,26 +247,17 @@ Published October 3, 2026 · Educational research, not listings or current marke
 
       - Aurora, Elgin, and Joliet cross county lines; Lake County here means Illinois, not Indiana.
 
-    
-
 > Defined scope. This guide covers these nine counties in Illinois, USA. It is not an exhaustive or official definition of “Chicagoland.” Indiana and Wisconsin properties are outside this guide; Lake County here means Lake County, Illinois, not Lake County, Indiana.
-
-    
 
 _Small- and mid-bay industrial buildings in Elk Grove Village, in Cook and DuPage counties—typical of the 10,000–100,000 SF segment._ ## Establish jurisdiction before comparing locations Record the street address, every property index number (PIN), county, and incorporated municipality or unincorporated status. A postal city, listing label, or county tax record does not establish the zoning authority. Municipalities can cross county lines, and a project can involve several parcels. Check each parcel rather than assigning the whole site from one address.
 
-
 For property inside a city or village, start with its planning, zoning, and building staff. For unincorporated property, start with the county department linked below. Confirm any shared-service arrangement and separate fire, health, highway, utility, or stormwater approvals. County assessment and mapping resources can be useful even where municipal zoning applies.
-
 
 Use GIS as a research aid, not a survey, title opinion, zoning approval, or guarantee of utility service. A comprehensive plan describes policy or future land use; it is not the same as today's zoning or permission to operate. Municipal examples below are orientation points, not recommendations or assurances that industrial space is available.
 
-
 ### County assessment offices
 
-
 Cook County has an elected county assessor. In the other eight counties, township assessors typically set initial values and the county supervisor of assessments or chief county assessment officer supervises, equalizes, and publishes them. Start with the county office below to identify parcels, assessment history, exemptions, and appeal deadlines; verify tax bills with the county treasurer separately.
-
 
 **Official assessment offices for the nine counties**
 - County: Office
@@ -347,165 +280,110 @@ Cook County has an elected county assessor. In the other eight counties, townshi
 
         - Will: Will County Supervisor of Assessments
 
-      
-    
-
 ## Cook County: distinguish Chicago from suburban authority
-
 
 Chicago and suburban locations such as Bedford Park require separate local research. Chicago's zoning map and Department of Buildings are city resources, not countywide permitting systems. Cook County Building and Zoning directs incorporated-property inquiries to the applicable municipality and handles unincorporated areas, with a separate role for Forest Preserve property.
 
-
 For a city distribution or service operation, trace the final approach from the public road to the loading area: curb access, backing movements, delivery windows, pedestrian conflicts, and any street-use requirements. For a suburban yard or warehouse, ask about outdoor storage and trailer parking independently of indoor warehouse permission. Neither a Chicago mailing address nor an industrial tax classification resolves those questions.
 
-      
         - Cook County Building and Zoning — county jurisdiction and building/zoning services.
 
         - Cook County Assessor — identify parcels and assessment records; verify tax bills separately.
 
         - Chicago zoning map and Chicago Department of Buildings — city-specific starting points.
 
-      
-    
-
 ## DeKalb County: separate mapped land use from approvals
-
 
 DeKalb and Sycamore provide municipal starting points; sites outside municipal limits require county confirmation. DeKalb County Community Development reviews construction in unincorporated areas and administers county planning, zoning, subdivision, and stormwater regulations.
 
-
 The county's Property Data and Maps page separates parcel information from Community Development mapping. Use those resources together to identify the site and inspect zoning and development layers. A mapped enterprise zone or a future-use designation does not by itself establish incentive eligibility or an approved industrial operation.
-
 
 For a new manufacturing site or warehouse expansion, define the construction footprint, process-water needs, electrical loads, drainage changes, and required access before an approval discussion. Ask the responsible authority and utilities what can be served at this specific parcel; nearby development is not evidence that capacity is reserved for the project.
 
-      
         - DeKalb County Assessment Office — parcel identification, assessment records, and appeal information.
 
         - DeKalb County Community Development — planning, building, and land-use responsibilities.
 
         - DeKalb County Property Data and Maps — parcel, tax, land-record, and Community Development map entry points.
 
-      
-    
-
 ## DuPage County: reconcile municipal limits and building fit
-
 
 Addison and Carol Stream are examples of DuPage County municipalities to research through their own departments. DuPage County Building and Zoning provides building permitting for unincorporated areas. Its Interactive Map Gallery links a parcel viewer for locating and checking the parcels under review.
 
-
 For an existing warehouse or office/industrial flex building, compare the proposed office, storage, and production mix with the approved occupancy and required parking. Document whether a conversion changes fire separation, accessibility, ventilation, or loading needs. A flexible floor plan does not necessarily mean every activity is allowed.
-
 
 Plot the actual lot, driveway, truck court, and easements before assuming there is room for more docks or trailer storage. When comparing a DuPage site with a neighboring-county option, keep the parcel and permitting records separate even if both share a familiar municipal or corridor label.
 
-      
         - DuPage County Supervisor of Assessments — assessment records, exemptions, and appeal procedures.
 
         - DuPage County Building and Zoning — building, zoning, and planning services.
 
         - DuPage County Interactive Map Gallery — county maps and the linked Parcel Viewer.
 
-      
-    
-
 ## Grundy County: investigate site development and approval paths
-
 
 Morris is a municipal starting point within Grundy County. For a county-administered site, the Land Use Department separates Building, Planning and Zoning, and Environmental and Resource Conservation functions. Contact the right office for the proposed work rather than treating a zoning inquiry as a complete development review.
 
-
 The Planning and Zoning Office describes hearings for map amendments, subdivision plats, special uses, and variances. Its page distinguishes recommendations to committees and the County Board from variance decisions by the Zoning Board of Appeals. If an industrial project needs relief or rezoning, confirm the applicable sequence before committing to a possession or construction date.
-
 
 For a distribution yard or undeveloped manufacturing site, include pavement, grading, drainage, outdoor storage, and emergency access in the concept plan. Review flood mapping and site elevations with qualified professionals; neither vacant land nor an existing paved yard establishes that expansion is permissible.
 
-      
         - Grundy County Supervisor of Assessments — online assessment inquiry, forms, and Board of Review information.
 
         - Grundy County Land Use Department — department structure and building-related starting points.
 
         - Grundy County Planning and Zoning Office — hearing types and decision paths.
 
-      
-    
-
 ## Kane County: resolve multi-county names and construction scope
-
 
 Geneva is a Kane County orientation point. Aurora and Elgin searches need particular care: both municipalities extend beyond Kane County. Find the actual county and municipal limits for the parcel before ordering records or estimating taxes. Kane's map directory supports municipality, address, and parcel research.
 
-
 Kane County Building and Zoning provides property-research and permit instructions for unincorporated sites, including new construction, remodeling, repair, and demolition. Confirm whether a proposed equipment installation, mezzanine, dock alteration, or production conversion requires review; a prior tenant's permit is not approval for your project.
-
 
 For operations whose routes cross the Fox River, test the specific crossing and local approach with the intended vehicle rather than relying on distance between towns. Check road authority, posted restrictions, and documented access rights. A mapped route does not establish legal truck access or a dependable delivery time.
 
-      
         - Kane County Supervisor of Assessments — parcel and assessment research for Kane County portions of a property.
 
         - Kane County Building and Zoning Division — unincorporated property research, permit instructions, and references.
 
         - Kane County maps — official entry point for parcel and municipality mapping.
 
-      
-    
-
 ## Kendall County: verify service authority and expansion assumptions
-
 
 Yorkville and Oswego are useful municipal starting points for Kendall County searches. Check the specific parcel when a search reaches a county boundary; a municipal name is not a substitute for county identification. The county GIS department provides mapping resources for that investigation.
 
-
 Kendall's Planning, Building and Zoning Department describes services for unincorporated areas and the incorporated villages of Millbrook and Plattville. This is a reason to confirm service arrangements rather than assuming that incorporation always rules out a county role. Ask which office handles each zoning, building, and inspection step for the address.
-
 
 When evaluating land for a warehouse or a manufacturing expansion, request written utility availability, extension responsibilities, and the approvals for subdivision or site changes. Review the county's Land Resource Management Plan as planning context, then confirm current zoning and any required relief. Budget approvals and infrastructure separately from the advertised land price.
 
-      
         - Kendall County Supervisor of Assessments — assessment records, township assessor contacts, and appeals.
 
         - Kendall County Planning, Building and Zoning — service area, land-use planning, and department guidance.
 
         - Kendall County Geographic Information Systems — official mapping and property-information entry point.
 
-      
-    
-
 ## Lake County, Illinois: use early assistance for complex projects
-
 
 Waukegan and Gurnee are Lake County, Illinois municipal examples. This section does not cover Indiana's Lake County or Wisconsin property. Lake County's permitting page directs incorporated-site inquiries to the village or city and describes county permits for unincorporated sites.
 
-
 For a complicated nonresidential project in unincorporated Lake County, the county describes Early Assistance meetings coordinated across applicable county departments. Bring a specific site and an operational concept: a manufacturing process, a warehouse change of use, or a flex conversion needs more detail than a square-footage target.
-
 
 The permitting page distinguishes change-of-use, site-development, building, conditional-use, and other approvals. Ask which apply to production, earthwork, outdoor activity, or a new storage arrangement. Use the county's mapping hub for initial geographic research, and verify drainage, wetland, and flood questions with the appropriate authority and specialists.
 
-      
         - Lake County, Illinois Chief County Assessment Office — assessment records, exemptions, and appeal procedures.
 
         - Lake County Permits, Approvals and Early Assistance — unincorporated permitting and coordinated project guidance.
 
         - Lake County, Illinois mapping and open data — official geographic-data starting point.
 
-      
-    
-
 ## McHenry County: combine land-use maps with permit history
-
 
 Woodstock and Crystal Lake are municipal starting points within McHenry County. The county Planning and Development Department directs incorporated-site inquiries to the city or village; its permitting services apply to unincorporated areas.
 
-
 The county GIS Interactive Maps directory distinguishes Athena property information from PlanDev zoning and land-use research. Read current zoning separately from proposed land use. For an existing industrial building, use the department's Electronic Records Search to investigate available closed permits and zoning petitions, then request missing records and confirmation of present approvals.
-
 
 For distribution or storage uses, review the full route between the site and destinations, not just a regional highway label. Include local truck access, drainage, loading-hour constraints, and neighboring uses in the review. For a manufacturing conversion, reconcile the record history with the proposed equipment, wastewater, ventilation, and fire-protection needs.
 
-      
         - McHenry County Office of Assessments — assessment notices, parcel inquiry, and complaint deadlines.
 
         - McHenry County Planning and Development — county permitting and land-use services.
@@ -514,33 +392,22 @@ For distribution or storage uses, review the full route between the site and des
 
         - McHenry County Electronic Records Search — available permit and zoning records, not proof of current building condition.
 
-      
-    
-
 ## Will County: separate freight proximity from usable access
-
 
 Romeoville is a Will County municipal example. Joliet searches can cross into Kendall County, so verify each parcel rather than assigning the entire city to Will. For incorporated sites, begin with the municipality; use county land-use staff for county-administered zoning questions.
 
-
 Will County's Current Planning and Zoning section describes map amendments, special uses, variances, and building-permit zoning review. It maintains official zoning maps and records. Request the zoning district, relevant approvals, and any conditions affecting yards, parking, setbacks, or proposed activity; an industrial district label alone is not a project approval.
-
 
 For a warehouse or distribution operation advertised near freight infrastructure, confirm the actual gate-to-destination route, terminal access arrangements where relevant, staging, queuing, and legal trailer parking. Nearby rail facilities do not mean a building has rail service or access rights. For manufacturing, investigate utility and process approvals independently of freight proximity.
 
-      
         - Will County Supervisor of Assessments — assessment records, exemptions, and appeal information.
 
         - Will County Land Use Department — official department entry point.
 
         - Will County Current Planning and Zoning — zoning applications, permit review, plans, and records.
 
-      
-    
-
 ## Match the operation in every county
 
-      
         - **Warehouse and storage**: Identify commodities, rack layout, storage height, slab loads, and fire-protection design. Verify usable clear height below obstructions and whether approved storage arrangements fit the inventory.
 
         - **Distribution and logistics**: Model peak vehicle movements, dock appointments, truck turning, queuing, trailer storage, and employee access. Test routes at relevant times; neither county location nor highway proximity guarantees travel time.
@@ -549,15 +416,10 @@ For a warehouse or distribution operation advertised near freight infrastructure
 
         - **Flex space**: Define the office/industrial mix, customer visits, parking, occupancy classification, ventilation, and separation between uses. Existing office improvements do not establish permission for assembly, production, or storage.
 
-      
-
 Use the industrial building-fit checklist for measurements, systems, loading, and inspection questions. County research complements that checklist; it does not replace an engineer's, environmental professional's, or code specialist's review.
-
-    
 
 ## Build a property-specific diligence file
 
-      
         - Identity and authority: retain the PINs, boundary evidence, zoning designation, responsible offices, and written responses about the exact use.
 
         - Records and site risk: collect approvals, permit history, title and survey information, access rights, drainage documents, and tax records for every parcel. Use the correct county assessor and treasurer, not Cook County by default.
@@ -566,11 +428,7 @@ Use the industrial building-fit checklist for measurements, systems, loading, an
 
         - Cost and schedule: itemize improvements, utility upgrades, permit dependencies, and responsibility for ongoing maintenance. Use the leasing guide or purchase-diligence guide for transaction-specific questions.
 
-      
-
 Record the source, access date, parcel searched, verified finding, and unresolved question. Official pages and applications can change; if a map or portal is unavailable, contact the named county department. For the broader research process, see commercial property research .
-
-    
 
 > This hub is general education, not a listing service, market ranking, appraisal, or legal, tax, engineering, environmental, or investment advice. It makes no claim about available inventory, rents, returns, incentives, or professional credentials. Obtain property-specific advice and current source documents before making a commitment.
 
@@ -581,16 +439,11 @@ Published: 2026-10-03 · Updated: 2026-10-03
 
 Owner guide · Chicagoland industrial sale preparation
 
-    
-
 # Selling an industrial property in Chicagoland
-
 
 This guide helps owners prepare a 10,000–100,000 square foot industrial property for sale in the nine-county Illinois market.
 
-
 Published October 3, 2026 · Educational, not a valuation or listing.
-
 
 ## In brief
 
@@ -602,11 +455,8 @@ Published October 3, 2026 · Educational, not a valuation or listing.
 
       - A clean file and confidentiality plan can reduce diligence friction.
 
-    
-
 _A well-kept industrial facade. Buyers read maintenance from the outside before they read the rent roll._ ## Who buys this size range Industrial assets between 10,000 and 100,000 square feet attract common buyer types. The audience depends on occupancy, function, location, financing, and timing.
 
-      
         - Owner-users: companies that want to occupy for warehouse, distribution, manufacturing, service, or flex operations.
 
         - Private investors: local or regional buyers seeking income, vacancy upside, or long-term control.
@@ -615,42 +465,27 @@ _A well-kept industrial facade. Buyers read maintenance from the outside before 
 
         - Small institutional or fund buyers: professional buyers focused on credit, scale, lease term, and repeatable industrial features.
 
-      
-
 A leased asset may appeal most to investors. A vacant asset may also draw owner-users that value control more than current income.
-
-    
 
 ## How buyers underwrite
 
-
 ### Leased buildings
-
 
 For a leased property, buyers start with the rent roll, lease documents, NOI, and the risk of keeping that income. They review lease term, WALT, tenant credit, options, expense recoveries, and landlord duties.
 
-
 Recoveries matter because leases differ. A buyer will test whether taxes, insurance, CAM, repairs, management fees, and capital items pass through or remain with the owner.
-
 
 ### Vacant or owner-user buildings
 
-
 For a vacant building, buyers focus on function, replacement cost, timing, financing, and needed improvements. Clear height, loading, power, office ratio, truck movement, and code compliance can matter more than a rent roll.
-
 
 Owner-users may evaluate conventional financing and programs such as SBA 504 loans . Verify eligibility and terms with the SBA, a lender, and qualified advisors.
 
-
 For building-fit questions, see the industrial building evaluation guide .
-
-    
 
 ## What drives value in this segment
 
-
 Value is not based on square footage alone. Buyers value buildings that solve a clear operating need.
-
 
 **Common value drivers for 10,000–100,000 square foot industrial assets**
 - Category: What buyers review
@@ -665,17 +500,11 @@ Value is not based on square footage alone. Buyers value buildings that solve a 
 
         - Income profile: Lease structure, rent, recovery language, obligations, remaining term, options, and credit.
 
-      
-
 The nine-county research hub helps identify parcel, zoning, and assessment offices.
-
-    
 
 ## Preparing the document file
 
-
 Organize documents before broad marketing. Missing records can slow offers, financing, title review, environmental review, and closing.
-
 
 **Industrial property seller document checklist**
 - Document: Why it matters
@@ -710,15 +539,10 @@ Organize documents before broad marketing. Missing records can slow offers, fina
 
         - Environmental and regulatory records: Cover permits, tanks, spills, notices, and closure documents.
 
-      
-    
-
 ## Physical preparation before marketing
-
 
 Physical preparation should make the site easier to inspect.
 
-      
         - Address obvious deferred maintenance where practical, or price and disclose it.
 
         - Clean warehouse areas, mechanical rooms, offices, loading areas, and yard.
@@ -729,35 +553,22 @@ Physical preparation should make the site easier to inspect.
 
         - Confirm what personal property, racks, equipment, and fixtures are included or excluded.
 
-      
-
 For leased buildings, coordinate site access with the tenant. A clean tour process protects operations and informs buyers.
-
-    
 
 ## Pricing approach
 
-
 A broker opinion of value is a marketing and pricing opinion, not a formal appraisal. An appraisal is prepared for a defined purpose, standard, date, and client.
-
 
 For leased industrial property, buyers often discuss cap-rate math. Conceptually, NOI divided by a capitalization rate indicates value before deal-specific adjustments.
 
-
 > Illustration only, not market data. If placeholder NOI is $300,000 and the placeholder cap rate is 6.0%, the arithmetic is $300,000 ÷ 6.0% = $5,000,000. Actual value depends on property-specific income, risk, lease terms, building condition, financing, and current buyer demand.
-
-      
 
 For vacant or owner-user property, pricing may be tested against sales, replacement cost, renovation cost, timing, and alternatives.
 
-    
-
 ## Typical sale process
-
 
 Sale processes vary. This sequence is not a promise of timing or outcome.
 
-      
         - Prep: gather records, resolve open questions, set pricing strategy, and define confidentiality rules.
 
         - Marketing or confidential offering: present the asset to targeted buyers with controlled information release.
@@ -774,54 +585,34 @@ Sale processes vary. This sequence is not a promise of timing or outcome.
 
         - Closing: finalize conditions, funds, deeds, prorations, notices, possession, and post-closing obligations.
 
-      
-
 The commercial investment diligence guide explains buyer-side items sellers should anticipate.
-
-    
 
 ## Illinois and Cook County considerations
 
-
 Cook County reassesses real property on a triennial cycle. Confirm current assessment status, appeal periods, and property-specific records with the Cook County Assessor .
-
 
 Transfer taxes may apply at state, county, and municipal levels. Verify current requirements with official sources such as the Illinois Department of Revenue and, for Chicago property, the City of Chicago Department of Finance .
 
-
 Do not rely on quoted rates from old closing statements or summaries. Municipal rules and exemptions can be property-specific, and parties should verify obligations before signing a purchase agreement.
-
-    
 
 ## Sale-leaseback and 1031 exchange planning
 
-
 ### Sale-leaseback
-
 
 An owner-user can sometimes sell the property and lease it back from the buyer. This may free capital while keeping the business in place, but it turns the seller into a tenant with lease obligations.
 
-
 Buyers will underwrite rent, lease term, renewal options, maintenance duties, credit, and the business's ability to keep paying rent. The lease should be negotiated with the same care as the sale.
-
 
 ### 1031 exchange planning
 
-
 A seller considering a 1031 exchange should plan before closing. Under IRC Section 1031, the identification period is 45 days and the exchange period is 180 days, subject to statutory rules and details.
-
 
 Use a qualified intermediary and tax advisor. Start with the IRS and confirm the structure, deadlines, related-party rules, replacement property, and documentation before relying on exchange treatment.
 
-      
-    
-
 ## Confidentiality with tenants and employees
-
 
 Confidentiality matters when a building is occupied or when an owner-user is still operating. Buyers need information, but tenants and employees may react to rumors before facts are available.
 
-      
         - Decide what information is public, what requires a signed confidentiality agreement, and what waits until a serious buyer is qualified.
 
         - Limit tenant contact unless lease review, estoppels, tours, or lender diligence require it.
@@ -830,22 +621,13 @@ Confidentiality matters when a building is occupied or when an owner-user is sti
 
         - Prepare a communication plan for employees if the business occupies the property.
 
-      
-
 Confidentiality should not be used to conceal material issues. It should control process, protect operations, and keep information accurate.
-
-    
-    
 
 ## Thinking about selling?
 
-
 I specialize in the investment sales of industrial assets from 10,000 to 100,000 square feet across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties. If you would like a second opinion on a building or on timing, reach out.
 
-
 Connect on LinkedIn Marcus & Millichap advisor page
-
-    
 
 > This guide is general education, not legal, tax, engineering, environmental, appraisal, brokerage, or investment advice. Verify property records, taxes, zoning, environmental matters, loan programs, and transaction documents with qualified professionals before acting.
 
@@ -856,16 +638,11 @@ Published: 2026-10-02 · Updated: 2026-10-03
 
 Lease comparison & preparation
 
-    
-
 # Comparing commercial leases in Chicago
-
 
 Compare total occupancy cost and operating fit—not just advertised rent. This framework applies to office, retail, industrial, warehouse, and flex space, with the actual lease language controlling the obligations.
 
-
 Published October 2, 2026 · No quoted market rents or available listings.
-
 
 ## In brief
 
@@ -877,14 +654,9 @@ Published October 2, 2026 · No quoted market rents or available listings.
 
       - Confirm zoning, permits, and buildout timing before relying on a move-in date.
 
-    
-
 _Dock positions, levelers, and trailer staging are lease terms as much as building features—confirm who may use them and when._ ## Gross and net are labels, not complete budgets - **Gross lease**: Typically bundles some building expenses into rent, but utilities, increases, exclusions, and other charges can remain separate. - **Modified gross lease**: Divides expenses between landlord and tenant according to the negotiated agreement. Ask exactly which expenses are included and which change over time. - **Net or triple-net (NNN) lease**: Commonly assigns taxes, insurance, and maintenance expenses to the tenant in addition to base rent. The label does not establish who pays for roof, structure, capital repairs, or every operating expense. - **Common area maintenance (CAM)**: A category of shared property costs whose definition, allocation, exclusions, reconciliation, and review rights should be read in the lease. Confirm whether an advertised rate is annual or monthly, the area basis, and the currency. Request the expense estimate and the history behind it; estimated pass-through charges may differ from the eventual reconciliation.
 
-    
-
 ## Build a total occupancy-cost comparison
-
 
 For each option, separate recurring expenses, upfront costs, refundable security, and later capital obligations. Use the same lease term and area measurement, and show scheduled increases rather than comparing only the first year.
 
@@ -893,14 +665,9 @@ For each option, separate recurring expenses, upfront costs, refundable security
 - Cash tied up: security deposit, prepaid rent, or letter-of-credit requirements. Refundable security is a liquidity requirement, not automatically an operating expense.
 - Contingent: expense increases, major repairs assigned to the tenant, delayed delivery, restoration at exit, and costs if the operation changes.
 
-
 > Illustrative arithmetic only—not Chicago market data. If 10,000 rentable square feet were quoted at $12 per square foot per year in base rent and $4 in estimated annual pass-throughs, those two components would total $160,000 per year, or about $13,333 per month. Utilities, improvements, other charges, and future changes would still need to be added. This example is not an available property or a rent estimate.
 
-      
-
 Ask for the assumptions behind each number. Where the amount is unknown, use an explicitly labeled estimate and test a higher-cost case instead of treating it as zero.
-
-    
 
 ## A lease-review checklist
 
@@ -912,20 +679,13 @@ Ask for the assumptions behind each number. Where the amount is unknown, use an 
 - Risk: review insurance, indemnity, casualty, condemnation, default remedies, and any personal guaranty with counsel.
 - Flexibility: examine renewal options, notice deadlines, assignment, subleasing, expansion, termination, and end-of-term restoration.
 
-
 A letter of intent can help organize negotiations, but its binding effect depends on its wording and the circumstances. Have counsel review it before signing; do not assume every term is nonbinding.
-
-    
 
 ## Make the occupancy schedule credible
 
-
 Check zoning and building requirements before relying on a move-in date. Plan for design, permits, utilities, construction, inspections, and equipment commissioning. For industrial space, review loading, power, storage, and fire-protection suitability early; these can change both budget and timing.
 
-
 Put dependencies in writing: which party delivers each item, the evidence of completion, and the consequence of delay. Confirm the timetable with the relevant authority and contractors rather than assuming an advertised “available now” means ready for your business.
-
-    
 
 ## Sources and next steps
 
@@ -935,12 +695,9 @@ Put dependencies in writing: which party delivers each item, the evidence of com
 
       - Cook County Treasurer — tax-bill verification when reviewing a Cook County property’s expense history.
 
-
 Use the property-research guide to confirm jurisdiction and public records. If buying instead of leasing, use the purchase-diligence guide .
 
-
 Comparing industrial leases across county lines? Use the nine-county Illinois industrial research hub to locate the applicable authority and official records. Confirm use approvals, buildout responsibilities, and utility-upgrade timing before treating two spaces as interchangeable.
-
 
 > General education only. Lease terms vary; obtain legal and financial advice for the specific lease and verify all cost assumptions.
 
@@ -951,16 +708,11 @@ Published: 2026-10-02 · Updated: 2026-10-03
 
 Acquisition preparation
 
-    
-
 # Commercial investment and purchase diligence
-
 
 When evaluating Chicago-area commercial or industrial real estate for sale, separate the property’s physical usefulness from the income and financing assumptions. A purchase price alone does not tell you the capital needed or the risks you are accepting.
 
-
 Published October 2, 2026 · Educational framework, not an investment recommendation.
-
 
 ## In brief
 
@@ -972,14 +724,9 @@ Published October 2, 2026 · Educational framework, not an investment recommenda
 
       - Organize legal, zoning, physical, environmental, tax, and tenancy reviews before contract deadlines expire.
 
-    
-
 _BNSF intermodal terminal in Cicero, Cook County. Freight infrastructure shapes demand, but a building’s own access still has to be verified._ ## Define the acquisition’s purpose An owner-user primarily needs a property that supports the business; an investor needs an evidence-based view of tenancy and cash flow. Redevelopment adds approval, construction, timing, and leasing risks. State the purpose, hold period, capital budget, and acceptable downside before comparing buildings.
 
-
 For an owner-user, evaluate the cost of ownership against a realistic leasing alternative, including financing, taxes, insurance, repairs, improvements, and liquidity committed to the building. For industrial assets, first confirm operational suitability .
-
-    
 
 ## Underwrite the documents, not the headline
 
@@ -993,31 +740,21 @@ For an owner-user, evaluate the cost of ownership against a realistic leasing al
 - **Capitalization rate**: NOI divided by price or value on the stated basis. A rate derived from projected income is not the same as one derived from current documented income, and neither guarantees a return.
 - **Cash flow to equity**: Requires accounting for financing and capital cash needs beyond NOI. Purchase costs, principal repayment, sale costs, and taxes also affect the investor’s overall outcome.
 
-      
-
 Any projected rent or resale value should be clearly labeled as an assumption and supported by relevant evidence. Do not treat an asking price or optimistic pro forma as a completed comparable transaction.
-
-    
 
 ## Test financing and downside explicitly
 
-
 Review interest rate, amortization, maturity, recourse, covenants, reserves, fees, prepayment terms, and any balloon payment. A lender’s approval does not replace your own diligence.
-
 
 Debt service coverage ratio (DSCR) compares a defined income measure with required debt service. Lenders can calculate qualifying income and debt service differently, so confirm their definitions and requirements; there is no universal threshold represented here.
 
-      
       - What happens if a major tenant leaves or stops paying?
 - Can the budget absorb higher taxes, insurance, or an unexpected roof replacement?
 - What if refinancing costs more or proceeds are lower at maturity?
 - How much additional equity is needed if approvals, construction, or leasing take longer?
 - What if sale proceeds are lower than planned or the property takes longer to sell?
 
-
 Compare a documented base case with clearly stated downside cases. Avoid describing appreciation, refinancing, or exit liquidity as certain.
-
-    
 
 ## Organize diligence before deadlines expire
 
@@ -1028,13 +765,9 @@ Compare a documented base case with clearly stated downside cases. Avoid describ
 - Tax and insurance: verify parcel-level history and obtain advice and quotes for the proposed ownership and use, rather than assuming the seller’s costs continue.
 - Tenancy and closing: review leases, amendments, tenant confirmations where appropriate, deposits, rent prorations, service contracts, and the documents required to close.
 
-
 EPA’s All Appropriate Inquiries guidance explains a framework relevant to certain environmental-liability protections. Completing an assessment alone does not establish eligibility for every protection; timing, purchaser status, and continuing obligations require professional advice.
 
-
 For industrial acquisitions, the Chicagoland nine-county Illinois hub provides local research paths beyond Chicago city and Cook County. Match each PIN to its actual county and authority, and distinguish current zoning from planned land use before underwriting expansion or a new tenant's operation.
-
-    
 
 ## Official sources for verification
 
@@ -1046,9 +779,7 @@ For industrial acquisitions, the Chicagoland nine-county Illinois hub provides l
 
       - Chicago Department of Buildings — city building and permitting resources.
 
-
 Review commercial lease terms and obligations when assessing a leased investment or comparing ownership with renting.
-
 
 > This guide is not an appraisal, securities solicitation, forecast, or legal, tax, or investment advice. Consult qualified advisers and verify the transaction’s facts. No return, financing outcome, or property availability is promised.
 
@@ -1059,16 +790,11 @@ Published: 2026-10-03 · Updated: 2026-10-03
 
 Reference · Industrial real estate and investment terms
 
-    
-
 # Industrial real estate & investment glossary
-
 
 Use this glossary to decode industrial building, lease, underwriting, investment, and Illinois local-record language. Definitions are general; contracts, statutes, ordinances, and official records control.
 
-
 Published October 3, 2026 · Plain-English reference for educational use.
-
 
 ## In brief
 
@@ -1080,16 +806,10 @@ Published October 3, 2026 · Plain-English reference for educational use.
 
       - Use the term IDs below as stable deep links from search results or diligence notes.
 
-    
-    
-    
-
 ## Building & site
-
 
 These terms describe the physical asset, site layout, and operating fit.
 
-      
         - **Clear height**: Usable vertical height from the finished floor to the lowest overhead obstruction.
 
         - **Column spacing**: The distance between structural columns, important for racking, staging, equipment, and forklift movement.
@@ -1128,15 +848,10 @@ These terms describe the physical asset, site layout, and operating fit.
 
         - **Infill vs. greenfield**: Infill sites are in developed areas; greenfield sites are undeveloped or less-developed land.
 
-      
-    
-
 ## Leases
-
 
 Lease language controls rent, expenses, risk, access, and remedies.
 
-      
         - **NNN / triple net**: A lease where the tenant commonly pays base rent plus taxes, insurance, and operating expenses.
 
         - **Gross lease**: A lease where many property expenses are included in rent.
@@ -1169,15 +884,10 @@ Lease language controls rent, expenses, risk, access, and remedies.
 
         - **Rent roll**: A summary of tenants, suites, area, rent, deposits, options, and lease dates.
 
-      
-    
-
 ## Underwriting & investment
-
 
 Investment terms simplify complex assumptions. Check the source model and period.
 
-      
         - **NOI**: Net operating income is property income minus operating expenses before debt service and some capital items.
 
         - **Cap rate**: NOI divided by price or value; a shorthand income and risk measure, not a complete valuation.
@@ -1216,15 +926,10 @@ Investment terms simplify complex assumptions. Check the source model and period
 
         - **Earnest money**: A buyer deposit governed by the PSA and escrow instructions.
 
-      
-    
-
 ## Illinois & local records
-
 
 Illinois property research depends on the correct county, municipality, township, and parcel.
 
-      
         - **PIN — property index number**: A parcel identifier used in county tax and assessment records.
 
         - **Assessed value & equalization factor**: Assessed value is the figure a county assigns to a parcel for property-tax purposes; it is derived from, but is not the same as, market value or the tax bill. An equalization factor (multiplier) is applied by the county or the Illinois Department of Revenue so assessment levels are uniform across jurisdictions. Verify current figures with the county assessor and treasurer.
@@ -1253,10 +958,6 @@ Illinois property research depends on the correct county, municipality, township
 
         - **Title commitment**: A title insurer's commitment to issue a policy subject to requirements and exceptions.
 
-      
-
 For broader local-record workflow, see the commercial property research guide and the nine-county industrial hub .
-
-    
 
 > This glossary is general education, not legal, tax, engineering, environmental, appraisal, brokerage, or investment advice. Definitions can change by contract, statute, ordinance, lender, or professional standard; verify property-specific meaning with qualified professionals and official sources.
