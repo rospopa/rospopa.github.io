@@ -22,6 +22,55 @@ redirect in the Cloudflare configuration and keep `rospopa.com` routed to
 GitHub Pages. Keep the private hostname routed to Render with its existing
 security protections. These external settings were inspected, not changed.
 
+Security-preserving Cloudflare configuration
+-------------------------------------------
+
+Keep the public library and private workspace on separate origins:
+
+| Hostname | Origin | Access |
+| --- | --- | --- |
+| `rospopa.com` | GitHub Pages | Public educational HTML only |
+| `www.rospopa.com` | Redirect to the public canonical hostname | Preserve the requested path and query |
+| `secure.rospopa.com` | Existing Render service | Existing private security controls and application authentication |
+
+Do not disable zone-wide security to enable SEO. Retain HTTPS, DDoS
+protection, WAF protections, and applicable rate limits on the public site.
+Retain the private site's existing Access policies (if configured), bot
+controls, origin-key guard, sessions, and per-user authorization. Neither
+robots.txt nor noindex is an access-control mechanism.
+
+In Cloudflare, inspect Redirect Rules, Bulk Redirects, legacy Page Rules,
+and any Worker routes. Change only the rule sending the public hostname
+to the private hostname. A broad rule may affect both hosts: narrow its
+hostname condition rather than disabling unrelated protections.
+
+If Cloudflare Access is configured, keep its login requirement on
+`secure.rospopa.com`. A wildcard application covering both public and
+private hostnames needs separate hostname scopes; do not add a wildcard
+bypass policy. Do not change the Render origin or expose private API routes
+through GitHub Pages.
+
+Search crawlers need public HTML without an interactive challenge. First
+inspect Cloudflare Security Events to identify the specific blocking rule.
+If a crawler exception is necessary and supported by the current plan,
+scope it to `rospopa.com` and use Cloudflare's verified-bot classification.
+Skip only the specific blocking challenge/control, not all WAF rules or
+rate limits. Never trust a claimed Googlebot/Bingbot user-agent alone, and
+never apply a public crawler exception to `secure.rospopa.com`. Exact bot
+fields and skip options vary by plan and rule type.
+
+Keep edge-to-origin TLS verification enabled (Full strict with valid origin
+certificates); do not use Flexible mode to resolve certificate problems.
+Purge cached public redirects after the routing rule is corrected.
+
+Before declaring the configuration finished, confirm public guides return
+200, missing public pages return 404, the private site's normal login still
+works, unauthenticated API requests remain denied, and direct requests to
+the Render origin remain blocked by its origin guard. Leave private
+controls intact even if they prevent crawlers from observing noindex.
+Cloudflare account access is required for these external changes; a git
+push cannot apply them.
+
 The root `index.html` is deliberately a small public resource directory
 (HTTP 200), not a redirect or marketing landing page. Four distinct guides
 under `resources/` contain the useful crawlable content. A future landing page
