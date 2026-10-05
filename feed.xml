@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Chicagoland Industrial — guides for industrial owners, buyers, and tenants</title>
+  <title>Chicagoland Industrial: guides for industrial owners, buyers, and tenants</title>
   <subtitle>Guides to industrial property research, selling, leasing, and investment across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties, Illinois.</subtitle>
   <link href="https://rospopa.com/feed.xml" rel="self" type="application/atom+xml"/>
   <link href="https://rospopa.com/" rel="alternate" type="text/html"/>
@@ -24,12 +24,12 @@
     <summary>Direct answers to the 100 most common questions about industrial real estate and the Chicago industrial market: warehouses, clear height, NNN leases, cap rates, selling, due diligence, Illinois property taxes, zoning, and logistics corridors.</summary>
   </entry>
   <entry>
-    <title>What experienced industrial investors ask—and how to think about the answers</title>
+    <title>What experienced industrial investors ask, and how to think about the answers</title>
     <link href="https://rospopa.com/resources/industrial-investor-faq/" rel="alternate" type="text/html"/>
     <id>https://rospopa.com/resources/industrial-investor-faq/</id>
     <published>2026-10-05T00:00:00Z</published>
     <updated>2026-10-05T00:00:00Z</updated>
-    <summary>Straight answers to the questions experienced industrial investors ask about pricing, building functionality, tenants, diligence, Illinois taxes, debt, and exit for 10,000–100,000 SF buildings.</summary>
+    <summary>Straight answers to the questions experienced industrial investors ask about pricing, building functionality, tenants, diligence, Illinois taxes, debt, and exit for 10,000 to 100,000 SF buildings.</summary>
   </entry>
   <entry>
     <title>Industrial real estate community Q&amp;A</title>
@@ -45,7 +45,7 @@
     <id>https://rospopa.com/resources/industrial-building-types/</id>
     <published>2026-10-03T00:00:00Z</published>
     <updated>2026-10-05T00:00:00Z</updated>
-    <summary>Guide to industrial building types, specifications, and verification points for 10,000–100,000 SF assets in Chicagoland.</summary>
+    <summary>Guide to industrial building types, specifications, and verification points for 10,000 to 100,000 SF assets in Chicagoland.</summary>
   </entry>
   <entry>
     <title>Evaluating Chicago industrial real estate</title>
@@ -93,7 +93,7 @@
     <id>https://rospopa.com/resources/selling-industrial-property/</id>
     <published>2026-10-03T00:00:00Z</published>
     <updated>2026-10-05T00:00:00Z</updated>
-    <summary>Plain-English guide for owners preparing to sell a 10,000–100,000 SF industrial property in Chicagoland, Illinois.</summary>
+    <summary>Plain-English guide for owners preparing to sell a 10,000 to 100,000 SF industrial property in Chicagoland, Illinois.</summary>
   </entry>
   <entry>
     <title>Commercial investment and purchase diligence</title>

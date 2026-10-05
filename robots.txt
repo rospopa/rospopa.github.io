@@ -1,4 +1,4 @@
-# rospopa.com — public guides to Chicagoland industrial real estate.
+# rospopa.com: public guides to Chicagoland industrial real estate.
 # The private workspace lives on a separate host and is not part of this site.
 
 User-agent: *

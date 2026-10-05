@@ -68,6 +68,8 @@ async function fetchNews() {
         if (feed.aggregator) { const m = title.match(/^(.*)\s-\s([^-]+)$/); if (m) { title = m[1].trim(); source = source === feed.name ? m[2].trim() : source; } }
         const link = tag(it, 'link') || (it.match(/<link[^>]*href="([^"]+)"/) || [])[1] || '';
         const date = new Date(tag(it, 'pubDate') || tag(it, 'updated') || tag(it, 'published'));
+        // House style avoids dashes: number ranges read "to", other dashes become a colon or comma.
+        title = title.replace(/(\d)\s*[\u2012\u2013\u2014]\s*(\d)/g, '$1 to $2').replace(/\s+[\u2012\u2013\u2014\u2015-]{1,2}\s+/, ': ').replace(/\s+[\u2012\u2013\u2014\u2015-]{1,2}\s+/g, ', ').replace(/\s*[\u2012\u2013\u2014\u2015]\s*/g, ', ');
         if (!title || !/^https?:\/\//.test(link) || isNaN(date)) continue;
         if (Date.now() - date > 30 * 86400000) continue;
         if (!INDUSTRIAL.test(title)) continue;
@@ -118,7 +120,7 @@ function toMarkdown(mainHtml) {
     .replace(/<span class="credit">[\s\S]*?<\/span>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<section class="news"[\s\S]*?<\/section>/gi, '')
-    .replace(/<div class="post-head">[\s\S]*?<strong>([\s\S]*?)<\/strong>[\s\S]*?<span class="post-role">([\s\S]*?)<\/span>([\s\S]*?)<\/div>/gi, (_, name, role, flag) => `\n<p>**${plain(name)}** (${plain(role)})${/Answer/.test(flag) ? ' — answer' : ''}:</p>\n`);
+    .replace(/<div class="post-head">[\s\S]*?<strong>([\s\S]*?)<\/strong>[\s\S]*?<span class="post-role">([\s\S]*?)<\/span>([\s\S]*?)<\/div>/gi, (_, name, role, flag) => `\n<p>**${plain(name)}** (${plain(role)})${/Answer/.test(flag) ? ' (answer)' : ''}:</p>\n`);
   h = h.replace(new RegExp(`${T('h1')}([\\s\\S]*?)<\\/h1>`, 'gi'), (_, t) => `\n# ${plain(t)}\n`)
     .replace(new RegExp(`${T('h2')}([\\s\\S]*?)<\\/h2>`, 'gi'), (_, t) => `\n## ${plain(t)}\n`)
     .replace(new RegExp(`${T('h3')}([\\s\\S]*?)<\\/h3>`, 'gi'), (_, t) => `\n### ${plain(t)}\n`)
@@ -202,7 +204,7 @@ await writeFile('sitemap.xml', sitemap);
 const latest = pages.map(p => p.modified).sort().pop();
 const feed = `<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>Chicagoland Industrial — guides for industrial owners, buyers, and tenants</title>
+  <title>Chicagoland Industrial: guides for industrial owners, buyers, and tenants</title>
   <subtitle>Guides to industrial property research, selling, leasing, and investment across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties, Illinois.</subtitle>
   <link href="${ORIGIN}/feed.xml" rel="self" type="application/atom+xml"/>
   <link href="${ORIGIN}/" rel="alternate" type="text/html"/>
@@ -222,7 +224,7 @@ ${pages.filter(p => p.url !== '/').map(p => `  <entry>
 await writeFile('feed.xml', feed);
 
 // llms-full.txt — the complete text of every public guide in Markdown
-const full = [`# Chicagoland Industrial — public guides, full text`, '',
+const full = [`# Chicagoland Industrial: public guides, full text`, '',
   `> ${AUTHOR.name} specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois. This file contains the complete text of the public guides at ${ORIGIN}/ for reading by assistants and tools. Definitions and checklists are general education, not legal, tax, engineering, or investment advice. Guides last updated ${latest}.`, '',
   // Reuse the broker-search section maintained in llms.txt.
   ...((await readFile('llms.txt', 'utf8')).match(/^## Finding and choosing a commercial real estate broker[\s\S]*?(?=\n## )/m) || []).map(s => s.trim() + '\n'),

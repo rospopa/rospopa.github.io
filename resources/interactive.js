@@ -8,10 +8,10 @@
   var usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
   var usdCents = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
   var num = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
-  var pct = function (v) { return isFinite(v) ? num.format(v) + '%' : '—'; };
-  var money = function (v) { return isFinite(v) ? usd.format(v) : '—'; };
-  var moneyCents = function (v) { return isFinite(v) ? usdCents.format(v) : '—'; };
-  var ratio = function (v) { return isFinite(v) ? num.format(v) + 'x' : '—'; };
+  var pct = function (v) { return isFinite(v) ? num.format(v) + '%' : 'N/A'; };
+  var money = function (v) { return isFinite(v) ? usd.format(v) : 'N/A'; };
+  var moneyCents = function (v) { return isFinite(v) ? usdCents.format(v) : 'N/A'; };
+  var ratio = function (v) { return isFinite(v) ? num.format(v) + 'x' : 'N/A'; };
 
   function readNumber(form, name) {
     var field = form.elements[name];
@@ -36,8 +36,8 @@
   var calculators = {
     'cap-rate': function (form) {
       var noi = readNumber(form, 'noi'), cap = readNumber(form, 'cap'), price = readNumber(form, 'price');
-      write(form, 'value', cap > 0 && noi >= 0 ? money(noi / (cap / 100)) : '—');
-      write(form, 'impliedCap', price > 0 && noi >= 0 ? pct(noi / price * 100) : '—');
+      write(form, 'value', cap > 0 && noi >= 0 ? money(noi / (cap / 100)) : 'N/A');
+      write(form, 'impliedCap', price > 0 && noi >= 0 ? pct(noi / price * 100) : 'N/A');
     },
     'dscr': function (form) {
       var noi = readNumber(form, 'noi'), loan = readNumber(form, 'loan'), rate = readNumber(form, 'rate'),
@@ -51,14 +51,14 @@
       var ads = payment * 12;
       write(form, 'payment', moneyCents(payment));
       write(form, 'ads', money(ads));
-      write(form, 'dscr', ads > 0 && noi >= 0 ? ratio(noi / ads) : '—');
-      write(form, 'cashflow', ads > 0 && noi >= 0 ? money(noi - ads) : '—');
-      write(form, 'ltv', price > 0 && loan > 0 ? pct(loan / price * 100) : '—');
+      write(form, 'dscr', ads > 0 && noi >= 0 ? ratio(noi / ads) : 'N/A');
+      write(form, 'cashflow', ads > 0 && noi >= 0 ? money(noi - ads) : 'N/A');
+      write(form, 'ltv', price > 0 && loan > 0 ? pct(loan / price * 100) : 'N/A');
     },
     'occupancy': function (form) {
       var sf = readNumber(form, 'sf'), base = readNumber(form, 'base'), pass = readNumber(form, 'pass'),
           esc = readNumber(form, 'esc'), term = Math.round(readNumber(form, 'term'));
-      if (!(sf > 0) || isNaN(base) || isNaN(pass)) { ['year1', 'monthly', 'final', 'total', 'average'].forEach(function (n) { write(form, n, '—'); }); return; }
+      if (!(sf > 0) || isNaN(base) || isNaN(pass)) { ['year1', 'monthly', 'final', 'total', 'average'].forEach(function (n) { write(form, n, 'N/A'); }); return; }
       if (isNaN(esc)) esc = 0;
       if (!(term > 0)) term = 1;
       var year1 = sf * (base + pass), total = 0, finalBase = base;
@@ -72,7 +72,7 @@
     'exchange-deadline': function (form) {
       var field = form.elements.closing, text = field && field.value;
       var match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text || '');
-      if (!match) { write(form, 'identify', '—'); write(form, 'complete', '—'); return; }
+      if (!match) { write(form, 'identify', 'N/A'); write(form, 'complete', 'N/A'); return; }
       var start = Date.UTC(+match[1], +match[2] - 1, +match[3]);
       var fmt = new Intl.DateTimeFormat('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
       write(form, 'identify', fmt.format(new Date(start + 45 * 86400000)));
@@ -130,7 +130,7 @@
       storage('remove', key); update();
       status.textContent = '0 of ' + rows.length + ' checked';
     });
-    if (caption) caption.textContent += ' — tick items as you gather them';
+    if (caption) caption.textContent += ' (tick items as you gather them)';
     update();
   }
 
