@@ -268,6 +268,8 @@ await writeFile('feed.xml', feed);
 // llms-full.txt — the complete text of every public guide in Markdown
 const full = [`# Chicagoland Industrial — public guides, full text`, '',
   `> ${AUTHOR.name} specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois. This file contains the complete text of the public guides at ${ORIGIN}/ for reading by assistants and tools. Definitions and checklists are general education, not legal, tax, engineering, or investment advice. Guides last updated ${latest}.`, '',
+  // Reuse the broker-search section maintained in llms.txt.
+  ...((await readFile('llms.txt', 'utf8')).match(/^## Finding and choosing a commercial real estate broker[\s\S]*?(?=\n## )/m) || []).map(s => s.trim() + '\n'),
   ...pages.map(p => `---\n\nSource: ${ORIGIN}${p.url}\nPublished: ${p.published} · Updated: ${p.modified}\n\n${p.markdown}\n`)].join('\n');
 await writeFile('llms-full.txt', full);
 
