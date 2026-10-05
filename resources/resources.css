@@ -402,6 +402,7 @@ td.check input { width: 1.5rem; height: 1.5rem; accent-color: var(--brand-strong
 .member-status { margin: 0 0 1rem; color: var(--muted); }
 .member-status.is-error { color: var(--ink); font-weight: 600; }
 .member-fallback[hidden] { display: none; }
+.board-load { margin: 0 0 1.25rem; cursor: pointer; background: var(--surface); color: var(--ink); }
 .member-toolbar { margin-bottom: 1rem; }
 .member-signed-in, .member-signed-out { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin: 0 0 1rem; }
 .member-threads { list-style: none; padding: 0; margin: 0; }

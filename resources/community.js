@@ -5,6 +5,7 @@
   'use strict';
   var API = 'https://secure.rospopa.com/api/community';
   var SIGN_IN = 'https://secure.rospopa.com/#community';
+  var LIVE_KEY = 'rp-board-live';
   var CATEGORIES = [
     ['general', 'General'], ['buying', 'Buying and investing'], ['leasing', 'Leasing and tenants'],
     ['building', 'Building and operations'], ['taxes', 'Illinois taxes and incentives'],
@@ -174,21 +175,42 @@
       });
     }
 
-    request('/me')
-      .then(function (data) { user = data.user; })
-      .catch(function () { user = null; })
-      .then(function () {
-        return loadThreads().then(function () {
-          root.querySelector('[data-board-fallback]').hidden = true;
-          renderToolbar();
-          root.appendChild(toolbar);
-          root.appendChild(list);
-          root.classList.add('is-live');
+    function remember(ok) {
+      try { if (ok) localStorage.setItem(LIVE_KEY, '1'); else localStorage.removeItem(LIVE_KEY); } catch (e) { /* storage blocked */ }
+    }
+
+    function start() {
+      if (loadButton) loadButton.remove();
+      request('/me')
+        .then(function (data) { user = data.user; })
+        .catch(function () { user = null; })
+        .then(function () {
+          return loadThreads().then(function () {
+            root.querySelector('[data-board-fallback]').hidden = true;
+            renderToolbar();
+            root.appendChild(toolbar);
+            root.appendChild(list);
+            root.classList.add('is-live');
+            remember(true);
+          });
+        })
+        .catch(function () {
+          remember(false);
+          say('The member board could not be loaded here right now. Members can read and post from their workspace.', true);
         });
-      })
-      .catch(function () {
-        say('The member board could not be loaded here right now. Members can read and post from their workspace.', true);
-      });
+    }
+
+    // The workspace sits behind a bot check, so only call it on request or
+    // once this browser has loaded the board successfully before.
+    var loadButton = null;
+    var seen = false;
+    try { seen = localStorage.getItem(LIVE_KEY) === '1'; } catch (e) { /* storage blocked */ }
+    if (seen) { start(); return; }
+    loadButton = el('button', { type: 'button', class: 'btn board-load', text: 'Load member posts here' });
+    loadButton.setAttribute('data-board-load', '');
+    loadButton.addEventListener('click', start);
+    say('Members who are signed in to the workspace can load the live board on this page.');
+    status.insertAdjacentElement('afterend', loadButton);
   }
 
   document.addEventListener('DOMContentLoaded', function () {
