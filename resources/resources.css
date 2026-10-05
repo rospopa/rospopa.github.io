@@ -71,8 +71,8 @@ main { padding-block: 2.25rem 3.5rem; overflow-wrap: anywhere; }
 .brand { display: inline-flex; align-items: center; gap: .7rem; flex: none; order: 1; text-decoration: none; color: var(--ink); }
 .brand img { width: 36px; height: 36px; object-fit: contain; border-radius: .125rem; }
 .brand-wordmark { display: flex; flex-direction: column; line-height: 1; gap: .125rem; }
-.brand-name { font: 800 .95rem/1 'Cormorant Garamond', serif; letter-spacing: .06em; white-space: nowrap; }
-.brand-given { font: 600 .62rem/1 'Cormorant Garamond', serif; letter-spacing: .25em; opacity: .66; white-space: nowrap; }
+.brand-name { font: 800 1.1rem/1 'Cormorant Garamond', serif; letter-spacing: .08em; }
+.brand-given { font: 600 .7rem/1 'Cormorant Garamond', serif; letter-spacing: .35em; opacity: .66; }
 .header-actions { display: flex; align-items: center; gap: .5rem; order: 2; margin-left: auto; }
 .site-search { order: 3; flex: 1 1 100%; min-width: 0; position: relative; display: flex; align-items: center; }
 .site-nav { order: 4; flex: 1 1 100%; min-width: 0; overflow-x: auto; scrollbar-width: thin; }
@@ -264,10 +264,6 @@ thead th { background: var(--color-base-200); border-top: 0; }
   .toc ol { columns: 1; }
   .lead { font-size: 1.05rem; }
   .brand-given { display: none; }
-  .brand-name { font-size: .85rem; letter-spacing: .05em; line-height: 1.05; white-space: normal; max-width: 8rem; }
-}
-@media (max-width: 359px) {
-  .brand-wordmark { display: none; }
 }
 @media (min-width: 768px) {
   .footer-grid { grid-template-columns: 1.4fr 1fr 1fr; gap: 2rem; }
