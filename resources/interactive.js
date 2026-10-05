@@ -161,6 +161,36 @@
     apply();
   }
 
+  // --- FAQ filter: each question is an h3[id^="q-"] plus the answer blocks after it
+  function setupFaqFilter(form) {
+    var input = form.querySelector('input'), output = form.querySelector('output');
+    var questions = Array.prototype.slice.call(document.querySelectorAll('main section h3[id^="q-"]')).map(function (h3) {
+      var parts = [h3], el = h3.nextElementSibling;
+      while (el && !/^H[23]$/.test(el.tagName)) { parts.push(el); el = el.nextElementSibling; }
+      return { parts: parts, section: h3.closest('section'), text: parts.map(function (p) { return p.textContent; }).join(' ').toLowerCase() };
+    });
+    var sections = questions.map(function (q) { return q.section; }).filter(function (s, i, all) { return all.indexOf(s) === i; });
+    var others = Array.prototype.slice.call(document.querySelectorAll('main section')).filter(function (s) { return sections.indexOf(s) === -1; });
+    form.hidden = false;
+    function apply() {
+      var q = input.value.trim().toLowerCase(), shown = 0;
+      questions.forEach(function (item) {
+        var hit = !q || item.text.indexOf(q) !== -1;
+        item.parts.forEach(function (p) { p.hidden = !hit; });
+        if (hit) shown++;
+      });
+      sections.forEach(function (section) {
+        section.hidden = !!q && !questions.some(function (item) { return item.section === section && !item.parts[0].hidden; });
+      });
+      others.forEach(function (section) { section.hidden = !!q; });
+      output.textContent = q ? shown + ' of ' + questions.length + ' questions match “' + input.value.trim() + '”' : questions.length + ' questions';
+    }
+    input.addEventListener('input', apply);
+    input.addEventListener('keydown', function (event) { if (event.key === 'Escape') { input.value = ''; apply(); } });
+    form.addEventListener('submit', function (event) { event.preventDefault(); apply(); });
+    apply();
+  }
+
   // --- Position tracking for tables of contents and county chips ------------
   function setupScrollSpy() {
     var links = Array.prototype.slice.call(document.querySelectorAll('.toc a[href^="#"], .chips a[href^="#"]'));
@@ -216,6 +246,7 @@
     document.querySelectorAll('form[data-calc]').forEach(setupCalculator);
     document.querySelectorAll('table[data-checklist]').forEach(setupChecklist);
     document.querySelectorAll('form[data-glossary-filter]').forEach(setupGlossaryFilter);
+    document.querySelectorAll('form[data-faq-filter]').forEach(setupFaqFilter);
     document.querySelectorAll('[data-carousel]').forEach(setupCarousel);
     setupScrollSpy();
   });

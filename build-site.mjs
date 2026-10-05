@@ -13,6 +13,7 @@ const AUTHOR = { name: 'Pavlo Rospopa', url: `${ORIGIN}/` };
 const PAGES = [
   'index.html',
   'resources/index.html',
+  'resources/industrial-real-estate-faq/index.html',
   'resources/industrial-investor-faq/index.html',
   'resources/industrial-building-types/index.html',
   'resources/chicago-industrial-real-estate/index.html',
