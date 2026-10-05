@@ -281,6 +281,12 @@ thead th { background: var(--color-base-200); border-top: 0; }
 .board-meta { margin: .2rem 0 0; color: var(--muted); font-size: .85rem; }
 .board-answered { font-weight: 650; color: var(--ink); }
 .board-empty { padding: .9rem 1rem; border: 1px dashed var(--line); border-radius: .4rem; }
+/* Contact reveal */
+.contact-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(16rem, 100%), 1fr)); gap: 1rem; margin-block: 1rem 2rem; }
+.contact-cards[hidden], .btn[hidden] { display: none; }
+.contact-card { padding: 1rem 1.2rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--color-base-100); }
+.contact-card h3 { margin: 0; }
+.contact-card p { margin: .35rem 0 0; overflow-wrap: anywhere; }
 @media (max-width: 639px) {
   .thread { padding: .9rem .8rem; }
   .post { padding: .7rem .7rem; }

@@ -242,12 +242,41 @@
     start();
   }
 
+  // Contact details are stored XOR-encoded and only decoded after a real click, so scrapers reading the HTML get nothing usable.
+  function setupContactReveal(button) {
+    var box = document.getElementById(button.getAttribute('aria-controls'));
+    if (!box) return;
+    var key = 'r0sp0pa-industrial';
+    function decode(value) {
+      var bytes = atob(value.split('').reverse().join(''));
+      var out = '';
+      for (var i = 0; i < bytes.length; i++) out += String.fromCharCode(bytes.charCodeAt(i) ^ key.charCodeAt(i % key.length));
+      return out;
+    }
+    button.hidden = false;
+    button.addEventListener('click', function (event) {
+      if (!event.isTrusted) return;
+      box.querySelectorAll('[data-c]').forEach(function (slot) {
+        var value = decode(slot.getAttribute('data-c'));
+        var link = document.createElement('a');
+        link.href = slot.getAttribute('data-t') === 'tel' ? 'tel:+1' + value.replace(/\D/g, '') : 'mailto:' + value;
+        link.textContent = value;
+        slot.replaceWith(link);
+      });
+      box.hidden = false;
+      button.setAttribute('aria-expanded', 'true');
+      button.hidden = true;
+      var first = box.querySelector('a');
+      if (first) first.focus();
+    });
+  }
   document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('form[data-calc]').forEach(setupCalculator);
     document.querySelectorAll('table[data-checklist]').forEach(setupChecklist);
     document.querySelectorAll('form[data-glossary-filter]').forEach(setupGlossaryFilter);
     document.querySelectorAll('form[data-faq-filter]').forEach(setupFaqFilter);
     document.querySelectorAll('[data-carousel]').forEach(setupCarousel);
+    document.querySelectorAll('[data-contact-reveal]').forEach(setupContactReveal);
     setupScrollSpy();
   });
 }());

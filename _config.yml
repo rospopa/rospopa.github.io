@@ -9,6 +9,7 @@ exclude:
   - README.md
   - render.yaml
   - archive
+  - js/real-estate-guide.js
   - audit-client-before.json
   - audit-server-after1.json
   - audit-server-full-after.json
