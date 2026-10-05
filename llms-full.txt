@@ -95,6 +95,7 @@ Plain-English definitions of building, lease, underwriting, and Illinois records
 - What is the Cook County Class 6b incentive?
 - Why is Chicago a major industrial and logistics hub?
 - See all 100 questions
+- Browse the community Q&A forum
 
 Library published October 2, 2026 · Expanded October 3, 2026 .
 
@@ -127,6 +128,10 @@ Direct answers to the most common questions about warehouses, leases, cap rates,
 ### Industrial investor Q&A
 
 The questions experienced buyers ask about pricing, functionality, tenants, diligence, Illinois taxes, debt, and exit—answered as general education.
+
+### Community Q&A forum
+
+Roundtable threads on buying, leasing, buildings, taxes, financing, and selling—each with an accepted answer—plus real questions from the community board.
 
 ### Industrial building types & specifications
 
@@ -808,6 +813,646 @@ The questions are paraphrased from recurring themes in investor forums, industry
 Have a question that belongs here? Send it on LinkedIn . For broader questions—what industrial real estate is, how leases work, zoning, and the Chicago market—see the industrial real estate FAQ: 100 common questions .
 
 > General education only—not legal, tax, environmental, engineering, lending, appraisal, or investment advice, and not a recommendation about any property. Verify facts and current rules with the responsible offices and qualified professionals before acting.
+
+---
+
+Source: https://rospopa.com/resources/community/
+Published: 2026-10-05 · Updated: 2026-10-05
+
+Community · Forum-style Q&A
+
+# Industrial real estate community Q&A
+
+Ask a question, answer one, or read how the people on every side of an industrial deal tend to see it: owner-users, investors, tenants, lenders, property managers, and tax consultants.
+
+Published October 5, 2026 · 30 roundtable threads · Educational, not advice on any specific property, lease, loan, or tax position.
+
+Ask a question
+Browse the community board
+
+## How this forum works
+
+- Community board (real people). Anyone can ask or answer on the board with a free GitHub account. The newest threads appear below and refresh daily. Answers there come from community members; check them before relying on them.
+- Roundtable threads (written by Pavlo Rospopa). Each reply shows how a typical owner-user, investor, tenant, lender, property manager, or tax consultant tends to see the question. These are illustrative roles, not real user accounts or quotes . The marked answer in each thread is mine.
+- Please don’t post confidential deal information, personal data, or anything you would not put on a public website.
+
+## Latest from the community board
+
+Updated Oct 5, 2026 · Posts by real community members on GitHub Discussions; links open on GitHub. Want to join in? Ask a question or answer one.
+
+No community questions yet. Be the first to ask a question .
+
+## Buying and investing
+
+### Is a 10,000–20,000 SF building a sensible first industrial investment?
+
+Buying and investing · 3 replies · Asked by Private investor (illustrative)
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+I own some residential rentals and want to move into industrial. Is a small single-tenant building too risky as a first deal?
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+From the user side: small buildings are where companies like mine live. When we looked, there were very few choices under 20,000 SF with a decent yard.
+
+**Commercial lender** (Illustrative role · underwrites industrial loans):
+
+We see a lot of first-time industrial buyers at this size. The questions we ask are about the lease term versus the loan term, and your liquidity if the tenant leaves.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+It can be, if you underwrite the vacancy you will eventually have. A single-tenant building is either 100% leased or 0% leased, so the questions are how fast it would re-lease, what it would cost (downtime, improvements, commissions), and whether you could carry the debt and taxes meanwhile.
+
+Small functional buildings in infill locations tend to have deep user demand, including owner-users who may buy it from you later. Read the single- versus multi-tenant discussion before you choose.
+
+### Two buildings are listed at the same cap rate. Why would one be the better buy?
+
+Buying and investing · 3 replies · Asked by Private investor (illustrative)
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+Same size, same county, same cap rate on the offering memorandum. How do I tell them apart?
+
+**Property manager** (Illustrative role · manages multi-tenant industrial):
+
+Look at what the tenants actually pay back. Two "NNN" leases can have very different recoveries once you read the CAM and roof language.
+
+**Tenant operations** (Illustrative role · leases warehouse space):
+
+Ask how happy the tenant is. If we are about to outgrow a space, nothing in the rent roll shows it.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+The cap rate is one number from one year. Compare the rent each tenant pays against market rent, the remaining lease term, renewal options, expense recoveries, the roof and pavement age, the tax situation after a sale, and the building’s functionality for the next tenant.
+
+A building with rent below market and a short lease can be the better buy at the same cap rate, because the income has room to grow, provided you can afford the rollover. Use the cap-rate calculator on your own adjusted NOI, not the marketing number.
+
+### Should an investor ever buy a vacant industrial building?
+
+Buying and investing · 3 replies · Asked by Private investor (illustrative)
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+Vacant buildings seem cheaper per square foot. What is the catch?
+
+**Commercial lender** (Illustrative role · underwrites industrial loans):
+
+Financing is the catch. Without leases we lend on a lower value with more equity, or we need a bridge loan with a higher rate.
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+You are competing with people like me. We can pay more for a vacant building because we plan to use it.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Sometimes. It is a value-add or lease-up strategy, and the price has to pay for the risk: months of carry (taxes, insurance, utilities, debt), improvements, commissions, and free rent. It works best for functional buildings in locations with steady demand and when you have the capital to wait.
+
+Expect to compete with owner-users, who often finance with SBA 504 loans and can pay more than an investor can justify on rent alone. See owner-user vs. investor buyers .
+
+### Should I buy industrial alone or with partners?
+
+Buying and investing · 2 replies · Asked by Private investor (illustrative)
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+A few friends want to pool money. What should we work out before we buy?
+
+**Commercial lender** (Illustrative role · underwrites industrial loans):
+
+We will want to know who signs the guaranty and who controls decisions. Unclear governance slows loans down.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Partnerships work when decision rights are clear before money moves. Agree in writing on who manages, how major decisions are made (sale, refinancing, capital calls, leasing), how cash is distributed, what happens if a partner cannot fund a capital call, and how someone exits.
+
+Raising money from passive investors can involve securities law, so talk to an attorney before you advertise a deal or accept investor funds.
+
+### How much cash should I keep in reserve after buying an industrial building?
+
+Buying and investing · 3 replies · Asked by Private investor (illustrative)
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+Is there a rule of thumb for reserves on a small industrial property?
+
+**Property manager** (Illustrative role · manages multi-tenant industrial):
+
+Roofs, dock levelers, overhead doors, and parking lots are the usual big-ticket items. Most surprises are one of those.
+
+**Commercial lender** (Illustrative role · underwrites industrial loans):
+
+Many loans require replacement reserves or tenant-improvement and leasing reserves anyway, especially when lease terms are short.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+There is no universal number. Build your reserve from the property condition assessment’s capital schedule, your lease rollover (downtime, improvements, commissions for the next expiration), and several months of taxes and debt service in case a tenant leaves.
+
+In Illinois, budget specifically for property tax increases after the sale. See the tax underwriting section .
+
+## Leasing and tenants
+
+### As a tenant, what lease terms matter more than the rent?
+
+Leasing and tenants · 3 replies · Asked by Tenant operations (illustrative)
+
+**Tenant operations** (Illustrative role · leases warehouse space):
+
+We are renewing a 25,000 SF lease. Rent gets all the attention internally. What else should we push on?
+
+**Property manager** (Illustrative role · manages multi-tenant industrial):
+
+Restoration at move-out. Tenants forget about it until they get the bill for removing racking anchors and offices.
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+From the landlord side, flexibility costs money. Expansion and termination rights are worth asking for, but expect to pay for them.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Total occupancy cost and flexibility. Check the expense pass-throughs (taxes, insurance, CAM, management fees, capital items), the repair and replacement responsibilities for the roof, HVAC, and docks, any renewal and expansion rights, assignment and sublease rights, restoration obligations, and the rights to use outdoor storage and trailer parking.
+
+Compare offers as an all-in cost over the full term. The lease cost section shows how.
+
+### My tenant is paying rent but has stopped operating in the building. Should I worry?
+
+Leasing and tenants · 3 replies · Asked by Private investor (illustrative)
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+The lights are off and the trucks are gone, but rent arrives on time.
+
+**Property manager** (Illustrative role · manages multi-tenant industrial):
+
+Walk the building. Vacant buildings get roof leaks, frozen pipes, and break-ins, and nobody reports them.
+
+**Commercial lender** (Illustrative role · underwrites industrial loans):
+
+Check your loan documents. Some have occupancy or insurance conditions that a dark building can trigger.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Yes, it is a signal to plan, even though it is not a default. Read the lease for any continuous-operation requirement, insurance conditions on vacancy, maintenance obligations, and sublease rights. Then talk with the tenant: an early termination or a sublease to a new user may be better for both of you than waiting out the term.
+
+Start marketing conversations early, because industrial space can take months to re-lease.
+
+### Our CAM reconciliation came in much higher than the estimate. What can we do?
+
+Leasing and tenants · 2 replies · Asked by Tenant operations (illustrative)
+
+**Tenant operations** (Illustrative role · leases warehouse space):
+
+The year-end true-up is several dollars per square foot higher than the budget.
+
+**Property manager** (Illustrative role · manages multi-tenant industrial):
+
+Snow removal and property tax swings cause most big true-ups around Chicago. Ask for the detail by line item.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Ask for the reconciliation backup and compare it with the lease: which costs are recoverable, how your share is calculated, whether there are caps on controllable expenses, and whether capital replacements were passed through improperly. Many leases give tenants audit rights within a set time after receiving the statement.
+
+In Chicagoland, property tax changes are often the biggest driver, so check whether the landlord appealed the assessment.
+
+### Can we sign a one-year lease on industrial space?
+
+Leasing and tenants · 3 replies · Asked by Tenant operations (illustrative)
+
+**Tenant operations** (Illustrative role · leases warehouse space):
+
+We need space for a project that may last 12–18 months.
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+Short terms are hard for landlords because the commission and improvement costs barely pay back. Expect as-is space and higher rent.
+
+**Property manager** (Illustrative role · manages multi-tenant industrial):
+
+Look for space that is already built out, or for a sublease with a short remaining term.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Sometimes, but expect trade-offs: as-is space, higher rent, fewer concessions, and possibly a larger deposit. Subleases with 12–24 months remaining, older multi-tenant buildings, and third-party logistics (3PL) warehousing are common short-term options.
+
+If the need may extend, negotiate a renewal option now.
+
+### Can we park trailers and store equipment outside a leased building?
+
+Leasing and tenants · 2 replies · Asked by Tenant operations (illustrative)
+
+**Tenant operations** (Illustrative role · leases warehouse space):
+
+Our operation needs space for about ten trailers and some equipment outside.
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+We learned the hard way that the village cared even though the landlord did not.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Only if both the lease and the zoning allow it. Many municipalities restrict outdoor storage and trailer parking even in industrial districts, or they require screening, paving, and approval. Get the lease to grant the specific rights (area, number of trailers, hours) and confirm the zoning with the municipality.
+
+See industrial outdoor storage for why yard rights are valuable.
+
+## Building and operations
+
+### Our roof is 20 years old. Repair it, restore it, or replace it?
+
+Building and operations · 3 replies · Asked by Owner-user (illustrative)
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+We have a few leaks on a 40,000 SF building and want to plan for the next 10 years.
+
+**Property manager** (Illustrative role · manages multi-tenant industrial):
+
+Get a core cut and moisture survey before deciding. Wet insulation usually rules out a coating.
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+If you might sell in a few years, a buyer will price the roof anyway. A transferable warranty helps.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Have a roofing consultant do an infrared or moisture survey and take core samples. If the insulation is mostly dry, a restoration or coating system may extend the roof’s life at lower cost; if it is wet, replacement is usually the better long-term answer.
+
+Either way, document the work and keep the warranties, because buyers and lenders will ask for them. See physical due diligence .
+
+### Can we add dock doors to an existing industrial building?
+
+Building and operations · 2 replies · Asked by Owner-user (illustrative)
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+We have grade-level doors only and need to load semi-trailers.
+
+**Property manager** (Illustrative role · manages multi-tenant industrial):
+
+Check the truck court first. A dock door is useless without room for the trailer to back in.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Often, yes. Common approaches are cutting the wall and excavating an exterior dock well, or building an interior pit with a leveler. Feasibility depends on the wall structure, the slab, drainage, utilities underground, truck-court depth, and permits.
+
+Get an engineer and a contractor to scope it, and check stormwater rules for the dock well. Adding docks can widen a building’s tenant and buyer pool.
+
+### How long does an electrical service upgrade take for a warehouse?
+
+Building and operations · 3 replies · Asked by Tenant operations (illustrative)
+
+**Tenant operations** (Illustrative role · leases warehouse space):
+
+We need more power for equipment and EV forklift charging.
+
+**Property manager** (Illustrative role · manages multi-tenant industrial):
+
+The utility timeline is usually the long pole, not the electrician.
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+Switchgear and transformer lead times have been long in recent years. Order early.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Plan for months, not weeks. The timeline depends on whether the utility needs to upgrade its transformer or line, equipment lead times for switchgear and transformers, engineering and permits, and lease negotiations over who pays and who owns the upgrade.
+
+If power is critical, confirm the available capacity with the utility before you sign a lease or purchase agreement.
+
+### Will our storage need a sprinkler upgrade in a building we are about to lease?
+
+Building and operations · 2 replies · Asked by Tenant operations (illustrative)
+
+**Tenant operations** (Illustrative role · leases warehouse space):
+
+We store plastic goods on racks about 24 feet high.
+
+**Property manager** (Illustrative role · manages multi-tenant industrial):
+
+Prior tenants often stored something easier, so the existing system was fine for them. Ask for the sprinkler design data.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Possibly. Sprinkler adequacy depends on the commodity classification (plastics are typically more demanding), storage height and arrangement, building height, and water supply. Ask the landlord for the system’s design criteria and have a fire-protection engineer compare it with your storage plan before you sign.
+
+Negotiate in the lease who pays if an upgrade or in-rack sprinklers are needed. The local fire department will have the final say.
+
+### We are moving out of our building. What improvements help it lease or sell?
+
+Building and operations · 3 replies · Asked by Owner-user (illustrative)
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+We plan to lease or sell our building after we relocate.
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+Buyers notice deferred maintenance immediately: roof, docks, lighting, pavement.
+
+**Tenant operations** (Illustrative role · leases warehouse space):
+
+Clean, bright, and empty sells. LED lighting and working docks matter on a tour.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Focus on things that are cheap relative to how much they change a buyer’s perception: fix roof leaks, service dock equipment and doors, upgrade to LED lighting, repair pavement, clean and paint, remove abandoned equipment, and gather documents (permits, warranties, drawings, environmental reports).
+
+Avoid custom improvements that only suit your operation. The selling guide covers preparation.
+
+## Illinois taxes and incentives
+
+### Our Cook County tax bill jumped after reassessment. Is an appeal worth it?
+
+Illinois taxes and incentives · 3 replies · Asked by Owner-user (illustrative)
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+Our assessed value rose much more than we expected.
+
+**Tax consultant** (Illustrative role · works on Illinois assessments):
+
+Watch the township appeal window. In Cook it is short and the dates are published by the Assessor.
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+Appeals are routine for income property. Most owners appeal regularly.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Often it is worth reviewing. Compare the Assessor’s estimate of market value with what the property would actually sell for, given its income, vacancy, condition, and comparable sales. Appeals can be filed with the Assessor during the township window, then with the Board of Review, and potentially the Property Tax Appeal Board.
+
+Many attorneys work on contingency. Details are in the appeals and deadlines section .
+
+### Can an owner-user get the Class 6b incentive when buying a vacant building?
+
+Illinois taxes and incentives · 2 replies · Asked by Owner-user (illustrative)
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+We are looking at a building in Cook County that has been empty for a while.
+
+**Tax consultant** (Illustrative role · works on Illinois assessments):
+
+Timing is critical. The application has to be filed on time, and the municipality’s support has to be in place.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+It is possible. Class 6b can apply to qualifying industrial property that is reoccupied after a period of vacancy, as well as new construction and substantial rehabilitation, if the municipality supports it and the application is timely. The rules on vacancy length, special circumstances, and filing deadlines are specific.
+
+Check the Cook County Assessor’s current incentive requirements and talk to the municipality early, before closing. See What is Class 6b?
+
+### How do I estimate taxes for a DuPage or Will County building I am buying?
+
+Illinois taxes and incentives · 2 replies · Asked by Private investor (illustrative)
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+I am used to Cook County. What changes in the collar counties?
+
+**Tax consultant** (Illustrative role · works on Illinois assessments):
+
+The township assessor is your first call. The supervisor of assessments and the Board of Review come next.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Outside Cook, property is generally assessed at one-third of market value by township assessors, with county equalization. Estimate the market value an assessor might apply after your purchase, apply the assessment level and the equalization factor, subtract exemptions, and multiply by the current tax rate for the property’s tax code.
+
+Then confirm the result with the township assessor’s office. The Cook vs. collar county section explains the differences.
+
+### Can a tenant appeal the property taxes on a building it leases?
+
+Illinois taxes and incentives · 2 replies · Asked by Tenant operations (illustrative)
+
+**Tenant operations** (Illustrative role · leases warehouse space):
+
+We pay the taxes under our NNN lease. The landlord does not seem interested in appealing.
+
+**Property manager** (Illustrative role · manages multi-tenant industrial):
+
+Read the lease. Many leases say who controls appeals and how refunds are split.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Read the lease first: many NNN leases say who may file appeals and who receives refunds. Illinois appeal rules also determine who has standing. A tenant that pays the taxes often has a strong interest, and in practice many tenants ask the landlord to appeal or to allow an appeal at the tenant’s expense.
+
+Talk to a property tax attorney about standing and deadlines before the appeal window closes.
+
+### What do Illinois Enterprise Zones offer an industrial company?
+
+Illinois taxes and incentives · 2 replies · Asked by Owner-user (illustrative)
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+Our broker mentioned that a site is inside an Enterprise Zone.
+
+**Tax consultant** (Illustrative role · works on Illinois assessments):
+
+Benefits vary by zone. Each zone has its own administrator and local terms.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Illinois Enterprise Zones can offer incentives such as a state sales tax exemption on building materials, and local benefits such as property tax abatements, depending on the zone. Benefits, eligibility, and application steps vary by zone and change over time.
+
+Contact the zone administrator and check the Illinois Department of Commerce and Economic Opportunity program pages. See the zones and TIFs section .
+
+## Financing
+
+### How does an SBA 504 loan work for buying our own warehouse?
+
+Financing · 2 replies · Asked by Owner-user (illustrative)
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+We are a growing distributor and want to buy instead of lease.
+
+**Commercial lender** (Illustrative role · underwrites industrial loans):
+
+The occupancy rules matter. For an existing building, the business generally needs to occupy at least 51%.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+An SBA 504 loan typically combines a bank first mortgage, a second loan from a Certified Development Company backed by the SBA, and a down payment from the business, often around 10% but higher in some cases. The 504 portion offers long-term fixed rates.
+
+The business must meet SBA size and eligibility rules and generally occupy at least 51% of an existing building. See the SBA’s 504 program page and talk to a CDC early.
+
+### Recourse or non-recourse debt on a small industrial building?
+
+Financing · 2 replies · Asked by Private investor (illustrative)
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+My bank offers a better rate with a full personal guaranty.
+
+**Commercial lender** (Illustrative role · underwrites industrial loans):
+
+Smaller loans from banks are usually recourse. Non-recourse is more common on larger loans and with life companies or CMBS lenders.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Compare the whole package, not just the rate. Recourse debt from a local bank can come with flexibility, relationship value, and lower costs, but it puts your personal assets at risk. Non-recourse loans limit that risk but typically carry “bad boy” carve-outs, stricter terms, and prepayment penalties such as yield maintenance or defeasance.
+
+Some lenders offer partial recourse or burn-offs once a property stabilizes.
+
+### How do prepayment penalties affect when I can sell?
+
+Financing · 2 replies · Asked by Private investor (illustrative)
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+I want flexibility to sell in three to five years.
+
+**Commercial lender** (Illustrative role · underwrites industrial loans):
+
+Step-down penalties, such as 3-2-1, are common on bank loans. Fixed-rate CMBS and life company loans tend to use yield maintenance or defeasance.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+A large prepayment penalty can effectively lock you into a hold or require a buyer to assume your loan. Match the loan’s prepayment terms to your realistic hold period, and ask whether the loan can be assumed by a buyer.
+
+Model the penalty in your exit analysis at different interest rates, because yield maintenance gets more expensive when rates fall.
+
+### Why do lenders discount income from leases that expire before the loan?
+
+Financing · 2 replies · Asked by Commercial lender (illustrative)
+
+**Commercial lender** (Illustrative role · underwrites industrial loans):
+
+A frequent borrower question we answer.
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+This surprised me on my first deal. The building was full but the loan came in lower than expected.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Because the lender is underwriting the risk that the income stops. If the leases roll during the loan term, lenders may size the loan on lower rent or vacancy, require leasing reserves, add a cash sweep, or shorten the term.
+
+Borrowers can improve proceeds by renewing leases early, showing tenant commitment, or providing reserves. See how lenders size loans .
+
+### What happens to a loan if the Phase I finds a problem?
+
+Financing · 2 replies · Asked by Commercial lender (illustrative)
+
+**Commercial lender** (Illustrative role · underwrites industrial loans):
+
+Another common borrower question.
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+Ours found an old underground tank. It delayed closing by a few weeks while it was investigated.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+It depends on the finding. Lenders may require a Phase II, a remediation plan and cost estimate, escrow holdbacks, environmental insurance, an indemnity, or an Illinois EPA No Further Remediation letter before closing. Some lenders will decline.
+
+Order the Phase I early so there is time to respond. See What is a Phase II?
+
+## Selling and exit
+
+### We own our building and are thinking about retiring. Sell, sale-leaseback, or lease it out?
+
+Selling and exit · 3 replies · Asked by Owner-user (illustrative)
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+The company may be sold separately from the real estate.
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+A buyer of your company might want a lease from you. That lease can be what makes the real estate valuable.
+
+**Tax consultant** (Illustrative role · works on Illinois assessments):
+
+Talk to your accountant about the tax basis and depreciation recapture before deciding.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Each path has trade-offs. A sale to an owner-user can pay well if the building is functional and you vacate. A sale-leaseback sets a lease and sells to an investor, which can work alongside a company sale. Keeping the building and leasing it gives income but keeps you as a landlord.
+
+Coordinate the real estate plan with the business sale and your tax advisor. See sale-leasebacks and 1031 exchanges .
+
+### My tenant’s lease expires in 18 months. Sell now or renew first?
+
+Selling and exit · 3 replies · Asked by Private investor (illustrative)
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+I am worried a short lease hurts the price.
+
+**Commercial lender** (Illustrative role · underwrites industrial loans):
+
+A buyer’s lender will discount that income too, which affects what the buyer can pay.
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+Some buyers like me want the building when the lease ends.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+A renewal at market rent usually maximizes investor pricing, because it removes the biggest risk. But the short lease can attract owner-users who plan to occupy the building after expiration. Price both options: investor value with a renewal versus owner-user value with a planned vacancy.
+
+If you negotiate a renewal, avoid concessions that cost more than the value they add.
+
+### The buyer asked for a price cut after inspections. Is that normal?
+
+Selling and exit · 2 replies · Asked by Owner-user (illustrative)
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+The roof and parking lot were raised as issues.
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+As a buyer, I renegotiate when diligence finds something the marketing did not disclose. I do not when it was disclosed.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+It is common for buyers to ask for a credit when diligence finds real costs. The question is whether the issue was already known and priced. Ask for the reports, get your own repair estimate, and consider a credit, a repair before closing, or holding firm if the issue was disclosed.
+
+Disclosing known problems up front and having documents ready reduces renegotiation. See the sale process .
+
+### I am selling and doing a 1031 exchange. How do I avoid running out of time?
+
+Selling and exit · 2 replies · Asked by Private investor (illustrative)
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+The 45-day identification window worries me.
+
+**Tax consultant** (Illustrative role · works on Illinois assessments):
+
+Set up your qualified intermediary before closing on the sale. You cannot touch the proceeds.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Start looking for replacement property before you close the sale, line up financing, and engage a qualified intermediary before closing. Identify replacement properties properly within 45 days and close within 180 days, under the identification rules your tax advisor recommends.
+
+Some sellers negotiate a longer closing or a delayed closing to give more time. See What is a 1031 exchange?
+
+### How do we sell our building without employees and customers finding out?
+
+Selling and exit · 2 replies · Asked by Owner-user (illustrative)
+
+**Owner-user** (Illustrative role · runs a company that owns its building):
+
+We want to keep operating while we explore a sale.
+
+**Private investor** (Illustrative role · owns leased industrial buildings):
+
+Serious buyers expect to sign a confidentiality agreement and will tour after hours.
+
+**Pavlo Rospopa** (Industrial investment sales · site author) — answer:
+
+Use a targeted marketing process: qualified buyers only, confidentiality agreements before materials, no signs or public listings, tours after hours, and clear rules for contacting employees and tenants.
+
+A broker can handle buyer screening. See confidentiality in the selling guide .
+
+## About the participants
+
+The roundtable roles—Owner-user, Private investor, Tenant operations, Commercial lender, Property manager, and Tax consultant—are composites I wrote to show how different sides of a transaction tend to think. They are not real people, and their posts are not quotes. The marked answers are mine, written as general education for the Chicagoland industrial market. For short answers, see the 100-question FAQ and the investor Q&A .
+
+To ask your own question, or answer someone else’s, post on the community board .
+
+> General education only—not legal, tax, environmental, engineering, lending, appraisal, or investment advice, and not a recommendation about any property. Community board posts are the views of their authors. Verify facts and current rules with the responsible offices and qualified professionals before acting.
 
 ---
 

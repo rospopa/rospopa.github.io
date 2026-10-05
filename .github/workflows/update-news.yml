@@ -1,7 +1,9 @@
 name: Update industrial news
 
-# Refreshes the Chicago industrial news carousel on the public homepage once a
-# day by regenerating resources/news.json and the generated site files, then
+# Refreshes the Chicago industrial news carousel on the public homepage and the
+# community board list on /resources/community/ (from this repo's GitHub
+# Discussions) once a day by regenerating resources/news.json,
+# resources/community.json, and the generated site files, then
 # committing them. GitHub Pages redeploys on the push. The commit message
 # carries [skip render] so the private Render service is not redeployed.
 on:
@@ -11,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  discussions: read
 
 concurrency:
   group: update-news
@@ -28,11 +31,13 @@ jobs:
           node-version: '22'
       - name: Fetch headlines and rebuild generated files
         run: node build-site.mjs --news
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Commit and push if anything changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add resources/news.json index.html resources/search-index.json sitemap.xml feed.xml llms-full.txt
+          git add resources/news.json resources/community.json resources/community/index.html index.html resources/search-index.json sitemap.xml feed.xml llms-full.txt
           if git diff --cached --quiet; then
             echo "No changes to publish."
             exit 0

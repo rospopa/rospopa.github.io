@@ -258,7 +258,33 @@ thead th { background: var(--color-base-200); border-top: 0; }
 .footer-note { margin: 1.75rem 0 0; font-size: .82rem; }
 
 /* ---- Responsive ------------------------------------------------------- */
+/* Community forum */
+.forum-actions { margin-top: 1rem; }
+.toc-count { color: var(--muted); font-size: .85em; }
+.thread { margin: 0 0 1.75rem; padding: 1.1rem 1.25rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--color-base-100); }
+.thread h3 { margin-top: 0; }
+.thread-meta { margin: -.25rem 0 1rem; color: var(--muted); font-size: .85rem; }
+.post { margin: .75rem 0 0; padding: .8rem 1rem; border: 1px solid var(--line); border-radius: .4rem; background: var(--paper); }
+.post p { margin: .45rem 0 0; }
+.post-head { display: flex; align-items: center; gap: .6rem; font-size: .88rem; }
+.avatar { display: inline-grid; place-items: center; flex: none; width: 2rem; height: 2rem; border: 1px solid var(--line); border-radius: 50%; background: var(--color-base-100); color: var(--ink); font-size: .72rem; font-weight: 700; letter-spacing: .03em; }
+.avatar-pr { background: var(--color-primary); border-color: var(--color-primary); color: var(--color-primary-content); }
+.post-author { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.post-role { display: block; }
+.post-handle, .post-role { color: var(--muted); font-size: .82rem; }
+.post-flag { flex: none; padding: .1rem .5rem; border: 1px solid var(--ink); border-radius: 1rem; font-size: .72rem; font-weight: 650; text-transform: uppercase; letter-spacing: .06em; }
+.post-flag-q { border-style: dashed; }
+.post.accepted { border: 2px solid var(--ink); background: var(--color-base-100); }
+.board-list { list-style: none; margin: 1rem 0 0; padding: 0; }
+.board-list li { padding: .7rem 0; border-top: 1px solid var(--line); }
+.board-list a { font-weight: 600; overflow-wrap: anywhere; }
+.board-meta { margin: .2rem 0 0; color: var(--muted); font-size: .85rem; }
+.board-answered { font-weight: 650; color: var(--ink); }
+.board-empty { padding: .9rem 1rem; border: 1px dashed var(--line); border-radius: .4rem; }
 @media (max-width: 639px) {
+  .thread { padding: .9rem .8rem; }
+  .post { padding: .7rem .7rem; }
+  .post-flag { margin-left: 0; }
   .site-footer, main { width: calc(100% - 2rem); }
   main { padding-top: 1.75rem; }
   .toc ol { columns: 1; }
