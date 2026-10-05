@@ -65,9 +65,18 @@
   --border: 1px;
 }
 
-/* Global font — Segoe UI for all app UI */
+/* Global font: San Francisco on Apple devices (system font), Inter elsewhere.
+   SF cannot be self-hosted under Apple's licence; Inter (OFL) is its closest
+   open equivalent and is served from /fonts. */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('/fonts/inter-latin-wght.woff2') format('woff2');
+}
 *, *::before, *::after {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 'Inter', 'Helvetica Neue', 'Segoe UI', Roboto, Arial, sans-serif;
 }
 
 /* Ensure form controls are always interactive, with the right cursor for

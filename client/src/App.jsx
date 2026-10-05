@@ -26,6 +26,7 @@ const PropertyDetailModal = lazy(() => import('./PropertyDetailModal'))
 const ContactsPage = lazy(() => import('./ContactsPage'))
 const AuditLogs = lazy(() => import('./AuditLogs'))
 const CalendarPage = lazy(() => import('./CalendarPage'))
+const CommunityPage = lazy(() => import('./CommunityPage'))
 
 export { ErrorBoundary } from './shared'
 
@@ -1180,8 +1181,9 @@ export default function App() {
           setCurrentUser(data.user)
           const saved = localStorage.getItem('rep_page')
           const adminPages = ['users', 'contacts', 'audit', 'calendar']
-          const validPages = ['dashboard', 'properties', 'profile', ...( data.user.role === 'admin' ? adminPages : [])]
-          setPage(saved && validPages.includes(saved) ? saved : 'dashboard')
+          const validPages = ['dashboard', 'properties', 'community', 'profile', ...( data.user.role === 'admin' ? adminPages : [])]
+          const linked = window.location.hash === '#community' ? 'community' : null
+          setPage(linked || (saved && validPages.includes(saved) ? saved : 'dashboard'))
         }
       })
       .catch(e => { if (e.status !== 401) setMsg(e.message || 'Could not restore your session') })
@@ -1223,7 +1225,7 @@ export default function App() {
       }
       setLoginStatus('success')
       await new Promise(r => setTimeout(r, 900))
-      setCurrentUser(data.user); setPage('dashboard'); setEmail(''); setPassword('')
+      setCurrentUser(data.user); setPage(window.location.hash === '#community' ? 'community' : 'dashboard'); setEmail(''); setPassword('')
       setLoginStatus(null)
     } catch {
       setLoginStatus('denied')
@@ -1335,6 +1337,7 @@ export default function App() {
   const navLinks = [
     { id: 'dashboard', label: 'Dashboard' },
     { id: 'properties', label: 'Properties' },
+    { id: 'community', label: 'Community' },
     ...(currentUser.role === 'admin' ? [{ id: 'users', label: 'Users' }, { id: 'contacts', label: 'Contacts' }, { id: 'calendar', label: 'Calendar' }, { id: 'audit', label: 'Audit Logs' }] : []),
   ]
 
@@ -1572,6 +1575,12 @@ export default function App() {
             </h2>
             <PropertiesPage user={currentUser} />
           </div>
+        )}
+
+        {page === 'community' && (
+          <Suspense fallback={<div className="flex items-center justify-center h-full"><span className="loading loading-spinner loading-lg" /></div>}>
+            <CommunityPage user={currentUser} />
+          </Suspense>
         )}
 
         {page === 'contacts' && currentUser.role === 'admin' && (

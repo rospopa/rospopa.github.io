@@ -890,20 +890,22 @@ Ask a question, answer one, or read how the people on every side of an industria
 
 Published October 5, 2026 · 30 roundtable threads · Educational, not advice on any specific property, lease, loan, or tax position.
 
-Ask a question
-Browse the community board
+Ask or answer a question
+Member sign in
 
 ## How this forum works
 
-- Community board (real people). Anyone can ask or answer on the board with a free GitHub account. The newest threads appear below and refresh daily. Answers there come from community members; check them before relying on them.
+- Members' board (real people). Anyone can read it. To ask or answer, sign in with your secure.rospopa.com account; posts show your first name and last initial, never your email. Answers come from members, so check them before relying on them. Accounts are by invitation; contact me if you would like one.
 - Roundtable threads (written by Pavlo Rospopa). Each reply shows how a typical owner-user, investor, tenant, lender, property manager, or tax consultant tends to see the question. These are illustrative roles, not real user accounts or quotes . The marked answer in each thread is mine.
 - Please don’t post confidential deal information, personal data, or anything you would not put on a public website.
 
-## Latest from the community board
+## Members' board
 
-Updated Oct 5, 2026 · Posts by real community members on GitHub Discussions; links open on GitHub. Want to join in? Ask a question or answer one.
+Questions from secure.rospopa.com members load here.
 
-- Welcome to the Chicagoland Industrial community board Announcements · by @rospopa · 0 replies · Oct 5, 2026
+Members ask and answer from their secure.rospopa.com account. If the board does not appear on this page, open it in the workspace.
+
+Open the members' board
 
 ## Buying and investing
 
@@ -1513,9 +1515,9 @@ A broker can handle buyer screening. See confidentiality in the selling guide .
 
 The roundtable roles—Owner-user, Private investor, Tenant operations, Commercial lender, Property manager, and Tax consultant—are composites I wrote to show how different sides of a transaction tend to think. They are not real people, and their posts are not quotes. The marked answers are mine, written as general education for the Chicagoland industrial market. For short answers, see the 100-question FAQ and the investor Q&A .
 
-To ask your own question, or answer someone else’s, post on the community board .
+To ask your own question, or answer someone else’s, use the members' board .
 
-> General education only—not legal, tax, environmental, engineering, lending, appraisal, or investment advice, and not a recommendation about any property. Community board posts are the views of their authors. Verify facts and current rules with the responsible offices and qualified professionals before acting.
+> General education only—not legal, tax, environmental, engineering, lending, appraisal, or investment advice, and not a recommendation about any property. Members' board posts are the views of their authors. Verify facts and current rules with the responsible offices and qualified professionals before acting.
 
 ---
 

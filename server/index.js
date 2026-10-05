@@ -11,6 +11,7 @@ const { Resend } = require('resend');
 const { rateLimit } = require('express-rate-limit');
 const compression = require('compression');
 const { createCalendarModule } = require('./calendar');
+const community = require('./community');
 
 const PORT = process.env.PORT || 3000;
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -325,6 +326,7 @@ app.use((req, res, next) => {
 // connection. A refused connection reaches the browser as a bare 502 from the
 // hosting proxy with no explanation; this says what is actually happening.
 let appReady = false;
+app.use('/api/community', community.cors);
 app.get(_healthPath, (req, res) => {
   res
     .status(appReady ? 200 : 503)
@@ -2450,6 +2452,8 @@ app.get('/api/status', async (req, res) => {
   });
 });
 
+community.registerRoutes(app, { pool, logAudit, clientIp });
+
 const clientDist = path.join(__dirname, '..', 'client', 'dist');
 if (require('fs').existsSync(clientDist)) {
   // Hashed assets (JS/CSS with content hash in filename) are immutable — cache 1 year
@@ -2518,6 +2522,7 @@ async function rotateLegacyImportPasswords() {
   try {
     await initializeSchema();
     await calendar.initSchema();
+    await community.initSchema(pool);
     calendar.startScheduler();
     await initializeAdminUser();
     await initializeSessionMiddleware();

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com; form-action 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://cloudflareinsights.com https://secure.rospopa.com; form-action 'self'; base-uri 'self'; object-src 'none'; upgrade-insecure-requests">
   <meta name="referrer" content="strict-origin-when-cross-origin">
   <link rel="icon" href="/css/favicons/unnamed-32x32.png" sizes="32x32" type="image/png">
   <link rel="icon" href="/css/favicons/unnamed-16x16.png" sizes="16x16" type="image/png">
@@ -13,13 +13,13 @@
   <title>Search the guides | Chicagoland Industrial</title>
   <meta name="description" content="Search the Chicagoland Industrial guides—industrial and commercial real estate for Chicago and the nine-county region—by term, county, or topic.">
   <meta name="theme-color" content="#ffffff">
-  <script src="/resources/theme.js?v=ee327fa7b0"></script>
+  <script src="/resources/theme.js?v=c069f971c4"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700;800&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/resources/resources.css?v=ee327fa7b0">
-  <script src="/resources/search.js?v=ee327fa7b0" defer></script>
-  <script src="/resources/interactive.js?v=ee327fa7b0" defer></script>
+  <link rel="stylesheet" href="/resources/resources.css?v=c069f971c4">
+  <script src="/resources/search.js?v=c069f971c4" defer></script>
+  <script src="/resources/interactive.js?v=c069f971c4" defer></script>
 </head>
 <body class="has-search-page">
   <a class="skip-link" href="#main">Skip to content</a>
@@ -39,8 +39,10 @@
     </div>
   </header>
   <main id="main" class="reading">
-    <p class="eyebrow">Search</p>
-    <h1 id="search-heading">Search the guides</h1>
+    <div class="page-hero">
+      <p class="eyebrow">Search</p>
+      <h1 id="search-heading">Search the guides</h1>
+    </div><!-- /page-hero -->
     <form class="search-page-form" role="search" aria-label="Guide search" action="/search/" method="get">
       <label for="search-page-input">Search every guide, county section, and glossary term</label>
       <div class="search-page-row">

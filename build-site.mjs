@@ -107,37 +107,6 @@ function renderNews(news) {
     <!-- news:end -->`;
 }
 
-// ---- community board (GitHub Discussions) -----------------------------------
-const COMMUNITY_PATH = 'resources/community.json';
-const COMMUNITY_PAGE = 'resources/community/index.html';
-const DISCUSSIONS_URL = 'https://github.com/rospopa/rospopa.github.io/discussions';
-async function fetchCommunity() {
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) { console.warn('community: GITHUB_TOKEN not set; keeping cached board'); return null; }
-  const query = `query { repository(owner: "rospopa", name: "rospopa.github.io") { discussions(first: 12, orderBy: { field: CREATED_AT, direction: DESC }) { nodes { title url createdAt author { login } category { name } comments { totalCount } answerChosenAt } } } }`;
-  try {
-    const res = await fetch('https://api.github.com/graphql', { method: 'POST', headers: { authorization: `bearer ${token}`, 'content-type': 'application/json', 'user-agent': 'rospopa.com community' }, body: JSON.stringify({ query }) });
-    const json = await res.json();
-    if (!res.ok || json.errors) { console.warn(`community: GitHub answered ${res.status} ${JSON.stringify(json.errors || '')}`); return null; }
-    const items = json.data.repository.discussions.nodes
-      .filter(n => n.url.startsWith(DISCUSSIONS_URL + '/'))
-      .map(n => ({ title: n.title, url: n.url, date: n.createdAt.slice(0, 10), author: n.author ? n.author.login : 'ghost', category: n.category.name, replies: n.comments.totalCount, answered: !!n.answerChosenAt }));
-    return { updated: today, items };
-  } catch (error) { console.warn(`community: ${error.message}`); return null; }
-}
-function renderCommunity(board) {
-  const fmt = new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeZone: 'UTC' });
-  const ask = (text = 'ask a question') => `<a href="${DISCUSSIONS_URL}/new?category=q-a" rel="noopener">${text}</a>`;
-  const list = board.items.length
-    ? `<ul class="board-list">
-        ${board.items.map(i => `<li><a href="${escapeHtml(i.url)}" rel="noopener ugc nofollow">${escapeHtml(i.title)}</a><p class="board-meta"><span class="board-cat">${escapeHtml(i.category)}</span> · by @${escapeHtml(i.author)} · ${i.replies} ${i.replies === 1 ? 'reply' : 'replies'}${i.answered ? ' · <span class="board-answered">Answered</span>' : ''} · <time datetime="${i.date}">${fmt.format(new Date(i.date + 'T00:00:00Z'))}</time></p></li>`).join('\n        ')}
-      </ul>`
-    : `<p class="board-empty">No community questions yet. Be the first to ${ask()}.</p>`;
-  return `<!-- community:start -->
-      <p class="meta">Updated <time datetime="${board.updated}">${fmt.format(new Date(board.updated + 'T00:00:00Z'))}</time> · Posts by real community members on GitHub Discussions; links open on GitHub. Want to join in? ${ask('Ask a question')} or answer one.</p>
-      ${list}
-      <!-- community:end -->`;
-}
 // ---- markdown conversion for llms-full.txt ----------------------------------
 const T = name => `<${name}(?=[\\s>])[^>]*>`;   // opening tag matcher that does not bleed into <picture>, <path>, <link>, …
 function toMarkdown(mainHtml) {
@@ -178,19 +147,6 @@ if (process.argv.includes('--news')) {
   home = home.replace(/<!-- news:start -->[\s\S]*?<!-- news:end -->/, renderNews(news));
   await writeFile('index.html', home);
 }
-{
-  let board = { updated: today, items: [] };
-  const fresh = process.argv.includes('--news') ? await fetchCommunity() : null;
-  if (fresh) { board = fresh; await writeFile(COMMUNITY_PATH, JSON.stringify(board, null, 2) + '\n'); console.log(`community: ${board.items.length} discussions`); }
-  else if (existsSync(COMMUNITY_PATH)) board = JSON.parse(await readFile(COMMUNITY_PATH, 'utf8'));
-  if (existsSync(COMMUNITY_PAGE)) {
-    let page = await readFile(COMMUNITY_PAGE, 'utf8');
-    if (!page.includes('<!-- community:start -->')) throw new Error(`${COMMUNITY_PAGE}: community markers missing`);
-    page = page.replace(/<!-- community:start -->[\s\S]*?<!-- community:end -->/, renderCommunity(board));
-    await writeFile(COMMUNITY_PAGE, page);
-  }
-}
-
 const records = [], pages = [];
 for (const page of PAGES) {
   if (!existsSync(page)) { console.warn(`Skipping ${page}: file not found`); continue; }
