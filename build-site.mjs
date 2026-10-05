@@ -13,6 +13,7 @@ const AUTHOR = { name: 'Pavlo Rospopa', url: `${ORIGIN}/` };
 const PAGES = [
   'index.html',
   'resources/index.html',
+  'resources/industrial-investor-faq/index.html',
   'resources/industrial-building-types/index.html',
   'resources/chicago-industrial-real-estate/index.html',
   'resources/industrial-due-diligence/index.html',
@@ -170,6 +171,11 @@ for (const page of PAGES) {
     if (terms.length) { for (const [, termId, term, definition] of terms) records.push({ p: title, u: `${url}#${termId}`, h: plain(term), t: plain(definition).slice(0, MAX_TEXT) }); continue; }
     const text = plain(body.replace(/<h2[^>]*>[\s\S]*?<\/h2>/i, ' '));
     if (text) records.push({ p: title, u: `${url}#${id}`, h: heading, t: text.slice(0, MAX_TEXT) });
+    // Sub-records for subsections with their own ids (e.g. individual Q&A entries).
+    for (const sub of body.matchAll(/<h3 id="([^"]+)">([\s\S]*?)<\/h3>([\s\S]*?)(?=<h3 id=|$)/g)) {
+      const subText = plain(sub[3]);
+      if (subText) records.push({ p: title, u: `${url}#${sub[1]}`, h: plain(sub[2]), t: subText.slice(0, MAX_TEXT) });
+    }
   }
 }
 await writeFile('resources/search-index.json', JSON.stringify(records));
@@ -194,7 +200,7 @@ await writeFile('sitemap.xml', sitemap);
 const latest = pages.map(p => p.modified).sort().pop();
 const feed = `<?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-  <title>ROSPOPA — Chicagoland industrial real estate guides</title>
+  <title>Chicagoland Industrial — guides for industrial owners, buyers, and tenants</title>
   <subtitle>Guides to industrial property research, selling, leasing, and investment across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties, Illinois.</subtitle>
   <link href="${ORIGIN}/feed.xml" rel="self" type="application/atom+xml"/>
   <link href="${ORIGIN}/" rel="alternate" type="text/html"/>
@@ -214,7 +220,7 @@ ${pages.filter(p => p.url !== '/').map(p => `  <entry>
 await writeFile('feed.xml', feed);
 
 // llms-full.txt — the complete text of every public guide in Markdown
-const full = [`# ROSPOPA public guides — full text`, '',
+const full = [`# Chicagoland Industrial — public guides, full text`, '',
   `> ${AUTHOR.name} specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois. This file contains the complete text of the public guides at ${ORIGIN}/ for reading by assistants and tools. Definitions and checklists are general education, not legal, tax, engineering, or investment advice. Guides last updated ${latest}.`, '',
   ...pages.map(p => `---\n\nSource: ${ORIGIN}${p.url}\nPublished: ${p.published} · Updated: ${p.modified}\n\n${p.markdown}\n`)].join('\n');
 await writeFile('llms-full.txt', full);

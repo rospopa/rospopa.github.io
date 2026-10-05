@@ -190,7 +190,7 @@
     var pageInput = document.querySelector('.search-page-form input.search-input');
     if (pageInput && query) pageInput.value = query;
     if (!query) return;
-    document.title = 'Search: ' + query + ' | ROSPOPA';
+    document.title = 'Search: ' + query + ' | Chicagoland Industrial';
     container.setAttribute('aria-busy', 'true');
     loadIndex().then(function (records) {
       var results = search(records, query);
