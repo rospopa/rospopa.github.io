@@ -209,7 +209,7 @@
     loadButton = el('button', { type: 'button', class: 'btn board-load', text: 'Load member posts here' });
     loadButton.setAttribute('data-board-load', '');
     loadButton.addEventListener('click', start);
-    say('Members who are signed in to the workspace can load the live board on this page.');
+    say('Invited members may load actual posts here after workspace sign-in. The editorial scenarios below are separate; no current activity is implied.');
     status.insertAdjacentElement('afterend', loadButton);
   }
 

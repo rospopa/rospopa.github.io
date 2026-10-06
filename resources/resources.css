@@ -220,6 +220,9 @@ tr.done th { text-decoration: line-through; text-decoration-thickness: 1px; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: .375rem; margin-block: 1.4rem; background: var(--color-base-100); }
 table { width: 100%; border-collapse: collapse; font-size: .93rem; }
 .table-wide table { min-width: 36rem; }
+.direct-contact { display: flex; flex-wrap: wrap; gap: .6rem; }
+.direct-contact .btn { white-space: normal; overflow-wrap: anywhere; max-width: 100%; }
+.guide-contact h2 { font-size: 1.35rem; }
 caption { text-align: left; font-weight: 650; padding: .8rem .8rem .5rem; }
 th, td { text-align: left; vertical-align: top; border-top: 1px solid var(--line); padding: .7rem .8rem; }
 thead th { background: var(--color-base-200); border-top: 0; }
@@ -236,11 +239,16 @@ thead th { background: var(--color-base-200); border-top: 0; }
 .footer-note { margin: 1.75rem 0 0; font-size: .82rem; }
 
 /* ---- Responsive ------------------------------------------------------- */
-/* Community forum */
+/* Editorial scenarios and the separate member board */
 .forum-actions { margin-top: 1rem; }
 .toc-count { color: var(--muted); font-size: .85em; }
-.thread { margin: 0 0 1.75rem; padding: 1.1rem 1.25rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--color-base-100); }
-.thread h3 { margin-top: 0; }
+.editorial-topic { margin: 0 0 1.75rem; padding: 1.1rem 1.25rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--color-base-100); }
+.editorial-topic h3 { margin-top: 0; }
+.scenario-meta { color: var(--muted); font-size: .9rem; }
+.perspective { padding: .75rem 0; border-top: 1px solid var(--line); }
+.perspective p { margin: .5rem 0; }
+.perspective-label { color: var(--ink); }
+.author-note { border-left: 3px solid var(--brand); padding-left: 1rem; }
 .thread-meta { margin: -.25rem 0 1rem; color: var(--muted); font-size: .85rem; }
 .post { margin: .75rem 0 0; padding: .8rem 1rem; border: 1px solid var(--line); border-radius: .4rem; background: var(--paper); }
 .post p { margin: .45rem 0 0; }
@@ -296,7 +304,7 @@ main > section > h2 + h3, main > section > h3:first-child { padding-top: 0; bord
 main li::marker { color: var(--brand); font-weight: 700; }
 
 /* Each content section is a card on the tinted page background. */
-main > section:not(.news):not(.cta):not(:has(> .cards)):not(:has(> .thread)) { margin-top: 1.5rem; padding: 1.5rem 1.75rem 1.4rem; background: var(--color-base-100); border: 1px solid var(--line); border-radius: .75rem; box-shadow: var(--shadow-sm); }
+main > section:not(.news):not(.cta):not(:has(> .cards)):not(:has(> .editorial-topic)) { margin-top: 1.5rem; padding: 1.5rem 1.75rem 1.4rem; background: var(--color-base-100); border: 1px solid var(--line); border-radius: .75rem; box-shadow: var(--shadow-sm); }
 main > section > :last-child { margin-bottom: 0; }
 .cta { color: var(--hero-ink); background: var(--hero-bg); border: 0; border-radius: .75rem; padding: 1.6rem 1.75rem; box-shadow: var(--shadow); }
 .cta h2 { color: var(--hero-ink); border-left-color: var(--hero-accent); }
@@ -331,7 +339,7 @@ td.check input { width: 1.5rem; height: 1.5rem; accent-color: var(--brand-strong
 .btn { border-radius: .4rem; }
 
 /* Forum. */
-.thread { box-shadow: var(--shadow-sm); border-top: 3px solid var(--ink); }
+.editorial-topic { box-shadow: var(--shadow-sm); border-top: 3px solid var(--ink); }
 .post.accepted { border-color: var(--brand); background: var(--brand-soft); }
 .post.accepted .post-flag { background: var(--brand-strong); border-color: var(--brand-strong); color: #ffffff; }
 [data-theme="monochrome-dark"] .post.accepted .post-flag { color: #0c1a11; }
@@ -373,12 +381,12 @@ main :is(input, select, textarea) { border-color: var(--control-line); }
 @media (max-width: 639px) {
   .header-actions { flex-basis: 100%; flex-wrap: wrap; }
   .header-contact { padding-inline: .4rem; font-size: .8rem; }
-  .thread { padding: .9rem .8rem; }
+  .editorial-topic { padding: .9rem .8rem; }
   .post { padding: .7rem .7rem; }
   .post-flag { margin-left: 0; }
   .site-footer, main { width: calc(100% - 2rem); }
   :root, :root[data-theme="monochrome-dark"] { --main-pad-top: 1.75rem; }
-  main > section:not(.news):not(.cta):not(:has(> .cards)):not(:has(> .thread)), .cta { padding: 1.15rem 1rem 1rem; }
+  main > section:not(.news):not(.cta):not(:has(> .cards)):not(:has(> .editorial-topic)), .cta { padding: 1.15rem 1rem 1rem; }
   .page-hero { padding: 1.5rem 0 1.75rem; }
   .toc ol { columns: 1; }
   .lead { font-size: 1.05rem; }

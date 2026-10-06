@@ -7,6 +7,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
+import { decodeContactValue } from './resources/contact-data.mjs';
 
 const ORIGIN = 'https://rospopa.com';
 const AUTHOR = { name: 'Pavlo Rospopa', url: `${ORIGIN}/` };
@@ -158,6 +159,28 @@ if (process.argv.includes('--news')) {
   if (!home.includes('<!-- news:start -->')) throw new Error('index.html: news markers missing');
   home = home.replace(/<!-- news:start -->[\s\S]*?<!-- news:end -->/, renderNews(news));
   await writeFile('index.html', home);
+}
+const homeContact = await readFile('index.html', 'utf8');
+const businessCard = homeContact.match(/<div class="contact-card"><h3>Business<\/h3>([\s\S]*?)<\/div>/);
+if (!businessCard) throw new Error('Homepage business contact source is missing');
+const contactValues = new Map([...businessCard[1].matchAll(/data-c="([^"]+)" data-t="([^"]+)"/g)].map(([, value, type]) => [type, decodeContactValue(value)]));
+const phone = contactValues.get('tel'), email = contactValues.get('mail');
+if (!phone || !email) throw new Error('Homepage business phone or email is missing');
+const directContact = `<!-- direct-contact:start -->
+      <p class="direct-contact"><a class="btn btn-primary" href="tel:+1${phone.replace(/\D/g, '')}">Call ${escapeHtml(phone)}</a> <a class="btn btn-outline" href="mailto:${escapeHtml(email)}">Email ${escapeHtml(email)}</a></p>
+      <!-- direct-contact:end -->`;
+for (const page of PAGES) {
+  let html = await readFile(page, 'utf8');
+  if (html.includes('<!-- direct-contact:start -->')) {
+    html = html.replace(/<!-- direct-contact:start -->[\s\S]*?<!-- direct-contact:end -->/, directContact);
+  } else if (page.startsWith('resources/')) {
+    const strip = `<aside class="guide-contact cta" aria-labelledby="guide-contact-heading"><h2 id="guide-contact-heading">Talk about your building</h2><p>Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus &amp; Millichap.</p>
+      ${directContact}
+    </aside>`;
+    if (!html.includes('<!-- /page-hero -->')) throw new Error(`${page}: page hero marker missing for contact strip`);
+    html = html.replace('<!-- /page-hero -->', `<!-- /page-hero -->\n    ${strip}`);
+  }
+  if (html !== await readFile(page, 'utf8')) await writeFile(page, html);
 }
 const records = [], pages = [];
 for (const page of PAGES) {

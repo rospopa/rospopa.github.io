@@ -58,6 +58,29 @@ available. Check keyboard activation, Escape/Close focus return, and the
 visible retry message on a failed homepage fetch. This control requires
 JavaScript; the homepage still provides its existing no-script LinkedIn link.
 
+The generator also builds visible one-click business phone/email links on
+every guide and the homepage seller introduction from that same contact source.
+These links work without JavaScript; business contact details are intentionally
+public. `resources\contact-data.mjs` shares the decoder between the generator
+and module-based `interactive.js`. Do not edit generated `direct-contact`
+regions independently. Public headers keep contact and theme controls; workspace
+Sign In lives in the footer, not the header. The logo's accessible name reads
+"Rospopa, Pavlo, home" rather than treating the two wordmark lines as one word.
+
+Community scenarios are editorial simulated perspectives, not member posts.
+Keep the invite-only board separate and do not imply participation or activity
+without actual member data. Guide publication metadata remains intact; prominent
+bulk publication stamps are omitted rather than represented as market freshness.
+The homepage bio uses the linked official advisor profile; add no career/deal
+claims or portrait without verification and permission. The selling-guide
+Elk Grove Village image uses the existing credited CC BY-SA 4.0 adaptation,
+illustrates the region, and does not represent an advisor transaction.
+Publishing a track-record section requires three to five verified, authorized
+closed transactions (size, county, buyer type, advisor role and closing evidence;
+price or price/SF only if approved), plus a permissioned advisor headshot.
+An archived listing is not evidence of a closing. The official profile confirms
+joining Marcus & Millichap in 2026, not a number of earlier brokerage years.
+
 The private React workspace in `client\` is built and served by the Node
 service in `server\`, separately from GitHub Pages. See `DEPLOY.md` for hosting,
 indexing controls, and the deployment verification checklist.

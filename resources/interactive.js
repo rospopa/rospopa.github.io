@@ -1,9 +1,11 @@
+import { decodeContactValue } from './contact-data.mjs?v=ad187cf99d';
+
 (function () {
   'use strict';
   // Progressive enhancements for the public guides. Every widget works from
   // plain HTML that already reads correctly without JavaScript; this file only
   // adds live computation, remembered checklist state, filtering and
-  // position tracking. No network requests, no dependencies.
+  // position tracking. Guide contact dialogs load the homepage source on request.
 
   var usd = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });
   var usdCents = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2 });
@@ -170,7 +172,7 @@
       return { parts: parts, section: h3.closest('section'), text: parts.map(function (p) { return p.textContent; }).join(' ').toLowerCase() };
     });
     var sections = questions.map(function (q) { return q.section; }).filter(function (s, i, all) { return all.indexOf(s) === i; });
-    var others = Array.prototype.slice.call(document.querySelectorAll('main section')).filter(function (s) { return sections.indexOf(s) === -1; });
+    var others = Array.prototype.slice.call(document.querySelectorAll('main section')).filter(function (s) { return sections.indexOf(s) === -1 && !s.classList.contains('guide-contact'); });
     form.hidden = false;
     function apply() {
       var q = input.value.trim().toLowerCase(), shown = 0;
@@ -242,17 +244,10 @@
     start();
   }
 
-  // Contact details are stored XOR-encoded and only decoded after a real click, so scrapers reading the HTML get nothing usable.
+  // The original disclosure retains its click-to-reveal behavior for additional contact options.
   function revealContactDetails(box) {
-    var key = 'r0sp0pa-industrial';
-    function decode(value) {
-      var bytes = atob(value.split('').reverse().join(''));
-      var out = '';
-      for (var i = 0; i < bytes.length; i++) out += String.fromCharCode(bytes.charCodeAt(i) ^ key.charCodeAt(i % key.length));
-      return out;
-    }
     box.querySelectorAll('[data-c]').forEach(function (slot) {
-      var value = decode(slot.getAttribute('data-c'));
+      var value = decodeContactValue(slot.getAttribute('data-c'));
       var link = document.createElement('a');
       link.href = slot.getAttribute('data-t') === 'tel' ? 'tel:+1' + value.replace(/\D/g, '') : 'mailto:' + value;
       link.textContent = value;
