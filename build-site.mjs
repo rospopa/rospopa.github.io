@@ -41,7 +41,8 @@ const first = (html, re) => { const m = html.match(re); return m ? plain(m[1]) :
 function git(args) { try { return execFileSync('git', args, { encoding: 'utf8' }).trim(); } catch { return ''; } }
 function lastmod(file) {
   if (git(['status', '--porcelain', '--', file])) return today;
-  return git(['log', '-1', '--format=%cs', '--', file]) || today;
+  const committed = git(['log', '-1', '--format=%cI', '--', file]);
+  return committed ? new Date(committed).toISOString().slice(0, 10) : today;
 }
 
 // ---- news ------------------------------------------------------------------

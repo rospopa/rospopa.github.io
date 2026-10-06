@@ -22,6 +22,8 @@ header/footer markup is identical on every page—edit all pages together when
 changing navigation. `/search/` is `noindex` and deliberately absent from the
 sitemap. `robots.txt` explicitly welcomes AI assistants; `llms.txt` and
 `llms-full.txt` give them a Markdown directory and full text.
+Generated modification dates use UTC for both working changes and commits,
+so committing a page does not shift its date across a local-time boundary.
 
 The public header uses `resources\resources.css`. Keep the complete logo
 (leaf, ROSPOPA, and PAVLO) visible at every viewport width; the compact rules
