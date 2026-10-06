@@ -30,6 +30,15 @@ the shared stylesheet, update its cache version on all public pages, including
 `search\index.html` and `404.html`. Check 320px, 375px, 390px, tablet, and desktop
 layouts, with the mobile menu both closed and open.
 
+News sources include the REjournals industrial RSS category and Connect CRE's
+Chicago/Midwest feed in addition to the existing feeds. Mixed-region feeds
+must match both an industrial/logistics term and a Chicagoland place in the
+headline; only the last 30 days are eligible. The build reports parsed and
+matched counts per source, deduplicates titles, and prefers direct publisher
+links to aggregator duplicates. A source returning HTML or failing to fetch
+is reported explicitly. The daily workflow remains the refresh mechanism;
+no credentials or article bodies are stored or displayed.
+
 The shared header's Show contact info button opens a native modal dialog,
 using the existing click-to-reveal decoder in `resources\interactive.js`.
 Contact data remains defined only in the homepage's `#contact-details`;

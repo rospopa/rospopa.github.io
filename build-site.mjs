@@ -46,11 +46,13 @@ function lastmod(file) {
 // ---- news ------------------------------------------------------------------
 const NEWS_PATH = 'resources/news.json';
 const INDUSTRIAL = /\b(industrial|warehouse|warehousing|logistics|distribution (center|facility|hub|space)|manufactur\w*|flex (space|building|industrial)|cold[- ]storage|intermodal|truck terminal|industrial outdoor storage|IOS\b|spec building|big[- ]box)/i;
-const REGION = /\b(chicago\w*|illinois|cook county|dupage|will county|kane county|lake county|mchenry|kendall|grundy|dekalb|joliet|elk grove|bolingbrook|romeoville|aurora|naperville|schaumburg|bedford park|cicero|o'?hare|elgin|waukegan|des plaines|franklin park|melrose park|bensenville|addison|carol stream|west chicago|geneva|batavia|yorkville|oswego|plainfield|minooka|channahon|morris|woodstock|crystal lake|huntley|university park|monee|wilmington|lockport|lemont|hodgkins|mccook|alsip|bridgeview|chicago heights|south holland|harvey|markham|matteson|new lenox|frankfort|mokena|tinley park|orland park|rosemont|itasca|wood dale|roselle|hanover park|streamwood|hoffman estates|arlington heights|wheeling|buffalo grove|lincolnshire|vernon hills|libertyville|gurnee|zion|grayslake|round lake|antioch|sycamore|genoa|sandwich|plano|shorewood|crest hill|i-?55|i-?80|i-?88|i-?90|i-?294|i-?355)/i;
+const REGION = /\b(chicago\w*|illinois|cook county|dupage|will county|kane county|lake county|mchenry|kendall|grundy|dekalb|joliet|elk grove|bolingbrook|romeoville|aurora|naperville|schaumburg|bedford park|cicero|blue island|elwood|o['’]?hare|elgin|waukegan|des plaines|franklin park|melrose park|bensenville|addison|carol stream|west chicago|geneva|batavia|yorkville|oswego|plainfield|minooka|channahon|morris|woodstock|crystal lake|huntley|university park|monee|wilmington|lockport|lemont|hodgkins|mccook|alsip|bridgeview|chicago heights|south holland|harvey|markham|matteson|new lenox|frankfort|mokena|tinley park|orland park|rosemont|itasca|wood dale|roselle|hanover park|streamwood|hoffman estates|arlington heights|wheeling|buffalo grove|lincolnshire|vernon hills|libertyville|gurnee|zion|grayslake|round lake|antioch|sycamore|genoa|sandwich|plano|shorewood|crest hill|i-?55|i-?80|i-?88|i-?90|i-?294|i-?355)/i;
 const FEEDS = [
   { name: 'Google News', url: 'https://news.google.com/rss/search?q=Chicago+industrial+real+estate+OR+warehouse&hl=en-US&gl=US&ceid=US:en', regional: false, aggregator: true },
   { name: 'Bisnow Chicago', url: 'https://www.bisnow.com/rss/chicago', regional: true },
   { name: 'REjournals', url: 'https://rejournals.com/feed/', regional: false },
+  { name: 'REjournals', url: 'https://rejournals.com/category/industrial/feed/', regional: false },
+  { name: 'Connect CRE', url: 'https://www.connectcre.com/feed/?story-market=chicago-midwest', regional: false },
   { name: 'The Real Deal Chicago', url: 'https://therealdeal.com/chicago/feed/', regional: true },
 ];
 const tag = (xml, name) => { const m = xml.match(new RegExp(`<${name}(?:\\s[^>]*)?>([\\s\\S]*?)<\\/${name}>`, 'i')); return m ? decode(m[1].replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').replace(/<[^>]+>/g, '')).trim() : ''; };
@@ -62,20 +64,26 @@ async function fetchNews() {
       const res = await fetch(feed.url, { headers: { 'user-agent': 'Mozilla/5.0 (compatible; rospopa.com news; +https://rospopa.com/)', accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*' }, redirect: 'follow', signal: AbortSignal.timeout(25000) });
       if (!res.ok) { console.warn(`news: ${feed.name} answered ${res.status}`); continue; }
       const body = await res.text();
-      for (const it of body.match(/<item>[\s\S]*?<\/item>|<entry>[\s\S]*?<\/entry>/gi) || []) {
+      if (!/<(?:rss|feed)\b/i.test(body)) { console.warn(`news: ${feed.name} did not return an RSS or Atom feed`); continue; }
+      const entries = body.match(/<item>[\s\S]*?<\/item>|<entry>[\s\S]*?<\/entry>/gi) || [];
+      let matched = 0;
+      for (const it of entries) {
         let title = tag(it, 'title').replace(/^(news|breaking|exclusive)\s*[|:]\s*/i, '');
         let source = tag(it, 'source') || feed.name;
         if (feed.aggregator) { const m = title.match(/^(.*)\s-\s([^-]+)$/); if (m) { title = m[1].trim(); source = source === feed.name ? m[2].trim() : source; } }
-        const link = tag(it, 'link') || (it.match(/<link[^>]*href="([^"]+)"/) || [])[1] || '';
+        const alternate = (it.match(/<link\b[^>]*>/gi) || []).find(link => !/\brel=["'](?:self|enclosure)["']/i.test(link) && /\bhref=/i.test(link));
+        const link = tag(it, 'link') || decode((alternate && alternate.match(/\bhref=["']([^"']+)["']/i) || [])[1] || '');
         const date = new Date(tag(it, 'pubDate') || tag(it, 'updated') || tag(it, 'published'));
         // House style avoids dashes: number ranges read "to", other dashes become a colon or comma.
         title = title.replace(/(\d)\s*[\u2012\u2013\u2014]\s*(\d)/g, '$1 to $2').replace(/\s+[\u2012\u2013\u2014\u2015-]{1,2}\s+/, ': ').replace(/\s+[\u2012\u2013\u2014\u2015-]{1,2}\s+/g, ', ').replace(/\s*[\u2012\u2013\u2014\u2015]\s*/g, ', ');
         if (!title || !/^https?:\/\//.test(link) || isNaN(date)) continue;
-        if (Date.now() - date > 30 * 86400000) continue;
+        if (date > Date.now() || Date.now() - date > 30 * 86400000) continue;
         if (!INDUSTRIAL.test(title)) continue;
         if (!feed.regional && !REGION.test(title)) continue;
         items.push({ title, url: link, source, date: date.toISOString().slice(0, 10) });
+        matched++;
       }
+      console.log(`news: ${feed.name} parsed ${entries.length} entries, ${matched} recent Chicago industrial matches (${feed.url})`);
     } catch (error) { console.warn(`news: ${feed.name} failed: ${error.message}`); }
   }
   // De-duplicate by normalized title, prefer direct publisher links over aggregator redirects.
