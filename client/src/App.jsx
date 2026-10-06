@@ -82,7 +82,7 @@ export function UsersTable({ users, onReload, onEdit, reloadKey = 0 }) {
       <div className="overflow-x-auto rounded border border-base-300">
         <table className="table table-zebra w-full">
           <thead>
-            <tr className="text-xs uppercase tracking-widest text-base-content/50">
+            <tr className="text-xs uppercase tracking-widest text-muted">
               <th className="py-3 px-4">User</th>
               <th className="py-3 px-4">Role</th>
               <th className="py-3 px-4">Organization</th>
@@ -94,7 +94,7 @@ export function UsersTable({ users, onReload, onEdit, reloadKey = 0 }) {
           </thead>
           <tbody>
             {users.length === 0
-              ? <tr><td colSpan={7} className="text-center py-8 text-base-content/40">No users found</td></tr>
+              ? <tr><td colSpan={7} className="text-center py-8 text-muted">No users found</td></tr>
               : users.map((u, i) => {
                 const isOnline = onlineStatus.online.includes(u.id)
                 const lastLogin = onlineStatus.lastLogin[u.id] || u.last_login
@@ -104,11 +104,11 @@ export function UsersTable({ users, onReload, onEdit, reloadKey = 0 }) {
                       <div className="flex items-center gap-3">
                         <div className="relative flex-shrink-0">
                           <Avatar src={u.profile_photo} name={[u.first_name, u.last_name].filter(Boolean).join(' ') || u.email} size="sm" />
-                          <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} title={isOnline ? 'Online' : 'Offline'} />
+                          <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-success' : 'bg-error'}`} title={isOnline ? 'Online' : 'Offline'} />
                         </div>
                         <div>
-                          <p className="font-medium text-sm">{[u.first_name, u.last_name].filter(Boolean).join(' ') || <span className="text-base-content/30">—</span>}</p>
-                          <p className="text-xs text-base-content/50">{u.email}</p>
+                          <p className="font-medium text-sm">{[u.first_name, u.last_name].filter(Boolean).join(' ') || <span className="text-muted">—</span>}</p>
+                          <p className="text-xs text-muted">{u.email}</p>
                         </div>
                       </div>
                     </td>
@@ -116,14 +116,14 @@ export function UsersTable({ users, onReload, onEdit, reloadKey = 0 }) {
                       <span className={`badge ${getRoleBadgeClass(u.role)} badge-sm`}>{u.role}</span>
                       {u.contact_type && <span className="badge badge-ghost badge-sm ml-1">{u.contact_type}</span>}
                     </td>
-                    <td className="py-3 px-4">{u.organization || <span className="text-base-content/30">—</span>}</td>
-                    <td className="py-3 px-4">{u.phone_number || <span className="text-base-content/30">—</span>}</td>
+                    <td className="py-3 px-4">{u.organization || <span className="text-muted">—</span>}</td>
+                    <td className="py-3 px-4">{u.phone_number || <span className="text-muted">—</span>}</td>
                     <td className="py-3 px-4 text-xs">
-                      <span className={isOnline ? 'text-green-600 font-medium' : 'text-base-content/50'}>
+                      <span className={isOnline ? 'text-success font-medium' : 'text-muted'}>
                         {isOnline ? '● Online' : fmtLastLogin(lastLogin)}
                       </span>
                     </td>
-                    <td className="py-3 px-4 text-xs text-base-content/50">{u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
+                    <td className="py-3 px-4 text-xs text-muted">{u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}</td>
                     <td className="py-3 px-4 text-right"><button className="btn btn-xs btn-ghost" onClick={() => onEdit?.(u)}>Edit</button></td>
                   </tr>
                 )
@@ -134,14 +134,14 @@ export function UsersTable({ users, onReload, onEdit, reloadKey = 0 }) {
       </div>
       <div className="flex flex-wrap gap-3 justify-between items-center">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs text-base-content/50 uppercase tracking-widest">Rows</span>
+          <span className="text-xs text-muted uppercase tracking-widest">Rows</span>
           <select value={perPage} onChange={e => { setPerPage(Number(e.target.value)); setPage(1) }} className="select select-bordered select-sm">
             <option value={10}>10</option>
             <option value={25}>25</option>
             <option value={50}>50</option>
           </select>
           {total !== null && total > 0 && (
-            <span className="text-xs text-base-content/50">
+            <span className="text-xs text-muted">
               {(page - 1) * perPage + 1}–{Math.min(page * perPage, total)} of {total}
             </span>
           )}
@@ -231,7 +231,7 @@ function AddUserForm({ onCreated }) {
               <input type="file" accept="image/*" className="hidden" onChange={handlePhotoChange} />
             </label>
           </div>
-          <p className="text-xs text-base-content/50 leading-relaxed">Upload a square or circular photo.<br />JPG, PNG, or WebP · max 5 MB · required</p>
+          <p className="text-xs text-muted leading-relaxed">Upload a square or circular photo.<br />JPG, PNG, or WebP · max 5 MB · required</p>
         </div>
       </Field>
 
@@ -392,7 +392,7 @@ export function EditUserModal({ open, user, onClose, onSave }) {
             <input type="email" placeholder="name@example.com" value={email}
               onChange={e => setEmail(e.target.value)} className="input input-bordered w-full" />
           </Field>
-          <p className="text-xs text-base-content/50 -mt-2">
+          <p className="text-xs text-muted -mt-2">
             ID: {user.id} · changing the email changes what this user signs in with
           </p>
 
@@ -411,7 +411,7 @@ export function EditUserModal({ open, user, onClose, onSave }) {
               <p className="font-medium text-sm">{displayName}</p>
               {photo
                 ? <p className="text-xs text-success mt-0.5">✓ Photo set</p>
-                : <p className="text-xs text-base-content/40 mt-0.5">No photo uploaded</p>}
+                : <p className="text-xs text-muted mt-0.5">No photo uploaded</p>}
               {photo && (
                 <button className="btn btn-xs btn-ghost text-error mt-1" onClick={() => setPhoto(null)}>Remove photo</button>
               )}
@@ -569,13 +569,13 @@ function ProfilePage({ currentUser, onUpdate }) {
                   <h2 className="text-2xl font-bold truncate">{displayName}</h2>
                   <span className={`badge ${getRoleBadgeClass(currentUser.role)}`}>{currentUser.role}</span>
                 </div>
-                <p className="text-sm text-base-content/60 break-all">{currentUser.email}</p>
-                {phoneNumber && <p className="text-sm text-base-content/60">{phoneNumber}</p>}
-                {organization && <p className="text-sm text-base-content/60">{organization}</p>}
-                {buyBox && <p className="text-sm text-base-content/60 line-clamp-2">{buyBox}</p>}
+                <p className="text-sm text-muted break-all">{currentUser.email}</p>
+                {phoneNumber && <p className="text-sm text-muted">{phoneNumber}</p>}
+                {organization && <p className="text-sm text-muted">{organization}</p>}
+                {buyBox && <p className="text-sm text-muted line-clamp-2">{buyBox}</p>}
               </div>
             </div>
-            <div className="text-xs text-base-content/40 space-y-1 lg:text-right">
+            <div className="text-xs text-muted space-y-1 lg:text-right">
               {currentUser.created_at && <div>Member since {new Date(currentUser.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>}
               {currentUser.updated_at && <div>Last updated {new Date(currentUser.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>}
             </div>
@@ -764,7 +764,7 @@ function PropertiesPage({ user }) {
           )}
           {/* Search */}
           <div className="relative">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
             </svg>
             <input
@@ -775,7 +775,7 @@ function PropertiesPage({ user }) {
               className="input input-bordered input-sm pl-8 w-60"
             />
             {search && (
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={() => setSearch('')}>✕</button>
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-base-content" onClick={() => setSearch('')}>✕</button>
             )}
           </div>
           {/* List-mode filters */}
@@ -838,11 +838,11 @@ function PropertiesPage({ user }) {
         />
       </Suspense>
 
-      {loading && <p className="text-base-content/40 text-sm">Loading…</p>}
+      {loading && <p className="text-muted text-sm">Loading…</p>}
       {error && <div role="alert" className="alert alert-error text-sm">{error}</div>}
 
       {!loading && properties.length === 0 && (
-        <div className="py-16 text-center text-base-content/30">
+        <div className="py-16 text-center text-muted">
           <p className="text-lg">No properties yet</p>
           {user.role === 'admin' && <p className="text-sm mt-1">Click &quot;+ New Property&quot; to add one</p>}
           {user.role !== 'admin' && <p className="text-sm mt-1">Properties assigned to you will appear here</p>}
@@ -850,7 +850,7 @@ function PropertiesPage({ user }) {
       )}
 
       {!loading && properties.length > 0 && filteredProperties.length === 0 && (
-        <div className="py-10 text-center text-base-content/30">
+        <div className="py-10 text-center text-muted">
           <p>No properties match &ldquo;{search}&rdquo;</p>
           <button className="btn btn-xs btn-ghost mt-2" onClick={() => setSearch('')}>Clear search</button>
         </div>
@@ -866,11 +866,11 @@ function PropertiesPage({ user }) {
               <div className="card-body gap-3 p-6" onClick={() => openProperty(prop)}>
                 <h2 className="text-base font-semibold leading-snug">{prop.address}</h2>
                 <div className="space-y-1">
-                  <p className="text-sm text-base-content/60">{prop.county} County</p>
-                  <p className="text-xs text-base-content/40 font-mono">PIN: {prop.pin}</p>
+                  <p className="text-sm text-muted">{prop.county} County</p>
+                  <p className="text-xs text-muted font-mono">PIN: {prop.pin}</p>
                   {prop.price && <p className="text-sm font-medium">{fmt(prop.price)}</p>}
                   {prop.updated_at && (
-                    <p className="text-xs text-base-content/30">Updated {new Date(prop.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                    <p className="text-xs text-muted">Updated {new Date(prop.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                   )}
                 </div>
                 {user.role === 'admin' && (
@@ -881,7 +881,7 @@ function PropertiesPage({ user }) {
                 )}
                 {user.role !== 'admin' && (
                   <div className="pt-2 border-t border-base-200 mt-1">
-                    <span className="text-xs text-base-content/40">Click to view details &amp; media</span>
+                    <span className="text-xs text-muted">Click to view details &amp; media</span>
                   </div>
                 )}
               </div>
@@ -895,7 +895,7 @@ function PropertiesPage({ user }) {
         <div className="overflow-x-auto rounded-lg border border-base-300">
           <table className="table table-zebra w-full">
             <thead>
-              <tr className="text-xs text-base-content/50 uppercase tracking-wide select-none">
+              <tr className="text-xs text-muted uppercase tracking-wide select-none">
                 {[
                   { label: 'Address', col: 'address' },
                   { label: 'County', col: 'county' },
@@ -918,14 +918,14 @@ function PropertiesPage({ user }) {
               {sortedListProperties.map((prop, i) => (
                 <tr key={i} className="hover cursor-pointer" onClick={() => openProperty(prop)}>
                   <td className="font-medium max-w-xs truncate">{prop.address}</td>
-                  <td className="text-sm text-base-content/60">{prop.county}</td>
-                  <td className="font-mono text-xs text-base-content/50">{prop.pin}</td>
+                  <td className="text-sm text-muted">{prop.county}</td>
+                  <td className="font-mono text-xs text-muted">{prop.pin}</td>
                   <td className="text-xs"><span className="badge badge-xs badge-outline">{prop.status || 'New'}</span></td>
-                  <td className="text-xs text-base-content/60">{prop.asset_type || <span className="text-base-content/30">—</span>}</td>
-                  <td className="text-sm">{fmt(prop.price) || <span className="text-base-content/30">—</span>}</td>
-                  <td className="text-sm">{prop.square_feet ? Number(prop.square_feet).toLocaleString() : <span className="text-base-content/30">—</span>}</td>
-                  <td className="text-sm">{prop.year_built || <span className="text-base-content/30">—</span>}</td>
-                  <td className="text-xs text-base-content/40 whitespace-nowrap">
+                  <td className="text-xs text-muted">{prop.asset_type || <span className="text-muted">—</span>}</td>
+                  <td className="text-sm">{fmt(prop.price) || <span className="text-muted">—</span>}</td>
+                  <td className="text-sm">{prop.square_feet ? Number(prop.square_feet).toLocaleString() : <span className="text-muted">—</span>}</td>
+                  <td className="text-sm">{prop.year_built || <span className="text-muted">—</span>}</td>
+                  <td className="text-xs text-muted whitespace-nowrap">
                     {prop.updated_at ? new Date(prop.updated_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' }) : '—'}
                   </td>
                   <td onClick={e => e.stopPropagation()}>
@@ -952,11 +952,11 @@ function PropertiesPage({ user }) {
               <div key={col.label} className="flex-shrink-0 w-72">
                 <div className="flex items-center gap-2 mb-3">
                   <span className={`badge badge-sm ${col.color}`}>{col.label}</span>
-                  <span className="text-xs text-base-content/40">{colProps.length}</span>
+                  <span className="text-xs text-muted">{colProps.length}</span>
                 </div>
                 <div className="space-y-3">
                   {colProps.length === 0 && (
-                    <div className="rounded-lg border border-dashed border-base-300 p-4 text-center text-xs text-base-content/30">
+                    <div className="rounded-lg border border-dashed border-base-300 p-4 text-center text-xs text-muted">
                       No properties
                     </div>
                   )}
@@ -966,9 +966,9 @@ function PropertiesPage({ user }) {
                       onClick={() => openProperty(prop)}>
                       <div className="card-body p-4 gap-2">
                         <p className="font-medium text-sm leading-snug line-clamp-2">{prop.address}</p>
-                        <p className="text-xs text-base-content/50">{prop.county} County</p>
+                        <p className="text-xs text-muted">{prop.county} County</p>
                         {prop.price && <p className="text-sm font-semibold">{fmt(prop.price)}</p>}
-                        <p className="text-xs text-base-content/40 font-mono">PIN: {prop.pin}</p>
+                        <p className="text-xs text-muted font-mono">PIN: {prop.pin}</p>
                         {isAdmin && (
                           <div className="flex gap-1 pt-1 border-t border-base-200 flex-wrap" onClick={e => e.stopPropagation()}>
                             <select
@@ -1067,6 +1067,18 @@ export default function App() {
   const [authError, setAuthError] = useState('')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('rep_theme') === 'dark')
+  useEffect(() => {
+    document.documentElement.dataset.theme = darkMode ? 'monochrome-dark' : 'monochrome'
+    const themeColor = document.querySelector('meta[name="theme-color"]')
+    if (themeColor) themeColor.content = darkMode ? '#14251a' : '#ffffff'
+  }, [darkMode])
+  useEffect(() => {
+    const syncTheme = event => {
+      if (event.key === 'rep_theme' || event.key === null) setDarkMode(event.newValue === 'dark')
+    }
+    window.addEventListener('storage', syncTheme)
+    return () => window.removeEventListener('storage', syncTheme)
+  }, [])
   const [loginPreview, setLoginPreview] = useState(null)
   const [loginStatus, setLoginStatus] = useState(null)
   const [editingUser, setEditingUser] = useState(null)
@@ -1272,6 +1284,9 @@ export default function App() {
         <div className="relative z-10 w-full flex items-center justify-center px-4">
           <div className="card w-full max-w-md bg-base-100 shadow-2xl">
             <div className="card-body p-10 space-y-6">
+              <button type="button" className="btn btn-sm btn-ghost self-end" onClick={toggleDarkMode}>
+                {darkMode ? 'Day mode' : 'Night mode'}
+              </button>
               <div className="flex justify-center mb-2">
                 {loginPreview ? (
                   <div className="flex flex-col items-center gap-3 animate-fade-in">
@@ -1282,7 +1297,7 @@ export default function App() {
                       <p className="text-xl font-semibold">
                         {[loginPreview.first_name, loginPreview.last_name].filter(Boolean).join(' ') || email.split('@')[0]}
                       </p>
-                      <p className="text-sm text-base-content/50">
+                      <p className="text-sm text-muted">
                         {loginPreview.login_count > 0 ? 'Welcome back' : 'Welcome'}
                       </p>
                     </div>
@@ -1315,8 +1330,8 @@ export default function App() {
                   {loading ? 'Processing…' : 'Sign In'}
                 </button>
               </form>
-              <div className="divider text-xs text-base-content/30 my-0" />
-              <button className="btn btn-ghost btn-sm w-full text-base-content/60"
+              <div className="divider text-xs text-muted my-0" />
+              <button className="btn btn-ghost btn-sm w-full text-muted"
                 onClick={() => { setShowForgot(true); setMsg('') }}>
                 Forgot your password?
               </button>
@@ -1383,7 +1398,7 @@ export default function App() {
   const renderGlobalSearch = (mobile = false) => (
     <div ref={mobile ? undefined : globalSearchRef} className={`relative ${mobile ? 'w-full' : 'w-[200px] xl:w-[300px] 2xl:w-[360px]'}`}>
       <div className="relative">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
         </svg>
         <input
@@ -1395,50 +1410,50 @@ export default function App() {
           className={`input input-bordered ${mobile ? 'input-sm w-full' : 'input-sm'} pl-9 pr-9 w-full`}
         />
         {globalSearch && (
-          <button className="absolute right-3 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={clearGlobalSearch}>✕</button>
+          <button className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-base-content" onClick={clearGlobalSearch}>✕</button>
         )}
       </div>
       {globalOpen && (
         <div className={`absolute ${mobile ? 'left-0 right-0 top-full mt-2' : 'right-0 top-full mt-2'} rounded-xl border border-base-300 bg-base-100 shadow-2xl overflow-hidden z-50`}>
           <div className="max-h-[70vh] overflow-y-auto">
-            {globalLoading && <div className="px-4 py-6 text-sm text-base-content/50 text-center">Searching…</div>}
+            {globalLoading && <div className="px-4 py-6 text-sm text-muted text-center">Searching…</div>}
             {!globalLoading && globalError && <div role="alert" className="px-4 py-6 text-sm text-error">{globalError}</div>}
             {!globalLoading && !globalError && !globalHasResults && debouncedGlobalSearch.trim().length >= 2 && (
-              <div className="px-4 py-6 text-sm text-base-content/50 text-center">No matches found</div>
+              <div className="px-4 py-6 text-sm text-muted text-center">No matches found</div>
             )}
             {!globalLoading && globalSections.map(section => {
               const items = globalResults[section.key] || []
               if (!items.length) return null
               return (
                 <div key={section.key} className="border-t first:border-t-0 border-base-300">
-                  <div className="px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-base-content/40 bg-base-200/60">{section.label}</div>
+                  <div className="px-4 py-2 text-[11px] uppercase tracking-[0.2em] text-muted bg-base-200/60">{section.label}</div>
                   <div className="divide-y divide-base-300/70">
                     {section.key === 'properties' && items.map(item => (
                       <button key={`property-${item.id}`} className="w-full text-left px-4 py-3 hover:bg-base-200 transition-colors" onClick={() => handleGlobalResultClick('property', item)}>
                         <div className="text-sm font-medium truncate">{item.address}</div>
-                        <div className="text-xs text-base-content/55 truncate">{item.county} · {item.asset_type || '—'} · {item.status || '—'}</div>
-                        <div className="text-[11px] text-base-content/35 font-mono truncate">PIN: {item.pin}</div>
+                        <div className="text-xs text-muted truncate">{item.county} · {item.asset_type || '—'} · {item.status || '—'}</div>
+                        <div className="text-[11px] text-muted font-mono truncate">PIN: {item.pin}</div>
                       </button>
                     ))}
                     {section.key === 'users' && items.map(item => (
                       <button key={`user-${item.id}`} className="w-full text-left px-4 py-3 hover:bg-base-200 transition-colors" onClick={() => handleGlobalResultClick('user', item)}>
                         <div className="text-sm font-medium truncate">{[item.first_name, item.last_name].filter(Boolean).join(' ') || item.email}</div>
-                        <div className="text-xs text-base-content/55 truncate">{item.email}</div>
-                        <div className="text-[11px] text-base-content/35 truncate">{item.organization || item.role || '—'}</div>
+                        <div className="text-xs text-muted truncate">{item.email}</div>
+                        <div className="text-[11px] text-muted truncate">{item.organization || item.role || '—'}</div>
                       </button>
                     ))}
                     {section.key === 'contacts' && items.map(item => (
                       <button key={`contact-${item.id}`} className="w-full text-left px-4 py-3 hover:bg-base-200 transition-colors" onClick={() => handleGlobalResultClick('contact', item)}>
                         <div className="text-sm font-medium truncate">{[item.first_name, item.last_name].filter(Boolean).join(' ') || item.email}</div>
-                        <div className="text-xs text-base-content/55 truncate">{item.email}</div>
-                        <div className="text-[11px] text-base-content/35 truncate">{item.last_note_text || item.buy_box || item.organization || 'No recent note'}</div>
+                        <div className="text-xs text-muted truncate">{item.email}</div>
+                        <div className="text-[11px] text-muted truncate">{item.last_note_text || item.buy_box || item.organization || 'No recent note'}</div>
                       </button>
                     ))}
                     {section.key === 'auditLogs' && items.map(item => (
                       <button key={`audit-${item.id}`} className="w-full text-left px-4 py-3 hover:bg-base-200 transition-colors" onClick={() => handleGlobalResultClick('audit', item)}>
                         <div className="text-sm font-medium truncate">{item.action}</div>
-                        <div className="text-xs text-base-content/55 truncate">{item.acted_by_email || 'system'} → {item.target_email || '—'}</div>
-                        <div className="text-[11px] text-base-content/35 truncate">{item.details || new Date(item.created_at).toLocaleString()}</div>
+                        <div className="text-xs text-muted truncate">{item.acted_by_email || 'system'} → {item.target_email || '—'}</div>
+                        <div className="text-[11px] text-muted truncate">{item.details || new Date(item.created_at).toLocaleString()}</div>
                       </button>
                     ))}
                   </div>
@@ -1476,7 +1491,7 @@ export default function App() {
         {/* Desktop right side */}
         <div className="hidden lg:flex flex-none items-center gap-2 ml-2">
           {currentUser.role === 'admin' && renderGlobalSearch()}
-          <button className="btn btn-sm btn-ghost" onClick={toggleDarkMode} title={darkMode ? 'Day mode' : 'Night mode'}>
+          <button className="btn btn-sm btn-ghost" onClick={toggleDarkMode} aria-label={darkMode ? 'Day mode' : 'Night mode'} title={darkMode ? 'Day mode' : 'Night mode'}>
             {darkMode ? <SunIcon /> : <MoonIcon />}
           </button>
           <button
@@ -1485,7 +1500,7 @@ export default function App() {
           >
             <Avatar src={currentUser.profile_photo} name={displayName} size="sm" />
             <div className="hidden xl:flex flex-col items-start leading-tight">
-              <span className="text-xs text-base-content/50 font-normal">
+              <span className="text-xs text-muted font-normal">
                 {(currentUser.login_count || 0) > 1 ? 'Welcome back,' : 'Welcome,'}
               </span>
               <span className="text-sm font-semibold truncate max-w-[160px]">
@@ -1550,12 +1565,12 @@ export default function App() {
             <h2 className="text-2xl font-bold">Manage Users</h2>
             <div className="card bg-base-100 border border-base-300">
               <div className="card-body p-4 md:p-8">
-                <h3 className="text-base font-semibold uppercase tracking-widest text-base-content/50 mb-6">Create New User</h3>
+                <h3 className="text-base font-semibold uppercase tracking-widest text-muted mb-6">Create New User</h3>
                 <AddUserForm onCreated={() => setUsersVersion(v => v + 1)} />
               </div>
             </div>
             <div>
-              <h3 className="text-base font-semibold uppercase tracking-widest text-base-content/50 mb-4">All Users</h3>
+              <h3 className="text-base font-semibold uppercase tracking-widest text-muted mb-4">All Users</h3>
               <UsersTable users={users} onReload={setUsers} reloadKey={usersVersion} onEdit={u => { setEditingUser(u); setShowEditUserModal(true) }} />
             </div>
 

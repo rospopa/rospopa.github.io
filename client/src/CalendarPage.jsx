@@ -181,7 +181,7 @@ function ContactMultiPicker({
 
   return (
     <div className="flex flex-col gap-1">
-      <span className="label-text text-xs uppercase tracking-widest text-base-content/50">
+      <span className="label-text text-xs uppercase tracking-widest text-muted">
         {label} {selectedIds.size > 0 && `(${selectedIds.size} selected)`}
       </span>
       <input
@@ -203,10 +203,10 @@ function ContactMultiPicker({
       )}
       <div className="mt-1 max-h-44 space-y-0.5 overflow-y-auto rounded-lg border border-base-200 p-1.5">
         {contacts.length === 0 && (
-          <p className="p-1.5 text-sm text-base-content/50">{emptyText}</p>
+          <p className="p-1.5 text-sm text-muted">{emptyText}</p>
         )}
         {contacts.length > 0 && visible.length === 0 && (
-          <p className="p-1.5 text-sm text-base-content/50">No contacts match "{search.trim()}".</p>
+          <p className="p-1.5 text-sm text-muted">No contacts match "{search.trim()}".</p>
         )}
         {visible.map(c => (
           <label key={c.id} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1 text-sm hover:bg-base-200">
@@ -214,13 +214,13 @@ function ContactMultiPicker({
               onChange={() => onToggle(c.id)} />
             <span className="min-w-0 flex-1 truncate">
               {contactName(c)}
-              {c.organization && <span className="text-base-content/45"> · {c.organization}</span>}
+              {c.organization && <span className="text-muted"> · {c.organization}</span>}
             </span>
-            {metaOf(c) && <span className="hidden max-w-[45%] truncate text-xs text-base-content/40 sm:inline" title={metaOf(c)}>{metaOf(c)}</span>}
+            {metaOf(c) && <span className="hidden max-w-[45%] truncate text-xs text-muted sm:inline" title={metaOf(c)}>{metaOf(c)}</span>}
           </label>
         ))}
       </div>
-      {footnote && <p className="text-[11px] text-base-content/45">{footnote}</p>}
+      {footnote && <p className="text-[11px] text-muted">{footnote}</p>}
     </div>
   )
 }
@@ -285,20 +285,20 @@ function ConnectPanel({ settings, onSaved }) {
       <div>
         <h3 className="font-semibold">Google Calendar connection</h3>
         {apiMode ? (
-          <p className="text-sm text-base-content/60 mt-1">
+          <p className="text-sm text-muted mt-1">
             Connected through the Google Calendar API using{' '}
             {googleMode === 'service_account' ? 'a service account' : 'an API key'}. Configured entirely
             through environment variables &mdash; change them in your host and redeploy.
           </p>
         ) : envManaged ? (
-          <p className="text-sm text-base-content/60 mt-1">
+          <p className="text-sm text-muted mt-1">
             This calendar is configured through deploy secrets. Point{' '}
             <code className="text-xs">GOOGLE_CALENDAR_ICS_URL</code> at your calendar's{' '}
             <strong>Secret address in iCal format</strong>, and optionally set{' '}
             <code className="text-xs">GOOGLE_CALENDAR_ID</code> for the embedded month view.
           </p>
         ) : (
-          <p className="text-sm text-base-content/60 mt-1">
+          <p className="text-sm text-muted mt-1">
             Paste the <strong>Secret address in iCal format</strong> below, or configure the Google Calendar
             API instead with a service account &mdash; see the setup notes below.
           </p>
@@ -314,12 +314,12 @@ function ConnectPanel({ settings, onSaved }) {
             via {googleMode === 'service_account' ? 'service account' : 'API key'}
           </p>
           {settings.service_account_email && (
-            <p className="text-xs text-base-content/55 break-all">
+            <p className="text-xs text-muted break-all">
               Share your calendar with <code>{settings.service_account_email}</code>
             </p>
           )}
           {settings.embed_calendar_id && (
-            <p className="text-xs text-base-content/55">Calendar: {settings.embed_calendar_id}</p>
+            <p className="text-xs text-muted">Calendar: {settings.embed_calendar_id}</p>
           )}
           {settings.needs_calendar_id && (
             <p className="text-xs text-warning">
@@ -333,15 +333,15 @@ function ConnectPanel({ settings, onSaved }) {
             <span className="badge badge-success badge-sm mr-2">Connected</span>
             via <code className="text-xs">GOOGLE_CALENDAR_ICS_URL</code>
           </p>
-          <p className="text-xs text-base-content/55 break-all">{settings.ics_url_preview}</p>
+          <p className="text-xs text-muted break-all">{settings.ics_url_preview}</p>
           {settings.embed_calendar_id && (
-            <p className="text-xs text-base-content/55">Embedded view: {settings.embed_calendar_id}</p>
+            <p className="text-xs text-muted">Embedded view: {settings.embed_calendar_id}</p>
           )}
         </div>
       ) : (
         <>
           <label className="form-control">
-            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Secret iCal address</span>
+            <span className="label-text text-xs uppercase tracking-widest text-muted">Secret iCal address</span>
             <input
               type="password"
               className="input input-bordered w-full"
@@ -353,7 +353,7 @@ function ConnectPanel({ settings, onSaved }) {
           </label>
 
           <label className="form-control">
-            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">
+            <span className="label-text text-xs uppercase tracking-widest text-muted">
               Calendar ID for the embedded view (optional)
             </span>
             <input
@@ -365,10 +365,10 @@ function ConnectPanel({ settings, onSaved }) {
           </label>
 
           <details className="text-sm">
-            <summary className="cursor-pointer text-base-content/70">
+            <summary className="cursor-pointer text-muted">
               Prefer API credentials instead of an iCal link?
             </summary>
-            <div className="mt-2 space-y-2 text-base-content/60">
+            <div className="mt-2 space-y-2 text-muted">
               <p>
                 An API key alone can only read <strong>public</strong> calendars. For a private calendar,
                 use a service account &mdash; still just environment variables, no browser sign-in:
@@ -414,7 +414,7 @@ function ConnectPanel({ settings, onSaved }) {
             <span className="badge badge-success badge-sm mr-2">Connected</span>
             {settings.work_label || 'Work'} calendar via <code className="text-xs">WORK_CALENDAR_ICS_URL</code> · read-only feed
           </p>
-          <p className="text-xs text-base-content/55 break-all">{settings.work_ics_url_preview}</p>
+          <p className="text-xs text-muted break-all">{settings.work_ics_url_preview}</p>
         </div>
       )}
 
@@ -479,7 +479,7 @@ export function MonthGrid({ monthKey, onMonthChange, eventsByDay, selectedDay, o
 
       <div className="grid grid-cols-7 border-b border-base-300 bg-base-200/50">
         {WEEKDAY_LABELS.map(label => (
-          <div key={label} className="px-1 py-1 text-center text-[11px] font-semibold uppercase tracking-wide text-base-content/50">
+          <div key={label} className="px-1 py-1 text-center text-[11px] font-semibold uppercase tracking-wide text-muted">
             <span className="hidden sm:inline">{label}</span>
             <span className="sm:hidden">{label[0]}</span>
           </div>
@@ -505,14 +505,14 @@ export function MonthGrid({ monthKey, onMonthChange, eventsByDay, selectedDay, o
                 // of pushing the seven columns wider than the viewport.
                 'flex min-w-0 flex-col min-h-[64px] sm:min-h-[92px] border-b border-r border-base-200 p-1',
                 'cursor-pointer transition-colors hover:bg-base-200/60 focus:outline-none focus-visible:ring focus-visible:ring-primary/40',
-                day.inMonth ? '' : 'bg-base-200/30 text-base-content/35',
+                day.inMonth ? '' : 'bg-base-200/30 text-muted',
                 isSelected ? 'bg-primary/10' : '',
               ].join(' ')}
             >
               <span
                 className={[
                   'inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full text-[11px]',
-                  isToday ? 'bg-primary font-bold text-primary-content' : 'text-base-content/70',
+                  isToday ? 'bg-primary font-bold text-primary-content' : 'text-muted',
                 ].join(' ')}
               >
                 {day.dayOfMonth}
@@ -538,7 +538,7 @@ export function MonthGrid({ monthKey, onMonthChange, eventsByDay, selectedDay, o
                   </button>
                 ))}
                 {dayEvents.length > 3 && (
-                  <span className="px-1 text-[10px] text-base-content/50">+{dayEvents.length - 3} more</span>
+                  <span className="px-1 text-[10px] text-muted">+{dayEvents.length - 3} more</span>
                 )}
               </span>
             </div>
@@ -665,15 +665,15 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
               <h3 className="text-lg font-bold">{event.title}</h3>
               {isWork && <span className={`badge badge-outline badge-sm shrink-0 ${CAL_BADGE.work}`}>Work</span>}
             </div>
-            <p className="mt-1 text-sm text-base-content/70">{fmtEventTime(event)}</p>
-            {event.location && <p className="mt-1 text-sm text-base-content/60">📍 {event.location}</p>}
-            {event.recurring && <p className="mt-1 text-xs text-base-content/45">Repeats</p>}
+            <p className="mt-1 text-sm text-muted">{fmtEventTime(event)}</p>
+            {event.location && <p className="mt-1 text-sm text-muted">📍 {event.location}</p>}
+            {event.recurring && <p className="mt-1 text-xs text-muted">Repeats</p>}
             {description && (
               <p className="mt-3 max-h-56 overflow-y-auto whitespace-pre-wrap text-sm text-base-content/75">{description}</p>
             )}
             {(attached || []).length > 0 && (
               <div className="mt-4">
-                <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">Contacts</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted">Contacts</p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {attached.map(c => (
                     <span key={c.contact_id} className="badge badge-sm badge-outline gap-1">
@@ -685,7 +685,7 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
             )}
             {rules.length > 0 && (
               <div className="mt-4">
-                <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">Notifications</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted">Notifications</p>
                 <div className="mt-1 flex flex-wrap gap-1">
                   {rules.map(rule => (
                     <span key={rule.id} className={`badge badge-sm gap-1 ${rule.enabled ? 'badge-primary badge-outline' : 'badge-ghost'}`}>
@@ -707,7 +707,7 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
           <>
             <h3 className="text-lg font-bold">{fieldsEditable ? 'Edit event' : 'Event contacts'}</h3>
             {!fieldsEditable && (
-              <p className="mt-1 text-xs text-base-content/55">
+              <p className="mt-1 text-xs text-muted">
                 {isWork
                   ? 'This event comes from the read-only work feed - change its details in Outlook. Contacts are saved on the platform.'
                   : 'This connection is read-only, so event details cannot be changed here. Contacts are saved on the platform.'}
@@ -717,7 +717,7 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
             {fieldsEditable && (
               <div className="mt-3 space-y-3">
                 <label className="form-control">
-                  <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Title</span>
+                  <span className="label-text text-xs uppercase tracking-widest text-muted">Title</span>
                   <input className="input input-bordered input-sm w-full" value={form.title}
                     onChange={e => set({ title: e.target.value })} />
                 </label>
@@ -731,12 +731,12 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
                 {form.allDay ? (
                   <div className="grid grid-cols-2 gap-2">
                     <label className="form-control">
-                      <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Starts</span>
+                      <span className="label-text text-xs uppercase tracking-widest text-muted">Starts</span>
                       <input type="date" className="input input-bordered input-sm w-full" value={form.startDate}
                         onChange={e => set({ startDate: e.target.value })} />
                     </label>
                     <label className="form-control">
-                      <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Ends</span>
+                      <span className="label-text text-xs uppercase tracking-widest text-muted">Ends</span>
                       <input type="date" className="input input-bordered input-sm w-full" value={form.endDate}
                         onChange={e => set({ endDate: e.target.value })} />
                     </label>
@@ -744,12 +744,12 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
                 ) : (
                   <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                     <label className="form-control">
-                      <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Starts</span>
+                      <span className="label-text text-xs uppercase tracking-widest text-muted">Starts</span>
                       <input type="datetime-local" className="input input-bordered input-sm w-full" value={form.startLocal}
                         onChange={e => set({ startLocal: e.target.value })} />
                     </label>
                     <label className="form-control">
-                      <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Ends</span>
+                      <span className="label-text text-xs uppercase tracking-widest text-muted">Ends</span>
                       <input type="datetime-local" className="input input-bordered input-sm w-full" value={form.endLocal}
                         onChange={e => set({ endLocal: e.target.value })} />
                     </label>
@@ -757,13 +757,13 @@ function EventDetailModal({ event, rules, contacts, attached, onClose, onAddNoti
                 )}
 
                 <label className="form-control">
-                  <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Location</span>
+                  <span className="label-text text-xs uppercase tracking-widest text-muted">Location</span>
                   <input className="input input-bordered input-sm w-full" value={form.location}
                     onChange={e => set({ location: e.target.value })} />
                 </label>
 
                 <label className="form-control">
-                  <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Description</span>
+                  <span className="label-text text-xs uppercase tracking-widest text-muted">Description</span>
                   <textarea className="textarea textarea-bordered w-full" rows={3} value={form.description}
                     onChange={e => set({ description: e.target.value })} />
                 </label>
@@ -865,7 +865,7 @@ function EventCreateModal({ contacts, defaultDay, onClose, onCreated }) {
         <h3 className="text-lg font-bold">New event</h3>
         <div className="mt-3 space-y-3">
           <label className="form-control">
-            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Title</span>
+            <span className="label-text text-xs uppercase tracking-widest text-muted">Title</span>
             <input className="input input-bordered input-sm w-full" value={form.title}
               onChange={e => set({ title: e.target.value })} autoFocus />
           </label>
@@ -879,12 +879,12 @@ function EventCreateModal({ contacts, defaultDay, onClose, onCreated }) {
           {form.allDay ? (
             <div className="grid grid-cols-2 gap-2">
               <label className="form-control">
-                <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Starts</span>
+                <span className="label-text text-xs uppercase tracking-widest text-muted">Starts</span>
                 <input type="date" className="input input-bordered input-sm w-full" value={form.startDate}
                   onChange={e => set({ startDate: e.target.value })} />
               </label>
               <label className="form-control">
-                <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Ends</span>
+                <span className="label-text text-xs uppercase tracking-widest text-muted">Ends</span>
                 <input type="date" className="input input-bordered input-sm w-full" value={form.endDate}
                   onChange={e => set({ endDate: e.target.value })} />
               </label>
@@ -892,12 +892,12 @@ function EventCreateModal({ contacts, defaultDay, onClose, onCreated }) {
           ) : (
             <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               <label className="form-control">
-                <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Starts</span>
+                <span className="label-text text-xs uppercase tracking-widest text-muted">Starts</span>
                 <input type="datetime-local" className="input input-bordered input-sm w-full" value={form.startLocal}
                   onChange={e => set({ startLocal: e.target.value })} />
               </label>
               <label className="form-control">
-                <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Ends</span>
+                <span className="label-text text-xs uppercase tracking-widest text-muted">Ends</span>
                 <input type="datetime-local" className="input input-bordered input-sm w-full" value={form.endLocal}
                   onChange={e => set({ endLocal: e.target.value })} />
               </label>
@@ -905,13 +905,13 @@ function EventCreateModal({ contacts, defaultDay, onClose, onCreated }) {
           )}
 
           <label className="form-control">
-            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Location</span>
+            <span className="label-text text-xs uppercase tracking-widest text-muted">Location</span>
             <input className="input input-bordered input-sm w-full" value={form.location}
               onChange={e => set({ location: e.target.value })} />
           </label>
 
           <label className="form-control">
-            <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Description</span>
+            <span className="label-text text-xs uppercase tracking-widest text-muted">Description</span>
             <textarea className="textarea textarea-bordered w-full" rows={3} value={form.description}
               onChange={e => set({ description: e.target.value })} />
           </label>
@@ -1046,11 +1046,11 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
         <h3 className="font-bold text-lg">Add notification</h3>
         <div className="rounded-lg bg-base-200 px-3 py-2">
           <p className="font-medium">{event.title}</p>
-          <p className="text-xs text-base-content/60">{fmtEventTime(event)}</p>
+          <p className="text-xs text-muted">{fmtEventTime(event)}</p>
         </div>
 
         <div>
-          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Notify by</span>
+          <span className="label-text text-xs uppercase tracking-widest text-muted">Notify by</span>
           <div className="join mt-1 w-full">
             {CHANNELS.map(c => (
               <button
@@ -1073,7 +1073,7 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">When</span>
+          <span className="label-text text-xs uppercase tracking-widest text-muted">When</span>
           <select className="select select-bordered select-sm w-full" value={minutesBefore} onChange={e => setMinutesBefore(e.target.value)}>
             {LEAD_TIMES.map(l => <option key={l.value} value={l.value}>{l.label}</option>)}
           </select>
@@ -1090,7 +1090,7 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
         />
 
         <div className="flex flex-col gap-1">
-          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">
+          <span className="label-text text-xs uppercase tracking-widest text-muted">
             {meta.needs === 'phone' ? 'Also notify a phone number (optional)' : 'Also notify an email address (optional)'}
           </span>
           {meta.needs === 'phone' ? (
@@ -1103,7 +1103,7 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Custom message (optional)</span>
+          <span className="label-text text-xs uppercase tracking-widest text-muted">Custom message (optional)</span>
           <textarea
             className="textarea textarea-bordered w-full"
             rows={3}
@@ -1114,7 +1114,7 @@ function NotificationModal({ open, event, contacts, channels, onClose, onSaved }
         </div>
 
         {recipientCount > 0 && !error && (
-          <p className="text-xs text-base-content/60">
+          <p className="text-xs text-muted">
             Will create {recipientCount} {meta.label.toLowerCase()} notification{recipientCount > 1 ? 's' : ''}
             {' '}{leadLabel(Number(minutesBefore)).toLowerCase()}.
           </p>
@@ -1359,11 +1359,11 @@ export default function CalendarPage() {
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold">Calendar</h2>
-          <p className="text-sm text-base-content/60">
+          <p className="text-sm text-muted">
             Your Google Calendar, with Call, Email and SMS notifications you can target at any contact.
           </p>
           {settings?.connected && (
-            <p className="text-xs text-base-content/45 mt-1">
+            <p className="text-xs text-muted mt-1">
               {error
                 ? 'Could not reach your calendar — the days below may be out of date.'
                 : lastSynced
@@ -1406,7 +1406,7 @@ export default function CalendarPage() {
           {detailsHidden && (
             <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm">
               <p className="font-medium">Events are syncing, but Google is hiding their names.</p>
-              <p className="mt-1 text-base-content/70">
+              <p className="mt-1 text-muted">
                 The calendar is shared with{' '}
                 <code className="text-xs break-all">{settings.service_account_email || 'the service account'}</code>{' '}
                 as <strong>See only free/busy (hide details)</strong>. In Google Calendar open{' '}
@@ -1419,7 +1419,7 @@ export default function CalendarPage() {
           {!error && events.length === 0 && (
             <div className="rounded-xl border border-warning/40 bg-warning/10 p-3 text-sm">
               <p className="font-medium">Your calendar was read, but it returned no events.</p>
-              <p className="mt-1 text-base-content/70">
+              <p className="mt-1 text-muted">
                 {settings.embed_calendar_id
                   ? <>Reading <code className="text-xs">{settings.embed_calendar_id}</code>. If your events live on a different calendar, point <code className="text-xs">GOOGLE_CALENDAR_ID</code> at that one.</>
                   : <>No calendar ID is set. Point <code className="text-xs">GOOGLE_CALENDAR_ID</code> at the calendar you want to read.</>}
@@ -1431,7 +1431,7 @@ export default function CalendarPage() {
           )}
 
           {settings.work_calendar && (
-            <div className="flex items-center gap-4 text-xs text-base-content/55">
+            <div className="flex items-center gap-4 text-xs text-muted">
               <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full cal-dot-personal" /> Personal</span>
               <span className="inline-flex items-center gap-1.5"><span className="h-2 w-2 rounded-full cal-dot-work" /> {settings.work_label || 'Work'}</span>
             </div>
@@ -1448,15 +1448,15 @@ export default function CalendarPage() {
 
           <div className="rounded-xl border border-base-300 bg-base-100 p-3 shadow-sm">
             {outsideLoadedRange && (
-              <p className="mb-2 text-xs text-base-content/50">
+              <p className="mb-2 text-xs text-muted">
                 This month is outside the range loaded from your calendar, so it may look empty.
               </p>
             )}
-            <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted">
               {fmtDayHeading(selectedDay)}
             </p>
             {selectedDayEvents.length === 0 ? (
-              <p className="mt-2 text-sm text-base-content/50">
+              <p className="mt-2 text-sm text-muted">
                 {error ? 'Your calendar could not be read, so nothing can be shown here.' : 'Nothing scheduled.'}
               </p>
             ) : (
@@ -1468,11 +1468,11 @@ export default function CalendarPage() {
                     onClick={() => setDetailEvent(event)}
                     className="flex w-full items-baseline gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-base-200"
                   >
-                    <span className="w-20 shrink-0 text-xs text-base-content/55">{fmtChipTime(event)}</span>
+                    <span className="w-20 shrink-0 text-xs text-muted">{fmtChipTime(event)}</span>
                     <span className={`h-2 w-2 shrink-0 self-center rounded-full ${CAL_DOT[calKind(event)]}`} />
                     <span className="min-w-0 flex-1 truncate text-sm">{event.title}</span>
                     {(rulesByEvent.get(event.uid) || []).length > 0 && (
-                      <span className="text-xs text-base-content/45">
+                      <span className="text-xs text-muted">
                         {(rulesByEvent.get(event.uid) || []).map(r => channelMeta(r.channel).icon).join('')}
                       </span>
                     )}
@@ -1484,15 +1484,15 @@ export default function CalendarPage() {
         </div>
         <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]">
           <div className="space-y-4">
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">Upcoming events</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-muted">Upcoming events</h3>
             {grouped.length === 0 && (
-              <div className="rounded-xl border border-dashed border-base-300 p-8 text-center text-sm text-base-content/50">
+              <div className="rounded-xl border border-dashed border-base-300 p-8 text-center text-sm text-muted">
                 No upcoming events in the next 120 days.
               </div>
             )}
             {grouped.map(([key, dayEvents]) => (
               <div key={key} className="space-y-2">
-                <p className="text-xs font-semibold uppercase tracking-widest text-base-content/45">{fmtDayHeading(key)}</p>
+                <p className="text-xs font-semibold uppercase tracking-widest text-muted">{fmtDayHeading(key)}</p>
                 {dayEvents.map(event => {
                   const eventRules = rulesByEvent.get(event.uid) || []
                   return (
@@ -1508,10 +1508,10 @@ export default function CalendarPage() {
                             {event.calendar === 'work' && <span className={`badge badge-outline badge-xs mr-1.5 align-middle ${CAL_BADGE.work}`}>Work</span>}
                             {event.title}
                           </p>
-                          <p className="text-xs text-base-content/60">{fmtEventTime(event)}</p>
-                          {event.location && <p className="text-xs text-base-content/45 truncate">{event.location}</p>}
+                          <p className="text-xs text-muted">{fmtEventTime(event)}</p>
+                          {event.location && <p className="text-xs text-muted truncate">{event.location}</p>}
                           {(eventContacts.get(event.uid) || []).length > 0 && (
-                            <p className="text-xs text-base-content/45 truncate">
+                            <p className="text-xs text-muted truncate">
                               👥 {(eventContacts.get(event.uid) || []).map(contactName).join(', ')}
                             </p>
                           )}
@@ -1543,11 +1543,11 @@ export default function CalendarPage() {
           <div className="space-y-6">
 
             <div className="space-y-3">
-              <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">
+              <h3 className="text-sm font-semibold uppercase tracking-widest text-muted">
                 Notification rules ({rules.length})
               </h3>
               {rules.length === 0 && (
-                <div className="rounded-xl border border-dashed border-base-300 p-6 text-center text-sm text-base-content/50">
+                <div className="rounded-xl border border-dashed border-base-300 p-6 text-center text-sm text-muted">
                   No notifications yet. Pick an event and add one.
                 </div>
               )}
@@ -1558,7 +1558,7 @@ export default function CalendarPage() {
                       <p className="font-medium truncate">
                         {channelMeta(rule.channel).icon} {rule.event_title || 'Calendar event'}
                       </p>
-                      <p className="text-xs text-base-content/60">
+                      <p className="text-xs text-muted">
                         {leadLabel(rule.minutes_before)} · {rule.recipient_name || rule.recipient_email || formatPhone(rule.recipient_phone)}
                       </p>
                       {rule.last_error && <p className="text-xs text-error truncate">Last attempt: {rule.last_error}</p>}

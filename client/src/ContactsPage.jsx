@@ -29,19 +29,19 @@ function typeLabel(type) {
 const LazyPropertyDetailModal = lazy(() => import('./PropertyDetailModal'))
 
 function PhoneLink({ phone }) {
-  if (!phone) return <span className="text-base-content/40">—</span>
+  if (!phone) return <span className="text-muted">—</span>
   const digits = phone.replace(/\D/g, '')
   return (
-    <a href={`tel:+${digits}`} className="text-blue-600 underline underline-offset-2 hover:text-blue-800 whitespace-nowrap">
+    <a href={`tel:+${digits}`} className="text-primary underline underline-offset-2 hover:text-primary whitespace-nowrap">
       {phone}
     </a>
   )
 }
 
 function EmailLink({ email }) {
-  if (!email) return <span className="text-base-content/40">—</span>
+  if (!email) return <span className="text-muted">—</span>
   return (
-    <a href={`mailto:${email}`} title={email} className="inline-block max-w-full align-bottom text-blue-600 underline underline-offset-2 hover:text-blue-800 truncate">
+    <a href={`mailto:${email}`} title={email} className="inline-block max-w-full align-bottom text-primary underline underline-offset-2 hover:text-primary truncate">
       {email}
     </a>
   )
@@ -58,7 +58,7 @@ function ContactAvatar({ contact, size = 'md' }) {
 
 function BirthdayText({ birthday, className = '' }) {
   const label = fmtBirthday(birthday)
-  if (!label) return <span className="text-base-content/40">—</span>
+  if (!label) return <span className="text-muted">—</span>
   const age = birthdayAge(birthday)
   const days = daysUntilBirthday(birthday)
   const soon = days !== null && days <= 30
@@ -93,14 +93,14 @@ function ContactCard({ contact, onViewNotes }) {
         {/* Details */}
         <div className="space-y-1 text-sm">
           {contact.organization && (
-            <div className="text-base-content/70 truncate">{contact.organization}</div>
+            <div className="text-muted truncate">{contact.organization}</div>
           )}
           <div><PhoneLink phone={contact.phone_number} /></div>
           {contact.birthday && (
-            <div className="text-xs text-base-content/60"><BirthdayText birthday={contact.birthday} /></div>
+            <div className="text-xs text-muted"><BirthdayText birthday={contact.birthday} /></div>
           )}
           {contact.buy_box && (
-            <div className="text-xs text-base-content/60 line-clamp-2">{contact.buy_box}</div>
+            <div className="text-xs text-muted line-clamp-2">{contact.buy_box}</div>
           )}
         </div>
         {/* Footer */}
@@ -108,7 +108,7 @@ function ContactCard({ contact, onViewNotes }) {
           <div className="flex items-center gap-2">
             <span className="badge badge-ghost badge-sm">{contact.note_count} {contact.note_count === 1 ? 'note' : 'notes'}</span>
             {contact.last_note_at && (
-              <span className="text-xs text-base-content/40">last: {fmtLastNote(contact.last_note_at)}</span>
+              <span className="text-xs text-muted">last: {fmtLastNote(contact.last_note_at)}</span>
             )}
           </div>
         </div>
@@ -191,13 +191,13 @@ function ContactNotesDrawer({ contact, onClose, onRefreshContacts }) {
           <button className="btn btn-sm btn-ghost btn-circle flex-shrink-0" onClick={onClose}>✕</button>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-3">
-          {loading && <div className="text-center py-8 text-base-content/50">Loading…</div>}
-          {!loading && notes.length === 0 && <div className="text-center py-8 text-base-content/40">No notes yet</div>}
+          {loading && <div className="text-center py-8 text-muted">Loading…</div>}
+          {!loading && notes.length === 0 && <div className="text-center py-8 text-muted">No notes yet</div>}
           {notes.map(note => (
             <div key={note.id} className="card bg-base-200 shadow-sm">
               <div className="card-body p-3 gap-2">
                 <div className="flex items-start justify-between gap-2">
-                  <span className="text-xs text-base-content/50">{new Date(note.created_at).toLocaleString()}</span>
+                  <span className="text-xs text-muted">{new Date(note.created_at).toLocaleString()}</span>
                   <button className="btn btn-xs btn-ghost text-error" onClick={() => handleDelete(note.id)} title="Delete note">
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                   </button>
@@ -430,8 +430,8 @@ function BuyBoxEditor({ userId, initialValue }) {
 
   if (!editing) return (
     <div className="group relative">
-      <p className="text-sm text-base-content/70 whitespace-pre-wrap min-h-[24px]">
-        {value || <span className="text-base-content/30 italic">Not set — click to add</span>}
+      <p className="text-sm text-muted whitespace-pre-wrap min-h-[24px]">
+        {value || <span className="text-muted italic">Not set — click to add</span>}
       </p>
       <button className="btn btn-xs btn-ghost mt-1 opacity-60 group-hover:opacity-100" onClick={() => setEditing(true)}>
         ✏️ Edit
@@ -477,8 +477,8 @@ function BirthdayEditor({ userId, initialValue, onSaved }) {
 
   if (!editing) return (
     <div className="group relative">
-      <p className="text-sm text-base-content/70 min-h-[24px]">
-        {value ? <BirthdayText birthday={value} /> : <span className="text-base-content/30 italic">Not set — click to add</span>}
+      <p className="text-sm text-muted min-h-[24px]">
+        {value ? <BirthdayText birthday={value} /> : <span className="text-muted italic">Not set — click to add</span>}
       </p>
       <button className="btn btn-xs btn-ghost mt-1 opacity-60 group-hover:opacity-100" onClick={() => setEditing(true)}>
         ✏️ Edit
@@ -581,8 +581,8 @@ function SmsModal({ contact, onClose }) {
     <div className="modal modal-open">
       <div className="modal-box max-w-md">
         <h3 className="font-bold text-lg">Send SMS</h3>
-        <p className="text-sm text-base-content/60 mt-1">To {name} · {contact.phone_number}</p>
-        {!config && <div className="py-6 text-center text-base-content/40">Loading…</div>}
+        <p className="text-sm text-muted mt-1">To {name} · {contact.phone_number}</p>
+        {!config && <div className="py-6 text-center text-muted">Loading…</div>}
         {config && !config.configured && (
           <div className="alert alert-warning text-sm mt-3">
             SMS is not configured. Set <code>TWILIO_ACCOUNT_SID</code>, <code>TWILIO_AUTH_TOKEN</code>, and <code>TWILIO_PHONE_NUMBER</code> on the server.
@@ -603,13 +603,13 @@ function SmsModal({ contact, onClose }) {
               </label>
             )}
             {config.numbers.length === 1 && (
-              <p className="text-xs text-base-content/50">From {config.numbers[0].phone_number}</p>
+              <p className="text-xs text-muted">From {config.numbers[0].phone_number}</p>
             )}
             <textarea
               className="textarea textarea-bordered w-full text-sm" rows={4} maxLength={1600}
               placeholder="Type your message…" value={body} onChange={e => setBody(e.target.value)} autoFocus
             />
-            <div className="text-xs text-base-content/40 text-right">{body.length}/1600</div>
+            <div className="text-xs text-muted text-right">{body.length}/1600</div>
             {error && <div className="alert alert-error text-sm">{error}</div>}
             {sent && <div className="alert alert-success text-sm">Message sent!</div>}
           </div>
@@ -669,27 +669,27 @@ function ProfileEditor({ user, onSaved, onCancel }) {
     <div className="w-full space-y-2">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <label className="form-control">
-          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">First name</span>
+          <span className="label-text text-xs uppercase tracking-widest text-muted">First name</span>
           <input className="input input-bordered input-sm w-full" value={form.first_name}
             onChange={e => set({ first_name: e.target.value })} autoFocus />
         </label>
         <label className="form-control">
-          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Last name</span>
+          <span className="label-text text-xs uppercase tracking-widest text-muted">Last name</span>
           <input className="input input-bordered input-sm w-full" value={form.last_name}
             onChange={e => set({ last_name: e.target.value })} />
         </label>
         <label className="form-control">
-          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Email</span>
+          <span className="label-text text-xs uppercase tracking-widest text-muted">Email</span>
           <input type="email" className="input input-bordered input-sm w-full" value={form.email}
             onChange={e => set({ email: e.target.value })} />
         </label>
         <label className="form-control">
-          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Phone</span>
+          <span className="label-text text-xs uppercase tracking-widest text-muted">Phone</span>
           <input type="tel" className="input input-bordered input-sm w-full" value={form.phone_number}
             onChange={e => set({ phone_number: e.target.value })} />
         </label>
         <label className="form-control sm:col-span-2">
-          <span className="label-text text-xs uppercase tracking-widest text-base-content/50">Organization</span>
+          <span className="label-text text-xs uppercase tracking-widest text-muted">Organization</span>
           <input className="input input-bordered input-sm w-full" value={form.organization}
             onChange={e => set({ organization: e.target.value })} />
         </label>
@@ -808,7 +808,7 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
     setDeleting(false)
   }
 
-  if (loading) return <div className="flex justify-center py-20 text-base-content/40">Loading…</div>
+  if (loading) return <div className="flex justify-center py-20 text-muted">Loading…</div>
   if (!data) return (
     <div className="text-center py-20 space-y-3">
       <p role="alert" className="text-error">{error || 'Contact not found'}</p>
@@ -877,16 +877,16 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
                   )}
                 </div>
               )}
-              {user.organization && <div className="text-sm text-base-content/60">{user.organization}</div>}
-              {user.birthday && <div className="text-sm text-base-content/60"><BirthdayText birthday={user.birthday} /></div>}
+              {user.organization && <div className="text-sm text-muted">{user.organization}</div>}
+              {user.birthday && <div className="text-sm text-muted"><BirthdayText birthday={user.birthday} /></div>}
                 </>
               )}
             </div>
-            <div className="text-xs text-base-content/40 text-right flex-shrink-0 space-y-0.5">
+            <div className="text-xs text-muted text-right flex-shrink-0 space-y-0.5">
               <div>Member since {new Date(user.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}</div>
               <div>Last updated {new Date(user.updated_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</div>
               <div className="mt-1 flex items-center justify-end gap-1.5">
-                <span className={`w-2 h-2 rounded-full ${user.last_login ? 'bg-red-400' : 'bg-base-300'}`} />
+                <span className={`w-2 h-2 rounded-full ${user.last_login ? 'bg-error' : 'bg-base-300'}`} />
                 <span>Last login: {fmtLastLogin(user.last_login)}</span>
               </div>
               {isAdmin && (
@@ -901,11 +901,11 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
           </div>
           <div className="mt-4 pt-4 border-t border-base-200 grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-1">Buy Box</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted mb-1">Buy Box</p>
               <BuyBoxEditor userId={user.id} initialValue={user.buy_box || ''} />
             </div>
             <div>
-              <p className="text-xs font-semibold uppercase tracking-widest text-base-content/40 mb-1">Birthday</p>
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted mb-1">Birthday</p>
               <BirthdayEditor
                 userId={user.id}
                 initialValue={user.birthday || ''}
@@ -922,11 +922,11 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
         {/* Properties */}
         <div className="card bg-base-100 border border-base-200">
           <div className="card-body p-5">
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50 mb-3">
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-muted mb-3">
               Assigned Properties <span className="badge badge-ghost badge-sm ml-1">{properties.length}</span>
             </h3>
             {properties.length === 0 && (
-              <p className="text-sm text-base-content/40 text-center py-6">No properties assigned</p>
+              <p className="text-sm text-muted text-center py-6">No properties assigned</p>
             )}
             <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1">
               {properties.map(p => (
@@ -938,12 +938,12 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
                 >
                   <div className="flex-1 min-w-0">
                     <div className="font-medium text-sm truncate">{p.address}</div>
-                    <div className="text-xs text-base-content/50 mt-0.5">{p.county} · PIN: {p.pin}</div>
-                    {p.price && <div className="text-xs text-base-content/60 mt-0.5">${Number(p.price).toLocaleString()}</div>}
+                    <div className="text-xs text-muted mt-0.5">{p.county} · PIN: {p.pin}</div>
+                    {p.price && <div className="text-xs text-muted mt-0.5">${Number(p.price).toLocaleString()}</div>}
                   </div>
                   <div className="flex flex-col items-end gap-1 flex-shrink-0">
                     <span className="badge badge-xs badge-outline">{p.status}</span>
-                    <span className="text-[10px] text-base-content/40">
+                    <span className="text-[10px] text-muted">
                       Assigned {new Date(p.assigned_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                     </span>
                     <span className="text-[10px] text-primary/70 font-medium">Click to open →</span>
@@ -957,19 +957,19 @@ function ContactDetailPage({ contactId, onBack, splitMode = false, isAdmin = fal
         {/* Notes */}
         <div className="card bg-base-100 border border-base-200 flex flex-col">
           <div className="card-body p-5 flex flex-col gap-3 min-h-0">
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-base-content/50">
+            <h3 className="text-sm font-semibold uppercase tracking-widest text-muted">
               Notes <span className="badge badge-ghost badge-sm ml-1">{notes.length}</span>
             </h3>
 
             {/* Notes thread */}
             <div className="flex-1 overflow-y-auto space-y-2 max-h-[280px] pr-1">
-              {notesLoading && <div className="text-center py-4 text-base-content/40 text-sm">Loading…</div>}
+              {notesLoading && <div className="text-center py-4 text-muted text-sm">Loading…</div>}
               {notesError && <div role="alert" className="text-error text-sm">{notesError}</div>}
-              {!notesLoading && !notesError && notes.length === 0 && <div className="text-center py-4 text-base-content/40 text-sm">No notes yet</div>}
+              {!notesLoading && !notesError && notes.length === 0 && <div className="text-center py-4 text-muted text-sm">No notes yet</div>}
               {notes.map(note => (
                 <div key={note.id} className="bg-base-200 rounded-lg p-3 space-y-1.5">
                   <div className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-base-content/50">{new Date(note.created_at).toLocaleString()}</span>
+                    <span className="text-xs text-muted">{new Date(note.created_at).toLocaleString()}</span>
                     <button className="btn btn-xs btn-ghost text-error" onClick={() => handleDelete(note.id)}>
                       <svg xmlns="http://www.w3.org/2000/svg" className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </button>
@@ -1200,14 +1200,14 @@ export default function ContactsPage() {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h2 className="text-2xl font-bold">Contacts</h2>
-          <p className="text-xs text-base-content/40 mt-0.5">
+          <p className="text-xs text-muted mt-0.5">
             {view === 'split' ? 'Click a contact to view details' : 'Double-click any contact to open full profile'}
           </p>
         </div>
         <div className="flex items-center gap-2 flex-wrap justify-end">
           {/* Search */}
           <div className="relative">
-            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
             </svg>
             <input
@@ -1218,7 +1218,7 @@ export default function ContactsPage() {
               className="input input-bordered input-sm pl-8 w-56"
             />
             {search && (
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={() => setSearch('')}>✕</button>
+              <button className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-base-content" onClick={() => setSearch('')}>✕</button>
             )}
           </div>
           {/* Type filter */}
@@ -1246,10 +1246,10 @@ export default function ContactsPage() {
         </div>
       </div>
 
-      {loading && <div className="text-center py-12 text-base-content/50">Loading contacts…</div>}
+      {loading && <div className="text-center py-12 text-muted">Loading contacts…</div>}
 
       {!loading && contacts.length > 0 && roleFilteredContacts.length === 0 && (
-        <div className="py-10 text-center text-base-content/30">
+        <div className="py-10 text-center text-muted">
           <p>No contacts match{search ? ` "${search}"` : ''}{filterType ? ` with type "${filterType}"` : ''}</p>
           <button className="btn btn-xs btn-ghost mt-2" onClick={() => { setSearch(''); setFilterType('') }}>Clear filters</button>
         </div>
@@ -1269,7 +1269,7 @@ export default function ContactsPage() {
         <div className="rounded-box border border-base-200 overflow-x-auto">
           <table className="table table-zebra table-sm w-full table-fixed">
             <thead>
-              <tr className="text-xs uppercase tracking-wider text-base-content/50 select-none">
+              <tr className="text-xs uppercase tracking-wider text-muted select-none">
                 <th className="w-12">Photo</th>
                 {[
                   { label: 'Name', col: 'name' },
@@ -1299,7 +1299,7 @@ export default function ContactsPage() {
                     <td>
                       <div className="relative inline-block">
                         <ContactAvatar contact={c} size="sm" />
-                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} />
+                        <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-success' : 'bg-error'}`} />
                       </div>
                     </td>
                     <td>
@@ -1307,21 +1307,21 @@ export default function ContactsPage() {
                       <div className="md:hidden mt-0.5 truncate"><EmailLink email={c.email} /></div>
                     </td>
                     <td className="hidden md:table-cell text-sm"><div className="truncate"><EmailLink email={c.email} /></div></td>
-                    <td>{c.contact_type ? <span className={`badge badge-sm ${getTypeBadgeClass(c.contact_type)}`}>{typeLabel(c.contact_type)}</span> : <span className="text-base-content/30">—</span>}</td>
-                    <td className="hidden lg:table-cell text-sm"><div className="truncate">{c.organization || <span className="text-base-content/30">—</span>}</div></td>
+                    <td>{c.contact_type ? <span className={`badge badge-sm ${getTypeBadgeClass(c.contact_type)}`}>{typeLabel(c.contact_type)}</span> : <span className="text-muted">—</span>}</td>
+                    <td className="hidden lg:table-cell text-sm"><div className="truncate">{c.organization || <span className="text-muted">—</span>}</div></td>
                     <td className="hidden sm:table-cell text-sm"><div className="truncate"><PhoneLink phone={c.phone_number} /></div></td>
                     <td className="hidden xl:table-cell text-sm"><div className="truncate"><BirthdayText birthday={c.birthday} /></div></td>
                     <td className="hidden 2xl:table-cell text-sm">
-                      <span className="line-clamp-2 text-base-content/60">{c.buy_box || <span className="text-base-content/30">—</span>}</span>
+                      <span className="line-clamp-2 text-muted">{c.buy_box || <span className="text-muted">—</span>}</span>
                     </td>
                     <td className="text-center"><span className="badge badge-ghost badge-sm">{c.note_count}</span></td>
                     <td className="hidden lg:table-cell text-xs">
-                      <div className={`truncate ${isOnline ? 'text-green-600 font-medium' : 'text-base-content/50'}`}>
+                      <div className={`truncate ${isOnline ? 'text-success font-medium' : 'text-muted'}`}>
                         {isOnline ? '● Online' : fmtLastLogin(lastLogin)}
                       </div>
                     </td>
-                    <td className="hidden xl:table-cell text-center text-xs text-base-content/50">
-                      <div className="truncate">{fmtLastNote(c.last_note_at) || <span className="text-base-content/25">—</span>}</div>
+                    <td className="hidden xl:table-cell text-center text-xs text-muted">
+                      <div className="truncate">{fmtLastNote(c.last_note_at) || <span className="text-muted">—</span>}</div>
                     </td>
                   </tr>
                 )
@@ -1350,7 +1350,7 @@ export default function ContactsPage() {
                 <h3 className="font-bold text-sm uppercase tracking-widest">{label}</h3>
                 <span className={`badge badge-sm ${badgeCls}`}>{items.length}</span>
               </div>
-              {items.length === 0 && <div className="text-sm text-base-content/40 text-center py-6">Empty</div>}
+              {items.length === 0 && <div className="text-sm text-muted text-center py-6">Empty</div>}
               <div className="space-y-2 overflow-y-auto max-h-[60vh] pr-0.5">
                 {items.map(c => {
                   const fullName = [c.first_name, c.last_name].filter(Boolean).join(' ') || c.email
@@ -1363,29 +1363,29 @@ export default function ContactsPage() {
                        <div className="flex items-center gap-2">
                          <div className="relative flex-shrink-0">
                            <ContactAvatar contact={c} size="sm" />
-                           <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} />
+                           <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-success' : 'bg-error'}`} />
                          </div>
                          <div className="flex-1 min-w-0">
                            <div className="font-medium text-sm truncate">{fullName}</div>
-                           <div className="text-xs text-base-content/50 truncate">{c.email}</div>
+                           <div className="text-xs text-muted truncate">{c.email}</div>
                          </div>
                        </div>
                        {c.organization && (
-                         <div className="text-xs text-base-content/60 truncate">{c.organization}</div>
+                         <div className="text-xs text-muted truncate">{c.organization}</div>
                        )}
                        {c.phone_number && (
                          <div className="text-xs"><PhoneLink phone={c.phone_number} /></div>
                        )}
                        {c.birthday && (
-                         <div className="text-xs text-base-content/60"><BirthdayText birthday={c.birthday} /></div>
+                         <div className="text-xs text-muted"><BirthdayText birthday={c.birthday} /></div>
                        )}
                        <div className="flex flex-col gap-0.5 pt-1 border-t border-base-200">
                          <span className="badge badge-ghost badge-xs">{c.note_count} {c.note_count === 1 ? 'note' : 'notes'}</span>
-                         <span className={`text-[10px] ${isOnline ? 'text-green-600 font-medium' : 'text-base-content/40'}`}>
+                         <span className={`text-[10px] ${isOnline ? 'text-success font-medium' : 'text-muted'}`}>
                            {isOnline ? '● Online' : fmtLastLogin(lastLogin)}
                          </span>
                          {c.last_note_at && (
-                           <span className="text-[10px] text-base-content/40">last note: {fmtLastNote(c.last_note_at)}</span>
+                           <span className="text-[10px] text-muted">last note: {fmtLastNote(c.last_note_at)}</span>
                          )}
                        </div>
                       </div>
@@ -1404,7 +1404,7 @@ export default function ContactsPage() {
           {/* Left: contact list */}
           <div className={`${splitDetailId ? 'hidden md:flex' : 'flex'} min-w-0 w-full md:w-64 lg:w-72 flex-shrink-0 md:border-r border-base-200 flex-col bg-base-100 overflow-hidden`}>
             <div className="px-3 py-2 border-b border-base-200 bg-base-200/40">
-              <span className="text-xs font-semibold uppercase tracking-widest text-base-content/50">
+              <span className="text-xs font-semibold uppercase tracking-widest text-muted">
                 {roleFilteredContacts.length}{roleFilteredContacts.length !== contacts.length ? `/${contacts.length}` : ''} Contacts
               </span>
             </div>
@@ -1423,16 +1423,16 @@ export default function ContactsPage() {
                   >
                     <div className="relative flex-shrink-0">
                       <ContactAvatar contact={c} size="sm" />
-                      <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-green-500' : 'bg-red-400'}`} />
+                      <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-base-100 ${isOnline ? 'bg-success' : 'bg-error'}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className={`text-sm font-medium truncate ${isActive ? 'text-primary' : ''}`}>{fullName}</div>
-                      <div className="text-xs text-base-content/50 truncate">{c.organization || c.email}</div>
+                      <div className="text-xs text-muted truncate">{c.organization || c.email}</div>
                       <div className="flex items-center gap-1.5 mt-0.5">
-                        <span className={`text-[10px] ${isOnline ? 'text-green-600 font-medium' : 'text-base-content/40'}`}>
+                        <span className={`text-[10px] ${isOnline ? 'text-success font-medium' : 'text-muted'}`}>
                           {isOnline ? '● Online' : fmtLastLogin(lastLogin)}
                         </span>
-                        {c.last_note_at && <span className="text-[10px] text-base-content/30">· {fmtLastNote(c.last_note_at)}</span>}
+                        {c.last_note_at && <span className="text-[10px] text-muted">· {fmtLastNote(c.last_note_at)}</span>}
                       </div>
                     </div>
                     {c.contact_type && <span className={`badge badge-xs flex-shrink-0 ${getTypeBadgeClass(c.contact_type)}`}>{typeLabel(c.contact_type)}</span>}
@@ -1457,7 +1457,7 @@ export default function ContactsPage() {
                 />
               </div>
             ) : (
-              <div className="flex flex-col items-center justify-center h-full text-base-content/30 gap-3">
+              <div className="flex flex-col items-center justify-center h-full text-muted gap-3">
                 <svg xmlns="http://www.w3.org/2000/svg" className="w-12 h-12 opacity-30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                 </svg>

@@ -6,7 +6,7 @@
 
   function applyTheme(dark) {
     root.dataset.theme = dark ? 'monochrome-dark' : 'monochrome';
-    if (themeColor) themeColor.content = dark ? '#1e1e22' : '#ffffff';
+    if (themeColor) themeColor.content = dark ? '#14251a' : '#ffffff';
     if (toggle) {
       var label = dark ? 'Day mode' : 'Night mode';
       toggle.setAttribute('aria-label', label);

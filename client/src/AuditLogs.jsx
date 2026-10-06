@@ -94,7 +94,7 @@ export default function AuditLogs() {
       {!loading && (
         <div className="space-y-1">
           {logs.length === 0
-            ? <p className="text-center py-8 text-base-content/40">No activity found</p>
+            ? <p className="text-center py-8 text-muted">No activity found</p>
             : logs.map((log) => {
                 const actor = log.acted_by_email || log.target_email || '(system)'
                 const text = formatLog(log)
@@ -155,12 +155,12 @@ export default function AuditLogs() {
                     <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${log.action === 'login_failed' ? 'bg-error' : log.action === 'login' || log.action === 'logout' ? 'bg-success' : 'bg-primary'}`} />
                     <div className="flex-1 min-w-0">
                       <span className="font-semibold text-sm break-all">{actor}</span>
-                      <span className="text-base-content/70 text-sm"> — {text}</span>
-                      {ip && <span className="text-xs text-base-content/30 ml-1">· {ip}</span>}
-                      <div className="text-xs text-base-content/40 mt-0.5 md:hidden">{ts}</div>
+                      <span className="text-muted text-sm"> — {text}</span>
+                      {ip && <span className="text-xs text-muted ml-1">· {ip}</span>}
+                      <div className="text-xs text-muted mt-0.5 md:hidden">{ts}</div>
                       {/* Note preview */}
                       {notePreview && (
-                        <div className="mt-1 text-xs bg-base-300/50 rounded px-2 py-1 text-base-content/70 italic">
+                        <div className="mt-1 text-xs bg-base-300/50 rounded px-2 py-1 text-muted italic">
                           "{notePreview}"
                         </div>
                       )}
@@ -180,17 +180,17 @@ export default function AuditLogs() {
                             const toStr = fmtVal(to)
                             return (
                               <div key={field} className="text-xs font-mono bg-base-300/50 rounded px-2 py-0.5 flex flex-wrap gap-x-2 items-center">
-                                <span className="font-semibold text-base-content/70 not-italic font-sans">{FIELD_LABELS[field] || field}:</span>
-                                {fromStr ? <span className="text-error/80 line-through">{fromStr}</span> : <em className="text-base-content/30">empty</em>}
-                                <span className="text-base-content/40">→</span>
-                                {toStr ? <span className="text-success/80">{toStr}</span> : <em className="text-base-content/30">empty</em>}
+                                <span className="font-semibold text-muted not-italic font-sans">{FIELD_LABELS[field] || field}:</span>
+                                {fromStr ? <span className="text-error/80 line-through">{fromStr}</span> : <em className="text-muted">empty</em>}
+                                <span className="text-muted">→</span>
+                                {toStr ? <span className="text-success/80">{toStr}</span> : <em className="text-muted">empty</em>}
                               </div>
                             )
                           })}
                         </div>
                       )}
                     </div>
-                    <span className="hidden md:block text-xs text-base-content/40 flex-shrink-0 mt-0.5 whitespace-nowrap">{ts}</span>
+                    <span className="hidden md:block text-xs text-muted flex-shrink-0 mt-0.5 whitespace-nowrap">{ts}</span>
                   </div>
                 )
               })
@@ -199,10 +199,10 @@ export default function AuditLogs() {
       )}
 
       <div className="flex flex-wrap justify-between items-center gap-2 pt-2">
-        <span className="text-xs text-base-content/40">{total} total events</span>
+        <span className="text-xs text-muted">{total} total events</span>
         <div className="flex items-center gap-2">
           <button className="btn btn-xs btn-ghost" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || loading}>← Prev</button>
-          <span className="text-xs text-base-content/60">Page {page} of {totalPages}</span>
+          <span className="text-xs text-muted">Page {page} of {totalPages}</span>
           <button className="btn btn-xs btn-ghost" onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={page >= totalPages || loading}>Next →</button>
         </div>
       </div>

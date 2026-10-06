@@ -1,5 +1,14 @@
 # React + Vite
 
+The workspace uses the shared green day/night tokens in
+`..\resources\palette.css`, imported by `src\index.css`. Keep theme identifiers
+`monochrome` and `monochrome-dark` stable: `rep_theme` stores `light` or `dark`.
+The login screen and authenticated navigation both provide theme controls;
+the selected mode also applies to dialogs and synchronizes across tabs.
+Use semantic DaisyUI/Tailwind tokens rather than fixed light-only colors.
+Calendar category colors and third-party imagery/embeds retain their own
+meaning. Validate with `npm run build` and `npm run lint`.
+
 This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
 
 Currently, two official plugins are available:

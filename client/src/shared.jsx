@@ -27,7 +27,7 @@ export class ErrorBoundary extends Component {
           <div className="card bg-base-100 shadow-xl max-w-md w-full">
             <div className="card-body items-center text-center gap-4">
               <h2 className="card-title text-error">Something went wrong</h2>
-              <p className="text-base-content/60 text-sm">{this.state.error.message}</p>
+              <p className="text-muted text-sm">{this.state.error.message}</p>
               <button className="btn btn-primary" onClick={() => { this.setState({ error: null }); window.location.reload() }}>
                 Reload Page
               </button>
@@ -277,17 +277,17 @@ export function Field({ label, required, help, children }) {
   const [helpOpen, setHelpOpen] = useState(false)
   return (
     <div className="flex min-w-0 flex-col gap-1">
-      <label className="text-xs font-semibold uppercase tracking-widest text-base-content/60 flex flex-wrap items-center gap-1">
+      <label className="text-xs font-semibold uppercase tracking-widest text-muted flex flex-wrap items-center gap-1">
         {label}{required && <span className="text-base-content ml-0.5">*</span>}
         {help && (
           <button type="button" aria-label={`Help for ${label}`} aria-expanded={helpOpen}
             onClick={() => setHelpOpen(open => !open)}
-            className="inline-flex shrink-0 items-center justify-center w-3.5 h-3.5 rounded-full bg-base-300 text-base-content/50 text-[9px] select-none leading-none">
+            className="inline-flex shrink-0 items-center justify-center w-3.5 h-3.5 rounded-full bg-base-300 text-muted text-[9px] select-none leading-none">
             ?
           </button>
         )}
       </label>
-      {help && helpOpen && <p className="text-xs text-base-content/60 [overflow-wrap:anywhere]">{help}</p>}
+      {help && helpOpen && <p className="text-xs text-muted [overflow-wrap:anywhere]">{help}</p>}
       {children}
     </div>
   )
@@ -404,7 +404,7 @@ export function PropertyCardCarousel({ propertyId, onClick }) {
 
   if (media.length === 0) return (
     <div className="w-full h-48 bg-base-200 flex items-center justify-center" onClick={onClick}>
-      <span className="text-xs text-base-content/30 uppercase tracking-widest">No images</span>
+      <span className="text-xs text-muted uppercase tracking-widest">No images</span>
     </div>
   )
 
@@ -478,7 +478,7 @@ export function PropertyModalCarousel({ propertyId }) {
   if (!loaded) return <div className="w-full h-64 bg-base-200 animate-pulse rounded-lg mb-4" />
   if (media.length === 0) return (
     <div className="w-full h-40 bg-base-200 rounded-lg flex items-center justify-center mb-4">
-      <span className="text-xs text-base-content/30 uppercase tracking-widest">No media uploaded</span>
+      <span className="text-xs text-muted uppercase tracking-widest">No media uploaded</span>
     </div>
   )
 
@@ -552,8 +552,8 @@ export function PropertyModalCarousel({ propertyId }) {
 export function RecaptchaShield({ status }) {
   // status: null | 'verifying' | 'success' | 'denied'
   const r = 22, circ = 2 * Math.PI * r
-  const ringColor = status === 'success' ? '#22c55e' : status === 'denied' ? '#ef4444' : '#9ca3af'
-  const iconColor = status === 'success' ? '#22c55e' : status === 'denied' ? '#ef4444' : '#9ca3af'
+  const ringColor = status === 'success' ? 'var(--color-success)' : status === 'denied' ? 'var(--color-error)' : 'var(--muted)'
+  const iconColor = ringColor
   const label = status === 'verifying' ? 'Verifying…' : status === 'success' ? 'Verified' : status === 'denied' ? 'Denied' : 'Protected by reCAPTCHA'
 
   return (
@@ -561,7 +561,7 @@ export function RecaptchaShield({ status }) {
       <div className="relative w-14 h-14 flex items-center justify-center">
         {/* Spinning progress ring */}
         <svg className="absolute inset-0 w-14 h-14" viewBox="0 0 56 56" style={{ transform: 'rotate(-90deg)' }}>
-          <circle cx="28" cy="28" r={r} fill="none" stroke={status ? ringColor + '33' : '#0001'} strokeWidth="3" />
+          <circle cx="28" cy="28" r={r} fill="none" stroke={`color-mix(in srgb, ${ringColor} 20%, transparent)`} strokeWidth="3" />
           {status === 'verifying' && (
             <circle cx="28" cy="28" r={r} fill="none" stroke={ringColor} strokeWidth="3"
               strokeDasharray={circ} strokeDashoffset={circ * 0.7}
@@ -575,7 +575,7 @@ export function RecaptchaShield({ status }) {
               style={{ transition: 'stroke-dashoffset 0.5s ease' }} />
           )}
           {!status && (
-            <circle cx="28" cy="28" r={r} fill="none" stroke="#9ca3af55" strokeWidth="2"
+            <circle cx="28" cy="28" r={r} fill="none" stroke="var(--control-line)" strokeWidth="2"
               strokeDasharray="3 4" />
           )}
         </svg>
@@ -617,13 +617,12 @@ export function Logo() {
         }}>
           ROSPOPA
         </span>
-        <span className="text-base-content" style={{
+        <span className="text-muted" style={{
           fontFamily: "'Cormorant Garamond', serif",
           fontWeight: 600,
           fontSize: '0.7rem',
           letterSpacing: '0.35em',
           textTransform: 'uppercase',
-          opacity: 0.45,
         }}>
           PAVLO
         </span>
@@ -638,7 +637,7 @@ export function Modal({ open, title, message, onConfirm, onCancel }) {
     <div className="modal modal-open">
       <div className="modal-box">
         <h3 className="font-bold text-lg mb-2">{title}</h3>
-        <p className="text-base-content/70 leading-relaxed">{message}</p>
+        <p className="text-muted leading-relaxed">{message}</p>
         <div className="modal-action mt-6">
           <button className="btn btn-ghost" onClick={onCancel}>Cancel</button>
           <button className="btn btn-primary" onClick={onConfirm}>Confirm</button>
@@ -654,7 +653,7 @@ export function Avatar({ src, name, size = 'md' }) {
   const initials = (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
   return src
     ? <img src={src} alt={name} className={`${dim} rounded-full object-cover border border-base-300 flex-shrink-0`} />
-    : <div className={`${dim} rounded-full bg-base-300 flex items-center justify-center font-semibold text-base-content/60 flex-shrink-0`}>{initials}</div>
+    : <div className={`${dim} rounded-full bg-base-300 flex items-center justify-center font-semibold text-muted flex-shrink-0`}>{initials}</div>
 }
 
 export function formatPhone(raw) {
@@ -792,7 +791,7 @@ export function PhotoCropper({ src, onSave, onCancel, onClose }) {
     >
       <div className="bg-base-100 rounded-2xl p-4 sm:p-6 space-y-4 w-full min-w-0 max-w-sm max-h-full overflow-y-auto shadow-2xl" onClick={e => e.stopPropagation()}>
         <h3 className="font-bold text-lg text-center">Adjust Profile Photo</h3>
-        <p className="text-xs text-base-content/50 text-center">Drag to reposition · Scroll or slider to zoom</p>
+        <p className="text-xs text-muted text-center">Drag to reposition · Scroll or slider to zoom</p>
         {imageError && <p role="alert" className="text-error text-sm text-center">{imageError}</p>}
 
         <div className="flex justify-center">
@@ -806,7 +805,7 @@ export function PhotoCropper({ src, onSave, onCancel, onClose }) {
         </div>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs text-base-content/40">Zoom</span>
+          <span className="text-xs text-muted">Zoom</span>
           <input type="range" min={fitScale} max={fitScale * 5} step={fitScale / 100} value={scale} disabled={!imageReady}
             onChange={e => setScale(Number(e.target.value))}
             className="range range-xs flex-1" />
@@ -917,12 +916,12 @@ export function ForgotPasswordModal({ onClose, prefillEmail }) {
           <div className="space-y-4 text-center">
             <div className="text-5xl">✅</div>
             <p className="font-medium">Your password has been reset.</p>
-            <p className="text-sm text-base-content/50">You can now sign in with your new password.</p>
+            <p className="text-sm text-muted">You can now sign in with your new password.</p>
             <button className="btn btn-primary w-full" onClick={onClose}>Sign In</button>
           </div>
         ) : step === 'email' ? (
           <form onSubmit={sendCode} className="space-y-4">
-            <p className="text-sm text-base-content/50">Enter your email and we'll send you a 6-digit code.</p>
+            <p className="text-sm text-muted">Enter your email and we'll send you a 6-digit code.</p>
             <Field label="Email" required>
               <input type="email" placeholder="your@email.com" value={email}
                 onChange={e => setEmail(e.target.value)} className="input input-bordered w-full" required />
@@ -939,7 +938,7 @@ export function ForgotPasswordModal({ onClose, prefillEmail }) {
           </form>
         ) : (
           <form onSubmit={resetPassword} className="space-y-4">
-            <p className="text-sm text-base-content/50">
+            <p className="text-sm text-muted">
               A 6-digit code was sent to <strong>{email}</strong>. It expires in 15 minutes.
             </p>
             <Field label="Code" required>
@@ -1000,7 +999,7 @@ export function OnlineDot({ online }) {
   return (
     <span
       title={online ? 'Online' : 'Offline'}
-      className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${online ? 'bg-green-500' : 'bg-red-400'}`}
+      className={`inline-block w-2 h-2 rounded-full flex-shrink-0 ${online ? 'bg-success' : 'bg-error'}`}
     />
   )
 }

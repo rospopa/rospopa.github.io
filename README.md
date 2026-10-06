@@ -41,3 +41,16 @@ JavaScript; the homepage still provides its existing no-script LinkedIn link.
 The private React workspace in `client\` is built and served by the Node
 service in `server\`, separately from GitHub Pages. See `DEPLOY.md` for hosting,
 indexing controls, and the deployment verification checklist.
+
+Both active sites share `resources\palette.css`: forest `#1F5F2E` for depth,
+leaf `#2E8B3E` for accents, fresh `#5DB85C` for night controls, mint `#B8E0B0`
+for highlights, and a white day background. Text and button colors use
+contrast-safe variants; warning, error, info, and calendar colors keep their
+semantic distinctions. The existing `monochrome` / `monochrome-dark` theme IDs
+and `rep_theme` light/dark preference are retained for compatibility.
+The workspace imports the shared palette at build time; the public stylesheet
+imports a cache-versioned copy. Refresh public CSS, theme-script, and palette
+cache versions when changing them. Archive/legacy assets, maps, chart embeds,
+and photographs are not recolored. Check both themes, persistence, the contact
+dialog, and phone/desktop layouts; run `npm --prefix client run build` and
+`npm --prefix client run lint` for workspace changes.

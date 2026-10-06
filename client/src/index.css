@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@import "../../resources/palette.css";
+@utility text-muted { color: var(--muted); }
 @plugin "daisyui" {
   themes: false;
 }
@@ -6,27 +8,6 @@
 @plugin "daisyui/theme" {
   name: "monochrome";
   default: true;
-  color-scheme: light;
-  --color-base-100: #ffffff;
-  --color-base-200: #f5f5f5;
-  --color-base-300: #e8e8e8;
-  --color-base-content: #111111;
-  --color-primary: #111111;
-  --color-primary-content: #ffffff;
-  --color-secondary: #444444;
-  --color-secondary-content: #ffffff;
-  --color-accent: #666666;
-  --color-accent-content: #ffffff;
-  --color-neutral: #222222;
-  --color-neutral-content: #ffffff;
-  --color-info: #0077cc;
-  --color-info-content: #ffffff;
-  --color-success: #1a7a1a;
-  --color-success-content: #ffffff;
-  --color-warning: #888888;
-  --color-warning-content: #ffffff;
-  --color-error: #cc2200;
-  --color-error-content: #ffffff;
   --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
   --radius-box: 0.375rem;
@@ -35,35 +16,27 @@
 
 @plugin "daisyui/theme" {
   name: "monochrome-dark";
-  color-scheme: dark;
-  /* Backgrounds — warm dark, not pitch black */
-  --color-base-100: #1e1e22;
-  --color-base-200: #26262c;
-  --color-base-300: #313138;
-  /* Text — off-white for comfortable contrast */
-  --color-base-content: #e8e8e8;
-  /* Primary stays high contrast */
-  --color-primary: #d4d4d4;
-  --color-primary-content: #111111;
-  --color-secondary: #9a9a9a;
-  --color-secondary-content: #111111;
-  --color-accent: #7a7a7a;
-  --color-accent-content: #ffffff;
-  --color-neutral: #404040;
-  --color-neutral-content: #e8e8e8;
-  --color-info: #4da6ff;
-  --color-info-content: #000000;
-  --color-success: #4caf50;
-  --color-success-content: #000000;
-  --color-warning: #c0a060;
-  --color-warning-content: #000000;
-  --color-error: #f06050;
-  --color-error-content: #000000;
   --radius-selector: 0.25rem;
   --radius-field: 0.25rem;
   --radius-box: 0.375rem;
   --border: 1px;
 }
+
+body { margin: 0; background: var(--paper); color: var(--color-base-content); }
+.min-h-screen.bg-base-200 { background: var(--paper); }
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus-color);
+  outline-offset: 3px;
+}
+.navbar { border-bottom: 2px solid var(--brand); box-shadow: var(--shadow-sm); }
+.card, .modal-box { box-shadow: var(--shadow-sm); }
+.card { border-color: var(--line); }
+.btn-primary { box-shadow: 0 2px 4px rgba(31, 95, 46, .18); }
+.input, .select, .textarea, .checkbox, .toggle { border-color: var(--control-line); }
+.input::placeholder, .textarea::placeholder { color: var(--muted); opacity: 1; }
+.btn-outline { border-color: var(--focus-color); }
+.tab { color: var(--muted); }
+.tab-active, .menu-active { color: var(--color-primary); }
 
 /* Global font: San Francisco on Apple devices (system font), Inter elsewhere.
    SF cannot be self-hosted under Apple's licence; Inter (OFL) is its closest
@@ -159,14 +132,14 @@ input[type="color"]:not([disabled]) {
 
 /* Save success flash */
 @keyframes save-flash {
-  0%   { background: linear-gradient(135deg, #3a7d44 0%, #5aaa5a 50%, #3a7d44 100%); background-size: 200% 200%; background-position: 0% 50%; box-shadow: 0 0 0 0 rgba(74,175,74,0.6); }
+  0%   { background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 50%, var(--color-primary) 100%); background-size: 200% 200%; background-position: 0% 50%; box-shadow: 0 0 0 0 rgba(46,139,62,0.6); }
   40%  { background-position: 100% 50%; box-shadow: 0 0 0 6px rgba(74,175,74,0); }
   100% { background-position: 0% 50%; box-shadow: 0 0 0 0 rgba(74,175,74,0); }
 }
 .btn-save-success {
-  background: linear-gradient(135deg, #3a7d44 0%, #5aaa5a 50%, #3a7d44 100%) !important;
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 50%, var(--color-primary) 100%) !important;
   background-size: 200% 200% !important;
-  color: #ffffff !important;
+  color: var(--color-primary-content) !important;
   border-color: transparent !important;
   animation: save-flash 1.4s ease-out forwards;
 }

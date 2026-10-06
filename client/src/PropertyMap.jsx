@@ -50,12 +50,12 @@ export default function PropertyMap({ address }) {
   }, [address])
 
   if (!address) return (
-    <div className="w-full h-full flex items-center justify-center bg-base-200 text-base-content/30 text-sm">
+    <div className="w-full h-full flex items-center justify-center bg-base-200 text-muted text-sm">
       Enter an address to see the map
     </div>
   )
   if (error) return (
-    <div className="w-full h-full flex items-center justify-center bg-base-200 text-base-content/30 text-sm">
+    <div className="w-full h-full flex items-center justify-center bg-base-200 text-muted text-sm">
       Location not found
     </div>
   )

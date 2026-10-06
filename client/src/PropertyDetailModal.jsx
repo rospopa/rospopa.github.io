@@ -30,7 +30,7 @@ function AssignUsersTab({ allUsers, assignLoading, toggleAssign, onViewContact }
           >
             {displayName}
           </button>
-          {u.organization && <p className="text-xs text-base-content/50 truncate">{u.organization}</p>}
+          {u.organization && <p className="text-xs text-muted truncate">{u.organization}</p>}
         </div>
         <input
           type="checkbox"
@@ -46,7 +46,7 @@ function AssignUsersTab({ allUsers, assignLoading, toggleAssign, onViewContact }
   return (
     <div className="space-y-3">
       <div className="relative">
-        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-base-content/40 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
         </svg>
         <input
@@ -57,18 +57,18 @@ function AssignUsersTab({ allUsers, assignLoading, toggleAssign, onViewContact }
           className="input input-bordered input-sm pl-8 w-full"
         />
         {assignSearch && (
-          <button className="absolute right-2 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content" onClick={() => setAssignSearch('')}>✕</button>
+          <button className="absolute right-2 top-1/2 -translate-y-1/2 text-muted hover:text-base-content" onClick={() => setAssignSearch('')}>✕</button>
         )}
       </div>
       {allUsers.length === 0
-        ? <p className="text-center text-base-content/30 py-8">No users found</p>
+        ? <p className="text-center text-muted py-8">No users found</p>
         : visibleUsers.length === 0
-          ? <p className="text-center text-base-content/30 py-4">No users match &ldquo;{assignSearch}&rdquo;</p>
+          ? <p className="text-center text-muted py-4">No users match &ldquo;{assignSearch}&rdquo;</p>
           : (
             <div>
               {assigned.length > 0 && (
                 <>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200 mb-1">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-muted pb-1 border-b border-base-200 mb-1">
                     Assigned ({assigned.length})
                   </p>
                   <div className="divide-y divide-base-200">
@@ -78,7 +78,7 @@ function AssignUsersTab({ allUsers, assignLoading, toggleAssign, onViewContact }
               )}
               {unassigned.length > 0 && (
                 <>
-                  <p className={`text-xs font-semibold uppercase tracking-wide text-base-content/40 pb-1 border-b border-base-200 mb-1 ${assigned.length > 0 ? 'mt-4' : ''}`}>
+                  <p className={`text-xs font-semibold uppercase tracking-wide text-muted pb-1 border-b border-base-200 mb-1 ${assigned.length > 0 ? 'mt-4' : ''}`}>
                     All Users ({unassigned.length})
                   </p>
                   <div className="divide-y divide-base-200">
@@ -127,13 +127,13 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
     { key: 'waterfallInvestor', label: 'Investor Waterfall', type: 'currency', category: 'waterfall', group: 'waterfall' },
   ]
   const DCF_GROUPS = [
-    { key: 'revenue', label: 'Revenue', tone: 'text-sky-700 border-sky-200 bg-sky-50/60' },
-    { key: 'expenses', label: 'Expenses / NOI', tone: 'text-amber-700 border-amber-200 bg-amber-50/60' },
-    { key: 'capital', label: 'Capital Events', tone: 'text-violet-700 border-violet-200 bg-violet-50/60' },
-    { key: 'debt', label: 'Debt', tone: 'text-indigo-700 border-indigo-200 bg-indigo-50/60' },
-    { key: 'tax', label: 'Taxes / Cash Flow', tone: 'text-rose-700 border-rose-200 bg-rose-50/60' },
-    { key: 'exit', label: 'Exit / Sale', tone: 'text-emerald-700 border-emerald-200 bg-emerald-50/60' },
-    { key: 'waterfall', label: 'Waterfall', tone: 'text-fuchsia-700 border-fuchsia-200 bg-fuchsia-50/60' },
+    { key: 'revenue', label: 'Revenue', tone: 'text-primary border-primary bg-primary/10' },
+    { key: 'expenses', label: 'Expenses / NOI', tone: 'text-warning border-warning bg-warning/10' },
+    { key: 'capital', label: 'Capital Events', tone: 'text-info border-info bg-info/10' },
+    { key: 'debt', label: 'Debt', tone: 'text-info border-info bg-info/10' },
+    { key: 'tax', label: 'Taxes / Cash Flow', tone: 'text-error border-error bg-error/10' },
+    { key: 'exit', label: 'Exit / Sale', tone: 'text-success border-success bg-success/10' },
+    { key: 'waterfall', label: 'Waterfall', tone: 'text-info border-info bg-info/10' },
   ]
   const DCF_MAX_YEARS = 10
   const defaultDcfModel = () => ({
@@ -1638,22 +1638,22 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
   const dscrFromEngine = adjustedNoiValue !== null && annualDebtServiceAmount > 0
     ? (adjustedNoiValue / annualDebtServiceAmount)
     : null
-  const financialInputClass = 'input input-bordered input-md w-full md:text-base border-sky-300 bg-sky-50/70 text-sky-950 focus:border-sky-500 focus:outline-none'
-  const financialOutputClass = 'input input-bordered input-md w-full md:text-base cursor-default border-slate-300 bg-slate-100 text-slate-900 font-semibold'
-  const financialFormulaClass = 'input input-bordered input-md w-full md:text-base cursor-default border-slate-400 bg-slate-50 text-slate-900 font-semibold'
-  const financialReferenceClass = 'input input-bordered input-md w-full md:text-base border-zinc-300 bg-zinc-50 text-zinc-700'
-  const financialSelectClass = 'select select-bordered input-md w-full md:text-base border-sky-300 bg-sky-50/70 text-sky-950'
-  const financialReferenceSelectClass = 'select select-bordered input-md w-full md:text-base border-zinc-300 bg-zinc-50 text-zinc-700'
-  const financialCheckboxClass = 'checkbox checkbox-sm border-sky-400 text-sky-600 [--chkbg:theme(colors.sky.500)] [--chkfg:white]'
-  const financialReferenceCheckboxClass = 'checkbox checkbox-sm border-zinc-400 text-zinc-600 [--chkbg:theme(colors.zinc.500)] [--chkfg:white]'
-  const financialToggleLabelClass = 'label-text text-sm font-medium text-sky-900'
-  const financialReferenceLabelClass = 'label-text text-sm font-medium text-zinc-700'
-  const financialTextareaClass = 'textarea textarea-bordered min-h-24 w-full md:text-base border-zinc-300 bg-zinc-50 text-zinc-700'
+  const financialInputClass = 'input input-bordered input-md w-full md:text-base border-primary bg-primary/10 text-primary focus:border-primary focus:outline-none'
+  const financialOutputClass = 'input input-bordered input-md w-full md:text-base cursor-default border-base-300 bg-base-200 text-base-content font-semibold'
+  const financialFormulaClass = 'input input-bordered input-md w-full md:text-base cursor-default border-base-300 bg-base-200 text-base-content font-semibold'
+  const financialReferenceClass = 'input input-bordered input-md w-full md:text-base border-base-300 bg-base-200 text-base-content'
+  const financialSelectClass = 'select select-bordered input-md w-full md:text-base border-primary bg-primary/10 text-primary'
+  const financialReferenceSelectClass = 'select select-bordered input-md w-full md:text-base border-base-300 bg-base-200 text-base-content'
+  const financialCheckboxClass = 'checkbox checkbox-sm border-primary text-primary checkbox-primary'
+  const financialReferenceCheckboxClass = 'checkbox checkbox-sm border-base-300 text-muted checkbox-primary'
+  const financialToggleLabelClass = 'label-text text-sm font-medium text-primary'
+  const financialReferenceLabelClass = 'label-text text-sm font-medium text-base-content'
+  const financialTextareaClass = 'textarea textarea-bordered min-h-24 w-full md:text-base border-base-300 bg-base-200 text-base-content'
   const sectionHeaderClass = 'text-sm font-semibold uppercase tracking-wide pb-2 border-b'
   const metricTone = {
-    good: 'input input-bordered input-md w-full md:text-base cursor-default font-semibold border-emerald-300 bg-emerald-50 text-emerald-900',
-    caution: 'input input-bordered input-md w-full md:text-base cursor-default font-semibold border-amber-300 bg-amber-50 text-amber-900',
-    danger: 'input input-bordered input-md w-full md:text-base cursor-default font-semibold border-rose-300 bg-rose-50 text-rose-900',
+    good: 'input input-bordered input-md w-full md:text-base cursor-default font-semibold border-success bg-success/10 text-success',
+    caution: 'input input-bordered input-md w-full md:text-base cursor-default font-semibold border-warning bg-warning/10 text-warning',
+    danger: 'input input-bordered input-md w-full md:text-base cursor-default font-semibold border-error bg-error/10 text-error',
     neutral: financialFormulaClass,
   }
   const dscrTone = dscrFromEngine !== null
@@ -2267,7 +2267,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
               </select>
             </Field>
 
-            <div className="divider text-xs text-base-content/40 my-1">Property Specs</div>
+            <div className="divider text-xs text-muted my-1">Property Specs</div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Field label="Price ($)" help={FIELD_HELP.price}>
                 <NumericInput placeholder="0" value={price} onChange={setPrice}
@@ -2312,7 +2312,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
             </Field>
 
             {/* Location attributes */}
-            <div className="divider text-xs text-base-content/40 my-1">Location Attributes</div>
+            <div className="divider text-xs text-muted my-1">Location Attributes</div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
                 { label: 'On Major Road', val: onMajorRoad, set: setOnMajorRoad },
@@ -2335,7 +2335,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
             )}
 
             {/* Interstates */}
-            <div className="divider text-xs text-base-content/40 my-1">Major Interstates</div>
+            <div className="divider text-xs text-muted my-1">Major Interstates</div>
             <div className="space-y-2">
               {interstates.map((item, i) => (
                 <div key={i} className="flex gap-2 items-center">
@@ -2345,18 +2345,18 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   <input type="number" placeholder="Miles away" value={item.distance}
                     onChange={e => updateInterstate(i, 'distance', e.target.value)}
                     className="input input-bordered input-sm w-32" disabled={!isAdmin} />
-                  <span className="text-sm text-base-content/50">miles</span>
+                  <span className="text-sm text-muted">miles</span>
                   {isAdmin && <button className="btn btn-xs btn-ghost text-error" onClick={() => removeInterstate(i)}>✕</button>}
                 </div>
               ))}
               {isAdmin && (
                 <button className="btn btn-xs btn-outline" onClick={addInterstate}>+ Add Interstate</button>
               )}
-              {interstates.length === 0 && <p className="text-sm text-base-content/40">No interstates added</p>}
+              {interstates.length === 0 && <p className="text-sm text-muted">No interstates added</p>}
             </div>
 
             {/* Demographics */}
-            <div className="divider text-xs text-base-content/40 my-1">Logistics Hubs</div>
+            <div className="divider text-xs text-muted my-1">Logistics Hubs</div>
             <div className="space-y-2">
               {logisticsHubs.map((item, i) => (
                 <div key={i} className="flex gap-2 items-center flex-wrap">
@@ -2371,15 +2371,15 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   <input type="number" placeholder="Miles" value={item.distance}
                     onChange={e => updateHub(i, 'distance', e.target.value)}
                     className="input input-bordered input-sm w-24" disabled={!isAdmin} />
-                  <span className="text-sm text-base-content/50">miles</span>
+                  <span className="text-sm text-muted">miles</span>
                   {isAdmin && <button className="btn btn-xs btn-ghost text-error" onClick={() => removeHub(i)}>✕</button>}
                 </div>
               ))}
               {isAdmin && <button className="btn btn-xs btn-outline" onClick={addHub}>+ Add Hub</button>}
-              {logisticsHubs.length === 0 && <p className="text-sm text-base-content/40">No logistics hubs added</p>}
+              {logisticsHubs.length === 0 && <p className="text-sm text-muted">No logistics hubs added</p>}
             </div>
 
-            <div className="divider text-xs text-base-content/40 my-1">Landmarks</div>
+            <div className="divider text-xs text-muted my-1">Landmarks</div>
             <div className="space-y-2">
               {landmarksList.map((item, i) => (
                 <div key={i} className="flex gap-2 items-center flex-wrap">
@@ -2395,15 +2395,15 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   <input type="number" placeholder="Miles" value={item.distance}
                     onChange={e => updateLandmark(i, 'distance', e.target.value)}
                     className="input input-bordered input-sm w-24" disabled={!isAdmin} />
-                  <span className="text-sm text-base-content/50">miles</span>
+                  <span className="text-sm text-muted">miles</span>
                   {isAdmin && <button className="btn btn-xs btn-ghost text-error" onClick={() => removeLandmark(i)}>✕</button>}
                 </div>
               ))}
               {isAdmin && <button className="btn btn-xs btn-outline" onClick={addLandmark}>+ Add Landmark</button>}
-              {landmarksList.length === 0 && <p className="text-sm text-base-content/40">No landmarks added</p>}
+              {landmarksList.length === 0 && <p className="text-sm text-muted">No landmarks added</p>}
             </div>
 
-            <div className="divider text-xs text-base-content/40 my-1">Water Sources</div>
+            <div className="divider text-xs text-muted my-1">Water Sources</div>
             <div className="space-y-2">
               {waterSources.map((item, i) => (
                 <div key={i} className="flex gap-2 items-center flex-wrap">
@@ -2413,15 +2413,15 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   <input type="number" placeholder="Miles" value={item.distance}
                     onChange={e => updateWaterSource(i, 'distance', e.target.value)}
                     className="input input-bordered input-sm w-24" disabled={!isAdmin} />
-                  <span className="text-sm text-base-content/50">miles</span>
+                  <span className="text-sm text-muted">miles</span>
                   {isAdmin && <button className="btn btn-xs btn-ghost text-error" onClick={() => removeWaterSource(i)}>✕</button>}
                 </div>
               ))}
               {isAdmin && <button className="btn btn-xs btn-outline" onClick={addWaterSource}>+ Add Water Source</button>}
-              {waterSources.length === 0 && <p className="text-sm text-base-content/40">No water sources added</p>}
+              {waterSources.length === 0 && <p className="text-sm text-muted">No water sources added</p>}
             </div>
 
-            <div className="divider text-xs text-base-content/40 my-1">Military Bases</div>
+            <div className="divider text-xs text-muted my-1">Military Bases</div>
             <div className="space-y-2">
               {militaryBases.map((item, i) => (
                 <div key={i} className="flex gap-2 items-center flex-wrap">
@@ -2431,16 +2431,16 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   <input type="number" placeholder="Miles" value={item.distance}
                     onChange={e => updateMilitaryBase(i, 'distance', e.target.value)}
                     className="input input-bordered input-sm w-24" disabled={!isAdmin} />
-                  <span className="text-sm text-base-content/50">miles</span>
+                  <span className="text-sm text-muted">miles</span>
                   {isAdmin && <button className="btn btn-xs btn-ghost text-error" onClick={() => removeMilitaryBase(i)}>✕</button>}
                 </div>
               ))}
               {isAdmin && <button className="btn btn-xs btn-outline" onClick={addMilitaryBase}>+ Add Military Base</button>}
-              {militaryBases.length === 0 && <p className="text-sm text-base-content/40">No military bases added</p>}
+              {militaryBases.length === 0 && <p className="text-sm text-muted">No military bases added</p>}
             </div>
 
             {/* Demographics */}
-            <div className="divider text-xs text-base-content/40 my-1">Demographics</div>
+            <div className="divider text-xs text-muted my-1">Demographics</div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Field label="Household Income Min ($)">
                 <NumericInput placeholder="e.g. 45,000" value={incomeMin}
@@ -2480,7 +2480,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <div className="rounded-2xl border border-base-300 overflow-hidden bg-base-100 shadow-sm">
                   <div className="px-4 py-3 border-b border-base-300 space-y-3">
                     <div className="flex flex-wrap items-start justify-between gap-3">
-                      <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
+                      <div className="text-sm font-semibold uppercase tracking-[0.22em] text-muted">Discounted Cash Flow</div>
                       <div className="badge badge-outline whitespace-nowrap">{activeHoldPeriod} Year Hold</div>
                     </div>
                     <div className="flex items-center gap-2">
@@ -2512,7 +2512,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                         </button>
                       </div>
                     </div>
-                    <div className="text-xs uppercase tracking-[0.18em] text-base-content/45">
+                    <div className="text-xs uppercase tracking-[0.18em] text-muted">
                       Showing {visibleDcfColumns.length > 0 ? clampedDcfColumnStart + 1 : 0}-{clampedDcfColumnStart + visibleDcfColumns.length} of {dcfPeriods.length} {dcfModel.timing.viewMode === 'monthly' ? 'periods' : 'years'}
                     </div>
                   </div>
@@ -2528,22 +2528,22 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                           <span className="text-lg leading-none">{collapsedDcfGroups[group.key] ? '+' : '-'}</span>
                         </button>
                         {!collapsedDcfGroups[group.key] && (
-                          <div className="bg-white px-4 py-3 space-y-3">
+                          <div className="bg-base-100 px-4 py-3 space-y-3">
                             {group.rows.filter(row => row.subtotal || row.readOnly).map((row) => (
-                              <div key={`mobile-inline-row-${row.key}`} className={`rounded-lg border px-3 py-2 ${row.subtotal ? 'border-slate-300 bg-slate-50' : 'border-base-200 bg-base-100'}`}>
+                              <div key={`mobile-inline-row-${row.key}`} className={`rounded-lg border px-3 py-2 ${row.subtotal ? 'border-base-300 bg-base-200' : 'border-base-200 bg-base-100'}`}>
                                 <div className="flex items-center justify-between gap-3">
                                   <div>
-                                    <div className="text-sm font-semibold text-slate-900">{row.label}</div>
-                                    <div className="text-[10px] uppercase tracking-[0.16em] text-slate-500">{row.category}</div>
+                                    <div className="text-sm font-semibold text-base-content">{row.label}</div>
+                                    <div className="text-[10px] uppercase tracking-[0.16em] text-muted">{row.category}</div>
                                   </div>
                                   <div className="text-right">
-                                    <div className="text-xs text-slate-500">{dcfModel.timing.viewMode === 'monthly' ? 'Current period' : 'Year 1'}</div>
-                                    <div className="text-sm font-semibold text-slate-900">
+                                    <div className="text-xs text-muted">{dcfModel.timing.viewMode === 'monthly' ? 'Current period' : 'Year 1'}</div>
+                                    <div className="text-sm font-semibold text-base-content">
                                       {formatMoneyCell(row.readOnly ? getComputedDcfValue(visibleDcfColumns[0] || {}, row.key) : visibleDcfColumns[0]?.[row.key])}
                                     </div>
                                   </div>
                                 </div>
-                                {row.help && <div className="mt-2 text-xs text-slate-500">{row.help}</div>}
+                                {row.help && <div className="mt-2 text-xs text-muted">{row.help}</div>}
                               </div>
                             ))}
                           </div>
@@ -2553,20 +2553,20 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   </div>
                 </div>
               </div>
-              <div className="rounded-2xl border border-slate-200 bg-white/90 px-4 py-3 shadow-sm">
+              <div className="rounded-2xl border border-base-300 bg-base-100 px-4 py-3 shadow-sm">
                 <div className="flex flex-wrap items-center gap-2">
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Legend</span>
-                  <span className="rounded-full border border-sky-300 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-900">Assumption</span>
-                  <span className="rounded-full border border-slate-300 bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-800">Computed</span>
-                  <span className="rounded-full border border-zinc-300 bg-zinc-50 px-3 py-1 text-xs font-semibold text-zinc-700">Reference</span>
-                  <span className="rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-800">Healthy</span>
-                  <span className="rounded-full border border-amber-300 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">Watch</span>
-                  <span className="rounded-full border border-rose-300 bg-rose-50 px-3 py-1 text-xs font-semibold text-rose-800">Risk</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-muted">Legend</span>
+                  <span className="rounded-full border border-primary bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">Assumption</span>
+                  <span className="rounded-full border border-base-300 bg-base-200 px-3 py-1 text-xs font-semibold text-base-content">Computed</span>
+                  <span className="rounded-full border border-base-300 bg-base-200 px-3 py-1 text-xs font-semibold text-base-content">Reference</span>
+                  <span className="rounded-full border border-success bg-success/10 px-3 py-1 text-xs font-semibold text-success">Healthy</span>
+                  <span className="rounded-full border border-warning bg-warning/10 px-3 py-1 text-xs font-semibold text-warning">Watch</span>
+                  <span className="rounded-full border border-error bg-error/10 px-3 py-1 text-xs font-semibold text-error">Risk</span>
                 </div>
               </div>
               {/* Investment metrics */}
               <div className="space-y-3 pt-2">
-                <div className={`${sectionHeaderClass} text-emerald-700 border-emerald-200`}>Investment Metrics</div>
+                <div className={`${sectionHeaderClass} text-success border-success`}>Investment Metrics</div>
                 {/* GRM = Price / Gross Scheduled Rent */}
                 <Field label="GRM" help={FIELD_HELP.grm}>
                   <input readOnly
@@ -2650,7 +2650,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
               {/* Operating */}
               <div className="space-y-3 pt-2">
-                <div className={`${sectionHeaderClass} text-amber-700 border-amber-200`}>Operating</div>
+                <div className={`${sectionHeaderClass} text-warning border-warning`}>Operating</div>
                 <Field label="Management Fee (%)" help={FIELD_HELP.managementFeePct}>
                   <NumericInput placeholder="e.g. 8" value={managementFeePct} onChange={setManagementFeePct}
                     className={financialInputClass} disabled={!isAdmin} allowDecimal />
@@ -2700,7 +2700,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
               {/* Income */}
               <div className="space-y-3 pt-2">
-                <div className={`${sectionHeaderClass} text-sky-700 border-sky-200`}>Income</div>
+                <div className={`${sectionHeaderClass} text-primary border-primary`}>Income</div>
                 <Field label="Gross Scheduled Rent ($/yr)" help={FIELD_HELP.grossScheduledRent}>
                   <NumericInput placeholder="e.g. 120000" value={grossScheduledRent} onChange={setGrossScheduledRent}
                     className={financialInputClass} disabled={!isAdmin} />
@@ -2751,7 +2751,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
               {/* Equity / Returns */}
               <div className="space-y-3 pt-2">
-                <div className={`${sectionHeaderClass} text-emerald-700 border-emerald-200`}>Equity / Returns</div>
+                <div className={`${sectionHeaderClass} text-success border-success`}>Equity / Returns</div>
                 <Field label="Equity ($)" help={FIELD_HELP.equity}>
                   <input readOnly
                     value={price !== '' && loanAmount !== ''
@@ -2775,7 +2775,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
               {/* Debt */}
               <div className="space-y-3 pt-2">
-                <div className={`${sectionHeaderClass} text-indigo-700 border-indigo-200`}>Debt</div>
+                <div className={`${sectionHeaderClass} text-info border-info`}>Debt</div>
                 <Field label="Loan Amount ($)" help={FIELD_HELP.loanAmount}>
                   <NumericInput placeholder="e.g. 750000" value={loanAmount} onChange={setLoanAmount}
                     className={financialInputClass} disabled={!isAdmin} />
@@ -2841,7 +2841,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
               {/* Tax & Cost Segregation */}
               <div className="space-y-3 pt-2">
-                <div className={`${sectionHeaderClass} text-rose-700 border-rose-200`}>Tax &amp; Cost Segregation</div>
+                <div className={`${sectionHeaderClass} text-error border-error`}>Tax &amp; Cost Segregation</div>
                 <Field label="Land Value (%)" help={FIELD_HELP.landValuePct}>
                   <NumericInput placeholder="e.g. 20" value={landValuePct} onChange={setLandValuePct}
                     className={financialInputClass} disabled={!isAdmin} allowDecimal />
@@ -2974,7 +2974,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
               {/* Exit / Reversion */}
               <div className="space-y-3 pt-2">
-                <div className={`${sectionHeaderClass} text-violet-700 border-violet-200`}>Exit / Reversion</div>
+                <div className={`${sectionHeaderClass} text-info border-info`}>Exit / Reversion</div>
                 <Field label="Refi LTV (%)" help={FIELD_HELP.refiLtv}>
                   <NumericInput placeholder="e.g. 70" value={refiLtv} onChange={setRefiLtv}
                     className={financialInputClass} disabled={!isAdmin} allowDecimal />
@@ -3019,7 +3019,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
 
               {/* Deal */}
               <div className="space-y-3 pt-2">
-                <div className={`${sectionHeaderClass} text-violet-700 border-violet-200`}>Deal</div>
+                <div className={`${sectionHeaderClass} text-info border-info`}>Deal</div>
                 <Field label="Closing Costs ($)" help={FIELD_HELP.closingCosts}>
                   <NumericInput placeholder="e.g. 25000" value={closingCosts} onChange={setClosingCosts}
                     className={financialInputClass} disabled={!isAdmin} />
@@ -3061,7 +3061,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
               </div>
 
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Model Governance</div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-muted pb-1 border-b border-base-200">Model Governance</div>
                 <label className="label cursor-pointer justify-start gap-3">
                 <input type="checkbox" className={financialReferenceCheckboxClass} checked={!!dcfModel.governance.inputsLocked}
                     onChange={(e) => updateGovernanceField('inputsLocked', e.target.checked)} disabled={!isAdmin} />
@@ -3099,7 +3099,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   </div>
                   <div className="space-y-2">
                     {governanceDiagnostics.issues.length === 0 ? (
-                      <div className="text-sm text-base-content/60">No lease timing or cash flow state conflicts detected.</div>
+                      <div className="text-sm text-muted">No lease timing or cash flow state conflicts detected.</div>
                     ) : governanceDiagnostics.issues.map((issue, index) => (
                       <div key={`governance-issue-${index}`} className={`rounded-lg border px-3 py-2 text-sm ${issue.severity === 'error' ? 'border-error/30 bg-error/10 text-error-content' : 'border-warning/30 bg-warning/10 text-warning-content'}`}>
                         <div className="font-semibold">{issue.scope}</div>
@@ -3108,9 +3108,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     ))}
                   </div>
                   <div className="space-y-2">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40">Override Inventory</div>
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted">Override Inventory</div>
                     {governanceDiagnostics.overrides.length === 0 ? (
-                      <div className="text-sm text-base-content/60">No non-default assumptions detected.</div>
+                      <div className="text-sm text-muted">No non-default assumptions detected.</div>
                     ) : (
                       <div className="grid grid-cols-1 gap-2">
                         {governanceDiagnostics.overrides.map((override, index) => (
@@ -3125,7 +3125,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
               </div>
 
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Lease Economics</div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-muted pb-1 border-b border-base-200">Lease Economics</div>
                 <Field label="Market Rent Growth (% / yr)" help={FIELD_HELP.marketRentGrowth}>
                   <NumericInput value={dcfModel.leaseEconomics.marketRentGrowthPct} onChange={(value) => updateLeaseEconomicsField('marketRentGrowthPct', value)}
                     className={financialInputClass} disabled={!isAdmin} allowDecimal />
@@ -3272,7 +3272,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
               {/* Tenant — retail / percentage-rent only */}
               {(assetType === 'Retail' || assetType === 'Net Lease' || assetType === '') && (
                 <div className="space-y-3 pt-2">
-                  <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Tenant</div>
+                  <div className="text-sm font-semibold uppercase tracking-wide text-muted pb-1 border-b border-base-200">Tenant</div>
                   <Field label="Tenant Annual Gross Sales ($)" help={FIELD_HELP.tenantGrossSales}>
                     <NumericInput placeholder="e.g. 1200000" value={tenantGrossSales} onChange={setTenantGrossSales}
                       className={financialInputClass} disabled={!isAdmin} />
@@ -3288,7 +3288,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   </Field>
                   <div className="pt-2">
                     <div className="flex items-center justify-between pb-2">
-                      <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40">Tenant Rent Roll</div>
+                      <div className="text-xs font-semibold uppercase tracking-wide text-muted">Tenant Rent Roll</div>
                       {isAdmin && <button type="button" className="btn btn-xs btn-outline" onClick={addRentRollRow}>Add Tenant</button>}
                     </div>
                     <div className="space-y-3">
@@ -3492,7 +3492,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </div>
               )}
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Waterfall</div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-muted pb-1 border-b border-base-200">Waterfall</div>
                 <Field label="Preferred Return (%)" help={FIELD_HELP.prefRate}>
                   <NumericInput value={dcfModel.waterfall.prefRate} onChange={(value) => updateWaterfallField('prefRate', value)}
                     className={financialInputClass} disabled={!isAdmin} allowDecimal />
@@ -3515,7 +3515,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
               </div>
               <div className="space-y-3 pt-2">
-                <div className="text-sm font-semibold uppercase tracking-wide text-base-content/50 pb-1 border-b border-base-200">Scenarios</div>
+                <div className="text-sm font-semibold uppercase tracking-wide text-muted pb-1 border-b border-base-200">Scenarios</div>
                 <Field label="Active Scenario" help={FIELD_HELP.activeScenario}>
                   <select value={dcfModel.scenarioName} onChange={(e) => setDcfModel(prev => ({ ...prev, scenarioName: e.target.value }))}
                     className={financialSelectClass} disabled={!isAdmin}>
@@ -3526,7 +3526,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 </Field>
                 {['base', 'upside', 'downside'].map((scenarioKey) => (
                   <div key={scenarioKey} className="rounded-xl border border-base-300 p-3 space-y-3">
-                    <div className="text-xs font-semibold uppercase tracking-wide text-base-content/40">{dcfModel.scenarios[scenarioKey].label}</div>
+                    <div className="text-xs font-semibold uppercase tracking-wide text-muted">{dcfModel.scenarios[scenarioKey].label}</div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                       <Field label="Rent Growth (% / yr)" help={FIELD_HELP.scenarioRentGrowth}>
                         <NumericInput value={dcfModel.scenarios[scenarioKey].rentGrowth} onChange={(value) => updateScenarioField(scenarioKey, 'rentGrowth', value)}
@@ -3556,7 +3556,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   </div>
                 ))}
                 <div className="rounded-xl border border-base-300 overflow-hidden">
-                  <div className="px-4 py-3 border-b border-base-300 text-xs font-semibold uppercase tracking-wide text-base-content/40">Scenario Output Comparison</div>
+                  <div className="px-4 py-3 border-b border-base-300 text-xs font-semibold uppercase tracking-wide text-muted">Scenario Output Comparison</div>
                   <div className="overflow-x-auto">
                     <table className="table table-sm">
                       <thead>
@@ -3595,7 +3595,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                   </div>
                 </div>
                 <div className="rounded-xl border border-base-300 overflow-hidden">
-                  <div className="px-4 py-3 border-b border-base-300 text-xs font-semibold uppercase tracking-wide text-base-content/40">Sensitivity Table</div>
+                  <div className="px-4 py-3 border-b border-base-300 text-xs font-semibold uppercase tracking-wide text-muted">Sensitivity Table</div>
                   <div className="overflow-x-auto">
                     <table className="table table-sm">
                       <thead>
@@ -3636,7 +3636,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
           <div className="space-y-5">
             {isAdmin && (
               <div className="border-2 border-dashed border-base-300 rounded-lg p-6 text-center">
-                <p className="text-sm text-base-content/50 mb-3">Upload images (JPG, PNG, GIF — max 10MB) or videos (MP4, MOV — max 50MB)</p>
+                <p className="text-sm text-muted mb-3">Upload images (JPG, PNG, GIF — max 10MB) or videos (MP4, MOV — max 50MB)</p>
                 <label className="btn btn-primary btn-sm cursor-pointer">
                   Choose Files
                   <input type="file" className="hidden" multiple accept="image/*,video/*" onChange={handleFileUpload} />
@@ -3645,9 +3645,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
             )}
             {uploadError && <p role="alert" className="text-error text-sm">{uploadError}</p>}
             {mediaLoading
-              ? <p className="text-center text-base-content/40 py-6">Loading…</p>
+              ? <p className="text-center text-muted py-6">Loading…</p>
               : media.length === 0
-                ? <p className="text-center text-base-content/30 py-8">No media uploaded yet</p>
+                ? <p className="text-center text-muted py-8">No media uploaded yet</p>
                 : (
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                     {media.map(m => (
@@ -3657,7 +3657,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                           : <img src={`/api/properties/${property.id}/media/${m.id}`} alt={m.filename} className="w-full h-28 object-cover" />
                         }
                         <div className="px-2 py-1 flex items-center justify-between">
-                          <span className="text-xs text-base-content/50 truncate">{m.filename}</span>
+                          <span className="text-xs text-muted truncate">{m.filename}</span>
                           {isAdmin && (
                             <button className="btn btn-xs btn-ghost text-error" onClick={() => deleteMedia(m.id)}>✕</button>
                           )}
@@ -3675,8 +3675,8 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
           <div className="space-y-5">
             {isAdmin && (
               <div className="border-2 border-dashed border-base-300 rounded-lg p-6 text-center">
-                <p className="text-sm text-base-content/50 mb-1">PDF, Word, Excel, CSV, images — max 25MB each</p>
-                <p className="text-xs text-base-content/30 mb-3">These are property documents, not visual media</p>
+                <p className="text-sm text-muted mb-1">PDF, Word, Excel, CSV, images — max 25MB each</p>
+                <p className="text-xs text-muted mb-3">These are property documents, not visual media</p>
                 <label className="btn btn-primary btn-sm cursor-pointer">
                   Upload Documents
                   <input type="file" className="hidden" multiple
@@ -3687,9 +3687,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
             )}
             {docUploadError && <p role="alert" className="text-error text-sm">{docUploadError}</p>}
             {docsLoading
-              ? <p className="text-center text-base-content/40 py-6">Loading…</p>
+              ? <p className="text-center text-muted py-6">Loading…</p>
               : docs.length === 0
-                ? <p className="text-center text-base-content/30 py-8">No documents uploaded yet</p>
+                ? <p className="text-center text-muted py-8">No documents uploaded yet</p>
                 : (
                   <div className="space-y-2">
                     {docs.map(doc => {
@@ -3708,7 +3708,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                             >
                               {doc.filename}
                             </a>
-                            <p className="text-xs text-base-content/40">
+                            <p className="text-xs text-muted">
                               {new Date(doc.uploaded_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
                               {doc.uploaded_by_email && ` · ${doc.uploaded_by_email}`}
                             </p>
@@ -3754,7 +3754,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                 <div className="px-5 py-4 border-b border-base-300 sticky top-0 bg-base-100 z-[1] space-y-3">
                   <div className="flex items-start justify-between gap-3 flex-wrap">
                     <div>
-                      <div className="text-sm font-semibold uppercase tracking-[0.22em] text-base-content/50">Discounted Cash Flow</div>
+                      <div className="text-sm font-semibold uppercase tracking-[0.22em] text-muted">Discounted Cash Flow</div>
                     </div>
                     <div className="flex items-center gap-2 flex-wrap justify-end">
                       <select
@@ -3770,7 +3770,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                     </div>
                   </div>
                   <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <div className="text-xs uppercase tracking-[0.18em] text-base-content/45">
+                    <div className="text-xs uppercase tracking-[0.18em] text-muted">
                       Showing {visibleDcfColumns.length > 0 ? clampedDcfColumnStart + 1 : 0}-{clampedDcfColumnStart + visibleDcfColumns.length} of {dcfPeriods.length} {dcfModel.timing.viewMode === 'monthly' ? 'periods' : 'years'}
                     </div>
                     <div className="join">
@@ -3821,19 +3821,19 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                             </th>
                           </tr>
                           {!collapsedDcfGroups[group.key] && group.rows.map((row) => (
-                            <tr key={row.key} className={row.subtotal ? 'bg-slate-100/90' : row.readOnly ? 'bg-base-200/30' : 'bg-white'}>
-                              <th className={`sticky left-0 z-[1] w-[220px] min-w-[220px] whitespace-normal border-b border-base-200 ${row.subtotal ? 'bg-slate-100 font-semibold' : 'bg-white font-medium'}`}>
+                            <tr key={row.key} className={row.subtotal ? 'bg-base-200' : row.readOnly ? 'bg-base-200/30' : 'bg-base-100'}>
+                              <th className={`sticky left-0 z-[1] w-[220px] min-w-[220px] whitespace-normal border-b border-base-200 ${row.subtotal ? 'bg-base-200 font-semibold' : 'bg-base-100 font-medium'}`}>
                                 <div className="flex items-start gap-2">
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-1">
                                       <span>{row.label}</span>
                                       {row.help && (
                                         <span title={row.help}>
-                                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-base-300 text-base-content/50 text-[10px] cursor-help">?</span>
+                                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-base-300 text-muted text-[10px] cursor-help">?</span>
                                         </span>
                                       )}
                                     </div>
-                                    <span className="text-[10px] uppercase tracking-[0.18em] text-base-content/35">{row.category}</span>
+                                    <span className="text-[10px] uppercase tracking-[0.18em] text-muted">{row.category}</span>
                                   </div>
                                 </div>
                               </th>
@@ -3841,9 +3841,9 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                                 const yearIndex = clampedDcfColumnStart + periodIndex
                                 const computedValue = row.readOnly ? getComputedDcfValue(period, row.key) : null
                                 return (
-                                  <td key={`${row.key}-${dcfModel.timing.viewMode === 'monthly' ? period.month : period.year}`} className={`align-middle border-b border-base-200 px-2 py-2 ${row.subtotal ? 'bg-slate-100/60' : ''}`}>
+                                  <td key={`${row.key}-${dcfModel.timing.viewMode === 'monthly' ? period.month : period.year}`} className={`align-middle border-b border-base-200 px-2 py-2 ${row.subtotal ? 'bg-base-200' : ''}`}>
                                     {row.readOnly ? (
-                                      <div className={`input input-bordered input-sm w-[108px] max-w-full ml-auto text-sm cursor-default flex items-center justify-end px-2 ${row.subtotal ? 'border-slate-400 bg-slate-50 font-bold text-slate-900' : 'border-slate-300 bg-slate-50 font-semibold text-slate-900'}`}>
+                                      <div className={`input input-bordered input-sm w-[108px] max-w-full ml-auto text-sm cursor-default flex items-center justify-end px-2 ${row.subtotal ? 'border-base-300 bg-base-200 font-bold text-base-content' : 'border-base-300 bg-base-200 font-semibold text-base-content'}`}>
                                         {formatMoneyCell(computedValue)}
                                       </div>
                                     ) : (
@@ -3851,7 +3851,7 @@ export default function PropertyDetailModal({ open, property, isAdmin, onClose, 
                                         placeholder="0"
                                         value={period[row.key]}
                                         onChange={(value) => dcfModel.timing.viewMode === 'monthly' ? null : updateDcfCell(yearIndex, row.key, value)}
-                                        className={`input input-bordered input-sm w-[108px] max-w-full ml-auto text-sm text-right px-2 ${row.subtotal ? 'border-slate-300 bg-slate-50 font-semibold text-slate-900' : 'border-sky-200 bg-sky-50/60 text-sky-900'}`}
+                                        className={`input input-bordered input-sm w-[108px] max-w-full ml-auto text-sm text-right px-2 ${row.subtotal ? 'border-base-300 bg-base-200 font-semibold text-base-content' : 'border-primary bg-primary/10 text-primary'}`}
                                         disabled={!isAdmin || dcfModel.timing.viewMode === 'monthly'}
                                         allowDecimal={false}
                                       />
