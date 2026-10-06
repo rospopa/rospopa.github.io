@@ -257,6 +257,13 @@ import { decodeContactValue } from './contact-data.mjs?v=ad187cf99d';
       var link = document.createElement('a');
       link.href = slot.getAttribute('data-t') === 'tel' ? 'tel:+1' + value.replace(/\D/g, '') : 'mailto:' + value;
       link.textContent = value;
+      if (slot.getAttribute('data-t') !== 'tel') {
+        link.replaceChildren();
+        value.split(/(?<=[@.])/).forEach(function (part, index) {
+          if (index) link.appendChild(document.createElement('wbr'));
+          link.appendChild(document.createTextNode(part));
+        });
+      }
       slot.replaceWith(link);
     });
     box.hidden = false;

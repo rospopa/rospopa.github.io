@@ -42,11 +42,12 @@ main { padding-block: 2.25rem 3.5rem; overflow-wrap: anywhere; }
 .header-contact { padding: .3rem .65rem; border: 1px solid var(--ink); border-radius: .25rem; background: transparent; color: var(--ink); font-size: .875rem; font-weight: 600; line-height: 1.5; white-space: nowrap; cursor: pointer; }
 .header-contact[hidden] { display: none; }
 .header-contact:hover { background: var(--color-base-200); }
-.contact-dialog { width: min(42rem, calc(100% - 2rem)); max-height: calc(100% - 2rem); overflow: auto; padding: 1.25rem; border: 1px solid var(--line); border-radius: .375rem; background: var(--color-base-100); color: var(--ink); box-shadow: var(--shadow); }
+.contact-dialog { width: min(50rem, calc(100% - 2rem)); max-height: calc(100% - 2rem); overflow: auto; padding: 1.25rem; border: 1px solid var(--line); border-radius: .375rem; background: var(--color-base-100); color: var(--ink); box-shadow: var(--shadow); }
 .contact-dialog::backdrop { background: rgba(0, 0, 0, .6); }
 .contact-dialog h2 { margin: 0 0 1rem; }
 .contact-dialog > .btn { margin-bottom: 1rem; }
 .contact-dialog a { overflow-wrap: anywhere; }
+.contact-dialog .contact-cards { grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr)); }
 .theme-toggle { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; padding: 6px; color: var(--ink); background: transparent; border: 0; border-radius: .25rem; cursor: pointer; }
 .theme-toggle[hidden] { display: none; }
 .theme-toggle svg { width: 20px; height: 20px; }
