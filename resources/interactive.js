@@ -243,9 +243,7 @@
   }
 
   // Contact details are stored XOR-encoded and only decoded after a real click, so scrapers reading the HTML get nothing usable.
-  function setupContactReveal(button) {
-    var box = document.getElementById(button.getAttribute('aria-controls'));
-    if (!box) return;
+  function revealContactDetails(box) {
     var key = 'r0sp0pa-industrial';
     function decode(value) {
       var bytes = atob(value.split('').reverse().join(''));
@@ -253,21 +251,84 @@
       for (var i = 0; i < bytes.length; i++) out += String.fromCharCode(bytes.charCodeAt(i) ^ key.charCodeAt(i % key.length));
       return out;
     }
+    box.querySelectorAll('[data-c]').forEach(function (slot) {
+      var value = decode(slot.getAttribute('data-c'));
+      var link = document.createElement('a');
+      link.href = slot.getAttribute('data-t') === 'tel' ? 'tel:+1' + value.replace(/\D/g, '') : 'mailto:' + value;
+      link.textContent = value;
+      slot.replaceWith(link);
+    });
+    box.hidden = false;
+  }
+  function setupContactReveal(button) {
+    var box = document.getElementById(button.getAttribute('aria-controls'));
+    if (!box) return;
     button.hidden = false;
     button.addEventListener('click', function (event) {
       if (!event.isTrusted) return;
-      box.querySelectorAll('[data-c]').forEach(function (slot) {
-        var value = decode(slot.getAttribute('data-c'));
-        var link = document.createElement('a');
-        link.href = slot.getAttribute('data-t') === 'tel' ? 'tel:+1' + value.replace(/\D/g, '') : 'mailto:' + value;
-        link.textContent = value;
-        slot.replaceWith(link);
-      });
-      box.hidden = false;
+      revealContactDetails(box);
       button.setAttribute('aria-expanded', 'true');
       button.hidden = true;
       var first = box.querySelector('a');
       if (first) first.focus();
+    });
+  }
+  function setupHeaderContact(button) {
+    var dialog = document.createElement('dialog');
+    dialog.className = 'contact-dialog';
+    dialog.id = 'header-contact-dialog';
+    dialog.setAttribute('aria-labelledby', 'header-contact-title');
+    var heading = document.createElement('h2');
+    heading.id = 'header-contact-title';
+    heading.textContent = 'Contact Pavlo Rospopa';
+    var close = document.createElement('button');
+    close.type = 'button';
+    close.className = 'btn btn-outline';
+    close.textContent = 'Close';
+    var content = document.createElement('div');
+    dialog.append(heading, close, content);
+    document.body.appendChild(dialog);
+    close.addEventListener('click', function () { dialog.close(); });
+    dialog.addEventListener('close', function () { button.focus(); });
+    var loaded = false, loading = false;
+    button.hidden = false;
+    button.addEventListener('click', async function (event) {
+      if (!event.isTrusted) return;
+      dialog.showModal();
+      if (loading) return;
+      if (loaded) {
+        content.querySelector('a').focus();
+        return;
+      }
+      loading = true;
+      content.setAttribute('role', 'status');
+      content.textContent = 'Loading contact information...';
+      try {
+        var source = document.getElementById('contact-details');
+        if (!source) {
+          var response = await fetch('/');
+          if (!response.ok) throw new Error('Contact page returned HTTP ' + response.status);
+          var home = new DOMParser().parseFromString(await response.text(), 'text/html');
+          source = home.getElementById('contact-details');
+        }
+        if (!source || !source.querySelector('[data-c], a')) throw new Error('Contact details are unavailable.');
+        var box = source.cloneNode(true);
+        box.removeAttribute('id');
+        revealContactDetails(box);
+        content.removeAttribute('role');
+        content.replaceChildren(box);
+        loaded = true;
+        if (dialog.open) box.querySelector('a').focus();
+      } catch (error) {
+        console.error('Unable to show contact information.', error);
+        content.textContent = 'Unable to load contact information. Close this dialog and select Show contact info to retry, or visit the homepage contact section.';
+        var fallback = document.createElement('a');
+        fallback.href = '/#contact';
+        fallback.textContent = 'Visit contact section';
+        content.appendChild(fallback);
+      } finally {
+        loading = false;
+      }
     });
   }
   document.addEventListener('DOMContentLoaded', function () {
@@ -277,6 +338,7 @@
     document.querySelectorAll('form[data-faq-filter]').forEach(setupFaqFilter);
     document.querySelectorAll('[data-carousel]').forEach(setupCarousel);
     document.querySelectorAll('[data-contact-reveal]').forEach(setupContactReveal);
+    document.querySelectorAll('[data-header-contact]').forEach(setupHeaderContact);
     setupScrollSpy();
   });
 }());

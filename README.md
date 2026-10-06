@@ -30,6 +30,14 @@ the shared stylesheet, update its cache version on all public pages, including
 `search\index.html` and `404.html`. Check 320px, 375px, 390px, tablet, and desktop
 layouts, with the mobile menu both closed and open.
 
+The shared header's Show contact info button opens a native modal dialog,
+using the existing click-to-reveal decoder in `resources\interactive.js`.
+Contact data remains defined only in the homepage's `#contact-details`;
+other pages fetch it on activation. The original homepage disclosure stays
+available. Check keyboard activation, Escape/Close focus return, and the
+visible retry message on a failed homepage fetch. This control requires
+JavaScript; the homepage still provides its existing no-script LinkedIn link.
+
 The private React workspace in `client\` is built and served by the Node
 service in `server\`, separately from GitHub Pages. See `DEPLOY.md` for hosting,
 indexing controls, and the deployment verification checklist.
