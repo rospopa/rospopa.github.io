@@ -81,6 +81,14 @@ price or price/SF only if approved), plus a permissioned advisor headshot.
 An archived listing is not evidence of a closing. The official profile confirms
 joining Marcus & Millichap in 2026, not a number of earlier brokerage years.
 
+Tables retain readable minimum widths inside their focusable horizontal-scroll
+wrappers instead of crushing checklist labels into narrow word fragments.
+Checklist hints explain arrow-key scrolling; toggles/reset and stored state
+must still work at phone widths. Generated business email links use Cloudflare's
+documented `email_off` comments to opt that intentionally public contact link
+out of edge obfuscation. Confirm the edge preserves the no-JavaScript mailto
+after deployment; local HTML alone cannot verify Cloudflare transformation.
+
 The private React workspace in `client\` is built and served by the Node
 service in `server\`, separately from GitHub Pages. See `DEPLOY.md` for hosting,
 indexing controls, and the deployment verification checklist.

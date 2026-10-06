@@ -167,7 +167,7 @@ const contactValues = new Map([...businessCard[1].matchAll(/data-c="([^"]+)" dat
 const phone = contactValues.get('tel'), email = contactValues.get('mail');
 if (!phone || !email) throw new Error('Homepage business phone or email is missing');
 const directContact = `<!-- direct-contact:start -->
-      <p class="direct-contact"><a class="btn btn-primary" href="tel:+1${phone.replace(/\D/g, '')}">Call ${escapeHtml(phone)}</a> <a class="btn btn-outline" href="mailto:${escapeHtml(email)}">Email ${escapeHtml(email)}</a></p>
+      <p class="direct-contact"><a class="btn btn-primary" href="tel:+1${phone.replace(/\D/g, '')}">Call ${escapeHtml(phone)}</a> <!--email_off--><a class="btn btn-outline" href="mailto:${escapeHtml(email)}">Email ${escapeHtml(email)}</a><!--/email_off--></p>
       <!-- direct-contact:end -->`;
 for (const page of PAGES) {
   let html = await readFile(page, 'utf8');

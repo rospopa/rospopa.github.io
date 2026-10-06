@@ -219,6 +219,12 @@ tr.done th { text-decoration: line-through; text-decoration-thickness: 1px; }
 .guide-list li { margin: .6rem 0; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: .375rem; margin-block: 1.4rem; background: var(--color-base-100); }
 table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+.table-wrap table { min-width: 32rem; overflow-wrap: normal; }
+table[data-checklist] { min-width: 36rem; }
+table[data-checklist] tbody th { min-width: 9rem; }
+table[data-checklist] td:not(.check) { min-width: 15rem; }
+table[data-checklist] :is(th, td).check { min-width: 3rem; vertical-align: middle; }
+.table-scroll-hint { display: block; font-size: .8rem; font-weight: 400; color: var(--muted); }
 .table-wide table { min-width: 36rem; }
 .direct-contact { display: flex; flex-wrap: wrap; gap: .6rem; }
 .direct-contact .btn { white-space: normal; overflow-wrap: anywhere; max-width: 100%; }

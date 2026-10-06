@@ -109,6 +109,12 @@ import { decodeContactValue } from './contact-data.mjs?v=ad187cf99d';
     reset.type = 'button'; reset.className = 'btn btn-outline btn-small'; reset.textContent = 'Reset checklist';
     tools.appendChild(status); tools.appendChild(reset);
     var wrap = table.closest('.table-wrap') || table;
+    var hint = document.createElement('p');
+    hint.id = id + '-scroll-hint';
+    hint.className = 'table-scroll-hint';
+    hint.textContent = 'Scroll horizontally to read all columns; use arrow keys when the table is focused.';
+    wrap.parentNode.insertBefore(hint, wrap);
+    wrap.setAttribute('aria-describedby', [wrap.getAttribute('aria-describedby'), hint.id].filter(Boolean).join(' '));
     wrap.parentNode.insertBefore(tools, wrap.nextSibling);
 
     function update() {
