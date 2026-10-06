@@ -456,7 +456,6 @@ td.check input { width: 1.5rem; height: 1.5rem; accent-color: var(--brand-strong
   .page-hero { padding: 1.5rem 0 1.75rem; }
   .toc ol { columns: 1; }
   .lead { font-size: 1.05rem; }
-  .brand-given { display: none; }
 }
 @media (max-width: 374px) {
   .site-header { padding-left: .75rem; padding-right: .75rem; column-gap: .5rem; }

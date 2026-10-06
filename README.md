@@ -23,6 +23,13 @@ changing navigation. `/search/` is `noindex` and deliberately absent from the
 sitemap. `robots.txt` explicitly welcomes AI assistants; `llms.txt` and
 `llms-full.txt` give them a Markdown directory and full text.
 
+The public header uses `resources\resources.css`. Keep the complete logo
+(leaf, ROSPOPA, and PAVLO) visible at every viewport width; the compact rules
+below 375px leave room for the theme, sign-in, and menu controls. When changing
+the shared stylesheet, update its cache version on all public pages, including
+`search\index.html` and `404.html`. Check 320px, 375px, 390px, tablet, and desktop
+layouts, with the mobile menu both closed and open.
+
 The private React workspace in `client\` is built and served by the Node
 service in `server\`, separately from GitHub Pages. See `DEPLOY.md` for hosting,
 indexing controls, and the deployment verification checklist.

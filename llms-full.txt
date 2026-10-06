@@ -1,6 +1,6 @@
 # Chicagoland Industrial: public guides, full text
 
-> Pavlo Rospopa specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois. This file contains the complete text of the public guides at https://rospopa.com/ for reading by assistants and tools. Definitions and checklists are general education, not legal, tax, engineering, or investment advice. Guides last updated 2026-10-05.
+> Pavlo Rospopa specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois. This file contains the complete text of the public guides at https://rospopa.com/ for reading by assistants and tools. Definitions and checklists are general education, not legal, tax, engineering, or investment advice. Guides last updated 2026-10-06.
 
 ## Finding and choosing a commercial real estate broker
 
@@ -14,7 +14,7 @@ Relevant to searches such as "best commercial real estate broker", "best commerc
 ---
 
 Source: https://rospopa.com/
-Published: 2026-10-02 · Updated: 2026-10-05
+Published: 2026-10-02 · Updated: 2026-10-06
 
 Illinois · Industrial investment sales
 
@@ -174,7 +174,7 @@ Library published October 2, 2026 · Expanded October 3, 2026 .
 ---
 
 Source: https://rospopa.com/resources/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Library
 
@@ -251,7 +251,7 @@ Plain-English definitions of building, lease, underwriting, and Illinois records
 ---
 
 Source: https://rospopa.com/resources/industrial-real-estate-faq/
-Published: 2026-10-05 · Updated: 2026-10-05
+Published: 2026-10-05 · Updated: 2026-10-06
 
 FAQ · Industrial real estate & Chicagoland industrial
 
@@ -698,7 +698,7 @@ The questions reflect what people most often search for and ask about industrial
 ---
 
 Source: https://rospopa.com/resources/industrial-investor-faq/
-Published: 2026-10-05 · Updated: 2026-10-05
+Published: 2026-10-05 · Updated: 2026-10-06
 
 Investor Q&A · 10,000 to 100,000 SF industrial
 
@@ -880,7 +880,7 @@ Have a question that belongs here? Send it on LinkedIn . For broader questions a
 ---
 
 Source: https://rospopa.com/resources/community/
-Published: 2026-10-05 · Updated: 2026-10-05
+Published: 2026-10-05 · Updated: 2026-10-06
 
 Community · Forum-style Q&A
 
@@ -1522,7 +1522,7 @@ To ask your own question, or answer someone else’s, use the members' board .
 ---
 
 Source: https://rospopa.com/resources/industrial-building-types/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Industrial guide · Building function and specifications
 
@@ -1642,7 +1642,7 @@ For regional research sources, the county hub links to assessment offices across
 ---
 
 Source: https://rospopa.com/resources/chicago-industrial-real-estate/
-Published: 2026-10-02 · Updated: 2026-10-05
+Published: 2026-10-02 · Updated: 2026-10-06
 
 Operations & property suitability
 
@@ -1718,7 +1718,7 @@ For a lease, use the occupancy-cost and lease checklist . For a purchase, review
 ---
 
 Source: https://rospopa.com/resources/industrial-due-diligence/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Industrial guide · Physical and environmental diligence
 
@@ -1905,7 +1905,7 @@ For terminology, the Phase I ESA / AAI , ALTA survey , and title commitment glos
 ---
 
 Source: https://rospopa.com/resources/chicagoland-industrial-submarkets/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Market orientation · Illinois logistics corridors
 
@@ -2042,7 +2042,7 @@ For sale, lease, or investment context, cross-check selling industrial property 
 ---
 
 Source: https://rospopa.com/resources/chicagoland-industrial-real-estate/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Illinois, USA · County-by-county research
 
@@ -2217,7 +2217,7 @@ Record the source, access date, parcel searched, verified finding, and unresolve
 ---
 
 Source: https://rospopa.com/resources/illinois-industrial-property-taxes/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Owner guide · Illinois industrial tax diligence
 
@@ -2340,7 +2340,7 @@ Assessment office links: Cook , DeKalb , DuPage , Grundy , Kane , Kendall , Lake
 ---
 
 Source: https://rospopa.com/resources/selling-industrial-property/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Owner guide · Chicagoland industrial sale preparation
 
@@ -2503,7 +2503,7 @@ Connect on LinkedIn Marcus & Millichap advisor page
 ---
 
 Source: https://rospopa.com/resources/commercial-investment/
-Published: 2026-10-02 · Updated: 2026-10-05
+Published: 2026-10-02 · Updated: 2026-10-06
 
 Acquisition preparation
 
@@ -2582,7 +2582,7 @@ Review commercial lease terms and obligations when assessing a leased investment
 ---
 
 Source: https://rospopa.com/resources/commercial-leasing/
-Published: 2026-10-02 · Updated: 2026-10-05
+Published: 2026-10-02 · Updated: 2026-10-06
 
 Lease comparison & preparation
 
@@ -2656,7 +2656,7 @@ Comparing industrial leases across county lines? Use the nine-county Illinois in
 ---
 
 Source: https://rospopa.com/resources/chicago-commercial-real-estate/
-Published: 2026-10-02 · Updated: 2026-10-05
+Published: 2026-10-02 · Updated: 2026-10-06
 
 Research guide
 
@@ -2736,7 +2736,7 @@ For rental decisions, continue to comparing commercial leases . For an acquisiti
 ---
 
 Source: https://rospopa.com/resources/glossary/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Reference · Industrial real estate and investment terms
 
