@@ -13,6 +13,15 @@ After changing any public page, regenerate the generated files from the repo roo
     node build-site.mjs          # search index, sitemap.xml (with images), feed.xml, llms-full.txt, news section
     node build-site.mjs --news   # also refresh resources/news.json from the news feeds
 
+The owner library starts at `resources\commercial-property-owner-questions\`.
+NOI, DCF, cost controls, insurance and budgets/reserves have dedicated guides;
+Illinois tax management extends the existing tax guide. Keep illustrative
+numbers distinct from market data, reconcile NOI/reserve/debt conventions,
+and link current official sources. FAQPage answers must match visible answers;
+structured data is not a promise of Google rich results or search ranking.
+The owner hub is linked in the shared footer, not added to the top navigation.
+New pages reuse the public template and generated business contact strip.
+
 `.github\workflows\update-news.yml` runs the `--news` variant daily and commits
 the result with `[skip render]` so only GitHub Pages redeploys. GitHub pauses
 scheduled workflows after 60 days without repository activity; re-enable it

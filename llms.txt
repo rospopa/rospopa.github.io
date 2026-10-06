@@ -22,6 +22,12 @@ These pages are not listings, market forecasts, legal or tax advice, or evidence
 - [Chicago commercial real estate research](https://rospopa.com/resources/chicago-commercial-real-estate/): Property types, jurisdiction, zoning, tax, and building research.
 - [Commercial leasing](https://rospopa.com/resources/commercial-leasing/): Occupancy costs, lease terms, and a tour checklist.
 - [Commercial investment](https://rospopa.com/resources/commercial-investment/): Acquisition diligence, cash flow, and financing risks.
+- [Commercial property owner questions](https://rospopa.com/resources/commercial-property-owner-questions/): Answer-first questions on NOI, expenses, Illinois tax appeals, insurance, CAM, reserves, debt and selling, linking to the deep guides.
+- [How to calculate NOI](https://rospopa.com/resources/net-operating-income/): Rent-to-EGI-to-NOI example, recoveries, exclusions and buyer adjustments; assumptions are illustrative, not market data.
+- [Discounted cash flow explained](https://rospopa.com/resources/discounted-cash-flow/): Hold-period cash flow, TI/LC, exit cap, discount rate, NPV/IRR, levered versus unlevered analysis and numerical sensitivity.
+- [Reducing commercial property costs](https://rospopa.com/resources/reduce-commercial-property-costs/): Utility review, official ComEd/Nicor programs, maintenance, contract bids and CAM reconciliation without cutting safety.
+- [Commercial property insurance](https://rospopa.com/resources/commercial-property-insurance/): Property, rental-value and liability coverage questions, valuation, coinsurance, flood exclusions and renewal trade-offs; not insurance advice.
+- [Commercial property budgets and reserves](https://rospopa.com/resources/commercial-property-budget/): Expense benchmarking, capex/opex, reserve funding, CPA questions on depreciation/cost segregation/1031 and financing liquidity.
 - [Industrial and investment glossary](https://rospopa.com/resources/glossary/): Plain-English definitions of building, lease, underwriting, and Illinois property-records terms, each with a stable anchor link.
 - [Search](https://rospopa.com/search/): Client-side search across every guide section and glossary term (not indexed).
 

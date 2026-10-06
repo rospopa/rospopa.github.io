@@ -177,6 +177,34 @@ Plain-English definitions of building, lease, underwriting, and Illinois records
 
 > Scope. “Chicago real estate” here means commercial and industrial property, not homes. The nine counties are the ones I work in, not an official definition of Chicagoland; Indiana and Wisconsin are outside this site. These pages are educational. They are not listings, appraisals, or legal, tax, engineering, or investment advice.
 
+## Owner questions: income, costs and risk
+
+Understand your operating statement, reduce waste, budget capital and evaluate taxes and insurance before the next lease, refinance or sale.
+
+### How is net operating income calculated for commercial property?
+
+Calculate commercial property NOI from rent, vacancy, recoveries and expenses. A worked example separates debt, capital costs and reserves for Illinois owners.
+
+### DCF explained for commercial real estate owners
+
+Understand commercial property discounted cash flow, discount rates, exit caps, NPV and IRR with an illustrative hold-period example and downside checks.
+
+### How can owners reduce commercial building operating costs?
+
+Practical Illinois owner controls for energy, maintenance, utilities, service bids and CAM, with ComEd/Nicor resources and links to insurance and tax guides.
+
+### Commercial property insurance: an owner renewal checklist
+
+Illinois owner guide to building insurance, loss of rents, liability, flood exclusions, replacement cost, coinsurance, deductibles and premium review.
+
+### How to budget expenses, reserves and capital for a commercial building
+
+Build an owner operating budget, normalize expense benchmarks, plan reserves, separate capex from opex, and prepare CPA questions on depreciation and 1031.
+
+### Commercial property owner questions: income, costs and decisions
+
+Plain-English answers for Illinois commercial owners on NOI, DCF, expense cuts, property tax appeals, CAM, insurance, reserves, debt and when to sell.
+
 ---
 
 Source: https://rospopa.com/resources/
@@ -186,7 +214,7 @@ Library
 
 # All guides
 
-Fourteen free guides to industrial and commercial real estate in Chicago and the nine-county Chicagoland region. They cover how buildings work, how deals are researched and underwritten, and where the official records live. Search every section or browse below.
+Free guides to industrial and commercial real estate in Chicago and the nine-county Chicagoland region. They cover how buildings work, how deals are researched and underwritten, and where the official records live. Search every section or browse below.
 
 ## Talk about your building
 
@@ -263,6 +291,34 @@ How to verify jurisdiction, PINs, zoning, building records, and taxes before com
 Plain-English definitions of building, lease, underwriting, and Illinois records terms, each with its own link and a live filter.
 
 > Scope. These guides are educational. They are not listings, appraisals, or legal, tax, engineering, environmental, or investment advice. “Chicagoland” here means the nine Illinois counties I work in. Verify records and requirements with the responsible offices and qualified professionals.
+
+## Owner questions: income, costs and risk
+
+Understand your operating statement, reduce waste, budget capital and evaluate taxes and insurance before the next lease, refinance or sale.
+
+### How is net operating income calculated for commercial property?
+
+Calculate commercial property NOI from rent, vacancy, recoveries and expenses. A worked example separates debt, capital costs and reserves for Illinois owners.
+
+### DCF explained for commercial real estate owners
+
+Understand commercial property discounted cash flow, discount rates, exit caps, NPV and IRR with an illustrative hold-period example and downside checks.
+
+### How can owners reduce commercial building operating costs?
+
+Practical Illinois owner controls for energy, maintenance, utilities, service bids and CAM, with ComEd/Nicor resources and links to insurance and tax guides.
+
+### Commercial property insurance: an owner renewal checklist
+
+Illinois owner guide to building insurance, loss of rents, liability, flood exclusions, replacement cost, coinsurance, deductibles and premium review.
+
+### How to budget expenses, reserves and capital for a commercial building
+
+Build an owner operating budget, normalize expense benchmarks, plan reserves, separate capex from opex, and prepare CPA questions on depreciation and 1031.
+
+### Commercial property owner questions: income, costs and decisions
+
+Plain-English answers for Illinois commercial owners on NOI, DCF, expense cuts, property tax appeals, CAM, insurance, reserves, debt and when to sell.
 
 ---
 
@@ -719,6 +775,13 @@ The questions reflect what people most often search for and ask about industrial
 
 > General education only. This is not legal, tax, environmental, engineering, lending, appraisal, or investment advice, and not a recommendation about any property. Verify facts, current market data, and current rules with the responsible offices and qualified professionals before acting.
 
+## Continue with the owner guides
+
+For the operating and financial questions behind this decision:
+- How is net operating income calculated for commercial property?
+- Commercial property insurance: an owner renewal checklist
+- Commercial property owner questions: income, costs and decisions
+
 ---
 
 Source: https://rospopa.com/resources/industrial-investor-faq/
@@ -906,6 +969,13 @@ The questions are paraphrased from recurring themes in investor forums, industry
 Have a question that belongs here? Send it on LinkedIn . For broader questions about what industrial real estate is, how leases work, zoning, and the Chicago market, see the industrial real estate FAQ: 100 common questions .
 
 > General education only. This is not legal, tax, environmental, engineering, lending, appraisal, or investment advice, and not a recommendation about any property. Verify facts and current rules with the responsible offices and qualified professionals before acting.
+
+## Continue with the owner guides
+
+For the operating and financial questions behind this decision:
+- DCF explained for commercial real estate owners
+- How to budget expenses, reserves and capital for a commercial building
+- Commercial property owner questions: income, costs and decisions
 
 ---
 
@@ -2046,6 +2116,13 @@ For terminology, the Phase I ESA / AAI , ALTA survey , and title commitment glos
 
 > This guide is general education, not engineering, environmental, legal, tax, appraisal, brokerage, or investment advice. Verify environmental conditions, building systems, title, survey, zoning, leases, utilities, and transaction decisions with qualified professionals before acting.
 
+## Continue with the owner guides
+
+For the operating and financial questions behind this decision:
+- Commercial property insurance: an owner renewal checklist
+- How to budget expenses, reserves and capital for a commercial building
+- How can owners reduce commercial building operating costs?
+
 ---
 
 Source: https://rospopa.com/resources/chicagoland-industrial-submarkets/
@@ -2485,6 +2562,48 @@ For sale-process context, see Illinois and Cook County considerations and pricin
 - Incentives: Confirm applications, ordinances, approvals, renewals, transferability, and clawbacks.
 - Leases: Check pass-through, refund, contest, and reassessment language.
 
+## How can an Illinois owner manage property taxes year-round?
+
+Start with a parcel file: every PIN, property card, areas, use/classification, assessment notices, current and prior bills, leases, vacancy records and capital-condition evidence. Correct factual errors with the responsible office. An appeal addresses the assessment and evidence; the assessor does not set every taxing district's levy or guarantee a particular tax bill.
+
+### Cook cycle versus filing windows
+
+Cook reassesses each region once every three years, but appeal opportunities and changed-property reviews are not limited to the triennial mailing. Use the current township calendar for the actual notice and appeal dates; a building's town name alone is not the appeal deadline. Track the Board of Review window separately. In the collar counties, use the county assessment publication, local Board of Review rules and annual equalization information rather than importing Cook's cycle.
+
+### Assessor, Board of Review and PTAB are different steps
+
+Check local assessor review first where available, then the county Board of Review filing requirements. A PTAB appeal normally follows a Board of Review decision; PTAB's filing instructions describe a 30-day period and the applicable decision/notification rules, including Cook-specific transmittal information. Have counsel confirm the trigger, entity representation, current forms, evidence and alternatives before the deadline. PTAB recommends an appraisal for commercial and industrial appeals; unsupported asking prices are not the same evidence.
+
+Build a calendar with the notice date, last filing date, evidence deadline, professional engagement, decision and any further-review deadline. Do not assume filing an appeal suspends tax payment obligations. Counsel and the treasurer should confirm payment and refund handling.
+
+### Budget the bill and tenant allocation, not only an appeal result
+
+Keep a documented base-case budget and a higher-tax scenario for reassessment, equalization, levies and incentive expiration. Do not book an unawarded appeal reduction as certain savings. Track accrued taxes, installments, lender escrow and closing prorations separately so the same bill is not counted twice.
+
+Review recoverable tax definitions, caps, appeal fees, refund sharing and responsibility after a sale in each lease. A gross-lease owner can bear a tax increase that a net-lease owner partly recovers; an incentive benefit may flow to tenants. Update the NOI bridge and cash budget with both sides of that change.
+
+## Class 6b, Class 7 and Class 8: which program fits?
+
+The Cook County Assessor's incentive directory supplies the governing eligibility bulletins and application forms. A reduced assessment classification is not a grant or an automatic percentage reduction of the tax bill. Confirm municipal support, project eligibility, deadlines, continued use, ownership changes and compliance before underwriting it.
+
+**Program purpose, not a determination of eligibility**
+- Class: General purpose: Owner diligence
+- 6b: Industrial development, rehabilitation and reutilization of qualifying abandoned industrial buildings: Industrial use, work/occupancy history, municipal resolution and remaining schedule
+- 7a / 7b: Qualifying commercial projects in areas needing commercial development; project-cost and feasibility requirements distinguish the classes: Not a substitute industrial class; check the current bulletin's category and development-cost rules
+- 8: Industrial/commercial development in qualifying areas experiencing severe economic stagnation: Area designation, project conditions and local support; not every Cook property qualifies
+
+Model income and taxes with and without the incentive, especially at expiration or renewal. Approval, continuation and tenant recovery must be documented. Consult municipal staff, the Assessor and qualified tax counsel rather than describing a class as guaranteed savings.
+
+## Illinois owner tax questions
+
+### How can I lower commercial property taxes in Illinois?
+
+Check parcel characteristics and assessment evidence, then file with the correct assessor or Board of Review within its calendar. Review further PTAB or court options with counsel. An assessment change does not guarantee a proportional tax-bill change because rates, levies and equalization also matter.
+
+### Does a Cook County incentive transfer automatically on sale?
+
+Do not assume it. Verify approval documents, the remaining schedule, ownership/use requirements and current renewal or compliance rules with the Assessor and municipality before pricing the benefit.
+
 ## Official sources
 
 ### State and regional sources
@@ -2498,6 +2617,13 @@ For sale-process context, see Illinois and Cook County considerations and pricin
 Assessment office links: Cook , DeKalb , DuPage , Grundy , Kane , Kendall , Lake , McHenry , and Will . Cook-specific billing and review sources: Treasurer and Board of Review .
 
 > This guide is general education, not legal, tax, appraisal, accounting, brokerage, or investment advice. Property tax rules, assessment notices, appeal deadlines, incentives, and transfer taxes change. Verify the parcel, current year, office calendar, lease language, and transaction documents with qualified professionals before acting.
+
+## Continue with the owner guides
+
+For the operating and financial questions behind this decision:
+- How to budget expenses, reserves and capital for a commercial building
+- How is net operating income calculated for commercial property?
+- Commercial property owner questions: income, costs and decisions
 
 ---
 
@@ -2668,6 +2794,13 @@ Connect on LinkedIn Marcus & Millichap advisor page
 
 > This guide is general education, not legal, tax, engineering, environmental, appraisal, brokerage, or investment advice. Verify property records, taxes, zoning, environmental matters, loan programs, and transaction documents with qualified professionals before acting.
 
+## Continue with the owner guides
+
+For the operating and financial questions behind this decision:
+- How is net operating income calculated for commercial property?
+- How to budget expenses, reserves and capital for a commercial building
+- Commercial property owner questions: income, costs and decisions
+
 ---
 
 Source: https://rospopa.com/resources/commercial-investment/
@@ -2729,6 +2862,16 @@ Debt service coverage ratio (DSCR) compares a defined income measure with requir
 
 Compare a documented base case with clearly stated downside cases. Avoid describing appreciation, refinancing, or exit liquidity as certain.
 
+## Debt yield, DSCR and refinancing costs
+
+Debt yield = the defined annual NOI divided by loan balance. Unlike DSCR, it does not directly change when the interest rate or amortization changes, although the lender's income adjustments still matter. LTV uses a value basis, while DSCR uses debt service; lenders can constrain proceeds with more than one test. There is no universal qualifying threshold here.
+
+Illustrative only: $300,000 NOI divided by $3,000,000 debt is a 10% debt yield. If annual debt service is $240,000, DSCR on the same NOI is 1.25. At an assumed $5,000,000 value, LTV is 60%. These inputs are arithmetic, not a Chicago loan quote or a lender approval.
+
+Before refinancing, obtain the current payoff, prepayment charges, proposed rate/amortization, lender fees, appraisal costs, escrows and reserve requirements. Calculate net available proceeds after payoff and costs; a lower appraised value or shorter lease can require new equity even if the property still pays its current loan. Test that liquidity gap in the owner budget .
+
+For the valuation/cash-flow framework see the OCC Commercial Real Estate Lending handbook , NOI guide and DCF guide . Property income, equity cash flow and taxable income are different measures.
+
 ## Organize diligence before deadlines expire
 
 - Legal and title: have counsel and title professionals review ownership, title exceptions, survey matters, easements, access, contracts, and the purchase agreement’s deadlines and remedies.
@@ -2752,6 +2895,606 @@ For industrial acquisitions, the Chicagoland nine-county Illinois hub provides l
 Review commercial lease terms and obligations when assessing a leased investment or comparing ownership with renting.
 
 > This guide is not an appraisal, securities solicitation, forecast, or legal, tax, or investment advice. Consult qualified advisers and verify the transaction’s facts. No return, financing outcome, or property availability is promised.
+
+## Continue with the owner guides
+
+For the operating and financial questions behind this decision:
+- How is net operating income calculated for commercial property?
+- DCF explained for commercial real estate owners
+- How to budget expenses, reserves and capital for a commercial building
+
+---
+
+Source: https://rospopa.com/resources/commercial-property-owner-questions/
+Published: 2026-10-06 · Updated: 2026-10-06
+
+Owner education · Chicagoland commercial and industrial
+
+# Commercial property owner questions: income, costs and decisions
+
+Start with the question you need to answer, then use the detailed guide and official source. These owner resources emphasize 10,000-100,000-SF industrial buildings in the nine Illinois counties while covering financial questions shared by many commercial properties.
+
+Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+
+## In brief
+- Document income before valuing it.
+- Expense cuts must preserve safety, condition and lease obligations.
+- Tax appeals and insurance renewals have their own evidence and deadlines.
+- No guide can supply a universal rent, return, premium or reserve target.
+
+## Income, value and cash-flow questions
+
+NOI: definition, inclusions, recoveries and worked statement explains operating income. DCF: projections, present value and exit sensitivity follows that income through a hold. Investment diligence and calculators connects it to price and debt.
+
+## Operating costs, insurance and tax questions
+
+Use cost controls for energy, maintenance and CAM; owner insurance for limits, valuation and renewal questions; and Illinois property taxes for assessment, appeals and Cook incentive classes. Budgets, reserves and capital separates cash needs from accounting and tax treatment.
+
+## Prepare the next owner decision
+
+Before renewing a lease, refinancing or selling, collect a current rent roll and lease abstracts, trailing statements, arrears, tax notices, policy schedules, contracts, condition reports and a capital plan. Model an operating downside before committing to a value or payout. Use the lease guide , selling guide and due-diligence checklist for the transaction itself.
+
+Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry and Will have different local records and calendars. Use the county research directory to identify the correct authority; a Chicago address label does not establish jurisdiction.
+
+## Owner questions and answers
+
+### How is NOI calculated for commercial real estate?
+
+Subtract vacancy and credit loss from potential rent, add collectible recoveries and other property income to get EGI, then subtract property operating expenses. Keep debt, depreciation and major capital cash needs separate. Read the detailed guide .
+
+### What is a good NOI?
+
+There is no universal dollar amount or margin. Compare the same period, property use, lease structure, occupancy, condition and reserve convention, with evidence for future changes. Read the detailed guide .
+
+### What is included in operating expenses?
+
+Real estate taxes, property insurance, owner-paid utilities, recurring repairs, maintenance and management are common categories. Recoveries and exclusions depend on leases; capital and financing are separate. Read the detailed guide .
+
+### How can I lower commercial property taxes in Illinois?
+
+Check parcel characteristics and assessment evidence, then use the correct assessor or Board of Review process within its calendar. Evaluate PTAB or court review with counsel after county review. An assessment reduction is not a guaranteed proportional bill reduction. Read the detailed guide .
+
+### How can I reduce CAM charges?
+
+Remove waste, compare equivalent vendor scopes, verify invoices and allocate only lease-permitted costs. Review caps, exclusions, audit rights and reconciliation timing instead of shifting disputed costs to tenants. Read the detailed guide .
+
+### How can I lower commercial building insurance costs?
+
+Document risk improvements and accurate values, compare equivalent quotes and review deductibles with a licensed adviser. A cheaper premium is not a saving if it removes required or important protection. Read the detailed guide .
+
+### When should I use DCF instead of just a cap rate?
+
+DCF is useful when lease rollover, capital spending or changing income matters during the hold. Direct capitalization is a one-year snapshot. Both require supported inputs and a consistent cash-flow basis. Read the detailed guide .
+
+### How can I increase commercial property value?
+
+Improve durable collected income, accurate recoveries, building condition and leasing certainty while controlling waste. The value effect depends on risk, future costs and supported pricing assumptions; no fixed uplift is guaranteed. Read the detailed guide .
+
+### When should I sell an industrial building?
+
+Compare holding, refinancing and selling after reviewing lease expirations, capital needs, debt maturity, tax basis and your liquidity/goals. Prepare the document file and review tax planning before committing to a sale. Read the detailed guide .
+
+### How much should I reserve for repairs and vacancy?
+
+Build a property-specific schedule of capital work, leasing costs, deductibles, carrying costs and debt maturity. Separate restricted lender reserves from usable cash; no universal percentage guarantees adequacy. Read the detailed guide .
+
+### Does a triple-net lease eliminate owner expenses?
+
+No. Contract exclusions, caps, vacancy, owner obligations and uncollected reimbursements can leave costs with the landlord. Read the signed lease rather than relying on the NNN label. Read the detailed guide .
+
+### What are DSCR, LTV and debt yield?
+
+DSCR compares defined income to debt service; LTV compares debt to a lender's value basis; debt yield compares a defined NOI to loan balance. Lenders set their own conventions and requirements. Read the detailed guide .
+
+### Is a repair an expense or a capital improvement?
+
+The scope and accounting/tax rules control. Routine maintenance and major replacements often have different treatment; IRS improvement rules examine betterments, restorations and adaptations. Ask a CPA rather than classifying solely by invoice size. Read the detailed guide .
+
+### Can a 1031 exchange remove all taxes from a sale?
+
+No. A qualifying exchange can defer eligible gain; cash, nonqualifying property, ownership and timing issues may create tax. Consult a CPA, attorney and qualified intermediary before closing. Read the detailed guide .
+
+### Are ComEd and Nicor savings programs available to every building?
+
+No. Utility territory/account, project type, equipment, program funding and application conditions matter. Check the official utility program before purchase; incentives and savings are not guaranteed. Read the detailed guide .
+
+## Primary sources and scope
+
+Official references checked 2026-10-06. Program terms, policy contracts, laws and local deadlines can change; use the linked office's current documents before acting. Examples on this page are educational assumptions, not local market data.
+- OCC: Commercial Real Estate Lending handbook
+- IRS: tangible property regulations, repairs and capitalization
+- Cook County Assessor: township assessment and appeal calendar
+- Illinois Department of Insurance: property insurance definitions
+
+## Related owner guides
+- How is net operating income calculated for commercial property?
+- How can owners reduce commercial building operating costs?
+- Illinois property taxes and appeals
+- All commercial property owner questions
+
+---
+
+Source: https://rospopa.com/resources/net-operating-income/
+Published: 2026-10-06 · Updated: 2026-10-06
+
+Owner education · Chicagoland commercial and industrial
+
+# How is net operating income calculated for commercial property?
+
+NOI is a property operating measure, not the cash left in your bank account. For a Chicagoland industrial building, start with the leases and collections, then show every expense and recovery on a consistent annual basis.
+
+Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+
+## In brief
+- Effective gross income minus property operating expenses equals NOI.
+- Debt service, depreciation, owner income taxes and capital spending are not ordinary NOI expenses.
+- A lease recovery is income to the owner, not permission to hide the matching expense.
+- Compare trailing, current and stabilized NOI separately.
+
+## What is NOI, and what is included?
+
+Net operating income = effective gross income (EGI) minus operating expenses. Gross potential rent represents scheduled rent at full occupancy on your chosen lease or market-rent basis. Subtract vacancy, free rent and collection losses; add other property income and tenant expense recoveries to reach EGI. Reconcile to the rent roll, signed amendments, receivables and general ledger.
+
+Typical operating expenses include real estate taxes, building insurance, owner-paid utilities, repairs, maintenance, contracted services and property management. Include a supported management allowance even if an owner manages personally when comparing professionally managed investments. Owner business revenue, tenant sales, refundable deposits and loan proceeds are not property rental income.
+
+NOI usually excludes mortgage principal and interest, depreciation, owner income taxes, acquisition costs, tenant improvements, leasing commissions and major capital replacements. Replacement reserves may be presented below NOI or included in a lender's adjusted measure. State your convention and reconcile it rather than comparing incompatible numbers.
+
+## NOI calculation: a worked rent-to-income example
+
+Illustration only, not market rent, expense benchmarks or an actual transaction. All figures are assumed annual dollars for a hypothetical leased building; no property size or market performance is implied.
+
+**Annual operating statement illustration**
+- Step: Amount: Treatment
+- Gross potential base rent: $400,000: Full scheduled rent on the stated basis
+- Vacancy and credit loss: ($20,000): One combined illustrative allowance, not double-counted
+- Expense recoveries: $80,000: Collectible reimbursements under leases
+- Other property income: $5,000: Documented ancillary charges
+- Effective gross income: $465,000: $400,000 - $20,000 + $80,000 + $5,000
+- Operating expenses: ($145,000): Taxes $75,000; insurance $15,000; utilities $10,000; repairs/services $30,000; management $15,000
+- NOI: $320,000: $465,000 - $145,000
+
+If annual debt service is $180,000 and separate capital spending is $40,000, cash after those two items is $100,000, not $320,000. That cash figure still excludes income taxes, leasing costs and other owner cash needs. Use the existing cap-rate and debt-service calculators to test your own assumptions.
+
+## How do NNN, modified-gross and gross leases change NOI?
+
+In a triple-net lease, show recoverable taxes, insurance and maintenance as expenses and the collectible tenant reimbursement as income. Deduct the owner's unrecovered share. "NNN" alone does not establish which repairs, capital items, administration charges or reassessment increases are allowed.
+
+Gross leases leave more expense risk with the owner. Modified-gross leases may use a base year, expense stop or negotiated split. For each tenant, read exclusions, caps, gross-up clauses, audit rights and reconciliation deadlines. Never assume a vacant suite reimburses its share. See lease expense allocation and CAM reconciliation and cost controls .
+
+## How do buyers and lenders re-underwrite NOI?
+
+Separate trailing-12-month results from a forward annual estimate and a stabilized scenario. A buyer may remove one-time income, replace related-party service costs with supported costs, normalize maintenance, adjust management fees, budget insurance renewal and test future Illinois taxes. No one adjustment is automatically correct; retain its evidence and effective date.
+
+Rents after a lease expiration require downtime, tenant improvements and commissions. A stabilized NOI that assumes full occupancy is not currently collected income. The DCF guide follows those costs through a hold period; the Illinois tax guide explains reassessment and appeals.
+
+### Common mistakes that inflate NOI
+- Counting expense recoveries without the matching operating expense.
+- Ignoring free rent, arrears, nonrecoverable CAM or an approaching vacancy.
+- Calling a major roof replacement routine maintenance to improve the presentation.
+- Using a low historical tax bill as a guaranteed future bill.
+- Mixing cash and accrual reporting or different area denominators without a reconciliation.
+
+## What is a good NOI, and how does it affect value?
+
+There is no universal "good" dollar NOI or NOI margin. Compare the same property type, condition, lease structure, occupancy and reporting convention. An owner of a 10,000-SF gross-leased building cannot fairly benchmark against a 100,000-SF net-leased warehouse just by total expense or income.
+
+Direct capitalization uses value = NOI divided by a supported cap rate. Higher durable NOI can increase indicated value, but vacancy risk, lease term, building functionality and capital needs influence the rate and buyer adjustments. A dollar of owner-paid energy savings fully reimbursed by a tenant may reduce the tenant's cost without adding a dollar of owner NOI. Improve budget discipline and reserves rather than promising a fixed value uplift.
+
+## Owner questions and answers
+
+### Does NOI include mortgage payments?
+
+No. Principal and interest are financing cash flows below ordinary property NOI. A lender may apply its own adjusted income measure when sizing debt.
+
+### Is a roof replacement deducted from NOI?
+
+A major replacement is generally a capital cash need presented separately from NOI; routine repair treatment depends on the work and accounting convention. Tax classification is a separate CPA review.
+
+### What is a good NOI for a commercial property?
+
+There is no universal figure. Compare documented income and expenses on the same period, occupancy, lease and reserve basis, then consider condition and future leasing costs.
+
+## Primary sources and scope
+
+Official references checked 2026-10-06. Program terms, policy contracts, laws and local deadlines can change; use the linked office's current documents before acting. Examples on this page are educational assumptions, not local market data.
+- OCC: Commercial Real Estate Lending handbook
+- IRS: tangible property regulations, repairs and capitalization
+
+## Related owner guides
+- DCF explained for commercial real estate owners
+- How to budget expenses, reserves and capital for a commercial building
+- Investment diligence and financing
+- All commercial property owner questions
+
+---
+
+Source: https://rospopa.com/resources/discounted-cash-flow/
+Published: 2026-10-06 · Updated: 2026-10-06
+
+Owner education · Chicagoland commercial and industrial
+
+# DCF explained for commercial real estate owners
+
+A discounted cash flow model asks what future property cash receipts and costs are worth today. It is especially useful when an industrial lease expires during the hold, capital work is uneven, or a stabilized cap-rate snapshot hides the work required.
+
+Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+
+## In brief
+- Project income, expenses and capital cash needs year by year.
+- An exit cap rate converts future NOI into a resale estimate; a discount rate converts future cash into present value.
+- Unlevered cash flows exclude debt; levered equity cash flows include it.
+- Sensitivity is more useful than a single optimistic IRR.
+
+## How do you build a property cash-flow projection?
+
+Choose a valuation date and hold period. Build each tenant's contractual rent, options and expiration schedule first. Show expense recoveries, taxes, insurance, repairs and management separately. At rollover, model retention or vacancy, downtime, free rent, new rent evidence, tenant improvements (TI) and leasing commissions (LC). Do not take vacancy twice by reducing occupied rent and adding the same loss again.
+
+Property cash flow is not simply NOI . Subtract capital replacements and leasing outlays, account for their timing, and state how reserves are handled. For a 10,000-100,000-SF building, one tenant departure or roof project can dominate a year's result. Use the condition report and lease abstracts, not a universal rent-growth percentage.
+
+Show an unlevered case before financing. For an equity case, add loan proceeds to the acquisition funding, subtract debt service during the hold, and deduct loan payoff and finance charges at sale. The discount rate and return label must match those cash flows. Pre-tax and after-tax are also different models.
+
+## Discount rate versus cap rate: what is the difference?
+
+The discount rate is the assumed required return used to translate future cash into today's dollars. A cap rate divides one year's income by value. An exit cap rate is a specific future resale assumption, commonly applied to the next year's stabilized NOI at the end of the hold. They are not interchangeable or automatically equal.
+
+For an end-of-year cash flow, present value = cash flow / (1 + discount rate) year . Net present value (NPV) subtracts the initial investment from the sum of discounted receipts. A positive NPV means the modeled investment exceeds the chosen return requirement on those assumptions, not that the outcome is certain.
+
+IRR is a rate that makes NPV zero. Nonconventional cash flows with later negative outlays can have multiple IRRs or no useful IRR; dated cash flows also differ from simple annual periods. NPV, capital required and downside exposure should remain visible even when an IRR looks attractive.
+
+## DCF worked example: operating cash, reversion and present value
+
+Illustration only, not market data, an appraisal or an investment recommendation. Assume a three-year unlevered hold, end-of-year cash receipts, no income taxes, and an 8% illustrative discount rate.
+
+**Assumed annual dollars; capital and leasing cash outlays below NOI**
+- Year: NOI: Capital / TI / LC: Operating cash
+- 1: $200,000: $50,000: $150,000
+- 2: $210,000: $30,000: $180,000
+- 3: $220,000: $30,000: $190,000
+
+Assume year-4 NOI of $230,000 and a 7% exit cap. Gross reversion at the end of year 3 is $230,000 / 0.07 = $3,285,714.29. With assumed sale costs of 2%, net reversion is $3,220,000. Year-3 total cash is therefore $3,410,000, including the $190,000 operating cash; year-4 NOI is used only to price the sale, not received again in this hold.
+
+Present value = $150,000 / 1.08 + $180,000 / 1.08 2 + $3,410,000 / 1.08 3 = $3,000,177.82 . At a $3,000,000 all-in initial investment, NPV is $177.82. At a $3,100,000 investment, NPV is negative $99,822.18. These results depend entirely on the assumptions and cash timing.
+
+## How do exit cap, rent and downtime change the result?
+
+Keep year-4 NOI at $230,000 and change the illustrative exit cap: at 6%, gross resale is $3,833,333; at 7%, $3,285,714; at 8%, $2,875,000, rounded to dollars before sale costs. Higher exit cap means lower resale at the same income. None of these rates is a Chicago market claim.
+
+Run a matrix of discount and exit rates, then a separate operational downside: lower collected rent, higher tax and insurance costs, longer downtime, larger TI/LC, capital overruns and a delayed sale. Avoid treating rent growth and a lower exit cap as independently guaranteed benefits. Include refinancing maturity in a levered case and show additional equity required, not just a revised return.
+
+Direct capitalization remains a useful NOI/cap-rate snapshot for stabilized income. DCF makes changes and execution costs explicit, but more model detail does not make speculative assumptions reliable. Have an appraiser and financial/tax advisers review property-specific inputs and conventions.
+
+## Owner questions and answers
+
+### Is the discount rate the same as the cap rate?
+
+No. A discount rate values a series of future cash flows; a cap rate relates one year of NOI to value. An exit cap rate is a future resale assumption.
+
+### Does a high IRR prove a good real estate investment?
+
+No. IRR depends on cash timing and assumptions, can be misleading for nonconventional cash flows, and does not measure absolute capital at risk. Review NPV, required equity and downside cases.
+
+### Should DCF include mortgage payments?
+
+Include debt service and loan payoff in a levered equity model, not in an unlevered property model. Match the discount rate to the cash-flow basis.
+
+## Primary sources and scope
+
+Official references checked 2026-10-06. Program terms, policy contracts, laws and local deadlines can change; use the linked office's current documents before acting. Examples on this page are educational assumptions, not local market data.
+- OCC: Commercial Real Estate Lending handbook
+
+## Related owner guides
+- How is net operating income calculated for commercial property?
+- Investment diligence and financing
+- How to budget expenses, reserves and capital for a commercial building
+- All commercial property owner questions
+
+---
+
+Source: https://rospopa.com/resources/reduce-commercial-property-costs/
+Published: 2026-10-06 · Updated: 2026-10-06
+
+Owner education · Chicagoland commercial and industrial
+
+# How can owners reduce commercial building operating costs?
+
+Cut waste before cutting service. For an industrial building in Chicagoland, the useful question is which cost can fall without creating a larger repair, compliance, vacancy or tenant-retention problem later.
+
+Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+
+## In brief
+- Start with invoices, meter use, service scope and lease responsibility.
+- Compare total cost and risk, not only the lowest bid.
+- Check utility-program eligibility before ordering work.
+- Savings and tenant recoveries affect owner NOI differently.
+
+## Which operating costs should an owner review first?
+
+Collect at least a full year of bills and contracts, then separate recurring operating expenses, one-time repairs, capital replacements and tenant-paid amounts. Compare dollars per relevant square foot, consumption, operating hours and occupancy. A heated manufacturing building cannot be benchmarked fairly against an unheated storage shed. See budgeting and normalized expense comparisons .
+
+Create a short action register: issue, responsible party, cost to implement, expected benefit based on evidence, lease recovery, required approval and follow-up measurement. Look for duplicate invoices, incorrect meter assignments, services billed to vacant areas, expired promotional pricing and contract auto-renewals. Do not assume any discovered charge is legally recoverable from tenants.
+
+## How can industrial owners reduce energy and utility waste?
+
+Review interval electricity data, demand charges, seasonal gas use and the supply/delivery portions of bills. Confirm the actual tariff with the utility; a cheaper commodity quote can still carry fees or unfavorable renewal terms. Demand reductions require understanding when the peak occurs, not just reducing annual kilowatt-hours.
+
+Evaluate LED fixtures and controls, occupancy scheduling, office HVAC setpoints, dock seals and weather-stripping with qualified contractors. Controls must suit work tasks, operating hours and equipment. Do not reduce required emergency illumination, ventilation, fire protection or freeze protection. Review water/sewer bills for leaks, irrigation timing, meter issues and locally permitted billing adjustments rather than assuming sewer charges disappear.
+
+Start at the official ComEd business savings portal and Nicor Gas business efficiency resources . Offerings depend on the utility account, service territory, measure and current rules. Ask about eligibility, approved equipment, preapproval, deadlines and whether landlord or tenant applies before purchase. No rebate amount, approval or percentage savings is promised here.
+
+Estimate simple payback as net project cost divided by supported annual savings. Include installation, commissioning, disruption and maintenance; rebates reduce cost only if eligible and approved. A capital project may improve tenant cost or resilience without immediately increasing owner NOI.
+
+## Preventive maintenance versus deferred repairs
+
+Inventory roof sections, HVAC units, dock equipment, pavement, drains and life-safety systems with condition, warranty, maintenance responsibility and next inspection date. Qualified inspections can help distinguish a repair from a replacement and sequence work around tenant operations. Deferring a leak or clogged drain is not a savings strategy when it increases consequential damage.
+
+Use a multi-year capital plan for roof, HVAC and paving. Obtain comparable scopes, restoration requirements, permit responsibilities and warranty terms. Keep required fire-system testing, access, structural repairs and worker safety outside discretionary cost-cutting. Building-specific engineering and municipal requirements control the work.
+
+## How do service rebids and management fees reduce waste?
+
+Rebid waste, landscaping, snow, janitorial, security and recurring maintenance using identical service levels. Specify frequency, disposal fees, after-hours response, snow-event triggers, de-icing standards, insurance, reporting and escalation clauses. A low bid that excludes emergency response or transfers uninsured risk may cost more overall.
+
+Review property-management fees against scope: rent collections, reporting, lease administration, capital supervision and additional fees. Check who approves invoices and related-party vendors. Do not compare only a fee percentage without the services and fee base. Set a renewal calendar so you can compare bids before cancellation windows close.
+
+## How can an owner reduce CAM disputes and improve recoveries?
+
+Build a lease-by-lease recovery matrix: pro rata share and area basis, included costs, exclusions, caps, management fees, capital amortization permissions, gross-up provisions, expense stops, reconciliation due date and audit rights. Allocate costs once and retain invoices. Reconcile estimates to allowed actual costs; return credits and explain increases.
+
+Reducing CAM means removing waste and billing accurately, not shifting excluded costs onto tenants. An expense cap or a vacant share can leave savings with the owner or tenant differently. Show both expense reductions and lower recoveries in the NOI bridge before claiming a benefit. Counsel should review disputed clauses and recovery changes.
+
+For two large expense categories, use the Illinois property-tax appeal and budgeting guide and insurance renewal/risk checklist . They have different deadlines, evidence and risk trade-offs from ordinary vendor bids.
+
+## A repeatable cost-control cycle
+- Record the starting bill, service scope and owner/tenant allocation.
+- Get comparable proposals and required approvals before changing service.
+- Track implementation cost and any approved incentive separately.
+- Compare post-change consumption and invoices on a weather/occupancy-adjusted basis where relevant.
+- Reconcile tenant recoveries and update the next operating budget.
+
+For a purely illustrative contract change, a $6,000 annual invoice reduction with $2,000 of unreimbursed implementation cost creates $4,000 of first-year net cash benefit before other effects. If tenants reimburse the full recurring expense, owner NOI may not increase by $6,000. This is arithmetic, not a savings forecast.
+
+## Owner questions and answers
+
+### How do I reduce CAM charges without cutting essential service?
+
+Audit scope, invoices and lease allocations; rebid comparable services and remove duplicate or ineligible charges. Do not cut required safety work or bill tenants for excluded costs.
+
+### Do LED upgrades automatically qualify for ComEd incentives?
+
+No. Confirm the account, measure, equipment and current program requirements, including any preapproval, before purchase or installation.
+
+### Does every expense reduction increase property value?
+
+No. Tenant reimbursements can fall along with expenses, and service cuts can harm risk or occupancy. Calculate the net owner income effect and capital cost first.
+
+## Primary sources and scope
+
+Official references checked 2026-10-06. Program terms, policy contracts, laws and local deadlines can change; use the linked office's current documents before acting. Examples on this page are educational assumptions, not local market data.
+- ComEd: business energy savings programs
+- Nicor Gas: business savings and efficiency resources
+- IRS: tangible property regulations, repairs and capitalization
+
+## Related owner guides
+- How to budget expenses, reserves and capital for a commercial building
+- Commercial property insurance: an owner renewal checklist
+- Illinois property taxes and appeals
+- All commercial property owner questions
+
+---
+
+Source: https://rospopa.com/resources/commercial-property-insurance/
+Published: 2026-10-06 · Updated: 2026-10-06
+
+Owner education · Chicagoland commercial and industrial
+
+# Commercial property insurance: an owner renewal checklist
+
+Insurance should match the building, tenancy and loss you need to survive. Comparing premiums without limits, exclusions, valuation and deductibles can leave an industrial owner with a cheaper policy and a larger uninsured exposure.
+
+Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+
+## In brief
+- Market purchase price is not the cost to rebuild the insured structure.
+- Property, liability and business-income protection address different losses.
+- Flood, earthquake and ordinance-or-law protection require explicit review.
+- A certificate is evidence of insurance, not a substitute for policy endorsements.
+
+## What coverage should a commercial property owner discuss?
+
+**Coverage questions for a licensed insurance adviser; not a policy recommendation**
+- Coverage: Owner question
+- Building/property: Which structures, permanently installed systems, perils and limits are insured? Are equipment breakdown and ordinance/law needs addressed?
+- Business income / rental value: Does the form cover loss of rents after a covered loss, continuing expenses, waiting periods and the expected restoration period?
+- General liability: Who is insured for premises-related liability, and what activities and exclusions matter?
+- Umbrella / excess liability: Which underlying policies and limits must be maintained? Does the excess form leave gaps?
+- Flood / earthquake: Are separate policies or endorsements needed? What are their limits, deductibles and exclusions?
+
+Business interruption or rental-value coverage is not a guarantee against an ordinary tenant default or market vacancy. Confirm the covered-loss trigger, waiting period, restoration period and extension conditions in the actual contract. The landlord's structure, the tenant's machinery/inventory and each party's liability may need different policies.
+
+FEMA explains that standard commercial property insurance typically does not cover flood damage and that NFIP commercial coverage excludes financial losses from business interruption or loss of use. Ask about private/excess options and policy gaps where relevant; do not assume flood building coverage replaces rental-income protection. Check the site and environmental diligence file and flood history.
+
+## Replacement cost, ACV and coinsurance: why do they matter?
+
+The Illinois Department of Insurance defines actual cash value (ACV) as replacement cost less depreciation for age and condition. Replacement cost uses like-kind/quality replacement without that depreciation deduction, subject to the policy's conditions. Land value, investment value and the purchase price do not establish a building's reconstruction limit.
+
+Review insured values with a qualified reconstruction estimate and licensed adviser: building area, construction, systems, location, debris removal and code upgrades all matter. Confirm whether payment requires actual repair or replacement, what deadlines apply and whether any limit or sublimit restricts recovery.
+
+A coinsurance clause requires maintaining a specified insured amount relative to the valuation basis in the policy. Underinsurance can reduce payment even for a partial loss. The percentage and ACV/replacement-cost basis must be read from the contract; do not assume a universal percentage or calculate a penalty from the purchase price. Discuss any agreed-value provision and its conditions rather than treating it as automatic protection.
+
+## How should owners compare deductibles and exclusions?
+
+Ask whether each deductible is a flat amount or a percentage and what value the percentage applies to. Wind/hail, flood, earthquake and water losses may have distinct terms. Model the owner's cash exposure for more than one event, not just the lower annual premium. Lease reimbursement and lender requirements may restrict the choice.
+
+Review vacancy/unoccupancy conditions when a tenant leaves, protective-safeguard requirements for sprinklers or alarms, roof coverage limitations and exclusions for contamination or wear. Notify the adviser of changes in occupancy, storage commodities and operations. An older industrial roof or changed tenant use warrants a review, not an unsupported promise that the premium will rise or fall by a fixed amount.
+
+## What should leases and tenant COIs require?
+
+Have counsel and the licensed insurance adviser coordinate limits, additional-insured status, waiver-of-subrogation requirements, primary/noncontributory wording where appropriate, evidence deadlines and responsibility for deductibles. The exact lease and endorsed policy wording control; a certificate of insurance (COI) alone does not amend coverage.
+
+Track renewal and cancellation information as required by the actual policies, confirm named entities and premises, and review contractor coverage before work. Do not infer that a tenant's certificate insures the owner's building or replaces the owner's liability protection. Use lease allocation review when responsibilities are unclear.
+
+## How can an owner manage commercial insurance premiums?
+- Prepare accurate building/use information, condition reports, loss runs and completed risk improvements well before renewal.
+- Ask qualified advisers about roof condition, drainage, fire protection, security and maintenance improvements; obtain carrier feedback before spending solely for a hoped-for discount.
+- Compare quotes with identical values, limits, deductibles, covered perils, income periods and exclusions. Record every difference.
+- Review retained risk and lender/lease constraints before increasing a deductible or removing coverage.
+- Record the chosen policy, endorsements, claims contacts and renewal date in the operating budget and reserve plan .
+
+There is no premium benchmark or promised savings on this page. Rates and coverage depend on the specific building, use, history and insurer. A licensed professional should recommend coverage; this page is education, not insurance or legal advice.
+
+## Owner questions and answers
+
+### How can I lower commercial building insurance costs?
+
+Improve risk information and maintenance, shop comparable coverage and review deductible options with a licensed adviser. Do not reduce required limits or silently remove protection to make a quote cheaper.
+
+### Does commercial property insurance cover flooding and lost rent?
+
+Do not assume it. Standard property policies typically exclude flood; NFIP commercial policies exclude business-interruption financial losses. Review separate flood and rental-value protection with an adviser.
+
+### Should my building be insured for its purchase price?
+
+Not automatically. Purchase price includes land and investment economics. The policy valuation basis and reconstruction exposure determine the insurance discussion.
+
+## Primary sources and scope
+
+Official references checked 2026-10-06. Program terms, policy contracts, laws and local deadlines can change; use the linked office's current documents before acting. Examples on this page are educational assumptions, not local market data.
+- Illinois Department of Insurance: property insurance definitions
+- FEMA/NFIP: commercial flood coverage and exclusions
+
+## Related owner guides
+- How can owners reduce commercial building operating costs?
+- How to budget expenses, reserves and capital for a commercial building
+- Lease costs and responsibilities
+- All commercial property owner questions
+
+---
+
+Source: https://rospopa.com/resources/commercial-property-budget/
+Published: 2026-10-06 · Updated: 2026-10-06
+
+Owner education · Chicagoland commercial and industrial
+
+# How to budget expenses, reserves and capital for a commercial building
+
+A profitable operating statement does not guarantee enough cash for a roof, a vacant suite or a loan maturity. A useful owner budget connects monthly operations, tenant recoveries, capital timing and financing without mixing them together.
+
+Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+
+## In brief
+- Maintain an operating budget and a separate capital/liquidity plan.
+- Normalize expense benchmarks for area, occupancy, use and lease basis.
+- Reserves are cash set aside; spending and tax deductions are different events.
+- Tax treatment is a separate CPA analysis, not an NOI shortcut.
+
+## What belongs in a commercial operating budget?
+
+Start with actual invoices, signed leases and a monthly trailing operating statement. Budget base rent, recoveries, collection loss and ancillary income by tenant. For expenses, track property taxes, insurance, utilities, repairs, snow, waste, grounds, management and other recurring services. Place each renewal or seasonal bill in the month cash is due, while retaining an annual comparison.
+
+For Chicagoland industrial assets, review winter service and heat, roof/drain condition, loading equipment and paving alongside the tenancy. Separate tenant-paid utilities from landlord service. Carry tax notices, appeal status and insurance-renewal assumptions into the budget rather than extrapolating one quiet year.
+
+Each month compare budget to actual, explain price versus usage versus timing variances, update collections and forecast the remaining year. A tax refund or insurance recovery is not recurring annual income. The NOI reconciliation preserves the operating basis; a cash forecast shows when liquidity is needed.
+
+## How do I benchmark operating expenses without misleading comparisons?
+
+State whether cost per square foot uses rentable, occupied or gross building area. Compare property type, heated area, tenant use, service level, reporting period and gross/net lease basis. Separate capital outlays and one-time events. Utility consumption per operating hour or occupied area can be more revealing than dollars alone.
+
+Use your own normalized history, comparable vendor scopes and verified peer data when available. This guide supplies no Chicago expense ratios or market rates. A low expense ratio can reflect deferred maintenance, tenant-paid costs or missing management fees rather than efficiency. Label every data source and adjustment.
+
+## Capex versus opex: where do roof and HVAC costs go?
+
+**Separate owner reporting questions from tax classification**
+- Item: Owner cash / underwriting view: Review needed
+- Routine servicing: Typically recurring operating expense: Lease responsibility and accounting policy
+- Major roof/system replacement: Separate capital plan and cash outlay: Condition, scope, permits and CPA classification
+- TI and leasing commission: Leasing cash needs below ordinary NOI: Lease timing, amortization and tax treatment
+- Reserve deposit: Cash earmarked for future needs, not the repair itself: Lender convention, funding and access restrictions
+
+For federal taxes, IRS tangible-property rules distinguish ordinary expenses from amounts that must be capitalized, including betterments, restorations and adaptations. Dollar size alone does not settle that question. Safe harbors and elections have conditions; an owner should not relabel improvements as repairs just to reduce NOI or taxable income.
+
+## How much reserve cash does a commercial owner need?
+
+There is no universal percentage that makes a reserve adequate. Prepare an asset schedule with condition, expected timing, installed replacement cost supported by estimates, responsibility under leases and contingency. Add vacancy carrying costs, TI/LC, deductibles, tax timing and loan maturity needs. Separate lender-restricted reserves from unrestricted cash you can use promptly.
+
+Illustrative arithmetic, not a reserve recommendation: if a supported future project estimate is $120,000, existing dedicated funds are $20,000 and the project is five years away, a straight-line funding target is $20,000 per year before inflation, interest or contingencies. A sooner failure would require more cash sooner. Do not treat the annual reserve contribution and the eventual project as two expenses in the same cash-flow model.
+
+## Depreciation, cost segregation and 1031: what should I ask my CPA?
+
+Depreciation allocates eligible capital basis over the applicable recovery period; it is not cash spent that year and is excluded from ordinary property NOI. Land is not depreciable. Basis allocation, placed-in-service dates, property classification, elections and current law matter. Start with IRS Publication 946 rather than a promised deduction.
+
+A cost-segregation study identifies supported components and their tax classifications/recovery periods; it is not an automatic percentage write-off or a new operating expense. Ask about study quality, basis reconciliation, timing rules, costs and potential recapture on sale. The IRS audit-guide directory links its Cost Segregation guide and explicitly cautions that law may change after publication.
+
+Section 1031 can defer recognition of qualifying gain on business/investment real-property exchanges, not erase it. Property held primarily for sale does not qualify; cash or other non-like-kind property can create taxable gain. Discuss ownership, qualified-intermediary arrangements, identification and completion timing, debt and state taxes before closing. See sale/1031 preparation and the IRS real-estate exchange overview . Consult a CPA and attorney; no tax result is promised.
+
+## Refinancing and debt costs belong in the liquidity plan
+
+Track interest, amortization, fees, escrows, covenants, maturity, recourse and prepayment provisions. DSCR compares the lender's income measure to debt service; LTV compares debt to its value basis; debt yield compares a defined NOI to loan balance. There is no universal qualifying threshold here.
+
+A balloon balance does not disappear because refinancing is planned. Test lower proceeds, higher borrowing cost and a delayed closing, and calculate the cash gap after payoff and fees. Use the existing debt-service calculator and financing guide and levered versus unlevered projections rather than a second duplicate calculator.
+
+## Owner questions and answers
+
+### What is included in commercial operating expenses?
+
+Typically taxes, property insurance, owner-paid utilities, recurring repairs/services and management. Debt service, depreciation and major capital outlays are separate from ordinary NOI. State reserve and lease-recovery conventions.
+
+### Are reserves the same as capital spending?
+
+No. A reserve earmarks cash; capital spending pays for work. A lender can treat reserves differently in underwriting, so reconcile the convention and avoid double-counting.
+
+### Does cost segregation increase NOI?
+
+No. It concerns tax depreciation timing and classification, not rental operating income. Review eligibility, study quality, current law and later recapture with a CPA.
+
+## Primary sources and scope
+
+Official references checked 2026-10-06. Program terms, policy contracts, laws and local deadlines can change; use the linked office's current documents before acting. Examples on this page are educational assumptions, not local market data.
+- IRS: tangible property regulations, repairs and capitalization
+- IRS Publication 946: depreciation
+- IRS: audit guides, including Cost Segregation Publication 5653
+- IRS: like-kind exchanges of business/investment real estate
+- OCC: Commercial Real Estate Lending handbook
+
+## Related owner guides
+- How is net operating income calculated for commercial property?
+- How can owners reduce commercial building operating costs?
+- Investment diligence and financing
+- All commercial property owner questions
 
 ---
 
@@ -2832,6 +3575,13 @@ Use the property-research guide to confirm jurisdiction and public records. If b
 Comparing industrial leases across county lines? Use the nine-county Illinois industrial research hub to locate the applicable authority and official records. Confirm use approvals, buildout responsibilities, and utility-upgrade timing before treating two spaces as interchangeable.
 
 > General education only. Lease terms vary; obtain legal and financial advice for the specific lease and verify all cost assumptions.
+
+## Continue with the owner guides
+
+For the operating and financial questions behind this decision:
+- How is net operating income calculated for commercial property?
+- How can owners reduce commercial building operating costs?
+- Commercial property insurance: an owner renewal checklist
 
 ---
 
@@ -2976,11 +3726,11 @@ Lease language controls rent, expenses, risk, access, and remedies.
 - **NNN / triple net**: A lease where the tenant commonly pays base rent plus taxes, insurance, and operating expenses.
 - **Gross lease**: A lease where many property expenses are included in rent.
 - **Modified gross**: A lease between gross and net structures, with expenses divided by negotiated language.
-- **CAM**: Common area maintenance charges for shared property costs such as snow, landscaping, lighting, security, pavement, and management.
+- **CAM**: Common area maintenance charges for shared property costs such as snow, landscaping, lighting, security, pavement, and management, subject to the lease's inclusions, exclusions, caps and allocation. See CAM reconciliation and cost controls .
 - **Base rent**: Stated rent before pass-through expenses, credits, abatements, or other adjustments.
 - **Escalations**: Scheduled rent increases or expense adjustments. They may be fixed, percentage-based, index-based, or tied to operating costs.
 - **TI allowance**: Money a landlord contributes toward approved tenant improvements.
-- **Leasing commission**: Compensation paid for procuring a tenant or lease renewal.
+- **LC (leasing commission)**: Compensation paid for procuring a tenant or lease renewal; model it as a leasing cash need in the hold-period DCF .
 - **Expense stop**: A threshold where the landlord covers expenses up to a stated amount and the tenant pays certain increases above it.
 - **Estoppel certificate**: A tenant statement confirming key lease facts, defaults, deposits, options, and claims.
 - **SNDA**: A subordination, non-disturbance, and attornment agreement among a tenant, landlord, and lender.
@@ -2994,12 +3744,24 @@ Lease language controls rent, expenses, risk, access, and remedies.
 
 Investment terms simplify complex assumptions. Check the source model and period.
 
-- **NOI**: Net operating income is property income minus operating expenses before debt service and some capital items.
+- **EGI (effective gross income)**: Potential rent less vacancy/credit losses plus collectible recoveries and other property income, on a stated annual basis. See the rent-to-NOI bridge .
+- **DCF (discounted cash flow)**: A projection that discounts future property or equity cash flows to a valuation date. Capital, lease rollover and sale assumptions must be explicit. DCF guide .
+- **NPV (net present value)**: Discounted future net receipts minus initial investment at a chosen rate; positive modeled NPV is not a guaranteed outcome. Worked example .
+- **Discount rate**: The assumed required return used to convert future cash to present value, matched to unlevered/levered and pre-/after-tax cash flows. Not the same as a cap rate.
+- **Exit cap rate**: A future resale capitalization assumption, commonly applied to the year after the hold's NOI. Higher rates reduce indicated resale at the same NOI.
+- **Debt yield**: A defined annual NOI divided by loan balance; lender definitions and required thresholds vary. Financing comparison .
+- **Capex (capital expenditures)**: Cash spent on capital improvements or replacements, generally modeled separately from ordinary property NOI. Tax capitalization is a separate analysis.
+- **Opex (operating expenses)**: Recurring property operating costs on the stated accounting basis, such as taxes, insurance, maintenance and management. Debt service is separate.
+- **Replacement reserve**: Cash earmarked for future capital needs; funding a reserve is not the same as paying for work. State lender and model conventions to avoid double-counting.
+- **Coinsurance**: A policy provision tying required insurance amounts to a specified value basis and percentage; underinsurance can reduce payment. Actual wording controls. Insurance valuation .
+- **BI (business income) / loss of rents**: Insurance addressing qualifying income losses after a covered event, subject to triggers, time limits and exclusions; not ordinary vacancy or tenant-default protection.
+- **Cook County Class 6b**: An incentive assessment classification for qualifying industrial development, rehabilitation or reutilization, subject to application, local support and compliance. Compare incentive classes .
+- **NOI**: Net operating income is effective gross property income minus operating expenses before debt service, depreciation and major capital cash needs. State the reserve convention. See NOI calculation and recoveries .
 - **Cap rate**: NOI divided by price or value; a shorthand income and risk measure, not a complete valuation.
 - **Going-in vs. exit cap**: Going-in cap rate uses current or first-year income; exit cap rate is a resale assumption.
 - **DSCR**: Debt service coverage ratio compares income available for debt payments to required debt service.
 - **LTV**: Loan-to-value compares loan amount to property value, purchase price, or another lender-defined base.
-- **IRR**: Internal rate of return estimates annualized return using the timing of cash flows.
+- **IRR**: Internal rate of return is a discount rate that makes modeled net present value zero. Nonconventional cash flows may have multiple or no useful IRRs. See DCF return measures .
 - **Equity multiple**: Total cash returned divided by total equity invested.
 - **Cash-on-cash**: Annual cash flow compared with cash invested, often after debt service and before taxes.
 - **Basis**: Basis can mean a tax basis, cost basis, or investor's all-in cost. Ask which definition is being used.
@@ -3007,7 +3769,7 @@ Investment terms simplify complex assumptions. Check the source model and period
 - **Sale-leaseback**: A transaction where an owner sells a property and leases it back.
 - **Owner-user vs. investor**: An owner-user buys to occupy; an investor buys for income, appreciation, redevelopment, or resale.
 - **Value-add vs. core**: Core usually describes stabilized assets with lower perceived risk. Value-add usually involves vacancy, rollover, improvements, repositioning, or other execution risk.
-- **1031 exchange**: A tax-deferred exchange with a 45-day identification period and 180-day exchange period, subject to detailed rules.
+- **1031 exchange**: A qualifying exchange of business/investment real property that can defer gain. Deferred exchanges generally require identification within 45 days and completion by the earlier of 180 days or the relevant tax-return due date, including extensions, subject to detailed rules. See IRS Form 8824 instructions . Consult a CPA/attorney before closing; see owner tax planning .
 - **Qualified intermediary**: A party used to facilitate a 1031 exchange and hold exchange proceeds.
 - **LOI**: A letter of intent outlining business terms before a purchase agreement or lease.
 - **PSA**: A purchase and sale agreement governing price, deposits, diligence, conditions, default, and closing.
