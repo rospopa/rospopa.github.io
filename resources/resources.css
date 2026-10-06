@@ -219,6 +219,7 @@ tr.done th { text-decoration: line-through; text-decoration-thickness: 1px; }
 .guide-list li { margin: .6rem 0; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: .375rem; margin-block: 1.4rem; background: var(--color-base-100); }
 table { width: 100%; border-collapse: collapse; font-size: .93rem; }
+.table-wide table { min-width: 36rem; }
 caption { text-align: left; font-weight: 650; padding: .8rem .8rem .5rem; }
 th, td { text-align: left; vertical-align: top; border-top: 1px solid var(--line); padding: .7rem .8rem; }
 thead th { background: var(--color-base-200); border-top: 0; }

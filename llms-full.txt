@@ -174,13 +174,13 @@ Library published October 2, 2026 · Expanded October 3, 2026 .
 ---
 
 Source: https://rospopa.com/resources/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Library
 
 # All guides
 
-Thirteen free guides to industrial and commercial real estate in Chicago and the nine-county Chicagoland region. They cover how buildings work, how deals are researched and underwritten, and where the official records live. Search every section or browse below.
+Fourteen free guides to industrial and commercial real estate in Chicago and the nine-county Chicagoland region. They cover how buildings work, how deals are researched and underwritten, and where the official records live. Search every section or browse below.
 
 ## Industrial property
 
@@ -199,6 +199,10 @@ Roundtable threads on buying, leasing, buildings, taxes, financing, and selling,
 ### Industrial building types & specifications
 
 Warehouse, light industrial, manufacturing, flex, cold storage, truck terminals, and IOS, plus what clear height, loading, power, and fire protection mean for each.
+
+### Truck dimensions & turning paths
+
+Sourced trailer lengths, box-truck cargo interiors, container size classes, and fleet-specific swept-path checks. Body size is not overall vehicle size or a safe turning clearance.
 
 ### Evaluating an industrial building
 
@@ -251,7 +255,7 @@ Plain-English definitions of building, lease, underwriting, and Illinois records
 ---
 
 Source: https://rospopa.com/resources/industrial-real-estate-faq/
-Published: 2026-10-05 · Updated: 2026-10-05
+Published: 2026-10-05 · Updated: 2026-10-06
 
 FAQ · Industrial real estate & Chicagoland industrial
 
@@ -332,6 +336,8 @@ It depends on throughput. A frequently cited rule of thumb for distribution is a
 ### What is a truck court, and how deep should it be?
 
 The truck court is the paved area in front of the dock doors where tractor-trailers maneuver and park. Depth is critical: modern facilities commonly provide roughly 120 to 135 feet for a single-sided court and more when trucks share a court from both sides. A shallow court limits which trucks can use the building and is one of the hardest features to fix. See truck court .
+
+Those depths are screening examples, not a safe-clearance guarantee. Review the sourced vehicle dimensions and turning-path reference , then have a qualified engineer check the actual fleet's entry, backing, and exit paths.
 
 ### Why does column spacing matter in an industrial building?
 
@@ -698,7 +704,7 @@ The questions reflect what people most often search for and ask about industrial
 ---
 
 Source: https://rospopa.com/resources/industrial-investor-faq/
-Published: 2026-10-05 · Updated: 2026-10-05
+Published: 2026-10-05 · Updated: 2026-10-06
 
 Investor Q&A · 10,000 to 100,000 SF industrial
 
@@ -880,7 +886,7 @@ Have a question that belongs here? Send it on LinkedIn . For broader questions a
 ---
 
 Source: https://rospopa.com/resources/community/
-Published: 2026-10-05 · Updated: 2026-10-05
+Published: 2026-10-05 · Updated: 2026-10-06
 
 Community · Forum-style Q&A
 
@@ -1522,7 +1528,7 @@ To ask your own question, or answer someone else’s, use the members' board .
 ---
 
 Source: https://rospopa.com/resources/industrial-building-types/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Industrial guide · Building function and specifications
 
@@ -1577,7 +1583,7 @@ A useful spec sheet explains both the number and the practical effect. Where pos
 - **Dock-high doors and door ratio**: Dock-high loading supports trailer-height movement and can be critical for distribution. Door-to-area ratios are a concept for comparing loading intensity, but the right ratio depends on the operation, trailer dwell, staffing, and truck scheduling.
 - **Drive-in doors**: Drive-in doors allow vehicles, equipment, or vans to enter at grade. Verify clear opening, apron slope, door condition, security, and whether grade changes affect safe use.
 - **Dock levelers, seals, shelters, and bumpers**: These components affect safety, weather protection, product handling, and dock efficiency. Condition, capacity, controls, and maintenance records should be reviewed during physical diligence.
-- **Truck court depth and turning**: Truck circulation depends on court depth, trailer length, door angle, opposing parking, curbs, fences, and stored materials. A site plan should be tested against the intended truck type.
+- **Truck court depth and turning**: Truck circulation depends on court depth, trailer length, door angle, opposing parking, curbs, fences, and stored materials. A site plan should be tested against the intended truck type. Use the truck dimensions and turning-path reference to distinguish body, cargo, and overall dimensions and prepare a fleet-specific swept-path review.
 - **Trailer and car parking**: Trailer stalls, car stalls, fleet spaces, and visitor spaces serve different functions. Verify striping, easements, shared rights, zoning requirements, and whether outdoor storage is permitted.
 - **Slab thickness, flatness, and load**: Slab performance matters for racking, forklifts, equipment, and high-bay storage. Concepts from ACI and ASTM standards may be relevant, but a structural engineer should verify thickness, joints, flatness, condition, and load capacity when material.
 - **Power**: Record amps, voltage, phase, panels, switchgear, transformer location, spare capacity, and utility service. Three-phase power is often important for machinery, compressors, welders, refrigeration, and certain charging or process loads.
@@ -1641,8 +1647,96 @@ For regional research sources, the county hub links to assessment offices across
 
 ---
 
+Source: https://rospopa.com/resources/truck-dimensions-turning/
+Published: 2026-10-06 · Updated: 2026-10-06
+
+Industrial guide · Fleet and site fit
+
+# Truck dimensions and turning paths
+
+Use these sourced examples to ask better questions about loading, gates, driveways, yards, and truck courts. Cargo capacity, road-legal dimensions, and space needed to maneuver are different measurements.
+
+Published and sources checked October 6, 2026 . Metric conversions are rounded.
+
+## In brief
+
+- A 53-foot trailer is not a 53-foot tractor-trailer combination. A box-truck body size is not the overall truck length.
+- A container's dimensions alone do not describe the tractor, chassis, loaded height, or turning envelope.
+- There is no universal truck turning radius or safe truck-court depth. Require fleet-specific swept-path review by a qualified engineer.
+
+## Tractors and semitrailers
+
+A tractor alone includes the cab and power unit. Its wheelbase, axle layout, sleeper, and fifth-wheel position vary. A tractor plus semitrailer is an articulated combination; overall length depends on both vehicles and their connection geometry. Do not add a guessed tractor length to the trailer label or use that label as the rig's overall length.
+
+**Semitrailer length references, not overall combination dimensions**
+- Reference: Imperial: Metric: What the number means
+- 48-foot semitrailer: 48 ft: 14.63 m: FHWA describes the minimum semitrailer length states must allow on the National Network and reasonable access routes, subject to grandfathered provisions. Not interior cargo length.
+- 53-foot semitrailer: 53 ft: 16.15 m: FHWA's Illinois grandfathered-length table lists 53 ft. This is the trailer length reference, not an overall rig length or a turning template.
+
+FHWA states that there is no federal overall-length limit for tractor-semitrailer combinations on the National Network and reasonable access routes. Its general commercial-vehicle width limit is 102 in (8 ft 6 in; approximately 2.6 m), with regulatory exceptions. Neither statement proves a particular vehicle can use a particular local road or driveway. Confirm current Illinois rules, route restrictions, permits, axle positions, and actual fleet dimensions.
+
+There is no federal commercial-vehicle height requirement. FHWA describes most state limits as 13 ft 6 in to 14 ft (approximately 4.11 to 4.27 m), with lower road clearances and exceptions. This is not a current Illinois height authorization; check the actual route and current state/local rules.
+
+## Straight and box trucks
+
+A straight truck carries its cargo body on the same vehicle chassis as its cab. The two verified rental examples below are interior cargo-box dimensions , not exterior bodies, door openings, overall vehicle lengths, or roof heights.
+
+**Penske published interior dimensions, up to the stated sizes**
+- Rental label: Interior L &times; W &times; H, imperial: Interior L &times; W &times; H, metric: Source and limitation
+- 16-foot box truck: 16 ft &times; 7 ft 7 in &times; 6 ft 6 in: 4.88 &times; 2.31 &times; 1.98 m: Penske 16-foot truck ; approximate maximum interior dimensions.
+- 26-foot box truck: 25 ft 11 in &times; 8 ft 1 in &times; 8 ft 1 in: 7.90 &times; 2.46 &times; 2.46 m: Penske 26-foot truck ; approximate maximum interior dimensions.
+
+Penske says these measurements vary by manufacturer. Overall external vehicle length is not published on either cited rental page. Its commercial light-duty range also lists 12-foot and 16-foot box trucks and 16-foot and 18-foot cabovers. These are fleet size labels, not universal specifications.
+
+For a requested 12, 14, 16, 18, 20, 22, 24, or 26 ft body (approximately 3.66, 4.27, 4.88, 5.49, 6.10, 6.71, 7.32, or 7.92 m respectively), obtain a model-specific body/chassis drawing. These conversions do not establish availability or interior dimensions. Verify actual overall length, exterior width including protrusions, loaded and unloaded height, wheelbase, rear overhang, door opening, and liftgate deployment separately.
+
+## Containers and chassis
+
+20-foot and 40-foot dry containers, including high-cube equipment, are containers alone , not complete road vehicles. Nominal length names are not usable interior dimensions. A high cube has a taller container body; the chassis deck, tires, suspension, and loading condition contribute additional height when carried on the road.
+
+**Maersk dry-container outside-size references, rounded nominal classes**
+- Equipment: L &times; W &times; H, published imperial: Approximate metric conversion
+- 20-foot standard steel: 20 ft &times; 8 ft &times; 8 ft 6 in: 6.10 &times; 2.44 &times; 2.59 m
+- 40-foot standard steel: 40 ft &times; 8 ft &times; 8 ft 6 in: 12.19 &times; 2.44 &times; 2.59 m
+- 40-foot high-cube steel: 40 ft &times; 8 ft &times; 9 ft 6 in: 12.19 &times; 2.44 &times; 2.90 m
+
+Source: Maersk dry equipment specifications (PDF, page 1) . The carrier publishes these rounded size classes separately from interior and door-opening dimensions. Metric values above convert those published nominal sizes; they are not precise ISO manufacturing dimensions or measurements of a particular unit. None includes a chassis or tractor. Obtain the actual equipment drawing for clearance work.
+
+Specify the carrier's exact equipment type and request its exterior, interior, and door-opening drawing. For a chassis combination, also obtain chassis length, axle positions, container placement, loaded height, and tractor geometry. Do not derive overall vehicle height or turning clearance from the container label. ISO 668 is the dimensional/classification standard; its full specification is not reproduced here.
+
+## Turning circle, swept path, and offtracking
+
+- **Turning circle diameter vs. radius**: Diameter spans a complete circle; radius is half that diameter only when both refer to the same circle and measurement convention. A curb-to-curb wheel path is not a wall-to-wall body envelope. Ask which reference point, steering lock, speed, and maneuver the supplier measured.
+- **Swept path and outer sweep**: A swept path is the area occupied by the vehicle through a specific maneuver. Its outer boundary must account for front corners, mirrors, body overhang, and trailer swing, not just a tire track.
+- **Offtracking**: Rear wheels and a trailer do not follow the tractor's front-wheel path in a low-speed turn; they commonly track inward. Trailer length, wheelbase, axle locations, articulation, steering, and approach angle change the path.
+- **Design vehicle**: AASHTO design-vehicle labels such as WB-62 and WB-67 describe particular geometric templates, not interchangeable fleet measurements or a universal radius. A qualified engineer must select a suitable current design vehicle and check it against the site's actual fleet and maneuvers.
+
+No numerical turning radius is supplied here because the cited fleet specifications do not establish one for a complete configuration. Forward circulation, reversing into a dock, simultaneous opposing traffic, and queuing require different checks. FHWA road-size limits are not turning-path templates.
+
+## Site-review checklist
+
+- Identify the fleet: exact tractor, trailer, straight-truck, or container/chassis configuration, wheelbases, axle positions, body projections, height, and operating loads.
+- Survey the constraints: gate openings, curb returns, driveways, dock angles, court depth, grade changes, fences, bollards, poles, parked vehicles, easements, fire access, snow storage, and overhead obstructions.
+- Test the maneuver: have a qualified civil/transportation engineer perform fleet-specific swept-path analysis for entry, turns, backing, unloading, and exit, including required operational margins and conflicts.
+- Check access and operation: local truck routes, bridge/underpass restrictions, delivery rules, pavement capacity, loading equipment, and municipal approvals. Legal road width or nominal cargo size is not a guaranteed safe clearance.
+
+Apply this reference with the building evaluation checklist , building specifications , and industrial due-diligence guide .
+
+## Primary sources and limitations
+
+- FHWA: Federal Size Regulations for Commercial Motor Vehicles , including the Illinois semitrailer grandfathered-length table. This explanatory report is not a current local-route approval; actual regulations govern.
+- Penske 16-foot truck and Penske 26-foot truck : approximate interior dimensions that vary by manufacturer.
+- Penske commercial light-duty trucks : published fleet labels, not overall vehicle drawings.
+- ISO 668 catalog : container classification/dimension standard; full tables require access to the standard.
+- Maersk dry equipment specifications (PDF) : published nominal outside-size classes for standard and high-cube steel containers, with separate interior and door-opening specifications.
+- AASHTO publications : the Green Book contains design-vehicle guidance. Its paid dimensional/turning templates are not reproduced or replaced with guessed values.
+
+> Scope. Educational reference, not engineering, construction, traffic, safety, or legal advice. No table here authorizes a clearance, maneuver, vehicle movement, or site design. Confirm specifications and current requirements with the fleet, carrier, responsible authorities, and qualified engineers.
+
+---
+
 Source: https://rospopa.com/resources/chicago-industrial-real-estate/
-Published: 2026-10-02 · Updated: 2026-10-05
+Published: 2026-10-02 · Updated: 2026-10-06
 
 Operations & property suitability
 
@@ -1676,7 +1770,7 @@ Write down pallet or equipment dimensions, inventory type, peak daily vehicle mo
 - Feature: What to verify
 - Clear height and columns: Measure usable clearance below obstructions, not just roof height. Review column spacing against the equipment and storage layout.
 - Loading: Identify dock-high and drive-in doors, their dimensions and condition, equipment, staging area, and shared-use restrictions.
-- Truck court and yard: Test turning and backing with the actual vehicle type. Confirm trailer parking, outdoor storage permissions, access rights, and snow-storage arrangements.
+- Truck court and yard: Test turning and backing with the actual vehicle type. Confirm trailer parking, outdoor storage permissions, access rights, and snow-storage arrangements. See vehicle dimensions and fleet-specific swept-path checks ; nominal trailer or body size does not establish clearance.
 - Floor and structure: Have qualified professionals assess slab condition, flatness, load capacity, and any proposed equipment or rack anchoring.
 - Power and utilities: Verify voltage, phase, service capacity, and available capacity with equipment needs and utility providers. An upgrade’s cost and schedule require confirmation.
 - Fire protection: Confirm that the installed system and approved storage arrangement suit the commodity, packaging, rack design, and proposed storage height.
@@ -1718,7 +1812,7 @@ For a lease, use the occupancy-cost and lease checklist . For a purchase, review
 ---
 
 Source: https://rospopa.com/resources/industrial-due-diligence/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Industrial guide · Physical and environmental diligence
 
@@ -1810,6 +1904,8 @@ Review roof age, membrane type, warranty, leaks, drainage, penetrations, insulat
 ### Docks, doors, and equipment
 
 Dock levelers, bumpers, seals, shelters, overhead doors, drive-in doors, controls, and restraints affect safety and operations. Field-test condition where practical and compare the loading package to the intended use.
+
+Compare the actual fleet to gates, docks, truck courts, and overhead obstructions using the vehicle dimensions and turning-path reference . Have a qualified engineer review swept paths and required operational margins; cargo-box dimensions alone do not establish site access.
 
 ### Mechanical, electrical, plumbing, and fire protection
 
@@ -1905,7 +2001,7 @@ For terminology, the Phase I ESA / AAI , ALTA survey , and title commitment glos
 ---
 
 Source: https://rospopa.com/resources/chicagoland-industrial-submarkets/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Market orientation · Illinois logistics corridors
 
@@ -2042,7 +2138,7 @@ For sale, lease, or investment context, cross-check selling industrial property 
 ---
 
 Source: https://rospopa.com/resources/chicagoland-industrial-real-estate/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Illinois, USA · County-by-county research
 
@@ -2217,7 +2313,7 @@ Record the source, access date, parcel searched, verified finding, and unresolve
 ---
 
 Source: https://rospopa.com/resources/illinois-industrial-property-taxes/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Owner guide · Illinois industrial tax diligence
 
@@ -2340,7 +2436,7 @@ Assessment office links: Cook , DeKalb , DuPage , Grundy , Kane , Kendall , Lake
 ---
 
 Source: https://rospopa.com/resources/selling-industrial-property/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Owner guide · Chicagoland industrial sale preparation
 
@@ -2503,7 +2599,7 @@ Connect on LinkedIn Marcus & Millichap advisor page
 ---
 
 Source: https://rospopa.com/resources/commercial-investment/
-Published: 2026-10-02 · Updated: 2026-10-05
+Published: 2026-10-02 · Updated: 2026-10-06
 
 Acquisition preparation
 
@@ -2582,7 +2678,7 @@ Review commercial lease terms and obligations when assessing a leased investment
 ---
 
 Source: https://rospopa.com/resources/commercial-leasing/
-Published: 2026-10-02 · Updated: 2026-10-05
+Published: 2026-10-02 · Updated: 2026-10-06
 
 Lease comparison & preparation
 
@@ -2656,7 +2752,7 @@ Comparing industrial leases across county lines? Use the nine-county Illinois in
 ---
 
 Source: https://rospopa.com/resources/chicago-commercial-real-estate/
-Published: 2026-10-02 · Updated: 2026-10-05
+Published: 2026-10-02 · Updated: 2026-10-06
 
 Research guide
 
@@ -2736,7 +2832,7 @@ For rental decisions, continue to comparing commercial leases . For an acquisiti
 ---
 
 Source: https://rospopa.com/resources/glossary/
-Published: 2026-10-03 · Updated: 2026-10-05
+Published: 2026-10-03 · Updated: 2026-10-06
 
 Reference · Industrial real estate and investment terms
 
@@ -2761,7 +2857,7 @@ These terms describe the physical asset, site layout, and operating fit.
 - **Column spacing**: The distance between structural columns, important for racking, staging, equipment, and forklift movement.
 - **Dock-high door**: A loading door designed for trailers backed to a dock.
 - **Drive-in door**: A grade-level overhead door that lets vehicles enter the building or yard area.
-- **Truck court**: The paved maneuvering area outside dock doors where trucks back, turn, and queue.
+- **Truck court**: The paved maneuvering area outside dock doors where trucks back, turn, and queue. Its usable depth must be evaluated for the actual fleet and maneuver, not a universal turning radius. See the turning circle, swept-path, and offtracking reference .
 - **Trailer parking**: Outdoor spaces used to store trailers, subject to zoning, surface, screening, and lease limits.
 - **Cross-dock**: A building arranged for freight to move from inbound doors to outbound doors with limited storage time.
 - **Rail-served**: A property with rail access or a rail spur; service, rights, and track condition still need review.

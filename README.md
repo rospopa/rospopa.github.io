@@ -39,6 +39,15 @@ links to aggregator duplicates. A source returning HTML or failing to fetch
 is reported explicitly. The daily workflow remains the refresh mechanism;
 no credentials or article bodies are stored or displayed.
 
+`resources\truck-dimensions-turning\index.html` is the central fleet-size
+reference. Keep measured cargo interiors, nominal body/container labels,
+road-size rules, and overall vehicle geometry distinct. Dimensional examples
+must link to primary fleet/carrier/regulatory sources; unknown overall lengths
+and turning radii remain unpublished, not guessed. All site-fit conclusions
+require fleet-specific engineering review. Tables reuse the keyboard-focusable,
+horizontal-scroll `.table-wrap` pattern. Register new guides in `PAGES` and
+`llms.txt`, link them from the guide directory and relevant sections, then build.
+
 The shared header's Show contact info button opens a native modal dialog,
 using the existing click-to-reveal decoder in `resources\interactive.js`.
 Contact data remains defined only in the homepage's `#contact-details`;

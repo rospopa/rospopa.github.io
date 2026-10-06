@@ -17,6 +17,7 @@ const PAGES = [
   'resources/industrial-investor-faq/index.html',
   'resources/community/index.html',
   'resources/industrial-building-types/index.html',
+  'resources/truck-dimensions-turning/index.html',
   'resources/chicago-industrial-real-estate/index.html',
   'resources/industrial-due-diligence/index.html',
   'resources/chicagoland-industrial-submarkets/index.html',
