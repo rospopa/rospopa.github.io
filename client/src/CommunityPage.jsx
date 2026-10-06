@@ -48,7 +48,7 @@ function AskForm({ onPosted }) {
     <form onSubmit={submit} className="card bg-base-100 border border-base-300 shadow-sm">
       <div className="card-body gap-3">
         <h3 className="card-title text-lg">Ask the community</h3>
-        <p className="text-sm opacity-70">Your question is public on rospopa.com and shows your first name and last initial. Please leave out confidential deal details.</p>
+        <p className="text-sm opacity-70">Your question is visible to signed-in members and shows your first name and last initial. Please leave out confidential deal details.</p>
         <label className="form-control">
           <span className="label-text mb-1">Topic</span>
           <select className="select select-bordered" value={category} onChange={e => setCategory(e.target.value)}>
@@ -177,7 +177,7 @@ export default function CommunityPage({ user }) {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-bold">Community Q&amp;A</h2>
-          <p className="text-sm opacity-70">Questions and answers from members. Posts also appear on <a className="link" href="https://rospopa.com/resources/community/" target="_blank" rel="noopener">rospopa.com/resources/community</a>.</p>
+          <p className="text-sm opacity-70">Questions and answers from members. Only signed-in members can see this board.</p>
         </div>
         <button className="btn btn-primary" onClick={() => setAsking(a => !a)}>{asking ? 'Cancel' : 'Ask a question'}</button>
       </div>

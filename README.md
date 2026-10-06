@@ -78,7 +78,8 @@ Sign In lives in the footer, not the header. The logo's accessible name reads
 
 Community scenarios are editorial simulated perspectives, not member posts.
 Keep the invite-only board separate and do not imply participation or activity
-without actual member data. Guide publication metadata remains intact; prominent
+without actual member data. The board is members-only: the API requires a
+signed-in session to read or post, and the public site only links to sign in. Guide publication metadata remains intact; prominent
 bulk publication stamps are omitted rather than represented as market freshness.
 The homepage bio uses the linked official advisor profile; add no career/deal
 claims or portrait without verification and permission. The selling-guide

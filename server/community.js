@@ -1,12 +1,9 @@
-// Members' community Q&A. Anyone may read; only signed-in secure.rospopa.com
-// accounts may post. The public site (rospopa.com) calls these endpoints
-// cross-origin, so CORS is allowed for those origins with credentials, and
-// every state-changing request must come from an allowed Origin.
+// Members' community Q&A. Only signed-in secure.rospopa.com accounts may read
+// or post. The board lives inside the workspace, so the only allowed Origin is
+// secure.rospopa.com, and every state-changing request must come from it.
 const rateLimit = require('express-rate-limit');
 
 const ALLOWED_ORIGINS = new Set([
-  'https://rospopa.com',
-  'https://www.rospopa.com',
   'https://secure.rospopa.com',
   ...(process.env.COMMUNITY_EXTRA_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean),
 ]);
@@ -90,13 +87,13 @@ function cors(req, res, next) {
 // an Origin check is what stops other sites from posting as a member.
 function requireAllowedOrigin(req, res, next) {
   const origin = req.headers.origin;
-  if (!origin || !ALLOWED_ORIGINS.has(origin)) return res.status(403).json({ error: 'Requests must come from rospopa.com.' });
+  if (!origin || !ALLOWED_ORIGINS.has(origin)) return res.status(403).json({ error: 'Requests must come from secure.rospopa.com.' });
   if (!req.is('application/json')) return res.status(415).json({ error: 'JSON body required.' });
   next();
 }
 
 function requireMember(req, res, next) {
-  if (!req.session || !req.session.user) return res.status(401).json({ error: 'Sign in at secure.rospopa.com to post.' });
+  if (!req.session || !req.session.user) return res.status(401).json({ error: 'Sign in at secure.rospopa.com to use the community board.' });
   next();
 }
 
@@ -126,7 +123,7 @@ function registerRoutes(app, { pool, logAudit, clientIp }) {
     res.json({ categories: Object.entries(CATEGORIES).map(([id, title]) => ({ id, title })) });
   });
 
-  app.get(`${base}/threads`, readLimiter, async (req, res) => {
+  app.get(`${base}/threads`, requireMember, readLimiter, async (req, res) => {
     res.set('Cache-Control', 'no-store');
     const admin = isAdmin(req);
     const category = CATEGORIES[req.query.category] ? req.query.category : null;
@@ -178,7 +175,7 @@ function registerRoutes(app, { pool, logAudit, clientIp }) {
     }
   });
 
-  app.get(`${base}/threads/:id`, readLimiter, async (req, res) => {
+  app.get(`${base}/threads/:id`, requireMember, readLimiter, async (req, res) => {
     res.set('Cache-Control', 'no-store');
     const id = parseInt(req.params.id, 10);
     if (!id) return res.status(404).json({ error: 'Thread not found.' });
