@@ -140,6 +140,7 @@ figcaption .credit { display: block; margin-top: .15rem; font-size: .76rem; }
 .btn-outline:hover { background: var(--color-primary); color: var(--color-primary-content); }
 .cta { padding: 1.4rem 1.5rem; border: 1px solid var(--line); border-radius: .375rem; background: var(--color-base-100); }
 .cta h2 { font-size: 1.3rem; }
+.cta > h2:first-child { margin-top: 0; }
 .cta p:last-child, .cta .btn-row { margin-bottom: 0; }
 
 /* ---- News carousel ---------------------------------------------------- */
