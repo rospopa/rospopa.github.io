@@ -203,8 +203,19 @@ for (const page of PAGES) {
     const strip = `<aside class="guide-contact cta" aria-labelledby="guide-contact-heading"><h2 id="guide-contact-heading">Talk about your building</h2><p>Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus &amp; Millichap.</p>
       ${directContact}
     </aside>`;
-    if (!html.includes('<!-- /page-hero -->')) throw new Error(`${page}: page hero marker missing for contact strip`);
-    html = html.replace('<!-- /page-hero -->', `<!-- /page-hero -->\n    ${strip}`);
+    const main = html.match(/<main\b[^>]*>[\s\S]*?<\/main>/i);
+    const hero = main && main[0].match(/<div class="page-hero">[\s\S]*?<\/div>(?:<!-- \/page-hero -->)?/);
+    if (!hero) throw new Error(`${page}: main page hero missing for contact strip`);
+    html = html.replace(main[0], main[0].replace(hero[0], `${hero[0]}\n    ${strip}`));
+  }
+  if (page.startsWith('resources/')) {
+    const main = html.match(/<main\b[^>]*>[\s\S]*?<\/main>/i);
+    const heroEnd = main && main[0].match(/<div class="page-hero">[\s\S]*?<\/div>/);
+    const contacts = [...html.matchAll(/<aside class="guide-contact cta"(?=[\s>])/g)];
+    const contactPosition = main ? main[0].indexOf('<aside class="guide-contact cta"') : -1;
+    if (contacts.length !== 1 || !heroEnd || contactPosition < heroEnd.index + heroEnd[0].length) {
+      throw new Error(`${page}: exactly one guide contact strip must appear inside main after the page hero`);
+    }
   }
   if (html !== await readFile(page, 'utf8')) await writeFile(page, html);
 }
