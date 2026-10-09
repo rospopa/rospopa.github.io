@@ -33,9 +33,7 @@
   }
 
   function tokenize(value) {
-    return String(value || '').toLowerCase().split(/[^a-z0-9]+/)
-      .filter(function (token) { return token.length > 1; })
-      .map(stem);
+    return rawTokens(value).map(stem);
   }
 
   function countMatches(tokens, query) {
@@ -77,7 +75,9 @@
   function escapeRegExp(value) { return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
 
   function rawTokens(value) {
-    return String(value || '').toLowerCase().split(/[^a-z0-9]+/).filter(function (token) { return token.length > 1; });
+    return String(value || '').toLowerCase()
+      .replace(/\b(?:[a-z]\.){2,}[a-z]?(?=$|[^a-z0-9])/g, function (acronym) { return acronym.replace(/\./g, ''); })
+      .split(/[^a-z0-9]+/).filter(function (token) { return token.length > 1; });
   }
 
   function highlight(text, query) {

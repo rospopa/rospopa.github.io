@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Commercial property insurance review</title>
+  <desc id="desc">A warehouse protected by a shield, with separate symbols for property, liability, business income, and deductibles.</desc>
+  <rect width="1200" height="675" rx="28" fill="#f2f6f1"/>
+  <path d="M600 95 820 174v146c0 130-92 208-220 260-128-52-220-130-220-260V174z" fill="#e5f1e3" stroke="#2e8b57" stroke-width="12"/>
+  <path d="M420 304 600 205l180 99v171H420z" fill="#fff" stroke="#214d35" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M420 304 600 205l180 99" fill="none" stroke="#2e8b57" stroke-width="10"/>
+  <path d="M462 335h276v20H462zm26 50h72v90h-72zm112 0h72v90h-72z" fill="#b8e0b0" stroke="#214d35" stroke-width="5"/>
+  <circle cx="600" cy="290" r="33" fill="#fff" stroke="#2e8b57" stroke-width="6"/>
+  <path d="m585 290 11 12 21-25" fill="none" stroke="#214d35" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <g font-family="Arial,sans-serif" fill="#214d35" font-weight="700" font-size="18">
+    <rect x="80" y="160" width="238" height="72" rx="16" fill="#fff" stroke="#d2ded2" stroke-width="3"/><text x="199" y="204" text-anchor="middle">PROPERTY + SYSTEMS</text>
+    <rect x="882" y="160" width="238" height="72" rx="16" fill="#fff" stroke="#d2ded2" stroke-width="3"/><text x="1001" y="204" text-anchor="middle">LIABILITY</text>
+    <rect x="80" y="410" width="238" height="72" rx="16" fill="#fff" stroke="#d2ded2" stroke-width="3"/><text x="199" y="454" text-anchor="middle">BUSINESS INCOME</text>
+    <rect x="882" y="410" width="238" height="72" rx="16" fill="#fff" stroke="#d2ded2" stroke-width="3"/><text x="1001" y="454" text-anchor="middle">DEDUCTIBLES + EXCLUSIONS</text>
+  </g>
+  <path d="M318 196h94m468 0h2M318 446h94m468 0h2" stroke="#9ab69d" stroke-width="5" stroke-dasharray="8 7"/>
+  <text x="600" y="610" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#536b58">Coverage depends on the policy wording, limits, conditions, and endorsements.</text>
+</svg>

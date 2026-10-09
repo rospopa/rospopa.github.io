@@ -1,6 +1,6 @@
 # Chicagoland Industrial: public guides, full text
 
-> Pavlo Rospopa specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois. This file contains the complete text of the public guides at https://rospopa.com/ for reading by assistants and tools. Definitions and checklists are general education, not legal, tax, engineering, or investment advice. Guides last updated 2026-10-06.
+> Pavlo Rospopa specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois. This file contains the complete text of the public guides at https://rospopa.com/ for reading by assistants and tools. Definitions and checklists are general education, not legal, tax, engineering, or investment advice. Guides last updated 2026-10-09.
 
 ## Finding and choosing a commercial real estate broker
 
@@ -14,7 +14,7 @@ Relevant to searches such as "best commercial real estate broker", "best commerc
 ---
 
 Source: https://rospopa.com/
-Published: 2026-10-02 · Updated: 2026-10-06
+Published: 2026-10-02 · Updated: 2026-10-09
 
 Illinois · Industrial investment sales
 
@@ -32,7 +32,7 @@ A first conversation is confidential and starts with your building, leases, and 
 
 Start with the property's operating facts and your goals, then organize the documents buyers will review and discuss pricing, confidentiality, and the sale process. The selling guide explains what to prepare before we talk.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Industrial corridor on the South Branch of the Chicago River, with the Loop beyond._
 
@@ -141,6 +141,18 @@ How to verify clear height, loading, truck court, slab, power, fire protection, 
 
 ### Transactions, research, and terms
 
+### Retirement planning with commercial real estate
+
+Compare property income and retirement accounts, understand IRA and Solo 401(k) restrictions, and plan liquidity, taxes, a sale or exchange, and succession.
+
+### CRE taxes, passive exchanges and inheritance
+
+Lazy 1031 and DST strategies, passive loss offsets, depreciation, cost segregation, recapture and federal and Illinois estate rules, with 35 retiree questions.
+
+### BESS: battery energy storage for industrial owners
+
+How storage works, kW versus kWh, demand savings, solar, backup power, safety, Illinois approvals and land leases. Includes a system diagram and 20 questions.
+
 ### Investment & purchase diligence
 
 Income, expenses, financing, downside cases, and the reviews before closing, with cap-rate and debt-service calculators.
@@ -208,7 +220,7 @@ Plain-English answers for Illinois commercial owners on NOI, DCF, expense cuts, 
 ---
 
 Source: https://rospopa.com/resources/
-Published: 2026-10-03 · Updated: 2026-10-06
+Published: 2026-10-03 · Updated: 2026-10-09
 
 Library
 
@@ -220,7 +232,7 @@ Free guides to industrial and commercial real estate in Chicago and the nine-cou
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## Industrial property
 
@@ -274,6 +286,18 @@ Buyer types for 10,000 to 100,000 SF, how they underwrite, value drivers, the do
 
 ## Transactions and research
 
+### Retirement planning with commercial real estate
+
+Property income, IRA and Solo 401(k) rules, RMD liquidity, prohibited transactions, 1031 exits, Illinois taxes and succession for retiring industrial owners.
+
+### CRE taxes, passive exchanges and inheritance
+
+Federal and Illinois rules for passive income offsets, lazy 1031, cost segregation, straight line depreciation, recapture, estate tax and inherited basis. Includes 35 retiree questions.
+
+### BESS: battery energy storage for industrial owners
+
+A practical guide to battery operation, power and energy ratings, peak shaving, solar, outage capability, fire safety, interconnection and grid storage land leases. Includes 20 questions.
+
 ### Investment & purchase diligence
 
 Income, expenses, financing, downside cases, and the legal, physical, environmental, and tax reviews before closing, with calculators.
@@ -323,7 +347,7 @@ Plain-English answers for Illinois commercial owners on NOI, DCF, expense cuts, 
 ---
 
 Source: https://rospopa.com/resources/industrial-real-estate-faq/
-Published: 2026-10-05 · Updated: 2026-10-06
+Published: 2026-10-05 · Updated: 2026-10-09
 
 FAQ · Industrial real estate & Chicagoland industrial
 
@@ -337,7 +361,7 @@ General education for the Chicagoland market, not advice on any specific propert
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 
@@ -347,6 +371,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - In Illinois, property taxes are often the largest operating expense; Cook County assesses industrial property differently from the collar counties.
 - Chicagoland’s rail, interstate, and air connections make it one of North America’s largest and most liquid industrial markets.
 - Owner lens: For an operating owner, use each answer as a prompt to verify the specific building, lease, authority, and deadline; general guidance is not proof that a use or improvement is approved at your site.
+
+_Suitability depends on the actual operation and approved use._
 
 ## Industrial real estate basics
 
@@ -786,7 +812,7 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/industrial-investor-faq/
-Published: 2026-10-05 · Updated: 2026-10-06
+Published: 2026-10-05 · Updated: 2026-10-09
 
 Investor Q&A · 10,000 to 100,000 SF industrial
 
@@ -800,7 +826,7 @@ Educational answers, not advice on any specific property, loan, tax position, or
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 
@@ -810,6 +836,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - Most “surprises” are knowable in diligence: roof, pavement, fire protection, environmental history, zoning conformity, and lease clauses.
 - Sell, refinance, or hold is a capital question first and a market-timing question second.
 - Owner lens: Stress correlated setbacks together, such as tenant loss, tax or insurance increases, a major repair, and tighter refinancing, rather than testing each downside in isolation.
+
+_Stress related downside risks together, not only one assumption at a time._
 
 ## Pricing and returns
 
@@ -982,7 +1010,7 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/community/
-Published: 2026-10-05 · Updated: 2026-10-06
+Published: 2026-10-05 · Updated: 2026-10-09
 
 Community · Editorial perspectives
 
@@ -999,7 +1027,7 @@ About the member board
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## Editorial scenarios and the separate member board
 
@@ -1007,6 +1035,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - How each side may see it. The panels below are simulated perspectives written by Pavlo Rospopa for education. First-person language illustrates a possible viewpoint; it is not a quote from an actual person. The editorial note in each scenario is the author's guidance.
 - Even on the private board, please don’t post confidential deal information or personal data.
 - Owner lens: Owners can use the editorial scenarios to identify diligence questions, but they are not actual member posts, transaction evidence, or a consensus view of the market.
+
+_These are illustrative scenarios, not testimonials, accounts, or member discussions._
 
 ## Invite-only member board
 
@@ -1629,7 +1659,7 @@ To ask your own question, or answer someone else’s, use the members' board .
 ---
 
 Source: https://rospopa.com/resources/industrial-building-types/
-Published: 2026-10-03 · Updated: 2026-10-06
+Published: 2026-10-03 · Updated: 2026-10-09
 
 Industrial guide · Building function and specifications
 
@@ -1643,7 +1673,7 @@ Educational, not an engineering report or valuation.
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 
@@ -1653,6 +1683,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - Specifications should be confirmed from documents, site measurements, municipal records, and qualified professionals.
 - For sellers, a clear spec sheet can reduce re-trading and help match the right buyer or tenant pool.
 - Owner lens: Prioritize costly-to-change features such as clear height, column grid, truck court, power, fire protection, and legal yard use over cosmetic fit-out when weighing long-term adaptability.
+
+_Verify specifications in source documents and through qualified site review._
 
 ## Why type and spec matter for 10,000 to 100,000 SF buildings
 
@@ -1756,7 +1788,7 @@ For regional research sources, the county hub links to assessment offices across
 ---
 
 Source: https://rospopa.com/resources/truck-dimensions-turning/
-Published: 2026-10-06 · Updated: 2026-10-06
+Published: 2026-10-06 · Updated: 2026-10-09
 
 Industrial guide · Fleet and site fit
 
@@ -1772,6 +1804,8 @@ Published and sources checked October 6, 2026 . Metric conversions are rounded.
 - A container's dimensions alone do not describe the tractor, chassis, loaded height, or turning envelope.
 - There is no universal truck turning radius or safe truck-court depth. Require fleet-specific swept-path review by a qualified engineer.
 - Owner lens: A site constraint can narrow future users even when the building itself is functional. Confirm recorded access and easements, gates, staging, and fleet-specific swept paths before valuing yard or loading improvements.
+
+_Conceptual only. Confirm the actual vehicle, access rights, and swept path with a surveyed site plan._
 
 ## Tractors and semitrailers
 
@@ -1845,7 +1879,7 @@ Apply this reference with the building evaluation checklist , building specifica
 ---
 
 Source: https://rospopa.com/resources/chicago-industrial-real-estate/
-Published: 2026-10-02 · Updated: 2026-10-06
+Published: 2026-10-02 · Updated: 2026-10-09
 
 Operations & property suitability
 
@@ -1859,7 +1893,7 @@ No current inventory or market statistics are represented.
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 
@@ -1928,7 +1962,7 @@ For a lease, use the occupancy-cost and lease checklist . For a purchase, review
 ---
 
 Source: https://rospopa.com/resources/industrial-due-diligence/
-Published: 2026-10-03 · Updated: 2026-10-06
+Published: 2026-10-03 · Updated: 2026-10-09
 
 Industrial guide · Physical and environmental diligence
 
@@ -1942,7 +1976,7 @@ Educational, not legal, environmental, engineering, or investment advice.
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 
@@ -1952,6 +1986,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - Physical diligence should convert roof, slab, dock, utility, fire-protection, pavement, and drainage findings into a capital plan.
 - Findings usually become a decision about price, credits, escrows, repairs, insurance, indemnities, or whether to proceed.
 - Owner lens: For an owner, diligence is also the start of the permanent building file. Preserve reports, permits, warranties, maintenance logs, environmental records, and repair decisions for lenders, insurers, tenants, and a future buyer.
+
+_Record each finding, responsible party, due date, and decision._
 
 ## Why industrial diligence is different
 
@@ -2085,6 +2121,8 @@ Industrial users often need utility confirmation before they can commit. Electri
 
 For much of the region, electrical capacity questions may involve ComEd , the serving utility, an electrical engineer, and the tenant's equipment vendor. Confirm service voltage, phase, amperage, transformer ownership, spare capacity, upgrade lead times, and shutdown requirements.
 
+For existing or proposed battery energy storage, collect ownership and service contracts, approved plans, utility permissions, commissioning records, safety documentation and removal obligations. The BESS owner guide explains storage, peak savings, engineered backup, fire and insurance review, and standalone storage land leases. Neither a large service nor nearby transmission guarantees interconnection capacity.
+
 Gas, water, and sewer review should include meter size, pressure, discharge limits, floor drains, pretreatment, process water, fire flow, and municipal capacity. Fiber and telecom are separate from an address being generally serviceable.
 
 ## Turning findings into price, credits, escrows, or repairs
@@ -2131,7 +2169,7 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/chicagoland-industrial-submarkets/
-Published: 2026-10-03 · Updated: 2026-10-06
+Published: 2026-10-03 · Updated: 2026-10-09
 
 Market orientation · Illinois logistics corridors
 
@@ -2145,7 +2183,7 @@ No rent, vacancy, pricing, or ranking claims.
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 - Submarket names are brokerage conventions, not legal boundaries.
@@ -2154,6 +2192,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - Aurora, Elgin, Joliet, and other municipalities can cross county lines, so county assumptions must be checked.
 - This guide describes geography and infrastructure only; it does not rank submarkets or state market statistics.
 - Owner lens: For an owner planning to lease or sell later, test actual staff and shipment routes and the pool of replacement users, not just distance to an interstate, airport, or terminal.
+
+_Use real routes and site access, not proximity alone._
 
 ## How to use submarket labels
 
@@ -2275,7 +2315,7 @@ For sale, lease, or investment context, cross-check selling industrial property 
 ---
 
 Source: https://rospopa.com/resources/chicagoland-industrial-real-estate/
-Published: 2026-10-03 · Updated: 2026-10-06
+Published: 2026-10-03 · Updated: 2026-10-09
 
 Illinois, USA · County-by-county research
 
@@ -2289,7 +2329,7 @@ Educational research, not listings or current market statistics.
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 
@@ -2457,7 +2497,7 @@ Record the source, access date, parcel searched, verified finding, and unresolve
 ---
 
 Source: https://rospopa.com/resources/illinois-industrial-property-taxes/
-Published: 2026-10-03 · Updated: 2026-10-06
+Published: 2026-10-03 · Updated: 2026-10-09
 
 Owner guide · Illinois industrial tax diligence
 
@@ -2471,7 +2511,7 @@ Educational, not tax or legal advice.
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 - Tax moves from assessment to equalization, levy, rate, bill, and collection.
@@ -2480,6 +2520,10 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - Incentives, zones, and TIFs require document review.
 - Leases should allocate appeals, refunds, escrows, and reassessment risk.
 - Owner lens: An appeal does not itself stop tax bills, lender escrows, or lease pass-throughs. Budget the cash payment separately and calendar every filing, payment, and tenant reconciliation date.
+
+_Verify each parcel, assessment, tax district, and tax year against official records._
+
+_Tax processes and deadlines vary by county, parcel, and tax year._
 
 ## How Illinois property tax works at a high level
 
@@ -2636,7 +2680,7 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/selling-industrial-property/
-Published: 2026-10-03 · Updated: 2026-10-06
+Published: 2026-10-03 · Updated: 2026-10-09
 
 Owner guide · Chicagoland industrial sale preparation
 
@@ -2650,7 +2694,7 @@ Educational, not a valuation or listing.
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 
@@ -2803,17 +2847,26 @@ Connect on LinkedIn Marcus & Millichap advisor page
 
 > This guide is general education, not legal, tax, engineering, environmental, appraisal, brokerage, or investment advice. Verify property records, taxes, zoning, environmental matters, loan programs, and transaction documents with qualified professionals before acting.
 
+## Planning an industrial property exit for retirement
+
+Compare holding with professional management, selling for liquid proceeds and a qualifying 1031 exchange before choosing a retirement date. Estimate cash after loan payoff, sale costs and taxes, and test lease rollover, major capital work and refinancing risk. If your company occupies the building, coordinate the business sale and future lease separately.
+
+The retirement exit guide explains why a 1031 exchange is not an IRA rollover, how retaining a building changes your workload and concentration, and which questions to bring to tax, financial and estate advisers.
+
+Before closing, review depreciation recapture and the sale gain example and lazy 1031 and DST exchange choices . Mortgage payoff changes sale cash, not ordinarily taxable gain, and less management can bring fees, restricted liquidity and sponsor risk.
+
 ## Continue with the owner guides
 
 For the operating and financial questions behind this decision:
 - How is net operating income calculated for commercial property?
 - How to budget expenses, reserves and capital for a commercial building
 - Commercial property owner questions: income, costs and decisions
+- Retirement planning with commercial real estate
 
 ---
 
 Source: https://rospopa.com/resources/commercial-investment/
-Published: 2026-10-02 · Updated: 2026-10-06
+Published: 2026-10-02 · Updated: 2026-10-09
 
 Acquisition preparation
 
@@ -2827,7 +2880,7 @@ Educational framework, not an investment recommendation.
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 
@@ -2882,6 +2935,8 @@ Before refinancing, obtain the current payoff, prepayment charges, proposed rate
 
 For the valuation/cash-flow framework see the OCC Commercial Real Estate Lending handbook , NOI guide and DCF guide . Property income, equity cash flow and taxable income are different measures.
 
+_An industrial investment review connects income, tenant rollover, capital needs, debt, and exit assumptions._
+
 ## Organize diligence before deadlines expire
 
 - Legal and title: have counsel and title professionals review ownership, title exceptions, survey matters, easements, access, contracts, and the purchase agreement’s deadlines and remedies.
@@ -2894,6 +2949,14 @@ For the valuation/cash-flow framework see the OCC Commercial Real Estate Lending
 EPA’s All Appropriate Inquiries guidance explains a framework relevant to certain environmental-liability protections. Completing an assessment alone does not establish eligibility for every protection; timing, purchaser status, and continuing obligations require professional advice.
 
 For industrial acquisitions, the Chicagoland nine-county Illinois hub provides local research paths beyond Chicago city and Cook County. Match each PIN to its actual county and authority, and distinguish current zoning from planned land use before underwriting expansion or a new tenant's operation.
+
+## How does CRE investing fit a retirement plan?
+
+Separate buying a taxable investment for future retirement income from investing inside an IRA or employer plan. Account ownership changes title, payment paths, borrowing, related party restrictions and distribution rules. Property cash must also cover debt, capital and leasing costs before supporting household spending.
+
+The CRE retirement planning guide compares IRA, Roth, Solo 401(k) and other plans, explains prohibited transactions and UBIT, and covers RMD liquidity, diversification, Illinois taxes and succession. Review account eligibility with qualified tax and plan advisers before an offer, loan guarantee or related business lease.
+
+The federal and Illinois tax guide separates passive activity income from portfolio income, explains cost segregation and straight line depreciation, and compares lazy 1031, recapture and inherited basis. Underwrite the investment before treating tax deferral as a reason to buy.
 
 ## Official sources for verification
 
@@ -2915,8 +2978,1041 @@ For the operating and financial questions behind this decision:
 
 ---
 
+Source: https://rospopa.com/resources/retirement-cre-investing/
+Published: 2026-10-08 · Updated: 2026-10-09
+
+Owner education: retirement and industrial investing
+
+# Retirement planning with commercial real estate
+
+Commercial real estate can be part of a retirement strategy, but a building is not a pension and rent is not guaranteed spending money. Start by separating two decisions: using property you already own to support retirement, and buying real estate inside an IRA or employer retirement plan. Their ownership, tax and distribution rules are different.
+
+Updated October 8, 2026 . General U.S. education with Illinois owner considerations, not personalized retirement, securities, tax, legal or investment advice.
+
+## Planning the building side of retirement
+
+Discuss industrial property sale preparation with Pavlo Rospopa at Marcus & Millichap. Retirement account selection, securities and tax planning require appropriately qualified advisers.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+
+## In brief
+
+- Compare retirement spending with cash after operating costs, debt, capital work, leasing costs and taxes, not gross rent or NOI alone.
+- A self directed IRA is an investment arrangement within an IRA, not a separate exemption from prohibited transaction or distribution rules.
+- Illiquid buildings, loans and private funds can complicate required minimum distributions and emergency spending.
+- A 1031 exchange is not a retirement account rollover and does not eliminate investment risk.
+- Owner lens: Plan who will manage the property if you stop working, become ill or die. A single industrial tenant leaving can interrupt income exactly when your household needs it.
+
+_Separate property reserves from household retirement spending and retirement account distribution requirements._
+
+## Is your retirement plan based on property income or a retirement account?
+
+Property held personally or through a taxable entity can fund retirement, but it does not become an IRA just because you retire. You may collect rent, hire a manager, refinance or sell, subject to leases, loan terms, entity agreements and tax rules. Property income and sale proceeds belong to that owner.
+
+When an IRA or qualified plan owns the investment, the account or plan receives rent and sale proceeds. Those receipts are not automatically available to pay household bills. Moving value to yourself is a distribution subject to the account's rules. Keep property underwriting, account compliance and household withdrawal planning as three separate worksheets.
+
+If your operating company occupies your industrial building, distinguish business earnings from property rent. Selling the business does not necessarily sell the building, and retaining the building can leave your retirement income dependent on the buyer of your business as tenant. Start with the investment diligence guide and lease review checklist .
+
+## Which retirement plans can hold commercial real estate?
+
+Permission under tax law, permission in plan documents and availability through a provider are different questions. Many ordinary brokerage accounts offer publicly traded REITs or real estate funds but do not administer direct buildings. Do not assume your existing IRA or workplace plan accepts a deed, private partnership or loan.
+
+**Account comparison: suitability and investment permissions require individual review**
+
+- Account or plan: Potential CRE exposure: Important constraints
+- Traditional IRA with a custodian supporting alternative assets: Direct property or eligible private investments, if supported: Prohibited transactions, account expenses, valuation, UBIT and RMDs; distributions generally taxable except for recovery of basis
+- Roth IRA with suitable custody: Similar investment permissions, subject to the provider: Contribution eligibility and qualified distribution requirements; prohibited transactions and UBIT still matter
+- Solo or one participant 401(k): Direct property only if plan and trustee arrangements permit it: Eligible business earnings, employee coverage, administration, reporting and qualified plan rules
+- SEP IRA or SIMPLE IRA: Custodian dependent; often funds or REITs, potentially other supported assets: Employer contribution and employee eligibility rules; SIMPLE arrangements have special distribution and transfer restrictions
+- Workplace 401(k), 403(b) or similar plan: Real estate funds or REIT exposure where included in the investment menu: Plan menu, fees, distribution eligibility and rollover rules; direct property is not automatically available
+- Defined benefit or cash balance plan: Investments permitted by the plan, not an unrestricted personal property account: Actuarial funding, benefit obligations, employee coverage, fiduciary duties and investment liquidity
+
+A Solo 401(k) generally covers an eligible business owner with no employees other than a spouse. Hiring eligible employees changes the obligations; common ownership and related businesses also need review. A plan marketed as a real estate or checkbook plan does not override tax law. A cash balance plan requires an actuary and specialist administration, not just opening an account.
+
+Traditional versus Roth is a tax timing decision, not a prediction that a property will perform better. Compare current taxes, future distributions, conversion costs, account fees and available cash with a CPA. This guide does not prescribe an account type or contribution amount; annual limits and income thresholds must be checked for the applicable year.
+
+## Can rental income or a building sale fund retirement plan contributions?
+
+Ordinary rental income generally is not compensation for an IRA contribution or earned income for a self employed retirement plan contribution. Property sale proceeds and investment appreciation likewise do not by themselves create qualifying compensation. Having enough cash is not the same as having contribution eligibility. Real estate professional status for passive activity rules does not by itself turn rent into compensation.
+
+Eligible wages or qualifying self employment earnings, including some active real estate business earnings, may support contributions. Spousal IRA rules may apply to a couple filing jointly with sufficient qualifying compensation. Have a CPA classify the actual activity, payroll and entity income rather than relabeling rent or creating unsupported management fees. Use IRS Publication 590-A and Publication 560 for eligibility, deductions and current limits.
+
+### Contributions, transfers, rollovers and conversions are different
+
+Moving eligible existing retirement assets through a properly executed transfer or rollover differs from making a new annual contribution. Check whether a workplace plan permits a distribution, whether the receiving account accepts it, and how withholding and deadlines apply. Direct provider coordination can avoid handling proceeds personally. IRA rollover frequency rules do not apply identically to every transfer, and required minimum distributions cannot be rolled over.
+
+A Roth conversion can create taxable income; it is not simply moving a building to a tax free account. An illiquid property needs supportable valuation and cash planning for taxes. A property you already own personally cannot simply be sold to your IRA or contributed as an ordinary IRA contribution. Obtain advice before signing contracts or moving titles.
+
+## What personal use and related party transactions are prohibited?
+
+An IRA property is an account investment, not a building for your personal or business use. IRS prohibited transaction rules cover improper use and dealings with disqualified persons. These include the account owner, certain fiduciaries, a spouse, ancestors, lineal descendants and their spouses, and certain controlled entities. Not every relative has identical statutory status, but indirect personal benefit can still be a problem.
+
+- Do not sell your existing building to your IRA, buy its building for yourself, or assume a lease to your own business or a disqualified person is permitted.
+- Do not personally guarantee account borrowing, pledge personal credit to support it, or use account assets as collateral for your personal debt.
+- Do not use account property personally, divert its rent to your household, or casually pay its bills from personal funds.
+- Do not assume you can perform repairs, pay yourself a management fee or provide services through your company. Administrative oversight and furnishing services require fact specific specialist review.
+- Review co investment, partnerships, family ownership, fees and IRA owned LLC arrangements before commitments. An LLC does not remove prohibited transaction rules.
+
+Charging market rent or describing a transaction as fair does not by itself make it permissible. Under IRS guidance , a prohibited transaction by an IRA owner or beneficiary can cause the account to stop being an IRA as of the first day of that year, with its assets treated as distributed at fair market value. Income tax and potentially additional early distribution tax can follow. Qualified plan consequences differ, but are also serious.
+
+Before purchase, confirm the buyer's legal name and title, authorized signers, approved payment path, account cash reserves and the custodian's procedures for leases, vendors, loans and closing. Custodian acceptance is not an independent legal opinion or endorsement of the investment.
+
+## Can real estate inside an IRA owe tax before a distribution?
+
+Yes. A retirement account's tax advantages do not exempt every activity from tax. Ordinary real property rent is generally excluded from unrelated business taxable income, but debt financed property, an operating business, certain service intensive activities or partnership income can change the treatment. Unrelated business income tax (UBIT) and unrelated debt financed income (UDFI) can affect both traditional and Roth IRAs.
+
+Account borrowing generally must avoid personal guarantees or other prohibited extensions of credit, often through a properly structured loan with recourse limited to account collateral. That does not make leverage tax free. Debt financed rental income and sale gain may require calculations based on acquisition indebtedness and adjusted basis, not simply a broker's cap rate or the original loan percentage.
+
+IRS Publication 598 explains exclusions, exceptions and debt financed income. Generally, $1,000 or more of gross income from an unrelated trade or business triggers a Form 990-T filing requirement; this is not a rule that only net profit above $1,000 matters. Have the CPA and custodian determine filing, estimated payments, tax allocation and account funding.
+
+Certain qualified retirement trusts may qualify for a real property debt exception under Section 514(c)(9) if its conditions are met. IRAs do not share that exception. A Solo 401(k) is not automatically free of UBIT on every investment, particularly through partnerships or operating activities.
+
+You generally cannot claim your IRA property's depreciation or losses on your personal return. Property tax attributes inside an account are not the same as personally owning a rental; any deductions used in account level tax calculations need separate review. Income remaining inside a traditional IRA and later distributions also have different tax treatment. Qualified Roth distributions require applicable age and holding period conditions, and do not cure a prohibited transaction.
+
+## How much commercial property cash is actually available for retirement?
+
+Start with a household spending plan, including health care, taxes and irregular expenses. Subtract other dependable income sources, then ask what property cash can cover the remaining gap under both ordinary and adverse conditions. A cap rate measures income relative to value, not a safe household withdrawal rate.
+
+Use documented NOI , then subtract debt service, planned capital funding and leasing costs without double counting reserves and the projects they fund. Separately estimate taxes and household withdrawals. A distribution from a property LLC may include refinancing cash or returned capital, not just operating profit.
+
+**Hypothetical annual cash bridge for a taxable property owner, not market data or a guaranteed return**
+
+- Step: Assumed cash: Meaning
+- Collected rent and recoveries: $240,000: Actual receipts, not full scheduled rent
+- Operating expenses: ($90,000): Includes assumed professional management
+- NOI: $150,000: Before financing and capital cash needs
+- Debt service: ($72,000): Principal and interest, not an ordinary NOI expense
+- Capital and leasing reserve funding: ($30,000): Retained for future projects; no separate project outlay in this base year
+- Available cash before owner income taxes: $48,000: Assumed $4,000 monthly equivalent, not a monthly payment promise
+- Separate downside: $60,000 less collected income: ($12,000): With other assumptions held constant, cash turns negative
+
+The downside deliberately keeps costs unchanged; actual vacancy can also change recoveries, utilities, management and leasing outlays. If a $100,000 roof project is paid from previously funded reserves, show the reserve withdrawal and remaining balance. Do not deduct the same reserve transfer and project payment twice. If reserves are insufficient, identify the additional equity required.
+
+A long NNN lease still leaves default, lease rollover, lender, environmental and landlord obligation risks. Test tenant failure, tax increases, insurance costs, roof or pavement replacement, refinancing at worse terms and a delayed sale. Keep property reserves distinct from liquid household emergency assets. Within a retirement account, the same property cash bridge does not bypass distribution rules.
+
+## Direct buildings, REITs or private real estate: what changes in retirement?
+
+Decide how much control, management, liquidity and concentration your household can tolerate. Owning one industrial building can concentrate exposure to one tenant, local market and asset condition. A diversified fund can reduce some property specific concentration without eliminating real estate, leverage or market risk.
+
+**Compare the structure, not just the advertised distribution rate**
+
+- Structure: Control and workload: Liquidity and risk to investigate
+- Direct industrial property: High decision responsibility, even with a manager: Slow or uncertain sale; tenant, capital, debt and environmental concentration
+- Publicly traded REIT or real estate fund: Professional management; limited control over individual assets: Market trading generally available, but prices can fall; distributions, leverage, fees and holdings vary
+- Nontraded REIT or private fund: Sponsor control; offering documents govern investor rights: Redemptions may be restricted or suspended; valuation, fees, leverage, capital calls and conflicts
+- Private syndication or eligible DST interest: Little operating control; sponsor and governing documents matter: Transfer restrictions, long holds, fees, debt and sponsor risk; securities and tax eligibility require separate review
+
+Some Delaware statutory trust (DST) interests may qualify as replacement real property for a 1031 exchange under specific tax requirements. Not every trust, fund, partnership interest or REIT share qualifies. A passive structure is not necessarily liquid, safer or suitable for retirement; do not accept a guaranteed income pitch.
+
+Review audited information where available, the source of distributions, sponsor history, compensation, affiliated transactions, redemption terms and downside projections with an independent adviser. Distributions funded by borrowing or returned capital are not the same as earned income. Consult the SEC's REIT overview and self directed IRA fraud alert . This page is not an offering or recommendation of any security or provider.
+
+## How do RMDs and valuations work when a retirement account owns property?
+
+An illiquid investment does not excuse a required minimum distribution. Traditional IRAs, SEP IRAs, SIMPLE IRAs and many employer plans have RMD rules. The applicable starting age depends on birth year and current law, not merely the year you stop working. Current rules generally use age 73 for people born from 1951 through 1959 and age 75 for those born in 1960 or later; earlier cohorts follow earlier starting ages.
+
+Roth IRAs and designated Roth plan accounts do not require lifetime RMDs from the original owner under current rules, but beneficiaries have distribution requirements. A workplace plan may allow a delay while employed, subject to plan terms and the exception for a 5% business owner; that delay generally does not apply to traditional IRAs. Confirm your own starting date with the plan administrator and IRS RMD guidance .
+
+### Value the asset and identify the source of the distribution
+
+RMDs generally use the prior December 31 account value and the appropriate IRS distribution factor. A deed, private fund interest or property loan needs a supportable value and custodian reporting, not an assumed unchanged purchase price. Schedule valuation early enough to meet reporting and distribution requirements.
+
+Rental cash or liquid assets can support withdrawals. An owner may generally aggregate RMDs across their own traditional IRAs after calculating each separately, but cannot satisfy a 401(k) RMD by taking extra from an IRA. Inherited accounts have additional restrictions. Plan for the specific account rather than assuming household cash held outside it satisfies a distribution.
+
+A custodian may permit an in kind distribution of a properly valued property interest, but it requires title, valuation and tax review. It does not necessarily provide cash to pay the resulting income tax. Continuing partial account ownership alongside personal ownership can create further prohibited transaction risks. Do not simply deed the building to yourself to meet an RMD.
+
+### Avoid deadline driven sales and tax surprises
+
+The first RMD may generally be delayed until April 1 of the following year, with the next due by December 31 of that same year. That can put two distributions into one tax year. Missed RMDs can trigger an excise tax; correction and relief rules require timely review. A tenant distribution or sale that arrives late is not a deadline extension.
+
+Model the withdrawal schedule, refinancing maturity and lease expiration together. Consider whether household spending needs before age 59 1/2 would require taxable withdrawals and an additional early distribution tax, unless an exception applies. Account type and exceptions differ. The account is not a replacement for accessible emergency cash.
+
+## Should an owner hold, sell or exchange industrial property before retirement?
+
+Compare options on after tax available cash, risk, workload and family needs, not just headline sale price. Write down when you need liquidity, who can manage a vacancy, the next major capital project and whether a loan matures near retirement.
+
+### Keep the building with professional management
+
+Obtain a management proposal, delegated authority, vendor controls, emergency coverage and reporting. Review lease expirations, renewal options, guarantees and landlord obligations. Holding can preserve future income potential, but also concentrates capital and keeps leasing, financing and condition risk. An NNN lease does not eliminate oversight.
+
+### Sell and redeploy cash outside the property
+
+Estimate loan payoff, prepayment charges, brokerage and closing costs, tax basis, depreciation related tax treatment and federal and state taxes before estimating proceeds available for retirement. A property sale's taxable gain is not simply sale proceeds minus loan balance. Let a financial adviser compare reinvestment and withdrawal alternatives without assuming future returns.
+
+### Consider a qualifying 1031 exchange, not an IRA rollover
+
+A Section 1031 exchange can defer eligible gain when qualifying business or investment real property is exchanged for qualifying real property. In a typical deferred exchange, identify replacement property within 45 days and receive it by the earlier of 180 days or the tax return due date, including extensions. Arrange the qualified intermediary and tax review before closing; receipt or control of cash can defeat the intended structure.
+
+Deferral is not forgiveness, and reinvesting can reduce cash available for retirement. Cash received or net debt relief can create taxable gain, subject to the full exchange calculation. Related party rules, entity ownership and replacement property requirements need review. Do not let a deadline force a weak acquisition or assume a DST, REIT or fund automatically qualifies.
+
+A 1031 exchange does not move taxable property into an IRA. Retirement account distributions, eligible rollovers and contribution limits are separate systems. A sale within an account retains proceeds in the account, subject to account level tax where applicable; do not automatically apply a taxable owner's exchange strategy to account property.
+
+### Coordinate the building with a business sale
+
+If your business occupies the property, compare selling both assets, selling the business and retaining the building under a lease, or a sale with a leaseback. A leaseback creates a rent obligation for the business; it is not free retirement income. Counsel should address buyer credit, rent, term, maintenance, guarantees, assignment and what happens if the business is later sold again. Keep this taxable business planning separate from IRA related party restrictions.
+
+## Can a lazy 1031 reduce landlord work in retirement?
+
+A lazy 1031 is informal language for a qualifying exchange into an investment with less day to day management, not an IRS program. Possibilities include eligible DST interests, qualifying ownership arrangements or directly held property with professional management. Net leases can shift expenses but do not eliminate tenant, repair, financing or resale risk.
+
+A Delaware statutory trust must satisfy specific conditions to qualify; not every trust offering does. Less control, sponsor fees, debt exposure and restricted transfers can be material retirement tradeoffs. Distributions are not guaranteed and may include returned capital or borrowing. Operationally passive does not mean liquid, safe or automatically passive under every tax rule.
+
+Compare the usable cash from a taxable sale with exchange alternatives and continued ownership before a deadline forces a purchase. Ordinary REIT shares and partnership interests are not 1031 replacement real property. A Section 721/UPREIT transaction is separate, and exchanging property is not an IRA rollover. See the lazy 1031 and DST guide for deadlines, boot, basis, loss carryforwards and independent adviser questions.
+
+## Will depreciation losses reduce my retirement income taxes?
+
+A deduction on paper is not necessarily usable against pension, IRA or conversion income. Rental losses generally are passive unless an exception applies; portfolio interest and dividends are not passive activity income. The active participation rental allowance is generally up to $25,000 with MAGI phaseouts and other requirements. Real estate professional status and material participation are separate annual tests, not benefits obtained automatically by retiring.
+
+Ordinary nonresidential buildings under GDS generally use 39 year straight line depreciation and a mid month convention, excluding land. A supported cost segregation study may classify eligible shorter life assets for accelerated deductions. Current law restored 100% bonus for eligible property acquired and placed in service after January 19, 2025, subject to detailed rules; this does not mean expensing an ordinary entire warehouse. Illinois modifications can differ from federal depreciation.
+
+Depreciation allowed or allowable reduces adjusted basis. On sale, qualifying asset recapture can be ordinary income, while unrecaptured Section 1250 gain has a maximum 25% individual rate rather than a mandatory flat 25%. Other gain, NIIT and Illinois taxes require a complete calculation. A mortgage payoff reduces cash, not ordinarily the property's taxable gain.
+
+Have a CPA model deductions actually usable now, suspended losses, future sale tax, hold period and costs before ordering a study or converting an IRA. The passive loss guide , cost segregation discussion and worked recapture and sale example explain the distinctions.
+
+## What should Illinois industrial owners account for in retirement?
+
+Being retired does not exempt ordinary rental income or property sale gains from Illinois income tax. Illinois permits a subtraction for qualifying retirement income included in federal adjusted gross income, including eligible IRA and qualified plan distributions. That is a different category from directly collected rent or gain on a personally owned building. See Illinois Department of Revenue Publication 120 .
+
+Moving to another state does not automatically remove Illinois tax on Illinois source rental income or a property sale. Ask a CPA to review residence, sourcing, entity returns, credits and distributions. Coordinate a large gain, Roth conversion or increased withdrawals with federal taxes and any effects on Medicare income related premiums and Social Security taxation.
+
+For a Chicagoland industrial building, verify every PIN, current and projected property taxes, appeal status, Cook County incentive terms where applicable, insurance, roof and pavement condition, fire protection and lease expense allocation. Incentive expiration or a tenant departure can change retirement cash even with the same base rent. Use the Illinois property tax guide , insurance checklist and industrial diligence guide .
+
+## Who will own and manage the investment if you die or cannot act?
+
+Review account beneficiary designations, a will or trust, entity operating agreements, powers of attorney and property management authority together. They do not all control the same assets. A family member needs a practical file covering leases, loans, insurance, tax deadlines, vendors, cash reserves and who may sign or authorize payments.
+
+A building inherited outside a retirement account and an inherited IRA containing real estate have different tax rules. Do not assume a property inside an IRA receives the same basis treatment as a personally owned building at death. Trust ownership, joint ownership, estate inclusion and state estate taxes need individual legal and CPA review.
+
+Income tax basis and estate tax are separate questions. Qualifying inherited property generally receives fair market value basis at death, potentially a step down, while lifetime gifts generally carry donor basis for gain. Inherited entity ownership does not automatically reset the underlying building's basis; taxable traditional IRA distributions are income in respect of a decedent, not ordinary property receiving a tax free basis reset.
+
+The 2026 federal basic estate/gift exclusion is $15 million per individual under current law, with prior taxable gifts and other rules affecting the result. Illinois has a separate $4 million estate exclusion and no portability between spouses. Illinois currently has estate tax rather than a separate inheritance tax; a revocable living trust does not by itself eliminate estate tax. Use the estate and inheritance guide to prepare counsel questions, including valuations, state filings, basis and estate liquidity.
+
+Many beneficiaries of inherited retirement accounts face a ten year payout rule; eligible beneficiary exceptions and annual distribution obligations depend on the account, beneficiary and the owner's death and RMD status. Roth inheritance also has distribution requirements. An illiquid building or restricted private fund can make compliance difficult. Review Publication 590-B before assuming heirs can hold the investment indefinitely.
+
+Plan for disagreements among heirs, buyout funding, loan consent, account administration and a sale if no one wants to manage the property. A succession plan should work during incapacity as well as after death, without relying on informal access to your accounts.
+
+## A retirement planning checklist for CRE owners and investors
+
+Start before a forced sale, retirement date or account distribution deadline. Update the plan annually and after a lease renewal, refinancing, major project, family change or new tax law.
+
+- Map ownership. List each building, entity, retirement account, debt obligation, guarantee and beneficiary. Identify taxable versus account owned assets.
+- Estimate the household gap. Compare spending, taxes and health care with other income and accessible savings. Do not assume every dollar of rent is spendable.
+- Build the cash bridge. Reconcile leases, actual collections, operating expenses, debt and planned capital or leasing cash needs. Include paid management.
+- Run adverse cases. Test tenant failure, longer vacancy, tax and insurance increases, capital work and worse refinancing or resale. Identify the source of new cash.
+- Check plan eligibility. Verify compensation, contribution limits, employee coverage, transfers, rollover eligibility and provider investment permissions.
+- Review account transactions. Obtain specialist review of related parties, services, title, guarantees, account expenses, borrowing and any UBIT filings.
+- Calendar liquidity. Coordinate valuations, RMDs, loan maturities, capital calls, lease expirations and household withdrawals. Check redemption restrictions.
+- Compare exits. Obtain property pricing and a CPA estimate of proceeds after debt, costs and taxes. Plan any exchange before closing.
+- Document continuity. Confirm managers, signers, beneficiaries, estate documents and the family's preference to hold or sell.
+- Use the right advisers. A property broker evaluates the building and sale process; a CPA, retirement plan administrator, qualified financial adviser and estate or tax counsel handle their respective specialties.
+
+Bring advisers a rent roll, leases, three years of operating records, condition reports, basis and depreciation schedules, loan documents, account statements, plan documents, beneficiary forms and household cash needs. Share sensitive records through an appropriate private channel, not a public community post.
+
+## Retirement and commercial real estate questions
+
+### Is commercial real estate a good retirement investment?
+
+It can support retirement income, but it is not automatically suitable. Evaluate spendable cash after debt, capital and leasing costs, tenant concentration, liquidity, management burden and the rest of your household portfolio. No rent, distribution or resale outcome is guaranteed.
+
+### Can I buy a warehouse or commercial building with an IRA?
+
+An IRA can hold qualifying real estate if its custodian supports it and the transaction follows tax rules. The account owns the investment, income and expenses stay within the account, and personal use or transactions with disqualified persons can jeopardize its tax status. Review the purchase with an independent tax adviser before signing.
+
+### Can my business rent a building owned by my IRA?
+
+Do not assume so. A lease involving your business can be a prohibited transaction because of disqualified person, control or personal benefit rules. Charging market rent does not by itself cure the issue. Obtain specialist legal review before any related business lease or purchase.
+
+### Can rental income fund an IRA or Solo 401(k) contribution?
+
+Ordinary rental income generally is not qualifying compensation for an IRA contribution or earned income for a self employed plan contribution. Eligible wages or self employment earnings may support contributions, subject to plan, income and annual limits. Real estate professional tax status does not by itself turn rent into compensation.
+
+### Is real estate income in a Roth IRA always tax free?
+
+No. Qualified Roth distributions can be tax free, but unrelated business income or debt financed income may create tax at the account level. Prohibited transactions remain restricted. A Roth label does not eliminate property risk or every tax obligation.
+
+### How do I take required minimum distributions when my IRA owns real estate?
+
+Plan valuation and liquidity before the deadline. Rental cash or other eligible IRA assets may fund the distribution, or a properly valued property interest may be distributed in kind if the custodian supports it. IRA aggregation rules differ from 401(k) rules. Illiquidity does not waive an RMD.
+
+### Can I move proceeds from a 1031 exchange into an IRA?
+
+A 1031 exchange is not an IRA rollover. It generally exchanges qualifying business or investment real property for qualifying replacement real property. Cash contributed to an IRA remains subject to contribution eligibility and limits; taking exchange proceeds can create taxable gain.
+
+### Is a triple net industrial lease truly passive retirement income?
+
+Not completely. Lease language can allocate many expenses to a tenant, but an owner still faces tenant default, lease expiration, capital and environmental issues, administration and resale risk. Review landlord obligations and budget management rather than assuming no work or cost.
+
+### Does Illinois exempt rental income because I am retired?
+
+No. Being retired does not turn ordinary rent or a taxable property sale gain into eligible retirement plan income. Illinois allows a subtraction for qualifying retirement income included in federal adjusted gross income. A CPA should distinguish property income, account distributions and Illinois source income.
+
+### Should I sell my industrial building before retirement?
+
+Compare holding with professional management, a taxable sale and a qualifying exchange using after tax cash, lease rollover, capital work, loan maturity and family goals. Plan the business transition separately if your company occupies the building. There is no universally best retirement exit.
+
+### Is a lazy 1031 a special retirement tax exemption?
+
+No. It describes a potentially qualifying exchange into less actively managed property, not an IRS program. Eligible DSTs or professionally managed properties still involve exchange rules, restricted liquidity, fees and investment risk. There is no guaranteed income or automatic qualification.
+
+### Can depreciation offset my retirement withdrawals?
+
+Not automatically. Passive rental losses generally cannot offset pension, IRA or conversion income without an applicable exception or allowance. Material participation, real estate professional status, MAGI, basis and at risk limits require separate review.
+
+### Should I order a cost segregation study before retiring?
+
+Compare usable deductions, study cost, suspended losses, hold period, Illinois differences and potential recapture with a CPA. Shorter life classifications can accelerate eligible deductions but do not guarantee current savings or improve property cash flow.
+
+### Will all my building sale gain be taxed as ordinary income?
+
+Not necessarily. Section 1245 and Section 1250 ordinary recapture, unrecaptured Section 1250 gain and other qualifying gain have different rules. Straight line building depreciation does not automatically make every gain dollar ordinary income. Ask for an asset specific federal and Illinois calculation.
+
+### Can my estate owe Illinois tax even if it owes no federal estate tax?
+
+Yes. Illinois has a separate $4 million exclusion and no state portability, while the federal basic exclusion is $15 million per individual for 2026 under current law. Gifts, deductions, ownership and Illinois situs matter; the exclusions are not simple property equity deductions.
+
+### Do gifting and inheriting my building give heirs the same basis?
+
+No. Lifetime gifts generally carry donor basis for gain, while qualifying inherited property generally uses fair market value at death or an applicable alternate value. Retirement accounts and entity interests have different rules. Coordinate gift, estate and later income taxes before transferring ownership.
+
+## Primary sources and scope
+
+Prepared October 8, 2026 using the references below. Verify the latest publication, applicable tax year, plan documents and transaction facts before acting. Annual limits, tax rules and provider permissions can change. Examples are educational assumptions, not Chicago market statistics or individualized recommendations.
+
+- IRS Publication 590-A: IRA contributions, compensation, transfers and rollovers
+- IRS Publication 590-B: distributions, Roth rules and inherited IRAs
+- IRS: prohibited transactions and consequences
+- IRS: one participant 401(k) plans and Publication 560: retirement plans for small business
+- IRS: required minimum distributions
+- IRS Publication 598: unrelated business taxable income and debt financed property
+- IRS: real property like kind exchanges and Form 8824 instructions: exchange requirements and deadlines
+- Illinois Department of Revenue: Publication 120, retirement income
+- IRS Publication 925: passive activity and loss limits , Publication 946: depreciation and Publication 544: sales and recapture
+- IRS estate and gift updates and Illinois Attorney General estate tax forms and instructions
+- SEC Investor.gov: REITs and self directed IRA fraud risks
+
+> This guide does not select a retirement plan, recommend a security or provider, determine legal eligibility, or promise income or tax savings. Coordinate property decisions with independent tax, legal, retirement plan and financial professionals. Public content is separate from the private workspace.
+
+## Related owner guides
+
+- Federal and Illinois CRE taxes, lazy 1031, recapture and inheritance
+- Calculate property NOI before planning withdrawals
+- Budget expenses, reserves and capital work
+- Compare future cash flow and exit assumptions
+- Investment diligence and financing
+- Prepare an industrial property sale
+- More commercial property owner questions
+
+---
+
+Source: https://rospopa.com/resources/cre-tax-retirement/
+Published: 2026-10-08 · Updated: 2026-10-09
+
+Federal and Illinois owner education
+
+# Commercial real estate taxes for retiring owners
+
+A smaller management workload, a larger deduction and a lower lifetime tax bill are three different goals. This guide connects passive 1031 strategies, rental loss limits, cost segregation, depreciation recapture and inheritance planning to the decisions industrial property owners face in retirement.
+
+Reviewed October 8, 2026 . Covers major federal and Illinois rules, not every statute, regulation, local ordinance or exception. General education, not personalized tax, legal, securities or retirement advice.
+
+## Coordinate your building and retirement decisions
+
+Discuss industrial sale preparation with Pavlo Rospopa at Marcus & Millichap. Use your CPA, tax counsel, estate attorney and qualified financial adviser for eligibility, calculations and investment selection.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+
+## In brief
+
+- A lazy 1031 is an informal description of exchanging into less actively managed property, not an IRS program or a guarantee of income.
+- Passive rental losses generally cannot offset wages, pensions, IRA distributions or Roth conversion income without an applicable exception.
+- Ordinary nonresidential buildings generally use 39 year straight line depreciation. Cost segregation changes eligible component timing, not land or the entire building.
+- Depreciation reduces basis and can change tax on sale. Ordinary recapture, unrecaptured Section 1250 gain and other gain are different categories.
+- Federal and Illinois estate taxes are separate from income tax on an inheritance. Illinois's $4 million exclusion differs from the 2026 federal $15 million basic exclusion.
+- Owner lens: Model deductions you can actually use, cash you can actually withdraw and taxes your estate can actually pay. A paper loss or a deferred gain is not household liquidity.
+
+_Keep basis, depreciation, exchange, ownership and valuation records alongside the property file._
+
+## Which federal and Illinois tax rules surround commercial real estate?
+
+Start with the taxpayer: an individual, partnership, S corporation, C corporation, trust, estate or retirement account does not have the same tax treatment. An LLC is a legal structure, not a universal federal tax classification. Also distinguish the asset's cash flow, your income tax return and estate exposure.
+
+**Rule map for adviser review, not an exhaustive legal inventory**
+
+- Decision: Federal starting points: Illinois or local overlay
+- Buying and improving: Basis and capitalization; Sections 1012, 263(a), 167, 168 and 179; repairs versus improvements: State depreciation modifications; real estate transfer taxes and transaction allocations
+- Operating and borrowing: Rent, expenses and interest; Sections 162, 163, 212 and 163(j); reporting method and activity classification: Income and replacement taxes, sourcing, property taxes and lease recoveries
+- Using deductions: Owner basis, at risk Section 465, passive loss Section 469, excess business loss Section 461(l), QBI Section 199A: Federal starting income with state additions, subtractions and entity rules
+- Selling or exchanging: Gain and basis; Sections 1001, 1031, 1231, 1245, 1250; installment Section 453; NIIT Section 1411: Illinois source gain, state depreciation differences and state, county and municipal transfer taxes
+- Gifting or inheriting: Estate, gift and generation skipping transfer taxes; Sections 1014, 1015, 2010; income in respect of a decedent: Illinois Estate and Generation-Skipping Transfer Tax Act, Form 700, situs and separate exclusion
+- Account investing: IRA/plan contributions, distributions and RMDs; Sections 408, 401(a)(9), 4975, 511 to 514: Qualifying retirement income subtraction, not a blanket exemption for property income
+
+Rental expenses may include properly classified interest, taxes, insurance, management and repairs. Loan principal and cash deposited into reserves are not automatically deductible expenses. Betterments, restorations and adaptations generally require capitalization; use the tangible property regulations and the budget and capital guide . A federal personal SALT deduction limit is not automatically the rule for taxes allocable to a rental business.
+
+Section 163(j) can limit business interest deductions. Small business exceptions depend on applicable gross receipts and tax shelter rules, not merely a small building. An electing real property trade or business can be excepted from the interest limitation but must use ADS for specified property, affecting depreciation and bonus eligibility. Review the election's consequences before making it.
+
+Section 199A may allow eligible noncorporate taxpayers a QBI deduction of up to 20%, subject to limits; it continues after 2025 under Public Law 119-21. Capital gains, wages and pension income are not QBI. Rental business qualification differs from passive activity classification. The rental safe harbor has books, records, service hour and statement requirements. Triple net leases are excluded from that safe harbor, but may qualify outside it as a Section 162 trade or business. Do not confuse its generally 250 rental service hours with the real estate professional tests.
+
+Other situations require a separate specialist: foreign owners and FIRPTA withholding, Opportunity Zone investments, development inventory, cancellation of debt, distressed loans, conservation or charitable gifts, energy incentives, partnership basis elections and multiple state returns. This guide identifies those issues rather than promising coverage of every applicable law. See Publication 544 , Section 163(j) guidance and IRS QBI guidance .
+
+## What is a lazy 1031 strategy, and is it appropriate for retirement?
+
+Lazy 1031 is informal marketing language for a qualifying exchange into property with less day to day management. It is not an IRS exemption, a special retirement plan or a promise that an investment is passive for every tax rule. A retiree might compare an eligible Delaware statutory trust (DST) interest, a properly structured tenancy in common interest or a directly owned property under professional management, including a net leased building.
+
+The aim is often to defer eligible sale gain while reducing landlord work. The tradeoff can be less control, fees, concentrated credit exposure, restricted resale and dependence on a sponsor. A taxable sale followed by a diversified liquid portfolio is another option. Compare after tax available cash, household needs and risk rather than choosing solely to avoid paying a current tax bill.
+
+### DST eligibility is specific, not automatic
+
+Revenue Ruling 2004-86 describes conditions under which a DST interest can be treated as a direct interest in real estate for Section 1031. Not every trust satisfies them. Qualifying structures can restrict trustee powers over new capital, debt, leases and reinvestment; those constraints can limit responses to a tenant failure or major repair. Verify the actual offering and tax opinion with independent counsel.
+
+DST offerings are commonly securities, with eligibility and distribution requirements separate from tax eligibility. Review offering documents, debt allocations, sponsor compensation, conflicts, cash reserves, fees, property condition, lease credit, distribution sources, exit plans and transfer restrictions. A projected distribution rate is not a guaranteed yield; return of capital and borrowed cash are not the same as earned profit.
+
+### Plan the exchange before closing
+
+- Ask the CPA to calculate basis, projected gain, depreciation categories, suspended losses and state consequences for selling, exchanging and retaining the property.
+- Engage a qualified intermediary before relinquished property closes. Avoid actual or constructive receipt of proceeds and confirm the same taxpayer and ownership structure requirements.
+- Identify qualifying replacement property in writing within 45 days of transfer. Observe the three property rule, 200% aggregate value rule or, where applicable, the restrictive 95% receipt exception.
+- Receive replacement property by the earlier of 180 days after transfer or the return due date, including extensions. A return extension may be needed; do not assume 180 days is always available.
+- Have advisers test replacement value, equity, liabilities, closing costs and any cash or other property received. Do not describe replacing a mortgage as a requirement to take the identical new loan.
+- Keep the exchange documents, deferred gain and replacement basis/depreciation schedule, and report the transaction on Form 8824.
+
+Cash or other nonqualifying property received, and certain net liability relief, can create taxable boot. Added cash can affect the liability calculation. Qualifying real property generally must be held for business or investment, not primarily for sale or personal use. Related party, partnership and subsequent transfer plans need special review. See Form 8824 instructions .
+
+### A replacement purchase does not erase deferred gain
+
+Replacement basis generally carries the deferred gain forward; depreciation rules distinguish exchanged basis from excess new investment. Do not assume a new purchase price means a completely new full depreciation basis. A later taxable sale may expose preserved gain and depreciation related tax. A 1031 exchange also generally does not release all suspended passive losses as a fully taxable disposition would.
+
+Ordinary REIT shares and partnership interests are not qualifying replacement real property. A Section 721 contribution to an UPREIT operating partnership is a different transaction, with debt, disguised sale and other partnership rules; later conversion to REIT shares can change liquidity and tax consequences. A marketed 1031 to 721 sequence is not an interchangeable exchange into publicly traded shares. Obtain advice on each step, not a blanket tax free claim.
+
+Cost segregated assets may not all qualify as real property for Section 1031. Exchange eligibility and depreciation recapture classification are separate analyses; do not assume an exchange defers every component's ordinary recapture. Nor is an exchange an IRA rollover. Use retirement exit planning and Publication 541 when entity interests are involved.
+
+## Can passive real estate losses offset active income in retirement?
+
+Rental real estate is generally passive under Section 469 even if the owner is involved. Passive losses ordinarily offset passive activity income, not wages, pensions, IRA withdrawals, Roth conversions, interest or dividends. Portfolio income is not passive activity income. Selling a property can involve special character and loss release rules, so do not assume any capital gain from any source is a passive loss offset.
+
+Cash received is not the tax classification. A passive rental can have positive cash flow and a paper loss from depreciation. A retiree can have no job yet still hold a passive rental. Active participation, material participation, real estate professional status, QBI eligibility and compensation for a retirement contribution are distinct tests.
+
+### Active participation and the limited rental loss allowance
+
+A qualifying owner who actively participates in rental decisions and generally has at least a 10% interest may use a special allowance of up to $25,000 against nonpassive income. For most taxpayers other than married filing separately, it generally phases out between $100,000 and $150,000 of specially defined MAGI. Married filing separately rules differ and can eliminate the allowance when spouses lived together. Pension income, distributions and a conversion can affect MAGI; do not infer eligibility from age or lack of wages.
+
+### Real estate professional status plus material participation
+
+To qualify, one spouse on a joint return must generally perform more than 750 hours of services in qualifying real property trades or businesses in which that spouse materially participates, and those services must exceed half of that spouse's personal services in all trades or businesses that year. Rental activities must also meet material participation, generally individually unless a valid election groups rental real estate interests.
+
+Spousal participation can count toward material participation, but spouses cannot simply combine their hours to meet one spouse's professional status thresholds. Employee hours have additional ownership conditions. Investment monitoring alone is not a substitute for qualifying services. Document activity and time; becoming retired, licensed or an LLC manager does not automatically qualify.
+
+### Other limits and the self rental trap
+
+Where applicable, owner basis limitations and at risk rules precede passive loss limits; an excess business loss limit can also defer a deduction. A nonpassive rental loss is not automatically deductible in full. Suspended amounts must be tracked by the correct limitation and activity.
+
+When you rent property to a business in which you materially participate, self rental rules generally recharacterize net rental income as nonpassive. They do not automatically turn a rental loss into a nonpassive loss. Retaining your building after selling your business can change the facts, especially if you remain employed or involved. Review grouping, leases and ownership before relying on offsets.
+
+Suspended passive losses generally become available on a fully taxable disposition of the entire activity interest to an unrelated person, with grouping and installment rules affecting the result. A 1031 exchange ordinarily is not that full taxable exit. At death, losses generally are deductible only to the extent they exceed the relevant inherited basis increase; they do not simply transfer to heirs. See IRS Publication 925 .
+
+### Illustrative loss offset, not tax savings promised
+
+Assume $50,000 of pension/IRA income, $20,000 of passive rental income from one activity and a $30,000 depreciation driven passive loss from another, with sufficient basis and at risk amounts and no other adjustments. The loss may offset the $20,000 passive income, leaving $10,000 subject to carryforward unless an allowance or other exception permits use. It does not automatically eliminate $30,000 of pension/IRA income. If the income were portfolio dividends instead, the ordinary passive offset would not apply.
+
+## How does straight line depreciation work for an industrial building?
+
+Ordinary nonresidential real property under the general depreciation system generally uses a 39 year recovery period, straight line method and mid month convention. Land is not depreciable. Residential rental, qualifying improvements, short life assets, ADS and specialized property can follow different rules. Depreciation begins when the asset is ready and available for its intended use, not simply when you sign a purchase contract.
+
+Allocate acquisition cost and applicable capitalized transaction costs between land, the building and supported components. Capital improvements increase basis; depreciation allowed or allowable generally reduces adjusted basis even if you neglected to claim it. A title transfer to your revocable trust or disregarded LLC does not normally reset basis or restart depreciation.
+
+Illustrative arithmetic: a $1,950,000 eligible building basis, excluding land and separately classified components, produces $50,000 in a full ordinary year under 39 year straight line treatment. First and last years require the mid month convention, so $50,000 is not a universal acquisition year deduction. This is not an appraisal allocation or a tax election recommendation.
+
+After the recovery period, rent remains potentially taxable even if the original building has no remaining depreciation. New eligible improvements have their own schedules. Principal repayment, a reserve transfer and depreciation are different from each other and from operating cash. Use Publication 946 and Publication 551 .
+
+## Can cost segregation and bonus depreciation improve a retiree's tax position?
+
+A supported cost segregation study separates assets that properly have shorter recovery periods from the building's long life structure. Depending on facts, examples include certain 5 year equipment, 7 year furnishings and 15 year land improvements. It does not depreciate land, change the total supported purchase basis or make every industrial feature short life property.
+
+Review engineering support, invoices, plans, allocations, component definitions and reconciliation to the existing tax schedule. A study on an older acquisition may require an accounting method change and Form 3115 with a Section 481(a) adjustment rather than simply deducting everything on the current return. A study performed in 2026 does not change an asset's original acquisition or placed in service date.
+
+### Current bonus rules are not the old phase down
+
+Public Law 119-21 restored 100% additional first year depreciation for qualifying property acquired and placed in service after January 19, 2025, subject to statutory and acquisition rules. Binding contracts, self construction, related parties, prior use and elections can matter. Do not use an old percentage schedule or promise a complete write off of a purchased warehouse.
+
+Eligible short life property and qualifying improvement property may qualify; an ordinary 39 year building and land generally do not qualify under Section 168(k). Qualified improvement property generally covers qualifying interior improvements made by the taxpayer after a nonresidential building was first placed in service, excluding enlargement, elevators/escalators and the internal structural framework. Its classification and eligibility must be verified.
+
+Section 168(n) separately addresses certain qualified production property under the 2025 law. It has manufacturing/production use, construction/acquisition, timing, election and recapture requirements and is not a blanket deduction for rental warehouses, office space or every industrial acquisition. An ordinary landlord should not assume a tenant's manufacturing use gives the landlord the deduction. Seek specialized review if it is relevant; Notice 2026-16 includes specific related ownership exceptions and requirements.
+
+See IRS Notice 2026-11 guidance and Publication 946 . Tax law can change; apply the law for the actual asset and tax year.
+
+### Section 179 is a different election
+
+Section 179 may apply to eligible purchased business assets and elected qualifying real property improvements, including eligible QIP and specified roofs, HVAC, fire protection/alarm and security systems. It has annual limits, investment phaseouts, taxable business income limits, business use conditions and special lessor restrictions. It is not automatic expensing of land or an entire building and is not identical to bonus depreciation.
+
+### Timing benefits can fail to become current savings
+
+Compare the cost of a study, deductions usable now, suspended losses, expected hold, recapture, federal and Illinois differences and future tax brackets. A passive retiree with no passive income and no usable exception may only increase suspended losses. A planned near term sale can shorten the timing benefit. Illinois bonus modifications can delay state deductions. Cost segregation does not increase NOI or pay for a roof.
+
+A lower income retirement year is not automatically the best year for a large deduction. A CPA should compare claiming, electing out where permitted, improving assets and selling, with effects on losses, QBI, NIIT and benefits. Consult the IRS Cost Segregation audit guide directory , not a vendor's fixed savings percentage.
+
+## What taxes arise on a sale, and what does depreciation recapture mean?
+
+Start with amount realized after applicable selling costs and adjusted basis, not just cash after mortgage payoff. Allocate sale proceeds to land, building and separately classified assets on a supportable basis. Debt payoff changes net cash; it does not ordinarily reduce the property's gain calculation.
+
+**Different gain buckets can have different tax treatment**
+
+- Category: Typical issue for an individual: Important limitation
+- Section 1245 recapture: Gain attributable to depreciation on qualifying assets generally taxed as ordinary income: Asset classification, allocation, gain and statutory recapture limits matter
+- Section 1250 ordinary recapture: Generally concerns additional depreciation above straight line on relevant real property: Not synonymous with every dollar of building depreciation
+- Unrecaptured Section 1250 gain: Relevant real property gain attributable to depreciation can face a maximum 25% individual rate: Not a mandatory flat 25%; netting and the full return control
+- Other qualifying long term gain: May use 0%, 15% or 20% individual capital gain rates: Section 1231 netting and five year loss lookback can change character
+- NIIT and state tax: 3.8% NIIT may apply; Illinois income tax may also apply: Activity, MAGI, ownership and state adjustments differ from capital gain rate calculations
+
+Ordinary 39 year straight line building depreciation often creates unrecaptured Section 1250 gain rather than ordinary Section 1250 recapture for an individual. Accelerated components, QIP, older assets and corporate owners require separate analysis. Section 291 can impose additional ordinary recapture for corporations. There is no one universal recapture rate for all CRE.
+
+### Worked sale example: gain is not equity cash
+
+Assume an individual bought property for $2,000,000, allocated $500,000 to land and $1,500,000 to an ordinary building, claimed $300,000 of straight line building depreciation, made no further basis changes and sells for $2,600,000 with $100,000 of eligible selling costs. Adjusted basis is $1,700,000; net amount realized is $2,500,000; realized gain is $800,000 .
+
+If mortgage payoff is $900,000, available sale cash before income tax is $1,600,000. The $900,000 payoff does not reduce the $800,000 gain. For this simplified illustration, assuming sufficient building gain, no ordinary recapture and no relevant netting or lookback adjustments, up to $300,000 may be unrecaptured Section 1250 gain and $500,000 other qualifying gain. Actual asset allocation and the return control; this is not an $800,000 gain at one rate.
+
+NIIT, Illinois taxes, suspended loss use and household income still need calculation. An installment sale generally does not defer depreciation recapture even if cash arrives later, and seller financing adds buyer credit and liquidity risk. A qualifying exchange can defer eligible gain, but a partial exchange may recognize some. Use Publication 544 , Form 4797 instructions and capital gain rate guidance .
+
+## How do Illinois income and property taxes differ from federal taxes?
+
+Illinois individual income tax is generally 4.95% of net income under current law, without a preferential state rate just because gain is long term. Corporations and certain pass through entities or trusts have different income and replacement tax rules. Partnerships, S corporations and trusts generally face 1.5% replacement tax; non-S corporations generally face 7% income tax plus 2.5% replacement tax, subject to applicable rules and exemptions. Entity elections and classifications need review; not every LLC has the same tax.
+
+Illinois residents and nonresidents have different sourcing and credit questions. Illinois real property can generate Illinois source rent and gain after an owner moves elsewhere. A qualifying federal exchange generally defers federal gain entering the state starting point, but Illinois modifications and historical basis differences must be tracked. See Illinois income and replacement tax rates and Schedule NR guidance .
+
+### Federal bonus is not automatically the Illinois deduction
+
+Illinois uses addition and subtraction modifications for federal bonus depreciation, calculated on IL-4562 and carried to the appropriate return or Schedule M. Keep separate federal and Illinois schedules through ownership, sale and exchange. Current IL-4562 instructions also address Section 168(n) for tax years beginning January 1, 2026. Do not multiply a federal first year deduction by 4.95% and call that immediate state savings.
+
+Review the current IL-4562 instructions for the relevant year and asset. Reversals and disposition adjustments can matter years after a study or purchase.
+
+### Property, transfer and retirement income taxes are separate
+
+Illinois property taxes come from assessment, equalization, levies and local extension/collection, not your federal depreciation schedule. A cost segregation study or low taxable rental profit does not automatically reduce the property tax bill. Cook County incentive classifications, renewal/compliance and appeal deadlines need parcel specific review. Use the Illinois industrial property tax guide .
+
+Real estate transfer taxes can apply at state, county and municipal levels, including Chicago's own requirements. Confirm situs, exemptions, transfer declarations, entity interest transfers where covered and who pays under law and contract. A federal 1031 exchange is not a blanket transfer tax exemption. Sales/use, lease, withholding or business taxes may also apply to other assets and activities in a mixed transaction.
+
+Eligible federally taxed retirement plan/IRA distributions and certain other retirement income may qualify for the Illinois subtraction in Publication 120 . Ordinary rent and directly realized property gain do not become qualifying retirement distributions because you are retired.
+
+## Is there inheritance tax, estate tax or both on a retiree's real estate?
+
+For ordinary domestic estates, federal law imposes an estate tax rather than a general inheritance tax on recipients; Illinois currently imposes estate tax, not a separate inheritance tax. Estate tax concerns transfers at death; income tax can still arise from inherited IRA withdrawals, later rent or a later sale. Other states, noncitizen/nonresident estates, covered expatriate transfers and treaty rules may differ.
+
+### Federal estate and gift rules in 2026
+
+Public Law 119-21 increased the federal basic exclusion to $15 million per individual for 2026 , with later inflation adjustments under current law. It is part of the estate and gift system, not a separate $15 million allowance for each building. Prior taxable gifts can consume exclusion; gross estate, adjusted gifts, debts, deductions, ownership and valuation affect filing and tax. Do not use obsolete claims of an automatic 2026 cut to the exclusion.
+
+A surviving spouse may use a deceased spouse's unused federal exclusion through a proper portability election, generally on Form 706. It is not automatic doubling, does not transfer to children and does not provide portability of the GST exemption. Marital deductions, citizenship conditions, trusts and prior gifts require counsel. Federal estate returns are generally due nine months after death, with extensions and portability relief requiring their own review.
+
+See IRS estate and gift updates and Form 706 instructions . A state filing or a portability election can matter even if no federal estate tax is owed.
+
+### Illinois's separate $4 million exclusion and no portability
+
+Illinois has a separate $4 million estate tax exclusion under current law and does not allow spouses to port an unused Illinois exclusion. A married couple does not automatically get an $8 million Illinois exclusion for the survivor. An estate below the federal exclusion may still require an Illinois return and owe Illinois estate tax.
+
+The Illinois exclusion is a threshold in an interrelated computation, not simply $4 million subtracted before applying a flat rate. Use the Attorney General's instructions and calculator. Gross estate, adjusted taxable gifts, deductions, Illinois situs and apportionment matter. Do not assume only the Illinois building's value determines whether a nonresident estate is exposed.
+
+Illinois Form 700 and estate tax information are administered by the Attorney General. Illinois situs real property can create exposure even for a decedent living elsewhere. Returns and payment are generally due nine months after death; a filing extension does not automatically extend payment. Confirm current requirements with counsel and the instruction fact sheet .
+
+### Estate value can exceed available cash
+
+Include the value of property/entity interests, accounts, other assets and life insurance where includible, not just checking accounts. Allowed debts may reduce the taxable estate but do not eliminate loan payments or filing analysis. Avoid counting a building and the full value of the entity holding it twice. Appraisals and supported entity valuations matter; discounts are not automatic.
+
+Plan cash for taxes, loan covenants, administration and property carrying costs while heirs decide whether to hold or sell. Trusts can address succession and marital/state planning, but a revocable living trust does not by itself erase estate tax. Counsel should evaluate federal/state marital elections, including QTIP where appropriate, rather than relying on a generic bypass trust or gifting rule.
+
+## What happens to basis, depreciation and suspended losses at death?
+
+Property acquired from a decedent generally receives a basis equal to fair market value at death, or a permitted alternate valuation, subject to statutory exceptions. This can be a step up or a step down. Qualified basis adjustment is not dependent solely on whether estate tax is actually paid. Obtain a defensible valuation and establish which property or interest qualifies.
+
+For directly inherited depreciable commercial real property, allocate the new supported basis to land and depreciable assets and apply the heir's depreciation rules and placed in service timing. Do not continue the decedent's schedule blindly. An inherited partnership or corporation interest does not automatically reset the underlying building's basis; partnership Section 754/743 adjustments and entity rules can be critical.
+
+### Inherited building example, not an estate tax calculation
+
+Assume a directly owned building and land with $1,700,000 adjusted basis qualifies for an inherited basis adjustment to a $2,800,000 date of death value. If the heir later sells for $2,900,000 with $100,000 selling costs, no intervening depreciation or improvements, and no other adjustment, net amount realized and inherited basis are both $2,800,000, so illustrative gain is zero. Estate tax could still have been due, and depreciation claimed after inheritance changes later basis.
+
+This is not proof that every 1031 chain or trust eliminates all tax. Qualifying real property still held at death may receive a basis adjustment under Section 1014, but account holdings, entity structure, prior transfers and estate inclusion must be reviewed. A taxable sale during life creates realized gain; retaining its cash until death does not undo that sale tax.
+
+### Gifting and inherited retirement accounts are different
+
+A lifetime gift generally carries donor basis for gain, with special loss basis and other adjustments; it does not automatically get the recipient a market value basis. Debt transfers can cause part sale treatment or other tax. A gift can require Form 709 and use exclusion without immediate gift tax due. The annual gift exclusion is not a per building reset and is not the same as the lifetime exclusion.
+
+Income in respect of a decedent, including the taxable portion of an inherited traditional IRA, does not receive the ordinary Section 1014 basis adjustment. An IRA containing real estate does not become tax free because the account owner died. Beneficiary distribution rules, account basis and a possible deduction for estate tax attributable to IRD need separate review.
+
+Suspended passive losses at death are generally allowed only to the extent they exceed the relevant increase in basis and do not simply pass intact to heirs. Other suspended losses, gifts and entity losses follow their own rules. Preserve separate loss schedules and ask the CPA to reconcile them to the final return. See Publication 551 , Publication 559 and Publication 925 .
+
+## How do property taxes interact with retirement withdrawals and benefits?
+
+Taxable property income and retirement account income are not interchangeable. IRA/plan property cannot provide you personal depreciation deductions. Prohibited transaction and unrelated business income rules can apply even to a Roth account. See the retirement account and CRE guide for account ownership, contribution eligibility and RMD liquidity.
+
+### Net investment income tax is separate from depreciation recapture
+
+NIIT is generally 3.8% of the lesser of net investment income or MAGI over $200,000 for single/head of household, $250,000 for married filing jointly/qualifying surviving spouse or $125,000 for married filing separately. Rental income and investment gains commonly count. Qualifying nonpassive business income may be excluded, but real estate professional status alone is not a blanket exemption.
+
+Retirement distributions generally are not themselves net investment income, yet can raise MAGI and increase NIIT on other investment income. The same distinction matters for a Roth conversion. Use IRS NIIT guidance and Form 8960 instructions .
+
+### Medicare IRMAA and Social Security tax
+
+A sale gain, conversion or larger taxable withdrawal can affect Medicare Part B and prescription coverage premiums separately from income tax. SSA generally uses tax information from two years earlier; IRMAA MAGI includes AGI plus tax exempt interest. A qualifying life changing event and income reduction can support reconsideration, but a property sale alone does not automatically qualify. Check SSA's IRMAA rules .
+
+Property income can also affect the federal combined income calculation for Social Security taxation. Up to 85% of benefits can be included in taxable income, not taxed at an 85% rate. Taxability differs from the earnings test for benefits before full retirement age; ordinary rent is not automatically wages, but activity and service exceptions matter. Refer to Publication 915 and SSA before treating every benefit effect as the same tax.
+
+Required minimum distributions and inherited account payout deadlines still apply to illiquid real estate holdings. Most noneligible designated beneficiaries face a ten year payout rule, with annual distributions required in some cases. Qualified Roth inheritance rules differ from traditional accounts but do not permit indefinite holding. A 1031 exchange does not satisfy an RMD.
+
+## What should a retiring owner bring to tax and estate advisers?
+
+- Ownership and family map: deeds, entities, operating agreements, trust documents, beneficiaries, citizenship/residence and authority to act.
+- Tax basis file: closing statements, land/building allocations, capital improvements, depreciation, cost segregation and federal versus Illinois schedules.
+- Loss and participation records: passive carryovers, basis/at risk limits, prior Section 1231 losses, elections and documented hours.
+- Exchange and debt records: deferred gains, Form 8824 history, intermediary proposals, loan balances, recourse, prepayment and entity consents.
+- Property cash needs: rent roll, leases, expense recoveries, management proposal, capital plan, vacancy case and sale estimates.
+- Household tax and benefits: filing status, projected pension/IRA income, conversions, RMDs, Medicare and Social Security information.
+- Estate liquidity: valuations, prior taxable gifts, federal portability filings, Illinois exposure and cash available for taxes and administration.
+
+Ask for side by side projections of holding, a taxable sale, an exchange, a study and lifetime versus inheritance transfers. Include deductions actually usable, the new investment's basis, management/control tradeoffs, fees, family goals and adverse cash cases. Tax deferral is only one part of a retirement decision. Nothing here recommends a DST, exchange, trust or security.
+
+## Questions retirees holding real estate ask
+
+### What is a lazy 1031 exchange?
+
+It is an informal description of exchanging qualifying property into a less actively managed investment, such as an eligible DST or professionally managed net leased property. It is not an IRS program, guaranteed income or a waiver of normal 1031 requirements.
+
+### Can a DST replace my industrial building when I retire?
+
+Some DST interests can qualify as replacement real property under specific tax conditions. Review the actual structure, offering documents, debt, fees, sponsor, property risks and transfer restrictions with independent advisers. Less management does not mean low risk or easy access to cash.
+
+### Can I do a 1031 exchange directly into REIT shares?
+
+Ordinary REIT shares are not qualifying replacement real property. A Section 721 contribution to an UPREIT partnership is a separate transaction, not an interchangeable 1031 exchange. A proposed multistep sequence needs its own legal and tax analysis.
+
+### Can I keep some sale cash for living expenses and exchange the rest?
+
+A partial exchange may be possible, but cash or other nonqualifying property received can create taxable boot and reduce deferral. Debt and expense allocations also matter. Ask a CPA and intermediary to calculate tax and available cash before closing.
+
+### Do I always get 180 days to complete an exchange?
+
+No. Replacement receipt is generally due by the earlier of 180 days or the tax return due date, including extensions. Identification is generally due within 45 days. Arrange the intermediary and any needed return extension before deadlines.
+
+### Does my 1031 replacement get a full new depreciation basis?
+
+Not automatically. Deferred gain generally carries into replacement basis, with separate exchanged basis and excess investment depreciation rules. A new price does not erase old deferred gain or guarantee a deduction for the full price.
+
+### Can rental losses offset my pension or IRA withdrawals?
+
+Generally not if the losses are passive, unless an applicable allowance or exception permits use. Pension and IRA income are not passive activity income. Real estate professional status plus material participation or a qualifying rental allowance require separate tests.
+
+### Can cost segregation wipe out the tax on a Roth conversion?
+
+Not automatically. Passive depreciation losses generally cannot offset conversion income, and the conversion can increase MAGI and reduce a rental loss allowance. Basis, at risk and other limits may also block a deduction. Model usable losses, not merely a study's deduction total.
+
+### Are dividends passive income that rental losses can offset?
+
+Portfolio dividends and interest generally are not passive activity income under Section 469. The everyday meaning of passive income differs from the tax category. Do not assume income requiring little work is available for rental loss offsets.
+
+### Does retirement make me a real estate professional?
+
+No. You must meet the annual qualifying service tests, generally more than 750 hours and more than half your personal services, and separately materially participate in the rentals as required. Being retired, licensed or an LLC owner is not enough.
+
+### Can a retiree use the $25,000 rental loss allowance?
+
+Possibly, with qualifying active participation, ownership and MAGI. For most taxpayers other than married filing separately, it generally phases out between $100,000 and $150,000 of specially defined MAGI. Retirement status does not establish eligibility.
+
+### Can rent from my own business absorb my other passive rental losses?
+
+Not necessarily. Self rental rules generally treat net rent from a business in which you materially participate as nonpassive, without automatically making rental losses nonpassive. Ownership, participation and grouping require review before using offsets.
+
+### What happens to suspended rental losses when I sell?
+
+A fully taxable disposition of the entire activity interest to an unrelated person generally releases passive losses, subject to applicable rules. A 1031 exchange is generally not that fully taxable disposition; grouping, recognized income and installment timing can change the result.
+
+### How many years do I depreciate a commercial building?
+
+Ordinary nonresidential real property under GDS generally uses 39 year straight line depreciation and the mid month convention. Land is excluded; ADS, eligible components, qualified improvements and special property can follow different rules.
+
+### Can I avoid later tax by never claiming depreciation?
+
+Generally no. Adjusted basis is reduced by depreciation allowed or allowable, so skipping deductions can still leave lower basis on sale. Have a CPA review correction procedures and records rather than deliberately omitting depreciation.
+
+### Is cost segregation worthwhile near retirement?
+
+Compare usable deductions now, study cost, carryforwards, hold period, state differences and later recapture. A passive owner may only create suspended losses, and a near term sale can shorten the timing benefit. It is not universally beneficial.
+
+### Can I write off my whole warehouse with 100% bonus depreciation?
+
+No, not as an ordinary warehouse purchase under Section 168(k). Eligible shorter life components and improvements may qualify under current rules, but land and the ordinary 39 year building generally do not. Specialized production property rules need separate review.
+
+### Does a new cost segregation study make an old building eligible for new bonus rules?
+
+No. The study date does not reset acquisition or placed in service dates. Eligible classifications, historical law and any accounting method change must be reviewed for the original assets.
+
+### Is all depreciation recapture taxed at 25%?
+
+No. Section 1245 ordinary recapture, Section 1250 ordinary recapture and unrecaptured Section 1250 gain are distinct. The latter has a maximum 25% individual rate, not a mandatory flat rate. Asset classifications, gain, netting and owner type matter.
+
+### Does paying off my mortgage reduce taxable sale gain?
+
+Ordinary loan payoff reduces sale cash but is not generally a deduction from property gain. Gain depends on amount realized, applicable sale costs and adjusted basis. Loan principal and tax basis are different.
+
+### Can seller financing defer depreciation recapture?
+
+Depreciation recapture generally is recognized in the sale year even when an installment method applies to other eligible gain. Seller financing also creates buyer credit, interest and liquidity issues. Review the full transaction before promising tax deferral.
+
+### Does Illinois allow the same immediate federal bonus deduction?
+
+Not automatically. Illinois uses addition and subtraction modifications on IL-4562 and related returns. Keep separate state and federal depreciation schedules and review current asset, year and disposition rules.
+
+### Does being retired exempt my Illinois rent or property sale gain?
+
+No. Eligible retirement account distributions can qualify for an Illinois subtraction, but ordinary property rent and directly realized gain do not become retirement plan income just because you are retired.
+
+### If I move away, do Illinois taxes on my building disappear?
+
+No. Illinois source rents, gains and Illinois situs estate property can remain relevant for nonresidents. Review sourcing, residency, credits, entity treatment and estate apportionment with advisers in the affected states.
+
+### Can a building sale raise my Medicare premiums?
+
+Yes. Taxable income can affect IRMAA, generally using a return from two years earlier. This is separate from sale income tax. A qualifying life changing event may support reconsideration, but a sale alone does not automatically qualify.
+
+### Can IRA withdrawals raise net investment income tax on rent?
+
+They can raise MAGI even though retirement distributions generally are not themselves net investment income. That can increase the amount of rental or investment income subject to the 3.8% NIIT, subject to activity and threshold rules.
+
+### Does Illinois have an inheritance tax on my children's building?
+
+Illinois currently has estate tax rather than a separate inheritance tax. The estate may owe tax before distributions, and heirs can owe income tax on later rent, a sale or taxable inherited account withdrawals. Other states can have different rules.
+
+### What are the federal and Illinois estate exclusions in 2026?
+
+The federal basic exclusion is $15 million per individual for 2026 under current law; prior taxable gifts and other rules affect available exclusion. Illinois has a separate $4 million exclusion and no state portability. Estate tax is not calculated simply from the building's equity.
+
+### Does a married couple automatically get twice the Illinois estate exclusion?
+
+No. Illinois does not allow portability of an unused spouse's exclusion. Federal portability is a separate election generally made on Form 706. Estate planning, marital deductions and trust elections require individual legal review.
+
+### Will my children get a new tax basis for inherited property?
+
+Qualifying inherited property generally gets fair market value basis at death or an applicable alternate value, which can be a step up or down. Direct property, entity interests, trusts and retirement accounts have different rules; a new basis is not guaranteed for every underlying asset.
+
+### Should I gift my building now to avoid inheritance taxes?
+
+There is no universal answer. A lifetime gift generally carries donor basis for gain and can use gift exclusion or require a return; debt and control changes add issues. Compare estate exposure, income tax basis, family goals and liquidity with counsel before transferring title.
+
+### Does an inherited IRA building get the same step up as personally held property?
+
+No ordinary inherited property basis adjustment applies to the taxable portion of a traditional IRA distribution as income in respect of a decedent. Account holdings, basis and beneficiary distribution rules must be analyzed separately.
+
+### Do unused passive rental losses pass to my heirs?
+
+Not automatically. At death, suspended passive losses generally are deductible only to the extent they exceed the relevant inherited basis increase. They do not simply become the heir's carryforward. The final return and other loss limitations require review.
+
+### Does putting the building into a living trust remove estate tax?
+
+A revocable living trust generally does not remove the property from the owner's taxable estate or reset basis during life. It can help administration and succession. Tax results depend on the trust, ownership, powers and applicable estate rules.
+
+### Is exchange and hold until death always the best retirement strategy?
+
+No. Qualifying basis treatment at death is only one factor. Liquidity, tenant and sponsor risk, management, fees, estate tax, family preferences and future law can outweigh deferral. Compare a taxable sale and other choices rather than treating inheritance as guaranteed tax elimination.
+
+## Official sources and limitations
+
+Reviewed October 8, 2026. Follow the current law and instructions for the actual year, asset, taxpayer and state. Public Law 119-21 changed bonus depreciation, QBI and federal estate rules; older guides may show obsolete sunsets. Official publications explain many rules but do not replace statutes, regulations, case law or professional advice.
+
+- IRS Publication 925: passive activities, at risk and dispositions
+- IRS Publication 946: depreciation, bonus, QIP and Section 179 and Publication 551: basis
+- IRS: restored bonus depreciation and Notice 2026-11
+- IRS: tangible property regulations and Cost Segregation audit guide directory
+- IRS Publication 544: sales, exchanges and recapture , Form 4797 and Form 8824 instructions
+- Revenue Ruling 2004-86: specific DST exchange treatment and Publication 541: partnerships
+- IRS: QBI deduction and Revenue Procedure 2019-38: rental safe harbor
+- IRS: business interest limitation and Form 8960: NIIT
+- IRS: estate and gift law updates , Form 706 and Publication 559: survivors, executors and administrators
+- Illinois Attorney General: estate tax forms and calculator and instruction fact sheet
+- Illinois income and replacement tax rates , IL-4562 and Publication 120: retirement income
+- SSA: IRMAA reconsideration , IRS Publication 915: Social Security and Publication 590-B: IRA distributions and inheritance
+
+> This is a major rule overview, not all federal or Illinois CRE tax laws. It does not calculate your tax, establish an exemption, certify an offering or recommend a tax strategy. Local taxes, citizenship, entities, trusts and transaction facts can change the outcome. Confirm with independent qualified professionals before an exchange, deduction, sale, gift or distribution.
+
+## Related retirement and owner guides
+
+- Retirement accounts, property income and planning
+- Expenses, capital and reserve budgeting
+- Property NOI versus taxable income and cash
+- Preparing an industrial sale
+- Illinois assessments, bills, appeals and incentives
+- Investment diligence and financing
+
+---
+
+Source: https://rospopa.com/resources/battery-energy-storage/
+Published: 2026-10-08 · Updated: 2026-10-09
+
+Industrial owner technology and diligence
+
+# Battery energy storage systems: an industrial owner's guide
+
+A BESS stores electricity for later use. For a warehouse, manufacturing facility or industrial landowner, its value depends on the meter, load profile, utility rules, safety design and contract, not just the size of a battery. Learn how it works and what to ask before buying a system or signing a storage lease.
+
+Reviewed October 8, 2026 . General property education, not engineering design, emergency instructions, an investment recommendation or a guarantee of approvals or savings.
+
+## Evaluate the property before the equipment proposal
+
+Discuss your industrial property's ownership, tenant and sale considerations with Pavlo Rospopa. Use qualified electrical engineers, the serving utility, fire officials, insurers and counsel for a BESS project.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+
+## In brief
+
+- BESS means battery energy storage system, sometimes written B.E.S.S. It stores energy; it does not create free electricity.
+- kW describes power; kWh describes stored energy. Both matter, along with usable capacity and losses.
+- Reducing a short billing peak is different from moving energy between hours or backing up a building.
+- A grid connected battery does not automatically work during an outage. Safe islanded operation and critical loads require specific engineered capability.
+- Utility approval, zoning and fire approval are separate. Export permissions and tariff economics must be confirmed.
+- Owner lens: Determine who pays the capital cost, who receives the meter savings and who owes removal and restoration. Tenant savings do not automatically become landlord NOI.
+
+_A concept map of an onsite BESS, not a wiring plan. Backup operation requires additional engineered capability._
+
+## How does a battery energy storage system work?
+
+A BESS takes electrical energy, stores it in batteries and releases it when the controls request power. Many commercial systems use lithium ion chemistry; other storage chemistries and technologies exist. Equipment, performance and hazards vary. Grid or onsite generation supplies charging energy, and conversion and auxiliary equipment consume some of it.
+
+**The battery cabinet is only one part of the system**
+
+- Part: What it does: Owner question
+- Cells, modules and racks: Store energy electrochemically: What chemistry, usable capacity, warranties and degradation limits apply?
+- Battery management system (BMS): Monitors conditions such as cell voltage and temperature and coordinates protective limits: How are faults reported, logged and handled by qualified operators?
+- Power conversion system/inverter: Converts battery DC and site/grid AC as the system design permits: What power rating and approved grid operating modes apply?
+- Energy management system (EMS): Schedules charge/discharge using meter, tariff, reserve and operating constraints: Who controls dispatch, data access and remote changes?
+- Thermal management and protection: Manage operating temperature and provide required detection/protection functions: What inspection, maintenance and safety documentation are required?
+- Site electrical and communications equipment: Connect the system to the meter, loads and utility through engineered protection: What upgrades, outages, cybersecurity and utility approvals are included?
+
+During charging, energy flows from an allowed source into the battery. During discharge, the converter supplies allowed loads or exports where authorized. The EMS decides when and how much within battery, tariff and project limits; the BMS monitors battery conditions. A storage controller is not the same as a building fire alarm or utility permission to export.
+
+Solar and storage can be coupled on the AC or DC side using different architectures. An engineer must check compatibility, controls, protection and metering; adding a battery is not simply plugging it into any existing solar installation. This guide intentionally does not provide wiring, installation or emergency response procedures.
+
+## What is the difference between kW, kWh and storage duration?
+
+Power is the rate of delivering energy; energy is how much can be delivered over time. A kW rating says nothing by itself about how long that output lasts. MW and MWh are the same concepts at larger scale: 1 MW is 1,000 kW and 1 MWh is 1,000 kWh.
+
+Illustrative arithmetic: 1,000 kWh of available delivered energy at a constant 250 kW load would last four hours in an idealized calculation. If only 800 kWh is available at that delivery boundary because of operating reserves and capacity limits, the same calculation is 3.2 hours before any additional losses excluded from that boundary. This is not a guarantee of actual runtime, and usable battery DC energy is not identical to AC energy delivered to loads.
+
+Ask whether stated capacity is nominal or usable, beginning or end of life, and measured at cells, inverter or the utility meter. Specify temperature, auxiliary HVAC/control loads, efficiency, cycling, standby time, operating reserves and the degradation assumptions. Power can also be constrained by temperature, equipment ratings and state of charge.
+
+Round trip efficiency compares energy returned with energy used to charge at defined measurement boundaries. A battery returns less energy than it takes in. Calendar aging and cycling generally reduce capacity over time. A warranty may limit years, energy throughput, cycles, temperature or operating conditions; it is not an unlimited capacity guarantee. Replacement or augmentation can require new approvals, downtime and disposal planning.
+
+## What can BESS do for an industrial building?
+
+### Reduce a billing peak, if the tariff rewards it
+
+Peak shaving discharges the battery while the site's grid demand would otherwise reach a chargeable peak. Manufacturing starts, refrigeration, compressors or synchronized charging can create load spikes. The utility's interval definition, demand ratchets, peak windows and charges determine whether reducing a particular spike changes the bill. Recharging at the wrong time can create a new peak.
+
+### Shift energy between hours
+
+Charging in a lower cost period and discharging later may reduce energy costs when the rate spread exceeds losses, degradation and other costs. A flat energy tariff offers no automatic time arbitrage benefit. Wholesale prices are not necessarily the tenant's retail rates, and incentives or export credit rules may differ from import prices.
+
+### Use more onsite solar or manage export
+
+Storage can shift eligible solar generation from production hours to later loads, depending on metering and controls. Compare the value of self consumption with allowed export compensation; storing every excess kWh is not always the economic choice. A battery can work without solar, and solar can operate without batteries, subject to design and utility rules.
+
+### Support selected loads during an outage, only when designed for it
+
+Ordinary grid tied operation does not automatically provide backup. Backup requires an engineered way to isolate from the utility, suitable inverter/control capabilities, protection, switching and approved islanded operation. Define critical loads, starting surges, target outage duration, reserve and restart behavior. A large battery can still fail to run a whole facility if instantaneous power or motor starting needs exceed capabilities.
+
+Reserving energy for backup can reduce capacity available for bill savings. Generator, solar and battery integration needs its own study. Emergency and legally required standby loads have applicable rules; do not assume a vendor's backup label replaces required systems. Site operators should follow approved professional procedures, not attempt manual improvised reconnection.
+
+### Provide grid services under a separate agreement
+
+Storage may participate in eligible demand response or other utility/market programs through approved arrangements. Enrollment, dispatch obligations, telemetry, penalties and revenue vary. Stacking several projected revenue streams can double count the same power, stored energy or available hours. Ask which uses are compatible and who bears performance risk.
+
+## Is an onsite battery the same as leasing land for grid storage?
+
+**Two property opportunities with different economics**
+
+- Model: Primary purpose: Property owner diligence
+- Behind the meter onsite BESS: Serve the facility account, manage bills or support engineered resilience: Interval data, tenant meter rights, tariff, equipment space, financing and savings allocation
+- Front of the meter grid project: Store and deliver energy for grid/market services under applicable permissions: Developer credit, transmission/distribution access, permitting, options, land rent, easements and decommissioning
+
+Front of the meter project income belongs to the project under its contracts; the landlord typically receives agreed land rent, not automatically a share of market profit or cheaper warehouse power. Behind the meter projects can also export where approved, so the label alone does not settle interconnection or revenue rules.
+
+A nearby substation, large electrical service or vacant paved yard does not establish grid capacity or approval. Feasibility, upgrades, queue timing, zoning, access and community/safety constraints can prevent a project. Avoid letting an inexpensive long option lock land away from leasing, truck circulation or sale without defined milestones, payments and termination rights.
+
+## How should an owner evaluate battery savings and costs?
+
+Obtain at least a representative year of bills and appropriate interval load data, more where seasonality or operations changed. Confirm delivery and supply tariffs, meter ownership, peak intervals, ratchets, import/export arrangements and demand response contracts. Compare storage with efficiency, controls, load scheduling and other solutions before buying equipment.
+
+Hypothetical demand charge arithmetic, not a ComEd rate quote: assume an avoidable demand charge of $15 per kW per month, and that a project reliably reduces the chargeable billing demand by 100 kW in each of 12 months. Gross annual demand charge reduction is $18,000. An offset during one isolated peak is not proof that every monthly billing peak falls by 100 kW.
+
+If additional charging/auxiliary energy costs are $4,000, service/software $3,000 and planned replacement reserve funding $2,000 per year, illustrative cash benefit before financing and tax is $9,000. On an assumed $180,000 net installed capital cost with no incentive included, simple cash payback would be 20 years. These are deliberately invented assumptions, not a proposal, useful life or recommended project.
+
+A full analysis must reflect degradation, replacement timing, discounting, tariffs, availability, contract term, financing, taxes and residual/removal costs. Reserve funding in this example is a cash planning item, not automatically a deductible expense; do not also count the same funded replacement twice. Monetize resilience separately with a documented business interruption scenario, not as an automatic bill credit.
+
+Require itemized civil works, electrical upgrades, engineering, permitting, equipment, commissioning, software, communications, safety work, maintenance, insurance and end of life costs. Identify warranty exclusions, spare parts and response obligations. Incentives and federal clean electricity/storage credits are project and taxpayer dependent; ask tax counsel about current eligibility, ownership, timing, labor, sourcing, elections and recapture rather than assuming a quoted percentage. The IRS Section 48E overview is a starting point, not confirmation that your project qualifies.
+
+Where tenants pay utilities, much of the benefit may belong to them. In a gross lease, some landlord bills may fall; in a net lease, lower recoverable expenses can also lower reimbursements. The property NOI effect is not automatically the gross bill saving or the equipment's capital cost. Use the NOI guide , DCF guide and energy cost controls .
+
+## What utility and permit questions apply in Illinois?
+
+Identify the actual serving utility and local jurisdiction. ComEd serves much of Chicagoland, but not every Illinois property. Regional PJM/MISO processes depend on where and how the project connects; retail utility approval and a regional market process are not the same thing.
+
+- Utility screen: confirm voltage, service, transformer, proposed power, charging source, export/nonexport mode, metering and required application/studies. Do not assume nonexport removes all interconnection requirements.
+- Site and title screen: review zoning, permitted use, setbacks, easements, flood/drainage, access, loading, fire apparatus routes and landlord/lender rights.
+- Code and fire screen: ask the authority having jurisdiction which editions, amendments, permits, studies and submittals apply to this project.
+- Financial screen: identify study deposits, upgrade costs, procurement conditions, deadlines, tariff permissions and who owns equipment or improvements.
+- Operating screen: establish dispatch, inspections, communications, emergency planning, utility authorization and ongoing compliance before operation.
+
+Use the serving utility's official channels and Illinois Commerce Commission information with an experienced project engineer. For ComEd accounts, review its DER interconnection guidelines and current rates and tariffs , confirming any updates directly. Not every application falls into the same interconnection category. Export eligibility, participation and deadlines must be confirmed under the current rules; a submitted application or queue position is not an operating approval.
+
+For standalone or wholesale projects, confirm the appropriate PJM or MISO process where relevant and the utility connection. Do not promise a project will connect merely because land is close to transmission. Zoning approval does not supply utility capacity, and utility approval does not waive building/fire requirements.
+
+## What safety and siting issues should an industrial owner understand?
+
+High energy electrical equipment and some battery chemistries present fire, electrical, thermal and chemical hazards. Lithium ion thermal runaway can release heat and flammable/toxic gases and propagate between cells, with reignition concerns. The design and emergency plan must address credible hazards; an equipment listing or outdoor location does not eliminate risk.
+
+UL 9540 and UL 9540A are not interchangeable. UL 9540 addresses energy storage system equipment safety certification. UL 9540A is a test method evaluating thermal runaway fire propagation behavior; a report is not a universal safety pass, site permit or a substitute for reviewing the actual configuration. Check the complete proposed system, installation and test evidence with qualified professionals. UL's current explanation identifies pass/fail criteria for Edition 6 installation level testing, with a January 1, 2027 effective date; do not assume every test edition or level has identical criteria. See UL's testing and code explanation .
+
+NFPA 855 and applicable fire/building/electrical codes can inform installation requirements, but the locally adopted edition, amendments, equipment and installation context control. Ask officials about documentation, location, separation, access, detection/protection, emergency plans and any hazard analysis. This guide intentionally supplies no universal setback, battery quantity exemption or suppression prescription.
+
+For an industrial parcel, keep proposed equipment clear of required circulation, exits and approved fire access. Review truck impacts, flood exposure, drainage, noise from cooling equipment, neighboring occupants, ventilation/gas hazards as applicable, foundations, security and signage. Indoor, outdoor, rooftop and container installations raise different questions; there is no universal best location.
+
+Obtain insurer approval and coordination with the fire department before committing. Operators need qualified training, documented inspections, authorized shutdown/response procedures and vendor contacts. Do not open battery cabinets, bypass interlocks, attempt electrical repairs or use this page as incident response instructions. In an emergency, follow site procedures and emergency services guidance.
+
+Plan battery removal, transport and recycling through qualified providers under applicable waste, transport and environmental rules. Damaged batteries may require special handling. EPA explains that most discarded lithium ion batteries are likely hazardous wastes because of ignitability or reactivity; review its commercial battery recycling guidance with qualified providers rather than treating them as ordinary building trash. Assign cleanup, restoration, financial security and surviving obligations in contracts; a manufacturer's warranty is not a decommissioning fund.
+
+## What belongs in a battery lease or ownership agreement?
+
+Use counsel experienced in energy and real property transactions. A storage purchase, equipment/service agreement, tenant improvement or developer ground lease creates different rights. Identify the equipment owner, project operator and utility account holder, rather than assuming the installer is responsible for everything.
+
+- Site rights: equipment footprint, access, cables, drainage, utility easements, maintenance areas and restoration; preserve truck courts and expansion plans.
+- Economics: fixed/variable payments, development option rent, milestones, savings measurement, baselines, escalation, charges and dispatch obligations.
+- Approvals and operations: permit/interconnection responsibility, costs, commissioning, inspections, data access, remote control security, downtime and notices.
+- Risk allocation: insurance, indemnities, pollution/cleanup duties, casualty, neighbor impacts, defaults, parent support and required security.
+- Transfers and endings: lender consent, assignment, sale, tenant expiration, equipment liens, casualty termination, removal deadlines and decommissioning security.
+
+Insurance wording and exclusions matter: fire/property coverage, business interruption, liability and potential environmental exposures may not be handled by a standard landlord policy. Ask the lender about liens, collateral, consent and remedies. A non disturbance or access agreement should not casually impair the existing lease or lender's rights.
+
+BESS does not automatically increase appraised value. A buyer may discount short warranties, unfavorable energy contracts, restricted land, contingent revenue or removal exposure. A long storage lease may support income but reduce flexibility. If retirement income is the goal, assess the developer's credit and operations plus the property's future marketability, not an advertised rent alone.
+
+## An owner checklist from proposal through end of life
+
+- Define the objective: bill reduction, solar use, critical load resilience or land rent, with measurable priorities and no conflicting assumptions.
+- Establish the baseline: bills, interval data, operations, outages, tenant/meter rights and equipment/service constraints.
+- Screen the site: title, leases, lender, utility, engineer, fire officials, insurer and zoning before equipment orders.
+- Compare proposals: usable delivered power/energy, end of life performance, system certification/test evidence, full costs and controls.
+- Model adverse cases: smaller savings, changed tariff, tenant departure, degradation, downtime, delayed approvals and removal costs.
+- Document contracts: guarantees and their conditions, measurable service levels, approved operating modes, data rights and security.
+- Commission professionally: retain approved plans, permits, utility authorization, acceptance records, warranties and operating/emergency documents.
+- Monitor and maintain: reconcile measured results with the baseline, maintain logs and support, and update plans when operations or tenants change.
+- Plan the exit: transfers, lender rights, lease expiry, augmentation, recycling, removal and restoration funding.
+
+A brochure's battery capacity is not a feasibility study. Retain a property file that a future owner, tenant, lender or manager can use without relying on the original sales representative.
+
+## 20 questions industrial owners ask about BESS
+
+### What does B.E.S.S. stand for?
+
+B.E.S.S., more commonly BESS, stands for battery energy storage system. It includes batteries, power conversion, controls, thermal management, protection and site equipment to store electricity and deliver it later.
+
+### Does a BESS generate electricity?
+
+It stores energy from an allowed source, such as the grid or onsite generation, rather than creating free electricity. Charging, conversion and auxiliary loads consume energy, so delivered energy is lower than charging energy at comparable measurement boundaries.
+
+### What is the difference between kW and kWh?
+
+kW is a power rate, while kWh is an energy amount. Storage must have enough instantaneous power for the load and enough usable delivered energy for the intended duration. Nominal battery capacity alone does not establish runtime.
+
+### Do I need solar panels to use battery storage?
+
+No. Some systems charge from the grid under applicable utility and tariff rules. Solar can add another charging source, but equipment compatibility, controls, export arrangements and economics require project specific review.
+
+### Will a grid connected battery automatically power my warehouse during an outage?
+
+No. Backup needs engineered isolation from the utility, suitable equipment and controls, approved protection and defined loads. Many bill management installations are not configured for islanded operation. Never assume a battery proposal includes whole building backup.
+
+### Can a battery back up my entire manufacturing facility?
+
+Only if the approved design can support its power, starting surges, energy duration and operating needs. Critical load backup may be more practical than whole facility backup. An engineer must evaluate the load profile and outage goals.
+
+### How does a BESS reduce demand charges?
+
+It can discharge during chargeable peaks to reduce grid demand, if its power, duration and controls match the tariff and load. Ratchets, peak windows and recharging can reduce or eliminate expected savings. Interval data is essential.
+
+### Does battery storage always lower electricity bills?
+
+No. Savings depend on actual tariffs, peaks, charging costs, losses, controls, degradation and project costs. A flat rate or unsuitable load may offer little benefit. Compare a supported simulation with cheaper efficiency or scheduling alternatives.
+
+### How long does a commercial battery last?
+
+There is no universal service life. Chemistry, temperature, cycling, throughput, operating limits and maintenance affect degradation. Review capacity and service warranties, end of life performance, replacement costs and the assumptions in the financial model.
+
+### Can I sell stored electricity back to the grid?
+
+Only under applicable permissions, interconnection, metering and commercial arrangements. A battery's technical export ability does not establish a right to export or a payment rate. Retail and wholesale participation follow different processes.
+
+### Does a nonexport system avoid utility review?
+
+Not automatically. Equipment connected in parallel with the utility can still require review, protection, studies and approval. Confirm the serving utility's current process and project configuration before purchase or operation.
+
+### Can I put a BESS in an unused truck court or warehouse corner?
+
+Not without site, code, fire, utility, lease and insurer review. Access, truck impacts, drainage, exits, neighboring uses and electrical constraints matter. An apparently vacant area may be required circulation or restricted by an easement.
+
+### Are lithium ion storage systems free of fire risk?
+
+No. Thermal runaway can release heat and hazardous gases and may propagate or reignite. Professional design, suitable equipment, code compliance, maintenance and emergency planning reduce risk but do not remove every hazard.
+
+### Are UL 9540 and UL 9540A the same approval?
+
+No. UL 9540 addresses energy storage system safety certification; UL 9540A is a thermal runaway fire propagation test method. Test evidence must match the proposed configuration and does not itself replace site permits or establish universal safety.
+
+### Does meeting NFPA 855 guarantee a permit?
+
+No. The authority having jurisdiction applies the locally adopted codes, editions and amendments to the specific project. Utility, zoning, building and fire approvals are separate, and additional documentation may be needed.
+
+### Who receives savings when the tenant pays the electric bill?
+
+The utility account and lease generally determine the direct benefit and allocation. Landlord capital spending does not automatically create landlord savings or NOI. Agree on meter access, payments, baselines and responsibilities before installation.
+
+### Is leasing land for a grid battery the same as installing onsite storage?
+
+No. A grid storage developer usually operates a separate project; the landowner receives contractual rent rather than automatically receiving project energy revenue or cheaper building power. Credit, options, easements, interconnection and removal obligations are central.
+
+### Will BESS automatically raise my building's value?
+
+No. Buyers and lenders evaluate documented net benefits, equipment condition, remaining warranties, contract obligations and removal costs. Restricted land, short support terms or unfavorable agreements can offset potential benefits.
+
+### Does every commercial battery qualify for rebates or tax credits?
+
+No. Eligibility depends on current law or program terms, equipment, project ownership, timing and other conditions. Obtain utility and tax advice before purchase and distinguish conditional incentives from committed funding in the model.
+
+### Who pays to remove batteries when the project ends?
+
+The contracts should assign removal, lawful handling, recycling, cleanup and site restoration, with appropriate financial security. Do not assume a tenant, developer or manufacturer will still have resources when the obligation arrives.
+
+## Official sources and further reading
+
+Reviewed October 8, 2026. Utility rules, tariffs, incentives, codes and technology change. Follow current project specific requirements and qualified professional advice; no universal project cost, savings rate, setback, life expectancy or permit approval is supplied here.
+
+- U.S. Department of Energy: energy storage
+- DOE FEMP: storage components and implementation
+- National laboratory: grid scale battery storage FAQ and DOE hosted onsite energy storage decision guide . These older educational references are not current rate, incentive or code guidance.
+- NFPA: NFPA 855 information and UL: UL 9540A, NFPA 855 and large scale fire testing . Confirm local adoption and the applicable edition.
+- PNNL: energy storage in local zoning ordinances . National examples do not establish Illinois municipal requirements.
+- ComEd: current rates and tariffs and DER interconnection guidelines . Confirm the current project requirements with the utility.
+- Illinois Commerce Commission: utility and interconnection information
+- PJM and MISO: applicable regional grid processes
+- EPA: lithium ion battery recycling and waste obligations
+- IRS: clean electricity investment credit and storage eligibility
+
+> Educational property guide only. It is not an equipment recommendation, engineering or fire safety design, installation manual, emergency response plan or tax opinion. Use qualified project professionals and the applicable authorities. Do not attempt battery work or improvise outage connections based on this page.
+
+## Continue your industrial property review
+
+- Energy use, maintenance and owner cost controls
+- Industrial utilities, physical and environmental diligence
+- Lease obligations and tenant cost comparisons
+- Insurance limits, exclusions and owner risks
+- Capital, reserves and long term budgets
+- Tax and retirement questions for CRE owners
+
+---
+
 Source: https://rospopa.com/resources/commercial-property-owner-questions/
-Published: 2026-10-06 · Updated: 2026-10-06
+Published: 2026-10-06 · Updated: 2026-10-09
 
 Owner education · Chicagoland commercial and industrial
 
@@ -2930,7 +4026,7 @@ Educational, not an appraisal or investment, tax, legal, engineering or insuranc
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 - Document income before valuing it.
@@ -2939,9 +4035,15 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - No guide can supply a universal rent, return, premium or reserve target.
 - Owner lens: Treat owner time, related-party services, deferred work, and unpaid tenant charges as real economic costs when judging performance, even if they do not appear consistently in the property statement.
 
+_An owner review aid, not a valuation or inspection report._
+
 ## Income, value and cash-flow questions
 
 NOI: definition, inclusions, recoveries and worked statement explains operating income. DCF: projections, present value and exit sensitivity follows that income through a hold. Investment diligence and calculators connects it to price and debt.
+
+For the next stage of ownership, the CRE retirement guide separates spendable property cash from account distributions and covers IRA and 401(k) restrictions, liquidity, a sale or exchange, Illinois taxes and succession.
+
+The CRE tax and inheritance guide answers 35 retiree questions about lazy 1031, passive loss offsets, cost segregation, depreciation, recapture, Illinois tax and inherited basis. Federal and state rules differ, and a tax deduction does not guarantee more cash to spend.
 
 ## Operating costs, insurance and tax questions
 
@@ -3032,7 +4134,7 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 ---
 
 Source: https://rospopa.com/resources/net-operating-income/
-Published: 2026-10-06 · Updated: 2026-10-06
+Published: 2026-10-06 · Updated: 2026-10-09
 
 Owner education · Chicagoland commercial and industrial
 
@@ -3046,7 +4148,7 @@ Educational, not an appraisal or investment, tax, legal, engineering or insuranc
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 - Effective gross income minus property operating expenses equals NOI.
@@ -3054,6 +4156,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - A lease recovery is income to the owner, not permission to hide the matching expense.
 - Compare trailing, current and stabilized NOI separately.
 - Owner lens: When comparing an owner-occupied building with an investment, show a supportable market rent for the occupied space and keep business costs separate from property expenses; otherwise the comparison can overstate or understate NOI.
+
+_Keep debt service, taxes on owner income, and major capital spending separate from property NOI._
 
 ## What is NOI, and what is included?
 
@@ -3133,7 +4237,7 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 ---
 
 Source: https://rospopa.com/resources/discounted-cash-flow/
-Published: 2026-10-06 · Updated: 2026-10-06
+Published: 2026-10-06 · Updated: 2026-10-09
 
 Owner education · Chicagoland commercial and industrial
 
@@ -3147,7 +4251,7 @@ Educational, not an appraisal or investment, tax, legal, engineering or insuranc
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 - Project income, expenses and capital cash needs year by year.
@@ -3155,6 +4259,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - Unlevered cash flows exclude debt; levered equity cash flows include it.
 - Sensitivity is more useful than a single optimistic IRR.
 - Owner lens: For an owner-user, separate the building investment from the operating business: compare ownership with a realistic lease alternative and include moving, downtime, fit-out, and eventual disposition costs.
+
+_Model property cash flow by year, then test hold-period assumptions._
 
 ## How do you build a property cash-flow projection?
 
@@ -3222,7 +4328,7 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 ---
 
 Source: https://rospopa.com/resources/reduce-commercial-property-costs/
-Published: 2026-10-06 · Updated: 2026-10-06
+Published: 2026-10-06 · Updated: 2026-10-09
 
 Owner education · Chicagoland commercial and industrial
 
@@ -3236,7 +4342,7 @@ Educational, not an appraisal or investment, tax, legal, engineering or insuranc
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 - Start with invoices, meter use, service scope and lease responsibility.
@@ -3244,6 +4350,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - Check utility-program eligibility before ordering work.
 - Savings and tenant recoveries affect owner NOI differently.
 - Owner lens: Count a proposed saving only after checking lease permissions, safety and code duties, insurer requirements, service reliability, and implementation cost; document a before-and-after baseline.
+
+_Measure savings while preserving safety, service, and lease obligations._
 
 ## Which operating costs should an owner review first?
 
@@ -3312,6 +4420,7 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 - IRS: tangible property regulations, repairs and capitalization
 
 ## Related owner guides
+- How battery energy storage works, and when BESS may help an industrial owner
 - How to budget expenses, reserves and capital for a commercial building
 - Commercial property insurance: an owner renewal checklist
 - Illinois property taxes and appeals
@@ -3320,7 +4429,7 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 ---
 
 Source: https://rospopa.com/resources/commercial-property-insurance/
-Published: 2026-10-06 · Updated: 2026-10-06
+Published: 2026-10-06 · Updated: 2026-10-09
 
 Owner education · Chicagoland commercial and industrial
 
@@ -3334,7 +4443,7 @@ Educational, not an appraisal or investment, tax, legal, engineering or insuranc
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 - Market purchase price is not the cost to rebuild the insured structure.
@@ -3342,6 +4451,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - Flood, earthquake and ordinance-or-law protection require explicit review.
 - A certificate is evidence of insurance, not a substitute for policy endorsements.
 - Owner lens: Coordinate insured replacement values, business-income limits and waiting periods, ordinance-or-law coverage, deductibles, lender terms, and lease obligations at renewal; a nominal limit alone does not establish claim adequacy.
+
+_Policy wording, limits, exclusions, and endorsements determine coverage._
 
 ## What coverage should a commercial property owner discuss?
 
@@ -3415,7 +4526,7 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 ---
 
 Source: https://rospopa.com/resources/commercial-property-budget/
-Published: 2026-10-06 · Updated: 2026-10-06
+Published: 2026-10-06 · Updated: 2026-10-09
 
 Owner education · Chicagoland commercial and industrial
 
@@ -3429,7 +4540,7 @@ Educational, not an appraisal or investment, tax, legal, engineering or insuranc
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 - Maintain an operating budget and a separate capital/liquidity plan.
@@ -3437,6 +4548,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - Reserves are cash set aside; spending and tax deductions are different events.
 - Tax treatment is a separate CPA analysis, not an NOI shortcut.
 - Owner lens: Keep unrestricted operating liquidity distinct from lender-controlled escrows and earmarked reserves. Stress near-term debt maturity and a major repair occurring in the same period as vacancy.
+
+_Set reserve needs from property condition, lease obligations, and debt timing._
 
 ## What belongs in a commercial operating budget?
 
@@ -3506,6 +4619,10 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 - IRS: like-kind exchanges of business/investment real estate
 - OCC: Commercial Real Estate Lending handbook
 
+## Connect tax deductions to retirement cash
+
+A deduction can be suspended under passive loss rules even when a study shows a large first year amount. Sale tax can include depreciation related categories and Illinois adjustments. The CRE tax and retirement guide covers straight line depreciation, cost segregation, current bonus rules, passive versus active offsets, recapture, lazy 1031 and inheritance. Use it to prepare a CPA review, not to substitute paper deductions for available cash.
+
 ## Related owner guides
 - How is net operating income calculated for commercial property?
 - How can owners reduce commercial building operating costs?
@@ -3515,7 +4632,7 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 ---
 
 Source: https://rospopa.com/resources/commercial-leasing/
-Published: 2026-10-02 · Updated: 2026-10-06
+Published: 2026-10-02 · Updated: 2026-10-09
 
 Lease comparison & preparation
 
@@ -3529,7 +4646,7 @@ No quoted market rents or available listings.
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 
@@ -3563,6 +4680,8 @@ For each option, separate recurring expenses, upfront costs, refundable security
 
 Ask for the assumptions behind each number. Where the amount is unknown, use an explicitly labeled estimate and test a higher-cost case instead of treating it as zero.
 
+_A lease document highlights expense allocation, improvements, and delivery timing._
+
 ## A lease-review checklist
 
 - Premises and use: confirm the exact space, shared areas, permitted use, parking, loading, yard rights, and operating restrictions.
@@ -3591,6 +4710,8 @@ Use the property-research guide to confirm jurisdiction and public records. If b
 
 Comparing industrial leases across county lines? Use the nine-county Illinois industrial research hub to locate the applicable authority and official records. Confirm use approvals, buildout responsibilities, and utility-upgrade timing before treating two spaces as interchangeable.
 
+For battery energy storage, agree on equipment ownership, meter access, the allocation of savings, maintenance, approvals, insurance, lender consent and removal when the tenancy ends. A landlord funded battery does not automatically reduce landlord expenses when the tenant pays electricity. See the BESS lease and ownership checklist .
+
 > General education only. Lease terms vary; obtain legal and financial advice for the specific lease and verify all cost assumptions.
 
 ## Continue with the owner guides
@@ -3603,7 +4724,7 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/chicago-commercial-real-estate/
-Published: 2026-10-02 · Updated: 2026-10-06
+Published: 2026-10-02 · Updated: 2026-10-09
 
 Research guide
 
@@ -3617,7 +4738,7 @@ Educational guide, not a market report.
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 
@@ -3690,7 +4811,7 @@ For rental decisions, continue to comparing commercial leases . For an acquisiti
 ---
 
 Source: https://rospopa.com/resources/glossary/
-Published: 2026-10-03 · Updated: 2026-10-06
+Published: 2026-10-03 · Updated: 2026-10-09
 
 Reference · Industrial real estate and investment terms
 
@@ -3704,7 +4825,7 @@ Plain-English reference for educational use.
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
-Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 ## In brief
 
@@ -3713,6 +4834,8 @@ Call (630) 570-2184 Email pavlo.rospopa@marcusmillichap.com
 - For Illinois property records, verify the parcel, county, municipality, and official source before relying on a definition.
 - Use the term IDs below as stable deep links from search results or diligence notes.
 - Owner lens: When a term appears in two records, use the controlling signed lease, loan, policy, survey, or government record rather than assuming the documents share the same definition.
+
+_Use the controlling signed or official record for each defined term._
 
 ## Building & site
 

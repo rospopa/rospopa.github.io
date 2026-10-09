@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="675" viewBox="0 0 1200 675" role="img" aria-labelledby="title description">
+  <title id="title">How an onsite battery energy storage system works</title>
+  <desc id="description">A concept map connects charging sources, the building meter, a bidirectional power converter and battery storage. Controls supervise operation. Outage backup is a separate engineered feature, not automatic.</desc>
+  <defs>
+    <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse"><path d="M0 0 8 4 0 8Z" fill="#24703e"/></marker>
+  </defs>
+  <rect width="1200" height="675" fill="#edf5ee"/>
+  <g font-family="Arial, sans-serif" fill="#153c23">
+    <text x="60" y="72" font-size="34" font-weight="700">BATTERY ENERGY STORAGE</text>
+    <text x="60" y="111" font-size="21">Conceptual flow, not a wiring or installation plan</text>
+    <g stroke="#24703e" stroke-width="3" fill="#fff">
+      <rect x="60" y="180" width="220" height="180" rx="18"/>
+      <rect x="350" y="180" width="220" height="180" rx="18"/>
+      <rect x="640" y="180" width="220" height="180" rx="18"/>
+      <rect x="930" y="180" width="210" height="180" rx="18"/>
+      <path d="M286 270H338" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+      <path d="M576 270H628" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+      <path d="M866 270H918" marker-start="url(#arrow)" marker-end="url(#arrow)"/>
+    </g>
+    <g text-anchor="middle">
+      <text x="170" y="233" font-size="27" font-weight="700">SOURCE</text>
+      <text x="170" y="275" font-size="22">Utility grid</text>
+      <text x="170" y="310" font-size="22">Optional solar</text>
+      <text x="460" y="233" font-size="27" font-weight="700">SITE</text>
+      <text x="460" y="275" font-size="22">Building meter</text>
+      <text x="460" y="310" font-size="22">and loads</text>
+      <text x="750" y="233" font-size="27" font-weight="700">CONVERTER</text>
+      <text x="750" y="275" font-size="22">AC / DC</text>
+      <text x="750" y="310" font-size="22">Power in kW</text>
+      <text x="1035" y="233" font-size="27" font-weight="700">BATTERY</text>
+      <text x="1035" y="275" font-size="22">Stored energy</text>
+      <text x="1035" y="310" font-size="22">Energy in kWh</text>
+    </g>
+    <rect x="60" y="412" width="540" height="130" rx="18" fill="#d6e9d9" stroke="#24703e" stroke-width="2"/>
+    <text x="86" y="451" font-size="25" font-weight="700">CONTROL AND PROTECTION</text>
+    <text x="86" y="486" font-size="21">EMS schedules; BMS monitors battery conditions.</text>
+    <text x="86" y="518" font-size="21">Thermal management, safeguards and monitoring.</text>
+    <rect x="630" y="412" width="510" height="130" rx="18" fill="#fff" stroke="#24703e" stroke-width="2"/>
+    <text x="656" y="451" font-size="25" font-weight="700">BACKUP IS NOT AUTOMATIC</text>
+    <text x="656" y="486" font-size="21">Requires approved isolation and suitable controls,</text>
+    <text x="656" y="518" font-size="21">equipment, protection and critical load planning.</text>
+    <text x="60" y="607" font-size="22">Charging and discharge incur losses. Export requires applicable permission.</text>
+    <text x="60" y="644" font-size="20">Use qualified project professionals, the serving utility and local authorities.</text>
+  </g>
+</svg>

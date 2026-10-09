@@ -26,6 +26,9 @@ const PAGES = [
   'resources/illinois-industrial-property-taxes/index.html',
   'resources/selling-industrial-property/index.html',
   'resources/commercial-investment/index.html',
+  'resources/retirement-cre-investing/index.html',
+  'resources/cre-tax-retirement/index.html',
+  'resources/battery-energy-storage/index.html',
   'resources/commercial-property-owner-questions/index.html',
   'resources/net-operating-income/index.html',
   'resources/discounted-cash-flow/index.html',
@@ -173,10 +176,27 @@ const contactValues = new Map([...businessCard[1].matchAll(/data-c="([^"]+)" dat
 const phone = contactValues.get('tel'), email = contactValues.get('mail');
 if (!phone || !email) throw new Error('Homepage business phone or email is missing');
 const directContact = `<!-- direct-contact:start -->
-      <p class="direct-contact"><a class="btn btn-primary" href="tel:+1${phone.replace(/\D/g, '')}">Call ${escapeHtml(phone)}</a> <!--email_off--><a class="btn btn-outline" href="mailto:${escapeHtml(email)}">Email ${escapeHtml(email)}</a><!--/email_off--></p>
+      <p class="direct-contact"><a class="btn btn-primary" href="tel:+1${phone.replace(/\D/g, '')}">Call&nbsp;${escapeHtml(phone).replace(/ /g, '&nbsp;').replace(/-/g, '&#8209;')}</a> <!--email_off--><a class="btn btn-outline" href="mailto:${escapeHtml(email)}">Email ${escapeHtml(email)}</a><!--/email_off--></p>
       <!-- direct-contact:end -->`;
 for (const page of PAGES) {
   let html = await readFile(page, 'utf8');
+  const faqSection = html.match(/<section id="faq" data-faq-schema="true">([\s\S]*?)<\/section>/);
+  if (faqSection) {
+    const schemaScript = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    const canonical = html.match(/<link rel="canonical" href="([^"]+)"/);
+    if (!schemaScript || !canonical) throw new Error(`${page}: generated FAQ requires structured data and a canonical URL`);
+    const schema = JSON.parse(schemaScript[1]);
+    const faq = schema['@graph'].find(node => node['@type'] === 'FAQPage');
+    if (!faq) throw new Error(`${page}: FAQPage node missing`);
+    const answers = [...faqSection[1].matchAll(/<h3 id="([^"]+)">([\s\S]*?)<\/h3>\s*<p>((?:(?!<\/p>)[\s\S])*)<\/p>(?=\s*<h3\b|\s*$)/g)];
+    const headings = [...faqSection[1].matchAll(/<h3\b/g)];
+    if (!answers.length || answers.length !== headings.length) throw new Error(`${page}: every generated FAQ heading must have an id and an answer paragraph`);
+    faq.mainEntity = answers.map(([, id, question, answer]) => ({
+      '@type': 'Question', '@id': `${canonical[1]}#${id}`, name: plain(question),
+      acceptedAnswer: { '@type': 'Answer', text: plain(answer) },
+    }));
+    html = html.replace(schemaScript[0], `<script type="application/ld+json">\n  ${JSON.stringify(schema)}\n  </script>`);
+  }
   if (html.includes('<!-- direct-contact:start -->')) {
     html = html.replace(/<!-- direct-contact:start -->[\s\S]*?<!-- direct-contact:end -->/, directContact);
   } else if (page.startsWith('resources/')) {

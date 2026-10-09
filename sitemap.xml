@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://rospopa.com/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
     <image:image>
       <image:loc>https://rospopa.com/resources/images/chicago-industrial-river-1600.jpg</image:loc>
       <image:title>Industrial buildings and a power plant along the South Branch of the Chicago River at dusk, with the downtown Chicago skyline behind them.</image:title>
@@ -11,31 +11,56 @@
   </url>
   <url>
     <loc>https://rospopa.com/resources/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
   </url>
   <url>
     <loc>https://rospopa.com/resources/industrial-real-estate-faq/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/industrial-operations.svg</image:loc>
+      <image:title>A warehouse connects loading, storage, fire protection, utilities, and site circulation.</image:title>
+      <image:caption>Suitability depends on the actual operation and approved use.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/industrial-investor-faq/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/investment-risk.svg</image:loc>
+      <image:title>An industrial asset is considered across income durability, tenant rollover, capital needs, financing, and exit.</image:title>
+      <image:caption>Stress related downside risks together, not only one assumption at a time.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/community/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/editorial-scenarios.svg</image:loc>
+      <image:title>An industrial building and question cards represent authored educational scenarios, not real people or member posts.</image:title>
+      <image:caption>These are illustrative scenarios, not testimonials, accounts, or member discussions.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/industrial-building-types/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/industrial-specifications.svg</image:loc>
+      <image:title>A warehouse cross-section highlights clear height, column spacing, and loading door dimensions.</image:title>
+      <image:caption>Verify specifications in source documents and through qualified site review.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/truck-dimensions-turning/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/truck-swept-path.svg</image:loc>
+      <image:title>A conceptual tractor-trailer path enters an industrial site from a public road and turns toward loading docks.</image:title>
+      <image:caption>Conceptual only. Confirm the actual vehicle, access rights, and swept path with a surveyed site plan.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/chicago-industrial-real-estate/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
     <image:image>
       <image:loc>https://rospopa.com/resources/images/warehouse-pallet-racking-1600.jpg</image:loc>
       <image:title>Interior of a high-bay warehouse with tall pallet racking, skylights, and forklifts moving palletized goods.</image:title>
@@ -44,15 +69,25 @@
   </url>
   <url>
     <loc>https://rospopa.com/resources/industrial-due-diligence/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/industrial-diligence.svg</image:loc>
+      <image:title>A warehouse and review file represent physical, environmental, title, survey, zoning, lease, and utility diligence.</image:title>
+      <image:caption>Record each finding, responsible party, due date, and decision.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/chicagoland-industrial-submarkets/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/chicagoland-freight-network.svg</image:loc>
+      <image:title>Schematic connections between an industrial site, highways, rail, intermodal facilities, air cargo, suppliers, and customers. This is not a geographic map.</image:title>
+      <image:caption>Use real routes and site access, not proximity alone.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/chicagoland-industrial-real-estate/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
     <image:image>
       <image:loc>https://rospopa.com/resources/images/elk-grove-village-aerial-1600.jpg</image:loc>
       <image:title>Aerial view of rows of single-story industrial and warehouse buildings with truck courts and parking in Elk Grove Village, Illinois.</image:title>
@@ -61,11 +96,16 @@
   </url>
   <url>
     <loc>https://rospopa.com/resources/illinois-industrial-property-taxes/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/property-tax-parcel.svg</image:loc>
+      <image:title>A parcel map and tax statement connect parcel identification, assessment, local rates, and the final property tax bill.</image:title>
+      <image:caption>Verify each parcel, assessment, tax district, and tax year against official records.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/selling-industrial-property/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
     <image:image>
       <image:loc>https://rospopa.com/resources/images/elk-grove-village-aerial-1600.jpg</image:loc>
       <image:title>Aerial view of rows of single-story industrial and warehouse buildings with truck courts and parking in Elk Grove Village, Illinois.</image:title>
@@ -74,7 +114,7 @@
   </url>
   <url>
     <loc>https://rospopa.com/resources/commercial-investment/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
     <image:image>
       <image:loc>https://rospopa.com/resources/images/cicero-intermodal-terminal-1600.jpg</image:loc>
       <image:title>Rows of container chassis and stacked intermodal containers at the BNSF rail terminal in Cicero, Illinois, under an overcast sky.</image:title>
@@ -82,32 +122,89 @@
     </image:image>
   </url>
   <url>
+    <loc>https://rospopa.com/resources/retirement-cre-investing/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/capital-reserve-planning.svg</image:loc>
+      <image:title>Property liquidity planning considers building systems, vacancy, loan escrows and available cash before an owner takes distributions.</image:title>
+      <image:caption>Separate property reserves from household retirement spending and retirement account distribution requirements.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/cre-tax-retirement/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/property-records.svg</image:loc>
+      <image:title>A property document file organizes records needed to substantiate ownership, tax basis, improvements and future sale or inheritance decisions.</image:title>
+      <image:caption>Keep basis, depreciation, exchange, ownership and valuation records alongside the property file.</image:caption>
+    </image:image>
+  </url>
+  <url>
+    <loc>https://rospopa.com/resources/battery-energy-storage/</loc>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/battery-energy-storage.svg</image:loc>
+      <image:title>Conceptual battery storage diagram links the grid and optional solar to a building meter, power converter and battery, with controls and a separately engineered backup option.</image:title>
+      <image:caption>A concept map of an onsite BESS, not a wiring plan. Backup operation requires additional engineered capability.</image:caption>
+    </image:image>
+  </url>
+  <url>
     <loc>https://rospopa.com/resources/commercial-property-owner-questions/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/owner-property-review.svg</image:loc>
+      <image:title>An industrial property is reviewed across income, condition, capital needs, and liquidity.</image:title>
+      <image:caption>An owner review aid, not a valuation or inspection report.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/net-operating-income/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/noi-waterfall.svg</image:loc>
+      <image:title>Potential rent is adjusted for vacancy, credit loss, recoveries, other income, and property operating expenses to reach NOI.</image:title>
+      <image:caption>Keep debt service, taxes on owner income, and major capital spending separate from property NOI.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/discounted-cash-flow/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/owner-cash-flow.svg</image:loc>
+      <image:title>A warehouse cash flow separates collected rent and recoveries, operating costs, and capital or leasing reserves.</image:title>
+      <image:caption>Model property cash flow by year, then test hold-period assumptions.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/reduce-commercial-property-costs/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/maintenance-efficiency.svg</image:loc>
+      <image:title>A recurring improvement cycle measures utility use, maintains systems, compares vendor scopes, and verifies results.</image:title>
+      <image:caption>Measure savings while preserving safety, service, and lease obligations.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/commercial-property-insurance/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/property-insurance.svg</image:loc>
+      <image:title>A warehouse inside a shield is surrounded by separate property, liability, business income, and deductible considerations.</image:title>
+      <image:caption>Policy wording, limits, exclusions, and endorsements determine coverage.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/commercial-property-budget/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/capital-reserve-planning.svg</image:loc>
+      <image:title>A capital and liquidity timeline links building work, vacancy, lender reserves, and cash available to the owner.</image:title>
+      <image:caption>Set reserve needs from property condition, lease obligations, and debt timing.</image:caption>
+    </image:image>
   </url>
   <url>
     <loc>https://rospopa.com/resources/commercial-leasing/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
     <image:image>
       <image:loc>https://rospopa.com/resources/images/loading-dock-trailers-1600.jpg</image:loc>
       <image:title>Loading dock of a warehouse with a shipping container on a chassis and a trailer backed up to dock doors.</image:title>
@@ -116,7 +213,7 @@
   </url>
   <url>
     <loc>https://rospopa.com/resources/chicago-commercial-real-estate/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
     <image:image>
       <image:loc>https://rospopa.com/resources/images/chicago-skyline-1600.jpg</image:loc>
       <image:title>The downtown Chicago skyline seen across the lakefront, with Willis Tower rising above the Loop.</image:title>
@@ -125,6 +222,11 @@
   </url>
   <url>
     <loc>https://rospopa.com/resources/glossary/</loc>
-    <lastmod>2026-10-06</lastmod>
+    <lastmod>2026-10-09</lastmod>
+    <image:image>
+      <image:loc>https://rospopa.com/resources/images/property-records.svg</image:loc>
+      <image:title>An organized property file includes signed leases, permits, inspection records, warranties, and service logs.</image:title>
+      <image:caption>Use the controlling signed or official record for each defined term.</image:caption>
+    </image:image>
   </url>
 </urlset>

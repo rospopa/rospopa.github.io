@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Industrial property cash flow</title>
+  <desc id="desc">A warehouse feeds a cash flow diagram with rent, operating costs, capital work, and a reserve.</desc>
+  <rect width="1200" height="675" rx="28" fill="#f2f6f1"/>
+  <path d="M72 570h1056" stroke="#cfdbd0" stroke-width="3"/>
+  <g transform="translate(95 155)">
+    <path d="M0 112 185 10l185 102v232H0z" fill="#fff" stroke="#214d35" stroke-width="8" stroke-linejoin="round"/>
+    <path d="M0 112 185 10l185 102" fill="none" stroke="#2e8b57" stroke-width="12" stroke-linejoin="round"/>
+    <path d="M36 143h298v24H36z" fill="#b8e0b0"/>
+    <path d="M50 191h92v153H50zm138 0h92v153h-92z" fill="#e5eee5" stroke="#214d35" stroke-width="6"/>
+    <path d="M80 224h32v31H80zm138 0h32v31h-32z" fill="#83bd86"/>
+    <text x="185" y="398" text-anchor="middle" font-family="Arial,sans-serif" font-size="22" font-weight="700" fill="#214d35">PROPERTY OPERATIONS</text>
+  </g>
+  <g transform="translate(520 105)">
+    <rect x="0" y="0" width="570" height="440" rx="24" fill="#fff" stroke="#d4dfd4" stroke-width="4"/>
+    <text x="42" y="58" font-family="Arial,sans-serif" font-size="25" font-weight="700" fill="#214d35">OWNER CASH FLOW</text>
+    <path d="M56 118h460M56 205h460M56 292h460M56 379h460" stroke="#e4ebe4" stroke-width="3"/>
+    <rect x="62" y="132" width="290" height="42" rx="8" fill="#2e8b57"/>
+    <text x="80" y="160" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#fff">Collected rent and recoveries</text>
+    <rect x="62" y="219" width="215" height="42" rx="8" fill="#89a98c"/>
+    <text x="80" y="247" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#173c2b">Operating costs</text>
+    <rect x="62" y="306" width="350" height="42" rx="8" fill="#b8e0b0"/>
+    <text x="80" y="334" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#173c2b">Capital and leasing reserve</text>
+    <circle cx="477" cy="153" r="32" fill="#e5f2e3"/><path d="M461 153h32m-16-16v32" stroke="#214d35" stroke-width="5"/>
+    <circle cx="477" cy="240" r="32" fill="#edf0eb"/><path d="M463 240h28" stroke="#214d35" stroke-width="5"/>
+    <circle cx="477" cy="327" r="32" fill="#e5f2e3"/><path d="M461 327h32m-16-16v32" stroke="#214d35" stroke-width="5"/>
+  </g>
+  <text x="600" y="625" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#536b58">Illustrative framework. Actual lease terms and property records control.</text>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Industrial investment decision and downside review</title>
+  <desc id="desc">An industrial property investment is evaluated across income durability, tenant rollover, capital needs, financing, and exit risk.</desc>
+  <rect width="1200" height="675" rx="28" fill="#f2f6f1"/>
+  <circle cx="600" cy="338" r="175" fill="#e2efe0" stroke="#2e8b57" stroke-width="8"/>
+  <path d="M469 344 600 272l131 72v134H469z" fill="#fff" stroke="#214d35" stroke-width="6"/>
+  <path d="M469 344 600 272l131 72" fill="none" stroke="#2e8b57" stroke-width="9"/>
+  <path d="M500 369h200v18H500zm18 38h57v71h-57zm97 0h57v71h-57z" fill="#b8e0b0" stroke="#214d35" stroke-width="4"/>
+  <g font-family="Arial,sans-serif" text-anchor="middle" fill="#214d35">
+    <rect x="75" y="115" width="245" height="82" rx="16" fill="#fff" stroke="#d2ded2" stroke-width="3"/><text x="197" y="150" font-size="18" font-weight="700">INCOME DURABILITY</text><text x="197" y="177" font-size="15">leases + collections</text>
+    <rect x="880" y="115" width="245" height="82" rx="16" fill="#fff" stroke="#d2ded2" stroke-width="3"/><text x="1002" y="150" font-size="18" font-weight="700">TENANT ROLLOVER</text><text x="1002" y="177" font-size="15">vacancy + re-leasing</text>
+    <rect x="75" y="447" width="245" height="82" rx="16" fill="#fff" stroke="#d2ded2" stroke-width="3"/><text x="197" y="482" font-size="18" font-weight="700">CAPITAL NEEDS</text><text x="197" y="509" font-size="15">roof + systems + site</text>
+    <rect x="880" y="447" width="245" height="82" rx="16" fill="#fff" stroke="#d2ded2" stroke-width="3"/><text x="1002" y="482" font-size="18" font-weight="700">DEBT + EXIT</text><text x="1002" y="509" font-size="15">maturity + proceeds</text>
+  </g>
+  <path d="M320 156h119l45 94m396-94H761l-45 94M320 488h119l45-94m396 94H761l-45-94" fill="none" stroke="#84a98a" stroke-width="5" stroke-dasharray="10 8"/>
+  <text x="600" y="610" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#536b58">Test connected risks together, not only one assumption at a time.</text>
+</svg>

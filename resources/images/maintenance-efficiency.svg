@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Industrial building maintenance and efficiency</title>
+  <desc id="desc">A warehouse connects preventive maintenance, utility monitoring, and comparable vendor scopes in a recurring improvement cycle.</desc>
+  <rect width="1200" height="675" rx="28" fill="#f2f6f1"/>
+  <circle cx="600" cy="340" r="205" fill="#fff" stroke="#d6e1d6" stroke-width="4"/>
+  <path d="M600 105a235 235 0 0 1 213 137" fill="none" stroke="#2e8b57" stroke-width="12" stroke-linecap="round"/>
+  <path d="m787 216 29 25-39 8" fill="#2e8b57"/>
+  <path d="M814 388a235 235 0 0 1-202 184" fill="none" stroke="#7eaa83" stroke-width="12" stroke-linecap="round"/>
+  <path d="m630 552-18 31-17-34" fill="#7eaa83"/>
+  <path d="M446 507a235 235 0 0 1-77-220" fill="none" stroke="#a3c99f" stroke-width="12" stroke-linecap="round"/>
+  <path d="m381 306-17-31 35 7" fill="#a3c99f"/>
+  <g transform="translate(460 232)">
+    <path d="M0 93 140 17l140 76v164H0z" fill="#edf4ec" stroke="#214d35" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M0 93 140 17l140 76" fill="none" stroke="#2e8b57" stroke-width="9"/>
+    <path d="M35 119h210v18H35zm18 42h68v84H53zm98 0h68v84h-68z" fill="#b8e0b0" stroke="#214d35" stroke-width="5"/>
+  </g>
+  <g font-family="Arial,sans-serif" font-weight="700" fill="#214d35" text-anchor="middle">
+    <rect x="75" y="95" width="260" height="85" rx="18" fill="#e5f2e3"/><text x="205" y="132" font-size="18">MEASURE + MONITOR</text><text x="205" y="157" font-size="15" font-weight="400">utility use and invoices</text>
+    <rect x="865" y="95" width="260" height="85" rx="18" fill="#e5f2e3"/><text x="995" y="132" font-size="18">MAINTAIN</text><text x="995" y="157" font-size="15" font-weight="400">systems and site condition</text>
+    <rect x="865" y="495" width="260" height="85" rx="18" fill="#e5f2e3"/><text x="995" y="532" font-size="18">COMPARE SCOPE</text><text x="995" y="557" font-size="15" font-weight="400">cost, service, and risk</text>
+    <rect x="75" y="495" width="260" height="85" rx="18" fill="#e5f2e3"/><text x="205" y="532" font-size="18">VERIFY RESULTS</text><text x="205" y="557" font-size="15" font-weight="400">and update the budget</text>
+  </g>
+  <text x="600" y="640" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#536b58">Savings should be measured after required service and obligations are protected.</text>
+</svg>

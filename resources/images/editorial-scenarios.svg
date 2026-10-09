@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Editorial industrial property scenarios</title>
+  <desc id="desc">An industrial building and several question cards represent authored educational scenarios, not real people or member posts.</desc>
+  <rect width="1200" height="675" rx="28" fill="#f2f6f1"/>
+  <rect x="78" y="74" width="1044" height="520" rx="26" fill="#fff" stroke="#d2ded2" stroke-width="4"/>
+  <path d="M160 332 350 235l190 97v175H160z" fill="#e7f0e5" stroke="#214d35" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M160 332 350 235l190 97" fill="none" stroke="#2e8b57" stroke-width="10"/>
+  <path d="M195 358h310v20H195zm22 48h75v95h-75zm112 0h75v95h-75zm112 0h55v95h-55z" fill="#fff" stroke="#214d35" stroke-width="5"/>
+  <path d="M213 378h274" stroke="#b8e0b0" stroke-width="10"/>
+  <g font-family="Arial,sans-serif">
+    <rect x="645" y="140" width="375" height="95" rx="18" fill="#edf4ec" stroke="#cbdacb" stroke-width="3"/>
+    <circle cx="700" cy="187" r="27" fill="#b8e0b0"/><text x="700" y="196" text-anchor="middle" font-size="26" font-weight="700" fill="#214d35">?</text>
+    <text x="748" y="180" font-size="19" font-weight="700" fill="#214d35">BUY OR LEASE?</text><text x="748" y="208" font-size="16" fill="#536b58">Compare total cost and fit</text>
+    <rect x="690" y="270" width="375" height="95" rx="18" fill="#f5f8f4" stroke="#cbdacb" stroke-width="3"/>
+    <circle cx="745" cy="317" r="27" fill="#dce9f3"/><text x="745" y="326" text-anchor="middle" font-size="26" font-weight="700" fill="#214d35">?</text>
+    <text x="793" y="310" font-size="19" font-weight="700" fill="#214d35">WHAT NEEDS REVIEW?</text><text x="793" y="338" font-size="16" fill="#536b58">Test leases, systems, and site</text>
+    <rect x="645" y="400" width="375" height="95" rx="18" fill="#edf4ec" stroke="#cbdacb" stroke-width="3"/>
+    <circle cx="700" cy="447" r="27" fill="#e6eedf"/><text x="700" y="456" text-anchor="middle" font-size="26" font-weight="700" fill="#214d35">?</text>
+    <text x="748" y="440" font-size="19" font-weight="700" fill="#214d35">WHAT IS THE RISK?</text><text x="748" y="468" font-size="16" fill="#536b58">Plan capital and downside</text>
+  </g>
+  <path d="M550 337h60m-15-15 15 15-15 15" fill="none" stroke="#2e8b57" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="600" y="555" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#536b58">Authored educational scenarios, not testimonials, real accounts, or member discussions.</text>
+</svg>

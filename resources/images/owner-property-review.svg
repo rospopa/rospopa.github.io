@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" role="img" aria-labelledby="title desc">
+  <title id="title">Industrial owner review dashboard</title>
+  <desc id="desc">An owner reviews a warehouse portfolio using income, condition, tenant, and capital planning indicators.</desc>
+  <rect width="1200" height="675" rx="28" fill="#f2f6f1"/>
+  <rect x="90" y="88" width="1020" height="500" rx="28" fill="#fff" stroke="#d2ded2" stroke-width="4"/>
+  <text x="145" y="150" font-family="Arial,sans-serif" font-size="28" font-weight="700" fill="#214d35">OWNER'S PROPERTY REVIEW</text>
+  <g transform="translate(145 192)">
+    <rect width="410" height="330" rx="20" fill="#e8f1e7"/>
+    <path d="M45 122 204 37l159 85v152H45z" fill="#fff" stroke="#214d35" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M45 122 204 37l159 85" fill="none" stroke="#2e8b57" stroke-width="10"/>
+    <path d="M76 151h256v21H76zm15 48h77v75H91zm111 0h77v75h-77z" fill="#b8e0b0" stroke="#214d35" stroke-width="5"/>
+    <path d="M300 199h32v76h-32z" fill="#d2e4d0" stroke="#214d35" stroke-width="5"/>
+    <text x="204" y="305" text-anchor="middle" font-family="Arial,sans-serif" font-size="20" font-weight="700" fill="#214d35">BUILDING + SITE</text>
+  </g>
+  <g transform="translate(600 192)">
+    <rect width="455" height="95" rx="16" fill="#f7f9f6" stroke="#d9e3d8" stroke-width="3"/>
+    <circle cx="54" cy="47" r="26" fill="#b8e0b0"/><path d="M43 48h22m-11-11v22" stroke="#214d35" stroke-width="4"/>
+    <text x="101" y="42" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="#214d35">INCOME</text><text x="101" y="68" font-family="Arial,sans-serif" font-size="17" fill="#536b58">Leases, collections, recoveries</text>
+    <rect y="116" width="455" height="95" rx="16" fill="#f7f9f6" stroke="#d9e3d8" stroke-width="3"/>
+    <circle cx="54" cy="163" r="26" fill="#e5eee5"/><path d="m41 164 9 9 18-20" fill="none" stroke="#214d35" stroke-width="5"/>
+    <text x="101" y="158" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="#214d35">CONDITION</text><text x="101" y="184" font-family="Arial,sans-serif" font-size="17" fill="#536b58">Roof, paving, systems, compliance</text>
+    <rect y="232" width="455" height="95" rx="16" fill="#f7f9f6" stroke="#d9e3d8" stroke-width="3"/>
+    <circle cx="54" cy="279" r="26" fill="#dce9f3"/><path d="M44 280h20m-10-10v20" stroke="#214d35" stroke-width="4"/>
+    <text x="101" y="274" font-family="Arial,sans-serif" font-size="19" font-weight="700" fill="#214d35">CAPITAL + LIQUIDITY</text><text x="101" y="300" font-family="Arial,sans-serif" font-size="17" fill="#536b58">Reserves, debt, timing, options</text>
+  </g>
+  <text x="600" y="625" text-anchor="middle" font-family="Arial,sans-serif" font-size="18" fill="#536b58">A review aid, not a property valuation or condition report.</text>
+</svg>
