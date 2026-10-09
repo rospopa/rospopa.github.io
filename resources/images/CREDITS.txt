@@ -1,14 +1,5 @@
 Public-site photographs — sources, licenses, and modifications
 
-Original vector illustrations were created for this website. They are
-schematic educational graphics, not photographs, surveys, engineering
-drawings, property inspections, or market data. No external artwork is used.
-
-battery-energy-storage.svg
-  Original conceptual illustration created for this website.
-  Shows storage components and optional backup considerations, not wiring,
-  installation design, safety instructions or a particular product.
-
 Every image below was obtained from Wikimedia Commons under an open license.
 Modifications to each: cropped, resized, converted to monochrome, and re-encoded as WebP/JPEG.
 Adaptations of CC BY-SA images are made available under the same CC BY-SA license.
@@ -54,3 +45,27 @@ chicago-skyline-{1600,800}.{webp,jpg}, chicago-skyline-social.jpg
   Author: Ryan from Toronto, Canada
   Source: https://commons.wikimedia.org/wiki/File:Chicago_skyline_(4592585863).jpg
   License: CC BY 2.0 — https://creativecommons.org/licenses/by/2.0
+
+property-planning-documents-{1600,800}.{webp,jpg}
+  Author: Thomas C. Gray / National Park Service
+  Source: https://commons.wikimedia.org/wiki/File:HFCA_1607_People_Volume_2_075.jpg_(2c8839f92042495abdbca2df044825d9).jpg
+  License: Public domain - https://commons.wikimedia.org/wiki/Template:PD-USGov-NPS
+  Modifications: cropped, resized, converted to monochrome and re-encoded.
+
+rheineck-battery-energy-storage-{1600,800}.{webp,jpg}
+  Author: Kecko
+  Source: https://commons.wikimedia.org/wiki/File:Tesvolt_battery_energy_storage_system_Rheineck.jpg
+  License: CC BY 2.0 - https://creativecommons.org/licenses/by/2.0/
+  Modifications: cropped, resized, converted to monochrome and re-encoded.
+
+industrial-rooftop-solar-{1600,800}.{webp,jpg}
+  Author: Out Walking
+  Source: https://commons.wikimedia.org/wiki/File:Rose_Calendars_Solar_Panels.jpg
+  License: CC BY-SA 4.0 - https://creativecommons.org/licenses/by-sa/4.0/
+  Modifications: cropped, resized, converted to monochrome and re-encoded.
+
+commercial-building-inspection-{1600,800}.{webp,jpg}
+  Author: Mark Nedzbala / U.S. Army Corps of Engineers Europe District
+  Source: https://commons.wikimedia.org/wiki/File:Conference_center_receives_USACE_safety_inspection_(4885136304).jpg
+  License: Public domain - https://commons.wikimedia.org/wiki/Template:PD-USGov-Military-Army
+  Modifications: cropped, resized, converted to monochrome and re-encoded.

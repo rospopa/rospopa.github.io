@@ -126,7 +126,6 @@ dd { margin: .25rem 0 0; }
 .hero-figure img, .guide-figure img { display: block; width: 100%; height: auto; border-radius: .375rem; border: 1px solid var(--line); background: var(--color-base-300); }
 .hero-figure img { aspect-ratio: 2 / 1; object-fit: cover; }
 .guide-figure img { aspect-ratio: 3 / 2; object-fit: cover; }
-.guide-figure[data-illustration="true"] img { aspect-ratio: 16 / 9; object-fit: contain; background: var(--surface-2); }
 [data-theme="monochrome-dark"] :is(.hero-figure, .guide-figure) img { filter: brightness(.88); }
 figcaption { margin-top: .55rem; font-size: .84rem; line-height: 1.5; color: var(--muted); }
 figcaption .credit { display: block; margin-top: .15rem; font-size: .76rem; }
