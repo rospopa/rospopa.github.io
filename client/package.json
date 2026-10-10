@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
+    "test": "node --test ../tests/dcf.test.mjs",
     "preview": "vite preview"
   },
   "dependencies": {

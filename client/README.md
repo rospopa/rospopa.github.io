@@ -6,6 +6,11 @@ The workspace uses the shared green day/night tokens in
 The login screen and authenticated navigation both provide theme controls;
 the selected mode also applies to dialogs and synchronizes across tabs.
 Use semantic DaisyUI/Tailwind tokens rather than fixed light-only colors.
+The property modal no longer has a Financials tab. Its calculator now lives
+on the public static site at `/resources/commercial-property-dcf-calculator/`.
+Details, Media, Documents and admin Assign Users remain. Existing financial
+values received with a property are preserved on save, not recalculated;
+server finance columns and API compatibility have deliberately not been removed.
 Calendar category colors and third-party imagery/embeds retain their own
 meaning. Validate with `npm run build` and `npm run lint`.
 

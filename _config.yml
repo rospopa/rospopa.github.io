@@ -19,4 +19,6 @@ exclude:
   - run-31012424458-logs.zip
   - build-site.mjs
   - site-seo.mjs
+  - tests
+  - tests/**
   - resources/icons/README.md

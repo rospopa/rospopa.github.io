@@ -168,6 +168,7 @@ Plain-English definitions of building, lease, underwriting, and Illinois records
 - Why is Chicago a major industrial and logistics hub?
 - See all 100 questions
 - Read real public forum questions and Pavlo's take
+- Use the free commercial property DCF calculator
 
 ## Official starting points
 
@@ -232,6 +233,10 @@ Common warehouse, lease, cap rate, selling, diligence, Illinois tax, zoning and 
 ### Industrial investor Q&A
 
 Educational answers to experienced buyers' pricing, functionality, tenant, diligence, Illinois tax, debt and exit questions.
+
+### Free DCF and investment calculator
+
+Model income, expenses, debt and a sale. See cap rate, IRR, NPV and equity multiples in yearly or monthly views; no account or calculator API.
 
 ### Real public forum questions
 
@@ -2572,6 +2577,10 @@ For the operating and financial questions behind this decision:
 - DCF explained for commercial real estate owners
 - How to budget expenses, reserves and capital for a commercial building
 
+## Test income and financing assumptions
+
+Use the free cap-rate, debt and DCF calculator to examine a purchase, hold, refinance and sale. Results are educational, not a valuation or lender approval.
+
 ---
 
 Source: https://rospopa.com/resources/retirement-cre-investing/
@@ -3735,6 +3744,10 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 - Illinois property taxes and appeals
 - All commercial property owner questions
 
+## Where can an owner model these numbers?
+
+The free commercial property investment calculator combines income, expenses, debt, capital costs and exit assumptions. No account is needed; entries stay in the page's memory.
+
 ---
 
 Source: https://rospopa.com/resources/net-operating-income/
@@ -3840,6 +3853,10 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 - Investment diligence and financing
 - All commercial property owner questions
 
+## Try the free income and DCF calculator
+
+Model NOI, debt service and investment returns with your own assumptions. Reconcile the tool's reserve-adjusted NOI with standard NOI before comparing cap rates.
+
 ---
 
 Source: https://rospopa.com/resources/discounted-cash-flow/
@@ -3932,6 +3949,109 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 - Investment diligence and financing
 - How to budget expenses, reserves and capital for a commercial building
 - All commercial property owner questions
+
+## Build a cash-flow model without an account
+
+The free commercial property DCF calculator provides yearly and monthly grids, levered and debt-free IRR, NPV and equity multiples. Its optional example is illustrative, not market data.
+
+---
+
+Source: https://rospopa.com/resources/commercial-property-dcf-calculator/
+Published: 2026-10-10 · Updated: 2026-10-10
+
+Free owner tool · No account required
+
+# Free commercial property DCF and investment calculator
+
+By Pavlo Rospopa · Last updated October 10, 2026
+
+## Start with your assumptions
+
+Model income, expenses, debt, capital costs and a sale over a one-to-ten-year hold. Compare NOI, cap rate , cash-on-cash, IRR, NPV and equity multiples without sending your inputs to a server.
+
+The calculator begins blank. The optional example is hypothetical, not market data, a recommended rate or a real property. Entries stay in this page's memory; reload clears them. No login, property database or calculator API is used.
+
+## Discounted cash flow calculator
+
+The interactive calculator requires JavaScript. The formulas and model limitations below remain readable without it.
+
+Load illustrative exampleClear all inputsExport annual CSV
+
+Blank model. Entries stay only in this page's memory and disappear on reload.
+
+Assumption: editableComputed: formula resultReference: not a model driverHealthyWatchRisk
+
+Healthy / Watch / Risk are inherited illustrative screening bands, not market benchmarks or recommendations: DSCR 1.25 / 1.00; cap rate 7% / 5%; cash-on-cash 8% / 4%; levered IRR 15% / 8%; debt yield 10% / 8%; yield on cost 8% / 6%. Values below the second band show Risk. Other metrics have no band.
+
+### Income, deal and debt assumptions
+
+### Optional lease-by-lease model
+
+All leases are modeled together. If you use a rent roll, do not also include the same rent in the scheduled-rent input. Detailed expenses add to the operating-expense total; avoid counting them twice.
+
+Add hypothetical lease
+
+### Scenarios and sensitivity
+
+Base, Upside and Downside are hypothetical assumption sets. Percentage-point deltas are illustrative, not forecasts; blank absolute overrides use the main inputs. Annual overrides remain shared across cases.
+
+### Cash-flow grid
+
+Annual assumption overrides replace that year's modeled line, spread evenly across its months. Clear an override to restore the engine result. Monthly values are computed. Loan balances, sale and waterfall rows are always computed.
+
+ViewYearlyMonthlyPrevNext
+
+Scroll horizontally to see every column. Focus the table region and use the arrow keys on a keyboard.
+
+### Investment metrics
+
+Select Help for definitions. Not defined means a denominator, initial investment or IRR root is missing; it does not mean zero return.
+
+## What formulas does this DCF calculator use?
+
+Effective gross income (EGI) = scheduled rent - vacancy/credit loss + percentage rent + other income + recoveries.
+
+Standard NOI = EGI - operating expenses - management fees - property taxes - insurance. This tool's reserve-adjusted NOI also deducts the separately entered replacement reserve. Do not compare it with a reserve-free broker or lender NOI without reconciling the convention.
+
+GRM = price / annual scheduled rent. Cap rate = year-one reserve-adjusted NOI / price.
+
+Initial equity = price + closing costs - loan + upfront interest reserve. Cash-on-cash = (year-one reserve-adjusted NOI - debt service) / initial equity, before income tax and one-time capital events.
+
+Monthly payment = principal × monthly rate / [1 - (1 + monthly rate) -number of payments ]. At a zero rate, payment = principal / number of payments. Interest-only periods are in years; principal amortization begins afterward.
+
+DSCR = reserve-adjusted NOI / annual debt service. Debt yield = reserve-adjusted NOI / initial loan. LTV = loan / price.
+
+Gross sale value = annualized sale-month reserve-adjusted NOI / exit cap rate. Net sale proceeds deduct selling costs, outstanding debt and modeled exit taxes. A shortfall stays negative; a refinance or balloon payoff can also require extra cash.
+
+Total equity cash flow = reserve-adjusted NOI - TI - LC - additional capex - debt service + reserve draw + gross refinance proceeds - refinance payoff - refinance costs - operating tax + net sale proceeds. LP and sponsor distributions allocate this total; they are not subtracted again from the total-equity return.
+
+NPV = sum of cash flow in year t / (1 + discount rate) t , starting at t = 0. IRR is a rate at which NPV equals zero. Equity multiple = net cash returned over the hold / initial investment. Negative contributions reduce the net-cash multiple. IRR may be undefined or have multiple roots when signs change repeatedly.
+
+Unlevered returns run the model again without borrowing, loan payoff or refinancing, rather than treating leveraged sale proceeds as debt-free cash. Both annual IRRs use end-of-year timing; monthly viewing does not turn them into monthly IRRs. The grid displays whole dollars; internal growth and loan formulas use full precision.
+
+## What should owners verify before using the results?
+
+This is education, not investment, tax, legal or insurance advice . Pavlo Rospopa provides this free planning tool; outputs are not appraisals, lender approvals or forecasts. Review leases, budgets and tax treatment with the appropriate professionals.
+
+Annual growth compounds monthly. The model sells in the selected month and stops operating cash flows then. It uses annualized sale-month NOI, not forward-year NOI, and a simplified lease-renewal probability with downtime and renewal TI/LC. It does not implement a full new-tenant leasing strategy, real lease CAM reconciliation, tax-return calculations or all entity-specific rules. Fields labeled Reference are kept for comparison with the former workspace form but do not independently change cash flows.
+
+Tax modeling is deliberately simplified: principal payments and reserve deposits are not income-tax deductions; interest and illustrative building depreciation are used. The 39-year convention, assumed bonus allocation, loss usage, recapture, installment-sale percentage and 1031 toggle are planning assumptions, not determinations of eligibility, law or timing. A full 1031 toggle assumes complete exit-tax deferral without checking qualification. A CPA must review these inputs and any modeled loss benefit.
+
+The LP/sponsor allocation returns LP capital, then pays accrued preferred return, then a simplified sponsor catch-up and promote. It is not a partnership agreement. Total-equity IRR is different from the return to an individual LP or sponsor. Reference-only GP ownership does not implement a separate GP capital-return tier.
+
+Use the NOI guide , DCF assumptions guide and budget and reserve planning to reconcile inputs. Do not enter sensitive personal or property information on a shared device.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+
+## Related owner guides
+
+- Cap rate, financing and investment diligence
+- Owner questions about income and expenses
+- Commercial real estate tax and exit planning
 
 ---
 
@@ -4242,6 +4362,10 @@ Passive-loss rules can suspend a deduction even when a study shows a large first
 - How can owners reduce commercial building operating costs?
 - Investment diligence and financing
 - All commercial property owner questions
+
+## Connect the budget with investment cash flow
+
+Use the free budget-to-DCF calculator to separate operating costs, replacement reserves, TI, LC, capex and debt. Avoid entering detailed expense items again in a total that already includes them.
 
 ---
 

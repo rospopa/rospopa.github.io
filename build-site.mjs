@@ -6,6 +6,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
+import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { decodeContactValue } from './resources/contact-data.mjs';
 import { updateSeo, buildAssistantDirectory } from './site-seo.mjs';
@@ -33,6 +34,7 @@ const PAGES = [
   'resources/commercial-property-owner-questions/index.html',
   'resources/net-operating-income/index.html',
   'resources/discounted-cash-flow/index.html',
+  'resources/commercial-property-dcf-calculator/index.html',
   'resources/reduce-commercial-property-costs/index.html',
   'resources/commercial-property-insurance/index.html',
   'resources/commercial-property-budget/index.html',
@@ -219,6 +221,27 @@ for (const page of PAGES) {
     }
   }
   if (html !== await readFile(page, 'utf8')) await writeFile(page, html);
+}
+// Version the calculator dependency graph, not just its entry module.
+for (const name of ['dcf-metrics.mjs', 'dcf-calculator.mjs']) {
+  const file = `resources/${name}`;
+  if (!existsSync(file)) continue;
+  let source = await readFile(file, 'utf8');
+  for (const dependency of ['dcf-engine.mjs', 'dcf-fields.mjs', 'dcf-metrics.mjs']) {
+    if (dependency === name || !source.includes(`./${dependency}`)) continue;
+    const version = createHash('sha256').update(await readFile(`resources/${dependency}`)).digest('hex').slice(0, 10);
+    source = source.replaceAll(new RegExp(`\\./${dependency.replace('.', '\\.')}(?:\\?v=[a-f0-9]+)?`, 'g'), `./${dependency}?v=${version}`);
+  }
+  await writeFile(file, source);
+}
+const calculatorPage = 'resources/commercial-property-dcf-calculator/index.html';
+if (existsSync(calculatorPage)) {
+  let html = await readFile(calculatorPage, 'utf8');
+  for (const name of ['dcf-calculator.css', 'dcf-calculator.mjs']) {
+    const version = createHash('sha256').update(await readFile(`resources/${name}`)).digest('hex').slice(0, 10);
+    html = html.replaceAll(new RegExp(`/resources/${name.replace('.', '\\.')}(?:\\?v=[a-f0-9]+)?`, 'g'), `/resources/${name}?v=${version}`);
+  }
+  await writeFile(calculatorPage, html);
 }
 await updateSeo([...PAGES, 'search/index.html', '404.html'], lastmod);
 const records = [], pages = [];
