@@ -13,9 +13,10 @@ const TITLES = {
   'commercial-investment': 'Chicago Commercial Property Investment and Purchase Diligence',
   'commercial-leasing': 'Chicago Commercial Leasing: Costs and Lease Checklist',
   'commercial-property-budget': 'Commercial Property Budgets, Reserves and Capex vs Opex',
+  'commercial-property-dcf-calculator': 'Free Commercial Property DCF Calculator: NOI, IRR and Returns',
   'commercial-property-insurance': 'Commercial Property Insurance for Illinois Building Owners',
   'commercial-property-owner-questions': 'Commercial Property Owner Questions: NOI, Costs and Taxes',
-  community: 'Industrial Perspectives and the Invite-only Board',
+  community: 'Commercial Property Forum Questions: Real Public Discussions',
   'discounted-cash-flow': 'Commercial Real Estate DCF: NPV, IRR and Exit Cap Explained',
   'industrial-investor-faq': 'Industrial Investor FAQ: Pricing, Diligence, Debt and Exit',
   'industrial-real-estate-faq': 'Industrial Real Estate FAQ: 100 Common Questions Answered',
@@ -27,6 +28,7 @@ const TITLES = {
   'battery-energy-storage': 'Battery Energy Storage Systems: Industrial Owner Guide',
 };
 const DESCRIPTIONS = {
+  'commercial-property-dcf-calculator': 'Free commercial property DCF calculator for NOI, cash flow, debt service, cap rate, IRR, NPV and equity multiple. No login; inputs stay in your browser.',
   home: 'Pavlo Rospopa focuses on Chicagoland industrial investment sales, 10,000 to 100,000 SF. Explore owner guides to value, costs, leases and Illinois taxes.',
   resources: 'Explore Chicagoland industrial real estate guides to building types, due diligence, Illinois taxes, selling, leasing, owner expenses and investment analysis.',
   '404': 'This page is not available. Find public Chicagoland industrial real estate guides on property research, selling, leasing, taxes and owner expenses.',
@@ -36,7 +38,7 @@ const DESCRIPTIONS = {
   'chicagoland-industrial-submarkets': 'Explore Chicagoland industrial submarkets, logistics corridors and freight infrastructure. Use location diligence questions, not invented market statistics.',
   'commercial-property-insurance': 'Illinois owner guide to commercial building insurance, loss of rents, liability, flood exclusions, coinsurance, deductibles and renewal cost review.',
   'commercial-property-owner-questions': 'Answers for Illinois commercial property owners on NOI, DCF, expense cuts, tax appeals, CAM, insurance, reserves and debt, with links to detailed guides.',
-  community: 'Read 30 simulated editorial perspectives on industrial deals, written by Pavlo Rospopa. The separate invite-only board does not imply member activity.',
+  community: 'Read attributed public forum quotes on commercial property, NOI, leases, CAM, insurance and Cook County taxes, with Pavlo Rospopa’s take and guide links.',
   glossary: 'Understand industrial real estate, leasing, underwriting and Illinois property terms. Find plain-English definitions of NOI, DCF, CAM, reserves and debt.',
   'illinois-industrial-property-taxes': 'Understand Illinois industrial property taxes, assessment, bills, appeals and Cook County incentives. Plan owner budgets, tenant recoveries and sale review.',
   'industrial-building-types': 'Compare industrial building types and specifications for Chicagoland assets, 10,000 to 100,000 SF. Review loading, power, clear height and verification.',
@@ -163,6 +165,7 @@ export async function updateSeo(files, lastmod) {
     if (article) {
       const terms = [...html.matchAll(/href="\/resources\/glossary\/#([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)];
       if (terms.length) article.mentions = [...new Map(terms.map(([, id, label]) => [id, { '@type': 'DefinedTerm', '@id': ORIGIN + '/resources/glossary/#' + id, name: text(label), inDefinedTermSet: { '@id': ORIGIN + '/resources/glossary/#terms' } }])).values()];
+      if (slug === 'community') article.citation = [...new Set([...html.matchAll(/<blockquote\b[^>]*\bcite="([^"]+)"/g)].map(m => m[1]))];
     }
     for (const faq of nodes.filter(n => n['@type'] === 'FAQPage')) {
       for (const question of faq.mainEntity) {
@@ -170,9 +173,9 @@ export async function updateSeo(files, lastmod) {
         if (!heading) throw new Error(`${file}: FAQ has no visible question: ${question.name}`);
         let body = html.slice(heading.index + heading[0].length).split(/<h[1234]\b|<\/(?:section|article)>/)[0];
         if (slug === 'community') {
-          const note = body.match(/<div class="perspective author-note">([\s\S]*?)<\/div>/);
+          const note = body.match(/<div class="forum-take author-note">([\s\S]*?)<\/div>/);
           if (!note) throw new Error(`${file}: editorial FAQ has no author note: ${question.name}`);
-          body = note[1].replace(/<p class="perspective-label">[\s\S]*?<\/p>/, '');
+          body = note[1].replace(/<p class="take-label">[\s\S]*?<\/p>/, '');
         }
         const answer = text(body);
         if (!answer) throw new Error(`${file}: FAQ has no visible answer: ${question.name}`);

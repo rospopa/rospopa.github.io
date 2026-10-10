@@ -175,6 +175,8 @@ import { decodeContactValue } from './contact-data.mjs?v=ad187cf99d';
     var questions = Array.prototype.slice.call(document.querySelectorAll('main section h3[id^="q-"]')).map(function (h3) {
       var parts = [h3], el = h3.nextElementSibling;
       while (el && !/^H[23]$/.test(el.tagName)) { parts.push(el); el = el.nextElementSibling; }
+      var card = h3.closest('.editorial-topic');
+      if (card) parts = [card];
       return { parts: parts, section: h3.closest('section'), text: parts.map(function (p) { return p.textContent; }).join(' ').toLowerCase() };
     });
     var sections = questions.map(function (q) { return q.section; }).filter(function (s, i, all) { return all.indexOf(s) === i; });

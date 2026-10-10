@@ -22,6 +22,21 @@ structured data is not a promise of Google rich results or search ranking.
 The owner hub is linked in the shared footer, not added to the top navigation.
 New pages reuse the public template and generated business contact strip.
 
+The free `resources\commercial-property-dcf-calculator\` replaces the private
+property modal's Financials tab. Its vanilla ES modules (`dcf-engine.mjs`,
+`dcf-fields.mjs`, `dcf-metrics.mjs`, `dcf-calculator.mjs`) run only in the browser;
+no auth, calculator API, database records or automatic persistence are used.
+Keep blank startup and explicitly hypothetical example inputs. Read the page's
+visible formula/convention/limitation sections before changing calculations.
+Annual overrides must drive the same engine shown by metrics; monthly cells,
+sale, balances and distributions are computed. Total-equity returns must not
+subtract LP/sponsor distributions again; debt-free returns need a separate run.
+Run `node --test tests\dcf.test.mjs`, the static build twice, and client build/lint/tests.
+The static build versions the calculator entry, stylesheet and ES-module dependencies.
+The general property API and finance database columns remain intact; Details
+saves preserve existing finance values via the property object, without editing
+or recalculating them. Do not delete those records or migrations.
+
 `.github\workflows\update-news.yml` runs the `--news` variant daily and commits
 the result with `[skip render]` so only GitHub Pages redeploys. GitHub pauses
 scheduled workflows after 60 days without repository activity; re-enable it
@@ -40,7 +55,7 @@ moved into the answer-first In brief box, not duplicated; keep condensed copy
 and owner decision notes intact. Current licensed guide photographs supply
 preview URLs, actual dimensions, alt text, credit text and license metadata.
 Search supports `?q=` but stays noindex; the 404 route is intentionally unlinked.
-The public community page contains educational editorial scenarios; the real
+The public community page contains attributed public forum quotes and editorial answers; the real
 member board remains on the noindex authenticated workspace, outside discovery
 files. Do not restore the removed homepage bio, education or license number.
 Public pages preload the existing Inter font with matching CORS credentials;
@@ -89,9 +104,13 @@ regions independently. Public headers keep contact and theme controls; workspace
 Sign In lives in the footer, not the header. The logo's accessible name reads
 "Rospopa, Pavlo, home" rather than treating the two wordmark lines as one word.
 
-Community scenarios are editorial simulated perspectives, not member posts.
-Keep the invite-only board separate and do not imply participation or activity
-without actual member data. The board is members-only: the API requires a
+The public community guide uses short, attributed quotations from independently
+verified public forum posts. Quotes retain exact wording and spelling; keep
+source links, displayed author names and original post dates. Do not reproduce
+personal finances, contact details or private/login-only material. Separate
+Pavlo's visible editorial take from each quote; only that answer belongs in
+FAQPage, never testimonials or Review schema. Keep the authenticated member
+board separate and do not imply participation, affiliation or endorsement. The board is members-only: the API requires a
 signed-in session to read or post, and the public site only links to sign in. Guide publication metadata remains intact; prominent
 bulk publication stamps are omitted rather than represented as market freshness.
 The homepage bio uses the linked official advisor profile; add no career/deal

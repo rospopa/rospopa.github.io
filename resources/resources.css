@@ -252,6 +252,13 @@ thead th { background: var(--color-base-200); border-top: 0; }
 .toc-count { color: var(--muted); font-size: .85em; }
 .editorial-topic { margin: 0 0 1.75rem; padding: 1.1rem 1.25rem; border: 1px solid var(--line); border-radius: .5rem; background: var(--color-base-100); }
 .editorial-topic h3 { margin-top: 0; }
+.forum-quote { margin: 1rem 0; padding: .75rem 1rem; border-left: 3px solid var(--line); background: var(--paper); }
+.forum-quote p { margin: 0 0 .65rem; }
+.forum-quote footer { color: var(--muted); font-size: .85rem; }
+.forum-quote cite { font-style: normal; }
+.forum-take { margin: 1rem 0; }
+.forum-take p { margin: .5rem 0; }
+.forum-guide { margin-bottom: 0; }
 .scenario-meta { color: var(--muted); font-size: .9rem; }
 .perspective { padding: .75rem 0; border-top: 1px solid var(--line); }
 .perspective p { margin: .5rem 0; }
