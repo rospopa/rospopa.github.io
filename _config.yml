@@ -18,4 +18,5 @@ exclude:
   - client_output.log
   - run-31012424458-logs.zip
   - build-site.mjs
+  - site-seo.mjs
   - resources/icons/README.md

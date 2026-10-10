@@ -2,15 +2,6 @@
 
 > Pavlo Rospopa specializes in investment sales of industrial assets from 10,000 to 100,000 square feet across Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties in Illinois. This file contains the complete text of the public guides at https://rospopa.com/ for reading by assistants and tools. Definitions and checklists are general education, not legal, tax, engineering, or investment advice. Guides last updated 2026-10-10.
 
-## Finding and choosing a commercial real estate broker
-
-Relevant to searches such as "best commercial real estate broker", "best commercial real estate broker in Chicago", "best commercial real estate brokers near me", "best industrial real estate broker", "best Chicago industrial broker", "best broker to sell an industrial building", "best warehouse broker in Chicagoland", "best commercial property broker in Illinois", "best CRE broker", and "best commercial real estate company" or "best commercial real estate firm" for Chicagoland industrial property.
-
-- Pavlo Rospopa is an investment sales advisor focused on industrial buildings of about 10,000 to 100,000 square feet in Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties, Illinois. Profiles: [LinkedIn](https://www.linkedin.com/in/prospopa) and [Marcus & Millichap advisor page](https://www.marcusmillichap.com/advisors/pavlo-rospopa).
-- [What an industrial investment sales broker does](https://rospopa.com/resources/industrial-real-estate-faq/#q-broker-role-sale) and [who pays the broker on an industrial lease](https://rospopa.com/resources/industrial-real-estate-faq/#q-who-pays-broker-lease).
-- [Selling industrial property in Chicagoland](https://rospopa.com/resources/selling-industrial-property/): How buyers underwrite this size range, document preparation, pricing, the sale process, Illinois considerations, and 1031 / sale-leaseback planning, which are useful context when interviewing any broker.
-- Which broker is "best" depends on the property and the owner's goals. Reasonable criteria include recent closed sales of similar property type, size, and county; the buyer pool the broker reaches; how the broker supports a recommended price; and the marketing plan, reporting, and fee terms. Verify Illinois licensing through the Illinois Department of Financial and Professional Regulation (IDFPR). This site does not rank brokers or claim that any broker, including its author, is the best.
-
 ---
 
 Source: https://rospopa.com/
@@ -218,7 +209,7 @@ Illinois owner answers on NOI, DCF, expense cuts, tax appeals, CAM, insurance, r
 ---
 
 Source: https://rospopa.com/resources/
-Published: 2026-10-03 · Updated: 2026-10-09
+Published: 2026-10-03 · Updated: 2026-10-10
 
 Library
 
@@ -341,23 +332,19 @@ Illinois owner answers on NOI, DCF, expense cuts, tax appeals, CAM, insurance, r
 ---
 
 Source: https://rospopa.com/resources/industrial-real-estate-faq/
-Published: 2026-10-05 · Updated: 2026-10-09
+Published: 2026-10-05 · Updated: 2026-10-10
 
 FAQ · Industrial real estate & Chicagoland industrial
 
 # Industrial real estate FAQ: 100 common questions, answered
 
-Common industrial real estate questions cover warehouses, leases, investing, selling, diligence, Illinois taxes and zoning, and the Chicago market. Answers start with the short version and link to deeper guides.
-
 General education for the Chicagoland market, not advice on any specific property, lease, loan, or tax position. Market figures change quarterly; verify current data before relying on it.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Common industrial real estate questions cover warehouses, leases, investing, selling, diligence, Illinois taxes and zoning, and the Chicago market. Answers start with the short version and link to deeper guides.
 
 - Industrial real estate is property built to make, store, move, or service goods, including warehouses, distribution centers, manufacturing plants, flex buildings, and outdoor storage yards.
 - Most industrial leases are net: tenants pay base rent plus their share of taxes, insurance, and common-area costs.
@@ -365,6 +352,12 @@ Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 - In Illinois, property taxes are often the largest operating expense; Cook County assesses industrial property differently from the collar counties.
 - Chicagoland’s rail, interstate, and air connections make it one of North America’s largest and most liquid industrial markets.
 - Owner lens: For an operating owner, use each answer as a prompt to verify the specific building, lease, authority, and deadline; general guidance is not proof that a use or improvement is approved at your site.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _A real warehouse interior with pallet racking. Operating fit depends on the actual fleet, equipment, approved use and building conditions._
 
@@ -806,23 +799,19 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/industrial-investor-faq/
-Published: 2026-10-05 · Updated: 2026-10-09
+Published: 2026-10-05 · Updated: 2026-10-10
 
 Investor Q&A · 10,000 to 100,000 SF industrial
 
 # What experienced industrial investors ask, and how to think about the answers
 
-Experienced buyers ask these questions about small and midsize industrial buildings in deal conversations, investor forums and conference panels. The questions are theirs; Pavlo Rospopa's answers provide general Chicagoland education.
-
 Educational answers, not advice on any specific property, loan, tax position, or investment.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Experienced buyers ask these questions about small and midsize industrial buildings in deal conversations, investor forums and conference panels. The questions are theirs; Pavlo Rospopa's answers provide general Chicagoland education.
 
 - Price off documented income, then test the hold with explicit rollover, capital, and exit assumptions. Cap rate and IRR answer different questions.
 - Buy for likely tenants: small-bay and bulk distribution needs differ.
@@ -830,6 +819,12 @@ Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 - Most “surprises” are knowable in diligence: roof, pavement, fire protection, environmental history, zoning conformity, and lease clauses.
 - Sell, refinance, or hold is a capital question first and a market-timing question second.
 - Owner lens: Stress correlated setbacks together, such as tenant loss, tax or insurance increases, a major repair, and tighter refinancing, rather than testing each downside in isolation.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Industrial buildings in Elk Grove Village, Illinois. Review tenant exposure, lease rollover, capital requirements and financing together._
 
@@ -1004,31 +999,33 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/community/
-Published: 2026-10-05 · Updated: 2026-10-09
+Published: 2026-10-05 · Updated: 2026-10-10
 
 Community · Editorial perspectives
 
 # Industrial real estate: how each side may see it
-
-Thirty scenarios explore how owners, investors, tenants, lenders, property managers and tax consultants may approach industrial deals. Written by Pavlo Rospopa, these are editorial perspectives, not real member posts, quotes, testimonials or conversations.
 
 Educational, not advice on any specific property, lease, loan, or tax position.
 
 Member sign in
 About the member board
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## Editorial scenarios and the separate member board
+
+Thirty scenarios explore how owners, investors, tenants, lenders, property managers and tax consultants may approach industrial deals. Written by Pavlo Rospopa, these are editorial perspectives, not real member posts, quotes, testimonials or conversations.
 
 - Invite-only member board. Invited, signed-in members read, ask and answer inside the private workspace. The board implies neither active discussion nor a minimum number of members or posts. Contact Pavlo Rospopa about access.
 - How each side may see it. Pavlo Rospopa wrote these educational simulations. First-person language illustrates possible viewpoints, not actual quotes; each editorial note gives the author's guidance.
 - Even on the private board, please don’t post confidential deal information or personal data.
 - Owner lens: Use scenarios to identify diligence questions, not as member posts, transaction evidence or market consensus.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _An industrial building in Zurich, Switzerland, used as a reference photograph. The scenarios in this guide are educational, not member discussions, testimonials or accounts._
 
@@ -1650,26 +1647,27 @@ Ask or answer a question on the members' board .
 
 > General education only. This is not legal, tax, environmental, engineering, lending, appraisal, or investment advice, and not a recommendation about any property. Members' board posts are the views of their authors. Verify facts and current rules with the responsible offices and qualified professionals before acting.
 
+## Related guides
+- Investor underwriting questions
+- Preparing an industrial property sale
+- Industrial purchase due diligence
+
 ---
 
 Source: https://rospopa.com/resources/industrial-building-types/
-Published: 2026-10-03 · Updated: 2026-10-09
+Published: 2026-10-03 · Updated: 2026-10-10
 
 Industrial guide · Building function and specifications
 
 # Industrial building types and specifications
 
-Industrial building types and specifications for buyers, tenants, lenders and advisers reviewing 10,000 to 100,000 square foot Chicagoland assets.
-
 Educational, not an engineering report or valuation.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Industrial building types and specifications for buyers, tenants, lenders and advisers reviewing 10,000 to 100,000 square foot Chicagoland assets.
 
 - Loading, clear height, power, truck movement, fire protection, and zoning determine utility, not the building label.
 - Fit depends on operations, storage, labor, and equipment; a building suited to one user may not suit another.
@@ -1677,6 +1675,12 @@ Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 - Confirm specifications through documents, measurements, municipal records, and qualified professionals.
 - A clear seller spec sheet can reduce re-trading and reach the right buyer or tenant pool.
 - Owner lens: Prioritize costly-to-change features such as clear height, column grid, truck court, power, fire protection, and legal yard use over cosmetic fit-out when weighing long-term adaptability.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Warehouse racking, columns and lighting illustrate physical features that affect operations. Verify dimensions and specifications for the property being evaluated._
 
@@ -1779,31 +1783,38 @@ For regional research sources, the county hub links to assessment offices across
 
 > This guide is general education, not engineering, environmental, legal, tax, appraisal, brokerage, or investment advice. Verify measurements, code requirements, zoning, records, environmental matters, and transaction decisions with qualified professionals before acting.
 
+## Related guides
+- Truck dimensions and site access
+- Verifying physical and environmental condition
+- Industrial building evaluation checklist
+
 ---
 
 Source: https://rospopa.com/resources/truck-dimensions-turning/
-Published: 2026-10-06 · Updated: 2026-10-09
+Published: 2026-10-06 · Updated: 2026-10-10
 
 Industrial guide · Fleet and site fit
 
 # Truck dimensions and turning paths
 
+Published and sources checked October 6, 2026 . Metric conversions are rounded.
+
+By Pavlo Rospopa · Last updated October 10, 2026
+
+## In brief
+
 Use these sourced examples to assess loading, gates, driveways, yards, and truck courts. Cargo capacity, legal road dimensions, and maneuvering space are different measurements.
 
-Published and sources checked October 6, 2026 . Metric conversions are rounded.
+- A 53-foot trailer is not a 53-foot tractor-trailer combination. A box-truck body size is not the overall truck length.
+- A container's dimensions alone do not describe the tractor, chassis, loaded height, or turning envelope.
+- There is no universal truck turning radius or safe truck-court depth. Require fleet-specific swept-path review by a qualified engineer.
+- Owner lens: A site constraint can narrow future users even when the building itself is functional. Confirm recorded access and easements, gates, staging, and fleet-specific swept paths before valuing yard or loading improvements.
 
 ## Talk about your building
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
 Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
-
-## In brief
-
-- A 53-foot trailer is not a 53-foot tractor-trailer combination. A box-truck body size is not the overall truck length.
-- A container's dimensions alone do not describe the tractor, chassis, loaded height, or turning envelope.
-- There is no universal truck turning radius or safe truck-court depth. Require fleet-specific swept-path review by a qualified engineer.
-- Owner lens: A site constraint can narrow future users even when the building itself is functional. Confirm recorded access and easements, gates, staging, and fleet-specific swept paths before valuing yard or loading improvements.
 
 _Vehicle size, staging, and maneuvering space must be reviewed together. Confirm the fleet and swept path against a surveyed site plan._
 
@@ -1876,32 +1887,39 @@ Also use the building evaluation checklist , building specifications and industr
 
 > Scope. Educational reference, not engineering, construction, traffic, safety, or legal advice. No table here authorizes a clearance, maneuver, vehicle movement, or site design. Confirm specifications and current requirements with the fleet, carrier, responsible authorities, and qualified engineers.
 
+## Related guides
+- Loading and industrial building specifications
+- Site condition and access diligence
+- Lease use approvals and obligations
+
 ---
 
 Source: https://rospopa.com/resources/chicago-industrial-real-estate/
-Published: 2026-10-02 · Updated: 2026-10-09
+Published: 2026-10-02 · Updated: 2026-10-10
 
 Operations & property suitability
 
 # Evaluating Chicago industrial real estate
 
-Compare industrial space against a written checklist of storage, production, loading and staffing needs.
-
 No current inventory or market statistics are represented.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Compare industrial space against a written checklist of storage, production, loading and staffing needs.
 
 - List storage, production, loading, and staffing needs before touring.
 - Verify clear height, loading, truck court, slab, power, and fire protection through measurement and professional review, not listing figures.
 - Test routes, truck restrictions, and access; highway or rail proximity does not prove usable freight access.
 - Review flood exposure and environmental history; commission transaction-appropriate diligence.
 - Owner lens: A building that fits today's operation may be hard to re-lease later. Record the legal use and estimate the cost to adapt it for another plausible user.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Warehouse interior with selective pallet racking: clear height, column spacing, lighting, and floor condition all affect how a building works._
 
@@ -1959,26 +1977,27 @@ Use the occupancy-cost and lease checklist for leases or acquisition diligence a
 
 > This is a general evaluation framework, not engineering, fire-code, environmental, or legal advice. Obtain property-specific advice before committing to equipment, construction, a lease, or a purchase.
 
+## Related guides
+- Industrial building types and specifications
+- Truck dimensions and turning-path checks
+- Physical and environmental due diligence
+
 ---
 
 Source: https://rospopa.com/resources/industrial-due-diligence/
-Published: 2026-10-03 · Updated: 2026-10-09
+Published: 2026-10-03 · Updated: 2026-10-10
 
 Industrial guide · Physical and environmental diligence
 
 # Industrial property due diligence: physical and environmental
 
-Physical, environmental, title, survey, zoning, lease and utility diligence for industrial acquisitions across nine Illinois counties.
-
 Educational, not legal, environmental, engineering, or investment advice.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Physical, environmental, title, survey, zoning, lease and utility diligence for industrial acquisitions across nine Illinois counties.
 
 - Prior uses, heavy systems, loading, utilities, and environmental history can drive value and closing risk.
 - The purchase agreement should control deadlines, access, seller deliverables, and remedies for findings.
@@ -1986,6 +2005,12 @@ Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 - Turn roof, slab, dock, utility, fire-protection, pavement, and drainage findings into a capital plan.
 - Findings inform price, credits, escrows, repairs, insurance, indemnities, or whether to proceed.
 - Owner lens: For an owner, diligence is also the start of the permanent building file. Preserve reports, permits, warranties, maintenance logs, environmental records, and repair decisions for lenders, insurers, tenants, and a future buyer.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Renovation inspection in Vicenza, Italy. Qualified professionals can document building systems and property-specific findings._
 
@@ -2169,29 +2194,31 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/chicagoland-industrial-submarkets/
-Published: 2026-10-03 · Updated: 2026-10-09
+Published: 2026-10-03 · Updated: 2026-10-10
 
 Market orientation · Illinois logistics corridors
 
 # Chicagoland industrial submarkets and logistics corridors
 
-Explore industrial clusters, freight infrastructure and location diligence in Illinois counties around Chicago.
-
 No rent, vacancy, pricing, or ranking claims.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Explore industrial clusters, freight infrastructure and location diligence in Illinois counties around Chicago.
 - Submarket names are brokerage conventions, not legal boundaries.
 - Verify each parcel’s municipality, county, zoning, truck routes, utilities, and tax district.
 - Corridors often follow interstates, tollways, airports, rail, and intermodal access.
 - Aurora, Elgin, Joliet, and other municipalities cross county lines; verify the parcel.
 - This guide covers geography and infrastructure, not market rankings or statistics.
 - Owner lens: Before a future lease or sale, test staff and shipment routes and replacement-user demand, not just distance to highways, airports, or terminals.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _The BNSF intermodal terminal in Cicero, Illinois. Verify each property’s routes and site access._
 
@@ -2312,32 +2339,39 @@ Cross-check selling industrial property , commercial leasing , commercial invest
 
 > This guide is general education, not legal, zoning, engineering, environmental, logistics, appraisal, brokerage, or investment advice. Submarket labels and freight references change by source and project. Verify jurisdiction, zoning, truck routes, utilities, tax records, incentives, and infrastructure access with official offices and qualified professionals before acting.
 
+## Related guides
+- Nine-county property research
+- Fleet access and turning paths
+- Industrial building function and specifications
+
 ---
 
 Source: https://rospopa.com/resources/chicagoland-industrial-real-estate/
-Published: 2026-10-03 · Updated: 2026-10-09
+Published: 2026-10-03 · Updated: 2026-10-10
 
 Illinois, USA · County-by-county research
 
 # Chicagoland industrial real estate: nine Illinois counties
 
-Research warehouse, distribution, manufacturing, and flex property in Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties. Start with the parcel and operation, then identify the relevant authorities and records.
-
 Educational research, not listings or current market statistics.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Research warehouse, distribution, manufacturing, and flex property in Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will counties. Start with the parcel and operation, then identify the relevant authorities and records.
 
 - Covers nine Illinois counties: Cook, DeKalb, DuPage, Grundy, Kane, Kendall, Lake, McHenry, and Will.
 - Confirm county, municipality or unincorporated status, and every PIN. Authority follows the parcel.
 - County sections link official planning, zoning, parcel, and assessment offices.
 - Aurora, Elgin, and Joliet cross county lines. Lake County here means Illinois, not Indiana.
 - Owner lens: A sale or expansion can involve separate municipal, county, fire, utility, stormwater, and tax reviews. Confirm parcel boundaries, service providers, and responsibility for each approval before committing capital.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 > Defined scope. This guide covers these nine counties in Illinois, USA. It is not an exhaustive or official definition of “Chicagoland.” Indiana and Wisconsin properties are outside this guide; Lake County here means Lake County, Illinois, not Lake County, Indiana.
 
@@ -2494,32 +2528,39 @@ Record the source, access date, parcel searched, verified finding, and unresolve
 
 > This hub is general education, not a listing service, market ranking, appraisal, or legal, tax, engineering, environmental, or investment advice. It makes no claim about available inventory, rents, returns, incentives, or professional credentials. Obtain property-specific advice and current source documents before making a commitment.
 
+## Related guides
+- Industrial submarkets and logistics corridors
+- Illinois assessment and property taxes
+- Evaluating an industrial building
+
 ---
 
 Source: https://rospopa.com/resources/illinois-industrial-property-taxes/
-Published: 2026-10-03 · Updated: 2026-10-09
+Published: 2026-10-03 · Updated: 2026-10-10
 
 Owner guide · Illinois industrial tax diligence
 
 # Property taxes on Illinois industrial real estate
 
-How tax bills, reassessments, incentives and lease pass-throughs affect Illinois’s small and midsize industrial assets.
-
 Educational, not tax or legal advice.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+How tax bills, reassessments, incentives and lease pass-throughs affect Illinois’s small and midsize industrial assets.
 - Tax flows from assessment through equalization, levy, rate, billing, and collection.
 - Cook uses classifications; collar counties generally follow the state assessment standard.
 - For a sale, model the likely future bill, not just the seller’s current bill.
 - Review incentive, zone, and TIF documents.
 - Leases should allocate appeals, refunds, escrows, and reassessment risk.
 - Owner lens: An appeal does not stop bills, lender escrows, or lease pass-throughs. Budget payments separately and calendar filings, payments, and tenant reconciliations.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Industrial parcels in Elk Grove Village, Illinois. Verify parcel boundaries, PINs, assessments and tax districts in official records._
 
@@ -2680,29 +2721,31 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/selling-industrial-property/
-Published: 2026-10-03 · Updated: 2026-10-09
+Published: 2026-10-03 · Updated: 2026-10-10
 
 Owner guide · Chicagoland industrial sale preparation
 
 # Selling an industrial property in Chicagoland
 
-Prepare a 10,000 to 100,000 square foot industrial property for sale in the nine-county Illinois market.
-
 Educational, not a valuation or listing.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Prepare a 10,000 to 100,000 square foot industrial property for sale in the nine-county Illinois market.
 
 - Buyers include owner-users, private investors, 1031 exchange buyers, and smaller institutions or funds.
 - Leased buildings are underwritten on income, term, credit, and expenses; vacant ones on utility and financing fit.
 - Value reflects function and risk: loading, clear height, systems, zoning, environmental history, leases, and deferred maintenance.
 - Organized records and a confidentiality plan can reduce diligence friction.
 - Owner lens: Compare net proceeds, not just price: include debt payoff and prepayment costs, transaction expenses, tax planning, repair credits, and any leaseback rent and obligations.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Industrial buildings in Elk Grove Village, Illinois. Regional illustration, not a listing or a transaction attributed to Pavlo Rospopa._
 
@@ -2866,29 +2909,31 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/commercial-investment/
-Published: 2026-10-02 · Updated: 2026-10-09
+Published: 2026-10-02 · Updated: 2026-10-10
 
 Acquisition preparation
 
 # Commercial investment and purchase diligence
 
-Evaluate Chicago-area commercial or industrial property by function, documented income, financing and capital needs. Price alone shows neither risks nor total cash required.
-
 Educational framework, not an investment recommendation.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Evaluate Chicago-area commercial or industrial property by function, documented income, financing and capital needs. Price alone shows neither risks nor total cash required.
 
 - State the purpose first: owner-use, rental income, or redevelopment each needs different underwriting.
 - Underwrite signed leases, collections, expenses, and capital needs, not the marketing summary.
 - Test financing terms and downside cases explicitly; a lender’s approval is not your diligence.
 - Organize legal, zoning, physical, environmental, tax, and tenancy reviews before contract deadlines expire.
 - Owner lens: Review entity authority, partner consent rights, guaranties, capital-call obligations, and loan covenants alongside property economics; a strong asset does not remove ownership-level liquidity risk.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _BNSF intermodal terminal in Cicero, Cook County. Freight infrastructure shapes demand, but a building’s own access still has to be verified._
 
@@ -2979,29 +3024,31 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/retirement-cre-investing/
-Published: 2026-10-08 · Updated: 2026-10-09
+Published: 2026-10-08 · Updated: 2026-10-10
 
 Owner education: retirement and industrial investing
 
 # Retirement planning with commercial real estate
 
-Commercial real estate can support retirement, but rent is not guaranteed. Existing property and IRA or employer plan investments have different ownership, tax and distribution rules.
-
 Updated October 8, 2026 . General U.S. education with Illinois owner considerations, not personalized retirement, securities, tax, legal or investment advice.
 
-## Planning the building side of retirement
-
-Discuss industrial property sale preparation with Pavlo Rospopa at Marcus & Millichap. Retirement account selection, securities and tax planning require appropriately qualified advisers.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Commercial real estate can support retirement, but rent is not guaranteed. Existing property and IRA or employer plan investments have different ownership, tax and distribution rules.
 
 - Compare retirement spending with cash after operating costs, debt, capital work, leasing and taxes, not gross rent or NOI alone.
 - A self directed IRA is an investment arrangement within an IRA, not a separate exemption from prohibited transaction or distribution rules.
 - Illiquid buildings, loans and private funds can complicate required minimum distributions and emergency spending.
 - A 1031 exchange is not a retirement account rollover and does not eliminate investment risk.
 - Owner lens: Arrange management for retirement, illness or death. A single industrial tenant leaving can interrupt income when your household needs it.
+
+## Planning the building side of retirement
+
+Discuss industrial property sale preparation with Pavlo Rospopa at Marcus & Millichap. Retirement account selection, securities and tax planning require appropriately qualified advisers.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _National Park Service staff review plans at Cape Cod National Seashore. Prepare a documented capital and cash plan for the property; this is a reference photograph, not a client meeting._
 
@@ -3304,23 +3351,19 @@ Prepared October 8, 2026. Check current sources, tax year, plan documents and tr
 ---
 
 Source: https://rospopa.com/resources/cre-tax-retirement/
-Published: 2026-10-08 · Updated: 2026-10-09
+Published: 2026-10-08 · Updated: 2026-10-10
 
 Federal and Illinois owner education
 
 # Commercial real estate taxes for retiring owners
 
-Less management, larger deductions and lower lifetime taxes are different goals. Retiring industrial owners can compare passive 1031 strategies, rental loss limits, cost segregation, depreciation recapture and inheritance planning.
-
 Reviewed October 8, 2026 . Major federal and Illinois rules, not every statute, regulation, local ordinance or exception. Education, not personalized tax, legal, securities or retirement advice.
 
-## Coordinate your building and retirement decisions
-
-Discuss industrial sale preparation with Pavlo Rospopa at Marcus & Millichap. Use your CPA, tax counsel, estate attorney and qualified financial adviser for eligibility, calculations and investment selection.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Less management, larger deductions and lower lifetime taxes are different goals. Retiring industrial owners can compare passive 1031 strategies, rental loss limits, cost segregation, depreciation recapture and inheritance planning.
 
 - A lazy 1031 informally describes exchanging into less actively managed property, not an IRS program or guaranteed income.
 - Passive rental losses generally cannot offset wages, pensions, IRA distributions or Roth conversion income without an applicable exception.
@@ -3328,6 +3371,12 @@ Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 - Depreciation reduces basis and can change sale tax. Ordinary recapture, unrecaptured Section 1250 gain and other gain are distinct.
 - Federal and Illinois estate taxes are separate from income tax on an inheritance. Illinois's $4 million exclusion differs from the 2026 federal $15 million basic exclusion.
 - Owner lens: Model usable deductions, withdrawable cash and payable estate taxes. Paper losses and deferred gains are not household liquidity.
+
+## Coordinate your building and retirement decisions
+
+Discuss industrial sale preparation with Pavlo Rospopa at Marcus & Millichap. Use your CPA, tax counsel, estate attorney and qualified financial adviser for eligibility, calculations and investment selection.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Plan review at Cape Cod National Seashore. Keep the actual signed ownership, tax, improvement and valuation records for your property._
 
@@ -3740,23 +3789,19 @@ Reviewed October 8, 2026. Use current law and instructions for the year, asset, 
 ---
 
 Source: https://rospopa.com/resources/battery-energy-storage/
-Published: 2026-10-08 · Updated: 2026-10-09
+Published: 2026-10-08 · Updated: 2026-10-10
 
 Industrial owner technology and diligence
 
 # Battery energy storage systems: an industrial owner's guide
 
-A BESS stores electricity for later use. For warehouses, manufacturers and landowners, value depends on the meter, load profile, utility rules, safety design and contract, not just battery size. Learn about operation, purchases and storage leases.
-
 Reviewed October 8, 2026 . General property education, not engineering design, emergency instructions, an investment recommendation or a guarantee of approvals or savings.
 
-## Evaluate the property before the equipment proposal
-
-Discuss your industrial property's ownership, tenant and sale considerations with Pavlo Rospopa. Use qualified electrical engineers, the serving utility, fire officials, insurers and counsel for a BESS project.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+A BESS stores electricity for later use. For warehouses, manufacturers and landowners, value depends on the meter, load profile, utility rules, safety design and contract, not just battery size. Learn about operation, purchases and storage leases.
 
 - BESS means battery energy storage system, sometimes written B.E.S.S. It stores energy; it does not create free electricity.
 - kW describes power; kWh describes stored energy. Both matter, along with usable capacity and losses.
@@ -3764,6 +3809,12 @@ Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 - A grid connected battery does not automatically work during an outage. Safe islanded operation and critical loads require specific engineered capability.
 - Utility approval, zoning and fire approval are separate. Export permissions and tariff economics must be confirmed.
 - Owner lens: Identify who pays capital costs, receives meter savings and owes removal and restoration. Tenant savings do not automatically become landlord NOI.
+
+## Evaluate the property before the equipment proposal
+
+Discuss your industrial property's ownership, tenant and sale considerations with Pavlo Rospopa. Use qualified electrical engineers, the serving utility, fire officials, insurers and counsel for a BESS project.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Stationary battery storage containers in Rheineck, Switzerland. This photograph is an equipment example, not a recommended product or site design._
 
@@ -4012,28 +4063,30 @@ Reviewed October 8, 2026. Rules, tariffs, incentives, codes and technology chang
 ---
 
 Source: https://rospopa.com/resources/commercial-property-owner-questions/
-Published: 2026-10-06 · Updated: 2026-10-09
+Published: 2026-10-06 · Updated: 2026-10-10
 
 Owner education · Chicagoland commercial and industrial
 
 # Commercial property owner questions: income, costs and decisions
 
-Answers and sources for commercial-property decisions, emphasizing 10,000-100,000-SF industrial buildings across nine Illinois counties.
-
 Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+By Pavlo Rospopa · Last updated October 10, 2026
+
+## In brief
+
+Answers and sources for commercial-property decisions, emphasizing 10,000-100,000-SF industrial buildings across nine Illinois counties.
+- Document income before valuing it.
+- Expense cuts must preserve safety, condition and lease obligations.
+- Tax appeals and insurance renewals have their own evidence and deadlines.
+- No guide can supply a universal rent, return, premium or reserve target.
+- Owner lens: Treat owner time, related-party services, deferred work, and unpaid tenant charges as real economic costs when judging performance, even if they do not appear consistently in the property statement.
 
 ## Talk about your building
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
 Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
-
-## In brief
-- Document income before valuing it.
-- Expense cuts must preserve safety, condition and lease obligations.
-- Tax appeals and insurance renewals have their own evidence and deadlines.
-- No guide can supply a universal rent, return, premium or reserve target.
-- Owner lens: Treat owner time, related-party services, deferred work, and unpaid tenant charges as real economic costs when judging performance, even if they do not appear consistently in the property statement.
 
 _An industrial facade in Zurich, Switzerland. Review the actual property’s income, condition, capital needs and ownership documents._
 
@@ -4134,28 +4187,30 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 ---
 
 Source: https://rospopa.com/resources/net-operating-income/
-Published: 2026-10-06 · Updated: 2026-10-09
+Published: 2026-10-06 · Updated: 2026-10-10
 
 Owner education · Chicagoland commercial and industrial
 
 # How is net operating income calculated for commercial property?
 
-NOI measures property operations, not cash in the bank. Reconcile leases, collections, expenses and recoveries on a consistent annual basis.
-
 Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+By Pavlo Rospopa · Last updated October 10, 2026
+
+## In brief
+
+NOI measures property operations, not cash in the bank. Reconcile leases, collections, expenses and recoveries on a consistent annual basis.
+- Effective gross income minus property operating expenses equals NOI.
+- Debt service, depreciation, owner income taxes and capital spending are not ordinary NOI expenses.
+- A lease recovery is income to the owner, not permission to hide the matching expense.
+- Compare trailing, current and stabilized NOI separately.
+- Owner lens: When comparing an owner-occupied building with an investment, show a supportable market rent for the occupied space and keep business costs separate from property expenses; otherwise the comparison can overstate or understate NOI.
 
 ## Talk about your building
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
 Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
-
-## In brief
-- Effective gross income minus property operating expenses equals NOI.
-- Debt service, depreciation, owner income taxes and capital spending are not ordinary NOI expenses.
-- A lease recovery is income to the owner, not permission to hide the matching expense.
-- Compare trailing, current and stabilized NOI separately.
-- Owner lens: When comparing an owner-occupied building with an investment, show a supportable market rent for the occupied space and keep business costs separate from property expenses; otherwise the comparison can overstate or understate NOI.
 
 _Warehouses in Elk Grove Village, Illinois. Separate property operating income from debt service, owner income taxes and major capital spending._
 
@@ -4237,28 +4292,30 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 ---
 
 Source: https://rospopa.com/resources/discounted-cash-flow/
-Published: 2026-10-06 · Updated: 2026-10-09
+Published: 2026-10-06 · Updated: 2026-10-10
 
 Owner education · Chicagoland commercial and industrial
 
 # DCF explained for commercial real estate owners
 
-Discounted cash flow (DCF) values future property receipts and costs today, exposing lease rollover, uneven capital work and changes hidden by cap-rate snapshots.
-
 Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+By Pavlo Rospopa · Last updated October 10, 2026
+
+## In brief
+
+Discounted cash flow (DCF) values future property receipts and costs today, exposing lease rollover, uneven capital work and changes hidden by cap-rate snapshots.
+- Project income, expenses and capital cash needs year by year.
+- An exit cap rate converts future NOI into a resale estimate; a discount rate converts future cash into present value.
+- Unlevered cash flows exclude debt; levered equity cash flows include it.
+- Sensitivity is more useful than a single optimistic IRR.
+- Owner lens: For an owner-user, separate the building investment from the operating business: compare ownership with a realistic lease alternative and include moving, downtime, fit-out, and eventual disposition costs.
 
 ## Talk about your building
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
 Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
-
-## In brief
-- Project income, expenses and capital cash needs year by year.
-- An exit cap rate converts future NOI into a resale estimate; a discount rate converts future cash into present value.
-- Unlevered cash flows exclude debt; levered equity cash flows include it.
-- Sensitivity is more useful than a single optimistic IRR.
-- Owner lens: For an owner-user, separate the building investment from the operating business: compare ownership with a realistic lease alternative and include moving, downtime, fit-out, and eventual disposition costs.
 
 _Industrial properties in Elk Grove Village, Illinois. Model each asset’s cash flow and test lease, capital, financing and exit assumptions._
 
@@ -4328,28 +4385,30 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 ---
 
 Source: https://rospopa.com/resources/reduce-commercial-property-costs/
-Published: 2026-10-06 · Updated: 2026-10-09
+Published: 2026-10-06 · Updated: 2026-10-10
 
 Owner education · Chicagoland commercial and industrial
 
 # How can owners reduce commercial building operating costs?
 
-Cut waste without creating larger repair, compliance, vacancy or tenant-retention costs. Start with documented bills, scopes and lease obligations.
-
 Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+By Pavlo Rospopa · Last updated October 10, 2026
+
+## In brief
+
+Cut waste without creating larger repair, compliance, vacancy or tenant-retention costs. Start with documented bills, scopes and lease obligations.
+- Start with invoices, meter use, service scope and lease responsibility.
+- Compare total cost and risk, not only the lowest bid.
+- Check utility-program eligibility before ordering work.
+- Savings and tenant recoveries affect owner NOI differently.
+- Owner lens: Count a proposed saving only after checking lease permissions, safety and code duties, insurer requirements, service reliability, and implementation cost; document a before-and-after baseline.
 
 ## Talk about your building
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
 Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
-
-## In brief
-- Start with invoices, meter use, service scope and lease responsibility.
-- Compare total cost and risk, not only the lowest bid.
-- Check utility-program eligibility before ordering work.
-- Savings and tenant recoveries affect owner NOI differently.
-- Owner lens: Count a proposed saving only after checking lease permissions, safety and code duties, insurer requirements, service reliability, and implementation cost; document a before-and-after baseline.
 
 _Photovoltaic panels on the Rose Calendars factory roof. Evaluate energy projects against actual bills, equipment condition and lease responsibilities._
 
@@ -4429,28 +4488,30 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 ---
 
 Source: https://rospopa.com/resources/commercial-property-insurance/
-Published: 2026-10-06 · Updated: 2026-10-09
+Published: 2026-10-06 · Updated: 2026-10-10
 
 Owner education · Chicagoland commercial and industrial
 
 # Commercial property insurance: an owner renewal checklist
 
-Match coverage to the building, tenancy and loss exposure. Comparing premiums without limits, exclusions, valuation and deductibles can leave an owner underinsured.
-
 Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+By Pavlo Rospopa · Last updated October 10, 2026
+
+## In brief
+
+Match coverage to the building, tenancy and loss exposure. Comparing premiums without limits, exclusions, valuation and deductibles can leave an owner underinsured.
+- Market purchase price is not the cost to rebuild the insured structure.
+- Property, liability and business-income protection address different losses.
+- Flood, earthquake and ordinance-or-law protection require explicit review.
+- A certificate is evidence of insurance, not a substitute for policy endorsements.
+- Owner lens: Coordinate insured replacement values, business-income limits and waiting periods, ordinance-or-law coverage, deductibles, lender terms, and lease obligations at renewal; a nominal limit alone does not establish claim adequacy.
 
 ## Talk about your building
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
 Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
-
-## In brief
-- Market purchase price is not the cost to rebuild the insured structure.
-- Property, liability and business-income protection address different losses.
-- Flood, earthquake and ordinance-or-law protection require explicit review.
-- A certificate is evidence of insurance, not a substitute for policy endorsements.
-- Owner lens: Coordinate insured replacement values, business-income limits and waiting periods, ordinance-or-law coverage, deductibles, lender terms, and lease obligations at renewal; a nominal limit alone does not establish claim adequacy.
 
 _Inspectors review a building renovation in Vicenza, Italy. Conditions, protections and policy wording all matter to insurance review._
 
@@ -4526,28 +4587,30 @@ Official references checked 2026-10-06. Program terms, policy contracts, laws an
 ---
 
 Source: https://rospopa.com/resources/commercial-property-budget/
-Published: 2026-10-06 · Updated: 2026-10-09
+Published: 2026-10-06 · Updated: 2026-10-10
 
 Owner education · Chicagoland commercial and industrial
 
 # How to budget expenses, reserves and capital for a commercial building
 
-A profitable operating statement may not fund a roof, vacant suite or loan maturity. Connect monthly operations, tenant recoveries, capital timing and financing without mixing them.
-
 Educational, not an appraisal or investment, tax, legal, engineering or insurance advice. Verify your property, leases and current rules with qualified advisers.
+
+By Pavlo Rospopa · Last updated October 10, 2026
+
+## In brief
+
+A profitable operating statement may not fund a roof, vacant suite or loan maturity. Connect monthly operations, tenant recoveries, capital timing and financing without mixing them.
+- Maintain an operating budget and a separate capital/liquidity plan.
+- Normalize expense benchmarks for area, occupancy, use and lease basis.
+- Reserves are cash set aside; spending and tax deductions are different events.
+- Tax treatment is a separate CPA analysis, not an NOI shortcut.
+- Owner lens: Keep unrestricted operating liquidity distinct from lender-controlled escrows and earmarked reserves. Stress near-term debt maturity and a major repair occurring in the same period as vacancy.
 
 ## Talk about your building
 
 Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
 
 Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
-
-## In brief
-- Maintain an operating budget and a separate capital/liquidity plan.
-- Normalize expense benchmarks for area, occupancy, use and lease basis.
-- Reserves are cash set aside; spending and tax deductions are different events.
-- Tax treatment is a separate CPA analysis, not an NOI shortcut.
-- Owner lens: Keep unrestricted operating liquidity distinct from lender-controlled escrows and earmarked reserves. Stress near-term debt maturity and a major repair occurring in the same period as vacancy.
 
 _National Park Service staff review plans at Cape Cod National Seashore. Prepare a documented capital and cash plan for the property; this is a reference photograph, not a client meeting._
 
@@ -4632,29 +4695,31 @@ Passive-loss rules can suspend a deduction even when a study shows a large first
 ---
 
 Source: https://rospopa.com/resources/commercial-leasing/
-Published: 2026-10-02 · Updated: 2026-10-09
+Published: 2026-10-02 · Updated: 2026-10-10
 
 Lease comparison & preparation
 
 # Comparing commercial leases in Chicago
 
-Compare total occupancy cost and operating fit for office, retail, industrial, warehouse and flex space, not just advertised rent. Lease language controls obligations.
-
 No quoted market rents or available listings.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Compare total occupancy cost and operating fit for office, retail, industrial, warehouse and flex space, not just advertised rent. Lease language controls obligations.
 
 - Compare total occupancy cost over the same term and area basis, not advertised rent.
 - “Gross,” “modified gross,” and “NNN” are labels; the lease language assigns the actual expenses.
 - Separate recurring, upfront, cash-tied-up, and contingent costs for every option.
 - Confirm zoning, permits, and buildout timing before relying on a move-in date.
 - Owner lens: For a landlord, define recoverable costs, caps, capital amortization, vacancy gross-ups, audit rights, and payment timing in the lease. Vacant space, disputed recoveries, and tenant credit still leave cash exposure with the owner.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Dock positions, levelers, and trailer staging are lease terms as much as building features. Confirm who may use them and when._
 
@@ -4724,29 +4789,31 @@ For the operating and financial questions behind this decision:
 ---
 
 Source: https://rospopa.com/resources/chicago-commercial-real-estate/
-Published: 2026-10-02 · Updated: 2026-10-09
+Published: 2026-10-02 · Updated: 2026-10-10
 
 Research guide
 
 # Researching Chicago commercial real estate
 
-Start a commercial property search with your proposed use and a verification plan. An address, asking price and listing description cannot establish business or investment suitability.
-
 Educational guide, not a market report.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Start a commercial property search with your proposed use and a verification plan. An address, asking price and listing description cannot establish business or investment suitability.
 
 - Start with use and verification, not an address or asking price.
 - Identify the municipality, county, and every PIN; the zoning authority follows the parcel, not the mailing address.
 - Confirm zoning maps, building records and tax bills with responsible authorities and qualified advisers.
 - Compare options on the same basis: area definition, total cost, timing, and verified evidence.
 - Owner lens: Before spending on a conversion, verify the approval path, who pays for utility or off-site work, and what happens to the budget if approvals or occupancy are delayed.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Chicago’s Loop from the lakefront. City records cover the city; suburban and unincorporated parcels have their own authorities._
 
@@ -4808,32 +4875,39 @@ Continue to comparing commercial leases for rentals or investment and purchase d
 
 > This guide provides a research process, not a determination that any property is legal, safe, available, or suitable. Consult qualified legal, tax, design, and inspection professionals for the specific transaction.
 
+## Related guides
+- Industrial building suitability
+- Commercial lease costs and obligations
+- Investment purchase diligence
+
 ---
 
 Source: https://rospopa.com/resources/glossary/
-Published: 2026-10-03 · Updated: 2026-10-09
+Published: 2026-10-03 · Updated: 2026-10-10
 
 Reference · Industrial real estate and investment terms
 
 # Industrial real estate & investment glossary
 
-Decode industrial building, lease, underwriting, investment and Illinois records terms. These general definitions defer to contracts, statutes, ordinances and official records.
-
 Plain-English reference for educational use.
 
-## Talk about your building
-
-Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
-
-Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
+By Pavlo Rospopa · Last updated October 10, 2026
 
 ## In brief
+
+Decode industrial building, lease, underwriting, investment and Illinois records terms. These general definitions defer to contracts, statutes, ordinances and official records.
 
 - Industrial terms span building features, contracts, accounting, and local records.
 - A phrase can mean different things in a lease, appraisal, loan, survey, or zoning file.
 - For Illinois records, verify the parcel, county, municipality, and official source.
 - Term IDs provide stable links for search results and diligence notes.
 - Owner lens: When records differ, rely on the controlling signed lease, loan, policy, survey, or government record.
+
+## Talk about your building
+
+Questions about selling an industrial building? Contact Pavlo Rospopa at Marcus & Millichap.
+
+Call (630) 570‑2184 Email pavlo.rospopa@marcusmillichap.com
 
 _Plan review at Cape Cod National Seashore. Keep the actual signed ownership, tax, improvement and valuation records for your property._
 
@@ -4940,3 +5014,8 @@ Identify the correct county, municipality, township, and parcel.
 For broader local-record workflow, see the commercial property research guide and the nine-county industrial hub .
 
 > This glossary is general education, not legal, tax, engineering, environmental, appraisal, brokerage, or investment advice. Definitions can change by contract, statute, ordinance, lender, or professional standard; verify property-specific meaning with qualified professionals and official sources.
+
+## Related guides
+- NOI calculation and expense conventions
+- DCF, NPV and exit-cap assumptions
+- Lease costs and recovery obligations

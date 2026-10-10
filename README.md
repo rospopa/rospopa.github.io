@@ -10,7 +10,7 @@ filter, county picker, table-of-contents tracking, news carousel).
 
 After changing any public page, regenerate the generated files from the repo root:
 
-    node build-site.mjs          # search index, sitemap.xml (with images), feed.xml, llms-full.txt, news section
+    node build-site.mjs          # page SEO, search, sitemap, feed, llms files, cached news
     node build-site.mjs --news   # also refresh resources/news.json from the news feeds
 
 The owner library starts at `resources\commercial-property-owner-questions\`.
@@ -26,13 +26,26 @@ New pages reuse the public template and generated business contact strip.
 the result with `[skip render]` so only GitHub Pages redeploys. GitHub pauses
 scheduled workflows after 60 days without repository activity; re-enable it
 from the Actions tab if the carousel stops updating. The script lists the
-indexed pages at its top; add new guides there and in `llms.txt`. The shared
+indexed pages at its top; add new guides there. `llms.txt` is generated from page
+metadata. The shared
 header/footer markup is identical on every page—edit all pages together when
 changing navigation. `/search/` is `noindex` and deliberately absent from the
 sitemap. `robots.txt` explicitly welcomes AI assistants; `llms.txt` and
 `llms-full.txt` give them a Markdown directory and full text.
 Generated modification dates use UTC for both working changes and commits,
 so committing a page does not shift its date across a local-time boundary.
+`site-seo.mjs` maintains concise metadata, linked site/author/employer entities,
+visible author/update lines, social previews and FAQ parity. Guide leads are
+moved into the answer-first In brief box, not duplicated; keep condensed copy
+and owner decision notes intact. Current licensed guide photographs supply
+preview URLs, actual dimensions, alt text, credit text and license metadata.
+Search supports `?q=` but stays noindex; the 404 route is intentionally unlinked.
+The public community page contains educational editorial scenarios; the real
+member board remains on the noindex authenticated workspace, outside discovery
+files. Do not restore the removed homepage bio, education or license number.
+Public pages preload the existing Inter font with matching CORS credentials;
+font-display remains swap. HTML-only changes need no CSS/JS cache bump.
+Validate both builds, JSON-LD/visible FAQs, links and both responsive themes.
 
 The public header uses `resources\resources.css`. Keep the complete logo
 (leaf, ROSPOPA, and PAVLO) visible at every viewport width; the compact rules

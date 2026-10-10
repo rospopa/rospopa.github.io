@@ -11,6 +11,8 @@ Disallow: /resources/news.json
 
 # AI assistants and answer engines are welcome to read and cite the public guides.
 # Full text in Markdown: /llms.txt and /llms-full.txt
+User-agent: Googlebot
+User-agent: Bingbot
 User-agent: GPTBot
 User-agent: OAI-SearchBot
 User-agent: ChatGPT-User

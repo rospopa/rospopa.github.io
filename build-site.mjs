@@ -8,6 +8,7 @@ import { existsSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
 import { resolve } from 'node:path';
 import { decodeContactValue } from './resources/contact-data.mjs';
+import { updateSeo, buildAssistantDirectory } from './site-seo.mjs';
 
 const ORIGIN = 'https://rospopa.com';
 const AUTHOR = { name: 'Pavlo Rospopa', url: `${ORIGIN}/` };
@@ -219,6 +220,7 @@ for (const page of PAGES) {
   }
   if (html !== await readFile(page, 'utf8')) await writeFile(page, html);
 }
+await updateSeo([...PAGES, 'search/index.html', '404.html'], lastmod);
 const records = [], pages = [];
 for (const page of PAGES) {
   if (!existsSync(page)) { console.warn(`Skipping ${page}: file not found`); continue; }
@@ -292,6 +294,7 @@ ${pages.filter(p => p.url !== '/').map(p => `  <entry>
 </feed>
 `;
 await writeFile('feed.xml', feed);
+await buildAssistantDirectory(pages);
 
 // llms-full.txt — the complete text of every public guide in Markdown
 const full = [`# Chicagoland Industrial: public guides, full text`, '',
