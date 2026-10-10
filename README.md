@@ -106,7 +106,15 @@ Sign In lives in the footer, not the header. The logo's accessible name reads
 
 The public community guide uses short, attributed quotations from independently
 verified public forum posts. Quotes retain exact wording and spelling; keep
-source links, displayed author names and original post dates. Do not reproduce
+source links, displayed author names and original post dates.
+Industry interviews and official public guidance can add a second perspective;
+label the publisher and distinguish forum handles from named speakers and offices.
+Keep regional/historical context visible and preserve source date precision
+(a seasonal magazine issue is not an exact publication day). Add a topic only
+when its verified voices and condensed take improve the page, not to fill a quota.
+The community FAQ is generated from the visible topic questions and Pavlo's
+editorial answers; source quotations belong in Article citations, not that FAQ.
+Do not reproduce
 personal finances, contact details or private/login-only material. Separate
 Pavlo's visible editorial take from each quote; only that answer belongs in
 FAQPage, never testimonials or Review schema. Keep the authenticated member

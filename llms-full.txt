@@ -167,7 +167,7 @@ Plain-English definitions of building, lease, underwriting, and Illinois records
 - What is the Cook County Class 6b incentive?
 - Why is Chicago a major industrial and logistics hub?
 - See all 100 questions
-- Read real public forum questions and Pavlo's take
+- Compare forum and industry voices with Pavlo's take
 - Use the free commercial property DCF calculator
 
 ## Official starting points
@@ -238,9 +238,9 @@ Educational answers to experienced buyers' pricing, functionality, tenant, dilig
 
 Model income, expenses, debt and a sale. See cap rate, IRR, NPV and equity multiples in yearly or monthly views; no account or calculator API.
 
-### Real public forum questions
+### Forums and industry voices
 
-Short, attributed forum quotes on income, leases, buildings, insurance, taxes and exits, with Pavlo Rospopa's take and guide links. The private member board is separate.
+Compare attributed forum comments, industry interviews and official tax guidance, with Pavlo Rospopa's take and related guides. The private member board is separate.
 
 ### Industrial building types & specifications
 
@@ -1006,9 +1006,9 @@ For the operating and financial questions behind this decision:
 Source: https://rospopa.com/resources/community/
 Published: 2026-10-05 · Updated: 2026-10-10
 
-Community · Public forum discussions
+Community · Forums and industry voices
 
-# What owners and investors are asking on public forums
+# Commercial property questions: forums and industry voices
 
 General education, not advice on a particular property, lease, loan or tax position.
 
@@ -1016,11 +1016,11 @@ By Pavlo Rospopa · Last updated October 10, 2026
 
 ## How to read these discussions
 
-Real public discussions raise useful questions about income, leases, building fit and owner decisions. Pavlo Rospopa adds a brief editorial take and links to the relevant guide.
+Public forum comments, industry interviews and official assessment guidance offer different perspectives on income, leases, building fit and owner decisions. Pavlo Rospopa adds a brief editorial take and links to the relevant guide.
 
-Short quotations link to the original public posts; their authors are not affiliated with this site. They are individual views, not endorsements or verified market evidence. Original spelling is preserved.
+Short quotations link to their original sources. Speakers and publishers are not members, clients or endorsers of this site; their inclusion does not imply affiliation. Original spelling is preserved, and individual views are not verified market evidence.
 
-The examples include general commercial, retail and small-bay topics plus a Cook County question; not every post concerns Illinois or industrial property. Sources checked 2026-10-10 .
+Sources include BiggerPockets, Hacker News, SIOR, NAIOP's Development magazine, Northmarq and the Cook County Assessor's Office. Examples cover general commercial, retail, office and industrial property; not every source concerns Illinois. Dates describe the original post or publication, not today's market. Sources checked 2026-10-10 .
 
 ## Talk about your building
 
@@ -1037,6 +1037,10 @@ _An industrial building in Zurich, Switzerland, used as a reference photograph; 
 On the other hand, you have more tenant-side risk because it can take longer to find a replacement tenant than in something like a single family house.
 
 Greg Scott on BiggerPockets · Sep 2022
+
+Commercial landlords want long term tenants, not people going out of business in one or two years.
+
+ww520 on Hacker News · Jul 2015 · Forum comment about startup tenants
 
 Pavlo's take
 
@@ -1062,6 +1066,10 @@ At the same time, you don't want to pay on the proforma because you'd be paying 
 
 Michael Le on BiggerPockets · Jul 2017
 
+As a result, insurance has become one of the fastest growing operating expenses for property owners that directly impacts cash flow, debt service coverage and collateral values,
+
+Whitney Ronning in Northmarq · Apr 2026 · Insurance interview
+
 Pavlo's take
 
 Pavlo starts with verified leases, collections and expenses, then models potential income separately. Achieving projected rent can require downtime, capital and leasing costs; a vacant building also has value beyond its current NOI.
@@ -1073,6 +1081,10 @@ Read the guide: Actual, forward and stabilized NOI .
 Call the local brokers in that area. The current data on the internet is behind so you need to find out what sold recently.
 
 John M. on BiggerPockets · Nov 2023
+
+You can track asking rents but you can't really get a handle on actual rent paid since there are many deal factors (renovations, free rent, triple net etc.) that would change the numbers significantly.
+
+larrys on Hacker News · Nov 2013 · Forum comment about transaction data
 
 Pavlo's take
 
@@ -1126,6 +1138,14 @@ I would really recommend changing the approach from "if you build it they will c
 
 Joseph Gozlan on BiggerPockets · Dec 2022
 
+The smaller space markets are very local in nature,
+
+Mark Duclos in SIOR Pulse · Jun 2023 · Interview focused on Connecticut and western Massachusetts
+
+In square footage, the pipeline is concentrated in megabuildings, which have seen the most decline in demand,
+
+Lisa DeNight in NAIOP Development magazine · Winter 2023/24 · Historical national industrial outlook, not a small-bay forecast
+
 Pavlo's take
 
 Pavlo starts with the intended use, access, loading, power and permitted occupancy. Tenant interviews and local leasing evidence are more useful than a universal ideal bay size; test the proposed layout and approvals before building.
@@ -1150,6 +1170,14 @@ The best policy (considering price and coverage) will vary by location, construc
 
 John Mocker on BiggerPockets · Dec 2020
 
+Policy exclusions or limitations can create compliance issues and unexpected gaps at renewal or claim time,
+
+Matt Dvorak in Northmarq · Apr 2026 · Insurance interview
+
+Lenders are placing greater emphasis on obtaining complete copies of insurance policies rather than relying on ACORD certificates, which are now seen as less dependable documentation,
+
+Whitney Ronning in Northmarq · Apr 2026 · Lender-compliance perspective
+
 Pavlo's take
 
 Pavlo recommends comparable limits, valuation, exclusions and deductibles, reviewed with a licensed commercial insurance adviser. Update occupancy and building information before renewal; a cheaper quote may remove protection rather than reduce the same risk.
@@ -1163,6 +1191,10 @@ Read the guide: Commercial insurance coverage and renewal review .
 You are most definitely looking for a property tax attorney
 
 Aaron Zimmerman on BiggerPockets · Nov 2025
+
+Commercial property assessments are calculated by determining a property’s use, estimated income, market-level vacancy, collections loss, and expenses.
+
+Cook County Assessor's Office · Jun 2026 · Official Palos Township assessment explanation
 
 Pavlo's take
 
@@ -1178,11 +1210,33 @@ Of course tides and environments can change drastically between " re financing" 
 
 Will G. on BiggerPockets · Oct 2017
 
+From an equity investor’s perspective, you’re willing to take a risk if you think that there is a potential big payout. If you’re a lender, there is no upside besides getting paid back.
+
+Jamie Woodwell in NAIOP Development magazine · Winter 2023/24 · Historical discussion of office lending and credit risk
+
 Pavlo's take
 
 Pavlo models refinancing as a risk, not a guaranteed exit. Check maturity, prepayment terms, lease expiry, lender-adjusted NOI, DSCR and cash needed if the new loan is smaller than the balance due.
 
 Read the guide: Refinancing, DSCR, LTV and debt yield .
+
+## Renewing versus re-leasing
+
+### Should an owner hold out for a higher renewal rent?
+
+The landlord doesn't want you to to leave but only to the extent that finding a new tenant costs more than the discount against the current market price they'd have to give you to stay.
+
+AnthonyMouse on Hacker News · Jun 2026 · Forum comment about commercial vacancy
+
+And because the pond is more shallow, landlords, while still in the drivers’ seat, cannot push rates up like they used to.
+
+Mark Duclos in SIOR Pulse · Jun 2023 · Historical Hartford warehouse leasing discussion
+
+Pavlo's take
+
+Pavlo compares the renewal with a documented re-leasing scenario: downtime, carrying costs, tenant improvements, commissions and tenant credit. Neither a forum view nor an older regional interview establishes today's achievable rent; use current local evidence and test the cash-flow trade-off.
+
+Read the guide: Lease rollover and downtime in DCF ; try the free cash-flow calculator .
 
 ## Selling and 1031 timing
 

@@ -16,7 +16,7 @@ const TITLES = {
   'commercial-property-dcf-calculator': 'Free Commercial Property DCF Calculator: NOI, IRR and Returns',
   'commercial-property-insurance': 'Commercial Property Insurance for Illinois Building Owners',
   'commercial-property-owner-questions': 'Commercial Property Owner Questions: NOI, Costs and Taxes',
-  community: 'Commercial Property Forum Questions: Real Public Discussions',
+  community: 'Commercial Property Questions: Forums and Industry Voices',
   'discounted-cash-flow': 'Commercial Real Estate DCF: NPV, IRR and Exit Cap Explained',
   'industrial-investor-faq': 'Industrial Investor FAQ: Pricing, Diligence, Debt and Exit',
   'industrial-real-estate-faq': 'Industrial Real Estate FAQ: 100 Common Questions Answered',
@@ -38,7 +38,7 @@ const DESCRIPTIONS = {
   'chicagoland-industrial-submarkets': 'Explore Chicagoland industrial submarkets, logistics corridors and freight infrastructure. Use location diligence questions, not invented market statistics.',
   'commercial-property-insurance': 'Illinois owner guide to commercial building insurance, loss of rents, liability, flood exclusions, coinsurance, deductibles and renewal cost review.',
   'commercial-property-owner-questions': 'Answers for Illinois commercial property owners on NOI, DCF, expense cuts, tax appeals, CAM, insurance, reserves and debt, with links to detailed guides.',
-  community: 'Read attributed public forum quotes on commercial property, NOI, leases, CAM, insurance and Cook County taxes, with Pavlo Rospopa’s take and guide links.',
+  community: 'Compare public forum and industry voices on commercial property, NOI, leases, insurance, renewals and Cook County taxes, with Pavlo Rospopa’s take.',
   glossary: 'Understand industrial real estate, leasing, underwriting and Illinois property terms. Find plain-English definitions of NOI, DCF, CAM, reserves and debt.',
   'illinois-industrial-property-taxes': 'Understand Illinois industrial property taxes, assessment, bills, appeals and Cook County incentives. Plan owner budgets, tenant recoveries and sale review.',
   'industrial-building-types': 'Compare industrial building types and specifications for Chicagoland assets, 10,000 to 100,000 SF. Review loading, power, clear height and verification.',
@@ -168,6 +168,9 @@ export async function updateSeo(files, lastmod) {
       if (slug === 'community') article.citation = [...new Set([...html.matchAll(/<blockquote\b[^>]*\bcite="([^"]+)"/g)].map(m => m[1]))];
     }
     for (const faq of nodes.filter(n => n['@type'] === 'FAQPage')) {
+      if (slug === 'community') faq.mainEntity = [...html.matchAll(/<article class="editorial-topic"[^>]*>\s*<h3\b[^>]*>([\s\S]*?)<\/h3>/g)].map(([, heading]) => ({
+        '@type': 'Question', name: text(heading), acceptedAnswer: { '@type': 'Answer', text: '' },
+      }));
       for (const question of faq.mainEntity) {
         const heading = [...html.matchAll(/<h[234][^>]*>([\s\S]*?)<\/h[234]>/g)].find(m => text(m[1]) === text(question.name));
         if (!heading) throw new Error(`${file}: FAQ has no visible question: ${question.name}`);
