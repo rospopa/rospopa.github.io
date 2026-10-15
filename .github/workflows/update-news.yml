@@ -28,11 +28,13 @@ jobs:
           node-version: '22'
       - name: Fetch headlines and rebuild generated files
         run: node build-site.mjs --news
+      - name: Validate public SEO and calculator regressions
+        run: node --test tests/*.test.mjs
       - name: Commit and push if anything changed
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add resources/news.json index.html 404.html search/index.html 'resources/**/index.html' resources/search-index.json sitemap.xml feed.xml llms.txt llms-full.txt
+          git add resources/news.json index.html 404.html search/index.html 'resources/**/index.html' resources/search-index.json resources/dcf-calculator.mjs resources/dcf-metrics.mjs sitemap.xml feed.xml llms.txt llms-full.txt
           if git diff --cached --quiet; then
             echo "No changes to publish."
             exit 0

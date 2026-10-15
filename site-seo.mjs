@@ -116,6 +116,20 @@ export async function updateSeo(files, lastmod) {
     const website = { '@type': 'WebSite', '@id': WEBSITE, url: ORIGIN + '/', name: 'Chicagoland Industrial', inLanguage: 'en-US', publisher: { '@id': PERSON }, potentialAction: { '@type': 'SearchAction', target: { '@type': 'EntryPoint', urlTemplate: ORIGIN + '/search/?q={search_term_string}' }, 'query-input': 'required name=search_term_string' } };
     const breadcrumbId = url + '#breadcrumb';
     const webpage = { ...collection, '@type': collection ? 'CollectionPage' : slug === 'search' ? 'SearchResultsPage' : 'WebPage', '@id': url, url, name: title, description, inLanguage: 'en-US', isPartOf: { '@id': WEBSITE }, ...(slug !== '404' ? { datePublished: published, dateModified: modified, author: { '@id': PERSON } } : {}), ...(slug !== 'home' ? { breadcrumb: { '@id': breadcrumbId } } : {}) };
+    if (slug === 'resources') {
+      const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1];
+      if (!main) throw new Error(`${file}: guide directory requires visible main content`);
+      const guides = new Map([...main.matchAll(/<a\b[^>]*href="(\/resources\/[^/#"]+\/)"[^>]*>([\s\S]*?)<\/a>/g)]
+        .map(([, path, label]) => [path, text(label)]));
+      if (!guides.size) throw new Error(`${file}: guide directory has no visible guide links`);
+      webpage.mainEntity = {
+        '@type': 'ItemList', itemListOrder: 'https://schema.org/ItemListUnordered',
+        numberOfItems: guides.size,
+        itemListElement: [...guides].map(([path, name], i) => ({
+          '@type': 'ListItem', position: i + 1, name, url: ORIGIN + path,
+        })),
+      };
+    }
     const preserved = graph.filter(n => !['Person', 'WebSite', 'Organization', 'WebPage', 'CollectionPage', 'SearchResultsPage', 'BreadcrumbList'].includes(n['@type']));
     if (article) {
       Object.assign(article, { '@id': url + '#article', name: title, headline: h1, description, dateModified: modified, author: { '@id': PERSON }, publisher: { '@id': PERSON }, mainEntityOfPage: { '@id': url }, isPartOf: { '@id': WEBSITE }, image: imageObject, about: { '@type': 'Thing', name: h1 } });
@@ -163,9 +177,21 @@ export async function updateSeo(files, lastmod) {
     }
     html = html.replace(/<footer[\s\S]*?<\/footer>/, footer => footer.includes('href="/search/">Search the guides</a>') ? footer : footer.replace(/(<a href="\/resources\/commercial-property-owner-questions\/">[^<]+<\/a>)/, '$1 <a href="/search/">Search the guides</a>'));
     if (article) {
+      const summary = html.match(/<p data-answer-summary>([\s\S]*?)<\/p>/);
+      if (summary) article.abstract = text(summary[1]);
+      const content = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i)?.[1] || '';
+      const references = content
+        .replace(/<figure\b[\s\S]*?<\/figure>/gi, '')
+        .replace(/<!-- guide-byline:start -->[\s\S]*?<!-- guide-byline:end -->/g, '')
+        .replace(/<aside class="guide-contact\b[\s\S]*?<\/aside>/g, '');
+      const citations = [...references.matchAll(/<a\b[^>]*href="(https?:\/\/[^"]+)"/g)]
+        .map(([, href]) => new URL(text(href)))
+        .filter(source => source.origin !== ORIGIN && source.hostname !== 'secure.rospopa.com')
+        .map(source => source.href);
+      if (citations.length) article.citation = [...new Set(citations)];
+      else delete article.citation;
       const terms = [...html.matchAll(/href="\/resources\/glossary\/#([^"]+)"[^>]*>([\s\S]*?)<\/a>/g)];
       if (terms.length) article.mentions = [...new Map(terms.map(([, id, label]) => [id, { '@type': 'DefinedTerm', '@id': ORIGIN + '/resources/glossary/#' + id, name: text(label), inDefinedTermSet: { '@id': ORIGIN + '/resources/glossary/#terms' } }])).values()];
-      if (slug === 'community') article.citation = [...new Set([...html.matchAll(/<blockquote\b[^>]*\bcite="([^"]+)"/g)].map(m => m[1]))];
     }
     for (const faq of nodes.filter(n => n['@type'] === 'FAQPage')) {
       if (slug === 'community') faq.mainEntity = [...html.matchAll(/<article class="editorial-topic"[^>]*>\s*<h3\b[^>]*>([\s\S]*?)<\/h3>/g)].map(([, heading]) => ({
@@ -184,6 +210,11 @@ export async function updateSeo(files, lastmod) {
         if (!answer) throw new Error(`${file}: FAQ has no visible answer: ${question.name}`);
         question.name = text(heading[1]);
         question.acceptedAnswer.text = answer;
+        const id = heading[0].match(/\bid="([^"]+)"/)?.[1];
+        if (id) {
+          question['@id'] = `${url}#${id}`;
+          question.url = `${url}#${id}`;
+        }
       }
     }
     function linkPage(node) {
@@ -200,7 +231,7 @@ export async function updateSeo(files, lastmod) {
 }
 
 export async function buildAssistantDirectory(pages) {
-  const owners = new Set(['commercial-property-owner-questions', 'net-operating-income', 'discounted-cash-flow', 'reduce-commercial-property-costs', 'commercial-property-insurance', 'commercial-property-budget', 'illinois-industrial-property-taxes', 'commercial-investment', 'retirement-cre-investing', 'cre-tax-retirement', 'battery-energy-storage']);
+  const owners = new Set(['commercial-property-owner-questions', 'net-operating-income', 'discounted-cash-flow', 'commercial-property-dcf-calculator', 'reduce-commercial-property-costs', 'commercial-property-insurance', 'commercial-property-budget', 'illinois-industrial-property-taxes', 'commercial-investment', 'retirement-cre-investing', 'cre-tax-retirement', 'battery-energy-storage']);
   const link = p => `- [${p.title}](${ORIGIN}${p.url}): ${p.description}`;
   const ownerPages = pages.filter(p => owners.has(p.url.split('/')[2]));
   const otherPages = pages.filter(p => !ownerPages.includes(p));

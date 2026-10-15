@@ -1,6 +1,6 @@
 import { DCF_ROW_DEFS, DCF_GROUPS, defaultDcfModel, normalizeRentRollRow, buildDefaultDcfModelFromProperty, getComputedDcfValue } from './dcf-engine.mjs?v=7f0f0621d6';
 import { SCALAR_FIELDS, MODEL_FIELDS } from './dcf-fields.mjs?v=e59325ac47';
-import { summarize, scenarioProperty, METRICS } from './dcf-metrics.mjs?v=9323ccff8b';
+import { summarize, scenarioProperty, METRICS } from './dcf-metrics.mjs?v=46ae694659';
 
 const root = document.querySelector('[data-dcf-calculator]');
 const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 });

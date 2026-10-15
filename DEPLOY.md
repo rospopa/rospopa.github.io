@@ -12,11 +12,12 @@ is checked into this repository. Recheck these settings before deployment.
 `client` and starting `server`; the private app uses `secure.rospopa.com`.
 Render does not publish the root public HTML.
 
-Observed live blocker on October 2, 2026: requests to the public homepage,
-`/robots.txt`, and a resource path all returned a Cloudflare HTTP 301 to
+Historical blocker on October 2, 2026 (no longer present in the October 15
+public crawl): requests to the public homepage, `/robots.txt`, and a resource
+path all returned a Cloudflare HTTP 301 to
 `https://secure.rospopa.com/`, losing the requested path. `www.rospopa.com`
 and plain HTTP also redirected there. The crawler fetch of the secure host
-returned 403. Publishing these files alone will therefore NOT make the
+returned 403. If this routing issue returns, publishing files alone will NOT make the
 public library accessible. Remove or narrow the public-host-to-secure-host
 redirect in the Cloudflare configuration and keep `rospopa.com` routed to
 GitHub Pages. Keep the private hostname routed to Render with its existing
@@ -31,7 +32,7 @@ Automation, search engines, and generated files
 - `.github/workflows/update-news.yml` runs daily (11:17 UTC) and on demand. It
   executes `node build-site.mjs --news`, which refreshes `resources/news.json`
   from public news feeds, regenerates the homepage news section, the search
-  index, `sitemap.xml`, `feed.xml`, and `llms-full.txt`, and commits with
+  index, `sitemap.xml`, `feed.xml`, `llms.txt`, and `llms-full.txt`, and commits with
   `[skip render]` so Render does not redeploy the private app. GitHub Pages
   redeploys from the bot commit (verified). GitHub disables scheduled workflows
   after 60 days without repository activity; re-enable from the Actions tab.
@@ -45,6 +46,22 @@ Automation, search engines, and generated files
   third-party script or font must be added to the policy in every page.
 - `robots.txt` explicitly welcomes AI assistants and blocks only internal
   search result queries and the two JSON data files. `/search/` is `noindex`.
+- `node --test tests/*.test.mjs` checks canonical metadata, the complete visible
+  guide-directory schema, FAQ anchors, source citations, assistant exports,
+  sitemap coverage, noindex exclusions, and DCF regressions. The daily workflow
+  runs these checks before publishing generated updates.
+- Guide structured data uses the visible answer summary as an Article abstract,
+  cites sources actually linked in the article, and gives FAQ questions their
+  visible section URLs. No ratings, broker rankings, or unsupported credentials
+  are generated. FAQ markup does not imply eligibility for Google's restricted
+  FAQ rich results.
+- The Markdown assistant export preserves source links and resolves internal
+  links against each guide's canonical URL. The DCF tool appears with owner
+  analysis guides in the optional `llms.txt` reading directory.
+- Regeneration preserves recorded editorial dates when main content is
+  unchanged; changing generated schema or bylines alone does not refresh every
+  guide's date. Asset hashes normalize line endings for consistent Windows/Linux
+  output.
 
 Keep the public library and private workspace on separate origins:
 
@@ -92,18 +109,19 @@ controls intact even if they prevent crawlers from observing noindex.
 Cloudflare account access is required for these external changes; a git
 push cannot apply them.
 
-The root `index.html` is deliberately a small public resource directory
-(HTTP 200), not a redirect or marketing landing page. Four distinct guides
-under `resources/` contain the useful crawlable content. A future landing page
-can link to this library; preserve or deliberately migrate its URLs then.
+The root `index.html` is a public industrial investment-sales homepage
+(HTTP 200), not a redirect. The guides directory links all 25 topic guides,
+including the free DCF calculator. Preserve existing canonical URLs.
 The public pages have unique metadata, HTTPS canonicals, text content, and
 WebPage/CollectionPage, WebSite, and breadcrumb data matching visible content.
-They make no brokerage, employer, listing, review, or performance claims.
+Author and employer references match the visible Pavlo Rospopa byline and
+official advisor profile; no listing, review, or performance claims are added.
 Publication dates reflect initial creation on October 2, 2026, not a market
 data update. Do not refresh dates without a real content change.
 
-`sitemap.xml` lists only the five canonical public URLs and omits invented
-last-modified dates. `robots.txt` allows public crawling. `llms.txt` is an
+`sitemap.xml` lists 27 canonical public URLs (home, directory and 25 guides),
+with editorial modification dates and image metadata. Search and 404 pages
+are excluded. `robots.txt` allows public crawling. `llms.txt` is an
 optional reading directory, not a ranking signal or indexing control.
 Google's official guidance says no special AI files or schema are required:
 https://developers.google.com/search/docs/appearance/ai-features

@@ -52,8 +52,15 @@ const escapeXml = escapeHtml;
 const plain = html => decode(html.replace(/<(script|style|form)[\s\S]*?<\/\1>/gi, ' ').replace(/<\/(p|li|dd|dt|h[1-6]|tr|caption|section|div|aside|figcaption)>/gi, ' ').replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim();
 const first = (html, re) => { const m = html.match(re); return m ? plain(m[1]) : ''; };
 function git(args) { try { return execFileSync('git', args, { encoding: 'utf8' }).trim(); } catch { return ''; } }
-function lastmod(file) {
-  if (git(['status', '--porcelain', '--', file])) return today;
+function lastmod(file, html) {
+  const recorded = html.match(/"dateModified"\s*:\s*"(\d{4}-\d{2}-\d{2})"/)?.[1];
+  if (git(['status', '--porcelain', '--', file])) {
+    const content = source => (source.match(/<main\b[^>]*>[\s\S]*?<\/main>/i)?.[0] || source)
+      .replace(/<!-- guide-byline:start -->[\s\S]*?<!-- guide-byline:end -->/g, '')
+      .replace(/\s+/g, ' ').trim();
+    if (content(html) !== content(git(['show', `HEAD:${file}`]))) return today;
+  }
+  if (recorded) return recorded;
   const committed = git(['log', '-1', '--format=%cI', '--', file]);
   return committed ? new Date(committed).toISOString().slice(0, 10) : today;
 }
@@ -134,7 +141,7 @@ function renderNews(news) {
 
 // ---- markdown conversion for llms-full.txt ----------------------------------
 const T = name => `<${name}(?=[\\s>])[^>]*>`;   // opening tag matcher that does not bleed into <picture>, <path>, <link>, …
-function toMarkdown(mainHtml) {
+function toMarkdown(mainHtml, pageUrl) {
   let h = mainHtml.replace(/\r\n?/g, '\n')
     .replace(/<nav class="(toc|breadcrumbs|chips)"[\s\S]*?<\/nav>/gi, '')
     .replace(/<form[\s\S]*?<\/form>/gi, '')
@@ -143,6 +150,12 @@ function toMarkdown(mainHtml) {
     .replace(/<span class="credit">[\s\S]*?<\/span>/gi, '')
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<section class="news"[\s\S]*?<\/section>/gi, '')
+    .replace(/<a\b[^>]*href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi, (_, href, label) => {
+      const url = new URL(decode(href), pageUrl);
+      const name = plain(label).replace(/[[\]]/g, '\\$&');
+      const target = url.href.replace(/\(/g, '%28').replace(/\)/g, '%29');
+      return name && ['https:', 'http:'].includes(url.protocol) ? `[${name}](${target})` : name;
+    })
     .replace(/<div class="post-head">[\s\S]*?<strong>([\s\S]*?)<\/strong>[\s\S]*?<span class="post-role">([\s\S]*?)<\/span>([\s\S]*?)<\/div>/gi, (_, name, role, flag) => `\n<p>**${plain(name)}** (${plain(role)})${/Answer/.test(flag) ? ' (answer)' : ''}:</p>\n`);
   h = h.replace(new RegExp(`${T('h1')}([\\s\\S]*?)<\\/h1>`, 'gi'), (_, t) => `\n# ${plain(t)}\n`)
     .replace(new RegExp(`${T('h2')}([\\s\\S]*?)<\\/h2>`, 'gi'), (_, t) => `\n## ${plain(t)}\n`)
@@ -158,6 +171,17 @@ function toMarkdown(mainHtml) {
 }
 
 // ---- main ------------------------------------------------------------------
+// Capture editorial dates before generated metadata makes source pages dirty.
+const modifiedDates = new Map();
+for (const file of [...PAGES, 'search/index.html', '404.html']) {
+  const html = await readFile(file, 'utf8');
+  modifiedDates.set(file, lastmod(file, html));
+}
+const editorialDate = file => {
+  const date = modifiedDates.get(file);
+  if (!date) throw new Error(`${file}: editorial modification date was not captured`);
+  return date;
+};
 let news = { updated: today, items: [] };
 if (process.argv.includes('--news')) {
   news = await fetchNews();
@@ -229,7 +253,7 @@ for (const name of ['dcf-metrics.mjs', 'dcf-calculator.mjs']) {
   let source = await readFile(file, 'utf8');
   for (const dependency of ['dcf-engine.mjs', 'dcf-fields.mjs', 'dcf-metrics.mjs']) {
     if (dependency === name || !source.includes(`./${dependency}`)) continue;
-    const version = createHash('sha256').update(await readFile(`resources/${dependency}`)).digest('hex').slice(0, 10);
+    const version = createHash('sha256').update((await readFile(`resources/${dependency}`, 'utf8')).replace(/\r\n?/g, '\n')).digest('hex').slice(0, 10);
     source = source.replaceAll(new RegExp(`\\./${dependency.replace('.', '\\.')}(?:\\?v=[a-f0-9]+)?`, 'g'), `./${dependency}?v=${version}`);
   }
   await writeFile(file, source);
@@ -238,12 +262,12 @@ const calculatorPage = 'resources/commercial-property-dcf-calculator/index.html'
 if (existsSync(calculatorPage)) {
   let html = await readFile(calculatorPage, 'utf8');
   for (const name of ['dcf-calculator.css', 'dcf-calculator.mjs']) {
-    const version = createHash('sha256').update(await readFile(`resources/${name}`)).digest('hex').slice(0, 10);
+    const version = createHash('sha256').update((await readFile(`resources/${name}`, 'utf8')).replace(/\r\n?/g, '\n')).digest('hex').slice(0, 10);
     html = html.replaceAll(new RegExp(`/resources/${name.replace('.', '\\.')}(?:\\?v=[a-f0-9]+)?`, 'g'), `/resources/${name}?v=${version}`);
   }
   await writeFile(calculatorPage, html);
 }
-await updateSeo([...PAGES, 'search/index.html', '404.html'], lastmod);
+await updateSeo([...PAGES, 'search/index.html', '404.html'], editorialDate);
 const records = [], pages = [];
 for (const page of PAGES) {
   if (!existsSync(page)) { console.warn(`Skipping ${page}: file not found`); continue; }
@@ -258,7 +282,7 @@ for (const page of PAGES) {
   const description = decode((html.match(/<meta name="description" content="([^"]+)"/) || [])[1] || '');
   const published = (html.match(/"datePublished":"(\d{4}-\d{2}-\d{2})"/) || [])[1] || today;
   const figure = html.match(/<figure class="(?:hero|guide)-figure"[\s\S]*?<img src="([^"]+)"[\s\S]*?alt="([^"]*)"[\s\S]*?<figcaption>([\s\S]*?)<span class="credit">/);
-  pages.push({ page, url, title, description, published, modified: lastmod(page), markdown: toMarkdown(main[1]),
+  pages.push({ page, url, title, description, published, modified: editorialDate(page), markdown: toMarkdown(main[1], ORIGIN + url),
     image: figure ? { loc: ORIGIN + figure[1], title: plain(figure[2]), caption: plain(figure[3]) } : null });
 
   const intro = main[1].split(/<section\b/i)[0].replace(/<nav class="toc"[\s\S]*?<\/nav>/i, ' ').replace(/<nav class="breadcrumbs"[\s\S]*?<\/nav>/i, ' ').replace(/<!-- news:start -->[\s\S]*?<!-- news:end -->/, ' ');
