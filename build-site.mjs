@@ -268,10 +268,17 @@ if (existsSync(calculatorPage)) {
   await writeFile(calculatorPage, html);
 }
 const publicPages = [...PAGES, 'search/index.html', '404.html'];
+const paletteVersion = createHash('sha256').update((await readFile('resources/palette.css', 'utf8')).replace(/\r\n?/g, '\n')).digest('hex').slice(0, 10);
+const stylesheet = await readFile('resources/resources.css', 'utf8');
+const versionedStylesheet = stylesheet.replace(/palette\.css(?:\?v=[a-f0-9]+)?/g, `palette.css?v=${paletteVersion}`);
+if (stylesheet !== versionedStylesheet) await writeFile('resources/resources.css', versionedStylesheet);
 const stylesheetVersion = createHash('sha256').update((await readFile('resources/resources.css', 'utf8')).replace(/\r\n?/g, '\n')).digest('hex').slice(0, 10);
+const themeVersion = createHash('sha256').update((await readFile('resources/theme.js', 'utf8')).replace(/\r\n?/g, '\n')).digest('hex').slice(0, 10);
 for (const file of publicPages) {
   const html = await readFile(file, 'utf8');
-  const versioned = html.replace(/\/resources\/resources\.css(?:\?v=[a-f0-9]+)?/g, `/resources/resources.css?v=${stylesheetVersion}`);
+  const versioned = html
+    .replace(/\/resources\/resources\.css(?:\?v=[a-f0-9]+)?/g, `/resources/resources.css?v=${stylesheetVersion}`)
+    .replace(/\/resources\/theme\.js(?:\?v=[a-f0-9]+)?/g, `/resources/theme.js?v=${themeVersion}`);
   if (html !== versioned) await writeFile(file, versioned);
 }
 await updateSeo(publicPages, editorialDate);

@@ -31,7 +31,7 @@ body { margin: 0; background: var(--paper); color: var(--color-base-content); }
 .navbar { border-bottom: 2px solid var(--brand); box-shadow: var(--shadow-sm); }
 .card, .modal-box { box-shadow: var(--shadow-sm); }
 .card { border-color: var(--line); }
-.btn-primary { box-shadow: 0 2px 4px rgba(31, 95, 46, .18); }
+.btn-primary { box-shadow: 0 2px 4px rgba(0, 0, 0, .12); }
 .input, .select, .textarea, .checkbox, .toggle { border-color: var(--control-line); }
 .input::placeholder, .textarea::placeholder { color: var(--muted); opacity: 1; }
 .btn-outline { border-color: var(--focus-color); }

@@ -1,4 +1,4 @@
-@import url('./palette.css?v=df30df4b71');
+@import url('./palette.css?v=e4bc7ea928');
 /* San Francisco on Apple devices (the system font), Inter elsewhere. SF cannot
    be self-hosted under Apple's licence; Inter (SIL OFL, /resources/fonts) is the
    closest open equivalent. The Cormorant Garamond wordmark is unchanged. */
@@ -349,18 +349,18 @@ td.check input { width: 1.5rem; height: 1.5rem; accent-color: var(--brand-strong
 .calc input { background: var(--color-base-100); }
 .calc-results dd { color: var(--brand-text); }
 .chips a[aria-current] { background: var(--brand-strong); border-color: var(--brand-strong); color: #ffffff; }
-[data-theme="monochrome-dark"] .chips a[aria-current] { color: #0c1a11; }
+[data-theme="monochrome-dark"] .chips a[aria-current] { color: var(--color-primary-content); }
 .btn { border-radius: .4rem; }
 
 /* Forum. */
 .editorial-topic { box-shadow: var(--shadow-sm); border-top: 3px solid var(--ink); }
 .post.accepted { border-color: var(--brand); background: var(--brand-soft); }
 .post.accepted .post-flag { background: var(--brand-strong); border-color: var(--brand-strong); color: #ffffff; }
-[data-theme="monochrome-dark"] .post.accepted .post-flag { color: #0c1a11; }
+[data-theme="monochrome-dark"] .post.accepted .post-flag { color: var(--color-primary-content); }
 .member-gate { padding: 1.25rem 1.25rem .25rem; border: 1px solid var(--line); border-left: 4px solid var(--brand); border-radius: .5rem; background: var(--surface-2); }
 .member-gate p { margin: 0 0 1rem; }
 .post-badge { flex: none; padding: .1rem .5rem; border-radius: 1rem; background: var(--brand-strong); color: #ffffff; font-size: .72rem; font-weight: 650; text-transform: uppercase; letter-spacing: .06em; }
-[data-theme="monochrome-dark"] .post-badge { color: #0c1a11; }
+[data-theme="monochrome-dark"] .post-badge { color: var(--color-primary-content); }
 main :is(input, select, textarea) { border-color: var(--control-line); }
 
 /* Emphasize the surface under the pointer without moving long reading sections. */

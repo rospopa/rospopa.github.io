@@ -1070,7 +1070,7 @@ export default function App() {
   useEffect(() => {
     document.documentElement.dataset.theme = darkMode ? 'monochrome-dark' : 'monochrome'
     const themeColor = document.querySelector('meta[name="theme-color"]')
-    if (themeColor) themeColor.content = darkMode ? '#14251a' : '#ffffff'
+    if (themeColor) themeColor.content = darkMode ? '#1f1f1f' : '#ffffff'
   }, [darkMode])
   useEffect(() => {
     const syncTheme = event => {
