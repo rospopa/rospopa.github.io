@@ -267,7 +267,14 @@ if (existsSync(calculatorPage)) {
   }
   await writeFile(calculatorPage, html);
 }
-await updateSeo([...PAGES, 'search/index.html', '404.html'], editorialDate);
+const publicPages = [...PAGES, 'search/index.html', '404.html'];
+const stylesheetVersion = createHash('sha256').update((await readFile('resources/resources.css', 'utf8')).replace(/\r\n?/g, '\n')).digest('hex').slice(0, 10);
+for (const file of publicPages) {
+  const html = await readFile(file, 'utf8');
+  const versioned = html.replace(/\/resources\/resources\.css(?:\?v=[a-f0-9]+)?/g, `/resources/resources.css?v=${stylesheetVersion}`);
+  if (html !== versioned) await writeFile(file, versioned);
+}
+await updateSeo(publicPages, editorialDate);
 const records = [], pages = [];
 for (const page of PAGES) {
   if (!existsSync(page)) { console.warn(`Skipping ${page}: file not found`); continue; }
