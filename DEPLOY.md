@@ -62,7 +62,8 @@ Automation, search engines, and generated files
   unchanged; changing generated schema or bylines alone does not refresh every
   guide's date. Asset hashes normalize line endings for consistent Windows/Linux
   output.
-- Public content surfaces have mouse-only hover emphasis; compact guide/news
+- Public content surfaces have neutral-gray mouse-only hover emphasis and black
+  shadows (charcoal borders in light mode, light gray in dark mode); compact guide/news
   cards also lift slightly. Reduced-motion users get no movement, and touch and
   print layouts retain their existing behavior. The generator versions the
   shared stylesheet on every public page so CSS updates do not require a hard

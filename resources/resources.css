@@ -364,18 +364,28 @@ td.check input { width: 1.5rem; height: 1.5rem; accent-color: var(--brand-strong
 main :is(input, select, textarea) { border-color: var(--control-line); }
 
 /* Emphasize the surface under the pointer without moving long reading sections. */
+:root {
+  --hover-border: #737373;
+  --hover-line: #d4d4d4;
+  --hover-shadow: 0 12px 32px rgba(0, 0, 0, .16);
+}
+[data-theme="monochrome-dark"] {
+  --hover-border: #a3a3a3;
+  --hover-line: #737373;
+  --hover-shadow: 0 12px 32px rgba(0, 0, 0, .5);
+}
 @media screen and (hover: hover) and (pointer: fine) {
   :is(main > section:not(.news):not(:has(> .cards)):not(:has(> .editorial-topic)), .in-brief, .toc, .cta, .card, .news-card, .editorial-topic, .contact-card, .calc) {
     transition: border-color .2s ease, box-shadow .2s ease;
   }
   :is(main > section:not(.news):not(.cta):not(:has(> .cards)):not(:has(> .editorial-topic)), .in-brief, .toc, .editorial-topic, .contact-card, .calc):hover {
-    border-color: var(--brand);
-    box-shadow: var(--shadow), inset 0 0 0 1px var(--brand-line);
+    border-color: var(--hover-border);
+    box-shadow: var(--hover-shadow), inset 0 0 0 1px var(--hover-line);
   }
-  .cta:hover { box-shadow: var(--shadow), inset 0 0 0 1px var(--hero-accent); }
+  .cta:hover { box-shadow: var(--hover-shadow), inset 0 0 0 1px #d4d4d4; }
   :is(.card, .news-card):hover {
-    border-color: var(--brand);
-    box-shadow: var(--shadow);
+    border-color: var(--hover-border);
+    box-shadow: var(--hover-shadow);
   }
 }
 @media screen and (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
