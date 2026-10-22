@@ -1,157 +1,56 @@
 # rospopa.github.io
 
-Public Chicago commercial and industrial real estate resources live in the
-root `index.html` and `resources\` directory. They are plain HTML and CSS;
-reading and crawling need no JavaScript. Three small scripts enhance the pages:
-`resources\theme.js` (day/night preference), `resources\search.js`
-(client-side search over `resources\search-index.json`) and
-`resources\interactive.js` (calculators, remembered checklists, glossary
-filter, county picker, table-of-contents tracking, news carousel).
+The public site at `rospopa.com` is a focused landing page for Pavlo Rospopa's
+Chicagoland industrial investment sales work at Marcus & Millichap. `CNAME`
+continues to point to `rospopa.com`. The secure app in `client\` and `server\`
+is separate and is not changed by the public-site builder.
 
-After changing any public page, regenerate the generated files from the repo root:
+## Public homepage
 
-    node build-site.mjs          # page SEO, search, sitemap, feed, llms files, cached news
-    node build-site.mjs --news   # also refresh resources/news.json from the news feeds
+`index.html` contains one full-viewport message, one call action and a short
+contact footer. Styles are inline. It loads no JavaScript, external stylesheets
+or web fonts. Keep the complete wordmark, responsive image preload, photo credit,
+visible contact details, keyboard focus styles and no-JavaScript rendering.
+Only verified facts belong in copy and Person/Organization structured data.
+There are no theme switches, menus, search boxes, pop-ups or news carousels.
 
-The owner library starts at `resources\commercial-property-owner-questions\`.
-NOI, DCF, cost controls, insurance and budgets/reserves have dedicated guides;
-Illinois tax management extends the existing tax guide. Keep illustrative
-numbers distinct from market data, reconcile NOI/reserve/debt conventions,
-and link current official sources. FAQPage answers must match visible answers;
-structured data is not a promise of Google rich results or search ranking.
-The owner hub is linked in the shared footer, not added to the top navigation.
-New pages reuse the public template and generated business contact strip.
+## Retired URLs and discovery
 
-The free `resources\commercial-property-dcf-calculator\` replaces the private
-property modal's Financials tab. Its vanilla ES modules (`dcf-engine.mjs`,
-`dcf-fields.mjs`, `dcf-metrics.mjs`, `dcf-calculator.mjs`) run only in the browser;
-no auth, calculator API, database records or automatic persistence are used.
-Keep blank startup and explicitly hypothetical example inputs. Read the page's
-visible formula/convention/limitation sections before changing calculations.
-Annual overrides must drive the same engine shown by metrics; monthly cells,
-sale, balances and distributions are computed. Total-equity returns must not
-subtract LP/sponsor distributions again; debt-free returns need a separate run.
-Run `node --test tests\dcf.test.mjs`, the static build twice, and client build/lint/tests.
-The static build versions the calculator entry, stylesheet and ES-module dependencies.
-The general property API and finance database columns remain intact; Details
-saves preserve existing finance values via the property object, without editing
-or recalculating them. Do not delete those records or migrations.
+Run from the repository root:
 
-`.github\workflows\update-news.yml` runs the `--news` variant daily and commits
-the result with `[skip render]` so only GitHub Pages redeploys. GitHub pauses
-scheduled workflows after 60 days without repository activity; re-enable it
-from the Actions tab if the carousel stops updating. The script lists the
-indexed pages at its top; add new guides there. `llms.txt` is generated from page
-metadata. The shared
-header/footer markup is identical on every page—edit all pages together when
-changing navigation. `/search/` is `noindex` and deliberately absent from the
-sitemap. `robots.txt` explicitly welcomes AI assistants; `llms.txt` and
-`llms-full.txt` give them a Markdown directory and full text.
-Generated modification dates use UTC for both working changes and commits,
-so committing a page does not shift its date across a local-time boundary.
-`site-seo.mjs` maintains concise metadata, linked site/author/employer entities,
-visible author/update lines, social previews and FAQ parity. Guide leads are
-moved into the answer-first In brief box, not duplicated; keep condensed copy
-and owner decision notes intact. Current licensed guide photographs supply
-preview URLs, actual dimensions, alt text, credit text and license metadata.
-Search supports `?q=` but stays noindex; the 404 route is intentionally unlinked.
-The public community page contains attributed public forum quotes and editorial answers; the real
-member board remains on the noindex authenticated workspace, outside discovery
-files. Do not restore the removed homepage bio, education or license number.
-Public pages preload the existing Inter font with matching CORS credentials;
-font-display remains swap. HTML-only changes need no CSS/JS cache bump.
-Validate both builds, JSON-LD/visible FAQs, links and both responsive themes.
+    node build-site.mjs
+    node --test tests/*.test.mjs
 
-The public header uses `resources\resources.css`. Keep the complete logo
-(leaf, ROSPOPA, and PAVLO) visible at every viewport width; the compact rules
-below 375px leave room for the theme, sign-in, and menu controls. When changing
-the shared stylesheet, update its cache version on all public pages, including
-`search\index.html` and `404.html`. Check 320px, 375px, 390px, tablet, and desktop
-layouts, with the mobile menu both closed and open.
+The builder updates homepage metadata, replaces every other public HTML file
+with an immediate redirect to `/`, and generates homepage-only discovery files.
+It excludes `client\`, `server\`, `tests\`, hidden directories and `node_modules\`.
+Redirect stubs contain a meta refresh, `location.replace('/')`, `noindex`, a
+homepage canonical and a visible fallback link. Old paths, queries and fragments
+are intentionally not forwarded.
 
-News sources include the REjournals industrial RSS category and Connect CRE's
-Chicago/Midwest feed in addition to the existing feeds. Mixed-region feeds
-must match both an industrial/logistics term and a Chicagoland place in the
-headline; only the last 30 days are eligible. The build reports parsed and
-matched counts per source, deduplicates titles, and prefers direct publisher
-links to aggregator duplicates. A source returning HTML or failing to fetch
-is reported explicitly. The daily workflow remains the refresh mechanism;
-no credentials or article bodies are stored or displayed.
+`404.html` uses the same redirect. GitHub Pages still returns an initial HTTP
+404 for unknown routes; the browser then loads the homepage with HTTP 200.
+These are client-side redirects, not server-side 301 responses. With JavaScript
+disabled, the meta refresh still redirects; if refreshes are also disabled,
+the visible link remains.
 
-`resources\truck-dimensions-turning\index.html` is the central fleet-size
-reference. Keep measured cargo interiors, nominal body/container labels,
-road-size rules, and overall vehicle geometry distinct. Dimensional examples
-must link to primary fleet/carrier/regulatory sources; unknown overall lengths
-and turning radii remain unpublished, not guessed. All site-fit conclusions
-require fleet-specific engineering review. Tables reuse the keyboard-focusable,
-horizontal-scroll `.table-wrap` pattern. Register new guides in `PAGES` and
-`llms.txt`, link them from the guide directory and relevant sections, then build.
+The sitemap lists only the homepage. The old feed remains valid but empty;
+the search index is empty and unlinked. Both llms files contain only homepage
+facts and contacts. `robots.txt` permits crawling so search engines can see
+the old pages' redirects and `noindex`, and keeps the sitemap declaration.
 
-The shared header's Show contact info button opens a native modal dialog,
-using the existing click-to-reveal decoder in `resources\interactive.js`.
-Contact data remains defined only in the homepage's `#contact-details`;
-other pages fetch it on activation. The original homepage disclosure stays
-available. Check keyboard activation, Escape/Close focus return, and the
-visible retry message on a failed homepage fetch. This control requires
-JavaScript; the homepage still provides its existing no-script LinkedIn link.
+The daily news workflow was removed. The legacy `--news` argument performs
+the same safe rebuild without fetching news or restoring the retired library.
+Unused images and calculator modules remain in the repository; the homepage
+does not load them.
 
-The generator also builds visible one-click business phone/email links on
-every guide and the homepage seller introduction from that same contact source.
-These links work without JavaScript; business contact details are intentionally
-public. `resources\contact-data.mjs` shares the decoder between the generator
-and module-based `interactive.js`. Do not edit generated `direct-contact`
-regions independently. Public headers keep contact and theme controls; workspace
-Sign In lives in the footer, not the header. The logo's accessible name reads
-"Rospopa, Pavlo, home" rather than treating the two wordmark lines as one word.
+## Backups before the homepage restart
 
-The public community guide uses short, attributed quotations from independently
-verified public forum posts. Quotes retain exact wording and spelling; keep
-source links, displayed author names and original post dates.
-Industry interviews and official public guidance can add a second perspective;
-label the publisher and distinguish forum handles from named speakers and offices.
-Keep regional/historical context visible and preserve source date precision
-(a seasonal magazine issue is not an exact publication day). Add a topic only
-when its verified voices and condensed take improve the page, not to fill a quota.
-The community FAQ is generated from the visible topic questions and Pavlo's
-editorial answers; source quotations belong in Article citations, not that FAQ.
-Do not reproduce
-personal finances, contact details or private/login-only material. Separate
-Pavlo's visible editorial take from each quote; only that answer belongs in
-FAQPage, never testimonials or Review schema. Keep the authenticated member
-board separate and do not imply participation, affiliation or endorsement. The board is members-only: the API requires a
-signed-in session to read or post, and the public site only links to sign in. Guide publication metadata remains intact; prominent
-bulk publication stamps are omitted rather than represented as market freshness.
-The homepage bio uses the linked official advisor profile; add no career/deal
-claims or portrait without verification and permission. The selling-guide
-Elk Grove Village image uses the existing credited CC BY-SA 4.0 adaptation,
-illustrates the region, and does not represent an advisor transaction.
-Publishing a track-record section requires three to five verified, authorized
-closed transactions (size, county, buyer type, advisor role and closing evidence;
-price or price/SF only if approved), plus a permissioned advisor headshot.
-An archived listing is not evidence of a closing. The official profile confirms
-joining Marcus & Millichap in 2026, not a number of earlier brokerage years.
+- `backup/full-site-2026-10-21` and annotated tag `full-site-2026-10-21`
+  preserve live revision `cc0a56681ea34b2ef44fcd570ea198c0f3152baa`.
+- `backup/editorial-rewrite-2026-10-21` preserves the unpublished editorial
+  rewrite at `8cd69f85dc5d88175a1329956bf0f8bd81014338`, based on that live revision.
 
-Tables retain readable minimum widths inside their focusable horizontal-scroll
-wrappers instead of crushing checklist labels into narrow word fragments.
-Checklist hints explain arrow-key scrolling; toggles/reset and stored state
-must still work at phone widths. Generated business email links use Cloudflare's
-documented `email_off` comments to opt that intentionally public contact link
-out of edge obfuscation. Confirm the edge preserves the no-JavaScript mailto
-after deployment; local HTML alone cannot verify Cloudflare transformation.
-
-The private React workspace in `client\` is built and served by the Node
-service in `server\`, separately from GitHub Pages. See `DEPLOY.md` for hosting,
-indexing controls, and the deployment verification checklist.
-
-Both active sites share `resources\palette.css`: forest `#1F5F2E` for depth,
-leaf `#2E8B3E` for accents, fresh `#5DB85C` for night controls, mint `#B8E0B0`
-for highlights, and a white day background. Text and button colors use
-contrast-safe variants; warning, error, info, and calendar colors keep their
-semantic distinctions. The existing `monochrome` / `monochrome-dark` theme IDs
-and `rep_theme` light/dark preference are retained for compatibility.
-The workspace imports the shared palette at build time; the public stylesheet
-imports a cache-versioned copy. Refresh public CSS, theme-script, and palette
-cache versions when changing them. Archive/legacy assets, maps, chart embeds,
-and photographs are not recolored. Check both themes, persistence, the contact
-dialog, and phone/desktop layouts; run `npm --prefix client run build` and
-`npm --prefix client run lint` for workspace changes.
+Both branches and the tag are pushed to GitHub. The full library, original
+generator and news workflow are recoverable there. Do not restore their
+homepage or scheduled publishing accidentally.

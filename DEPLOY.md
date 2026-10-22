@@ -1,7 +1,7 @@
 ﻿Deployment instructions
 
-Public resource site and search deployment
------------------------------------------
+Focused public homepage deployment
+----------------------------------
 
 `CNAME` sets `rospopa.com`; the root `_config.yml` is the GitHub Pages/Jekyll
 configuration. A read-only GitHub API check on October 2, 2026 confirmed
@@ -29,55 +29,40 @@ Security-preserving Cloudflare configuration
 Automation, search engines, and generated files
 -----------------------------------------------
 
-- `.github/workflows/update-news.yml` runs daily (11:17 UTC) and on demand. It
-  executes `node build-site.mjs --news`, which refreshes `resources/news.json`
-  from public news feeds, regenerates the homepage news section, the search
-  index, `sitemap.xml`, `feed.xml`, `llms.txt`, and `llms-full.txt`, and commits with
-  `[skip render]` so Render does not redeploy the private app. GitHub Pages
-  redeploys from the bot commit (verified). GitHub disables scheduled workflows
-  after 60 days without repository activity; re-enable from the Actions tab.
+- The focused-homepage release retires the old public library. The
+  `update-news.yml` workflow has been removed; do not re-enable scheduled news
+  publishing from the backup. `node build-site.mjs` now produces redirect stubs
+  for all other public HTML routes, a homepage-only sitemap and llms files, an
+  empty Atom feed and an empty search index. `--news` is a safe compatibility
+  alias and does not fetch or render headlines.
+- Retired routes use meta refresh and `location.replace('/')`, not server-side
+  301 responses. The custom `404.html` sends unknown paths to the homepage,
+  but the first response remains HTTP 404 on GitHub Pages. With JavaScript
+  disabled the meta refresh works; a visible homepage link is also present.
+- Backups: `backup/full-site-2026-10-21` and annotated tag
+  `full-site-2026-10-21` point to `cc0a56681ea34b2ef44fcd570ea198c0f3152baa`.
+  The unpublished editorial work is on `backup/editorial-rewrite-2026-10-21`
+  at `8cd69f85dc5d88175a1329956bf0f8bd81014338`. The secure app is unchanged.
 - IndexNow key file: `e129f7456b6092356f7ab9e99a4830d6.txt` at the site root.
   Submit URL changes with a POST to `https://api.indexnow.org/indexnow`
   (host `rospopa.com`, the key, and `urlList`); the key is intentionally
   public. Google does not use IndexNow; use Search Console there.
-- Pages carry a `Content-Security-Policy` meta tag. It allows the site's own
-  scripts, Google Fonts, and Cloudflare Web Analytics
-  (`static.cloudflareinsights.com` / `cloudflareinsights.com`). Any new
-  third-party script or font must be added to the policy in every page.
-- `robots.txt` explicitly welcomes AI assistants and blocks only internal
-  search result queries and the two JSON data files. `/search/` is `noindex`.
-- `node --test tests/*.test.mjs` checks canonical metadata, the complete visible
-  guide-directory schema, FAQ anchors, source citations, assistant exports,
-  sitemap coverage, noindex exclusions, and DCF regressions. The daily workflow
-  runs these checks before publishing generated updates.
-- Guide structured data uses the visible answer summary as an Article abstract,
-  cites sources actually linked in the article, and gives FAQ questions their
-  visible section URLs. No ratings, broker rankings, or unsupported credentials
-  are generated. FAQ markup does not imply eligibility for Google's restricted
-  FAQ rich results.
-- The Markdown assistant export preserves source links and resolves internal
-  links against each guide's canonical URL. The DCF tool appears with owner
-  analysis guides in the optional `llms.txt` reading directory.
-- Regeneration preserves recorded editorial dates when main content is
-  unchanged; changing generated schema or bylines alone does not refresh every
-  guide's date. Asset hashes normalize line endings for consistent Windows/Linux
-  output.
-- The shared public/workspace palette uses white and gray surfaces, charcoal
-  text and title/footer bands, and neutral borders and table headers. Dark mode
-  uses charcoal surfaces and light-gray text. Green is reserved for links,
-  primary actions, focus indicators, and success states.
-- Public content surfaces have neutral-gray mouse-only hover emphasis and black
-  shadows (charcoal borders in light mode, light gray in dark mode); compact guide/news
-  cards also lift slightly. Reduced-motion users get no movement, and touch and
-  print layouts retain their existing behavior. The generator versions the
-  shared stylesheet and theme script on every public page, including the nested
-  palette import, so theme updates do not require a hard refresh.
+- The homepage uses inline styles and no JavaScript, web fonts or third-party
+  requests. Its licensed photo is preloaded. The footer carries the photo credit.
+- `robots.txt` allows crawling of old paths so their redirects and `noindex`
+  can be processed. Its sitemap lists only `https://rospopa.com/`.
+- `node --test tests/*.test.mjs` checks the focused homepage, verified identity
+  schema, retired-route stubs, discovery files and retained DCF math regressions.
+  Run the builder twice and compare output before publishing.
+- The homepage's fixed dark-green treatment is independent of the old
+  public/workspace palette. Neither the palette nor secure application code
+  needs modification for this release.
 
 Keep the public library and private workspace on separate origins:
 
 | Hostname | Origin | Access |
 | --- | --- | --- |
-| `rospopa.com` | GitHub Pages | Public educational HTML only |
+| `rospopa.com` | GitHub Pages | Focused public homepage and retired-route redirects |
 | `www.rospopa.com` | Redirect to the public canonical hostname | Preserve the requested path and query |
 | `secure.rospopa.com` | Existing Render service | Existing private security controls and application authentication |
 

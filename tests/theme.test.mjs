@@ -55,7 +55,7 @@ for (const [name, theme] of Object.entries({ light, dark })) {
   });
 }
 
-test('public pages version the theme script, stylesheet and nested palette', async () => {
+test('focused homepage loads no legacy theme and retired pages load no styles', async () => {
   const version = content => createHash('sha256').update(content.replace(/\r\n?/g, '\n')).digest('hex').slice(0, 10);
   const stylesheet = await read('resources/resources.css');
   const script = await read('resources/theme.js');
@@ -69,8 +69,14 @@ test('public pages version the theme script, stylesheet and nested palette', asy
   }
   for (const file of pages) {
     const html = await read(file);
-    assert.ok(html.includes(`/resources/resources.css?v=${version(stylesheet)}`), file);
-    assert.ok(html.includes(`/resources/theme.js?v=${version(script)}`), file);
+    if (file === 'index.html') {
+      assert.ok(!html.includes('/resources/theme.js'), 'focused homepage has no theme script');
+      assert.ok(!html.includes('/resources/resources.css'), 'focused homepage has isolated styles');
+      continue;
+    }
+    assert.match(html, /name="robots" content="noindex"/, file);
+    assert.ok(!html.includes('/resources/resources.css'), file);
+    assert.ok(!html.includes('/resources/theme.js'), file);
   }
   assert.ok(script.includes(resolveColor(dark, '--theme-chrome')));
 });

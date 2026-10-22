@@ -1,95 +1,83 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFile, readdir } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import {readFile, readdir, access} from 'node:fs/promises';
+import {resolve} from 'node:path';
+import {updateHomepageSeo} from '../site-seo.mjs';
 
 const root = resolve(import.meta.dirname, '..');
 const read = file => readFile(resolve(root, file), 'utf8');
-const origin = 'https://rospopa.com';
-const pages = ['index.html', 'resources/index.html'];
-for (const entry of await readdir(resolve(root, 'resources'), { withFileTypes: true })) {
-  if (!entry.isDirectory()) continue;
-  const path = `resources/${entry.name}/index.html`;
-  try { await read(path); pages.push(path); }
-  catch (error) { if (error.code !== 'ENOENT') throw error; }
-}
-const documents = await Promise.all(pages.map(async file => {
-  const html = await read(file);
-  const url = origin + '/' + file.replace(/index\.html$/, '');
-  const graph = JSON.parse(html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
-  return { file, html, url, graph };
-}));
+const origin = 'https://rospopa.com/';
+const home = await read('index.html');
 
-test('indexable pages have unique titles, descriptions and canonical URLs', () => {
-  const titles = new Set(), descriptions = new Set();
-  for (const { file, html, url } of documents) {
-    const title = html.match(/<title>([\s\S]*?)<\/title>/)[1];
-    const description = html.match(/<meta name="description" content="([^"]+)"/)[1];
-    assert.ok(!titles.has(title), `${file}: duplicate title`);
-    assert.ok(!descriptions.has(description), `${file}: duplicate description`);
-    titles.add(title); descriptions.add(description);
-    assert.ok(html.includes(`<link rel="canonical" href="${url}">`), file);
-    assert.match(html, /name="robots" content="index, follow, max-image-preview:large, max-snippet:-1/);
-    assert.ok(html.includes(`property="og:url" content="${url}"`), file);
-  }
+test('homepage metadata contains only verified identity and one canonical URL', () => {
+  const title = home.match(/<title>([^<]+)<\/title>/)[1];
+  const description = home.match(/<meta name="description" content="([^"]+)"/)[1].replace(/&amp;/g, '&');
+  assert.ok(title.length <= 65);
+  assert.ok(description.length >= 140 && description.length <= 160);
+  assert.match(home, /<link rel="canonical" href="https:\/\/rospopa.com\/">/);
+  assert.match(home, /name="robots" content="index, follow/);
+  const graph = JSON.parse(home.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1])['@graph'];
+  assert.deepEqual(graph.map(n => n['@type']), ['Person', 'Organization', 'WebSite', 'WebPage']);
+  assert.equal(graph[0].name, 'Pavlo Rospopa');
+  assert.equal(graph[1].name, 'Marcus & Millichap');
+  assert.equal(graph[0].worksFor['@id'], graph[1]['@id']);
+  assert.equal(graph[3].description, description);
+  assert.equal(graph[3].url, origin);
+  assert.equal(updateHomepageSeo(home), home, 'homepage SEO must be idempotent');
+  assert.throws(() => updateHomepageSeo('<html><title>Old library</title></html>'), /focused homepage/);
 });
 
-test('guide directory schema lists every visible guide exactly once', () => {
-  const directory = documents.find(d => d.file === 'resources/index.html');
-  const list = directory.graph.find(n => n['@type'] === 'CollectionPage').mainEntity;
-  const expected = documents.filter(d => d.file.startsWith('resources/') && d.file !== directory.file).map(d => d.url).sort();
-  assert.equal(list.numberOfItems, expected.length);
-  assert.deepEqual(list.itemListElement.map(item => item.url).sort(), expected);
-  for (const [i, item] of list.itemListElement.entries()) {
-    assert.equal(item.position, i + 1);
-    assert.ok(directory.html.includes(`href="${new URL(item.url).pathname}"`));
-    assert.ok(item.name.length > 0);
-  }
+test('homepage keeps one focused action without library enhancements', () => {
+  assert.equal([...home.matchAll(/<h1\b/g)].length, 1);
+  assert.equal([...home.matchAll(/class="primary-cta"/g)].length, 1);
+  assert.match(home, /class="primary-cta" href="tel:\+16305702184"/);
+  assert.match(home, /href="mailto:pavlo\.rospopa@marcusmillichap\.com"/);
+  assert.match(home, /href="https:\/\/secure\.rospopa\.com\/"/);
+  assert.doesNotMatch(home, /<script\b[^>]*\bsrc=|<nav\b|<form\b|<dialog\b|theme-toggle|news:start|href="\/resources\/"/);
+  assert.match(home, /rel="preload" as="image"/);
+  assert.match(home, /fetchpriority="high"/);
+  assert.match(home, /rel="license noopener"/);
 });
 
-test('article summaries, citations and FAQ deep links correspond to visible content', () => {
-  for (const { file, html, url, graph } of documents) {
-    const article = graph.find(n => n['@type'] === 'Article');
-    if (article) {
-      assert.ok(article.abstract?.length > 30, `${file}: missing answer summary`);
-      assert.ok(article.dateModified >= article.datePublished, `${file}: inconsistent dates`);
-      for (const citation of article.citation || []) {
-        const escaped = citation.replace(/&/g, '&amp;');
-        assert.ok(html.includes(citation) || html.includes(escaped), `${file}: citation not visible: ${citation}`);
+test('every retired public HTML file is a noindex redirect, including archive and 404', async () => {
+  const files = ['404.html', 'search/index.html', 'resources/index.html'];
+  for (const directory of ['resources', 'archive']) {
+    async function visit(dir) {
+      for (const entry of await readdir(resolve(root, dir), {withFileTypes: true})) {
+        const file = `${dir}/${entry.name}`;
+        if (entry.isDirectory()) await visit(file);
+        else if (entry.name.endsWith('.html') && !files.includes(file)) files.push(file);
       }
     }
-    for (const faq of graph.filter(n => n['@type'] === 'FAQPage')) {
-      for (const q of faq.mainEntity) {
-        assert.ok(q.acceptedAnswer.text.length > 0, `${file}: empty answer`);
-        assert.ok(q['@id']?.startsWith(url + '#'), `${file}: missing question deep link`);
-        assert.equal(q.url, q['@id']);
-        assert.ok(html.includes(`id="${new URL(q.url).hash.slice(1)}"`), `${file}: broken question anchor`);
-      }
-    }
+    await visit(directory);
+  }
+  assert.ok(files.length >= 60, 'all existing legacy routes must be retained as stubs');
+  for (const file of files) {
+    const html = await read(file);
+    assert.match(html, /<meta http-equiv="refresh" content="0; url=\/">/, file);
+    assert.match(html, /<meta name="robots" content="noindex">/, file);
+    assert.match(html, /<link rel="canonical" href="https:\/\/rospopa.com\/">/, file);
+    assert.match(html, /<script>location\.replace\('\/'\);<\/script>/, file);
+    assert.match(html, /<a href="https:\/\/rospopa.com\/">Continue to rospopa.com<\/a>/, file);
+    assert.ok(html.length < 700, `${file}: unexpected old content`);
+    assert.doesNotMatch(html, /application\/ld\+json|src=|<link rel="stylesheet"/, file);
   }
 });
 
-test('sitemap includes only canonical indexable pages', async () => {
-  const sitemap = await read('sitemap.xml');
-  const urls = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]);
-  assert.deepEqual(urls.sort(), documents.map(d => d.url).sort());
-  assert.ok(!urls.some(url => new URL(url).hostname !== 'rospopa.com' || ['/search/', '/404.html'].includes(new URL(url).pathname)));
-});
-
-test('assistant reference retains citations and canonical section links', async () => {
-  const full = await read('llms-full.txt');
-  const directory = await read('llms.txt');
-  for (const { url } of documents) {
-    assert.ok(full.includes(`Source: ${url}`), `missing full text for ${url}`);
-    assert.ok(directory.includes(`](${url})`), `missing directory link for ${url}`);
+test('discovery advertises only the homepage and the retired news job is absent', async () => {
+  assert.deepEqual([...(await read('sitemap.xml')).matchAll(/<loc>([^<]+)<\/loc>/g)].map(m => m[1]), [origin]);
+  const feed = await read('feed.xml');
+  assert.match(feed, /xmlns="http:\/\/www.w3.org\/2005\/Atom"/);
+  assert.doesNotMatch(feed, /<entry>/);
+  assert.deepEqual(JSON.parse(await read('resources/search-index.json')), []);
+  for (const file of ['llms.txt', 'llms-full.txt']) {
+    const text = await read(file);
+    assert.match(text, /Pavlo Rospopa/);
+    assert.match(text, /10,000 to 100,000 square feet/);
+    assert.doesNotMatch(text, /https:\/\/rospopa.com\/(?:resources|search)\//);
+    assert.ok(text.length < 1100);
   }
-  assert.match(full, /\[[^\]]+\]\(https:\/\/www\.irs\.gov\/[^)]*\)/);
-  assert.match(full, /\[[^\]]+\]\(https:\/\/rospopa\.com\/resources\/glossary\/#noi\)/);
-  assert.ok(!full.includes('](https://rospopa.com/#exchange-sequence)'), 'relative fragments must retain their page');
-});
-
-test('search and error pages stay out of the index', async () => {
-  for (const file of ['search/index.html', '404.html']) {
-    assert.match(await read(file), /name="robots" content="noindex, follow"/);
-  }
+  assert.match(await read('robots.txt'), /Sitemap: https:\/\/rospopa.com\/sitemap.xml/);
+  assert.doesNotMatch(await read('robots.txt'), /Disallow: \//, 'retired routes must remain crawlable');
+  await assert.rejects(access(resolve(root, '.github/workflows/update-news.yml')), {code: 'ENOENT'});
 });
