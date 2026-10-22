@@ -51,8 +51,15 @@ Generated modification dates use UTC for both working changes and commits,
 so committing a page does not shift its date across a local-time boundary.
 `site-seo.mjs` maintains concise metadata, linked site/author/employer entities,
 visible author/update lines, social previews and FAQ parity. Guide leads are
-moved into the answer-first In brief box, not duplicated; keep condensed copy
-and owner decision notes intact. Current licensed guide photographs supply
+moved into the visible opening (`data-answer-summary`), not duplicated.
+Use a subject-specific heading and direct prose, not an SEO label or repeated
+"Owner lens" badge. Keep useful owner decision notes, quotations and formulas
+intact. The shared stylesheet leaves reading sections open, with rules between
+topics and guide listings rather than uniform boxed cards. Guide contact strips
+follow the reading content; their generated phone/email links remain available
+without JavaScript. Keep one general disclaimer per page and retain specific
+safety, tax, example and model limitations where needed.
+Current licensed guide photographs supply
 preview URLs, actual dimensions, alt text, credit text and license metadata.
 Search supports `?q=` but stays noindex; the 404 route is intentionally unlinked.
 The public community page contains attributed public forum quotes and editorial answers; the real

@@ -231,9 +231,8 @@ for (const page of PAGES) {
       ${directContact}
     </aside>`;
     const main = html.match(/<main\b[^>]*>[\s\S]*?<\/main>/i);
-    const hero = main && main[0].match(/<div class="page-hero">[\s\S]*?<\/div>(?:<!-- \/page-hero -->)?/);
-    if (!hero) throw new Error(`${page}: main page hero missing for contact strip`);
-    html = html.replace(main[0], main[0].replace(hero[0], `${hero[0]}\n    ${strip}`));
+    if (!main) throw new Error(`${page}: main content missing for contact strip`);
+    html = html.replace(main[0], main[0].replace('</main>', `  ${strip}\n  </main>`));
   }
   if (page.startsWith('resources/')) {
     const main = html.match(/<main\b[^>]*>[\s\S]*?<\/main>/i);

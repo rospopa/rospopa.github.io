@@ -19,7 +19,7 @@
 .dcf-metric { border-bottom: 1px solid var(--line); padding: .75rem 0; }
 .dcf-metric dt { font-weight: 600; }
 .dcf-metric dd { margin: .4rem 0 0; font-size: 1.1rem; font-weight: 600; display: flex; gap: .5rem; flex-wrap: wrap; align-items: center; }
-.dcf-signal, .dcf-legend span { border: 1px solid var(--line); border-radius: .25rem; padding: .2rem .5rem; font-size: .8rem; }
+.dcf-signal, .dcf-legend span { padding: .15rem .5rem; font-size: .85rem; }
 .dcf-healthy { border-inline-start: 4px solid var(--brand) !important; }
 .dcf-watch { border-inline-start: 4px solid #b7791f !important; }
 .dcf-risk { border-inline-start: 4px solid #d44545 !important; }
