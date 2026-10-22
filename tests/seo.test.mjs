@@ -39,6 +39,20 @@ test('homepage keeps one focused action without library enhancements', () => {
   assert.match(home, /rel="license noopener"/);
 });
 
+test('homepage has a secondary same-tab login and matches the secure wordmark', () => {
+  const header = home.match(/<header\b[\s\S]*?<\/header>/)[0];
+  assert.match(header, /<a class="login-link" href="https:\/\/secure\.rospopa\.com\/" rel="nofollow">Log in<\/a>/);
+  assert.doesNotMatch(header, /\btarget=/);
+  assert.match(home, /\.login-link \{[^}]*min-height: 44px/);
+  assert.match(home, /a:focus-visible \{[^}]*outline: 3px/);
+  assert.match(home, /Cormorant\+Garamond:wght@600;700;800&amp;display=swap/);
+  assert.match(home, /\.brand \{[^}]*gap: \.75rem/);
+  assert.match(home, /\.brand img \{ width: 36px; height: 36px; object-fit: contain;/);
+  assert.match(home, /\.wordmark \{[^}]*gap: \.125rem; line-height: 1;/);
+  assert.match(home, /\.brand-name \{ font-size: 1\.1rem; font-weight: 800; letter-spacing: \.08em;/);
+  assert.match(home, /\.brand-given \{ font-size: \.7rem; font-weight: 600; letter-spacing: \.35em; text-transform: uppercase;/);
+});
+
 test('every retired public HTML file is a noindex redirect, including archive and 404', async () => {
   const files = ['404.html', 'search/index.html', 'resources/index.html'];
   for (const directory of ['resources', 'archive']) {

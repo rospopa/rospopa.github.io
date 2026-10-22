@@ -7,9 +7,12 @@ is separate and is not changed by the public-site builder.
 
 ## Public homepage
 
-`index.html` contains one full-viewport message, one call action and a short
-contact footer. Styles are inline. It loads no JavaScript, external stylesheets
-or web fonts. Keep the complete wordmark, responsive image preload, photo credit,
+`index.html` contains one full-viewport message, one call action, a secondary
+secure-workspace login and a short contact footer. Styles are inline except for
+the Cormorant Garamond wordmark font, loaded from Google Fonts with `display=swap`.
+The font request matches the secure app, including weight 700: Google omits
+unavailable weight 800, so the browser uses 700 for the shared 800-weight styling.
+The page needs no JavaScript. Keep the complete wordmark, responsive image preload, photo credit,
 visible contact details, keyboard focus styles and no-JavaScript rendering.
 Only verified facts belong in copy and Person/Organization structured data.
 There are no theme switches, menus, search boxes, pop-ups or news carousels.

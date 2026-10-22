@@ -47,8 +47,9 @@ Automation, search engines, and generated files
   Submit URL changes with a POST to `https://api.indexnow.org/indexnow`
   (host `rospopa.com`, the key, and `urlList`); the key is intentionally
   public. Google does not use IndexNow; use Search Console there.
-- The homepage uses inline styles and no JavaScript, web fonts or third-party
-  requests. Its licensed photo is preloaded. The footer carries the photo credit.
+- The homepage uses inline styles and needs no JavaScript. Google Fonts supplies
+  Cormorant Garamond for the wordmark with `display=swap` and a Georgia fallback.
+  Its licensed photo is preloaded. The footer carries the photo credit.
 - `robots.txt` allows crawling of old paths so their redirects and `noindex`
   can be processed. Its sitemap lists only `https://rospopa.com/`.
 - `node --test tests/*.test.mjs` checks the focused homepage, verified identity
